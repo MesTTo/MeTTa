@@ -5,6 +5,9 @@
 % Guarantees: both trailed context scopes are published host services
 %   [tested: reference_scopes:both_scope_doors_are_published_host_services;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: metta_after_foreign/2 retains one reconciliation attempt through
+%   native parents and foreign completion before observation delivery
+%   [tested: transaction_completion; commit=WORKTREE].
 % Guarantees: engine/host_transactions.pl supplies the documented host rollback
 %   workaround before runtime declarations load [tested:
 %   host_transactions, test_class_declaration_rollback; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -466,6 +469,8 @@
             metta_transaction/1,
             metta_transaction/2,
             metta_transaction_notified/3,
+            metta_after_foreign/2,
+            metta_foreign_completion/2,
             metta_with_state_write_fence/1,
             metta_with_trailed/3,
             metta_with_trailed_enumeration/3,
@@ -2295,6 +2300,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- consult('metta/types.pl').
 :- consult('metta/refinements.pl').
 :- consult('metta/effects.pl').
+:- consult('metta/completion.pl').
 :- consult('metta/space_hooks.pl').
 :- consult('metta/runtime.pl').
 :- consult('metta/control.pl').

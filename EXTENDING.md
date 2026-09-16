@@ -1760,6 +1760,50 @@ whose entries live until engine disposal. Its transaction and speculate
 callbacks still refuse at the existing suspension door; the capture migration
 does not add Node transaction support.
 
+Every required rollback is attempted even if an earlier one fails or throws.
+A bare failure becomes `error(metta_completion_failed(foreign(Space, Verb)), _)`.
+`metta_foreign_completion(Phase, Attempts)` returns the calling engine's last
+ordered receipt. Its entries are `completed(Space, Verb, ok)` or
+`completed(Space, Verb, threw(Error))`; they contain the original exception,
+including secondary failures. The receipt adds no captured operation or
+registration reference; an exception retains its original payload.
+`metta_foreign_writes_lost/2` derives its existing saga answer from
+this same receipt. A body or notification exception remains primary over an
+ordinary completion failure. A registered control exception remains terminal.
+Speculation also reports failed rollback rather than discarding its result.
+
+Schedule host reconciliation with `metta_after_foreign(Label, QualifiedGoal)`.
+The diagnostic label must be ground. Inside a native transaction the operation
+transfers through `host_transaction_on_exit/1` to its outermost native parent.
+An active user coordinator then runs it after captured foreign participants
+and before observation delivery. With no native transaction or user
+coordinator, it runs immediately. Native completion runs outside the engine's
+commit and event-list locks. Immediate callers must release their own
+application locks before calling. The goal must inspect the standing native
+ownership when reconciling a foreign projection; whether a body threw is not
+an allocation's lifetime authority.
+
+The queue guarantees this phase order, not the relative order of separately
+registered operations after transfer through native parents. Keep any
+required resource-withdrawal sequence in the operation its receipt schedules.
+Raw native reconciliation still uses the host's existing cleanup retry and
+exception urgency. Its walk attempts every registered repair and retains
+failed idempotent repairs; completed scheduled operations are not repeated.
+`host_transaction_on_exit(QualifiedGoal, Outcome)` also exposes the original
+native result to that goal: `committed`, `discarded`, `failed` or
+`threw(OriginalException)`. The one-argument form ignores the result. A later
+repair error does not change this result. The engine retains that distinction
+for notifications, foreign completion and observation, then reports the late
+error to its caller.
+
+Each scheduled operation owns one attempt. Success or failure retires its
+captured goal, and the native wrapper's cleanup retry cannot invoke it again.
+An explicit cleanup retry schedules a new operation. Resource owners must
+retain their own failed-cleanup receipt and must delay physical close until
+their last admitted use returns. Scheduling does not supply that admission
+or grace period. Prefix registration and a concrete resource's lifetime
+remain separate ownership decisions.
+
 A provider file declares an EXTENSION and exports nothing, which is what makes
 it loadable at all:
 

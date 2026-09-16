@@ -186,6 +186,38 @@ test(failed_reconciliation_is_loud,
      [throws(error(goal_failed(_), _))]) :-
     transaction(host_transactions:host_transaction_on_exit(fail)).
 
+test(a_failed_reconciliation_does_not_skip_other_registered_goals,
+     [setup(nb_setval(host_completion_results, [])),
+      cleanup(nb_delete(host_completion_results))]) :-
+    catch(transaction((
+        host_transactions:host_transaction_on_exit(
+            plunit_host_transaction_completion:completion_note),
+        host_transactions:host_transaction_on_exit(fail))), Error, true),
+    assertion(Error = error(goal_failed(_), _)),
+    nb_getval(host_completion_results, Results), assertion(Results == [outside]).
+
+test(reconciliation_keeps_the_hosts_exception_urgency) :-
+    Urgent = error(resource_error(completion_witness), context(test, cleanup)),
+    catch(transaction((
+        host_transactions:host_transaction_on_exit(throw(Urgent)),
+        host_transactions:host_transaction_on_exit(throw(ordinary_repair)))), Error, true),
+    assertion(Error == Urgent).
+
+test(the_original_native_outcome_survives_a_later_repair_error,
+     [forall(member(Kind-Expected,
+                    [commit-committed, rollback-failed, snapshot-discarded,
+                     exception-threw(completion_test), constraint-failed])),
+      setup(nb_setval(host_completion_results, [])),
+      cleanup(nb_delete(host_completion_results))]) :-
+    catch(completion_outcome(Kind,
+        (host_transactions:host_transaction_on_exit(
+             nb_setval(host_completion_results, [Original]), Original),
+         host_transactions:host_transaction_on_exit(fail))), Error, true),
+    % A body exception stays primary, so the exception row's helper consumes
+    % it and the repair failure is not a second outward error.
+    ( Kind == exception -> assertion(var(Error)) ; assertion(nonvar(Error)) ),
+    nb_getval(host_completion_results, Results), assertion(Results == [Expected]).
+
 completion_armed :-
     host_transactions:host_transaction_on_exit(
         nb_setval(host_completion_pending, false)),

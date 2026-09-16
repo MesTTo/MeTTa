@@ -9,13 +9,17 @@
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Guarantees: transaction_constraint/1 prepares checks after the body and before
 %   the commit mutex; their execution uses the refreshed outer commit view
-%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+%   [source: engine/metta/space_hooks.pl:metta_native_transaction/3; commit=WORKTREE].
 % Owns resources: outer transactions retain provider registration identities
 %   and qualified completion applications until foreign completion; nested
 %   transactions share them and speculation owns a separate capture list.
 % Guarantees: capture selects every completion operation before begin, and
 %   unregistering or replacing a name does not redirect completion
 %   [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f].
+% Guarantees: failed completion still attempts every required original
+%   participant; queued reconciliation runs after those attempts and before
+%   observations [tested: foreign_completion_results, transaction_completion;
+%   commit=WORKTREE].
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
 %   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -34,14 +38,11 @@
 %   observation frame back on success, failure, and throw [tested:
 %   test_a_speculative_journal_write_is_neither_persisted_nor_published;
 %   commit=3ded7552797b66d78e666141eb51f3bc14686bd2].
-%   every enlisted provider of an outermost transaction leaves the commit
-%   phase committed or rolled back, never neither, and which of them made
-%   their writes durable is recorded for the owner of those writes to read
-%   through metta_foreign_writes_lost/2 [tested:
-%   foreign_commit_phase:a_refused_commit_rolls_back_the_participants_it_never_reached,
-%   foreign_commit_phase:the_commit_phase_records_which_participants_lost_their_writes,
-%   foreign_commit_phase:a_commit_that_only_fails_is_named_rather_than_failing_the_finish;
-%   commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
+%   a refusing commit leaves earlier commits durable, its own outcome
+%   uncertain, and every unreached participant attempted for rollback.
+%   metta_foreign_completion/2 retains every result and supplies the existing
+%   metta_foreign_writes_lost/2 query [source:
+%   engine/metta/space_hooks.pl:metta_complete_participants/2; commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -366,7 +367,7 @@ metta_hook_post_apply(Got, Space, Handler, Term) :-
     metta_hook_invalid_verdict('post-add', Got, Space, Handler, Term).
 
 metta_hook_granted_form(Space, Term) :-
-    catch(b_getval('$metta_hook_granted', granted(GSpace, GTerm)), _, fail),
+    nb_current('$metta_hook_granted', granted(GSpace, GTerm)),
     GSpace == Space,
     GTerm == Term.
 
@@ -510,17 +511,16 @@ metta_writes(Ctx, Atomicity) :-
 :- meta_predicate metta_transaction(0), metta_transaction(0, ?).
 metta_transaction(Goal) :-
     term_variables(Goal, Vars),
-    metta_transaction_run(Goal, Vars, Answers,
-                          Outcome, Foreign, Observation),
+    metta_run_transaction(metta_transaction_answers(Goal, Vars, Answers),
+                          none, Outcome, _, Foreign, Observation),
     metta_transaction_result(Outcome, Foreign, Observation),
     member(Vars, Answers).
 
 metta_transaction(Goal, Value) :-
     term_variables(Goal, Vars),
-    metta_transaction_prepare_goal(
+    metta_run_transaction(
         metta_transaction_value_answers(Goal, [Value|Vars], Answers),
-        Outcome, Completion),
-    metta_transaction_finish(Completion, Outcome, Foreign, Observation),
+        none, Outcome, _, Foreign, Observation),
     (   Outcome = threw('$metta_transaction_error_answers'(Rejected))
     ->  metta_transaction_result(committed, Foreign, Observation),
         member([Value|Vars], Rejected)
@@ -544,44 +544,82 @@ metta_transaction_value_answers(Goal, Template, Answers) :-
 :- meta_predicate metta_transaction_notified(0, 0, 0).
 metta_transaction_notified(Goal, Committed, RolledBack) :-
     term_variables(Goal, Vars),
-    metta_transaction_prepare(Goal, Vars, Answers, Outcome, Completion),
-    metta_notify_transaction(Outcome, Committed, RolledBack, Notification),
-    metta_transaction_finish(Completion, Outcome, Foreign, Observation),
+    metta_run_transaction(metta_transaction_answers(Goal, Vars, Answers),
+                          notifications(Committed, RolledBack), Outcome,
+                          Notification, Foreign, Observation),
     metta_notified_transaction_result(Notification, Outcome,
                                       Foreign, Observation),
     member(Vars, Answers).
 
-metta_transaction_run(Goal, Vars, Answers,
-                      Outcome, Foreign, Observation) :-
-    metta_transaction_prepare(Goal, Vars, Answers, Outcome, Completion),
-    metta_transaction_finish(Completion, Outcome, Foreign, Observation).
-
-%Separate the durable local decision from fallible post-commit work. The saga
-%notification runs between these phases, so a provider commit or observer that
-%raises BaseException cannot make committed receipt bookkeeping look rolled
-%back. Ordinary transactions use the same phases without a notification.
-metta_transaction_prepare(Goal, Vars, Answers, Outcome, Completion) :-
-    metta_transaction_prepare_goal(
-        metta_transaction_answers(Goal, Vars, Answers), Outcome, Completion).
-
-metta_transaction_prepare_goal(Goal, Outcome, Completion) :-
+% The context spans native preparation, foreign completion and observation.
+% A callback can start a new outer transaction; its trailed context restores
+% this coordinator and its linked participant cells when that call returns.
+metta_run_transaction(Goal, Notices, Outcome, Notice, Foreign, Observation) :-
     (   metta_in_user_transaction
-    ->  metta_nested_transaction_prepare(Goal, Outcome, Completion)
-    ;   metta_outer_transaction_prepare(Goal, Outcome, Completion)
+    ->  metta_transaction_scope(Notices, Scope),
+        metta_run_transaction_scope(metta_native_transaction(nested, Goal), Scope,
+                                     metta_complete_nested(Scope)),
+        metta_transaction_scope_results(Scope, Outcome, Notice, Foreign, Observation)
+    ;   metta_run_coordinator(commit, Goal, Notices, Context),
+        metta_coordinator_results(Context, Outcome, Notice, Foreign, Observation)
     ).
 
-metta_nested_transaction_prepare(Goal, Outcome, nested) :-
-    seam:observation_begin,
-    catch(( transaction(Goal)
-          -> Outcome = committed
-          ;  Outcome = failed
-          ),
-          Error,
-          Outcome = threw(Error)).
+metta_transaction_scope(Notices,
+        transaction_scope(native(pending, pending), notices(Notices, task(pending)),
+                          observation(completion(observation(begin),
+                                                 pending(seam:observation_begin),
+                                                 unqueued), task(pending), depth(pending)))).
 
-metta_outer_transaction_prepare(Goal, Outcome, outer(Enlisted)) :-
-    seam:observation_begin,
-    nb_setval('$metta_tx_enlisted', []),
+metta_run_coordinator(Policy, Goal, Notices, Context) :-
+    metta_transaction_scope(Notices, Scope),
+    Context = coordinator(Scope, enlisted([]), scheduled([], none, []), task(pending)),
+    metta_with_trailed_enumeration('$metta_completion_context', Context,
+        metta_with_trailed_enumeration('$metta_user_tx', false,
+            metta_run_transaction_scope(metta_native_user_transaction(Policy, Goal),
+                                         Scope, metta_complete_transaction(Context)))).
+
+metta_native_user_transaction(Policy, Goal, Native) :-
+    metta_with_trailed_enumeration('$metta_user_tx', true,
+                                  metta_native_transaction(Policy, Goal, Native)).
+
+% Nested and outer scopes share the protected observation/native decision.
+% Only an outer coordinator owns participants and the reconciliation queue.
+:- meta_predicate metta_run_transaction_scope(1, +, 1).
+metta_run_transaction_scope(Goal, Scope, Finish) :-
+    setup_call_catcher_cleanup(
+        true,
+        metta_transaction_scope_prepare(Goal, Scope),
+        Catcher,
+        catch(call(Finish, Catcher), Ball,
+              (call(Finish, Catcher), throw(Ball)))).
+
+metta_transaction_scope_prepare(Goal, Scope) :-
+    arg(3, Scope, observation(Begin, _, Depth)),
+    % The frames themselves say whether begin pushed one. A cut between that
+    % push and the recorded result left the frame open when the result decided
+    % [measured 2026-09-16: transaction_completion's inference sweep grew
+    % seam:observation_frames/1 by one per interrupted budget].
+    seam:observation_frames(Frames0), length(Frames0, Depth0),
+    nb_linkarg(1, Depth, Depth0),
+    metta_attempt_completion(Begin, BeginResult),
+    metta_completion_result(BeginResult),
+    arg(1, Scope, Native),
+    % Workaround: swi-cleanup-window - record the native decision inside the
+    % protected cleanup before completion can be interrupted.
+    setup_call_catcher_cleanup(
+        true,
+        catch(( call(Goal, Native)
+              -> Returned = ok
+              ;  Returned = failed ), Error, Returned = threw(Error)),
+        Catcher,
+        catch(metta_transaction_decision(Native, Returned, Catcher), Ball,
+              (metta_transaction_decision(Native, Returned, Catcher), throw(Ball)))).
+
+metta_native_transaction(nested, Goal, Native) :- !,
+    transaction(metta_native_transaction_body(Goal, Native)).
+metta_native_transaction(discard, Goal, Native) :- !,
+    snapshot(metta_native_transaction_body(Goal, Native)).
+metta_native_transaction(commit, Goal, Native) :-
     nb_setval('$metta_tx_aliases', []),
     %transaction/3 rather than /1, for the invariant a snapshot cannot see.
     %SWI calls Goal, locks the mutex, changes visibility to the current global
@@ -592,50 +630,157 @@ metta_outer_transaction_prepare(Goal, Outcome, outer(Enlisted)) :-
     %declaration time cannot see and which left both declarations standing
     %[measured 2026-09-05; the nested branch does NOT refresh, which is why
     %only the outer boundary carries this].
-    catch(( setup_call_cleanup(
-                b_setval('$metta_user_tx', true),
-                materialization_transaction(
-                    ( call(Goal),
-                      findall(Check, seam:transaction_constraint(Check), Checks) ),
-                    ( metta_validate_pending_type_aliases,
-                      maplist(call, Checks) )),
-                b_setval('$metta_user_tx', false))
-        ->  Outcome = committed ; Outcome = failed ),
-          Error,
-          Outcome = threw(Error)),
-    nb_getval('$metta_tx_enlisted', Enlisted),
-    nb_setval('$metta_tx_enlisted', []).
+    materialization_transaction(
+        ( metta_native_transaction_body(Goal, Native),
+          findall(Check, seam:transaction_constraint(Check), Checks) ),
+        ( metta_validate_pending_type_aliases, maplist(call, Checks) )).
 
-metta_transaction_finish(nested, Outcome, ok, Observation) :-
-    metta_finish_observation(Outcome, Observation).
-metta_transaction_finish(outer(Enlisted), Outcome, Foreign, Observation) :-
-    metta_finish_foreign(Outcome, Enlisted, Foreign),
-    metta_finish_observation(Outcome, Observation),
+% Register before the body can write. The native journal fills Original before
+% repairs; its callback records the decision even if another repair fails.
+metta_native_transaction_body(Goal, Native) :-
+    context_module(Module),
+    host_transactions:host_transaction_on_exit(
+        Module:metta_native_transaction_decided(Native, Original), Original),
+    call(Goal).
+
+metta_native_transaction_decided(Native, Original) :-
+    ( arg(1, Native, pending)
+    -> nb_linkarg(1, Native, Original)
+    ; true ).
+
+metta_transaction_decision(Native, Returned, Catcher) :-
+    ( arg(2, Native, pending)
+    -> ( nonvar(Returned) -> Result = Returned
+       ; Catcher = exception(Error) -> Result = threw(Error)
+       ; Catcher = external_exception(Error) -> Result = threw(Error)
+       ; Result = failed ),
+       nb_linkarg(2, Native, Result)
+    ; arg(2, Native, Result) ),
+    % No native callback means entry never reached its registered body.
+    ( Result = threw(Thrown) -> BeforeEntry = threw(Thrown) ; BeforeEntry = failed ),
+    metta_native_transaction_decided(Native, BeforeEntry).
+
+metta_complete_transaction(Context, Catcher) :-
+    arg(1, Context, Scope),
+    metta_transaction_scope_notification(Scope, Catcher, Outcome),
+    arg(2, Context, enlisted(Enlisted)),
+    metta_finish_foreign(Outcome, Enlisted, _),
+    arg(3, Context, Queue), metta_drain_completions(Queue),
+    metta_transaction_scope_observe(Scope, Outcome),
+    % An observer can request another retirement. It finishes after that
+    % callback returns, before this coordinator releases its retained work.
+    metta_drain_completions(Queue),
     %A rolled-back local definition may also have replaced a repaired weak
     %import. Its dependency row survives the rollback, so the same sweep
     %re-arms that inherited procedure identity on every outcome [tested:
     %filereader_import_lifecycle:
     %a_failed_local_redefinition_restores_the_repaired_inherited_call;
     %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
-    metta_repair_emptied_shadows.
+    arg(4, Context, RepairCell),
+    context_module(Module),
+    metta_coordinator_task(RepairCell, repair(emptied_shadows),
+                           Module:metta_repair_emptied_shadows, Repair),
+    metta_attempt_completion(Repair, _),
+    metta_drain_completions(Queue).
 
-metta_notify_transaction(Outcome, Committed, RolledBack, Result) :-
-    catch(( (   Outcome == committed
-            ->  call(Committed)
-            ;   call(RolledBack)
+metta_complete_nested(Scope, Catcher) :-
+    metta_transaction_scope_notification(Scope, Catcher, Outcome),
+    metta_transaction_scope_observe(Scope, Outcome).
+
+metta_transaction_scope_notification(Scope, Catcher, Outcome) :-
+    arg(1, Scope, Native),
+    metta_transaction_decision(Native, _, Catcher),
+    arg(1, Native, Outcome),
+    arg(2, Scope, notices(Notices, NoticeCell)),
+    metta_coordinator_notification(Notices, Outcome, NoticeCell).
+
+metta_transaction_scope_observe(Scope, Outcome) :-
+    arg(3, Scope, observation(_, ObservationCell, depth(Depth0))),
+    (   integer(Depth0), metta_observation_open(Depth0)
+    ->  ( Outcome == committed -> Goal = seam:observation_commit
+        ; Goal = seam:observation_discard ),
+        Task = completion(observation(Outcome), pending(Goal), unqueued),
+        nb_linkarg(1, ObservationCell, Task),
+        metta_attempt_completion(Task, Result),
+        % The open frame is the state, and its pop is the engine's own step. A
+        % control signal that lands before the pop is recorded as this attempt's
+        % result and the coordinator goes on, so the pop is tried once more; a
+        % frame still open after that is a loud engine failure, never a frame
+        % left behind. An attempt cut after the pop is not repeated, so a
+        % partially delivered segment stays partial [measured 2026-09-16: the
+        % inference sweep left one frame open on eleven budgets where the limit
+        % landed between the attempt's start and observation_commit].
+        (   Result = threw(_), metta_observation_open(Depth0)
+        ->  Retry = completion(observation(Outcome), pending(Goal), unqueued),
+            metta_attempt_completion(Retry, _),
+            (   metta_observation_open(Depth0)
+            ->  throw(error(metta_observation_frame_open(Outcome),
+                            context(metta_transaction_scope_observe/2,
+                                    'the transaction observation frame could not be closed')))
+            ;   true
             )
-          ->  Result = ok
-          ;   Result = failed
-          ),
-          Error,
-          Result = threw(Error)).
+        ;   true
+        )
+    ;   true
+    ).
+
+metta_observation_open(Depth0) :-
+    seam:observation_frames(Frames), length(Frames, Depth), Depth > Depth0.
+
+metta_coordinator_task(Cell, Label, Goal, Task) :-
+    arg(1, Cell, Held),
+    ( Held == pending
+    -> Task = completion(Label, pending(Goal), unqueued), nb_linkarg(1, Cell, Task)
+    ; Task = Held ).
+
+metta_coordinator_notification(none, _, _) :- !.
+metta_coordinator_notification(Notices, Outcome, Cell) :-
+    context_module(Module),
+    metta_coordinator_task(Cell, notification(Outcome),
+                           Module:metta_notification_goal(Notices, Outcome), Task),
+    metta_attempt_completion(Task, _).
+
+metta_notification_goal(notifications(Committed, RolledBack), Outcome) :-
+    ( Outcome == committed -> Goal = Committed ; Goal = RolledBack ),
+    ( call(Goal) -> true
+    ; throw(error(metta_transaction_notification_failed(Outcome), none)) ).
+
+metta_coordinator_results(Context, Outcome, Notice, Foreign, Observation) :-
+    arg(1, Context, Scope),
+    metta_transaction_scope_results(Scope, Outcome, Notice, NativeResult, Observed),
+    arg(2, Context, enlisted(Enlisted)),
+    metta_foreign_attempts(Enlisted, Attempts),
+    metta_record_foreign_outcome(Outcome, Attempts),
+    findall(Result, member(completed(_, _, Result), Attempts), ForeignResults),
+    arg(3, Context, Queue), metta_queued_completion_results(Queue, Queued),
+    findall(Result, member(completed(_, Result), Queued), Reconciliation),
+    arg(4, Context, RepairCell), metta_coordinator_task_result(RepairCell, Repair),
+    append(ForeignResults, Reconciliation, Results),
+    metta_completion_error([NativeResult|Results], Foreign),
+    metta_completion_error([Observed, Repair], Observation).
+
+metta_transaction_scope_results(Scope, Outcome, Notice, NativeResult, Observation) :-
+    arg(1, Scope, native(Outcome, Returned)),
+    % The value form rolls its Error-valued answers back through its own
+    % signal; that decision reaches the caller as Outcome, not as an error.
+    ( Returned = threw('$metta_transaction_error_answers'(_)) -> NativeResult = ok
+    ; Returned == failed, memberchk(Outcome, [committed, discarded])
+    -> NativeResult = threw(error(metta_completion_failed(native_transaction(Outcome)), none))
+    ; Returned == failed -> NativeResult = ok
+    ; NativeResult = Returned ),
+    arg(2, Scope, notices(_, NoticeCell)), metta_coordinator_task_result(NoticeCell, Notice),
+    arg(3, Scope, observation(_, ObservationCell, _)),
+    metta_coordinator_task_result(ObservationCell, Observation).
+
+metta_coordinator_task_result(task(pending), ok) :- !.
+metta_coordinator_task_result(task(completion(_, done(Result), _)), Result).
 
 metta_notified_transaction_result(ok, Outcome, Foreign, Observation) :- !,
     metta_transaction_result(Outcome, Foreign, Observation).
-metta_notified_transaction_result(threw(Error), _, _, _) :- !,
-    throw(Error).
-metta_notified_transaction_result(failed, Outcome, _, _) :-
-    throw(error(metta_transaction_notification_failed(Outcome), _)).
+metta_notified_transaction_result(Notification, Outcome, Foreign, Observation) :-
+    metta_transaction_body_result(Outcome, Body),
+    metta_completion_error([Notification, Body, Foreign, Observation], Result),
+    metta_completion_result(Result).
 
 %The commit phase takes the participants one at a time, because what a
 %caller may believe about its own writes depends on WHICH participant carried
@@ -662,48 +807,41 @@ metta_notified_transaction_result(failed, Outcome, _, _) :-
 %what became of its rows, the way an XA resource manager's state after a
 %failed xa_commit is the resource manager's to report, and asking a store
 %that has just failed to interpret a second verb invents an answer.
-metta_finish_foreign(committed, Enlisted, Result) :- !,
-    metta_commit_participants(Enlisted, [], Durable, Result, Lost),
-    metta_record_foreign_outcome(commit, Durable, Lost).
-metta_finish_foreign(_, Enlisted, ok) :-
-    metta_rollback_participants(Enlisted),
-    metta_participant_spaces(Enlisted, Spaces),
-    metta_record_foreign_outcome(discard, [], Spaces).
+metta_finish_foreign(Outcome, Enlisted, Result) :-
+    ( Outcome == committed -> First = commit ; First = rollback ),
+    metta_complete_participants(Enlisted, First),
+    metta_foreign_attempts(Enlisted, Attempts),
+    metta_record_foreign_outcome(Outcome, Attempts),
+    findall(Attempt, member(completed(_, _, Attempt), Attempts), Results),
+    metta_completion_error(Results, Result).
 
-metta_commit_participants([], Durable0, Durable, ok, []) :-
-    reverse(Durable0, Durable).
-metta_commit_participants([Participant|Rest], Durable0, Durable, Result, Lost) :-
-    Participant = participant(Space, _, _),
-    metta_commit_participant(Participant, Outcome),
-    (   Outcome == committed
-    ->  metta_commit_participants(Rest, [Space|Durable0], Durable, Result, Lost)
-    ;   Outcome = refused(Error),
-        reverse(Durable0, Durable),
-        Result = threw(Error),
-        metta_participant_spaces([Participant|Rest], Lost),
-        metta_rollback_participants(Rest)
+% The participant cells are the progress record. Re-entering the coordinator
+% after an interrupted cleanup reuses those results and derives the remaining
+% commit/rollback choice from them, rather than replaying a provider operation.
+metta_complete_participants([], _).
+metta_complete_participants([Participant|Rest], Requested) :-
+    metta_participant_task(Participant, Requested, Verb, Task),
+    metta_attempt_completion(Task, Result),
+    ( Verb == commit, Result == ok -> Next = commit ; Next = rollback ),
+    metta_complete_participants(Rest, Next).
+
+metta_participant_task(Participant, Requested, Verb, Task) :-
+    arg(3, Participant, State),
+    (   State = completing(Verb, Task)
+    ->  true
+    ;   State = ready(Commit, Rollback),
+        Verb = Requested,
+        ( Verb == commit -> Goal = Commit ; Goal = Rollback ),
+        arg(1, Participant, Space),
+        Task = completion(foreign(Space, Verb), pending(Goal), unqueued),
+        nb_linkarg(3, Participant, completing(Verb, Task))
     ).
 
-metta_commit_participant(participant(Space, _, ready(Commit, _)), Outcome) :-
-    catch(( call(Commit)
-          ->  Outcome = committed
-          ;   Outcome = refused(error(metta_foreign_commit_failed(Space),
-                                      none))
-          ),
-          Error,
-          Outcome = refused(Error)).
-
-metta_rollback_participants(Participants) :-
-    forall(member(participant(_, _, ready(_, Rollback)), Participants),
-           catch(call(Rollback), RollbackError,
-                 print_message(error, RollbackError))).
-
-% Receipts name spaces, while enlistment distinguishes their allocations.
-% A replacement may enlist under the same name; one lost allocation is enough
-% to report that space, and the receipt must not retain provider objects.
-metta_participant_spaces(Participants, Spaces) :-
-    findall(Space, member(participant(Space, _, _), Participants), Names),
-    list_to_set(Names, Spaces).
+metta_foreign_attempts(Participants, Attempts) :-
+    findall(completed(Space, Verb, Result),
+            member(participant(Space, _,
+                               completing(Verb, completion(_, done(Result), _))),
+                   Participants), Attempts).
 
 %What the last finished outermost transaction did to each enlisted provider.
 %Phase is commit when the local database committed and the providers were
@@ -712,10 +850,15 @@ metta_participant_spaces(Participants, Spaces) :-
 %on the far side of metta_transaction_notified/3, whose two notifications
 %carry no arguments and whose caller has already returned by the time the
 %question is worth asking.
-metta_record_foreign_outcome(Phase, Durable, Lost) :-
-    list_to_set(Durable, DurableSpaces), list_to_set(Lost, LostSpaces),
-    nb_setval('$metta_tx_foreign_outcome',
-              foreign_outcome(Phase, DurableSpaces, LostSpaces)).
+metta_record_foreign_outcome(Outcome, Attempts) :-
+    ( Outcome == committed -> Phase = commit ; Phase = discard ),
+    nb_setval('$metta_tx_foreign_outcome', foreign_completion(Phase, Attempts)).
+
+% One ordered receipt supplies both failures and the existing saga query.
+% It adds no registration reference or captured application; an exception
+% keeps exactly the payload its provider threw.
+metta_foreign_completion(Phase, Attempts) :-
+    nb_current('$metta_tx_foreign_outcome', foreign_completion(Phase, Attempts)).
 
 %The providers, other than Journal, whose writes the last finished outermost
 %transaction did not make durable, and only where the local database DID
@@ -728,33 +871,21 @@ metta_record_foreign_outcome(Phase, Durable, Lost) :-
 %receipt saying which half [tested:
 %test_a_lost_participant_leaves_the_saga_in_doubt_rather_than_compensating].
 metta_foreign_writes_lost(Journal, Lost) :-
-    nb_current('$metta_tx_foreign_outcome',
-               foreign_outcome(commit, _Durable, Lost0)),
-    exclude(==(Journal), Lost0, Lost),
+    metta_foreign_completion(commit, Attempts),
+    findall(Space,
+            ( member(completed(Space, Verb, Result), Attempts),
+              \+ (Verb == commit, Result == ok), Space \== Journal ), Spaces),
+    list_to_set(Spaces, Lost),
     Lost \== [].
 
-:- multifile prolog:error_message//1.
-prolog:error_message(metta_foreign_commit_failed(Space)) -->
-    [ '~w failed its commit without saying why: a provider that cannot land \c
-       its batch owes its caller a reason, and a bare failure here would \c
-       leave the transaction reporting no outcome at all'-[Space] ].
+metta_transaction_result(Outcome, Foreign, Observation) :-
+    metta_transaction_body_result(Outcome, Body),
+    metta_completion_error([Body, Foreign, Observation], Result),
+    metta_completion_result(Result),
+    Outcome \== failed.
 
-%Foreign providers finish before observers run, so a callback reads the
-%committed state on both sides of the seam. If a single-coordinator provider
-%commit throws, the engine transaction is already durable; its event segment
-%still publishes and the provider error remains the exception returned.
-metta_finish_observation(committed, Result) :- !,
-    catch(( seam:observation_commit, Result = ok ),
-          Error,
-          Result = threw(Error)).
-metta_finish_observation(_, ok) :-
-    seam:observation_discard.
-
-metta_transaction_result(committed, threw(Error), _) :- !, throw(Error).
-metta_transaction_result(committed, ok, threw(Error)) :- !, throw(Error).
-metta_transaction_result(committed, ok, ok) :- !.
-metta_transaction_result(failed, _, _) :- !, fail.
-metta_transaction_result(threw(Error), _, _) :- throw(Error).
+metta_transaction_body_result(threw(Error), threw(Error)) :- !.
+metta_transaction_body_result(_, ok).
 
 %The discarded sibling of metta_transaction/1. snapshot/1 rolls back the
 %engine database, while a fresh enlistment registry makes the same
@@ -784,35 +915,11 @@ metta_transaction_result(threw(Error), _, _) :- throw(Error).
 :- meta_predicate metta_speculate(0).
 metta_speculate(Goal) :-
     term_variables(Goal, Vars),
-    metta_speculate_prepare(Goal, Vars, Answers, Outcome),
-    metta_speculate_result(Outcome),
+    metta_run_coordinator(discard, metta_transaction_answers(Goal, Vars, Answers),
+                          none, Context),
+    metta_coordinator_results(Context, Outcome, _, Foreign, Observation),
+    metta_transaction_result(Outcome, Foreign, Observation),
     member(Vars, Answers).
-
-metta_speculate_prepare(Goal, Vars, Answers, Outcome) :-
-    seam:observation_begin,
-    (   nb_current('$metta_tx_enlisted', OuterEnlisted)
-    ->  true
-    ;   OuterEnlisted = []
-    ),
-    ( metta_in_user_transaction -> OuterFlag = true ; OuterFlag = false ),
-    nb_setval('$metta_tx_enlisted', []),
-    catch(( setup_call_cleanup(
-                b_setval('$metta_user_tx', true),
-                snapshot(metta_transaction_answers(Goal, Vars, Answers)),
-                b_setval('$metta_user_tx', OuterFlag))
-        ->  Outcome = succeeded
-        ;   Outcome = failed
-        ),
-        Error,
-        Outcome = threw(Error)),
-    nb_getval('$metta_tx_enlisted', Enlisted),
-    nb_linkval('$metta_tx_enlisted', OuterEnlisted),
-    metta_finish_foreign(discarded, Enlisted, _),
-    seam:observation_discard.
-
-metta_speculate_result(succeeded).
-metta_speculate_result(failed) :- !, fail.
-metta_speculate_result(threw(Error)) :- throw(Error).
 
 %COLLECT, COMMIT, THEN REPLAY, which is what preserving a body's answers
 %costs. SWI's transaction/1 runs its goal as once/1 and cannot be made
@@ -848,14 +955,19 @@ metta_transaction_answers(Goal, Vars, Answers) :-
 %one for atomic rollback of compiler state) keep their long-standing
 %behaviour, which the foreign-rules suite pins. The flag is
 %backtrackable and thread-local; the outermost user transaction sets it,
-%a nested one runs inside it untouched.
+%a nested one runs inside it untouched. Read with nb_current/2, which fails
+%quietly on an unset key: the catch-all that used to wrap b_getval/2 here
+%also swallowed an inference limit landing on that read, which lifted the
+%limit for the rest of the transaction and ran the inner transaction as a
+%fresh coordinator [measured 2026-09-16: transaction_completion's inference
+%sweep reported ! at budgets below the goal's cost, with [outer, outer] runs].
 metta_in_user_transaction :-
-    catch(b_getval('$metta_user_tx', true), _, fail).
+    nb_current('$metta_user_tx', true).
 
 metta_enlist_foreign(Space) :-
     once(seam:foreign_participant(Space, Identity, Capture)),
     must_be(ground, Identity),
-    nb_getval('$metta_tx_enlisted', Enlisted),
+    metta_current_enlistment(Registry), arg(1, Registry, Enlisted),
     (   member(participant(HeldSpace, HeldIdentity, State), Enlisted),
         HeldSpace == Space, HeldIdentity == Identity
     ->  ( State = ready(_, _) -> true
@@ -869,12 +981,18 @@ metta_enlist_foreign(Space) :-
         % [source: engine/host_transactions.pl:host_transaction/2; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f].
         setup_call_catcher_cleanup(
             true,
-            ( nb_linkval('$metta_tx_enlisted', [Participant|Enlisted]),
+            ( nb_linkarg(1, Registry, [Participant|Enlisted]),
               metta_capture_participant(Capture, Participant) ),
             Why,
             catch(metta_finish_capture(Why, Participant), Ball,
                   (metta_finish_capture(Why, Participant), throw(Ball))))
     ).
+
+metta_current_enlistment(Registry) :-
+    ( nb_current('$metta_completion_context', Context), Context \== []
+    -> arg(2, Context, Registry)
+    ; throw(error(context_error(transaction),
+                  context(metta_enlist_foreign/1, 'no transaction owns this participant'))) ).
 
 metta_capture_participant(Capture, Participant) :-
     metta_participant_goal(Capture),
@@ -912,9 +1030,12 @@ metta_participant_goal(Goal) :-
 metta_finish_capture(exit, _) :- !.
 metta_finish_capture(_, participant(_, _, ready(_, _))) :- !.
 metta_finish_capture(_, Participant) :-
-    nb_getval('$metta_tx_enlisted', Enlisted),
-    exclude(==(Participant), Enlisted, Kept),
-    nb_linkval('$metta_tx_enlisted', Kept).
+    metta_current_enlistment(Registry), arg(1, Registry, Enlisted),
+    exclude(==(Participant), Enlisted, Kept0),
+    % Linked, not copied: the spine must not depend on bindings the exception
+    % now unwinding will undo, and exclude/3 binds its tails as it recurses.
+    reverse(Kept0, Reversed), reverse(Reversed, Kept),
+    nb_linkarg(1, Registry, Kept).
 
 :- multifile prolog:error_message//1.
 prolog:error_message(metta_transaction_unsupported(Ctx, undeclared)) -->

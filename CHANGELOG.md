@@ -20,6 +20,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `(eval-one Source)` requires exactly one answer and returns it as data.
   It preserves variable sharing and constraints, counts duplicate answers,
   accepts failing alternatives and stops before a third answer can execute.
+- Native `metta_after_foreign/2` retains reconciliation until native parents
+  and captured foreign participants finish, before observers run. Every
+  required completion is attempted despite another failure, and a completed
+  callback is not replayed by native cleanup retry. Foreign attempt receipts
+  expose rollback failures and retain the original provider's outcome.
 - `(on-unwind Source Handler)` applies an editable native handler once when
   evaluation fails, is cut or throws. The handler receives the actual outcome;
   deterministic completion leaves it untouched. Captured variables, source
@@ -339,6 +344,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A resource limit landing on a transaction's nesting check, or on the negation,
+  bridge-depth, answer-continuation and hook-grant reads, is no longer swallowed by
+  a catch-all around the global read. It used to lift the limit for the rest of the
+  transaction and could run a nested transaction as a fresh outer one.
 - An older transaction no longer loses a space's rows after the last atom of a
   storage predicate is removed: every native storage predicate keeps one inert clause
   from its first write, working around SWI-Prolog 10.1.13's zero-count shortcut in

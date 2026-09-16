@@ -949,7 +949,7 @@ hplt_clear_participants :-
     retractall(hplt_participant(_)),
     retractall(hplt_refusal(_, _)),
     retractall(hplt_call(_, _)),
-    nb_setval('$metta_tx_foreign_outcome', foreign_outcome(discard, [], [])).
+    nb_setval('$metta_tx_foreign_outcome', foreign_completion(discard, [])).
 
 hplt_calls(Calls) :-
     findall(S-V, hplt_call(S, V), Calls).
@@ -1002,7 +1002,7 @@ test(a_commit_that_only_fails_is_named_rather_than_failing_the_finish,
        cleanup(hplt_clear_participants) ]) :-
     hplt_finish_foreign(committed, ['&hplt-p1'], Result),
     assertion(subsumes_term(
-                  threw(error(metta_foreign_commit_failed('&hplt-p1'), _)),
+                  threw(error(metta_completion_failed(foreign('&hplt-p1', commit)), _)),
                   Result)),
     metta_foreign_writes_lost('&hplt-other', Lost),
     assertion(Lost == ['&hplt-p1']).

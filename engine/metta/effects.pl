@@ -2607,7 +2607,7 @@ metta_annotation(K) :-
     metta_annotation(Ctx, K).
 
 metta_annotation(Ctx, K) :-
-    (   catch(b_getval('$metta_answer_k', K0), _, fail)
+    (   nb_current('$metta_answer_k', K0)
     ->  K = K0
     ;   metta_algebra_one(Ctx, K)
     ),
@@ -2868,7 +2868,7 @@ metta_context_world(Ctx, World) :-
     ).
 
 metta_in_negation :-
-    catch(b_getval('$metta_in_negation', true), _, fail).
+    nb_current('$metta_in_negation', true).
 
 metta_negation_world_guard(Space) :-
     (   metta_in_negation
@@ -3079,7 +3079,7 @@ metta_bridge_apply(Pattern, Term, Op) :-
     ).
 
 metta_bridge_descend(Op) :-
-    (   catch(b_getval('$metta_bridge_depth', Depth0), _, fail)
+    (   nb_current('$metta_bridge_depth', Depth0)
     ->  true
     ;   Depth0 = 0
     ),
