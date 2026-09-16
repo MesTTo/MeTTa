@@ -368,6 +368,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   generation (`swi-empty-indexed-snapshot`, the fourth patched ledger entry).
   Five inferences per native write and one failing clause per enumeration
   return, and the atom count is the host's own clause count.
+- `current_transaction/1` enumerates every enclosing transaction exactly once on
+  the patched host (`swi-transaction-enumerator-repeats-parent`, the fifth
+  patched ledger entry); the two engine sites that asked for existence with
+  `once/1` keep that shape as their stated intent and lose the marker.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

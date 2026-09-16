@@ -418,7 +418,8 @@ metta_reference_binding(Space, Module, Name, Arity,
     memberchk(Home-HomeModule-Face, Faces),
     findall(R, member(Name/Arity-R, Face), [root(Home, Name, Arity, [])]),
     compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
-    % Workaround: swi-transaction-enumerator-repeats-parent - test existence once before the wrapper check can fail.
+    % Existence once: the wrapper check must not backtrack into the ancestor
+    % enumeration.
     \+ ( once(current_transaction(_)),
          current_predicate_wrapper(Module:Head, metta_reference_union, _, _) ),
     !,

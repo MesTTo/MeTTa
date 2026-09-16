@@ -189,19 +189,23 @@ Record: docs/journal/2026-09-17-host-patches.md, the budget sweep and the
   20,000-budget sweep; docs/journal/2026-09-10-every-host-workaround-is-commented.md.
 
 ## swi-transaction-enumerator-repeats-parent
-Host: SWI-Prolog 10.1.13; `src/pl-transaction.c:current_transaction/1` at
-  fc7ef84b949378b729052c3ade79c90ce5416abb, lines 721-745.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `src/pl-transaction.c:current_transaction/1`.
+  This tree runs on 10.1.14 built with the patch below.
 Defect: a successful redo retains the same parent stack pointer, so enumerating
   two nested transactions returns the parent indefinitely.
 Reproduction: tests/checks/host_workarounds/swi-transaction-enumerator-repeats-parent.pl,
   which asks for at most three answers from exactly two nested transactions.
-Workaround: ask for existence with `once(current_transaction(_))` before a
-  later condition can backtrack into the enumerator.
-Lifted when: successful redo advances the parent pointer and the reproduction
-  returns exactly two answers, printing absent.
-Record: docs/journal/2026-09-11-classes-on-metta.md, transaction existence does
-  not enumerate ancestors; docs/journal/2026-09-05-function-free-materialization.md.
-
+Patch: tests/checks/host_workarounds/swi-transaction-enumerator-repeats-parent.patch,
+  against swipl-devel V10.1.14 src/pl-transaction.c: the redo case takes the
+  entry's id and advances to its parent before answering, so the saved redo
+  pointer is the next ancestor and the last one answers deterministically;
+  three nested transactions enumerate exactly three ids, and SWI's
+  transaction group passes on the build.
+Lifted when: SWI-Prolog as shipped advances the parent pointer on redo, so the
+  reproduction prints absent; the patch and the entry go together then.
+Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-11-classes-on-metta.md,
+  transaction existence does not enumerate ancestors;
+  docs/journal/2026-09-05-function-free-materialization.md.
 ## swi-ugraphs-implicit-append
 Host: SWI-Prolog 10.1.13, library/ugraphs.pl:460 (`top_sort/2`); the same
   line at swipl-devel V10.1.14.

@@ -1,0 +1,12 @@
+diff --git a/src/pl-transaction.c b/src/pl-transaction.c
+index bac3b25..7effa53 100644
+--- a/src/pl-transaction.c
++++ b/src/pl-transaction.c
+@@ -721,6 +741,7 @@ PRED_IMPL("current_transaction", 1, current_transaction, PL_FA_NONDETERMINISTIC)
+     case FRG_REDO:
+     { stack = CTX_PTR;
+       id0 = stack->id;
++      stack = stack->parent;	/* the entry after the one answered now */
+       break;
+     }
+     default:
