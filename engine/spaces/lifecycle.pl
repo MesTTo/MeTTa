@@ -17,7 +17,7 @@
 %   space_retirement:a_retirement_loses_to_a_write_that_committed_first,
 %   owned_records:retirement_and_writes_conflict_in_both_commit_orders,
 %   extensions/python/tests/ch15_writing_transactions_and_worlds/test_commit_validation.py;
-%   commit=WORKTREE].
+%   commit=23dee6dc5b745a57ade43bd5fd2d317116634f6f].
 % Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Owns resources: native_removal_reference/1 reads a per-thread control context,

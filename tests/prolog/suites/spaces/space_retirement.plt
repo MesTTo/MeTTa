@@ -7,7 +7,7 @@
 %   both orders, for removals, equal-valued replacements, definitions,
 %   children, empty allocations, nested and snapshot entries, with disjoint
 %   and multivalued writes as the positive controls [tested: space_retirement;
-%   commit=WORKTREE].
+%   commit=23dee6dc5b745a57ade43bd5fd2d317116634f6f].
 % Owns resources: every test releases its generated spaces and erases its notes.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
