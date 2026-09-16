@@ -280,11 +280,42 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   refuses other operations until the outcome; `dropped` reports the durable
   state. `metta_release_space/2` takes a completion goal called with `retired`
   or `restored`; `metta_py_drop_space/2` carries the handle's callback.
+- A Python provider is held for the whole of every use: each `metta.foreign`
+  door admits its use of the registration at entry and releases it when the
+  use ends, a streamed match, enumeration or token stream at its last pull
+  (exhaustion, a closed cursor, a backend failure or an engine cut alike),
+  and an enlisted transaction participant at its commit or rollback.
+  `unregister_provider` removes the registration row at once, inside the
+  caller's transaction, so a replacement may follow in the same transaction
+  while a batch the old provider began finishes on its captured methods; it
+  returns the registration's `Admission`, which admits nothing new (a
+  transaction whose snapshot still holds the row is refused) and which the
+  owner's physical retirement waits on: `Space.drop` waits for the admitted
+  uses before the engine retirement and the owned backing's close, and a
+  drop requested from inside one of the provider's own uses is retained
+  until that use exits, the handle reading pending meanwhile. A registration
+  row edited natively replaces the stale record. `metta.foreign.admitted(name)`
+  and `closing(name)` expose the interval.
 - A prototype-grain class instance withdraws its registry rows before its
   own space is dropped, and a receiver that names a retired space is the
   class layer's `ReferenceError` ("has retired or its construction rolled
   back") rather than a dead-handle refusal: every handle of a retired name
   refuses to cross, the decoded receiver's included.
+- A write and a space retirement that raced each other are decided at the
+  outer commit, in the refreshed view SWI's `transaction/3` gives its
+  constraint, beside the owned-record validation: a transaction that wrote
+  into a space another transaction retired since its snapshot is refused
+  with `metta_retirement_conflict(writer(Space), retired)`, and a retirement
+  is refused with `metta_retirement_conflict(retirement(Space), Problem)`
+  when the refreshed view still holds occurrences, a re-registered
+  allocation, a child or a source publication committed since its
+  withdrawal, an equal-valued replacement included. The loser's transaction
+  rolls back whole, so a losing drop restores its handle and keeps its
+  scope and backing. Both refusals name the outer transaction retry.
+  `filereader:source_owns_space/2` exposes source ownership without the
+  allocation. The plunit two-transaction overlap harness moved to
+  `tests/prolog/overlap_transactions.pl`, and the Python one is the
+  `overlap` fixture in `tests/conftest.py`.
 - Every Python handle of one live space name shares one life. A retirement by
   any party, another handle, a lifetime scope, a native or MeTTa drop, marks
   every retained handle dropped and refuses its operations with the cause; a

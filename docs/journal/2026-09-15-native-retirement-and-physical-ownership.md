@@ -311,3 +311,98 @@ Open: whether the engine's `seam:foreign_*` clauses should ask admission
 before `py_iter` (one more crossing per operation) or Python's doors alone
 carry it; the plan is Python-only, since every use enters through a door.
 
+### R4 provider admission intervals, results
+
+Decided: the admission record lives in `metta.foreign` beside the registry
+view (`_Admission`: count, per-thread holders, closing flag, condition,
+pending action); `_admit` checks the engine row of the caller's snapshot
+still names the record's provider, so a registration rolled back leaves a
+record that is dropped on its next use and a row from outside the registry
+is refused. Every door admits through `_admitted` (synchronous) or
+`_admit` plus `_admitted_stream` (streams, released in the generator's
+finally, so exhaustion, a closed cursor, a backend failure and an engine cut
+all release; janus closes the iterator on the cut). The transactional
+participant admits in its wrapped begin and releases in commit or rollback.
+Tried: a `then` callback on `unregister_provider` for the owner's backing
+close -> unnecessary once the drop path itself goes through the close: the
+handle's `drop()` used `metta_py_unregister_foreign` directly, bypassing the
+admission, and a self-retiring drop then had the engine's own foreign clear
+refused as closing. Decided: `drop()` calls `unregister_provider`, and a
+drop requested while the calling thread holds an admission of the same
+provider (`self_admitted`) sets the handle pending and retains the whole
+teardown through `after_last_release`; the last release runs it from the
+generator's finally, one nested engine query deep, the same depth every
+provider callback's own crossing already uses.
+Measured: the first control's new-use refusal came from the pending
+handle's own gate, not the provider's; the control reaches the provider by
+name. Eight controls pass (test_provider_admission.py): close waits for a
+held pull and refuses new admission by name; exhaustion, closed cursor,
+backend failure and cut each release; an older snapshot's transaction
+cannot invoke the closed provider; a self-retiring drop completes at the
+last release with `closing` True until then; an enlisted participant is
+held from begin to commit. test_foreign 46 and test_drop_recovery pass.
+Open: the two-resource prefix fixture named by the contract's controls is
+not written; the reading of "two resources" (a provider and a cursor of one
+registration, or two registrations sharing a prefix) is settled when the
+class withdrawal producer (R5) names which it needs.
+Tried: `unregister_provider` as the waiting close (row removal after the
+admitted uses drain) -> ch15 test_participant_capture deadlocked under the
+battery: test_an_independent_snapshot_keeps_its_original_provider replaces
+the registration from the main thread while another engine's transaction
+holds the provider enlisted and waits for the replacement, and the
+same-transaction replacement controls found the row still standing. The
+existing design already lets a registration change under an admitted
+batch: the captured begin/commit/rollback keep the old provider callable.
+Decided: the row goes at once, inside the caller's transaction, and the
+registration's `Admission` is returned instead; it admits nothing new (a
+transaction whose snapshot still holds the row is refused), and the owner's
+PHYSICAL retirement waits on it (`Space.drop` waits before the engine
+retirement, or retains the teardown through `after_last_release` when the
+caller holds one of its uses). A record whose row was edited natively
+follows the row: the stale record closes to new uses and a fresh one is
+made for the row's provider (test_native_provider_edits_change_the_public_projection).
+The participant suite is unchanged; nine admission controls pass, the
+same-transaction replacement among them.
+
+### R5 class withdrawal producer, plan
+
+Goal: split `_declare/classes.py:release` into the agreed producer pair
+(ai-tmp/ai-class-withdrawal-contract.md): `prepare_withdrawal(home_names)
+-> ClassWithdrawal`, whose native writes ride the surrounding transaction
+while every affected home is still admitted, and
+`reconcile_withdrawal(receipt, retired_homes)`, which changes Python
+instrumentation, registrations and owned provider records only for the
+homes the native outcome retired and refreshes surviving projections once.
+Found: `release(space)` today runs after the engine retired the space
+(`_finish_drop` -> `release_definitions` -> `classes.release`): it closes
+the dependency graph, withdraws native rows outside the retirement's
+transaction, restores instrumentation, and drops dependent class homes
+itself (`plan.space.drop()`), a second lifetime mechanism; borrowers and
+`space.dropped` decide retention on the Python side.
+Decided (plan): `ClassWithdrawal` is a frozen dataclass carrying the
+requested homes, the additional class homes of the dependency closure
+(`homes`), the retired candidate plans, the surviving plans, and a
+progress set so a failed reconciliation retries only the plans not yet
+done. Preparation closes dependents through `bases` and `references` (the
+standing class edges), withdraws the candidates' record, method and
+inherited rows through `_withdraw_rows` inside the caller's transaction,
+and returns; it touches no Python state. The consumer is `Space.drop()`:
+when the name is a class home, the drop runs its group in one engine
+transaction (prepare, drop each additional home, drop itself with the host
+completion), each home's completion records its outcome on the receipt,
+and the requesting handle's `_finish_drop` reconciles with the set of homes
+whose completion reported retired; an abort passes the empty set and the
+rows return with the transaction. A native-origin retirement reaches the
+same reconciliation through the lease hook (`metta._spaces.lease.released`)
+with the retired name alone, since the engine's clear withdrew the rows.
+`classes.release` goes.
+Controls (contract): commit, rollback, a rejected outer commit (the R3
+validator), nested transfer, native-origin and Python-origin retirement,
+cyclic class dependencies, exact surviving-home projection withdrawal, a
+retained class provider snapshot, and a failure followed by an explicit
+reconciliation retry.
+Open: whether the additional homes are dropped through their own handles
+(one completion each) or through one engine group release
+(`metta_space_release_plan/2` closes owned children, not class homes);
+the plan uses handles, since each home's completion is what records its
+outcome.

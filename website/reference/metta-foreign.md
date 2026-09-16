@@ -511,10 +511,20 @@ def require_capability(space: str, capability: str, operation: str, **request: A
 ## `unregister_provider`
 
 ```python
-def unregister_provider(runtime, name: str) -> None:
+def unregister_provider(runtime, name: str) -> Admission:
 ```
 
 > Release a registered provider; an absent name is a KeyError.
 >
 > convert.unregister_type answers the same way. Removing something that
 > was never there is a mistake worth hearing about.
+>
+> The registration row goes at once, inside the caller's transaction, so a
+> replacement can follow in the same transaction while a batch the old
+> provider began finishes on its captured methods. The registration's
+> admission stays: it admits nothing new (a door asked for it now refuses
+> with "is closing", a transaction whose snapshot still holds the row
+> included) and is returned so the owner's PHYSICAL close can wait for the
+> uses it already admitted, a streamed match's remaining pulls and an
+> enlisted participant's commit or rollback among them, before closing the
+> backing; ``closing(name)`` reads True until the last of them releases.
