@@ -12,7 +12,7 @@
 %   release keeps the compiled equations and a receiver's imported binding
 %   callable, a committed one abolishes the generated predicates and retires
 %   the receiver's binding at the completion [tested: space_retirement;
-%   commit=WORKTREE].
+%   commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
 % Owns resources: every test releases its generated spaces and erases its notes.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

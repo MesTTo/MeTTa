@@ -15,7 +15,7 @@
 %   space_retirement:an_aborted_release_keeps_the_compiled_equations_callable,
 %   space_retirement:a_committed_release_abolishes_the_generated_predicates_at_completion,
 %   extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows;
-%   commit=WORKTREE].
+%   commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
 % Guarantees: a write and a retirement that raced each other are decided at
 %   the outer commit in the refreshed view: a writer whose allocation another
 %   transaction retired since its snapshot is refused, and a retirement whose
@@ -553,7 +553,7 @@ metta_abolish_local_predicate(Module, Name, Arity) :-
     %the next wrapper lookup, the class home's own retirement of the
     %binding, was a segfault in libswipl. Every wrapper comes off first
     %[tested: extensions/python/tests/ch09_types run in file order
-    %(test_class_method_costs.py after test_class_withdrawal.py); commit=WORKTREE].
+    %(test_class_method_costs.py after test_class_withdrawal.py); commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
     (   catch('$wrapped_predicate'(Module:Head, Wrappers), _, fail)
     ->  forall(member(Wrapper-_, Wrappers),
                catch(unwrap_predicate(Module:Head, Wrapper), _, true))
