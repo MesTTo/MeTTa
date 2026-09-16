@@ -552,8 +552,8 @@ metta_abolish_local_predicate(Module, Name, Arity) :-
     %clause of its own; abolishing under it leaves the chain dangling, and
     %the next wrapper lookup, the class home's own retirement of the
     %binding, was a segfault in libswipl. Every wrapper comes off first
-    %[tested: extensions/python/tests/ch09_types run in file order
-    %(test_class_method_costs.py after test_class_withdrawal.py); commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+    %[tested: extensions/python/tests/ch09_types/test_class_method_costs.py run in file order after
+    %extensions/python/tests/ch09_types/test_class_withdrawal.py; commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
     (   catch('$wrapped_predicate'(Module:Head, Wrappers), _, fail)
     ->  forall(member(Wrapper-_, Wrappers),
                catch(unwrap_predicate(Module:Head, Wrapper), _, true))
