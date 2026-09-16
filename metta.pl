@@ -1871,6 +1871,7 @@ metta_engine_reexport(kernel, 'space-atom-count'/2).
 metta_engine_reexport(spaces, match_foreign/4).
 metta_engine_reexport(spaces, native_storage_functor/2).
 metta_engine_reexport(spaces, protect_metta_exec_modules/0).
+metta_engine_reexport(spaces, refuse_autoload_into_exec_modules/0).
 metta_engine_reexport(spaces, stored_atom_of_ref/4).
 metta_engine_reexport(translator_rules, restore_translator_rule_snapshot/3).
 metta_engine_reexport(translator_rules, translator_rule_home/2).
@@ -2461,6 +2462,8 @@ metta_host_function_generation(Generation) :-
 %export the declaration promises can only be made once every engine file has
 %been [tested: metta_published_surface:every_declared_seam_that_exists_is_exported].
 :- initialization((seam:publish_declared, protect_metta_exec_modules,
+                   refuse_autoload_into_exec_modules,
+                   spaces:import_ugraphs_implicit_dependency,
                    load_builtin_type_surface, install_engine_prelude,
                    spaces:metta_publish_builtin_visibility,
                    spaces:metta_publish_every_vocabulary_type,

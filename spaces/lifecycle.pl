@@ -16,6 +16,13 @@
 %   space_retirement:a_committed_release_abolishes_the_generated_predicates_at_completion,
 %   extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows;
 %   commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+% Guarantees: an undefined name in a space's module is never resolved against
+%   SWI's library index: refuse_autoload_into_exec_modules/0 answers `error`
+%   for every exec module from the undefined-procedure hook at engine boot, so
+%   the module receives no library predicate in place of the engine's deferred
+%   definition or reference demand, and the process's autoload flag is untouched
+%   [tested: spaces:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
+%   commit=WORKTREE].
 % Guarantees: a write and a retirement that raced each other are decided at
 %   the outer commit in the refreshed view: a writer whose allocation another
 %   transaction retired since its snapshot is refused, and a retirement whose
@@ -865,6 +872,47 @@ prolog:error_message(metta_engine_export_collision(Name, Arity, Space, Engine)) 
 %SWI's own error carries both parties, so nothing is lost by catching once: it
 %names the predicate indicator that was refused and the module it was refused
 %into.
+%
+%Exec modules never autoload. An undefined procedure goes to
+%user:exception/3 first and to the library index only when no hook clause
+%answers [source: SWI-Prolog 10.1.13 boot/init.pl, '$undefined_procedure'/4],
+%so a MeTTa name the engine's own hooks do not claim (not deferred, not a
+%reference demand) that some library exports at the compiled arity was
+%imported into the space's module: xpce's send/3 for a channel's `send` before
+%its lib_thread face stood, which also opened the display, lists' last/2 or
+%sum_list/2 for any program that used the name first [measured 2026-09-16:
+%verbose_autoload on examples/operations/concurrency_handles.py printed
+%`autoloading '$metta_exec:&pyspace_1':send/3 from xpce/prolog/lib/pce` and
+%the process died on X_GLXCreateContext]. This clause is asserted at boot so
+%it stands LAST among the hook's clauses, after the engine's retry clauses
+%(engine/spaces/foreign.pl, engine/metta/references.pl), and answers `error`
+%for every exec module: the existence error the name would have raised had no
+%library carried it, and no import. The process flag is left alone, because
+%plunit's generated unit modules and other library-made modules resolve their
+%own names through the index [measured 2026-09-16: `autoload =
+%user_or_explicit` left plunit_spaces_cycles:end_tests/1 unknown and
+%ugraphs:append/2 unknown under top_sort/2] [tested:
+%spaces:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
+%commit=WORKTREE].
+refuse_autoload_into_exec_modules :-
+    Clause = (user:exception(undefined_predicate, Module:_, error) :-
+                  spaces:metta_exec_module_known(_, Module)),
+    (   clause(user:exception(undefined_predicate, M:_, error),
+               spaces:metta_exec_module_known(_, M))
+    ->  true
+    ;   assertz(Clause)
+    ).
+
+%Workaround: swi-ugraphs-implicit-append - import lists:append/2 into ugraphs at boot.
+%library(ugraphs) declares its lists dependency as append/3 alone and its
+%top_sort/2 calls append/2 (ugraphs.pl:460), which only the library index
+%supplies; with autoload off (run.sh NO_AUTOLOAD=1, the engine's no-autoload
+%gate) the release plan (metta_space_release_plan/2) met `Unknown procedure:
+%ugraphs:append/2` at examples/ch20-extending-the-engine/20-03-prolog-underneath/05-the-module-doors.metta.
+import_ugraphs_implicit_dependency :-
+    use_module(library(ugraphs)),
+    ugraphs:use_module(library(lists), [append/2]).
+
 protect_metta_exec_modules :-
     metta_engine_module(Engine),
     refuse_unreachable_engine_emitted(Engine),
