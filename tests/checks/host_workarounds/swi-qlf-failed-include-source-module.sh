@@ -12,7 +12,7 @@
 #  absent (safe-replay) on 10.1.14 built with
 #  tests/checks/host_workarounds/swi-qlf-failed-include-source-module.patch, three
 #  runs of three; command=sh check.sh host-workarounds;
-#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=9954e37b2700fa1f4e81be9e22cda2e7f606c432]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}
