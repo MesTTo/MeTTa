@@ -8,7 +8,7 @@
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-cached-undefined-supervisor.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=7e0b0ea3255455bb7db337cab55190c974ec64e1].
 
 :- dynamic ready/1, loaded/1.
 :- multifile user:exception/3.
