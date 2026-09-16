@@ -7,7 +7,7 @@
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: metta_after_foreign/2 retains one reconciliation attempt through
 %   native parents and foreign completion before observation delivery
-%   [tested: transaction_completion; commit=WORKTREE].
+%   [tested: transaction_completion; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Guarantees: engine/host_transactions.pl supplies the documented host rollback
 %   workaround before runtime declarations load [tested:
 %   host_transactions, test_class_declaration_rollback; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].

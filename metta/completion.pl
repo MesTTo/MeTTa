@@ -3,7 +3,7 @@
 % Guarantees: metta_after_foreign/2 transfers through native transactions,
 %   finishes after captured foreign participants and before observations, and
 %   never repeats a completed callback [tested: transaction_completion,
-%   foreign_completion_results; commit=WORKTREE].
+%   foreign_completion_results; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Owns resources: native journals and the current coordinator retain scheduled
 %   goals. A completed attempt drops its captured goal; scope exit drops its
 %   queue. Explicit retry creates a new attempt, never a retired-name entry.
@@ -26,7 +26,7 @@ metta_after_foreign(Label, Goal) :-
 
 % The native wrapper restores its parent before invoking this goal. Reusing
 % that boundary keeps physical callbacks outside SWI's event-list mutex.
-% [source: engine/host_transactions.pl:host_transaction_leave/4; commit=WORKTREE].
+% [source: engine/host_transactions.pl:host_transaction_leave/4; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 metta_schedule_completion(Task) :-
     (   arg(2, Task, done(_))
     ->  true
@@ -93,7 +93,7 @@ metta_queued_completion_results(Queue, Results) :-
 % Cleanup records the attempt before an exception can escape. Catch retries
 % only that idempotent state write, never Goal. This is the existing native
 % cleanup-window workaround applied to a retained callback result.
-% [source: engine/host_transactions.pl:host_transaction/2; commit=WORKTREE].
+% [source: engine/host_transactions.pl:host_transaction/2; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 metta_attempt_completion(Task, Result) :-
     arg(2, Task, State),
     (   State = done(Result)

@@ -9,7 +9,7 @@
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Guarantees: transaction_constraint/1 prepares checks after the body and before
 %   the commit mutex; their execution uses the refreshed outer commit view
-%   [source: engine/metta/space_hooks.pl:metta_native_transaction/3; commit=WORKTREE].
+%   [source: engine/metta/space_hooks.pl:metta_native_transaction/3; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Owns resources: outer transactions retain provider registration identities
 %   and qualified completion applications until foreign completion; nested
 %   transactions share them and speculation owns a separate capture list.
@@ -19,7 +19,7 @@
 % Guarantees: failed completion still attempts every required original
 %   participant; queued reconciliation runs after those attempts and before
 %   observations [tested: foreign_completion_results, transaction_completion;
-%   commit=WORKTREE].
+%   commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
 %   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -42,7 +42,7 @@
 %   uncertain, and every unreached participant attempted for rollback.
 %   metta_foreign_completion/2 retains every result and supplies the existing
 %   metta_foreign_writes_lost/2 query [source:
-%   engine/metta/space_hooks.pl:metta_complete_participants/2; commit=WORKTREE].
+%   engine/metta/space_hooks.pl:metta_complete_participants/2; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
