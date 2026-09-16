@@ -6,7 +6,7 @@
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-nested-retract-loses-outer-assert.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
 :- dynamic row/1, clock/1.
 
 main :-

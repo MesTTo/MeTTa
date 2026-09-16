@@ -5,7 +5,7 @@
 %   one a nested transaction erased (host ledger,
 %   swi-nested-retract-loses-outer-assert, patched), older rows survive
 %   rollback, and completion registries remain local to their executing thread
-%   [tested: host_transactions; commit=WORKTREE].
+%   [tested: host_transactions; commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
 % Owns resources: each test removes its private rows; worker threads are joined.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/host_transactions', []).

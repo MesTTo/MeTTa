@@ -1,13 +1,13 @@
 % Purpose: run registered reconciliation after native transactions and snapshots return.
 % Assumes: native transactions cross '$transaction'/2,3 and '$snapshot'/1,
 %   the primitives behind transaction/1,2,3 and snapshot/1
-%   [source: SWI-Prolog 10.1.14 boot/init.pl; commit=WORKTREE].
+%   [source: SWI-Prolog 10.1.14 boot/init.pl; commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
 % Guarantees: host_transaction_on_exit/1 runs its registered reconciliation
 %   after the native transaction returns and the parent registry is restored
 %   [tested: host_transaction_completion; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: registered reconciliation is idempotent and succeeds; the host runs
 %   the cleanup that walks it to completion [tested: host_transaction_completion;
-%   commit=WORKTREE].
+%   commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
 % Guarantees: one failed reconciliation cannot skip another registered goal;
 %   the registry retains only failed goals after an ordinary completion
 %   walk [tested: host_transaction_completion; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
@@ -16,10 +16,10 @@
 %   host_transaction_completion; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Owns resources: each transaction retains its completion registry until it
 %   finishes; a nested engine or thread opens its own
-%   [tested: host_transactions:a_nested_engine_keeps_its_own_registry; commit=WORKTREE].
+%   [tested: host_transactions:a_nested_engine_keeps_its_own_registry; commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
 % Guarded by: the registry is a SWI global variable, local to its engine and
 %   thread [tested: host_transactions:concurrent_registries_keep_their_owners;
-%   commit=WORKTREE].
+%   commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
 
 :- module(host_transactions, [host_transaction_on_exit/1, host_transaction_on_exit/2]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4]).
