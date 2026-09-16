@@ -134,8 +134,16 @@ autoload to module `user` [source: /usr/lib/swi-prolog/boot/autoload.pl,
 autoload_in/3]. Not changed in this unit; it is the next one, with the
 gate's independence from GLX as its control.
 
-Open: the autoload capture above; the ch14 live-handle method regression
-from ba819bfa2; the pre-existing red at ch17 `test_async_engine_injection_*`
+Decided (ch14): the "live handle" control asserted the law before ba819bfa2,
+when methods were Python operations unwrapping a Grounded receiver. Under
+the classes design a value instance IS its constructor term
+(2026-09-11-classes-on-metta.md), the crossing projects a declared instance
+to that term (`m.eval(S["MethodPoint-norm"](MethodPoint(3.0, 4.0)))` answers
+5.0), and `ground()` is the opaque escape no equation over the constructor
+can take apart; the control now states that.
+
+Open: the autoload capture above (its own thread,
+2026-09-16-exec-modules-never-autoload.md); the pre-existing red at ch17 `test_async_engine_injection_*`
 under the eight-chapter battery (already red at 54102ad92; passes alone);
 the seeded removal defect and the ch19 shuffle hang recorded in
 2026-09-16-release-phases-and-reference-bindings.md; the class-definition

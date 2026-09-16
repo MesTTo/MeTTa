@@ -29,14 +29,22 @@
 !(test (collapse (get-type Rex)) (Dog Animal LivingThing))
 
 ;Two things are NOT widened, and both are deliberate: a grounded literal's
-;built-in type, and the return type of an application. The type graph is read
-;for symbols and expressions only.
+;built-in type, and the return type of an IMPLEMENTED operation. A symbol
+;with an arrow type and an equation is an operation, and its application
+;answers the declared return type alone.
 (:< Number Countable)
 !(test (collapse (get-type 1)) (Number))
 
 (: half (-> Number Fraction))
+(= (half $n) (/ $n 2))
 (:< Fraction Rational)
 !(test (collapse (get-type (half 3))) (Fraction))
+
+;A symbol with an arrow type and NO equation is a data constructor. Its
+;application is sorted data, and sorted data is widened the way a symbol is,
+;so the same edge that left `(half 3)` alone reaches `(ratio 1 2)`.
+(: ratio (-> Number Number Fraction))
+!(test (collapse (get-type (ratio 1 2))) (Fraction Rational))
 
 ;A diamond answers its join TWICE, and that is not a bug to report. Widening
 ;checks what is already present against the list as it stood when the round
