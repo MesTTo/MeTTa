@@ -174,7 +174,7 @@ qlf_source_newest(Here, Newest) :-
 %The boot's own child regenerates the engine set; a library half otherwise
 %compiles at its first import, inside whichever process that is
 %[tested: extensions/python/tests/repository/test_twin_coverage.py::test_a_measurement_warms_stale_artifacts_once_per_process;
-%commit=WORKTREE].
+%commit=bde3d297922bcef86e840361749bced147323977].
 qlf_compile_claimed :-
     qlf_boot_directory(Here),
     forall(( qlf_pattern(prolog, Pattern),
