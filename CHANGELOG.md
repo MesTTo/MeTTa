@@ -7,6 +7,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Door-order analysis treats a declaration the type checker verified as
+  authoritative: a value the declaration cannot admit does not escape a
+  function (`runtime() -> Runtime` no longer answers `None`), a caller's
+  supplied or unknown value reaches a concrete parameter as the declared
+  class, and an `Any` narrowed by `isinstance` is that class. `getattr`
+  answers its default, `type(x)` is `x`'s class, iteration through a source
+  `__iter__` or an inherited `UserList` yields the elements, a field tested
+  against `None` narrows wherever a subclass holds it, and a branch no
+  value enters is unreachable rather than an unresolved call. The
+  `_WatchIterator` and `integrate` helpers declare the `Subscription` and
+  `Space` they take.
+
 - Door-order analysis reads the structure the source declares: a generic
   annotation keeps its element, key, position or class type and admits only
   that type's own operations; a door's public contract is its overloads'
