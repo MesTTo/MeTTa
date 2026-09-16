@@ -377,7 +377,7 @@ metta_catalog_head('@owned-record').
 %rows it may see after the last one is erased because the host walks them at
 %the transaction's generation (host ledger, swi-empty-indexed-snapshot,
 %patched) [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
-%commit=WORKTREE].
+%commit=c6337b74018252516e43107789ceb7d47d044546].
 store_native_clause(Module, Term, Ref) :-
     assertz(Module:Term, Ref).
 
