@@ -9,7 +9,7 @@
 #   refcount 2 with one tracked referrer; the build carrying
 #   janus-callback-exception-leak.patch answers absent;
 #   command=sh check.sh host-workarounds; fixture=Janus 1.5.3, SWI 10.1.13;
-#   commit=WORKTREE].
+#   commit=928be33b031956e3eed5a05d62c7f2f3bd534631].
 # Owns resources: one Python child, joined; no engine source is loaded.
 set -eu
 exec "${CHECK_PY:-python3}" - <<'PY'

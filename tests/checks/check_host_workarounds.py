@@ -49,11 +49,11 @@ Guarantees:
     answers `present`, and is refused when the patch is not a tracked .patch
     file [tested: test_a_patched_host_passes_without_a_site,
     test_a_patched_host_that_still_shows_the_defect_names_the_patch,
-    test_a_patch_must_be_tracked; commit=WORKTREE]
+    test_a_patch_must_be_tracked; commit=928be33b031956e3eed5a05d62c7f2f3bd534631]
   - the shipped tree passes: every worked-around entry has a site and answers
     `present`, and every patched one answers `absent`, on SWI-Prolog 10.1.13
     with Janus 1.5.3 built with the tracked patches [tested:
-    test_the_shipped_tree_passes_its_own_gate; commit=WORKTREE]
+    test_the_shipped_tree_passes_its_own_gate; commit=928be33b031956e3eed5a05d62c7f2f3bd534631]
 Fails when:
   - read as a count. The number of entries is not a score; the lane's value is
     that every one of them is live, reproduced and findable.
