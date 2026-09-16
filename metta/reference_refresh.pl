@@ -90,8 +90,7 @@ metta_reference_invalidate(Spaces) :-
 metta_reference_refresh :-
     (   metta_reference_refreshing
     ->  true
-    ;   % Workaround: swi-cleanup-window - an interrupted drain restores its trailed marker.
-        metta_with_trailed_enumeration('$metta_reference_refreshing', true,
+    ;   metta_with_trailed_enumeration('$metta_reference_refreshing', true,
                                       metta_reference_refresh_now)
     ).
 
@@ -229,9 +228,7 @@ metta_reference_finish_frame(Frame) :-
     metta_reference_frame_entries(Frames),
     (   memberchk(frame(Frame, Roots), Frames)
     ->  nb_set_to_list(Roots, Spaces),
-        ( nb_current('$metta_reference_finishing', Before) -> true ; Before = [] ),
-        % Workaround: swi-cleanup-window - exclusion of finishing frames follows the trail.
-        metta_with_trailed_enumeration('$metta_reference_finishing', [Frame|Before],
+        metta_with_trailed_push('$metta_reference_finishing', Frame,
             ( metta_reference_track_transaction(Spaces),
               metta_reference_invalidate(Spaces),
               metta_reference_refresh,

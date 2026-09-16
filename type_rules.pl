@@ -344,7 +344,6 @@ with_typing_policy_stable(Goal) :-
     ),
     with_mutex(
         '$metta_typing_policy',
-        % Workaround: swi-cleanup-window - the policy snapshot follows the trail.
         metta_with_trailed_enumeration('$metta_typing_policy_snapshot',
                                       snapshot(Snapshot), Goal)).
 

@@ -476,6 +476,7 @@
             metta_with_state_write_fence/1,
             metta_with_trailed/3,
             metta_with_trailed_enumeration/3,
+            metta_with_trailed_push/3,
             metta_world_effect_coverage/2,
             %
             % ERRORS AND REFUSALS: the vocabulary every tier raises and every host reads.

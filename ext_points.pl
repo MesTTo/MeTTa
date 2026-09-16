@@ -1280,6 +1280,7 @@ kind(metta_host_read_forms/2, host_service).
 kind(metta_host_with_stack_limit/2, host_service).
 kind(metta_with_trailed/3, host_service).
 kind(metta_with_trailed_enumeration/3, host_service).
+kind(metta_with_trailed_push/3, host_service).
 
 % Declare a reader beside its writer:
 %   :- seam:context_reader(active, '$module_active', value(true)).
@@ -1287,7 +1288,8 @@ kind(metta_with_trailed_enumeration/3, host_service).
 % stack. The declaration supplies both the callable predicate and its inline
 % read, avoiding an extra predicate call on each hot-path guard check.
 % [source: engine/ext_points.pl:context_read/3; commit=3a931690116abfa8a5a37ecba3fe179d826cd712]
-% Workaround: swi-cleanup-window - context readers inspect the trailed root instead of an asserted guard.
+% Context readers inspect the scoped root its writer set through one of the
+% metta_with_trailed doors, never an asserted guard.
 :- multifile context_reader/4.
 kind(context_reader/4, declaration).
 
