@@ -477,7 +477,7 @@ Record: docs/journal/2026-09-17-host-patches.md;
   docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
   buffered VM trace and unchanged-body foldall controls.
 ## swi-concurrent-import-removal-resets-provider
-Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, this tree running on 10.1.14 built with the patch below; at fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-proc.c:388-416, 1510-1544 and 2871-2935.
 Defect: abolishProcedure replaces an imported Procedure's Definition with an
   empty child definition, then resetProcedure reads the Procedure again.
@@ -488,14 +488,16 @@ Reproduction: tests/checks/host_workarounds/swi-concurrent-import-removal-resets
   a compiled child call racing with one million imported abolish operations.
   It loads no engine. The original provider clause survives but its metadata
   disappears; the last line is present.
-Workaround: import repair retains an existing link when the first resolving
-  base still selects its provider. Module refresh and rollback repair use
-  that same reconciliation. This removes repeated detachment during unrelated
-  mutation; actual concurrent shadow replacement still depends on the host's
-  native rebinding semantics.
-Lifted when: abolishProcedure resets its captured child Definition before
-  publication, or synchronizes the entire transition with autoImport, and
-  the reproduction retains the provider's metadata and prints absent.
+Patch: tests/checks/host_workarounds/swi-concurrent-import-removal-resets-provider.patch,
+  against swipl-devel V10.1.14 src/pl-proc.c: `abolishProcedure()` resets the
+  definition it captured and locked, the empty child before publishing it
+  and the local definition in the other branches, never `proc->definition`
+  read again after a concurrent `autoImport()` may have relinked the
+  provider. The reproduction, a million abolishes against a million reads,
+  keeps the provider's clause and meta declaration and answers absent; SWI's
+  core, db, library and engines groups pass.
+Lifted when: SWI-Prolog as shipped resets only the captured definition, so the
+  reproduction prints absent; the patch and the entry go together then.
 Record: docs/journal/2026-09-11-classes-on-metta.md, import repair retains an
   unchanged provider.
 

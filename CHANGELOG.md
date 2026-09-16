@@ -405,6 +405,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   host (`swi-bound-clause-reference-ignores-snapshot`), so an owned record
   decompiles through `clause/3` like every other reader instead of the
   internal `'$clause'/4`.
+- Abolishing an imported predicate no longer races auto-import into wiping the
+  provider on the patched host (`swi-concurrent-import-removal-resets-provider`);
+  the shadow repair's retained-import guard stays for the churn it avoids.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

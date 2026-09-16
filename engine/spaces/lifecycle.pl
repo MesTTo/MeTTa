@@ -750,15 +750,12 @@ metta_repair_shadow_imports :-
 %metta_restore_inherited_predicate/3 above]. The guard cannot change the
 %answer: a name current_predicate/1 does not find has no local clause count.
 %
-% Workaround: swi-concurrent-import-removal-resets-provider - retain unchanged imports.
-% abolishProcedure installs an empty child definition before resetProcedure
-% rereads that pointer. Concurrent autoImport can replace it with the provider
-% in between, so the reset clears the provider's count and meta declaration
-% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-proc.c#L1510-L1544;
-% commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24]. Inspect the first resolving base before comparing sources:
-% a later base matching the old source must not hide a nearer new definition.
-% Actual shadow removal or parent replacement still needs the native rebind;
-% this guard prevents unrelated repair sweeps from detaching a live provider.
+% An unchanged import is retained: re-stating an import that already resolves
+% to the same provider buys nothing. Inspect the first resolving base before
+% comparing sources: a later base matching the old source must not hide a
+% nearer new definition. Actual shadow removal or parent replacement still
+% needs the native rebind; this guard keeps unrelated repair sweeps from
+% detaching a live provider.
 metta_repair_shadow_import(Module, Name, Arity) :-
     functor(Head, Name, Arity),
     (   current_predicate(Module:Name/Arity),

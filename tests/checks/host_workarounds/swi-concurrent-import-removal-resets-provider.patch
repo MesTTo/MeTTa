@@ -1,0 +1,63 @@
+diff --git a/src/pl-proc.c b/src/pl-proc.c
+index 4fd2445..a0dc6ce 100644
+--- a/src/pl-proc.c
++++ b/src/pl-proc.c
+@@ -68,7 +68,8 @@ finding source files, etc.
+ 
+ #define LDFUNC_DECLARATIONS
+ 
+-static void	resetProcedure(Procedure proc, bool isnew);
++static void	resetDefinition(Definition def, bool isnew);
++#define resetProcedure(proc, isnew) resetDefinition((proc)->definition, isnew)
+ static atom_t	autoLoader(Definition def);
+ static Procedure visibleProcedure(functor_t f, Module m);
+ static void	freeClauseRef(ClauseRef cref);
+@@ -385,10 +386,8 @@ locking the L_PREDICATE mutex.
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
+ static void
+-resetProcedure(Procedure proc, bool isnew)
+-{ Definition def = proc->definition;
+-
+-  if ( (ison(def, P_DYNAMIC) /*&& def->references == 0*/) ||
++resetDefinition(Definition def, bool isnew)
++{ if ( (ison(def, P_DYNAMIC) /*&& def->references == 0*/) ||
+        !def->impl.any.defined )
+     isnew = true;
+ 
+@@ -1523,17 +1522,21 @@ abolishProcedure(Procedure proc, Module module)
+ 					       def->functor->arity);
+     ndef->module             = module;	     /* lookupProcedure()!! */
+     ndef->codes		     = SUPERVISOR(virgin);
++    /* Reset the child before publishing it: a concurrent autoImport()
++       may relink the provider into proc between the publication and a
++       reset that reads proc->definition again, and then the reset wiped
++       the provider's clause count and meta declaration. */
++    resetDefinition(ndef, true);
+     proc->definition         = ndef;
+     ATOMIC_INC(&GD->statistics.predicates);
+     ATOMIC_ADD(&module->code_size, sizeof(*ndef));
+-    resetProcedure(proc, true);
+     DEBUG(MSG_PRED_COUNT, Sdprintf("Created %s at %p\n",
+ 				   predicateName(ndef), ndef));
+     if ( unshareDefinition(odef) == 0 )
+       lingerDefinition(odef);
+   } else if ( ison(def, P_FOREIGN) )	/* foreign: make normal */
+   { def->impl.clauses.first_clause = def->impl.clauses.last_clause = NULL;
+-    resetProcedure(proc, true);
++    resetDefinition(def, true);
+   } else if ( ison(def, P_THREAD_LOCAL) )
+   { UNLOCKDEF(def);
+     return PL_error(NULL, 0, NULL, ERR_PERMISSION_PROC,
+@@ -1541,7 +1544,10 @@ abolishProcedure(Procedure proc, Module module)
+   } else				/* normal Prolog procedure */
+   { removeClausesPredicate(def, 0, false);
+     setDynamicDefinition_unlocked(def, false);
+-    resetProcedure(proc, false);
++    /* The captured definition, not proc->definition: a concurrent
++       autoImport() may have relinked the provider into proc since this
++       (child) definition was captured and locked. */
++    resetDefinition(def, false);
+   }
+ 
+   DEBUG(CHK_SECURE, checkDefinition(def));
