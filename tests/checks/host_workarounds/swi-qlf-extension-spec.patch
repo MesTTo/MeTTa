@@ -1,0 +1,30 @@
+diff --git a/boot/init.pl b/boot/init.pl
+index a275c47..18b0073 100644
+--- a/boot/init.pl
++++ b/boot/init.pl
+@@ -2350,17 +2350,14 @@ load_files(Module:Files, Options) :-
+ '$qlf_file'(Spec, _, Spec, stream, Options) :-
+     '$option'(stream(_), Options),      % stream: no choice
+     !.
+-'$qlf_file'(Spec, FullFile, LoadFile, compile, _) :-
+-    '$spec_extension'(Spec, Ext),       % user explicitly specified
+-    (   user:prolog_file_type(Ext, qlf)
+-    ->  absolute_file_name(Spec, LoadFile,
+-                           [ file_type(qlf),
+-                             access(read)
+-                           ])
+-    ;   user:prolog_file_type(Ext, prolog)
+-    ->  LoadFile = FullFile
+-    ),
+-    !.
++'$qlf_file'(Spec, _, LoadFile, compile, _) :-
++    '$spec_extension'(Spec, Ext),       % user explicitly specified a QLF
++    user:prolog_file_type(Ext, qlf),
++    !,
++    absolute_file_name(Spec, LoadFile,
++                       [ file_type(qlf),
++                         access(read)
++                       ]).
+ '$qlf_file'(_, FullFile, FullFile, compile, _) :-
+     current_prolog_flag(source, true),
+     access_file(FullFile, read),

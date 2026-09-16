@@ -282,7 +282,7 @@ Record: docs/journal/2026-09-07-the-gate-green-again.md, the artifact that
   outlived its locale.
 
 ## swi-qlf-extension-spec
-Host: SWI-Prolog 10.1.13; `'$qlf_file'/5` in boot/init.pl decides by the
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, this tree running on 10.1.14 built with the patch below;; `'$qlf_file'/5` in boot/init.pl decides by the
   shape of the spec.
 Defect: a `load_files/2` spec that names its `.pl` extension compiles from
   source whatever `qcompile(auto)` says; only a bare stem reaches the artifact
@@ -291,9 +291,14 @@ Defect: a `load_files/2` spec that names its `.pl` extension compiles from
 Reproduction: tests/checks/host_workarounds/swi-qlf-extension-spec.sh, which
   loads one unit as `'one.pl'` and another as `two` and looks for the
   artifacts.
-Workaround: `metta_load_source/2` strips the extension of a source the boot
-  claims, so every runtime unit reaches the artifact rule.
-Lifted when: the artifact rule applies to an extension-bearing spec too.
+Patch: tests/checks/host_workarounds/swi-qlf-extension-spec.patch, against
+  swipl-devel V10.1.14 boot/init.pl: `'$qlf_file'/5` keeps its explicit
+  branch for a spec naming a QLF extension and lets a spec naming its Prolog
+  extension reach the artifact rule like a stem, so `qcompile(auto)` governs
+  both. The reproduction answers absent and SWI's core, files, save and
+  compile groups pass.
+Lifted when: the artifact rule as shipped applies to an extension-bearing spec too; the
+  reproduction then prints absent and the patch and the entry go together.
 Record: docs/journal/2026-09-09-runtime-units-compile-beside-their-source.md.
 
 ## swi-qlf-failed-include-source-module
