@@ -88,7 +88,7 @@ not performance comparisons. Logs: `ai-tmp/ai-classes-c58-native.log` and
 `ai-tmp/ai-classes-c58-python.log`. The driver
 `sh ai-tmp/ai-classes-c58-verify.sh` sets the worktree-local temporary directory
 and the selected Python environment, runs each command alone, and captures
-its exit status. Its Python executable is `/home/user/Dev/.venv-pypetta/bin/python`.
+its exit status. Its Python executable is the one `select-python.sh` selects.
 
 ```sh
 rg --files -uu engine lib -g '*.qlf' -0 | xargs -0 -r rm --

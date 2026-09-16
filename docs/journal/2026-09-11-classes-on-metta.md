@@ -2667,7 +2667,7 @@ Projection uses that codec for class values after explicit metaclass hooks
 and registrations. Class retirement removes the declaration the codec reads.
 Explicit Grounded remains an opaque host value.
 
-Verified: `/home/user/Dev/.venv-pypetta/bin/python -m pytest -q -n 6
+Verified: `python -m pytest -q -n 6
 --benchmark-disable --randomly-seed=1438340450
 extensions/python/tests/ch09_types/test_class_values.py
 extensions/python/tests/ch09_types/test_class_methods.py

@@ -69,7 +69,7 @@ the clause in every nesting tried), and one probe met `py_object <PyObject>(free
 exist` on a fresh object. Decided: the test asserts what this unit controls, that completion
 returns the provider to its registered reference count with no bound-method holders; the
 registration reference and the input-object retention are the reclamation unit's questions
-(`/home/user/Dev/PyPeTTa1/ai-notes/janus-deferred-decref-after-atom-gc.md`, probes
+(the workspace note `janus-deferred-decref-after-atom-gc`, probes
 `ai-tmp/ai-participant-gc-probe*.py`, `ai-tmp/ai-janus-*-probe*.py`).
 Tried: Node: `npm run --silent typecheck && npm run --silent test` -> 654 pass; the source
 runner `node --test test/*.test.ts` needs a Node built with TypeScript support, which v22.22.1

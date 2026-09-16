@@ -5,7 +5,7 @@ construction and validation explicit to static checking.
 
 ## 2026-09-15: runtime annotation alternatives
 
-Observed: `python -m ty check --python /home/user/Dev/.venv-pypetta
+Observed: `python -m ty check --python <the venv select-python.sh selects>
 metta/_catalog/annotations.py metta/_catalog/call_signatures.py
 metta/_catalog/call_values.py`, run from extensions/python, reports five
 diagnostics. The runtime_type_atoms return joins list[Expression] with
