@@ -9,7 +9,7 @@
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-empty-indexed-snapshot.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=c6337b74018252516e43107789ceb7d47d044546].
 % Owns resources: each erasing thread is joined; fixture facts are withdrawn.
 
 :- dynamic snapshot_row/1.
