@@ -6,7 +6,7 @@
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-wrapper-roundtrip-merges-closures.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=69a64a92b4c8fb228da66abe3a594e8027902052].
 % Owns resources: fixture predicates and wrappers die with the probe process.
 
 :- use_module(library(prolog_wrap)).
