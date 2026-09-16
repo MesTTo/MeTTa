@@ -78,7 +78,7 @@ Record: docs/journal/2026-09-16-reclamation-counts.md, the retention bisection
   from the reclamation counts to the hidden reference and the patched build.
 
 ## swi-bound-clause-reference-ignores-snapshot
-Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, this tree running on 10.1.14 built with the patch below; at fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-dbref.c:PL_get_clref and src/pl-comp.c:clause.
 Defect: bound-reference clause/3 rejects the global CL_ERASED flag even when
   enumeration in the caller's older transaction still admits that occurrence.
@@ -86,11 +86,15 @@ Defect: bound-reference clause/3 rejects the global CL_ERASED flag even when
 Reproduction: tests/checks/host_workarounds/swi-bound-clause-reference-ignores-snapshot.pl,
   an old transaction enumerates its original fact after an independently joined
   eraser, then compares bound-reference reading with retained-term decompilation.
-Workaround: select the occurrence through the snapshot or native transaction
-  delta, then use '$clause'/4 to recover its original syntax. Decompilation does
-  not establish visibility or committed liveness.
-Lifted when: bound-reference clause/3 returns the same occurrence admitted by
-  enumeration in the transaction, so the reproduction prints absent.
+Patch: tests/checks/host_workarounds/swi-bound-clause-reference-ignores-snapshot.patch,
+  against swipl-devel V10.1.14 src/pl-comp.c: clause/3 with a bound reference
+  admits an erased clause that is still visible at the caller's generation
+  (`current_generation()` of its predicate), the view enumeration takes, so
+  a second read returns the occurrence the first read saw. The reproduction
+  answers absent and SWI's core, db, transaction and tabling groups pass.
+Lifted when: SWI-Prolog as shipped reads a bound reference at the caller's
+  generation, so the reproduction prints absent; the patch and the entry go
+  together then.
 Record: docs/journal/2026-09-15-native-owned-records.md.
 
 ## swi-cached-undefined-supervisor

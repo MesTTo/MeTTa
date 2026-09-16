@@ -401,6 +401,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the tenth patched ledger entry). The receipt and reference watches keep their
   nearest-live-transaction transfer as their own design for nested
   transactions and lose the marker.
+- A bound clause reference reads at the caller's generation on the patched
+  host (`swi-bound-clause-reference-ignores-snapshot`), so an owned record
+  decompiles through `clause/3` like every other reader instead of the
+  internal `'$clause'/4`.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

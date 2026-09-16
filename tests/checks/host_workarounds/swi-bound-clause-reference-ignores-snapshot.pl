@@ -1,7 +1,11 @@
 % Purpose: compare clause enumeration with bound-reference reads in an old snapshot.
 % Guarantees: the last line is present only when enumeration retains the fact
 %   but clause/3 with its reference loses it after another thread erases it
-%   [tested: sh check.sh host-workarounds; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+%   [tested: sh check.sh host-workarounds; commit=c5bdd73e06840e1d0fd0991523983c75def074f6]
+%   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+%   absent on 10.1.14 built with tests/checks/host_workarounds/swi-bound-clause-reference-ignores-snapshot.patch;
+%   command=sh check.sh host-workarounds;
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
 % Owns resources: the erasing thread is joined before inspection; the fixture
 %   is removed after the outer transaction finishes.
 
