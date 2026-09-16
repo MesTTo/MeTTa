@@ -758,10 +758,15 @@ def drop(self) -> None:
 def dropped(self) -> bool:
 ```
 
-> Whether :meth:`drop` has released this handle's space.
+> Whether this handle's space has been released, by any party.
 >
-> A drop pending inside an open transaction reports False until that
-> transaction's outcome finishes or restores it.
+> Every handle of one live name shares that answer: a drop through
+> another handle, a lifetime scope, a native or MeTTa drop, and a
+> birth inside a transaction that did not commit all read True here. A
+> drop pending inside an open transaction reports False until that
+> transaction's outcome finishes or restores it, and a drop whose
+> engine half finished but whose own cleanup failed reports False
+> until drop() finishes it.
 
 ### `Channel.bind`
 
@@ -4372,10 +4377,15 @@ def drop(self) -> None:
 def dropped(self) -> bool:
 ```
 
-> Whether :meth:`drop` has released this handle's space.
+> Whether this handle's space has been released, by any party.
 >
-> A drop pending inside an open transaction reports False until that
-> transaction's outcome finishes or restores it.
+> Every handle of one live name shares that answer: a drop through
+> another handle, a lifetime scope, a native or MeTTa drop, and a
+> birth inside a transaction that did not commit all read True here. A
+> drop pending inside an open transaction reports False until that
+> transaction's outcome finishes or restores it, and a drop whose
+> engine half finished but whose own cleanup failed reports False
+> until drop() finishes it.
 
 ### `FutureSpace.__enter__`
 

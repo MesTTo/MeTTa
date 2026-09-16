@@ -1320,12 +1320,17 @@ Guarantees result type `Bool` with the answer shape, effect, and determinism abo
 
 Implementation failures propagate, including failures from callees and providers.
 
-> Whether :meth:`drop` has released this handle's space.
+> Whether this handle's space has been released, by any party.
 >
-> A drop pending inside an open transaction reports False until that
-> transaction's outcome finishes or restores it.
+> Every handle of one live name shares that answer: a drop through
+> another handle, a lifetime scope, a native or MeTTa drop, and a
+> birth inside a transaction that did not commit all read True here. A
+> drop pending inside an open transaction reports False until that
+> transaction's outcome finishes or restores it, and a drop whose
+> engine half finished but whose own cleanup failed reports False
+> until drop() finishes it.
 
-Evidence: `extensions/python/tests/repository/test_door_rows.py::test_space_identity_doors_follow_the_handle_lifetime`.
+Evidence: `extensions/python/tests/ch04_spaces_and_matching/test_space_leases.py::test_a_native_drop_marks_every_retained_handle_dead`, `extensions/python/tests/repository/test_door_rows.py::test_space_identity_doors_follow_the_handle_lifetime`.
 
 ## space:to-wire
 

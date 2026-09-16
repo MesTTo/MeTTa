@@ -88,3 +88,154 @@ control showed answers and properties restored after abort, so no repair is
 selected. Open: commit validation of writes against a retired allocation and
 of retirement over concurrent live state, provider admission intervals with a
 waiting close, the class withdrawal producer and reclamation counts remain.
+
+### R2 host registration lease
+
+Decided: one engine row `metta_py_lease(Space, Lease)` per live name with a
+Python handle, opened by `metta_py_lease_open/2` inside the caller's
+transaction on the first handle and shared by every later handle of the name
+through `metta._spaces.lease` (`_BY_NAME` and `_BY_LEASE`, both weak). The
+lease number, not the name, is the identity every report carries, so a name
+reused after a drop starts a second life a first-life handle cannot reach. A
+`metta_after_foreign/2` completion registered at open reads the row after the
+outcome; its absence means the birth was aborted and the cell learns that by
+lease number (`metta_ops:lease_aborted/1`). Retirement reaches the binding
+through a permanent `seam:space_released/1` provision that retracts the
+name's rows and reports each lease (`metta_ops:space_released/1`); it runs in
+the hook phase, after the retiring handle's own completion. A collected cell
+releases its row through `defer_engine_call("metta_py_lease_release", ...)`.
+Tried: the provision as a `provides_template/4` row like `atom_added` ->
+never installed. Templates become `provided_template/2` facts that a
+subscription installs on demand through `metta_py_provided_clause/2`, so
+`seam:space_released/1` had only its multifile declaration and no retained
+handle read dropped: 16 reds across test_space_leases.py,
+test_space_retirement.py and test_scopes.py (ai-tmp/ai-lease-python-1.log).
+Decided: a permanent `provides/3` row; the hook runs only at release
+completion and the retract is a no-op without rows.
+Tried: the aborted-birth completion holding the cell's bound method as a
+crossed host, `py_call(Host:'__call__'())` -> janus retained the crossed
+object until atom GC (2026-09-15-foreign-participant-capture.md), so
+the transient cell, every handle of it and its row survived `gc.collect()`:
+test_lease_rows_follow_outstanding_handles read 1 row where 0 were owed.
+Decided: both reports name the lease through `metta_ops` callbacks; no
+Python object crosses, and no `Capability` row for a dynamic `__call__` is
+needed.
+Measured: the two above also explain the last false reading. A name released
+without the hook kept a live cell in `_BY_NAME`; the pooled name was minted
+again inside an aborted transaction; the new handle shared the stale cell
+instead of opening a lease, so the abort never reached it
+(test_a_handle_born_in_an_aborted_transaction_is_dead read dropped=False),
+and the same stale cell reported `did not commit` on a live handle in
+test_a_rolled_back_allocation_cannot_recycle_a_revoked_name.
+Decided: the per-handle cleanup obligation stays separate from the shared
+life. `dropped` is `_dropped or (cell dead and not _drop_engine_done)`, so a
+retiring handle whose engine half committed but whose backing close failed
+reads False and its gate says `call drop() again` before the cell's refusal
+(test_cleanup_failure_after_a_committed_drop_is_retryable,
+test_backing_close_failure_keeps_the_name_and_cleanup_retryable). The
+`lib_thread:scope_engine_released/1` and `scope_space_dead/1` queries leave
+`drop()` and `dropped`: the scope's release fires the same hook.
+Decided: a dead alias refuses in Python with the cause before any engine
+crossing. ch17 test_cleanup_failure_revokes_aliases_attempts_all_and_can_retry
+expects `is dead: its space was dropped` where it read the engine's
+`released_scope_space`, which still guards raw names reaching the engine.
+Decided: `name` stays a live-state door; the rolled-back allocation control
+reads the name inside the transaction body while the handle is live.
+Measured: with the shared life reporting truthfully, `MeTTa().space()` was
+a silent use-after-release: chapters 04/15/17/19 read 12 reds and 22 fixture
+errors, every one `is dead: its space was dropped` on a handle the test
+still used (ai-tmp/ai-lease-chapters-1.log), and the memory-scale benchmark
+CLI, the digest subprocess control, the C-space, TypeScript-space and
+compliance fixtures all mint through an unreferenced context. The context's
+home handle is what the abandoned-world backstop watches; nothing minted
+inside the world held it, so the collector dropped the world under the
+child and the child kept writing into a revived name, which the pool scan
+tolerates by design. test_a_borrowed_context_leaves_its_minted_handle_with_the_caller
+asserted both halves of that: the child's name gone from the engine and
+`dropped` still False.
+Decided: a space minted with an equation home holds that home handle
+(`SpaceHandle._world`), the rule the backstop already stated for
+`MeTTa().self` extended to every reference handed out of a world; the
+borrowed-context control now reads the child dropped once the owner
+closes, and test_a_child_handle_outliving_its_context_keeps_the_world is
+the fresh-process control. Rejected: teaching the idiom away in tests and
+docs, because the idiom is documented (website tutorial, multishot, the
+integrations page, `metta/__main__.py`, sixteen examples) and the rule is
+the library's own.
+Measured: a bare crossing costs 12 inferences, a first handle of a name 32,
+a cached attach 14, a named-space door 40, a first handle inside a no-op
+transaction 511 (the transaction wrapper, not the lease)
+(ai-tmp/probe/ai-lease-cost-probe.py). The completion that reports an
+aborted birth is scheduled only inside a transaction, since nothing else
+can take the row back. The spaces3 twin reads 545 here against a pin of
+371; in provisioned worktrees the chain is 371 within budget at c80041350,
+383 at 709e556c1 (completion and admission-law units), 524 at 1a8c00f93
+(the FROM source-origins reader, +141 on this twin's four written forms),
+524 at c1961afeb and 9d7d4164c, 545 here (+21, the lease). Re-pinned with
+that chain through twin_coverage.py --repin.
+Decided: a name's lease stays weak rather than cached for the process: a
+strong cache would drop the finalizer and the release crossing but leak a
+row for every name a handle ever named and never created, and the measured
+cost of the weak design is one crossing per first handle, not per handle.
+Measured: the repository suite at 9d7d4164c was already red on four static
+checks the recent units never ran: the host-service scoreboard lacked nine
+declared rows, the llms sources table's unit and kind counts, the ruff
+suppression ceilings (68/64/157 observed against 67/62/152, identical at
+HEAD and here), and four journal citations by absolute path. Repaired in
+their own commit ahead of this unit's.
+
+### R3 commit validation, plan
+
+Goal: a write cannot commit against an allocation retired since its
+snapshot, and a retirement cannot commit over live state its prepared
+withdrawal did not remove.
+Decided: one more `seam:transaction_constraint/1` row beside the owned
+records' (engine/spaces/owned_records.pl), collected at the outer boundary
+in engine/metta/space_hooks.pl and run by SWI's transaction/3 after the view
+is refreshed to the global state plus this transaction's changes. The
+preparation reads `transaction_updates/1` once, the validation reads only
+native clauses; no evaluator, provider, host callback or source loader runs
+under the materialization mutex.
+Decided: three checks from the contract. (1) A writer's allocation: every
+storage module this transaction asserted into or erased from maps to
+`native_storage_module_cache(Space, Module)`; the cache clause reference
+the writer observed must still be live in the refreshed view unless this
+transaction asserted it itself, and a retirement committed by another
+transaction erased it. (2) A retirement's residue: for every
+`metta_space_retired(Space, Token)` witness this transaction asserted, the
+refreshed view holds no clause in the storage module and no
+`metta_exec_module_known`, `native_storage_module_cache`,
+`space_equation_home` or `space_parent` row for the space beyond the ones
+this transaction erased; a concurrently added equal-valued occurrence is a
+surviving clause, so clauses are counted, never compared. (3) A retirement's
+attachments: no `space_parent(_, Space)`, `space_equation_home(_, Space)` or
+source-owned publication (`filereader:source_owned_space/2`) for the space
+survives in the refreshed view. Empty and row-only allocations take part
+through their cache clause, which is their native identity.
+Decided: the refusal is an error term with its own message, the way
+`metta_owned_record_conflict/2` is, not a catalog refusal row:
+`metta_retirement_conflict(writer(Space), retired)` and
+`metta_retirement_conflict(retirement(Space), Problem)` with Problem one of
+`occurrences(N)`, `children(N)`, `publications(N)`, each naming the outer
+transaction retry as its remedy. A losing retirement's witness rolls back
+with the transaction, so its completion reports `restored`, its scope keeps
+the name and its backing stays open, which R1 already guarantees.
+Decided: the two-worker overlap harness (`overlap/4`, `worker/4`, `stage/3`,
+`with_queues/2`, `worker_cleanup/2`) leaves owned_records.plt for
+tests/prolog/overlap_transactions.pl, consulted by both suites, since the
+retirement suite is its second user and the two are one harness by
+construction.
+Controls: writer-first and retirement-first commit on both roots, same-value
+occurrence replacement, a definition publication and a source publication,
+a new owned child and a new equation-home child, an empty allocation and a
+row-only allocation, nested commit and abort, inner abort with outer commit,
+snapshot entry, and native-origin entry; disjoint and multivalued writes as
+positive controls; a losing retirement keeps its scope record and its
+Python handle live (restored). Python: ch15 controls through two engines
+of one process, the refusal arriving as MettaError from transaction() with
+the retry remedy, the handle usable afterwards.
+Open: whether `transaction_updates/1` lists the storage-module asserts of a
+foreign-backed space (it should not; a provider's rows are not native
+clauses), and whether a retirement of a space with tabled equations leaves
+table clauses the residue count must ignore (untable/1 runs before the
+outcome, so none are expected).

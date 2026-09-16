@@ -417,7 +417,7 @@ Clear this space and release its owned resources.
 dropped -> bool
 ```
 
-Whether :meth:`drop` has released this handle's space.
+Whether this handle's space has been released, by any party.
 
 `space:to-wire`: `introspection`, returns `list`, effect `pureStructural`, determinism `det`; tiers `sync`.
 

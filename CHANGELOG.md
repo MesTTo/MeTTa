@@ -280,6 +280,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   refuses other operations until the outcome; `dropped` reports the durable
   state. `metta_release_space/2` takes a completion goal called with `retired`
   or `restored`; `metta_py_drop_space/2` carries the handle's callback.
+- Every Python handle of one live space name shares one life. A retirement by
+  any party, another handle, a lifetime scope, a native or MeTTa drop, marks
+  every retained handle dropped and refuses its operations with the cause; a
+  name reused after a drop never answers an old handle; a handle created in a
+  transaction that does not commit is dead when the transaction ends; and a
+  `drop()` on a handle whose space another party retired finishes only this
+  side's cleanup. The engine keeps one `metta_py_lease/2` row per live name
+  with a Python cell and releases it with the retirement or with the last
+  handle. A handle minted inside a context's world keeps that world alive,
+  so `MeTTa().space()` stays usable after the unreferenced context is
+  collected instead of writing into a released name.
 - `seam:form_rewriter/1` callables take four arguments, `Term, Origins,
   Rewritten, RewrittenOrigins`. An origin tree is `source`, `value` or
   `children(Origins)`, aligned with the term, and a shape-changing rewriter
