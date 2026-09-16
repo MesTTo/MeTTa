@@ -603,7 +603,8 @@ metta_reference_publish_metadata(Space, Face) :-
 % release_preparation:preliminary_clear_retires_the_provider_once_before_removing_rows,
 % extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows,
 % extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_live_borrower_keeps_its_class_out_of_the_withdrawal
-% run before test_class_construction.py in one process; commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+% run before extensions/python/tests/ch09_types/test_class_construction.py in one process;
+% commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
 metta_reference_release(Space) :-
     retractall(metta_reference_space_option(Space, _, _)),
     (   metta_reference_seen_space(Space, Module)
@@ -664,7 +665,8 @@ metta_reference_retired_module(Space, Module) :-
     %or import left standing on an abolished predicate is a dangling
     %definition, and the receiver's own retirement crashed the process on it
     %[tested: extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_live_borrower_keeps_its_class_out_of_the_withdrawal
-    %run before test_class_construction.py in one process; commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+    %run before extensions/python/tests/ch09_types/test_class_construction.py in one process;
+    %commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
     forall(( metta_reference_roots(Other, Name, Arity, Roots), Other \== Module,
              memberchk(root(Space, _, _, _), Roots) ),
            ( metta_reference_retire_binding(Other, Name, Arity, discard),
