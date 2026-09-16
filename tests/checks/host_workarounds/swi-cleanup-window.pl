@@ -14,7 +14,7 @@
 %     [measured 2026-09-17: present on SWI-Prolog 10.1.14 as shipped, absent on
 %     10.1.14 built with tests/checks/host_workarounds/swi-cleanup-window.patch;
 %     command=sh check.sh host-workarounds;
-%     fixture=SWI-Prolog 10.1.14 with swi-cleanup-window.patch; commit=WORKTREE]
+%     fixture=SWI-Prolog 10.1.14 with swi-cleanup-window.patch; commit=ca783ee2ae42f40bdc3cff1ce17590df02ccbd60]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
