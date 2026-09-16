@@ -266,7 +266,9 @@ Record: docs/journal/2026-09-11-classes-on-metta.md, binding ownership spans the
   native transition and its closure reconstruction follow-up.
 
 ## swi-locale-default-encoding
-Host: SWI-Prolog 10.1.13; the default source encoding follows `setlocale()`.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, where the default source
+  encoding follows `setlocale()`; this tree runs on 10.1.14 built with the
+  patch below.
 Defect: a boot under `LC_ALL=C` reads a UTF-8 source as single bytes and
   compiles each non-ASCII character to U+FFFD. A `.qlf` written by that boot
   outlives the locale, since its mtime is newer than every source, so every
@@ -274,10 +276,15 @@ Defect: a boot under `LC_ALL=C` reads a UTF-8 source as single bytes and
   output stream does not fail on the mark, it escapes it.
 Reproduction: tests/checks/host_workarounds/swi-locale-default-encoding.sh,
   which reads an atom written as U+2705 back under `LC_ALL=C`.
-Workaround: the encoding flag and both standard streams are pinned to UTF-8
-  before any file loads, and the artifact stamp carries the encoding beside
-  the version, so a set compiled under another one is purged.
-Lifted when: SWI reads source files as UTF-8 whatever the locale says.
+Patch: tests/checks/host_workarounds/swi-locale-default-encoding.patch, against
+  swipl-devel V10.1.14 src/os/pl-ctype.c: `init_locale()` reads and writes
+  UTF-8 when the C library's LC_CTYPE is the C or POSIX locale, as Python's
+  UTF-8 mode does for the same case, so a UTF-8 source compiles the same
+  under every locale; the `encoding` flag reads `utf8` under `LC_ALL=C`.
+  The reproduction answers absent and SWI's core, files, charset and library
+  groups pass.
+Lifted when: SWI-Prolog as shipped reads UTF-8 under the C locale; the reproduction
+  then answers absent and the patch and the entry go together.
 Record: docs/journal/2026-09-07-the-gate-green-again.md, the artifact that
   outlived its locale.
 

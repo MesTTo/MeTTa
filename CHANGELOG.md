@@ -419,6 +419,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the patched host (`swi-qlf-extension-spec`), the artifact rule applying to an
   extension-bearing spec as to a stem, so the loader no longer strips the
   extension to reach it.
+- The default encoding of a process started under the C or POSIX locale is
+  UTF-8 on the patched host (`swi-locale-default-encoding`), so the boot's
+  encoding pin is the seat's own choice for every locale rather than a repair.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
