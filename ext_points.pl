@@ -196,16 +196,14 @@
             foreign_token/3,
             foreign_add_token/3,
             foreign_remove_token/3,
-            foreign_begin/1,
             foreign_clear/1,
-            foreign_commit/1,
             foreign_erring/5,
             foreign_match/3,
             foreign_plan/5,
+            foreign_participant/3,
             foreign_pushdown/3,
             foreign_refuse/2,
             foreign_remove/3,
-            foreign_rollback/1,
             foreign_space/1,
 
             % The grounded-value protocol.
@@ -597,17 +595,17 @@ kind(foreign_space/1, ownership).
 %host exceptions cannot cross as Prolog exceptions implement this; a
 %Prolog-hosted provider needs none, the engine's catch handles it.
 :- multifile foreign_erring/5.
-%Transactional participation, driven by (writes Ctx transactional): one
-%begin at the provider's first write inside the outermost transaction,
-%then exactly one commit or rollback when it finishes.
-:- multifile foreign_begin/1.
-:- multifile foreign_commit/1.
-:- multifile foreign_rollback/1.
+% A pure ownership lookup returns the selected registration's ground Identity
+% and a module-qualified Capture closure. Calling Capture with one additional
+% argument binds transaction(Begin, Commit, Rollback), three qualified goals
+% retaining that provider. Capture runs once, outside locks, before Begin at
+% the first write for Space/Identity. Completion never resolves Space again.
+% A replacement registration has another identity, even under the same name.
+% [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=WORKTREE]
+:- multifile foreign_participant/3.
 kind(foreign_match/3, ownership).
 kind(foreign_erring/5, ownership).
-kind(foreign_begin/1, ownership).
-kind(foreign_commit/1, ownership).
-kind(foreign_rollback/1, ownership).
+kind(foreign_participant/3, ownership).
 %Custom matching for grounded values, Hyperon's CustomMatch: a host value
 %may carry its own matching logic, consulted by metta_match_atoms/2 when
 %that value meets a non-variable operand inside `unify`. The hook
@@ -1746,6 +1744,13 @@ kind(native_storage_functor/2, service).
 kind(ensure_native_storage_module/2, service).
 kind(native_atom_clause/4, service).
 kind(metta_storage_term/4, service).
+% A host registration retains original native occurrences through completion.
+% The raw pair admits a reference; the decoder recovers its syntax only.
+% The owned-record reader shares commit validation and returns owner references
+% plus Ref-CompleteRow pairs, refusing duplicate or malformed native keys.
+kind(metta_native_pair/4, host_service).
+kind(metta_owned_clause/2, host_service).
+kind(metta_owned_record_occurrences/3, host_service).
 kind(metta_actor/1, host_service).
 kind(metta_token_order/3, service).
 kind(metta_token_parts/3, service).
