@@ -1,7 +1,7 @@
 % Purpose: verify that a space release inside a transaction finishes only with its outcome.
 % Guarantees: rows, storage cache and ownership return after an abort, the
 %   hooks and the host completion run once after a commit, and the completion
-%   reports retired or restored [tested: space_retirement; commit=WORKTREE].
+%   reports retired or restored [tested: space_retirement; commit=f9ef614a03bce1a1878d9b43fb7618df57ccfa21].
 % Owns resources: every test releases its generated spaces and erases its notes.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
