@@ -4,6 +4,11 @@
 %   reference_sources.pl owns the receiving home's source-name projection
 %   [source: engine/filereader/source_origins.pl:source_bound_names/5;
 %   commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
+% Guarantees: with_definition_batch/1 defers reference publication and
+%   dependent recompilation to the batch's first evaluating door or its end,
+%   and drops a repair filed for a module released before the drain [tested:
+%   test_class_method_costs:test_a_class_definition_publishes_its_references_once,
+%   extensions/python/tests/ch09_types/test_class_withdrawal.py; commit=WORKTREE].
 % Guarantees: ordinary deferral also preserves the resolved &self storage law
 %   [tested: test_equal_raw_and_resolved_source_can_still_own_a_binding;
 %   commit=323a89d607b656a3a238315ef111e3b23725ce83].
@@ -1063,6 +1068,24 @@ with_source_definition_order(Id, Names, Goal) :-
           retractall(source_pending_definition(Id, _)),
           retractall(source_compiled_definition(Id)) )).
 
+%A batch of definitions arriving through host doors rather than from a file.
+%Reference publication and dependent recompilation wait for the first door
+%that evaluates or plans (its flush) or for the batch's end, as a file's wait
+%for its next runnable or its exit; a write inside the batch pays its own
+%compilation and invalidation only. The load context files the repairs so the
+%batch drains them once, under transaction/1, as a file does at its exit.
+:- meta_predicate with_definition_batch(0).
+with_definition_batch(Goal) :-
+    gensym(source_load_, LoadId),
+    gensym(source_program_, ProgramId),
+    setup_call_cleanup(
+        asserta(active_source_load(LoadId), LoadRef),
+        ( with_source_definition_order(ProgramId, [], Goal),
+          run_source_repairs(LoadId) ),
+        ( erase(LoadRef),
+          retractall(source_load_repair(LoadId, _)),
+          retractall(support_recompile_pending(LoadId, _, _)) )).
+
 source_definition_arrived(F) :-
     active_source_program(Id),
     !,
@@ -1927,7 +1950,10 @@ repair_support_invalidations(Context) :-
             retract(support_recompile_pending(Context, Module, G)),
             Repairs0),
     sort(Repairs0, Repairs),
-    forall(member(Module-G, Repairs),
+    %A module released since its repair was filed has nothing left to
+    %recompile: a definition batch can drop a space before its drain.
+    forall(( member(Module-G, Repairs),
+             spaces:metta_exec_module_known(_, Module) ),
            recompile_function_in_module(Module, G)).
 repair_support_invalidations(_).
 

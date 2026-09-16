@@ -2886,3 +2886,74 @@ silently. Decided: withdraw the rows while the name is live, then drop; and
 a receiver carrying a dropped handle is the class layer's ReferenceError
 before any crossing (`_retired_receiver`), so `convert.build` on a retired
 instance keeps its contract instead of surfacing the handle refusal.
+
+## 2026-09-17: a class definition publishes its references once
+
+Goal: the handoff's class-definition cost unit. The four-class method diamond
+of `test_class_open_recursion_and_cooperative_super_follow_c3` cost
+257,602,163 inferences to define (MethodRoot 9,244,411, MethodLeft
+14,649,702, MethodRight 31,680,634, MethodDiamond 257,602,163;
+`ai-tmp/ai_probe_class_def_cost.py` at 01f2e238d on the patched host).
+
+Measured: the definition's 47 binding row adds cost up to 24,956,703 each
+(`ai-tmp/ai_probe_class_def_profile.py`); wrapping the refresh steps
+(`ai-tmp/ai_probe_class_def_refresh.py`) -> 228 `metta_reference_refresh_now`
+iterations for 198 interface rows, 37,676 `metta_reference_local_face`
+computations, 12,406 bindings and 10,860 function-change announcements for one
+define. Attributing every refresh to its callers
+(`ai-tmp/ai_probe_refresh_trace.pl`) -> 44 from `metta_reference_finish_frame`
+at each add's nested transaction completion, the rest from the doors' flushes.
+
+Decided: a Python transaction is a definition batch
+(`filereader:with_definition_batch/1` around `metta_py_transaction/2`'s body):
+reference publication and dependent recompilation wait for the first
+evaluating or planning door (`metta_py_settle_definitions/0`, one inference
+outside a batch) or for the batch's end, as a file's wait for its next
+runnable; a nested completion inside a source program or batch queues its
+spaces without refreshing. A MeTTa `(transaction ...)` form is not a batch: a
+nested evaluation inside it passes no door, and a file already defers that
+same case. A repair filed under the batch for a module released before the
+drain is dropped (`repair_support_invalidations/1`): the context drop of the
+class tests filed a recompile for a class space and then released it, and the
+drain raised `type_error(metta_execution_module, ...)`.
+
+Decided: a provider's face depends on its path only through the spaces of
+that path it can reach again (a from row back into the path is cut there), so
+faces are memoised by home and blocked set (Visited ∩ reachable, the
+reachable set by breadth-first walk over from rows) while the rows stand: the
+epoch every row change advances forgets them, as do the two row retirements.
+A clean node's retained face (`support_graph:support_retained/2`, new) serves
+when nothing it reaches is blocked, which is what its publication computed.
+The first shape memoised on a cut counter (a face whose computation met no
+cut) and missed every class space: the user's space imports each class space
+and the scoped class spaces import it back, so every face sits on a cycle
+(3,704 misses against 3,860 retained reads in one define).
+
+Tried: skipping `metta_reference_bind/6` when the stored roots equal the new
+ones and the slot exists -> references suite red
+(`rollback_restores_native_links_and_nested_rollback_restores_its_parent`,
+`one_face_publication_recompiles_a_shared_caller_once`,
+`every_three_vertex_graph_preserves_reachable_occurrence_bags`) and method
+calls 200 to 1,285 inferences dearer: `metta_reference_roots/4` and
+`metta_reference_slot/3` are transactional facts while the import or wrapper
+they describe is procedure-table state, so a publication inside a rolled-back
+transaction leaves a binding the reverted facts call current, and a wrapper's
+shape also reads the provider's local roots, which the importer's roots do not
+carry. Rejected. Revisit if the installed binding carries its own signature:
+an import's `imported_from/1` does, and a union wrapper could carry a variant
+hash of its roots and shapes in its wrapper name.
+
+Measured (`ai-tmp/ai_probe_class_def_cost.py`, same host, same tip):
+MethodRoot 4,173,145, MethodLeft 2,693,019, MethodRight 4,438,822,
+MethodDiamond 13,793,588, 18.7 times below; the four together 313,177,000 ->
+25,098,574. Method calls unchanged but for the settle check: MethodRoot.rank
+14,554 -> 14,557. The remaining 13.8M: four refreshes of the five touched
+spaces (8.8M: 910 `support_invalidate_many/1` walks 4.2M, 782 function-change
+announcements 2.4M, 750 bindings 2.2M), 88 invalidations at 14.5k each, and
+the adds' own compilation.
+
+Open: `projections.refresh` re-adds every ancestor method's equations when a
+value-grain subclass appears, and `methods.synchronize` adds the new
+provider's entry maps to every ancestor space, so a define still touches every
+class in the hierarchy; a refresh still rebinds every key of a published face;
+each row add still walks the support graph from its space.

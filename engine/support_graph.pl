@@ -86,6 +86,7 @@
             support_publish/3,
             support_publish_compiled_form/5,
             support_stabilize/3,
+            support_retained/2,
             with_support_repairs_deferred/1,
             support_memo_take_change/2,
             support_memo_sccs/2,
@@ -780,6 +781,17 @@ support_visit_list([Node|Nodes], Seen, Out, Tail) :-
 support_is_dirty(Node) :-
     term_hash(Node, NodeKey),
     support_dirty_node(NodeKey, Node).
+
+% The value a node stabilized last, while no change has dirtied it since.
+support_retained(Derived, Value) :-
+    must_be_support_node(Derived),
+    support_atomic(support_retained_locked(Derived, Value)).
+
+support_retained_locked(Derived, Value) :-
+    term_hash(Derived, DerivedKey),
+    \+ support_dirty_node(DerivedKey, Derived),
+    support_value(DerivedKey, Derived, Stored),
+    copy_term(Stored, Value).
 
 % Compute is called as call(Compute, FreshValue). A clean retained value is
 % returned without calling it. A changed value invalidates successors; an

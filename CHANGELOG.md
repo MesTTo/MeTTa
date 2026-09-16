@@ -440,6 +440,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   call `=/2`, `arg/3` or `is/2` from inside under the debugger. The source
   observer's trace hook no longer switches the collector off at exit ports
   and back on at every other port, and observation restores no collector flag.
+- A class definition publishes its references once: a Python transaction is a
+  definition batch, so reference publication and dependent recompilation wait
+  for the first evaluating door inside it or for its end, as a file's wait for
+  its next runnable; a provider's face is remembered by home and blocked path
+  set while the rows stand instead of being recomputed for every importer and
+  every row; and a repair filed for a module released before the batch's drain
+  is dropped. The four-class method diamond of the class methods tests costs
+  13.8M inferences to define where it cost 257.6M.
 - The `swi-first-arg-index-dead-keys` ledger entry is retired: a retracted
   clause's index key lives until clause collection by SWI-Prolog's logical
   update view, not by a defect, and the cmetta bridge keeps its cursor owners
