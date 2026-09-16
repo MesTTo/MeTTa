@@ -7,6 +7,15 @@
 %   extensions/python/tests/ch15_writing_transactions_and_worlds/test_space_retirement.py,
 %   extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_cleanup_failure_revokes_aliases_attempts_all_and_can_retry;
 %   commit=f9ef614a03bce1a1878d9b43fb7618df57ccfa21].
+% Guarantees: an aborted release also leaves the module's compiled program
+%   and its reference bindings callable: the generated predicates behind a
+%   released space's equations are abolished at the completion of a retired
+%   outcome, after the bindings drawn from the space are retired, never inside
+%   the transaction [tested:
+%   space_retirement:an_aborted_release_keeps_the_compiled_equations_callable,
+%   space_retirement:a_committed_release_abolishes_the_generated_predicates_at_completion,
+%   extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows;
+%   commit=WORKTREE].
 % Guarantees: a write and a retirement that raced each other are decided at
 %   the outer commit in the refreshed view: a writer whose allocation another
 %   transaction retired since its snapshot is refused, and a retirement whose
@@ -538,6 +547,18 @@ ensure_metta_exec_module_locked(Space, Module) :-
 %[source: SWI-Prolog Reference Manual, import/1 and abolish/1;
 % commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 metta_abolish_local_predicate(Module, Name, Arity) :-
+    functor(Head, Name, Arity),
+    %A wrapper chain on the predicate (a reference union, a capture) holds a
+    %clause of its own; abolishing under it leaves the chain dangling, and
+    %the next wrapper lookup, the class home's own retirement of the
+    %binding, was a segfault in libswipl. Every wrapper comes off first
+    %[tested: extensions/python/tests/ch09_types run in file order
+    %(test_class_method_costs.py after test_class_withdrawal.py); commit=WORKTREE].
+    (   catch('$wrapped_predicate'(Module:Head, Wrappers), _, fail)
+    ->  forall(member(Wrapper-_, Wrappers),
+               catch(unwrap_predicate(Module:Head, Wrapper), _, true))
+    ;   true
+    ),
     catch(abolish(Module:Name/Arity), _, true),
     metta_restore_inherited_predicate(Module, Name, Arity).
 
@@ -1539,7 +1560,7 @@ metta_prepare_space_release(Space) :-
 %retired in the current transaction is left to its pending completion; a
 %caller who wants that completion reported must have been the one to retire it.
 :- dynamic metta_space_retired/2.
-:- meta_predicate metta_release_space(+, 1), metta_space_release_complete(+, +, 1).
+:- meta_predicate metta_release_space(+, 1), metta_space_release_complete(+, +, +, 1).
 
 metta_release_space(Space) :-
     (   metta_space_retired(Space, _)
@@ -1573,9 +1594,14 @@ metta_release_space_(Space, Host) :-
                  with_metta_space_releasing(
                      Space,
                      ( metta_release_owned_children(Space),
-                       metta_host_clear_space(Space) )),
-                 transaction(( metta_exec_module_known(Space, Module),
-                               support_forget_module(Module),
+                       metta_host_clear_space(Space, retirement) )),
+                 %The clear made the space's module when nothing had; a
+                 %space that still has none has no generated predicates for
+                 %the completion to abolish either.
+                 transaction(( (   metta_exec_module_known(Space, Module)
+                               ->  support_forget_module(Module)
+                               ;   Module = none
+                               ),
                                metta_forget_space_parent(Space),
                                retractall(space_equation_home(Space, _)),
                                metta_forget_space_restriction(Space),
@@ -1588,7 +1614,7 @@ metta_release_space_(Space, Host) :-
                )),
     metta_engine:metta_after_foreign(
         space_retirement(Space, Token),
-        spaces:metta_space_release_complete(Space, Token, Host)).
+        spaces:metta_space_release_complete(Space, Token, Module, Host)).
 
 %Read after the outcome, the witness is the durable decision: present means
 %the retirement committed, absent means the abort restored the space. The
@@ -1597,10 +1623,23 @@ metta_release_space_(Space, Host) :-
 %host's cleanup still reaches the name through ordinary doors. The hooks run
 %whatever the host's cleanup did, so a failed backing close still revokes
 %the name and the host retries its own half through another drop.
-metta_space_release_complete(Space, Token, Host) :-
+metta_space_release_complete(Space, Token, Module, Host) :-
     (   retract(metta_space_retired(Space, Token))
-    ->  Outcome = retired
-    ;   Outcome = restored
+    ->  Outcome = retired,
+        %The physical half of the retirement, once it is durable and before
+        %the host can pool the name. The reference bindings go first: they
+        %are imports and wrappers standing on the module's predicates. Then
+        %the module's generated predicates go, so the name's next life
+        %inherits none of them.
+        metta_engine:metta_reference_retired(Space, Module),
+        (   Module == none
+        ->  true
+        ;   with_mutex('$metta_metta_exec', clear_generated_predicates(Module))
+        )
+    ;   Outcome = restored,
+        %The abort put the rows back; the references take the space back into
+        %sight and republish what the release published without it.
+        metta_engine:metta_reference_restored(Space, Module)
     ),
     setup_call_cleanup(
         true,
@@ -2729,6 +2768,16 @@ seam:atom_hook_ref_idle(Space, Ref) :-
 %(tabled ...) reflection facts, which describe declarations that no longer
 %exist [tested: test_pool_reuse_starts_tabling_clean].
 metta_host_clear_space(Space) :-
+    metta_host_clear_space(Space, now).
+
+%A clear abolishes the module's generated predicates at once. A retirement
+%leaves that to its completion: abolish/1 is not journaled, so a release
+%whose transaction rolls back would otherwise restore the rows and leave the
+%compiled program behind them gone (a class home's mint answered Unknown
+%procedure after an aborted drop). Untabling stays ahead of the retracts in
+%both phases; a clause of a tabled predicate must not be retracted under
+%live tables (the fault the untabling note above the native clause records).
+metta_host_clear_space(Space, Phase) :-
     seam:foreign_space(Space), !,
     metta_assert_space_destructible(clear, Space),
     filereader:source_owned_release_plan(Space, _),
@@ -2738,7 +2787,7 @@ metta_host_clear_space(Space) :-
         % the provider's removal funnel just as it does for native storage.
         metta_host_clear_tabling(Space, Module),
         metta_host_clear_foreign_storage(Space),
-        clear_generated_predicates(Module),
+        metta_host_clear_generated(Phase, Module),
         retractall(deferred_metta_function(_, Module, Space, _, _, _)),
         clear_module_translation_state(Module),
         support_graph:support_clear_module(Module),
@@ -2771,7 +2820,7 @@ metta_host_clear_space(Space) :-
 %process, so a single test never showed it
 %[tested: test_a_drop_untables_before_it_removes_any_clause,
 %spaces_drop_untables_first; commit=b33102fbd50a30ae44d58eca08abd49e447ea60d].
-metta_host_clear_space(Space) :-
+metta_host_clear_space(Space, Phase) :-
     metta_assert_space_destructible(clear, Space),
     filereader:source_owned_release_plan(Space, _),
     materialize:discard_space(Space),
@@ -2786,9 +2835,12 @@ metta_host_clear_space(Space) :-
     ),
     clear_native_atoms(Space),
     retire_type_alias_scope(Module),
-    clear_generated_predicates(Module),
+    metta_host_clear_generated(Phase, Module),
     retractall(deferred_metta_function(_, Module, Space, _, _, _)),
     clear_module_translation_state(Module).
+
+metta_host_clear_generated(now, Module) :- clear_generated_predicates(Module).
+metta_host_clear_generated(retirement, _).
 
 %The store cleared as its OWN query, ahead of the release, under the same
 %mute the release uses. Two facts force this shape. Clearing inside the
@@ -2802,9 +2854,14 @@ metta_host_clear_space(Space) :-
 %commit=57f21ba9edf94bcf28cde11f938bce2c241a3709]
 %[measured 2026-08-31: post_gc_atom_count 20008 -> 6 at 10,000 atoms;
 %commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
+%The clear a host runs before the release: the retirement phase, so the
+%module's generated predicates wait for the release's completion. The now
+%phase inside a transaction would abolish them through the shadow repair at
+%some later removal, with their reference wrappers still standing; the
+%completion unwraps first.
 metta_clear_space_for_release(Space) :-
     metta_prepare_space_release(Space),
-    with_metta_space_releasing(Space, metta_host_clear_space(Space)).
+    with_metta_space_releasing(Space, metta_host_clear_space(Space, retirement)).
 
 metta_host_clear_foreign_storage(Space) :-
     clear_foreign_atoms(Space),

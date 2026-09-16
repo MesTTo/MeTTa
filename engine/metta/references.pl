@@ -23,6 +23,15 @@
 %   leaves their outer query frame unwatched [tested:
 %   reference_loading:a_suspended_background_qualified_query_survives_release;
 %   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: a release's physical effects on bindings, the imports and
+%   wrappers on the space's module and on its receivers', wait for the
+%   retirement's completion, so an aborted release leaves them as they were
+%   and a committed one retires every binding drawn from the space before the
+%   module's predicates are abolished [tested:
+%   space_retirement:an_aborted_release_keeps_the_receivers_imported_binding_callable,
+%   space_retirement:a_committed_release_retires_the_receivers_binding_at_completion,
+%   release_preparation:preliminary_clear_retires_the_provider_once_before_removing_rows;
+%   commit=WORKTREE].
 % Owns resources: observed spaces own mutation observers, projected metadata and
 %   native bindings; space release withdraws all three. Transaction completion
 %   reconciles native bindings with the rows surviving commit or rollback.
@@ -57,6 +66,13 @@
 :- dynamic metta_reference_slot/3, metta_reference_observed/1.
 :- volatile metta_reference_seen_space/2, metta_reference_slot/3.
 :- '$notransact'(metta_reference_seen_space/2).
+%A release takes the space out of sight before the outcome, and sight is not
+%journaled: this row remembers the module and the receivers a transaction
+%deferred until the completion, which re-seats the space on a restored
+%outcome and republishes the receivers on a retired one. Not journaled
+%either, for the same reason.
+:- dynamic metta_reference_release_unseen/3.
+:- '$notransact'(metta_reference_release_unseen/3).
 :- '$notransact'(metta_reference_slot/3).
 :- seam:context_reader(metta_reference_refreshing, '$metta_reference_refreshing', value(true)).
 :- seam:context_reader(metta_reference_finishing(Frame), '$metta_reference_finishing', stack(Frame)).
@@ -565,12 +581,33 @@ metta_reference_publish_metadata(Space, Face) :-
 
 % The released space is the mutation root of its own disappearance: its
 % dependents are queued through the graph BEFORE the edges that reach them
-% are forgotten, and the names it alone demanded are pruned after the drain.
+% are forgotten. This half runs when the release begins (seam:space_releasing/1).
+% Every row it takes out is journaled, so an abort puts the space back as it
+% was, and the space is no longer seen, so no drain publishes a dying face
+% into a module the clear is taking apart. Sight is not journaled, so the
+% completion re-seats it on a restored outcome (metta_reference_restored/2).
+% Outside a transaction the receivers are republished here, without the space,
+% as the preliminary clear's contract wants. Inside one they wait for the
+% outcome (metta_reference_retired/2): a receiver republished inside the
+% transaction receives a placeholder wrapper for each name the space gave it,
+% installed under the transaction, and unwrapping that wrapper after the
+% commit crashed the process; the completion runs outside any transaction,
+% where retiring the binding is a plain import removal. The space's own
+% bindings are imports and wrappers on its module's predicates, physical
+% state no journal restores: they too go at the completion, before the
+% module's predicates are abolished. Retiring them at the start left an
+% aborted release with its slots restored and its import of scope-defer/4
+% gone, so a class home's mint answered Unknown procedure
+% [tested: space_retirement:an_aborted_release_keeps_the_receivers_imported_binding_callable,
+% space_retirement:a_committed_release_retires_the_receivers_binding_at_completion,
+% release_preparation:preliminary_clear_retires_the_provider_once_before_removing_rows,
+% extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows,
+% extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_live_borrower_keeps_its_class_out_of_the_withdrawal
+% run before test_class_construction.py in one process; commit=WORKTREE].
 metta_reference_release(Space) :-
     retractall(metta_reference_space_option(Space, _, _)),
     (   metta_reference_seen_space(Space, Module)
-    ->  metta_reference_demand_names([Space-Module], Demanded),
-        metta_reference_invalidate([Space]),
+    ->  ( current_transaction(_) -> true ; metta_reference_invalidate([Space]) ),
         metta_reference_source_clear(Space),
         retract(metta_reference_seen_space(Space, Module)),
         metta_reference_release_loader(Space),
@@ -580,20 +617,65 @@ metta_reference_release(Space) :-
                retractall(metta_reference_map(Token, _, _))),
         retractall(metta_occurrence_grade(Space, _, _, _)),
         retractall(metta_reference_projection(Space, _, _, _)),
+        findall(Receiver, metta_reference_row(Receiver, _, Space, _), Receivers0),
+        sort(Receivers0, Receivers),
         forall(retract(metta_reference_row(Receiver, Token, Space, _)),
                ( retractall(metta_reference_map(Token, _, _)),
                  space_module(Receiver, ReceiverModule),
                  support_graph:support_forget(derived(ReceiverModule, reference_row(Token))) )),
-        forall(metta_reference_slot(Module, Name, Arity),
-               metta_reference_retire_binding(Module, Name, Arity, preserve)),
-        retractall(metta_reference_roots(Module, _, _, _)),
-        support_graph:support_forget(derived(Module, reference_face)),
-        metta_reference_refresh,
-        forall(( member(Name, Demanded), \+ metta_reference_demanded_elsewhere(Name) ),
-               retractall(metta_reference_demand(Name))),
-        with_typing_policy_stable(metta_reference_demand_wrapper)
+        (   current_transaction(_)
+        ->  Deferred = Receivers
+        ;   metta_reference_refresh, Deferred = []
+        ),
+        assertz(metta_reference_release_unseen(Space, Module, Deferred))
     ;   true
     ).
+
+% The restored outcome: the space is in sight again. Its rows came back with
+% the abort, its bindings and its receivers' were never touched, so nothing is
+% republished. A space the release never took out of sight needs nothing.
+metta_reference_restored(Space, _) :-
+    (   retract(metta_reference_release_unseen(Space, Module, _))
+    ->  ( metta_reference_seen_space(Space, Module) -> true
+        ; assertz(metta_reference_seen_space(Space, Module)) )
+    ;   true
+    ).
+
+% The physical half, once the retirement is durable and while the module still
+% stands: the bindings drawn from the space anywhere, the module's own, the
+% names it alone demanded, and the receivers a transaction deferred.
+metta_reference_retired(Space, Module) :-
+    (   retract(metta_reference_release_unseen(Space, _, Deferred))
+    ->  metta_reference_retired_module(Space, Module),
+        (   Deferred == []
+        ->  true
+        ;   metta_reference_invalidate(Deferred), metta_reference_refresh
+        )
+    ;   true
+    ).
+
+metta_reference_retired_module(_, none) :- !.
+metta_reference_retired_module(Space, Module) :-
+    metta_reference_demand_names([Space-Module], Demanded),
+    %A receiver retiring in the same group was already out of sight when this
+    %space's release republished its receivers, so its bindings drawn from this
+    %space still stand: the roots rows are the reverse index that names them.
+    %They go before the module's predicates are abolished, because a wrapper
+    %or import left standing on an abolished predicate is a dangling
+    %definition, and the receiver's own retirement crashed the process on it
+    %[tested: extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_live_borrower_keeps_its_class_out_of_the_withdrawal
+    %run before test_class_construction.py in one process; commit=WORKTREE].
+    forall(( metta_reference_roots(Other, Name, Arity, Roots), Other \== Module,
+             memberchk(root(Space, _, _, _), Roots) ),
+           ( metta_reference_retire_binding(Other, Name, Arity, discard),
+             retractall(metta_reference_roots(Other, Name, Arity, _)) )),
+    forall(metta_reference_slot(Module, Name, Arity),
+           metta_reference_retire_binding(Module, Name, Arity, preserve)),
+    retractall(metta_reference_roots(Module, _, _, _)),
+    support_graph:support_forget(derived(Module, reference_face)),
+    forall(( member(Name, Demanded), \+ metta_reference_demanded_elsewhere(Name) ),
+           retractall(metta_reference_demand(Name))),
+    with_typing_policy_stable(metta_reference_demand_wrapper).
 
 :- dynamic seam:space_releasing/1, seam:deferred_translation_settled/0.
 metta_reference_install_hooks :-

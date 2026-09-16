@@ -3276,7 +3276,8 @@ test(a_type_marker_probe_sends_a_writable_pattern_to_a_foreign_space,
 
 % A drop removes clauses: the hook-driven remove-atom loop and
 % clear_native_atoms/1 both retract the compiled half of a stored (= ...),
-% and clear_generated_predicates/1 abolishes what the compiler generated.
+% and metta_host_clear_generated/2 abolishes what the compiler generated,
+% at once for a clear and at the retirement's completion for a release.
 % SWI does not allow the clauses of a TABLED predicate to be modified while
 % its tables stand, and for a plain table it is undefined behaviour, so the
 % untabling has to come before all three. Written as a source-order check
@@ -3287,13 +3288,13 @@ test(a_type_marker_probe_sends_a_writable_pattern_to_a_foreign_space,
 
 test(a_drop_untables_before_it_removes_any_clause) :-
     findall(Body,
-            ( clause(spaces:metta_host_clear_space(_), Body),
+            ( clause(spaces:metta_host_clear_space(_, _), Body),
               \+ Body = (seam:foreign_space(_), _) ),
             [Removing]),
     comma_goals(Removing, Goals),
     once(nth0(Untable, Goals, metta_host_clear_tabling(_, _))),
     once(nth0(Native, Goals, clear_native_atoms(_))),
-    once(nth0(Generated, Goals, clear_generated_predicates(_))),
+    once(nth0(Generated, Goals, metta_host_clear_generated(_, _))),
     assertion(Untable < Native),
     assertion(Untable < Generated),
     % The removal branch is an if-then-else, so it is one goal in the list.

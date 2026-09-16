@@ -8,6 +8,11 @@
 %   children, empty allocations, nested and snapshot entries, with disjoint
 %   and multivalued writes as the positive controls [tested: space_retirement;
 %   commit=23dee6dc5b745a57ade43bd5fd2d317116634f6f].
+% Guarantees: the release's physical work follows the outcome: an aborted
+%   release keeps the compiled equations and a receiver's imported binding
+%   callable, a committed one abolishes the generated predicates and retires
+%   the receiver's binding at the completion [tested: space_retirement;
+%   commit=WORKTREE].
 % Owns resources: every test releases its generated spaces and erases its notes.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -315,5 +320,59 @@ test(multivalued_writes_into_one_space_commit_in_either_order,
             second, [first-First, second-Second]),
     assertion(First == committed), assertion(Second == committed),
     rows(Space, Rows), assertion(Rows == [[retained, 7], [written, 1], [written, 2]]).
+
+% The physical half of the clear follows the outcome: a rolled-back release
+% keeps the compiled program behind the restored rows callable, a committed
+% one abolishes the module's generated predicates at its completion.
+test(an_aborted_release_keeps_the_compiled_equations_callable,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    metta_add_atom(Space, [=, [answer], 42], _),
+    space_module(Space, Module),
+    assertion(eval_metta_in_module(Module, [answer], 42)),
+    \+ transaction(( metta_release_space(Space, plunit_space_retirement:retire_note), fail )),
+    retire_notes(Notes), assertion(Notes == [restored]),
+    assertion(spaces:native_storage_module_cache(Space, _)),
+    assertion(eval_metta_in_module(Module, [answer], 42)).
+
+test(a_committed_release_abolishes_the_generated_predicates_at_completion,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    metta_add_atom(Space, [=, [answer], 42], _),
+    space_module(Space, Module),
+    transaction(( metta_release_space(Space, plunit_space_retirement:retire_note),
+                  assertion(( current_predicate(Module:Name/_), Name \== '$metta_native_storage' )) )),
+    retire_notes(Notes), assertion(Notes == [retired]),
+    assertion(retired(Space)),
+    assertion(\+ ( current_predicate(Module:Name/Arity), functor(Head, Name, Arity),
+                    \+ predicate_property(Module:Head, imported_from(_)) )).
+
+% A reference binding is physical: a publication imports or wraps a predicate
+% in the receiver's module, which no journal restores. The release publishes
+% nothing before the outcome: an aborted release leaves the receiver's binding
+% callable, a committed one retires it at the completion.
+test(an_aborted_release_keeps_the_receivers_imported_binding_callable,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Home), retire_space(Receiver),
+    metta_add_atom(Home, [=, ['imported-answer'], 5], _),
+    metta_add_atom(Receiver, [from, Home], _),
+    space_module(Receiver, Module),
+    assertion(eval_metta_in_module(Module, ['imported-answer'], 5)),
+    \+ transaction(( metta_release_space(Home, plunit_space_retirement:retire_note), fail )),
+    assertion(eval_metta_in_module(Module, ['imported-answer'], 5)),
+    \+ transaction(( metta_release_space(Receiver, plunit_space_retirement:retire_note), fail )),
+    retire_notes(Notes), assertion(Notes == [restored, restored]),
+    assertion(eval_metta_in_module(Module, ['imported-answer'], 5)).
+
+test(a_committed_release_retires_the_receivers_binding_at_completion,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Home), retire_space(Receiver),
+    metta_add_atom(Home, [=, ['imported-answer'], 5], _),
+    metta_add_atom(Receiver, [from, Home], _),
+    space_module(Receiver, Module),
+    assertion(eval_metta_in_module(Module, ['imported-answer'], 5)),
+    transaction(metta_release_space(Home, plunit_space_retirement:retire_note)),
+    retire_notes(Notes), assertion(Notes == [retired]),
+    assertion(\+ eval_metta_in_module(Module, ['imported-answer'], 5)).
 
 :- end_tests(space_retirement).

@@ -285,6 +285,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   artifact aside (`metta_qlf_boot:qlf_compile_claimed/0`), so a measured child
   never pays a library half's compile after an engine source edit, which read
   as a few tens of inferences of drift in the first child of a lane.
+- A space release changes physical engine state only once the retirement is
+  durable. The generated predicates behind a released space's equations, and
+  the reference bindings it holds and its receivers hold on it (imports and
+  wrappers), go at the release's completion, so a drop inside a transaction
+  that rolls back leaves the space's equations and its imported functions
+  callable and its receivers bound, where before the rows came back and the
+  compiled program and imports behind them did not (a class mint answered
+  `Unknown procedure` after an aborted drop). The host's preliminary clear no
+  longer abolishes anything either, and abolishing a released module's
+  predicate first removes its wrappers and every import of it in any module,
+  which closes two segfaults when class homes sharing definitions retired in
+  one transaction. Untabling still precedes the clause removal.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
