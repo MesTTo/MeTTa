@@ -222,7 +222,7 @@ def installed() -> dict[tuple[str, str], Any]:
 ## `integrate`
 
 ```python
-def integrate(m, target: Any) -> str:
+def integrate(m: Space, target: Any) -> str:
 ```
 
 > Install an integration on a space, idempotently per (space, name).

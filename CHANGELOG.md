@@ -30,7 +30,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   narrow as a type checker does. Which standard-library calls invoke a
   supplied callback is read from mypy's typeshed into the generated table
   `extensions/python/metta/doors/_invocations.py`, so `sorted(key=)` and
-  `atexit.register` run their callback and `callable(fn)` does not. A value
+  `atexit.register` run their callback and `callable(fn)` does not; only the
+  stub modules typeshed ships for the running interpreter enter it. A value
   the standard library made is host work; what a supplied callable answers
   keeps its contract instead of becoming a defect.
 

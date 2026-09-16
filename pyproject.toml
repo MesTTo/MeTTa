@@ -731,7 +731,7 @@ optional_dependencies_dev_groups = ["test", "checks"]
 # `metta.testing.SpaceMachine` behind PEP 562 and whose require_module guard
 # runs first, so importing metta or metta.testing loads neither the module nor
 # the package it needs.
-DEP004 = ["pytest", "hypothesis", "griffe"] # griffe is used by tools/reference.py, shipped development tooling in the checks extra.
+DEP004 = ["pytest", "hypothesis", "griffe", "mypy"] # griffe is used by tools/reference.py and mypy's typeshed by tools/doororder.py, shipped development tooling in the checks extra.
 # pygments is imported only by metta/_pygments.py, which nothing in this
 # package imports: Pygments itself loads it through the entry point above,
 # so its presence is the precondition of the load, exactly as rich's is
