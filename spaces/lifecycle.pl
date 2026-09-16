@@ -578,54 +578,22 @@ metta_abolish_local_predicate(Module, Name, Arity) :-
 metta_restore_inherited_predicate(_, Name, _) :-
     sub_atom(Name, 0, 1, _, '$'),
     !.
-%A cheap guard asks first, and imported_from/1 still decides. The abolish
-%above leaves most names resolving NOWHERE -- a space's own function, gone
-%with its last equation -- and imported_from/1 on such a name runs SWI's
-%undefined-procedure trap, which reads the asking module's autoload
-%declarations and the library index before raising the existence error this
-%clause discards: 1,033 inferences to learn "nothing above me has it", 7,351
-%times over the plunit suites, and 1,053 of the 5,347 it costs to add and
-%remove one equation for a function nothing above the space defines
-%[measured 2026-09-06: 200 such cycles through 'remove-atom'/3, 1,069,438
-%inferences before and 858,838 after;
-%commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
-%
-%Two arms, in this ORDER, which the benchmarks decided. current_predicate/1
-%answers yes for a local definition, an import and an inherited one alike, for
-%one inference, and that is the whole cost on every call that resolves.
-%implementation_module/1 is asked only when it fails, and is what admits a
-%name the autoloader would supply: SWI special-cases that property and reaches
-%'$find_library'/5 directly instead of the trap, so it answers for 33
-%[source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2]. Asking
-%implementation_module/1 FIRST also works and was measured; it costs six
-%inferences on every resolving call rather than one, which is +90 on eight
-%Python benchmark cases against +15 for this order
-%[measured 2026-09-06: op-raw 298,847 at the merge base, 298,937 that way and
-%298,864 this way; command=extensions/python/bench.py --counter-only op-raw;
-%commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
-%
-%Neither arm can change which branch is taken: Home \== Module holds exactly
-%where imported_from/1 answers, on every one of the 7,949 module/name pairs of
-%a booted image, across a two-hop import chain, for a name the module defines
-%itself (both say no) and for an autoloadable name (both name the library).
-%
-%It is a GUARD and not a replacement, which a differential decided rather than
-%taste: implementation_module/1 names the library WITHOUT loading it, and the
-%import/1 below then binds this module to one that has no export list yet --
-%SWI warns `sumlist/2 is not exported (still imported into ...)` and the
-%repaired call resolves to nothing. imported_from/1 loads it, which is the
-%side effect this clause needs
-%[measured 2026-09-06: 12 shadow-repair probes, one fresh module each, the
-%sumlist/2 row alone diverging;
-%commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%After the abolish most names resolve NOWHERE, a space's own function gone
+%with its last equation, and current_predicate/1 says so for one inference.
+%A name that still resolves does so through the module's default chain or an
+%explicit import, and only an explicit import is re-stated and recorded here,
+%so the repair pass can follow it to a recycled module's next parent. The
+%library index is not consulted: an execution module never resolves a name
+%against SWI's library (refuse_autoload_into_exec_modules/0), so a shadowed
+%library predicate is not what a removed equation uncovers, and the
+%implementation_module/1 probe that once admitted one cost six inferences on
+%every resolving call [measured 2026-09-06: 200 add-and-remove cycles through
+%'remove-atom'/3, 1,069,438 inferences with the trap asked first and 858,838
+%with current_predicate/1 first; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 metta_restore_inherited_predicate(Module, Name, Arity) :-
     retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
     functor(Head, Name, Arity),
-    (   (   current_predicate(Module:Name/Arity)
-        ->  true
-        ;   predicate_property(Module:Head, implementation_module(Home)),
-            Home \== Module
-        ),
+    (   current_predicate(Module:Name/Arity),
         predicate_property(Module:Head, imported_from(Source)),
         Source \== system,
         \+ predicate_property(Module:Head, built_in),
@@ -633,6 +601,7 @@ metta_restore_inherited_predicate(Module, Name, Arity) :-
     ->  assertz('$metta_repaired_shadow_import'(Module, Name, Arity, Source))
     ;   true
     ).
+
 
 %Calling an inherited predicate can materialize a weak import even when the
 %space never defined that name.  A pooled execution module keeps the import
