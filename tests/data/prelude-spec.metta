@@ -507,6 +507,7 @@
 (@doc rename (@desc "Uses the first matching (old new) pair, or keeps the head; partial application is a from map"))
 (@doc qualified (@desc "Builds a prefix map using the library name and a dot"))
 (@doc get-property (@desc "Answers visibility, defining origins and declared effect, cost, deprecation and documentation properties, one per answer"))
+(@doc owned-record-read (@desc "Validates a ground @owned-record key and returns zero or one complete native value rows in an expression; retired owners and malformed occurrences are refused") (@params ((@param "Ground @owned-record declaration, held as data"))) (@return "Expression containing zero or one complete value rows"))
 (@doc assert-answers
   (@desc "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess")
   (@params ((@param "Verdict, evaluated") (@param "Call to report, as written") (@param "Answers produced") (@param "Answers expected")))
@@ -762,6 +763,15 @@
 ; store, flat however large the space grows, which is what a
 ; set-semantics rule wants per add.
 (: space-contains (-> %Undefined% Atom Bool))
+
+; owned-record-read reads a native owned record as data: the ground
+; (@owned-record Home Owner Storage Prefix) key is held unevaluated, both
+; storage identities resolve once, and the answer is an expression of zero
+; or one complete rows inside one database snapshot. A retired owner, a
+; second value or a nonground original key refuses under the reader's own
+; name, and only the outer commit validator asks for a retry
+; [tested: owned_record_reads in tests/prolog/suites/spaces/owned_record_reads.plt].
+(: owned-record-read (-> Atom Atom))
 
 ; %%%% Space admission: the shipped judge over (admits ...) and (capacity ...) %%%%
 ;

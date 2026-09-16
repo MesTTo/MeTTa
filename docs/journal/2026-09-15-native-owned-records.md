@@ -219,3 +219,13 @@ said.
 Tried: the three files serially -> 50 passed
 (`ai-tmp/ai-owned-record-consumer-root-python-remedy2.log`); `sh extensions/python/test.sh
 tests/ch09_types` -> 733 passed (`ai-tmp/ai-owned-record-consumer-root-ch09-parallel.log`).
+
+## 2026-09-16, later: the spec fixture names the reader
+
+Tried: `sh engine/test.sh suites/evaluation/prelude_spec.plt` -> `the_declarations_are_the_spec_fixtures`
+and `the_documents_are_the_spec_fixtures` red since dbb95d0bf: the reader's `prelude_declaration/2`
+and `prelude_document/2` rows had no counterpart in `tests/data/prelude-spec.metta`, which the
+register is compared with in order.
+Decided: the fixture gains `(: owned-record-read (-> Atom Atom))` after `space-contains` and the
+matching `@doc` form after `get-property`, where the register places them; the counts read 47
+declarations and 43 documents. Both prelude suites pass (12; 62 + 11).
