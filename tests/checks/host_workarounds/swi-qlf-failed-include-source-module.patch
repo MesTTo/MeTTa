@@ -1,8 +1,8 @@
 diff --git a/boot/init.pl b/boot/init.pl
-index a275c47..bb897db 100644
+index a275c47..09b838e 100644
 --- a/boot/init.pl
 +++ b/boot/init.pl
-@@ -3028,9 +3028,12 @@ load_files(Module:Files, Options) :-
+@@ -3028,9 +3039,12 @@ load_files(Module:Files, Options) :-
  '$consult_file'(Absolute, Module, What, LM, Options) :-
      '$set_source_module'(OldModule, Module),
      '$ifcompiling'('$qlf_start_sub_module'(Module)),

@@ -299,11 +299,14 @@ Reproduction: tests/checks/host_workarounds/swi-qlf-extension-spec.sh, which
   loads one unit as `'one.pl'` and another as `two` and looks for the
   artifacts.
 Patch: tests/checks/host_workarounds/swi-qlf-extension-spec.patch, against
-  swipl-devel V10.1.14 boot/init.pl: `'$qlf_file'/5` keeps its explicit
-  branch for a spec naming a QLF extension and lets a spec naming its Prolog
-  extension reach the artifact rule like a stem, so `qcompile(auto)` governs
-  both. The reproduction answers absent and SWI's core, files, save and
-  compile groups pass.
+  swipl-devel V10.1.14 boot/init.pl: `'$qlf_file'/5` keeps loading a
+  spec that names its Prolog extension from source when only the process-wide
+  `qcompile` flag is on, which keeps that flag from writing an artifact beside
+  every file a program names by path, and lets the spec reach the artifact
+  rule like a stem when the call carries its own `qcompile` option. A first
+  shape that let the flag reach it too wrote artifacts beside the engine's
+  backends and the binding's shim during the umbrella boot. The reproduction
+  answers absent and SWI's core, files, save and compile groups pass.
 Lifted when: the artifact rule as shipped applies to an extension-bearing spec too; the
   reproduction then prints absent and the patch and the entry go together.
 Record: docs/journal/2026-09-09-runtime-units-compile-beside-their-source.md.

@@ -417,8 +417,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the clause body itself.
 - A claimed source loads under `qcompile(auto)` by its resolved `.pl` path on
   the patched host (`swi-qlf-extension-spec`), the artifact rule applying to an
-  extension-bearing spec as to a stem, so the loader no longer strips the
-  extension to reach it.
+  extension-bearing spec as to a stem when the load names `qcompile`, so the
+  loader no longer strips the extension to reach it; the process-wide
+  `qcompile` flag alone still compiles a file named by its path from source.
 - The default encoding of a process started under the C or POSIX locale is
   UTF-8 on the patched host (`swi-locale-default-encoding`), so the boot's
   encoding pin is the seat's own choice for every locale rather than a repair.
