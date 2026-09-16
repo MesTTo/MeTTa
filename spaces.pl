@@ -309,6 +309,7 @@
             metta_module_space/2,
             metta_forget_derived/0,
             metta_release_space/1,
+            metta_release_space/2,
             metta_remove_atom/3,
             metta_remove_atom_reference/1,
             deferred_metta_function/6,
