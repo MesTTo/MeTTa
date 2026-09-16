@@ -10,6 +10,12 @@
 % Guarantees: transaction_constraint/1 prepares checks after the body and before
 %   the commit mutex; their execution uses the refreshed outer commit view
 %   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+% Owns resources: outer transactions retain provider registration identities
+%   and qualified completion applications until foreign completion; nested
+%   transactions share them and speculation owns a separate capture list.
+% Guarantees: capture selects every completion operation before begin, and
+%   unregistering or replacing a name does not redirect completion
+%   [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=WORKTREE].
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
 %   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -661,23 +667,25 @@ metta_finish_foreign(committed, Enlisted, Result) :- !,
     metta_record_foreign_outcome(commit, Durable, Lost).
 metta_finish_foreign(_, Enlisted, ok) :-
     metta_rollback_participants(Enlisted),
-    metta_record_foreign_outcome(discard, [], Enlisted).
+    metta_participant_spaces(Enlisted, Spaces),
+    metta_record_foreign_outcome(discard, [], Spaces).
 
 metta_commit_participants([], Durable0, Durable, ok, []) :-
     reverse(Durable0, Durable).
-metta_commit_participants([Space|Rest], Durable0, Durable, Result, Lost) :-
-    metta_commit_participant(Space, Outcome),
+metta_commit_participants([Participant|Rest], Durable0, Durable, Result, Lost) :-
+    Participant = participant(Space, _, _),
+    metta_commit_participant(Participant, Outcome),
     (   Outcome == committed
     ->  metta_commit_participants(Rest, [Space|Durable0], Durable, Result, Lost)
     ;   Outcome = refused(Error),
         reverse(Durable0, Durable),
         Result = threw(Error),
-        Lost = [Space|Rest],
+        metta_participant_spaces([Participant|Rest], Lost),
         metta_rollback_participants(Rest)
     ).
 
-metta_commit_participant(Space, Outcome) :-
-    catch(( seam:foreign_commit(Space)
+metta_commit_participant(participant(Space, _, ready(Commit, _)), Outcome) :-
+    catch(( call(Commit)
           ->  Outcome = committed
           ;   Outcome = refused(error(metta_foreign_commit_failed(Space),
                                       none))
@@ -685,10 +693,17 @@ metta_commit_participant(Space, Outcome) :-
           Error,
           Outcome = refused(Error)).
 
-metta_rollback_participants(Spaces) :-
-    forall(member(Space, Spaces),
-           catch(seam:foreign_rollback(Space), RollbackError,
+metta_rollback_participants(Participants) :-
+    forall(member(participant(_, _, ready(_, Rollback)), Participants),
+           catch(call(Rollback), RollbackError,
                  print_message(error, RollbackError))).
+
+% Receipts name spaces, while enlistment distinguishes their allocations.
+% A replacement may enlist under the same name; one lost allocation is enough
+% to report that space, and the receipt must not retain provider objects.
+metta_participant_spaces(Participants, Spaces) :-
+    findall(Space, member(participant(Space, _, _), Participants), Names),
+    list_to_set(Names, Spaces).
 
 %What the last finished outermost transaction did to each enlisted provider.
 %Phase is commit when the local database committed and the providers were
@@ -698,8 +713,9 @@ metta_rollback_participants(Spaces) :-
 %carry no arguments and whose caller has already returned by the time the
 %question is worth asking.
 metta_record_foreign_outcome(Phase, Durable, Lost) :-
+    list_to_set(Durable, DurableSpaces), list_to_set(Lost, LostSpaces),
     nb_setval('$metta_tx_foreign_outcome',
-              foreign_outcome(Phase, Durable, Lost)).
+              foreign_outcome(Phase, DurableSpaces, LostSpaces)).
 
 %The providers, other than Journal, whose writes the last finished outermost
 %transaction did not make durable, and only where the local database DID
@@ -790,7 +806,7 @@ metta_speculate_prepare(Goal, Vars, Answers, Outcome) :-
         Error,
         Outcome = threw(Error)),
     nb_getval('$metta_tx_enlisted', Enlisted),
-    nb_setval('$metta_tx_enlisted', OuterEnlisted),
+    nb_linkval('$metta_tx_enlisted', OuterEnlisted),
     metta_finish_foreign(discarded, Enlisted, _),
     seam:observation_discard.
 
@@ -837,12 +853,68 @@ metta_in_user_transaction :-
     catch(b_getval('$metta_user_tx', true), _, fail).
 
 metta_enlist_foreign(Space) :-
+    once(seam:foreign_participant(Space, Identity, Capture)),
+    must_be(ground, Identity),
     nb_getval('$metta_tx_enlisted', Enlisted),
-    (   memberchk(Space, Enlisted)
-    ->  true
-    ;   seam:foreign_begin(Space),
-        nb_setval('$metta_tx_enlisted', [Space|Enlisted])
+    (   member(participant(HeldSpace, HeldIdentity, State), Enlisted),
+        HeldSpace == Space, HeldIdentity == Identity
+    ->  ( State = ready(_, _) -> true
+        ; throw(error(metta_foreign_reentrant_begin(Space),
+                      context(metta_enlist_foreign/1,
+                              'a provider cannot write through its own unfinished capture or begin'))) )
+    ;   Participant = participant(Space, Identity, opening),
+        % Linking preserves this cell when a capture or begin enlists another
+        % provider. Copying the list would leave the caller updating an old cell.
+        % Workaround: swi-cleanup-window - register cleanup before linking the attempt and repeat only idempotent state retirement after an inference cut.
+        % [source: engine/host_transactions.pl:host_transaction/2; commit=WORKTREE].
+        setup_call_catcher_cleanup(
+            true,
+            ( nb_linkval('$metta_tx_enlisted', [Participant|Enlisted]),
+              metta_capture_participant(Capture, Participant) ),
+            Why,
+            catch(metta_finish_capture(Why, Participant), Ball,
+                  (metta_finish_capture(Why, Participant), throw(Ball))))
     ).
+
+metta_capture_participant(Capture, Participant) :-
+    metta_participant_goal(Capture),
+    once(call(Capture, Protocol)),
+    (   nonvar(Protocol), Protocol = transaction(_, _, _)
+    ->  true
+    ;   throw(error(domain_error(foreign_transaction_participant, Protocol),
+                    context(metta_enlist_foreign/1,
+                            'capture must return transaction(Begin, Commit, Rollback)')))
+    ),
+    Protocol = transaction(Begin, Commit, Rollback),
+    maplist(metta_participant_goal, [Begin, Commit, Rollback]),
+    % Record a successful begin in its cleanup, before a pending signal can
+    % escape the admission. A failed or interrupted begin still owns its own
+    % recovery; it never became an enlisted participant.
+    setup_call_catcher_cleanup(
+        true, once(call(Begin)), Why,
+        catch(metta_participant_begun(Why, Participant, ready(Commit, Rollback)), Ball,
+              ( metta_participant_begun(Why, Participant, ready(Commit, Rollback)),
+                throw(Ball) ))).
+
+metta_participant_begun(exit, Participant, Ready) :- !,
+    nb_linkarg(3, Participant, Ready).
+metta_participant_begun(_, _, _).
+
+metta_participant_goal(Goal) :-
+    ( nonvar(Goal), Goal = Module:Body, atom(Module), callable(Body)
+    -> true
+    ; throw(error(type_error(qualified_callable, Goal),
+                  context(metta_enlist_foreign/1,
+                          'participant operations retain their defining module'))) ).
+
+% Remove only an unfinished attempt: callbacks may enlist other providers,
+% and a signal after begin succeeded must leave that participant for rollback.
+metta_finish_capture(exit, _) :- !.
+metta_finish_capture(_, participant(_, _, ready(_, _))) :- !.
+metta_finish_capture(_, Participant) :-
+    nb_getval('$metta_tx_enlisted', Enlisted),
+    exclude(==(Participant), Enlisted, Kept),
+    nb_linkval('$metta_tx_enlisted', Kept).
 
 :- multifile prolog:error_message//1.
 prolog:error_message(metta_transaction_unsupported(Ctx, undeclared)) -->

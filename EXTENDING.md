@@ -1716,10 +1716,49 @@ talks to. `das.py`, `remote.py` and `persistent.py` are three real instances.
 :- multifile seam:foreign_match/3.     % answer a pattern
 :- multifile seam:foreign_clear/1.     % empty the space
 :- multifile seam:foreign_erring/5.    % a declared error mode's stream
-:- multifile seam:foreign_begin/1.     % transactional participation:
-:- multifile seam:foreign_commit/1.    %   one begin at the first write,
-:- multifile seam:foreign_rollback/1.  %   one commit or rollback after
+:- multifile seam:foreign_participant/3. % Space, registration identity, capture
 ```
+
+Transactional providers implement `foreign_participant(Space, Identity, Capture)`.
+The seam performs a pure ownership lookup. `Identity` is the selected
+registration's ground occurrence identity, and `Capture` is a qualified
+closure. On the first write for that space and identity, the engine calls
+`call(Capture, transaction(Begin, Commit, Rollback))`. Each result is a qualified
+goal retaining its original provider and selected operation. Capture must
+validate all three before begin runs. Descriptor lookup belongs to capture,
+outside native commit locks; the ownership guard never calls user code.
+
+For example, a Prolog provider can retain its registration reference and the
+resource already stored in that registration:
+
+```prolog
+seam:foreign_participant(Space, Ref, my_provider:capture(Resource)) :-
+    my_provider:registration(Space, _),
+    clause(my_provider:registration(Space, Resource), true, Ref).
+
+capture(Resource, transaction(my_provider:begin(Resource),
+                              my_provider:commit(Resource),
+                              my_provider:rollback(Resource))).
+```
+
+Repeated writes share the capture. Nested user transactions share the outer
+participant list; speculation takes its own savepoint. Replacing a registration
+creates another identity, so a later write can enlist it separately. Removing
+or replacing the name never redirects an earlier participant's completion.
+Capture or begin failure is the provider's recovery responsibility. Once begin
+succeeds, the engine retains the completion until the outer outcome. A commit
+refusal preserves the existing partial-commit contract: earlier commits stand,
+the refusing provider owns its outcome, and untouched participants roll back.
+
+Migrate the former `foreign_begin/1`, `foreign_commit/1` and
+`foreign_rollback/1` hooks together to this seam. Completion must use the
+captured operations, not a lookup by the space name. Python stores the actual
+provider in `(@python-provider (HostSpace Space) Provider)` under its native
+owned record; `metta.foreign.PROVIDERS` reads that native snapshot. The Node
+producer retains the existing provider and method identities in `HostValues`,
+whose entries live until engine disposal. Its transaction and speculate
+callbacks still refuse at the existing suspension door; the capture migration
+does not add Node transaction support.
 
 A provider file declares an EXTENSION and exports nothing, which is what makes
 it loadable at all:
@@ -3312,6 +3351,7 @@ honest. Today's list: `catch_recover/2`, `match_foreign/5`, `metta_add_atoms/2`,
 `metta_host_save_fast/3`, `metta_host_set_silent/1`, `metta_host_stored/2`,
 `metta_host_substitute/3`, `metta_host_unregister_reader_token/1`,
 `metta_reducible_head/2`, `metta_source_declarations/2`, `metta_space_names/1`,
+`metta_native_pair/4`, `metta_owned_clause/2`, `metta_owned_record_occurrences/3`,
 `metta_string_declarations/2`, `metta_substitute_self/3`,
 `metta_trace_source/4`, `metta_annotations/2`, `metta_contract_fact/1`,
 `metta_error_answer/3`, `metta_handles_coherent/1`, `metta_on_error_mode/3`,
@@ -3323,6 +3363,23 @@ honest. Today's list: `catch_recover/2`, `match_foreign/5`, `metta_add_atoms/2`,
 `sread_with_names/3`, `translate_expr/3`, `unregister_metta_extension/1` and
 `with_metta_module/2`. Shrinking this list is the shim-thinning work's
 scoreboard; growing it is a deliberate publication, not a drive-by.
+
+`spaces:metta_owned_record_occurrences(Declaration, OwnerRefs, RefRowPairs)`
+shares the owned-record reader's original-key, duplicate and liveness checks.
+It returns each complete value row with its admitted clause reference, while
+`OwnerRefs` retains the original owner occurrence. Empty owners and values
+expose absence to an allocation producer. A remaining value without its owner
+refuses, as do duplicate occurrences, original nonground keys and unavailable
+native storage. The ordinary `owned-record-read` additionally refuses a
+missing owner. Stored values can contain variables or Error expressions;
+neither reader evaluates them.
+
+`metta_native_pair/4` supplies indexed raw occurrences when the caller still
+needs to select a concrete descriptor. That raw match does not validate a
+record. `metta_owned_clause/2` decodes an already admitted reference after
+concurrent withdrawal; it establishes neither snapshot membership nor current
+resource admission. Physical resource use must still hold its lifetime claim.
+
 `metta_host_set_silent/1` is the row whose ADDITION shrank the floor: it sets
 the print-suppression flag `engine/filereader.pl` decides from `argv` at load
 time, which an embedded host therefore cannot reach, and the Python and C seats

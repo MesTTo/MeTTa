@@ -28,6 +28,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   owner at outer commit. Overlapping record writes name the conflicting key;
   ordinary relations retain their multivalued snapshot behavior. Removing an
   occurrence whose key is not ground commits as a repair.
+
+- Foreign transactions retain each original provider and its completion
+  operations across unregister and same-name replacement. Python registration
+  is native owned-record state, so its public mapping follows rollback and
+  transaction snapshots. Provider extensions migrate to one capture seam;
+  Node keeps its existing transaction and speculate callback refusal.
 - Python operator syntax, imported aliases and module calls share generated
   callable identities and signatures from pinned Python sources. The same
   rows supply atom words, compiler selectors and differential test programs;

@@ -919,25 +919,21 @@ test(test_the_threadpool_bound_is_one_simpagation_rule,
 %%%% The foreign commit phase %%%%
 %
 %A test participant that records every verb it is asked for and can refuse
-%its commit by throwing or by simply failing. It rides the same multifile
-%seam the Python and Node providers ride; both of their clauses fail for an
-%atom neither of them registered, so these clauses decide the test spaces
-%and nothing else.
-:- multifile seam:foreign_commit/1.
-:- multifile seam:foreign_rollback/1.
-
+%its commit by throwing or by simply failing. hplt_finish_foreign/3 supplies
+%the retained completion applications produced by the ownership seam, so
+%these tests isolate the shared completion driver's durable/lost outcome.
 :- dynamic hplt_participant/1.
 :- dynamic hplt_refusal/2.
 :- dynamic hplt_call/2.
 
-seam:foreign_commit(Space) :-
+hplt_commit(Space) :-
     hplt_participant(Space),
     assertz(hplt_call(Space, commit)),
     (   hplt_refusal(Space, throw)
     ->  throw(error(hplt_commit_refused(Space), none))
     ;   \+ hplt_refusal(Space, fail)
     ).
-seam:foreign_rollback(Space) :-
+hplt_rollback(Space) :-
     hplt_participant(Space),
     assertz(hplt_call(Space, rollback)).
 
@@ -958,6 +954,13 @@ hplt_clear_participants :-
 hplt_calls(Calls) :-
     findall(S-V, hplt_call(S, V), Calls).
 
+hplt_finish_foreign(Outcome, Spaces, Result) :-
+    findall(participant(Space, Ref, ready(user:hplt_commit(Space),
+                                        user:hplt_rollback(Space))),
+            ( member(Space, Spaces), clause(hplt_participant(Space), true, Ref) ),
+            Participants),
+    metta_finish_foreign(Outcome, Participants, Result).
+
 :- begin_tests(foreign_commit_phase).
 
 % Commit is single-coordinator, so a refusal leaves the earlier commits
@@ -968,7 +971,7 @@ test(a_refused_commit_rolls_back_the_participants_it_never_reached,
      [ setup(hplt_participants(['&hplt-p1', '&hplt-p2', '&hplt-p3'],
                                '&hplt-p2'-throw)),
        cleanup(hplt_clear_participants) ]) :-
-    metta_finish_foreign(committed,
+    hplt_finish_foreign(committed,
                          ['&hplt-p1', '&hplt-p2', '&hplt-p3'], Result),
     assertion(subsumes_term(threw(error(hplt_commit_refused('&hplt-p2'), _)),
                             Result)),
@@ -984,7 +987,7 @@ test(the_commit_phase_records_which_participants_lost_their_writes,
      [ setup(hplt_participants(['&hplt-p1', '&hplt-p2', '&hplt-p3'],
                                '&hplt-p2'-throw)),
        cleanup(hplt_clear_participants) ]) :-
-    metta_finish_foreign(committed,
+    hplt_finish_foreign(committed,
                          ['&hplt-p1', '&hplt-p2', '&hplt-p3'], _),
     metta_foreign_writes_lost('&hplt-p1', FromFirst),
     assertion(FromFirst == ['&hplt-p2', '&hplt-p3']),
@@ -997,7 +1000,7 @@ test(the_commit_phase_records_which_participants_lost_their_writes,
 test(a_commit_that_only_fails_is_named_rather_than_failing_the_finish,
      [ setup(hplt_participants(['&hplt-p1'], '&hplt-p1'-fail)),
        cleanup(hplt_clear_participants) ]) :-
-    metta_finish_foreign(committed, ['&hplt-p1'], Result),
+    hplt_finish_foreign(committed, ['&hplt-p1'], Result),
     assertion(subsumes_term(
                   threw(error(metta_foreign_commit_failed('&hplt-p1'), _)),
                   Result)),
@@ -1009,7 +1012,7 @@ test(a_commit_that_only_fails_is_named_rather_than_failing_the_finish,
 test(a_whole_commit_phase_leaves_no_lost_writes,
      [ setup(hplt_participants(['&hplt-p1', '&hplt-p2'], none)),
        cleanup(hplt_clear_participants) ]) :-
-    metta_finish_foreign(committed, ['&hplt-p1', '&hplt-p2'], Result),
+    hplt_finish_foreign(committed, ['&hplt-p1', '&hplt-p2'], Result),
     assertion(Result == ok),
     hplt_calls(Calls),
     assertion(Calls == ['&hplt-p1'-commit, '&hplt-p2'-commit]),
@@ -1020,7 +1023,7 @@ test(a_whole_commit_phase_leaves_no_lost_writes,
 test(a_rolled_back_transaction_reports_no_lost_writes,
      [ setup(hplt_participants(['&hplt-p1', '&hplt-p2'], none)),
        cleanup(hplt_clear_participants) ]) :-
-    metta_finish_foreign(failed, ['&hplt-p1', '&hplt-p2'], Result),
+    hplt_finish_foreign(failed, ['&hplt-p1', '&hplt-p2'], Result),
     assertion(Result == ok),
     hplt_calls(Calls),
     assertion(Calls == ['&hplt-p1'-rollback, '&hplt-p2'-rollback]),

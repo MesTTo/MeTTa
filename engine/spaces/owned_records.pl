@@ -14,6 +14,10 @@
 %   A read refusal names 'owned-record-read'/2 and its repair; only the outer
 %   commit validator asks for a retry
 %   [tested: owned_record_reads:read_refusals_name_the_reader_and_the_repair; commit=e4fdf699f9dedb73f1fe0de7446334b60bd8dc36].
+%   metta_owned_record_occurrences/3 exposes those same checked references to
+%   native allocation producers, including the zero-owner/zero-value state,
+%   and refuses under its own name
+%   [source: engine/spaces/owned_records.pl:metta_owned_read_references/5; commit=WORKTREE].
 
 :- multifile seam:transaction_constraint/1.
 
@@ -324,23 +328,44 @@ metta_owned_value(View, Prefix, Ref) :-
     snapshot(metta_owned_read_rows(Key, Rows)).
 
 metta_owned_read_rows(Key, Rows) :-
-    Key = key(Home, _, Storage, _),
-    metta_owned_reader_view(Home, OwnerView),
-    metta_owned_reader_view(Storage, RecordView),
-    metta_owned_key_problem([Home-OwnerView, Storage-RecordView], Key, Owners, Values, Problem),
+    metta_owned_read_references(Key, Owners, Values, RecordView, Problem),
     (   Problem \== none
-    ->  metta_owned_read_refusal(Key, Problem)
+    ->  metta_owned_read_refusal('owned-record-read'/2, Key, Problem)
     ;   Owners == []
-    ->  metta_owned_read_refusal(Key, retired_owner)
+    ->  metta_owned_read_refusal('owned-record-read'/2, Key, retired_owner)
     ;   maplist(metta_owned_original(RecordView), Values, Rows)
     ).
 
+% Host lifetimes retain the original occurrences, not a reconstructed key.
+% Empty owner/value lists expose absence for an explicit allocation producer;
+% a value without its owner is still the shared check's retired-owner problem.
+metta_owned_record_occurrences(Declaration, Owners, Rows) :-
+    metta_check_owned_record(Declaration),
+    Declaration = ['@owned-record', Home, Owner, Storage, Prefix],
+    metta_owned_key(Home, Owner, Storage, Prefix, Key),
+    snapshot(metta_owned_occurrence_rows(Key, Owners, Rows)).
+
+metta_owned_occurrence_rows(Key, Owners, Rows) :-
+    metta_owned_read_references(Key, Owners, Values, RecordView, Problem),
+    (   Problem \== none
+    ->  metta_owned_read_refusal(metta_owned_record_occurrences/3, Key, Problem)
+    ;   maplist(metta_owned_occurrence(RecordView), Values, Rows)
+    ).
+
+metta_owned_occurrence(View, Ref, Ref-Row) :- metta_owned_original(View, Ref, Row).
+
+metta_owned_read_references(Key, Owners, Values, RecordView, Problem) :-
+    Key = key(Home, _, Storage, _),
+    metta_owned_reader_view(Home, OwnerView),
+    metta_owned_reader_view(Storage, RecordView),
+    metta_owned_key_problem([Home-OwnerView, Storage-RecordView], Key, Owners, Values, Problem).
+
 % A read meets the store as it is. Nothing is retried; a surplus occurrence is
-% removed by the caller, so the remedy is the reader's, not the validator's.
-metta_owned_read_refusal(key(Home, Owner, Storage, Prefix), Problem) :-
+% removed by the caller, so the remedy is the reading door's, not the validator's.
+metta_owned_read_refusal(Door, key(Home, Owner, Storage, Prefix), Problem) :-
     metta_owned_read_remedy(Problem, Remedy),
     throw(error(metta_owned_record_conflict(record(Home, Owner, Storage, Prefix), Problem),
-                context('owned-record-read'/2, Remedy))).
+                context(Door, Remedy))).
 
 metta_owned_read_remedy(retired_owner, 'the native owner has retired').
 metta_owned_read_remedy(multiple_values, 'remove the surplus value rows').

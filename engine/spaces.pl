@@ -223,6 +223,8 @@
             metta_prepare_owned_records/1,
             metta_validate_owned_records/1,
             'owned-record-read'/2,
+            metta_owned_record_occurrences/3,
+            metta_owned_clause/2,
             metta_space_pair/4,
             metta_require_token_read/2,
             metta_require_token_mutation/2,

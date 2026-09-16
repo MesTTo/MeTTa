@@ -1412,7 +1412,7 @@ backend_scan_sees_a_planted_reach :-
 % whose head names its space is checked before it is ever consulted. What
 % remains outside both is a rule that computes its names, and each of the two
 % in this tree carries the prefix in its own guard: mork_owns_space/1 tests
-% '&mork' and metta_py_register_foreign/3 is fed by a Python door that refuses
+% '&mork' and metta_py_register_foreign/4 is fed by a Python door that refuses
 % any other spelling.
 %
 % A parametric space is named by a nonempty list rather than an atom and
