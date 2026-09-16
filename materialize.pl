@@ -255,10 +255,8 @@ flush_source_materialization :-
 flush_source_materialization.
 
 flush_space_materialization(Space, Names) :-
-    % Workaround: swi-transaction-enumerator-repeats-parent - test existence once before the owner check can fail.
-    % This asks whether any transaction exists. Enumerating its ancestors
-    % after the owner check fails repeats an ancestor on SWI 10.1.13.
-    % https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-transaction.c#L721-L745
+    % This asks whether any transaction exists, once: the owner check that
+    % follows must not backtrack into the ancestor enumeration.
     % [tested: nested_source_transactions_finish_and_restore_the_rolled_back_bag;
     % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
     (   once(current_transaction(_)), \+ materialization_transaction_owner
