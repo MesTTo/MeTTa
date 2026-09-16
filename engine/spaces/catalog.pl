@@ -387,7 +387,8 @@ metta_catalog_head('@owned-record').
 %inert clause the count stays above zero and the visibility-aware walk finds
 %them. The clause answers nothing: a direct call fails on it, clause/3 with
 %body true never unifies with it, the owned-record decoder reads body true
-%only, and its key is a spelling no MeTTa symbol can have. On the host probe,
+%only, space_atom_count subtracts it through native_storage_clause_count/3,
+%and its key is a spelling no MeTTa symbol can have. On the host probe,
 %erasing every real clause by reference prints present without it and absent
 %with it [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
 %commit=c5bdd73e06840e1d0fd0991523983c75def074f6]. The price is five inferences per write for the two functor/3,
@@ -400,14 +401,31 @@ metta_catalog_head('@owned-record').
 %3eb5acc22, on this tree with the three funnel sites reverted to assertz/2, and
 %on this tree; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 store_native_clause(Module, Term, Ref) :-
-    functor(Term, Name, Arity),
-    functor(Sentinel, Name, Arity),
-    arg(1, Sentinel, '$metta_sentinel'),
+    native_storage_sentinel(Term, Sentinel),
     (   clause(Module:Sentinel, fail)
     ->  true
     ;   assertz(Module:(Sentinel :- fail))
     ),
     assertz(Module:Term, Ref).
+
+%The inert clause's head: the storage term's functor with the reserved key in
+%the first argument, one builder for the funnel and the count.
+native_storage_sentinel(Term, Sentinel) :-
+    functor(Term, Name, Arity),
+    functor(Sentinel, Name, Arity),
+    arg(1, Sentinel, '$metta_sentinel').
+
+%A storage predicate's live clause count is the host's count less the inert
+%clause when it carries one; readers that enumerate clauses with body true
+%never see it, and this is the one reader that counts instead.
+native_storage_clause_count(Module, Head, Count) :-
+    predicate_property(Module:Head, number_of_clauses(Total)),
+    (   compound(Head),
+        native_storage_sentinel(Head, Sentinel),
+        clause(Module:Sentinel, fail)
+    ->  Count is Total - 1
+    ;   Count = Total
+    ).
 
 add_sexp_in(Module, Space, Atom, Ref) :-
     add_sexp_in(Module, Space, Atom, _, Ref).

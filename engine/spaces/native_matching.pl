@@ -539,7 +539,9 @@ space_atom_count_uncached(Space, Count) :-
     ->  findall(N,
                 ( current_predicate(Module:Name/Arity),
                   functor(Head, Name, Arity),
-                  (   predicate_property(Module:Head, number_of_clauses(N))
+                  %The count leaves out the storage predicate's inert clause
+                  %[source: engine/spaces/catalog.pl:native_storage_clause_count/3; commit=WORKTREE].
+                  (   native_storage_clause_count(Module, Head, N)
                   ->  true
                   ;   N = 0
                   ) ),

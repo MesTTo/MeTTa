@@ -134,3 +134,18 @@ the phrasebook row answers `((balance (Account 1) 12))` on both surfaces at 3425
 1846 Python inferences, two byte-identical runs (`ai-tmp/ai-owned-record-phrasebook-measure-{1,2}.json`).
 The test form evaluates its expected side, so the example writes `(noeval (+ 5 5))` there;
 the refused second value is asserted through `(if-error (catch (transaction ...)) refused committed)`.
+
+## 2026-09-15, later: the atom count leaves out the inert clause
+
+Tried: `sh extensions/python/test.sh tests/ch09_types/test_space_length_refinements.py -n 0` ->
+both parametrizations red since c5bdd73e0: `space_atom_count_uncached/2` sums
+`number_of_clauses` per storage predicate and counted the sentinel.
+Decided: `native_storage_clause_count/3` beside the sentinel's builder in `engine/spaces/catalog.pl`
+subtracts the inert clause when the predicate carries one, and only that reader counts: every
+other clause-count site in the engine walks compiled-function modules, and every enumeration over
+storage reads body `true`. The first guard raised `arg/3: Type error: compound expected` on the
+storage module's arity-zero marker predicate `'$metta_native_storage'`, hence `compound/1` before
+the sentinel head is built.
+Tried: the two refinement cases -> pass; `sh engine/test.sh suites/spaces/length_refinements.plt
+suites/evaluation/prelude.plt suites/spaces/hooks.plt suites/typecheck/refinements.plt` -> 8 + 2,
+62 + 11, 45 + 11 and 21 + 2 pass (`ai-tmp/ai-owned-record-remedy-native-extra.log`).
