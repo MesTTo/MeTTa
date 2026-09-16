@@ -1,7 +1,12 @@
 % Purpose: expose an aborted assertion revived by a later transaction.
 % Assumes: plain SWI-Prolog, with no repository engine or workaround loaded.
 % Guarantees: the last line is present exactly when the aborted row returns
-%   [tested: sh check.sh host-workarounds; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+%   [tested: sh check.sh host-workarounds; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1]
+%   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+%   absent on 10.1.14 built with
+%   tests/checks/host_workarounds/swi-nested-retract-loses-outer-assert.patch;
+%   command=sh check.sh host-workarounds;
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
 :- dynamic row/1, clock/1.
 
 main :-

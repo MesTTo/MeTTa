@@ -174,14 +174,6 @@ Patch: tests/checks/host_workarounds/swi-cleanup-window.patch, against
   goals. SWI's own suite passes on the build (87 of 88, `pldoc:man_links`
   needs the documentation the build omits; `tests/core_lang/test_inflimit.pl`
   among the passes).
-Workaround: one site remains, engine/host_transactions.pl's record of a
-  fresh assertion reference into the ownership journal: a limit can land at
-  the call port between the assertion and its record, which no cleanup owns,
-  so the record runs under catch/3, exempt from the limit, and the handler
-  records before rethrowing. `sig_atomic/1` around the pair would close it
-  for one inference more per assertion on the evaluation path. The site goes
-  with the wrapper itself when swi-nested-retract-loses-outer-assert is
-  patched; the scoped-root sites were lifted on 2026-09-17.
 Lifted when: SWI-Prolog as shipped registers the cleanup before the call port
   that follows Setup, or its inference check honours the atomic region as the
   patch makes it; the patch and the entry go together then. The Workaround
@@ -471,8 +463,9 @@ Record: docs/journal/2026-09-11-classes-on-metta.md, import repair retains an
   unchanged provider.
 
 ## swi-nested-retract-loses-outer-assert
-Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
-  src/pl-transaction.c:417-427, merge_clause_tables.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, and upstream master at
+  2026-09-16; src/pl-transaction.c, merge_clause_tables. This tree runs on
+  10.1.14 built with the patch below.
 Defect: committing a nested erase of a clause asserted by its outer transaction
   overwrites the outer GEN_ASSERTA or GEN_ASSERTZ entry with GEN_NESTED_RETRACT.
   Outer rollback restores the erased generation instead of discarding the
@@ -481,12 +474,25 @@ Defect: committing a nested erase of a clause asserted by its outer transaction
 Reproduction: tests/checks/host_workarounds/swi-nested-retract-loses-outer-assert.pl,
   an outer assert, committed inner erase, failed outer transaction, then 100
   unrelated assertions in a later transaction. No engine is loaded.
-Workaround: engine/host_transactions.pl records fresh assertion references in
-  a journal local to the executing engine and thread. A child journal belongs
-  to its parent before any child writes. After rollback or snapshot exit it
-  erases those references explicitly. Nontransactional host predicates retain
-  their own semantics. This preserves savepoints and never deduplicates rows.
-Lifted when: merge_clause_tables preserves outer assertion ownership when it
-  merges a nested retract, so the plain-host reproduction prints absent.
-Record: docs/journal/2026-09-11-classes-on-metta.md, repository ownership after
-  nested rollback.
+Patch: tests/checks/host_workarounds/swi-nested-retract-loses-outer-assert.patch,
+  against swipl-devel V10.1.14 src/pl-transaction.c: when the nested table
+  brings a nested retract of a clause the outer table holds as asserted,
+  `merge_clause_tables()` keeps the outer assert marker and completes the
+  retract bookkeeping the nested retract deferred (`retract_clause()`), so the
+  clause is an in-transaction assertion that was retracted, which the outer
+  commit discards and the outer rollback does not revive; the nested commit
+  merges its clause table before its predicate table, because that bookkeeping
+  records the predicate as modified in the nested table and the predicate
+  merge carries it to the parent (merging predicates first destroyed the
+  table the bookkeeping then wrote to, a crash). Verified by the
+  reproduction and eight scenarios (asserta and retract/1, a grandchild
+  erase, a child assert with a grandchild erase under an outer commit, a
+  rolled-back nested erase, a pre-existing row, clause GC afterwards); SWI's
+  own suite passes on the build (87 of 88, `pldoc:man_links` needs the
+  documentation the build omits; tests/transaction among the passes).
+Lifted when: SWI-Prolog as shipped merges a nested retract without losing the
+  outer assertion, so the reproduction prints absent; the patch and the entry
+  go together then.
+Record: docs/journal/2026-09-17-host-patches.md, the merge fix and the
+  ownership journal it retires; docs/journal/2026-09-11-classes-on-metta.md,
+  repository ownership after nested rollback.

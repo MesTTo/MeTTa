@@ -1,0 +1,80 @@
+diff --git a/src/pl-transaction.c b/src/pl-transaction.c
+index bac3b25..041977c 100644
+--- a/src/pl-transaction.c
++++ b/src/pl-transaction.c
+@@ -415,15 +415,30 @@ transaction_discard(DECL_LD)
+   return rc;
+ }
+ 
++#define merge_clause_tables(into, from) LDFUNC(merge_clause_tables, into, from)
+ static void
+-merge_clause_tables(TablePW into, TablePW from)
++merge_clause_tables(DECL_LD TablePW into, TablePW from)
+ { FOR_TABLE(from, n, v)
+   { Clause cl = val2ptr(n);
+-
+-    if ( addHTablePW(into, cl, v) == v )
+-      acquire_clause(cl);		/* new in outer table */
+-    else
+-      updateHTablePW(into, cl, v);	/* already in outer table */
++    tr_gen_t lgen = (tr_gen_t)v;
++    tr_gen_t ogen = (tr_gen_t)addHTablePW(into, cl, v);
++
++    if ( ogen == lgen )
++    { acquire_clause(cl);		/* new in outer table */
++    } else if ( IS_ASSERT_GEN(ogen) && lgen == GEN_NESTED_RETRACT )
++    { /* The outer transaction asserted this clause and the nested one
++	 erased it.  Keep the outer assert marker and complete the retract
++	 bookkeeping the nested retract deferred, so the clause is an
++	 in-transaction assertion that was retracted, as a local retract
++	 leaves it: the outer commit discards it and the outer rollback
++	 does not revive it.  Overwriting the marker with the nested
++	 retract made the rollback restore the erased generation of a
++	 clause that was never committed, which reappeared once a later
++	 transaction advanced past its creation generation. */
++      retract_clause(cl, cl->generation.erased);
++    } else
++    { updateHTablePW(into, cl, v);	/* already in outer table */
++    }
+   };
+ }
+ 
+@@ -570,16 +585,11 @@ transaction(DECL_LD term_t goal, term_t constraint, term_t lock, int flags)
+ 	}
+       }
+ 
+-      if ( LD->transaction.predicates )
+-      { if ( parent.predicates )
+-	{ merge_pred_tables(parent.predicates,
+-			    LD->transaction.predicates);
+-	  destroyHTablePW(LD->transaction.predicates);
+-	} else
+-	{ parent.predicates = LD->transaction.predicates;
+-	}
+-      }
+-
++      /* Clauses merge before predicates: completing a nested retract of
++	 an outer assertion records the predicate as modified in this
++	 nested table, which the predicate merge below then carries to the
++	 parent, and a refused bulk announcement discards this level before
++	 either table has reached the parent. */
+       if ( LD->transaction.clauses )
+       {	if ( parent.clauses )
+ 	{ if ( (flags&TR_BULK) )
+@@ -593,6 +603,16 @@ transaction(DECL_LD term_t goal, term_t constraint, term_t lock, int flags)
+ 	{ parent.clauses = LD->transaction.clauses;
+ 	}
+       }
++
++      if ( LD->transaction.predicates )
++      { if ( parent.predicates )
++	{ merge_pred_tables(parent.predicates,
++			    LD->transaction.predicates);
++	  destroyHTablePW(LD->transaction.predicates);
++	} else
++	{ parent.predicates = LD->transaction.predicates;
++	}
++      }
+     } else
+     { nested_discard:
+       rc = transaction_discard() && rc;

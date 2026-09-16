@@ -354,6 +354,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   native transaction scope and its decision, the foreign capture attempt and the
   reference capture wrapper put their effects in Setup and their retirement in
   the cleanup, without the retry-on-cut wrappers.
+- The assertion ownership journal is gone. SWI-Prolog, patched, keeps an outer
+  transaction's assertion when a nested transaction erases it
+  (`swi-nested-retract-loses-outer-assert`, the third patched ledger entry), so
+  `assert/1,2`, `asserta/1,2` and `assertz/1,2` are the host's own doors again,
+  a wrapped transaction carries only its completion registry, and the three
+  inferences every assertion paid for the journal return. The last
+  `swi-cleanup-window` site went with the wrapper.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

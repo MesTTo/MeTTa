@@ -1,7 +1,11 @@
-% Purpose: verify the repository workaround for nested host rollback.
-% Guarantees: later transactions cannot observe aborted assertions, older
-%   rows survive rollback, and journals remain local to their executing thread
-%   [tested: host_transactions; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Purpose: verify native transaction and snapshot outcomes on the host this
+%   tree runs on, through every assertion door, and the completion registry
+%   the engine wraps around each transaction.
+% Guarantees: later transactions cannot observe aborted assertions, including
+%   one a nested transaction erased (host ledger,
+%   swi-nested-retract-loses-outer-assert, patched), older rows survive
+%   rollback, and completion registries remain local to their executing thread
+%   [tested: host_transactions; commit=WORKTREE].
 % Owns resources: each test removes its private rows; worker threads are joined.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/host_transactions', []).
@@ -64,10 +68,10 @@ test(a_failed_commit_constraint_retires_its_assertions,
                    (transaction(erase(Ref)), fail), host_transaction_test),
     later_rows(Rows), assertion(Rows == []).
 
-test(a_bound_reference_failure_is_still_owned,
+test(a_bound_reference_is_the_hosts_own_refusal,
      [setup(assertz(row(old), Ref)), cleanup(retractall(row(_)))]) :-
-    \+ transaction(( \+ assertz(row(new), Ref),
-                     transaction(retract(row(new))), fail )),
+    catch(transaction(assertz(row(new), Ref)), error(Formal, _), true),
+    assertion(Formal = uninstantiation_error(_)),
     later_rows(Rows), assertion(Rows == [old]).
 
 test(an_attributed_reference_can_reject_the_assertion,
@@ -82,16 +86,16 @@ test(a_nontransactional_predicate_keeps_its_host_semantics,
     \+ transaction((assertz(permanent(kept)), fail)),
     assertion(permanent(kept)).
 
-test(empty_savepoints_do_not_accumulate) :-
+test(empty_savepoints_register_nothing) :-
     transaction(( forall(between(1, 1000, _), transaction(true)),
-                  nb_getval('$metta_host_assertions', Journal),
-                  arg(1, Journal, Entries), assertion(Entries == []) )),
-    nb_getval('$metta_host_assertions', Owner), assertion(Owner == none).
+                  nb_getval('$metta_host_completions', Registry),
+                  arg(1, Registry, Goals), assertion(Goals == []) )),
+    nb_getval('$metta_host_completions', Owner), assertion(Owner == none).
 
 rollback_goal :-
     transaction(( assertz(row(bounded), Ref), transaction(erase(Ref)), fail )).
 
-test(an_inference_cut_at_each_journal_port_retires_owned_clauses,
+test(an_inference_cut_at_each_port_leaves_no_clause_behind,
      [cleanup(retractall(row(_)))]) :-
     statistics(inferences, Before),
     ignore(rollback_goal),
@@ -100,10 +104,10 @@ test(an_inference_cut_at_each_journal_port_retires_owned_clauses,
     forall(between(1, Last, Budget),
            ( ignore(call_with_inference_limit(rollback_goal, Budget, _)),
              later_rows(Rows), assertion(Rows == []),
-             nb_getval('$metta_host_assertions', Owner),
+             nb_getval('$metta_host_completions', Owner),
              assertion(Owner == none) )).
 
-test(a_nested_engine_keeps_its_own_journal,
+test(a_nested_engine_keeps_its_own_registry,
      [cleanup(retractall(row(_)))]) :-
     transaction(( assertz(row(parent)),
                   setup_call_cleanup(
@@ -115,7 +119,7 @@ test(a_nested_engine_keeps_its_own_journal,
                   assertion(row(parent)) )),
     later_rows(Rows), assertion(Rows == [parent]).
 
-test(concurrent_journals_keep_their_owners,
+test(concurrent_registries_keep_their_owners,
      [cleanup(retractall(row(_)))]) :-
     thread_create(transaction(assertz(row(committed))), Committer, []),
     thread_create(( \+ transaction(( assertz(row(aborted), Ref),
@@ -127,14 +131,14 @@ test(concurrent_journals_keep_their_owners,
     later_rows(Rows), assertion(Rows == [committed]).
 
 test(reinstalling_one_door_keeps_the_existing_primitive,
-     [cleanup(retractall(row(_)))]) :-
+     [setup(nb_setval(host_completion_pending, false)),
+      cleanup(nb_delete(host_completion_pending))]) :-
     setup_call_cleanup(
-        unwrap_predicate(system:assertz(_), metta_host_assertion_ownership),
-        ( host_transactions:install_host_transaction_workaround,
-          \+ transaction((assertz(row(reinstalled)),
-                           transaction(retract(row(reinstalled))), fail)),
-          later_rows(Rows), assertion(Rows == []) ),
-        host_transactions:install_host_transaction_workaround).
+        unwrap_predicate(system:'$transaction'(_, _), metta_host_transaction_completion),
+        ( host_transactions:install_host_transaction_completion,
+          transaction(host_transactions:host_transaction_on_exit(nb_setval(host_completion_pending, true))),
+          nb_getval(host_completion_pending, Pending), assertion(Pending == true) ),
+        host_transactions:install_host_transaction_completion).
 
 :- end_tests(host_transactions).
 

@@ -291,14 +291,12 @@ remove_sexp(Space, Atom, Removed) :-
 % so callbacks cannot accidentally inherit it. SWI's erase/1 is the exact
 % reference operation; term equality cannot identify duplicate ownership.
 % [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
-% Workaround: swi-nested-retract-loses-outer-assert - keep the selected removal reference outside the host transaction table.
-% This selector was moved out of the database because of the host defect,
-% now also covered by engine/host_transactions.pl. Its scoped ownership still
-% prevents a callback from inheriting another removal's selector.
-% This is control state, like with_metta_space_releasing/2 below. A database
-% selector can reappear inside a later transaction after a failed reload even
-% though a query outside that transaction sees no row. Then specialization
-% invalidation mistakes its own removal for the old source's selected atom.
+% The selector is control state, like with_metta_space_releasing/2 below: a
+% scoped global rather than a database row, so a callback cannot inherit
+% another removal's selector. As a database row it could reappear inside a
+% later transaction after a failed reload on the host as shipped, even though
+% a query outside that transaction saw no row, and specialization invalidation
+% then mistook its own removal for the old source's selected atom.
 % [tested: extensions/python/tests/ch05_equations_and_evaluation/test_reload.py;
 % commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 native_removal_reference(Ref) :-
