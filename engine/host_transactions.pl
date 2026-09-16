@@ -86,10 +86,15 @@ host_assertion_body(Clause, Ref, Assert, Original, Body) :-
     Body = (
         (   nb_current('$metta_host_assertions', Journal), Journal \== none
         ->  Assert,
-            % Workaround: swi-cleanup-window - catch an inference cut before recording the just-created reference.
-            % SWI defers a cut on catch/3's call port until inside its
-            % protected goal. Retrying ownership cannot lose Ref. The goal
-            % is qualified because this body runs as system's wrapper, not
+            % Workaround: swi-cleanup-window - an inference limit can land at the call port between the assertion and the record of its reference; catch/3 is exempt from the limit, so it fires inside the protected goal and the handler records before rethrowing.
+            % Recording twice cannot lose Ref. sig_atomic/1 around the pair
+            % closes the same window for one inference more per assertion, on
+            % a path that asserts inside every evaluation [measured 2026-09-17:
+            % constructors.plt's cold typed loop 1468 -> 1508 inferences;
+            % command=swipl -g main ai_probe_scope_cost2.pl, old_pair 6 against
+            % new_pair 7 per assertion]. The site goes with this wrapper when
+            % swi-nested-retract-loses-outer-assert is patched in the host. The
+            % goal is qualified because this body runs as system's wrapper, not
             % as a clause of this module.
             catch(host_transactions:host_record_assertion(Journal, Clause, Ref),
                   Ball,
@@ -105,21 +110,17 @@ host_record_assertion(Journal, Clause, Ref) :-
     ;   true
     ).
 
-% Workaround: swi-cleanup-window - register cleanup before linking the journal and trail its active owner.
 % A child is linked before it can assert anything, so unwinding cannot leave
-% its committed assertions outside the parent's ownership. The cleanup is a
-% catch term and can repeat retirement after an inference cut.
+% its committed assertions outside the parent's ownership: Setup links it and
+% the cleanup, which the host runs to completion, retires it.
 host_transaction(Original, Policy) :-
     ( nb_current('$metta_host_assertions', Parent) -> true ; Parent = none ),
     Journal = journal([], []),
     setup_call_catcher_cleanup(
-        true,
-        ( host_transaction_enter(Parent, Journal), call(Original) ),
+        host_transaction_enter(Parent, Journal),
+        call(Original),
         Catcher,
-        catch(host_transaction_leave(Parent, Journal, Catcher, Policy),
-              Ball,
-              ( host_transaction_leave(Parent, Journal, Catcher, Policy),
-                throw(Ball) ))).
+        host_transaction_leave(Parent, Journal, Catcher, Policy)).
 
 host_transaction_enter(Parent, Journal) :-
     (   Parent == none

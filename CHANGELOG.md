@@ -350,6 +350,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   one item onto a stack-shaped root for the same span; the reference finishing,
   forcing and source-mapping stacks, the evaluation context and lib_memo's
   reconciliation marker derive from them instead of carrying their own writes.
+- Cleanup handlers are trusted to run to completion: the host transaction, the
+  native transaction scope and its decision, the foreign capture attempt and the
+  reference capture wrapper put their effects in Setup and their retirement in
+  the cleanup, without the retry-on-cut wrappers.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

@@ -174,11 +174,14 @@ Patch: tests/checks/host_workarounds/swi-cleanup-window.patch, against
   goals. SWI's own suite passes on the build (87 of 88, `pldoc:man_links`
   needs the documentation the build omits; `tests/core_lang/test_inflimit.pl`
   among the passes).
-Workaround: the sites still marked `swi-cleanup-window` keep state that
-  must not outlive its scope as a trailed write (`b_setval/2` on entry,
-  `nb_setval/2` on the ordinary exit, `b_getval/2` to read); each is lifted
-  in its own commit now that the host owes the cleanup, and the marker goes
-  with it.
+Workaround: one site remains, engine/host_transactions.pl's record of a
+  fresh assertion reference into the ownership journal: a limit can land at
+  the call port between the assertion and its record, which no cleanup owns,
+  so the record runs under catch/3, exempt from the limit, and the handler
+  records before rethrowing. `sig_atomic/1` around the pair would close it
+  for one inference more per assertion on the evaluation path. The site goes
+  with the wrapper itself when swi-nested-retract-loses-outer-assert is
+  patched; the scoped-root sites were lifted on 2026-09-17.
 Lifted when: SWI-Prolog as shipped registers the cleanup before the call port
   that follows Setup, or its inference check honours the atomic region as the
   patch makes it; the patch and the entry go together then. The Workaround

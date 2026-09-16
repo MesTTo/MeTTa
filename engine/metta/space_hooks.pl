@@ -590,8 +590,7 @@ metta_run_transaction_scope(Goal, Scope, Finish) :-
         true,
         metta_transaction_scope_prepare(Goal, Scope),
         Catcher,
-        catch(call(Finish, Catcher), Ball,
-              (call(Finish, Catcher), throw(Ball)))).
+        call(Finish, Catcher)).
 
 metta_transaction_scope_prepare(Goal, Scope) :-
     arg(3, Scope, observation(Begin, _, Depth)),
@@ -604,16 +603,14 @@ metta_transaction_scope_prepare(Goal, Scope) :-
     metta_attempt_completion(Begin, BeginResult),
     metta_completion_result(BeginResult),
     arg(1, Scope, Native),
-    % Workaround: swi-cleanup-window - record the native decision inside the
-    % protected cleanup before completion can be interrupted.
+    % The cleanup records the native decision; the host runs it to completion.
     setup_call_catcher_cleanup(
         true,
         catch(( call(Goal, Native)
               -> Returned = ok
               ;  Returned = failed ), Error, Returned = threw(Error)),
         Catcher,
-        catch(metta_transaction_decision(Native, Returned, Catcher), Ball,
-              (metta_transaction_decision(Native, Returned, Catcher), throw(Ball)))).
+        metta_transaction_decision(Native, Returned, Catcher)).
 
 metta_native_transaction(nested, Goal, Native) :- !,
     transaction(metta_native_transaction_body(Goal, Native)).
@@ -978,15 +975,13 @@ metta_enlist_foreign(Space) :-
     ;   Participant = participant(Space, Identity, opening),
         % Linking preserves this cell when a capture or begin enlists another
         % provider. Copying the list would leave the caller updating an old cell.
-        % Workaround: swi-cleanup-window - register cleanup before linking the attempt and repeat only idempotent state retirement after an inference cut.
-        % [source: engine/host_transactions.pl:host_transaction/2; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f].
+        % Setup links the attempt, so the cleanup that retires it is owed from
+        % the first moment it is visible.
         setup_call_catcher_cleanup(
-            true,
-            ( nb_linkarg(1, Registry, [Participant|Enlisted]),
-              metta_capture_participant(Capture, Participant) ),
+            nb_linkarg(1, Registry, [Participant|Enlisted]),
+            metta_capture_participant(Capture, Participant),
             Why,
-            catch(metta_finish_capture(Why, Participant), Ball,
-                  (metta_finish_capture(Why, Participant), throw(Ball))))
+            metta_finish_capture(Why, Participant))
     ).
 
 metta_current_enlistment(Registry) :-
