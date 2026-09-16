@@ -1,4 +1,4 @@
-"""Purpose: every host workaround names a ledger entry whose defect still reproduces.
+"""Purpose: every host workaround names a ledger entry whose defect still reproduces, and every host patch one whose defect no longer does.
 
 The engine runs on hosts it does not own, SWI-Prolog first among them, and
 works around what they do: an inference limit that strikes between a Setup and
@@ -21,6 +21,12 @@ while the host still has the defect and `absent` once it does not, and this
 lane RUNS it. A workaround whose reason has gone fails the gate naming the
 sites to lift, rather than outliving its reason unnoticed.
 
+An entry may instead carry `Patch:`, a tracked patch the host this tree runs
+on is built with. That is the dual state: the defect is fixed in the host
+rather than worked around in the tree, so the entry needs no site, its
+reproduction must answer `absent`, and `present` means this environment's
+host was built without the patch; the lane fails naming the patch.
+
 Assumes:
   - the tree is a git checkout: sites are read from `git ls-files`, so a
     scratch file or a linked `node_modules` is never scanned
@@ -38,9 +44,16 @@ Guarantees:
     to lift, and one whose reproduction answers neither word or exits nonzero
     is reported as broken [tested:
     tests/checks/check_host_workarounds_selftest.py; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
-  - the shipped tree passes: every entry has a site and a reproduction that
-    answers `present` on SWI-Prolog 10.1.13 [tested:
-    test_the_shipped_tree_passes_its_own_gate; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
+  - an entry carrying `Patch:` passes with no site when its reproduction
+    answers `absent`, is reported naming the patch to rebuild with when it
+    answers `present`, and is refused when the patch is not a tracked .patch
+    file [tested: test_a_patched_host_passes_without_a_site,
+    test_a_patched_host_that_still_shows_the_defect_names_the_patch,
+    test_a_patch_must_be_tracked; commit=WORKTREE]
+  - the shipped tree passes: every worked-around entry has a site and answers
+    `present`, and every patched one answers `absent`, on SWI-Prolog 10.1.13
+    with Janus 1.5.3 built with the tracked patches [tested:
+    test_the_shipped_tree_passes_its_own_gate; commit=WORKTREE]
 Fails when:
   - read as a count. The number of entries is not a score; the lane's value is
     that every one of them is live, reproduced and findable.
@@ -74,7 +87,7 @@ MARKER = re.compile(r"^[\s%#;/*!]*Workaround:(.*)$")
 SITE = re.compile(r"^\s+(" + KEY + r")\s+-\s+(\S.*)$")
 FIELD = re.compile(r"^([A-Z][a-z]+(?: [a-z]+)?):\s+(\S.*)$")
 REQUIRED = ("Host", "Defect", "Reproduction", "Lifted when")
-OPTIONAL = ("Workaround", "Record")
+OPTIONAL = ("Workaround", "Record", "Patch")
 UNSCANNED = frozenset({".md", ".txt"})
 RUNNABLE = frozenset({".pl", ".sh"})
 VERDICTS = frozenset({"present", "absent"})
@@ -195,17 +208,19 @@ def cross_check(sites: list[Site], entries: list[Entry]) -> list[str]:
         for site in sites
         if site.key not in keys
     ]
+    # A patched host has nothing at a site to lift; the reproduction alone
+    # says whether this environment carries the patch.
     findings.extend(
         f"{LEDGER}:{entry.line}: no site carries `Workaround: {entry.key} - ...`"
         for entry in entries
-        if entry.key not in carried
+        if entry.key not in carried and "Patch" not in entry.fields
     )
     return findings
 
 
-def reproduction_of(entry: Entry) -> Path | None:
-    """The file an entry's `Reproduction:` names, or None when it names nothing."""
-    words = entry.fields.get("Reproduction", "").split()
+def named_file(entry: Entry, name: str) -> Path | None:
+    """The file an entry's `<name>:` field names first, or None when it names nothing."""
+    words = entry.fields.get(name, "").split()
     return Path(words[0].rstrip(",;")) if words else None
 
 
@@ -255,24 +270,39 @@ def check_tree(root: Path, *, run: bool = True) -> Report:
     findings.extend(cross_check(sites, entries))
     tracked = set(files)
     for entry in entries:
-        path = reproduction_of(entry)
+        path = named_file(entry, "Reproduction")
         if path is None or path not in tracked or path.suffix not in RUNNABLE:
             findings.append(
                 f"{LEDGER}:{entry.line}: `{entry.key}` needs `Reproduction:`"
                 " to name a tracked .pl or .sh file"
             )
             continue
+        patch = named_file(entry, "Patch")
+        if "Patch" in entry.fields and (
+            patch is None or patch not in tracked or patch.suffix != ".patch"
+        ):
+            findings.append(
+                f"{LEDGER}:{entry.line}: `{entry.key}` needs `Patch:`"
+                " to name a tracked .patch file"
+            )
+            continue
         if not run:
             continue
         verdict, detail = run_reproduction(root, path)
-        if verdict == "absent":
+        if verdict == "broken":
+            findings.append(f"{entry.key}: reproduction {path} is broken: {detail}")
+        elif patch is not None:
+            if verdict == "present":
+                findings.append(
+                    f"{entry.key}: this environment's host still shows the defect ({path}"
+                    f" answered present); rebuild it with {patch}"
+                )
+        elif verdict == "absent":
             where = ", ".join(f"{s.path}:{s.line}" for s in sites if s.key == entry.key)
             findings.append(
                 f"{entry.key}: the host no longer shows this defect ({path} answered"
                 f" absent); lift the workaround at {where} and remove the entry"
             )
-        elif verdict == "broken":
-            findings.append(f"{entry.key}: reproduction {path} is broken: {detail}")
     return Report(sites, entries, findings)
 
 
@@ -283,9 +313,11 @@ def main() -> int:
         print(finding)
     if report.findings:
         return 1
+    patched = sum("Patch" in entry.fields for entry in report.entries)
     print(
-        f"host workarounds: {len(report.entries)} entries, {len(report.sites)} sites,"
-        " every reproduction answers present"
+        f"host workarounds: {len(report.entries)} entries ({patched} patched),"
+        f" {len(report.sites)} sites, every worked-around defect answers present"
+        " and every patched one absent"
     )
     return 0
 

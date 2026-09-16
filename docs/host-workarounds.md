@@ -33,11 +33,44 @@ The fields, one per line, continuation lines indented:
 - `Workaround:` the shape every site uses, when there is one; each site
   states its own.
 - `Lifted when:` the host change that makes the reproduction answer `absent`.
+- `Patch:` the tracked patch the host this tree runs on is built with, when
+  the defect is fixed in the host rather than worked around in the tree.
 - `Record:` the journal thread that holds the evidence.
 
 An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
+
+An entry with `Patch:` is the dual state. Its host is built from the patched
+source, so it needs no site, its reproduction must answer `absent`, and
+`present` means this environment's host was built without the patch: the lane
+fails naming the patch to rebuild with. The reproduction still describes the
+defect as shipped, so a fresh environment learns what its host must carry.
+
+## janus-callback-exception-leak
+Host: janus-swi 1.5.3 (janus/janus.c `check_error`, the same code at upstream
+  packages-swipy master b0356a162, 2026-07-28) on SWI-Prolog 10.1.13.
+Defect: when a Python callback raises, `check_error` fetches the exception's
+  type, value and traceback with `PyErr_Fetch` to build the
+  `python_error(Class, Obj)` ball, and returns without releasing the three
+  references it owns. The blobs the ball carries release theirs at atom GC;
+  these never do, so every exception a callback raised stays alive for the
+  process with its traceback, every frame below the callback and every local
+  those frames hold. In this engine that kept a dropped space's handle, its
+  lease cell and the transaction frames of each rolled-back body.
+Reproduction: tests/checks/host_workarounds/janus-callback-exception-leak.sh,
+  one Python child raising three exceptions inside `py_call/2`, then atom GC,
+  a Prolog-to-Python call to drain the deferred releases and a Python
+  collection; `present` when an instance survives.
+Patch: tests/checks/host_workarounds/janus-callback-exception-leak.patch,
+  applied to the janus-swi 1.5.3 source and installed into the seat's
+  interpreter (`uv pip install --reinstall --no-deps <patched source>` with
+  `SWIPL` naming the interpreter); it releases the fetched references on every
+  exit of `check_error`.
+Lifted when: janus-swi releases what `PyErr_Fetch` handed `check_error`; the
+  entry and the patch go together once the installed janus carries that.
+Record: docs/journal/2026-09-16-reclamation-counts.md, the retention bisection
+  from the reclamation counts to the hidden reference and the patched build.
 
 ## swi-bound-clause-reference-ignores-snapshot
 Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;

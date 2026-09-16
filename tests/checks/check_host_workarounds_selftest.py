@@ -14,6 +14,11 @@ Guarantees:
   - an `absent` answer names the site to lift, and a third word is reported as
     a broken reproduction [tested: test_an_absent_answer_names_the_sites_to_lift,
     test_a_third_word_is_a_broken_reproduction; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
+  - a patched entry passes with no site on `absent`, names its patch on
+    `present`, and is refused when the patch is untracked [tested:
+    test_a_patched_host_passes_without_a_site,
+    test_a_patched_host_that_still_shows_the_defect_names_the_patch,
+    test_a_patch_must_be_tracked; commit=WORKTREE]
   - the shipped tree passes the same gate, so a red above is the fixture
     [tested: test_the_shipped_tree_passes_its_own_gate; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 Open Obligations:
@@ -44,10 +49,26 @@ ENTRY = (
     "Lifted when: never; this is a fixture.\n"
 )
 PRESENT = "#!/bin/sh\nprintf 'present\\n'\n"
+ABSENT = "#!/bin/sh\nprintf 'absent\\n'\n"
+PATCHED = (
+    "# Host workarounds\n\n"
+    "## janus-planted-leak\n"
+    "Host: Janus 1.5.3; planted.\n"
+    "Defect: a fetched exception is never released.\n"
+    "Reproduction: tests/checks/host_workarounds/planted.sh, a fixture.\n"
+    "Patch: tests/checks/host_workarounds/planted.patch, a fixture.\n"
+    "Lifted when: never; this is a fixture.\n"
+)
+DIFF = "--- a/planted.c\n+++ b/planted.c\n"
 
 
 def plant(
-    root: Path, *, site: str = SITE, entry: str = ENTRY, reproduction: str = PRESENT
+    root: Path,
+    *,
+    site: str = SITE,
+    entry: str = ENTRY,
+    reproduction: str = PRESENT,
+    patch: str | None = None,
 ) -> Path:
     """Write one fixture tree and stage it, so the gate's file listing sees it."""
     (root / "src").mkdir(parents=True)
@@ -58,6 +79,10 @@ def plant(
     (root / "tests" / "checks" / "host_workarounds" / "planted.sh").write_text(
         reproduction, encoding="utf-8"
     )
+    if patch is not None:
+        (root / "tests" / "checks" / "host_workarounds" / "planted.patch").write_text(
+            patch, encoding="utf-8"
+        )
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
     subprocess.run(["git", "add", "-A"], cwd=root, check=True)
     return root
@@ -129,6 +154,24 @@ def test_a_third_word_is_a_broken_reproduction(tmp_path: Path) -> None:
     findings = findings_of(plant(tmp_path / "again", reproduction="#!/bin/sh\nexit 3\n"))
     assert len(findings) == 1
     assert "is broken" in findings[0]
+
+
+def test_a_patched_host_passes_without_a_site(tmp_path: Path) -> None:
+    """A defect fixed in the host needs no site; its reproduction answering absent is the proof."""
+    assert findings_of(plant(tmp_path, site="", entry=PATCHED, reproduction=ABSENT, patch=DIFF)) == []
+
+
+def test_a_patched_host_that_still_shows_the_defect_names_the_patch(tmp_path: Path) -> None:
+    """An environment whose host was built without the patch is told which patch to rebuild with."""
+    findings = findings_of(plant(tmp_path, site="", entry=PATCHED, reproduction=PRESENT, patch=DIFF))
+    assert len(findings) == 1
+    assert "rebuild it with tests/checks/host_workarounds/planted.patch" in findings[0]
+
+
+def test_a_patch_must_be_tracked(tmp_path: Path) -> None:
+    """A patch the tree does not carry cannot be what the host was built with."""
+    findings = findings_of(plant(tmp_path, site="", entry=PATCHED, reproduction=ABSENT))
+    assert [f for f in findings if "needs `Patch:` to name a tracked .patch file" in f]
 
 
 def test_the_shipped_tree_passes_its_own_gate() -> None:

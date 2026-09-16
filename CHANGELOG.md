@@ -297,6 +297,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   predicate first removes its wrappers and every import of it in any module,
   which closes two segfaults when class homes sharing definitions retired in
   one transaction. Untabling still precedes the clause removal.
+- The host ledger has a patched state. A `docs/host-workarounds.md` entry may
+  carry `Patch:`, the tracked patch the host this tree runs on is built with;
+  it needs no site, its reproduction must answer `absent`, and `present` fails
+  the lane naming the patch to rebuild with. The first is
+  `janus-callback-exception-leak`: janus-swi 1.5.3's `check_error` never
+  released the references `PyErr_Fetch` handed it, so every exception a Python
+  callback raised into the engine, with its traceback and every frame and
+  local below the callback, lived for the process.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

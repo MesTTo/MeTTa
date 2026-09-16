@@ -1,0 +1,53 @@
+--- a/janus/janus.c
++++ b/janus/janus.c
+@@ -559,20 +559,19 @@
+     if ( (tname=PyObject_GetAttrString(type, "__name__")) )
+       error_type = PyUnicode_AsUTF8AndSize(tname, NULL);
+ 
+-    PyObject *exit_code;
++    PyObject *exit_code = NULL;
+     long long code;
+     if ( error_type )
+     { if ( strcmp(error_type, "SystemExit") == 0 &&
+ 	   (exit_code=PyObject_GetAttrString(value, "code")) &&
+ 	   (code=PyLong_AsLongLong(exit_code)) )
+       { propagate_sys_exit((int)code);
+-	Py_CLEAR(tname);
+-	return NULL;
++	goto out;
+       }
+ 
+       if ( strcmp(error_type, "KeyboardInterrupt") == 0 )
+       { if ( propagate_keyboard_interrupt() )
+-	  return NULL;
++	  goto out;
+       }
+     }
+ 
+@@ -584,7 +583,7 @@
+     { if ( !py_unify(ctx, stack, PYU_ERROR) ||
+ 	   !PL_cons_functor_v(ctx, FUNCTOR_python_stack1, ctx) ||
+ 	   !PL_cons_functor(ctx, FUNCTOR_context2, t, ctx) )
+-	return NULL;
++	goto out;
+       PL_put_variable(t);
+     }
+ 
+@@ -596,7 +595,17 @@
+ 	 PL_cons_functor(t, FUNCTOR_error2, t, ctx) )
+       PL_raise_exception(t);
+ 
++  out:
++    /* PyErr_Fetch() handed us owned references to the type, the exception
++       and its traceback.  The blobs py_unify() made hold their own, dropped
++       when atom GC reclaims them, so ours go here.  Keeping them kept every
++       exception a callback raised alive for the life of the process, with
++       its traceback and every frame and local below it. */
+     Py_CLEAR(tname);
++    Py_CLEAR(exit_code);
++    Py_CLEAR(type);
++    Py_CLEAR(value);
++    Py_CLEAR(stack);
+     return NULL;
+   } else
+     return obj;
