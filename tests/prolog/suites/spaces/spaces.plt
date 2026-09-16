@@ -10,7 +10,7 @@
 %     library index: the call is an existence error and the module imports no
 %     library predicate, while the process's autoload flag stays true [tested:
 %     spaces_execution_modules:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
-%     commit=WORKTREE].
+%     commit=b7d85e1d7e2ce7ea6d56a4a67ac7344ef2826750].
 %   - Every seam:engine_emitted/1 declaration is protected from capture in
 %     a space [tested: test_every_engine_emitted_name_is_protected_by_derivation;
 %     commit=dcfc20be4933c19140ccb5759291401d13058301].

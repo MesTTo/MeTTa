@@ -10,7 +10,7 @@
 %     with autoload off, the engine's no-autoload configuration
 %     [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14, ugraphs.pl:460;
 %     command=sh check.sh host-workarounds; fixture=SWI-Prolog 10.1.13;
-%     commit=WORKTREE]
+%     commit=b7d85e1d7e2ce7ea6d56a4a67ac7344ef2826750]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
