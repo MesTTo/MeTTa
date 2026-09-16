@@ -14,7 +14,7 @@
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-ugraphs-implicit-append.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=213559ecd8e8ec1f2f44ab16ea06a197c734bb81].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
