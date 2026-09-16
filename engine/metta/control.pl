@@ -13,7 +13,7 @@
 %   metta_with_trailed_push/3 pushes one item onto a stack-shaped root for the
 %   same span. All three preserve linked payloads and retire under every
 %   inference cut [tested: tests/prolog/suites/evaluation/reference_scopes.plt;
-%   commit=WORKTREE].
+%   commit=291d5658b48aca358f4dabc530802428d0190220].
 % Owns resources: scoped roots belong to their engine's trail. An unset key
 %   and [] mean inactive; a goal may mutate its payload but must not replace
 %   the scoped root with nb_setval/2, nb_linkval/2 or nb_delete/1.
