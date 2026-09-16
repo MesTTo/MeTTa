@@ -202,11 +202,10 @@ metta_reference_track_transaction(Spaces) :-
     ;   true
     ).
 
-% Workaround: swi-query-frame-discarded-on-engine-destroy - watch the nearest live transaction and exclude finishing frames when transferring its roots.
-% Inspecting a frame marks it FR_NOTIFY. SWI's discard_query can notify an
-% inspected outer query after closing its foreign frame. Stop at the nearest
-% transaction and exclude a finishing frame when transferring its roots.
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wam.c#L3052-L3064
+% Roots are tracked on the nearest live transaction frame; when that frame
+% finishes inside an enclosing transaction its roots transfer to the next one,
+% and the frame being finished is excluded from the walk because a failing
+% frame is still in the live ancestry while its completion runs.
 metta_reference_track_frames(Frame, Spaces) :-
     prolog_frame_attribute(Frame, predicate_indicator, Predicate),
     % policy-inventory-exempt: mechanism-internal; reason=the three native transaction and snapshot frames in the pinned SWI source; evidence=engine/metta/reference_refresh.pl:metta_reference_track_frames/2

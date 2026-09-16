@@ -73,21 +73,20 @@ metta_receipt_transaction_scope(Scope) :-
         metta_receipt_watch_transaction(none, Scope)
     ).
 
-% Workaround: swi-query-frame-discarded-on-engine-destroy - transfer the owner to the nearest live transaction.
+% A scope watches the nearest live transaction frame and, when that frame
+% finishes inside an enclosing transaction, transfers to the next one, so the
+% scope is retired only by the outermost completion.
 metta_receipt_watch_transaction(Finished, Scope) :-
     prolog_current_frame(Current),
     metta_receipt_nearest_frame(Current, Finished, Frame),
     ( Frame == none -> existence_error(transaction_frame, Current) ; true ),
     nb_setval('$metta_occurrence_transaction', Frame-Scope).
 
-% Inspection marks its input FR_NOTIFY. Stop at a live transaction rather than
-% marking the outer query, which discard_query notifies after its foreign frame
-% has closed. On failure frameFailed leaves the completed frame in the live
-% ancestry, so exclude it when transferring the watch [source:
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wam.c#L902-L916
-% and https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-trace.c#L2484-L2503;
+% The walk stops at the nearest live transaction frame. On failure frameFailed
+% leaves the completed frame in the live ancestry, so the frame being finished
+% is excluded when the watch transfers [source:
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wam.c#L902-L916;
 % commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
-% Workaround: swi-query-frame-discarded-on-engine-destroy - stop before the engine's outer query frame.
 metta_receipt_nearest_frame(Current, Finished, Nearest) :-
     prolog_frame_attribute(Current, predicate_indicator, Predicate),
     ( Current \== Finished, metta_receipt_transaction_predicate(Predicate)

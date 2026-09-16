@@ -6,6 +6,11 @@
 #   answers present, a normal exit answers absent, and every other failure
 #   remains an error [tested: sh check.sh host-workarounds; commit=5a1127efe0f575668061e8a24c59b8ab60e6122a].
 # Owns resources: bounded.sh joins the child; the lane removes the scratch files.
+# [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+#  absent on 10.1.14 built with
+#  tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-destroy.patch,
+#  three runs of three; command=sh check.sh host-workarounds;
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}

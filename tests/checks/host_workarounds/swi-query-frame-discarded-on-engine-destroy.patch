@@ -1,0 +1,40 @@
+diff --git a/src/pl-wam.c b/src/pl-wam.c
+index 1cc1aa7..13f1a30 100644
+--- a/src/pl-wam.c
++++ b/src/pl-wam.c
+@@ -893,7 +893,18 @@ frameFinished(DECL_LD LocalFrame fr, enum finished reason)
+   }
+ 
+   if ( ison(fr, FR_NOTIFY) )
+-    return callEventHook(PLEV_FRAMEFINISHED, fr);
++  { /* The listener runs Prolog: give its term references and its query a
++       foreign frame of their own above the finished frame, as the cleanup
++       handler above does, rather than the frame of whoever is discarding. */
++    fid_t fid;
++    bool rc = true;
++
++    if ( (fid = PL_open_foreign_frame()) )
++    { rc = callEventHook(PLEV_FRAMEFINISHED, fr);
++      PL_close_foreign_frame(fid);
++    }
++    return rc;
++  }
+ 
+   return true;
+ }
+@@ -3058,8 +3086,14 @@ discard_query(qid_t qid)
+     qf = QueryFromQid(qid);		/* may be shifted */
+     discardFrame(&qf->frame);
+     if ( ison(&qf->frame, FR_WATCHED) )
+-    { lTop = (LocalFrame)argFrameP(&qf->frame,
++    { /* Every frame above the query frame is discarded, and this query's own
++	 foreign frame is already closed, so the finished-frame listener or
++	 cleanup handler must open above the query frame itself; an engine
++	 destroyed while yielded still has its environment deep in the
++	 discarded region. */
++      lTop = (LocalFrame)argFrameP(&qf->frame,
+ 				   qf->frame.predicate->functor->arity);
++      environment_frame = &qf->frame;
+       frameFinished(&qf->frame, FINISH_CUT);
+     }
+   }

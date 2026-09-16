@@ -1,8 +1,8 @@
 diff --git a/src/pl-wam.c b/src/pl-wam.c
-index 1cc1aa7..1f41182 100644
+index 1cc1aa7..13f1a30 100644
 --- a/src/pl-wam.c
 +++ b/src/pl-wam.c
-@@ -1665,10 +1665,27 @@ getProcDefinitionForThread(Definition def, size_t tid)
+@@ -1665,10 +1676,27 @@ getProcDefinitionForThread(Definition def, size_t tid)
  }
  
  

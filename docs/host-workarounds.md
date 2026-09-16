@@ -313,9 +313,10 @@ Lifted when: SWI-Prolog as shipped restores the source module after a failed
   prints absent; the patch and the entry go together then.
 Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-11-the-engine-and-packaging-lanes-after-the-wave.md.
 ## swi-query-frame-discarded-on-engine-destroy
-Host: SWI-Prolog 10.1.13; `PL_close_query` in src/pl-wam.c closes the
-  foreign frame before discarding the outer query frame, while
-  `prolog_frame_attribute/3` marks inspected ancestors for `frame_finished`.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `PL_close_query` in
+  src/pl-wam.c closes the foreign frame before discarding the outer query
+  frame, while `prolog_frame_attribute/3` marks inspected ancestors for
+  `frame_finished`. This tree runs on 10.1.14 built with the patch below.
 Defect: destroying a yielded engine delivers the event for that discarded
   outer frame. Opening the listener's query aborts on the host's assertion
   `PL_open_query: Assertion failed: (void*)fli_context > (void*)environment_frame`,
@@ -328,16 +329,19 @@ Reproduction: tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-
   an engine yield and destruction. It loads no repository engine predicates.
   Exit 139, or 134 with the exact assertion above, answers `present`; exit 0
   answers `absent`; every other result is a broken reproduction.
-Workaround: inspect only through the nearest live transaction frame and
-  transfer its watch to the surviving transaction when it finishes. Exclude
-  the finished frame ID because failure notification can start on that frame.
-Lifted when: SWI no longer delivers `frame_finished` for the frame that
-  `PL_close_query` discards, or excludes its outer query frame from
-  `prolog_frame_attribute/3` marking. Verify that host change before treating
-  `absent` from a build without assertions as a lift signal.
-Record: docs/journal/2026-09-09-the-binding-collapse.md, transfer bound watches
-  before native query destruction.
-
+Patch: tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-destroy.patch,
+  against swipl-devel V10.1.14 src/pl-wam.c: `discard_query()` makes the
+  query frame the environment before it notifies, since every frame above it
+  is discarded and a yielded engine's environment lies in that region, and
+  `frameFinished()` runs the listener inside a foreign frame of its own above
+  the finished frame, as the cleanup handler already does. The reproduction
+  answers absent three runs of three, and SWI's core, engines, debug, GC,
+  signals, db and transaction groups pass on the build.
+Lifted when: SWI-Prolog as shipped delivers `frame_finished` for a discarded
+  query frame from a sane environment and foreign frame, so the reproduction
+  prints absent; the patch and the entry go together then.
+Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-09-the-binding-collapse.md,
+  transfer bound watches before native query destruction.
 ## swi-file-search-cache-autoload
 Host: Janus 1.5.3 on SWI-Prolog 10.1.13; janus.pl's `py_call/4` failed-query
   branch resolves its declared `maplist/2` autoload on first use.

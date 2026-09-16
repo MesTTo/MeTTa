@@ -394,6 +394,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `user:exception/3` once more before it raises (`swi-cached-undefined-supervisor`,
   the ninth patched ledger entry), so deferring a definition records it without
   rearming a native slot.
+- Destroying a yielded engine no longer crashes the host when a
+  `frame_finished` listener watches a frame under it: SWI-Prolog, patched,
+  notifies a discarded query frame from a sane environment and inside a
+  foreign frame of the listener's own (`swi-query-frame-discarded-on-engine-destroy`,
+  the tenth patched ledger entry). The receipt and reference watches keep their
+  nearest-live-transaction transfer as their own design for nested
+  transactions and lose the marker.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
