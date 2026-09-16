@@ -465,26 +465,6 @@ Lifted when: an aged lookup as shipped costs what a warm one costs; the reproduc
 Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the cache-age
   controls and the 2026-09-10 host-reproduction section.
 
-## swi-first-arg-index-dead-keys
-Host: SWI-Prolog 10.1.13; next_clause_primary_index in src/pl-index.c:293-346
-  and the clause-collection contract in src/pl-proc.c:2248-2276,
-  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-index.c#L293-L346.
-Defect: retract leaves dead ClauseRef keys in the primary index until clause
-  collection. A bound lookup for the sole live tail scans the retired keys;
-  the physical scan grows although Prolog reports the same inference count.
-Reproduction: tests/checks/host_workarounds/swi-first-arg-index-dead-keys.pl,
-  retains 20000 retired rows, measures live-tail lookups, then collects clauses
-  and measures the same lookups twice. Automatic collection is held off only
-  in this fresh diagnostic process so it cannot erase the inspected state.
-Workaround: extensions/cmetta/bridge.pl keeps cursor owners under one static
-  recorded key; the C handle carries a bound record reference, and close erases
-  the owner immediately instead of retracting a dynamic cursor row.
-Lifted when: retained-key lookups cost no more than four times the collected
-  control, so the reproduction answers absent. Unequal inference counts or
-  a fourfold spread between collected controls report a broken reproduction.
-Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, immediate cursor
-  retirement and the 2026-09-10 host-reproduction section.
-
 ## swi-inherited-empty-predicate-retry
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; S_VIRGIN in src/pl-vmi.c.
   This tree runs on 10.1.14 built with the patch below.
