@@ -335,6 +335,11 @@
             drop_unconstraining_types/3,
             letstar_to_rec_let/3,
             memberchk_eq/2,
+            %The Python binding assembles a repeatable-evaluation goal from the
+            %translator's goal lists (extensions/python/metta/_binding/query.pl,
+            %evaluation.pl); reading the translator's own conjunction builder is
+            %what keeps that goal's shape from drifting.
+            goals_list_to_conj/2,
             reduce/2,
             reduce/3,
             %The compiled-lambda table. engine/metta/control.pl's collection
