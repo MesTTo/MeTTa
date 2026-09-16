@@ -16,7 +16,7 @@
 %   reference_source_origins:equal_shape_does_not_fabricate_coordinates_for_a_rewritten_body,
 %   reference_source_origins:a_rebuilding_rewriter_keeps_every_unchanged_coordinate,
 %   reference_source_origins:a_rewritten_leaf_marks_its_own_path_and_keeps_its_siblings;
-%   commit=WORKTREE].
+%   commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Guarantees: compiler observation emits no runtime goals and changes no atom
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
 %   commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
