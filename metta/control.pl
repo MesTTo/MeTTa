@@ -1549,7 +1549,7 @@ substitute_bound_tokens_(Term, Term).
 %atoms exactly as they do for every other token.
 metta_substitute_self('&self', Term, Term) :- !.
 %A term that never says &self pays one C write and one C substring probe
-%and no walk: the shortcut rewrite_parsed_form/4 takes on the source text
+%and no walk: the shortcut rewrite_parsed_form/5 takes on the source text
 %it holds, taken here on the term for the doors that hold no text, the
 %one-equation door, the deferred door's fallback, the removal probe and a
 %batch's arriving equations. The walk is Prolog and costs the term's size in
@@ -1586,7 +1586,8 @@ substitute_self_list_([Term|Terms], Space, [Out|Outs]) :-
 %pays a flat few inferences however large its data is: the unguarded
 %walk cost alpha-unique's counter +12% and every runnable +10, caught by
 %the gate.
-rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
+:- dynamic rewrite_parsed_form/5.
+rewrite_parsed_form(Space, origin(Kind, Origins), FormStr, Term, Rewritten) :-
     (   Space == '&self'
     ->  Term1 = Term
     ;   string(FormStr)
@@ -1603,12 +1604,14 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
         metta_substitute_self(Space, Term, Term1)
     ),
     (   seam:form_rewriter(Rewriter)
-    ->  call(Rewriter, Term1, Bound)
-    ;   Bound = Term1
-    ),
-    (   metta_token_claim(_, _, _, _)
-    ->  substitute_bound_tokens_(Bound, Rewritten)
-    ;   Rewritten = Bound
+    ->  filereader:rewrite_source_form(Rewriter, Term1, Origins, Bound, BoundOrigins),
+        metta_reference_resolve_source(Space, origin(Kind, BoundOrigins),
+                                       tokens, Bound, Rewritten)
+    ;   Bound = Term1,
+        (   metta_token_claim(_, _, _, _)
+        ->  substitute_bound_tokens_(Bound, Rewritten)
+        ;   Rewritten = Bound
+        )
     ).
 %%% A state cell is a VALUE, and the value is parametric in what it holds %%%
 %

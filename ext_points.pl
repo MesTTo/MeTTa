@@ -163,6 +163,7 @@
             observation_commit/0,
             observation_discard/0,
             observation_defer/2,
+            observation_frames/1,
             observe/3,
 
             % Declarations: fact tables the engine reads as data.
@@ -1901,11 +1902,16 @@ kind(host_object/1, ownership).
 :- multifile host_reader_token_construct/3.
 kind(host_reader_token_construct/3, ownership).
 
-%A registered rewriter runs over every loaded form; a host installs one only
+%A registered rewriter runs over function and runnable source forms; a host installs one only
 %while it is needed (the Python bridge registers its import-as alias rewrite
 %when the first alias lands), so a program that never uses the feature pays
 %one failed lookup per form and nothing more, the same install-on-demand
-%shape the atom hooks use.
+%shape the atom hooks use. Its four arguments are Term, Origins, Rewritten,
+%RewrittenOrigins. Origins is source, value, or children(ChildOrigins), aligned
+%with the term. A shape-changing extension must transform both outputs.
+%The reader validates that tree before applying source-name resolution.
+%Source observation keeps coordinates for every subtree a rewriter returns
+%unchanged at its position and reports the path above a change as generated.
 :- dynamic form_rewriter/1.
 :- multifile form_rewriter/1.
 kind(form_rewriter/1, ownership).

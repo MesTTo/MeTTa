@@ -39,7 +39,8 @@ support_graph:support_invalidation_action(derived(Module, reference_face)) :-
 metta_reference_queue(Space) :-
     ( nb_current('$metta_reference_pending', Pending) -> true
     ; empty_nb_set(Pending), nb_linkval('$metta_reference_pending', Pending) ),
-    add_nb_set(Space, Pending).
+    add_nb_set(Space, Pending),
+    metta_reference_source_queued(Space).
 
 metta_reference_pending(Spaces) :-
     ( nb_current('$metta_reference_pending', Pending)
@@ -110,6 +111,9 @@ metta_reference_refresh_now :-
                 ( member(Space-Module, Spaces),
                   metta_reference_local_face(Space, [], Face) ), Faces),
         metta_reference_binding_context(Faces, Context),
+        findall(Space-Plan,
+                ( member(Space-_-Face, Faces),
+                  metta_reference_source_plan(Space, Face, Plan) ), Sources),
         % Publish all bindings and metadata before repairing a shared caller.
         % A defining home's face may be needed to select its own closure;
         % reading that context does not publish the unmodified home.
@@ -121,7 +125,10 @@ metta_reference_refresh_now :-
                         metta_reference_publish_face(Space, Module, Face, Context)),
                  metta_reference_publish_demand(Faces, PreviousDemand),
                  forall(member(Space-_-Face, Faces),
-                        metta_reference_publish_metadata(Space, Face)),
+                        ( memberchk(Space-Plan, Sources),
+                          metta_reference_source_metadata_face(Face, Plan, Metadata),
+                          metta_reference_publish_metadata(Space, Metadata),
+                          metta_reference_publish_source(Space, Plan) )),
                  % Stabilization can notify another member of this batch.
                  % Every batch face already describes the same row epoch.
                  % Consume those notifications and retain newly affected homes.

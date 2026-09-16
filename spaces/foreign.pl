@@ -1201,7 +1201,7 @@ add_function_atom(Storage, Space, Module, Term, FAtom, W, Token) :-
     %The STORED atom keeps the &self the author wrote and the compiled CLAUSE
     %resolves it against this space, which is the split a source load already
     %makes: filereader:process_form/3 stores the parsed term and compiles the
-    %one rewrite_parsed_form/4 answers, which resolves &self through the same
+    %one rewrite_parsed_form/5 answers, which resolves &self through the same
     %metta_substitute_self/3; the deferred door's fallback in
     %filereader:stored_equation_source/4 gives an occurrence with no binding
     %row the same reading. Without it the two
@@ -1906,7 +1906,7 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
 %The PROBE that finds the compiled clause is the equation as the space
 %compiled it, &self resolved to the space, because that is the term every
 %compile path leaves in translated_from/2 and fun_meta: the reader through
-%rewrite_parsed_form/4, add_function_atom/6 above, and the deferred door
+%rewrite_parsed_form/5, add_function_atom/6 above, and the deferred door
 %through filereader:stored_equation_source/4. Probing with the WRITTEN atom
 %found no clause for a natively added `(= (f $x) (match &self ...))` in a
 %named space, so remove-atom took the stored atom and left the clause

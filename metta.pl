@@ -576,6 +576,7 @@
             metta_string_declarations/2,
             metta_string_registrations/2,
             metta_substitute_self/3,
+            metta_token/2,
             metta_token_snapshot/2,
             metta_undeclare_hook/2,
             metta_vocabulary_claim/3,
@@ -583,7 +584,7 @@
             read_form_step/4,
             retire_metta_tokens_in/1,
             retract_prelude_declarations/1,
-            rewrite_parsed_form/4,
+            rewrite_parsed_form/5,
             set_metta_pragma/2,
             substitute_bound_tokens/2,
             %
@@ -2321,6 +2322,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- consult('metta/properties.pl').
 :- consult('metta/registration.pl').
 :- consult('metta/references.pl').
+:- consult('metta/reference_sources.pl').
 :- consult('metta/reference_refresh.pl').
 :- consult('metta/reference_loading.pl').
 %%%%%%%%%% The engine's own type surface %%%%%%%%%%

@@ -1,5 +1,9 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Assumes: source_origins.pl keeps supplied-value origins beside parsed terms;
+%   reference_sources.pl owns the receiving home's source-name projection
+%   [source: engine/filereader/source_origins.pl:source_bound_names/5;
+%   commit=WORKTREE].
 % Guarantees: ordinary deferral also preserves the resolved &self storage law
 %   [tested: test_equal_raw_and_resolved_source_can_still_own_a_binding;
 %   commit=323a89d607b656a3a238315ef111e3b23725ce83].
@@ -267,6 +271,9 @@
             read_source_text/2,
             parse_metta_source_prolog/2,
             parsed_form_parts/4,
+            rewrite_source_form/5,
+            source_bound_names/5,
+            source_form/2,
             metta_answer_term/2,
             metta_source_changed/1,
             run_with_loading_marker/2,
@@ -683,6 +690,8 @@ metta_host_default_working_dir :-
 %run, and registering a signature for a head that no longer exists would
 %leave a fun/1 nothing can ever define. An empty Bindings list walks
 %nothing.
+:- consult('filereader/source_origins.pl').
+
 metta_host_run_source(Source0, Space, Bindings, Groups) :-
     metta_host_default_working_dir,
     ( string(Source0) -> Source = Source0 ; atom_string(Source0, Source) ),
@@ -691,16 +700,17 @@ metta_host_run_source(Source0, Space, Bindings, Groups) :-
         %rewrite any subterm, heads included, so the substituted branch
         %below recomputes everything from the forms it actually runs.
         metta_host_tagged_parse_summary(Source, Parsed, Sigs, Decls),
-        prepare_parsed_summary_in(space(Space), Parsed, Sigs, Decls, Names)
+        prepare_parsed_summary_in(space(Space), Parsed, Sigs, Decls, Names),
+        Execution = Parsed
     ;   metta_host_tagged_parse(Source, Parsed0),
-        maplist(metta_host_substitute_form(Bindings), Parsed0, Parsed),
+        maplist(metta_host_substitute_form(Bindings), Parsed0, Parsed, Execution),
         source_summary_of_forms(Parsed, Sigs, Decls),
         prepare_parsed_summary_in(space(Space), Parsed, Sigs, Decls, Names)
     ),
     with_named_program_order(
         Space, Names,
         with_runnable_variable_epochs(
-            metta_host_process_groups(Parsed, Space, Groups))),
+            metta_host_process_groups(Execution, Space, Groups))),
     !.
 
 %One walk, processing and grouping together: process_form/3, not /4's
@@ -711,27 +721,29 @@ metta_host_run_source(Source0, Space, Bindings, Groups) :-
 metta_host_process_groups([], _, []).
 metta_host_process_groups([Form|Forms], Space, Groups) :-
     process_form(Space, Form, Results),
-    (   Form = parsed(runnable, _, _, _)
+    (   ( Form = parsed(runnable, _, _, _)
+        ; Form = bound_source(_, parsed(runnable, _, _, _)) )
     ->  Groups = [Results|More]
     ;   Groups = More
     ),
     metta_host_process_groups(Forms, Space, More).
 
 metta_host_substitute_form(Bindings, parsed(Kind, N, Term0),
-                           parsed(Kind, N, Term)) :- !,
-    metta_host_substitute(Bindings, Term0, Term).
+                           parsed(Kind, N, Term),
+                           bound_source(Origins, parsed(Kind, N, Term))) :- !,
+    metta_host_substitute(Bindings, Term0, Term, Origins).
 metta_host_substitute_form(Bindings, parsed(runnable, N, Term0, Names),
-                           parsed(runnable, N, Term, Names)) :- !,
-    metta_host_substitute(Bindings, Term0, Term).
-metta_host_substitute_form(Bindings, Term0, Term) :-
-    metta_host_substitute(Bindings, Term0, Term).
+                           parsed(runnable, N, Term, Names),
+                           bound_source(Origins, parsed(runnable, N, Term, Names))) :- !,
+    metta_host_substitute(Bindings, Term0, Term, Origins).
+metta_host_substitute_form(Bindings, Term0, Term, bound_source(Origins, Term)) :-
+    metta_host_substitute(Bindings, Term0, Term, Origins).
 
-metta_host_substitute(_, T, T) :- var(T), !.
-metta_host_substitute(Bindings, T, V) :- atom(T), memberchk(T-V, Bindings), !.
-metta_host_substitute(Bindings, T, Out) :-
-    is_list(T), !,
-    maplist(metta_host_substitute(Bindings), T, Out).
-metta_host_substitute(_, T, T).
+metta_host_substitute(Bindings, Term, Bound) :-
+    metta_host_substitute(Bindings, Term, Bound, _).
+metta_host_substitute(Bindings, Term, Bound, Origins) :-
+    source_replace(metta_host_binding(Bindings), Term, source, Bound, Origins).
+metta_host_binding(Bindings, Name, Value) :- memberchk(Name-Value, Bindings).
 
 %The status vocabulary a binding shows per answer: value for a head the
 %engine will try to reduce, not-reducible otherwise (the translator's own
@@ -902,7 +914,7 @@ data_run(Forms, Space, Run, Rest) :-
 data_prefix([parsed(expression, _, Term)|Forms], [Term|Run], Rest) :-
     (   Term = [Head|_]
     ->  Head \== (=),
-        Head \== (:), Head \== from, Head \== internal
+        Head \== (:), Head \== (:<), Head \== from, Head \== internal
     ;   true
     ),
     !,
@@ -911,7 +923,8 @@ data_prefix(Forms, [], Forms).
 
 %A definition is bulk-loadable while nothing about the form needs the per-form
 %door: the trace is off, and the space is the one the source was written
-%against, so rewrite_parsed_form/4 would be the identity on it.
+%against, so rewrite_parsed_form/5 would be the identity on it. Active FROM
+%source readers install a home-indexed guard before this ordinary clause.
 definition_run(Forms, Space, Run, Rest) :-
     silent(true),
     Space == '&self',
@@ -927,7 +940,7 @@ definition_run(Forms, Space, Run, Rest) :-
     %
     %The fence itself hoists out of the prefix walk when both rewrite
     %tables are EMPTY: with no seam:form_rewriter and no bound token,
-    %rewrite_parsed_form/4 on a '&self' form is the identity by its own
+    %rewrite_parsed_form/5 on a '&self' form is the identity by its own
     %three guards, so the per-form probe pair and the == fence prove the
     %same thing once for the whole run. One registered rewriter or token
     %keeps the per-form fence exactly as it stood; bind! is a runnable and
@@ -952,7 +965,7 @@ definition_prefix([parsed(function, FormStr, Term)|Forms], Space,
                   [Term|Run], Rest) :-
     Term = [=, [F|_], _],
     atom(F),
-    rewrite_parsed_form(Space, FormStr, Term, Bound),
+    rewrite_parsed_form(Space, origin(function, source), FormStr, Term, Bound),
     Bound == Term,
     !,
     definition_prefix(Forms, Space, Run, Rest).
@@ -1633,7 +1646,7 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
 %
 % An occurrence WITHOUT a binding row compiles against the space it is stored
 % in: &self in the clause names that space, the reading every other compile
-% path gives it (the reader's per-form door through rewrite_parsed_form/4, the
+% path gives it (the reader's per-form door through rewrite_parsed_form/5, the
 % one-equation door through spaces:add_function_atom/6). Answering the raw
 % stored atom here compiled a natively added or fast-restored equation against
 % the ENGINE ROOT while the same atom through the reader read its own space: a
@@ -1940,12 +1953,10 @@ parsed_form_parts(parsed(Kind, Source, Term, _), Kind, Source, Term).
 % process_form/3 is the direct-string path used by named Python spaces. File
 % loads use process_form/4 so source clauses compile once while their atoms are
 % populated into each target space.
-%Only the token substitution here, not the whole parsed-form rewrite: a data
-%atom is not a call site, so the py-call alias rewrite has nothing to do in one
-%and this path never ran it. The token lookup is one inference per atom and it
-%is what makes `(bind! x 1)` reach a stored `(fact x)`.
+% Data applies global tokens and the receiving home's FROM source names.
+% It retains the data door's existing exclusion of host form rewriters.
 process_form(Space, parsed(expression, _, Term0), []) :-
-    substitute_bound_tokens(Term0, Term),
+    rewrite_source_data(Space, origin(expression, source), Term0, Term),
     %metta_add_atom/3, not the public `add-atom`: the loader has already
     %resolved this space, so the space-argument check the public one owes a
     %PROGRAM is pure cost here. It runs once per atom loaded, and save-load-metta
@@ -1955,7 +1966,7 @@ process_form(Space, parsed(expression, _, Term0), []) :-
     print_expression_form(Term).
 process_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
     flush_source_program_analysis_if_needed,
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
+    rewrite_parsed_form(Space, origin(runnable, source), FormStr, Term, BoundTerm),
     space_module(Space, Module),
     with_metta_module(Module,
                       translate_runnable_expr(BoundTerm, Names, Goals, Result)),
@@ -1970,7 +1981,7 @@ process_form(Space, parsed(function, FormStr, Term), []) :-
     add_sexp(Space, Term, SpaceRef),
     record_source_atom_assertion(SpaceRef),
     space_module(Space, Module),
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
+    rewrite_parsed_form(Space, origin(function, source), FormStr, Term, BoundTerm),
     %The one compile door (compile_metta_equation/4 in spaces.pl) carries
     %the eviction, registration, translation, provenance, and the complete
     %change notification this clause used to restate.
@@ -2003,7 +2014,7 @@ process_loader_form(Space, parsed(expression, _, Term), []) :-
     print_expression_form(Term).
 process_loader_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
     flush_source_program_analysis_if_needed,
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
+    rewrite_parsed_form(Space, origin(runnable, source), FormStr, Term, BoundTerm),
     space_module(Space, Module),
     with_metta_module(Module,
                       translate_runnable_expr(BoundTerm, Names, Goals, Result)),
@@ -2013,7 +2024,7 @@ process_loader_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|_], _],
     add_sexp(Space, Term, SpaceRef),
     record_source_atom_assertion(SpaceRef),
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
+    rewrite_parsed_form(Space, origin(function, source), FormStr, Term, BoundTerm),
     space_module(Space, Module),
     store_metta_equation(Space, Module, Term, BoundTerm, SpaceRef, FormStr),
     source_definition_arrived(F).
