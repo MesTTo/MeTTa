@@ -1,0 +1,24 @@
+diff --git a/src/pl-index.c b/src/pl-index.c
+index f85cf27..361911d 100644
+--- a/src/pl-index.c
++++ b/src/pl-index.c
+@@ -661,7 +661,19 @@ retry:
+   cref = NULL;
+ 
+   if ( unlikely(clist->number_of_clauses == 0) )
++  { if ( LD->transaction.generation )
++    { /* Inside a transaction the frame reads at the transaction's
++	 generation, so clauses that another thread's committed transaction
++	 erased after this one started are still visible here until clause
++	 GC reclaims them: walk them with the generation check instead of
++	 answering nothing.  Outside a transaction a first lookup after the
++	 last erase answers nothing, which is what an undo/1 goal erasing at
++	 the call port relies on. */
++      chp->cref = clist->first_clause;
++      return next_clause_unindexed(ctx);
++    }
+     return NULL;
++  }
+ 
+   pindex = clist->primary_index;
+   pkey = indexOfWord(argv[pindex]);

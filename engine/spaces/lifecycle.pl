@@ -1798,8 +1798,7 @@ metta_retirement_residue(Space, _, publications(Count)) :-
     Homes \== [],
     length(Homes, Count).
 
-%Body true, as every row reader enumerates: the storage funnel's inert
-%sentinel clause has body fail (native_storage_sentinel/2 in catalog.pl).
+%Body true, as every row reader enumerates.
 metta_dynamic_clause(Module, Head) :-
     current_predicate(Module:Name/Arity),
     functor(Head, Name, Arity),

@@ -2,12 +2,6 @@
 % and capability catalog Assumes: engine/spaces.pl consults this plain file
 % while its owning module is the load context. Guarantees: every definition
 % retains engine/spaces.pl's implementation module and original load order.
-% Guarantees: every native storage predicate keeps one inert clause, head key
-% '$metta_sentinel' and body fail, from its first write on, so the host never
-% reads its clause count as zero and an older transaction still finds the rows
-% it may see after the last real clause is erased; no reader answers that clause
-% [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
-% commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Guarantees: @owned-record syntax is checked before native publication and
 % cannot be weakened by withdrawing its descriptive kind row
 % [source: engine/spaces/catalog.pl:metta_declaration_check; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
@@ -378,54 +372,14 @@ metta_catalog_head(deprecated).
 metta_catalog_head(visibility).
 metta_catalog_head('@owned-record').
 
-%Workaround: swi-empty-indexed-snapshot - the first write to a storage
-%predicate also asserts one inert clause, head key '$metta_sentinel' and body
-%fail, which no erase path removes. SWI-Prolog 10.1.13's first_clause_guarded
-%returns no clause once the predicate's clause count is zero, before the
-%caller's transaction generation is applied, so an older transaction lost the
-%rows it should still see after the last real clause was erased. With the
-%inert clause the count stays above zero and the visibility-aware walk finds
-%them. The clause answers nothing: a direct call fails on it, clause/3 with
-%body true never unifies with it, the owned-record decoder reads body true
-%only, space_atom_count subtracts it through native_storage_clause_count/3,
-%and its key is a spelling no MeTTa symbol can have. On the host probe,
-%erasing every real clause by reference prints present without it and absent
-%with it [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
-%commit=c5bdd73e06840e1d0fd0991523983c75def074f6]. The price is five inferences per write for the two functor/3,
-%the arg/3 and the indexed clause/2 probe, and one failing clause per full
-%enumeration: 1000 add-atoms plus one enumeration cost 43,157 inferences at the
-%tip before this funnel and with the owned-record checks alone, 48,162 with it,
-%three identical samples each [measured 2026-09-15: command=python - with
-%MeTTa().space() then 1000 space.add(S.row(i, S.value)) and one
-%space.match(S.row(V.i, V.v)) under m.stats(), on a provisioned worktree at
-%3eb5acc22, on this tree with the three funnel sites reverted to assertz/2, and
-%on this tree; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+%Every native storage write goes through one door, so a storage predicate's
+%rows are host clauses and nothing else: an older transaction still reads the
+%rows it may see after the last one is erased because the host walks them at
+%the transaction's generation (host ledger, swi-empty-indexed-snapshot,
+%patched) [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
+%commit=WORKTREE].
 store_native_clause(Module, Term, Ref) :-
-    native_storage_sentinel(Term, Sentinel),
-    (   clause(Module:Sentinel, fail)
-    ->  true
-    ;   assertz(Module:(Sentinel :- fail))
-    ),
     assertz(Module:Term, Ref).
-
-%The inert clause's head: the storage term's functor with the reserved key in
-%the first argument, one builder for the funnel and the count.
-native_storage_sentinel(Term, Sentinel) :-
-    functor(Term, Name, Arity),
-    functor(Sentinel, Name, Arity),
-    arg(1, Sentinel, '$metta_sentinel').
-
-%A storage predicate's live clause count is the host's count less the inert
-%clause when it carries one; readers that enumerate clauses with body true
-%never see it, and this is the one reader that counts instead.
-native_storage_clause_count(Module, Head, Count) :-
-    predicate_property(Module:Head, number_of_clauses(Total)),
-    (   compound(Head),
-        native_storage_sentinel(Head, Sentinel),
-        clause(Module:Sentinel, fail)
-    ->  Count is Total - 1
-    ;   Count = Total
-    ).
 
 add_sexp_in(Module, Space, Atom, Ref) :-
     add_sexp_in(Module, Space, Atom, _, Ref).

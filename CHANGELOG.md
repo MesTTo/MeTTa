@@ -361,6 +361,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   a wrapped transaction carries only its completion registry, and the three
   inferences every assertion paid for the journal return. The last
   `swi-cleanup-window` site went with the wrapper.
+- Native storage predicates hold rows and nothing else: the inert
+  `'$metta_sentinel'` clause every storage predicate carried, so an older
+  transaction could still read rows after the last one was erased, is gone,
+  because SWI-Prolog, patched, walks an emptied predicate at the transaction's
+  generation (`swi-empty-indexed-snapshot`, the fourth patched ledger entry).
+  Five inferences per native write and one failing clause per enumeration
+  return, and the atom count is the host's own clause count.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

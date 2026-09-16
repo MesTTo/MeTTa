@@ -112,8 +112,8 @@ Lifted when: a cached undefined call consults the loader after source becomes
 Record: docs/journal/2026-09-15-deferred-definitions-rearm-undefined-calls.md.
 
 ## swi-empty-indexed-snapshot
-Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
-  src/pl-index.c:first_clause_guarded.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; src/pl-index.c,
+  first_clause_guarded. This tree runs on 10.1.14 built with the patch below.
 Defect: a call or an unbound clause/3 on a dynamic predicate whose current
   clause count is zero returns no clause before the caller's transaction
   generation is applied, so an older transaction loses the rows it should
@@ -122,14 +122,19 @@ Defect: a call or an unbound clause/3 on a dynamic predicate whose current
 Reproduction: tests/checks/host_workarounds/swi-empty-indexed-snapshot.pl,
   an old transaction reads one and sixteen facts after an independently joined
   thread erases every current clause of the predicate.
-Workaround: the first write to a native storage predicate also asserts one
-  inert clause, key '$metta_sentinel' and body fail, that no erase path
-  removes, so the count never reads zero; no reader answers it.
-Lifted when: the empty-current list is routed through the visibility-aware
-  unindexed reader, a three-line correction in first_clause_guarded, so the
-  reproduction prints absent.
-Record: docs/journal/2026-09-15-native-owned-records.md.
-
+Patch: tests/checks/host_workarounds/swi-empty-indexed-snapshot.patch, against
+  swipl-devel V10.1.14 src/pl-index.c: when the current count is zero and the
+  caller runs inside a transaction, `first_clause_guarded()` walks the
+  clause list with the generation check (`next_clause_unindexed()`) instead
+  of answering nothing; outside a transaction the empty answer stands, which
+  undo/1's erase at the call port relies on (SWI's `undo:undo_or` and
+  `undo:clauses` tests read the erase through it). SWI's core_lang,
+  transaction, db and tabling groups pass on the build.
+Lifted when: SWI-Prolog as shipped routes the empty-current list through the
+  visibility-aware reader for a transaction, so the reproduction prints
+  absent; the patch and the entry go together then.
+Record: docs/journal/2026-09-17-host-patches.md, the walk and the inert
+  clause it retires; docs/journal/2026-09-15-native-owned-records.md.
 ## swi-erased-definition-bypasses-loader
 Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-vmi.c:S_VIRGIN, src/pl-proc.c:resetProcedure and

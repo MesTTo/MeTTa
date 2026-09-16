@@ -4,7 +4,12 @@
 % Guarantees: the last line is present only when the old transaction's call
 %   and clause/3 both answer nothing while nth_clause/3 still admits every
 %   original reference, for one and for sixteen facts; mixed readings throw
-%   [tested: sh check.sh host-workarounds; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+%   [tested: sh check.sh host-workarounds; commit=c5bdd73e06840e1d0fd0991523983c75def074f6]
+%   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+%   absent on 10.1.14 built with
+%   tests/checks/host_workarounds/swi-empty-indexed-snapshot.patch;
+%   command=sh check.sh host-workarounds;
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
 % Owns resources: each erasing thread is joined; fixture facts are withdrawn.
 
 :- dynamic snapshot_row/1.
