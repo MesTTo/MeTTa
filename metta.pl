@@ -2476,7 +2476,6 @@ metta_host_function_generation(Generation) :-
 %been [tested: metta_published_surface:every_declared_seam_that_exists_is_exported].
 :- initialization((seam:publish_declared, protect_metta_exec_modules,
                    refuse_autoload_into_exec_modules,
-                   spaces:import_ugraphs_implicit_dependency,
                    load_builtin_type_surface, install_engine_prelude,
                    spaces:metta_publish_builtin_visibility,
                    spaces:metta_publish_every_vocabulary_type,
