@@ -7,6 +7,17 @@
 %   extensions/python/tests/ch15_writing_transactions_and_worlds/test_space_retirement.py,
 %   extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_cleanup_failure_revokes_aliases_attempts_all_and_can_retry;
 %   commit=f9ef614a03bce1a1878d9b43fb7618df57ccfa21].
+% Guarantees: a write and a retirement that raced each other are decided at
+%   the outer commit in the refreshed view: a writer whose allocation another
+%   transaction retired since its snapshot is refused, and a retirement whose
+%   refreshed view still holds occurrences, an allocation, a child or a source
+%   publication committed since its withdrawal is refused, equal-valued
+%   replacements included; the loser rolls back whole [tested:
+%   space_retirement:a_write_loses_to_a_retirement_that_committed_first,
+%   space_retirement:a_retirement_loses_to_a_write_that_committed_first,
+%   owned_records:retirement_and_writes_conflict_in_both_commit_orders,
+%   extensions/python/tests/ch15_writing_transactions_and_worlds/test_commit_validation.py;
+%   commit=WORKTREE].
 % Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Owns resources: native_removal_reference/1 reads a per-thread control context,
@@ -1598,6 +1609,124 @@ metta_space_release_complete(Space, Token, Host) :-
         ->  forall(seam:space_released(Space), true)
         ;   true
         )).
+
+%A retirement and a write that raced it are both validated at the outer
+%commit, in the view SWI's transaction/3 gives its constraint (the global
+%state plus this transaction's changes), beside the owned records. This is
+%optimistic concurrency control validated at commit (Kung and Robinson, ACM
+%TODS 6(2), 1981): a writer's read set is its allocation's cache clause,
+%identified by clause reference so a name re-minted after a committed
+%retirement is a different allocation, and a retirement's write set is the
+%whole space, so any clause another transaction committed into it since the
+%withdrawal is a conflict. Preparation reads this transaction's journal once,
+%before the view changes; validation reads native clauses only.
+:- multifile seam:transaction_constraint/1.
+
+seam:transaction_constraint(spaces:metta_validate_retirements(Prepared)) :-
+    spaces:metta_prepare_retirements(Prepared).
+
+%Fails when the transaction neither wrote into an allocation nor retired
+%one, so an ordinary transaction adds no constraint. An allocation this
+%transaction erased itself is its own retirement and is validated as one.
+metta_prepare_retirements(retirements(Allocations, Retired)) :-
+    transaction_updates(Updates),
+    findall(Action-Ref,
+            ( member(Update, Updates), metta_owned_update(Update, Action, Ref) ),
+            Changes),
+    %The storage module comes from the cache clause this retirement erased,
+    %the way the owned records recover a retired space's identity: the name
+    %mapping needs a parametric registration the retirement has withdrawn.
+    findall(retired(Space, Storage),
+            ( member(added-Ref, Changes), metta_retirement_witness(Ref, Space),
+              (   member(removed-CacheRef, Changes),
+                  metta_owned_cache_reference(CacheRef, Space, Storage)
+              ->  true
+              ;   Storage = none
+              ) ),
+            Retired0),
+    sort(Retired0, Retired),
+    findall(ErasedRef, member(removed-ErasedRef, Changes), ErasedRefs),
+    findall(allocation(Space, Module, Cache),
+            ( member(_-Ref, Changes),
+              metta_written_allocation(Ref, Space, Module, Cache),
+              \+ memberchk(Cache, ErasedRefs) ),
+            Allocations0),
+    sort(Allocations0, Allocations),
+    ( Allocations == [] -> Retired \== [] ; true ).
+
+metta_retirement_witness(Ref, Space) :-
+    catch(clause_property(Ref, predicate(spaces:metta_space_retired/2)), _, fail),
+    clause(metta_space_retired(Space, _), true, Ref).
+
+%The allocation a journal entry wrote into or erased from, and the cache
+%clause naming it in this transaction's own view: the writer found that
+%clause or created it, and either way it is the allocation the write meant.
+metta_written_allocation(Ref, Space, Module, Cache) :-
+    catch(clause_property(Ref, predicate(Module:_/_)), _, fail),
+    clause(native_storage_module_cache(Space, Module), true, Cache).
+
+metta_validate_retirements(retirements(Allocations, Retired)) :-
+    forall(member(allocation(Space, Module, Cache), Allocations),
+           metta_validate_written_allocation(Space, Module, Cache)),
+    forall(member(retired(Space, Storage), Retired),
+           metta_validate_retirement(Space, Storage)).
+
+%A bound-reference clause/3 fails for a clause erased globally whatever the
+%snapshot (the swi-bound-clause-reference-ignores-snapshot note above
+%metta_owned_clause/2), which is what a retirement committed by another
+%transaction did to the clause this writer observed.
+metta_validate_written_allocation(Space, Module, Cache) :-
+    (   clause(native_storage_module_cache(Space, Module), true, Live),
+        Live == Cache
+    ->  true
+    ;   throw(error(metta_retirement_conflict(writer(Space), retired),
+                    context(metta_validate_retirements/1,
+                            'the space this transaction wrote into was retired by another transaction; retry the outer transaction')))
+    ).
+
+metta_validate_retirement(Space, Storage) :-
+    (   metta_retirement_residue(Space, Storage, Problem)
+    ->  throw(error(metta_retirement_conflict(retirement(Space), Problem),
+                    context(metta_validate_retirements/1,
+                            'state committed since this retirement was prepared survives it; retry the outer transaction')))
+    ;   true
+    ).
+
+%What the refreshed view still holds for a retired space was committed by
+%another transaction after the withdrawal: storage clauses, whatever their
+%values, a re-registered allocation, a child reading its equations or
+%inheriting from it, or a source that owns it.
+metta_retirement_residue(_, Storage, occurrences(Count)) :-
+    Storage \== none,
+    findall(Head, metta_dynamic_clause(Storage, Head), Heads),
+    Heads \== [],
+    length(Heads, Count).
+metta_retirement_residue(Space, _, allocation) :-
+    ( native_storage_module_cache(Space, _) ; metta_exec_module_known(Space, _) ),
+    !.
+metta_retirement_residue(Space, _, children(Count)) :-
+    findall(Child, ( space_parent(Child, Space) ; space_equation_home(Child, Space) ), Children),
+    Children \== [],
+    length(Children, Count).
+metta_retirement_residue(Space, _, publications(Count)) :-
+    findall(Home, filereader:source_owns_space(Home, Space), Homes),
+    Homes \== [],
+    length(Homes, Count).
+
+%Body true, as every row reader enumerates: the storage funnel's inert
+%sentinel clause has body fail (native_storage_sentinel/2 in catalog.pl).
+metta_dynamic_clause(Module, Head) :-
+    current_predicate(Module:Name/Arity),
+    functor(Head, Name, Arity),
+    predicate_property(Module:Head, dynamic),
+    \+ predicate_property(Module:Head, imported_from(_)),
+    clause(Module:Head, true).
+
+:- multifile prolog:error_message//1.
+prolog:error_message(metta_retirement_conflict(writer(Space), retired)) -->
+    ['space ~q was retired by another transaction while this one wrote into it'-[Space]].
+prolog:error_message(metta_retirement_conflict(retirement(Space), Problem)) -->
+    ['retiring ~q conflicts with state committed since its withdrawal: ~q'-[Space, Problem]].
 
 metta_forget_exec_module_parent(Space) :-
     (   metta_exec_module_known(Space, Module)
