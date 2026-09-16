@@ -1000,7 +1000,7 @@ kind(pure_operation/1, declaration).
 % run under '$metta_materialization' and must not evaluate MeTTa, call a host,
 % yield, or invoke arbitrary user goals. Preparation may inspect native deltas.
 % [source: engine/metta/space_hooks.pl:metta_native_transaction/3;
-% commit=WORKTREE].
+% commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 :- multifile transaction_constraint/1.
 kind(transaction_constraint/1, declaration).
 

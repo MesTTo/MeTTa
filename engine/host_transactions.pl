@@ -20,10 +20,10 @@
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: one failed reconciliation cannot skip another registered goal;
 %   the cleanup retry retains only failed goals after an ordinary completion
-%   walk [tested: host_transaction_completion; commit=WORKTREE].
+%   walk [tested: host_transaction_completion; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Guarantees: host_transaction_on_exit/2 supplies the original native outcome,
 %   independently of any later reconciliation error [tested:
-%   host_transaction_completion; commit=WORKTREE].
+%   host_transaction_completion; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 
 :- module(host_transactions, [host_transaction_on_exit/1, host_transaction_on_exit/2]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4]).

@@ -1,7 +1,7 @@
 % Purpose: verify captured foreign outcomes and deferred native reconciliation.
 % Assumes: participant capture, completion and the native transaction wrapper
 %   are loaded through engine/metta.pl [source:
-%   engine/metta/space_hooks.pl:metta_run_coordinator/4; commit=WORKTREE].
+%   engine/metta/space_hooks.pl:metta_run_coordinator/4; commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
 % Owns resources: fixture cleanup removes provider/native rows and restores the
 %   observation wrapper. Callback logs are engine-local and survive rollback.
 
