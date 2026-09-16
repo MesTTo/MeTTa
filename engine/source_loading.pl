@@ -40,22 +40,15 @@ load_failure(_, error).
 load_failure(goal_failed(directive, _), warning).
 load_failure(initialization_failure(_, _), warning).
 
-% Workaround: swi-qlf-failed-include-source-module - restore the source module
-% before a failed nested consult returns to the enclosing QLF loader.
-% SWI's $consult_file restores it only on success. With qcompile(auto), a
-% failed include can leave user as the source module; loadPredicate then
-% dereferences a null lookupProcedureToDefine result for a strong import.
-% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-qlf.c#L1423;
-% commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
+% A load that printed a diagnostic is a refusal at the boot boundary, not a
+% warning that scrolled past: every message the load printed is collected and
+% thrown as one error. The host restores the source module after a failed
+% nested consult itself (host ledger, swi-qlf-failed-include-source-module).
 :- meta_predicate loading_loudly(0).
 loading_loudly(Goal) :-
-    '$current_source_module'(Module),
     setup_call_cleanup(
         assertz(watching, Ref),
-        ( setup_call_cleanup(
-              true,
-              ( call(Goal) -> Succeeded = true ; Succeeded = false ),
-              '$set_source_module'(Module)),
+        ( ( call(Goal) -> Succeeded = true ; Succeeded = false ),
           findall(Text, diagnostic(Ref, Text), Diagnostics),
           (   Diagnostics == []
           ->  Succeeded == true

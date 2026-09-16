@@ -1,0 +1,33 @@
+diff --git a/boot/init.pl b/boot/init.pl
+index a275c47..bb897db 100644
+--- a/boot/init.pl
++++ b/boot/init.pl
+@@ -3028,9 +3028,12 @@ load_files(Module:Files, Options) :-
+ '$consult_file'(Absolute, Module, What, LM, Options) :-
+     '$set_source_module'(OldModule, Module),
+     '$ifcompiling'('$qlf_start_sub_module'(Module)),
+-    '$consult_file_2'(Absolute, Module, What, LM, Options),
+-    '$ifcompiling'('$qlf_end_part'),
+-    '$set_source_module'(OldModule).
++    setup_call_cleanup(
++	true,
++	( '$consult_file_2'(Absolute, Module, What, LM, Options),
++	  '$ifcompiling'('$qlf_end_part')
++	),
++	'$set_source_module'(OldModule)).
+ 
+ '$consult_file_2'(Absolute, Module, What, LM, Options) :-
+     '$set_source_module'(OldModule, Module),
+diff --git a/src/pl-qlf.c b/src/pl-qlf.c
+index 3c55cef..8b8cf70 100644
+--- a/src/pl-qlf.c
++++ b/src/pl-qlf.c
+@@ -1429,6 +1429,8 @@ loadPredicate(DECL_LD wic_state *state, int skip)
+   SourceFile csf = NULL;
+ 
+   proc = lookupProcedureToDefine(f, LD->modules.source);
++  if ( !proc )			/* permission error is pending */
++    return false;
+   DEBUG(MSG_QLF_PREDICATE, Sdprintf("Loading %s%s",
+ 				    procedureName(proc),
+ 				    skip ? " (skip)" : ""));

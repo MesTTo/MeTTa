@@ -8,6 +8,11 @@
 #   [tested: sh check.sh host-workarounds; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 # Owns resources: only the supplied scratch tree is written; bounded.sh reaps
 #   children, and core files are disabled for the deliberate crash.
+# [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+#  absent (safe-replay) on 10.1.14 built with
+#  tests/checks/host_workarounds/swi-qlf-failed-include-source-module.patch, three
+#  runs of three; command=sh check.sh host-workarounds;
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}

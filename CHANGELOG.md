@@ -377,6 +377,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   SWI's library index for a shadowed library predicate, since an execution
   module never resolves a name there, and the library-surface gate asserts that
   contract for a deprecated alias instead of a lazy import.
+- A failed nested include no longer corrupts QLF replay: SWI-Prolog, patched,
+  restores the source module after a failed consult and refuses a null
+  procedure in its loader (`swi-qlf-failed-include-source-module`, the sixth
+  patched ledger entry), so the loud loader collects diagnostics without
+  restoring the module itself.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
