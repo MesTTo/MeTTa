@@ -19,7 +19,7 @@
 # [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 #  absent on 10.1.14 built with tests/checks/host_workarounds/swi-qlf-extension-spec.patch;
 #  command=sh check.sh host-workarounds;
-#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=b045ab60c186e14b700fd689c3195b196b7778ec]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}
