@@ -187,6 +187,25 @@ test(a_variable_in_an_owned_key_refuses_before_commit,
     assertion(Result = threw(error(domain_error(ground_owned_record_key, _), _))),
     values(Record, Values), assertion(Values == []).
 
+% A malformed occurrence no commit admitted still has to leave through one:
+% its removal derives no key and contributes no check, while the ground rows
+% the same transaction touches validate as usual.
+test(removing_a_nonground_key_occurrence_commits_as_a_repair,
+     [forall(member(Part, [owner, value])),
+      setup(fixture(entity, value(7), yes, Record)), cleanup(cleanup_record(Record))]) :-
+    Record = record(Home, Owner, _, _, _),
+    ( Part == owner -> Malformed = ['owned-by', ['Entity', _]] ; Malformed = [field, ['Entity', _], 8] ),
+    metta_add_atom(Home, Malformed, true),
+    outcome(metta_transaction(write_value(Record, 9)), Refused),
+    assertion(Refused = threw(error(domain_error(ground_owned_record_key, _), _))),
+    outcome(metta_transaction(( spaces:'remove-atom'(Home, Malformed, true),
+                                ( Part == owner -> metta_add_atom(Home, ['owned-by', Owner], true) ; true ) )),
+            Repaired),
+    assertion(Repaired == committed),
+    values(Record, Values), assertion(Values == [7]),
+    outcome(metta_transaction(write_value(Record, 9)), Written),
+    assertion(Written == committed).
+
 test(new_declaration_checks_original_keys_before_query_unification,
      [forall(member(RowKind, [value, owner])),
       setup(fixture(entity, empty, no, Record)), cleanup(cleanup_record(Record))]) :-

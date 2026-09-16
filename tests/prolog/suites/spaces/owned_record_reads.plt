@@ -3,8 +3,9 @@
 % Owns resources: every fixture releases its native spaces; the snapshot race
 %   joins its worker and removes its temporary predicate wrapper.
 % Guarantees: tests distinguish empty records, stored data, malformed original
-%   keys and concurrent replacement without selecting a surviving row by chance
-%   [source: tests/prolog/suites/spaces/owned_record_reads.plt; commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
+%   keys, the reader's own refusal remedies and concurrent replacement without
+%   selecting a surviving row by chance
+%   [source: tests/prolog/suites/spaces/owned_record_reads.plt; commit=WORKTREE].
 
 :- ensure_loaded('owned_records.plt').
 
@@ -65,6 +66,41 @@ test(retired_owners_are_refused_with_or_without_a_remaining_value,
     plunit_owned_records:outcome(plunit_owned_record_reads:read_record(Key, _), Outcome),
     assertion(plunit_owned_records:conflict(Outcome, retired_owner)).
 
+% A read never asks for a retry: the store is what it is, and the message says
+% what to remove. The commit validator keeps the retry as its own remedy.
+test(read_refusals_name_the_reader_and_the_repair,
+     [forall(member(Part-Problem-Repair,
+                    [value-multiple_values-'remove the surplus value rows',
+                     owner-multiple_owners-'remove the surplus owner rows',
+                     retired-retired_owner-'the native owner has retired'])),
+      setup(fixture(entity, atomic, value(7), Record, Key)), cleanup(cleanup(Record))]) :-
+    Record = record(Home, Owner, _, _, _),
+    (   Part == value
+    ->  plunit_owned_records:add_value(Record, 7)
+    ;   Part == owner
+    ->  metta_add_atom(Home, ['owned-by', Owner], true)
+    ;   metta_remove_atom(Home, ['owned-by', Owner], true)
+    ),
+    plunit_owned_records:outcome(plunit_owned_record_reads:read_record(Key, _), Outcome),
+    assertion(plunit_owned_records:conflict(Outcome, Problem)),
+    Outcome = threw(Error), Error = error(_, Context),
+    assertion(Context == context('owned-record-read'/2, Repair)),
+    message_to_string(Error, Message),
+    assertion(sub_string(Message, _, _, _, Repair)),
+    assertion(\+ sub_string(Message, _, _, _, "retry")).
+
+test(a_nonground_original_key_refusal_names_no_phase,
+     [setup(fixture(entity, atomic, empty, Record, Key)), cleanup(cleanup(Record))]) :-
+    Record = record(Home, _, _, _, _),
+    metta_add_atom(Home, [field, ['Entity', _], 7], true),
+    plunit_owned_records:outcome(plunit_owned_record_reads:read_record(Key, _), Outcome),
+    Outcome = threw(Error), Error = error(Formal, context(Phase, _)),
+    assertion(Formal = domain_error(ground_owned_record_key, _)),
+    assertion(var(Phase)),
+    message_to_string(Error, Message),
+    assertion(sub_string(Message, _, _, _, "must be ground")),
+    assertion(\+ sub_string(Message, _, _, _, "metta_prepare_owned_records")).
+
 test(a_read_observes_its_callers_uncommitted_writes,
      [setup(fixture(cell, atomic, value(1), Record, Key)), cleanup(cleanup(Record))]) :-
     Record = record(_, _, _, Prefix, _), append(Prefix, [2], Row),
@@ -109,12 +145,12 @@ test(a_read_keeps_the_checked_occurrence_after_concurrent_replacement,
         plunit_owned_record_reads:setup_call_cleanup(
             thread_create(snapshot_writer(Record, Ready, Released), Writer, []),
             ( setup_call_cleanup(
-                wrap_predicate(spaces:metta_owned_checked_key(_, _, _, _), owned_read_snapshot, Wrapped,
+                wrap_predicate(spaces:metta_owned_key_problem(_, _, _, _, _), owned_read_snapshot, Wrapped,
                     ( call(Wrapped), thread_send_message(Ready, read_checked),
                       thread_get_message(Released, written(Outcome)),
                       assertion(Outcome == committed) )),
                 read_record(Key, Rows),
-                unwrap_predicate(spaces:metta_owned_checked_key(_, _, _, _), owned_read_snapshot)),
+                unwrap_predicate(spaces:metta_owned_key_problem(_, _, _, _, _), owned_read_snapshot)),
               assertion(Rows == [Before]), read_record(Key, Current), assertion(Current == [After]),
               Finished = true ),
             plunit_owned_records:worker_cleanup(Finished, Writer))).

@@ -3269,12 +3269,17 @@ Declaration additions and replacements validate their newly covered records,
 including records committed after the transaction began. These checks govern
 outer engine transactions. Arbitrary unwrapped native writes remain explicit
 graph edits; they do not acquire an implicit transaction through this seam.
+Removing an occurrence whose key is not ground derives no key and contributes
+no check, so a transaction can repair a store that no commit admitted.
 
 `(owned-record-read (@owned-record Home Owner Storage Prefix))` reads a ground
 record key. It returns one expression containing zero or one complete value
 rows, so a stored `Error` stays inside its row. An empty live record returns
 `()`. A retired owner, duplicate value or owner occurrences, an original
-nonground key, or unresolved or foreign storage is refused. The key is held as
+nonground key, or unresolved or foreign storage is refused, and the refusal
+names the reader and the repair: the surplus rows to remove, the retired
+owner, the key that must be ground. Only the commit validator asks for a
+retry. The key is held as
 data; expressions inside it are not evaluated. The supplied key need not itself
 be a stored declaration, so the same native check is available during allocation
 and after an explicit declaration withdrawal.

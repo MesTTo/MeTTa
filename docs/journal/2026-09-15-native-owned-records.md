@@ -149,3 +149,26 @@ the sentinel head is built.
 Tried: the two refinement cases -> pass; `sh engine/test.sh suites/spaces/length_refinements.plt
 suites/evaluation/prelude.plt suites/spaces/hooks.plt suites/typecheck/refinements.plt` -> 8 + 2,
 62 + 11, 45 + 11 and 21 + 2 pass (`ai-tmp/ai-owned-record-remedy-native-extra.log`).
+
+## 2026-09-16: read refusals name the reader and the repair
+
+Tried: the class getter on a record with a second value -> `metta_validate_owned_records/1: native
+owned-record conflict multiple_values ...; retry the outer transaction`. No commit ran: the shared
+collector threw with the validator's context and the renderer carried the retry, so a read of a
+malformed store told the caller to retry a transaction that did not exist.
+Decided: `metta_owned_key_problem/5` answers the problem and never throws; the validator throws
+with `metta_validate_owned_records/1` and `retry the outer transaction`, the reader with
+`'owned-record-read'/2` and the repair (`remove the surplus value rows`, `remove the surplus owner
+rows`, `the native owner has retired`); the renderer carries no remedy, the context does, and
+`metta_owned_ground/1` names no phase since preparation, validation and the reader all reach it.
+Decided: removing an occurrence whose key is not ground derives no key and contributes no check
+(`metta_owned_change_admits/2`), because a transaction had no way to repair a store no commit
+admitted: the removal itself was refused with `ground_owned_record_key`. Adding one still refuses.
+Measured: a plain `Space.add` outside a transaction runs no commit check and a duplicate value
+lands; `home.transaction(lambda: storage.add(...))` refuses `multiple_values`, a duplicate owner
+`multiple_owners`, and `del storage[pattern]` drains every occurrence
+(`ai-tmp/ai-owned-record-unwrapped-probe.py`).
+Tried: `sh engine/test.sh suites/spaces/owned_records.plt suites/spaces/owned_record_reads.plt`
+-> 29 + 75 and 42 + 91 pass (`ai-tmp/ai-owned-record-remedy-native2.log`); the twin re-pins 6051
+to 6058 and the native side moves 9285 to 9292, the problem-term answer and the per-change
+admission check (`ai-tmp/ai-owned-record-remedy-twin-repin.log`).
