@@ -17,7 +17,7 @@
 %       planted_library_shadow_is_named; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 %     - an execution module resolves no name against SWI's library index, so a
 %       deprecated library alias stays undefined in a space
-%       [tested: library_lazy_import_differential; commit=WORKTREE]
+%       [tested: library_lazy_import_differential; commit=25206c8416042991709423d6d4c2d51bc324ac93]
 % Owns resources: each meaning arm releases its scratch space and restores
 %     prelude translator registrations, including on failure.
 % Fails when:
