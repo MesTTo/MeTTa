@@ -9,7 +9,7 @@
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=9d54ed2129cea9859779419d6120636486eb6585].
 
 :- dynamic ready/1, loaded/1.
 :- multifile user:exception/3.
