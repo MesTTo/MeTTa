@@ -427,6 +427,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   file is gone (`swi-file-search-cache-sweep`), so a library load after the
   cache's timeout costs what a warm one costs; the twin-coverage harness keeps
   its cache-lifetime setting as protocol rather than as a repair.
+- Janus imports its library dependencies when it loads on the patched host
+  (`swi-file-search-cache-autoload`), so the first failed text query pays no
+  autoload walk and the binding's shim no longer imports `maplist/2` into
+  janus on its behalf.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

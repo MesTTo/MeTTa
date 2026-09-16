@@ -366,8 +366,9 @@ Lifted when: SWI-Prolog as shipped delivers `frame_finished` for a discarded
 Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-09-the-binding-collapse.md,
   transfer bound watches before native query destruction.
 ## swi-file-search-cache-autoload
-Host: Janus 1.5.3 on SWI-Prolog 10.1.13; janus.pl's `py_call/4` failed-query
-  branch resolves its declared `maplist/2` autoload on first use.
+Host: janus-swi 1.5.3, the same janus.pl in swipl-devel V10.1.14's
+  packages/swipy, on SWI-Prolog 10.1.13 and 10.1.14 as shipped; the venv's
+  janus wheel is built from that tree with the patch below.
 Defect: the first failed text query walks the file search path when the
   dependency's cached path has expired. The same query therefore pays a
   different inference cost according to earlier wall-clock state, despite
@@ -380,11 +381,14 @@ Reproduction: tests/checks/host_workarounds/swi-file-search-cache-autoload.sh,
   disabled at zero; explicitly importing `maplist/2` gives 8 in both arms.
   The native count surrounds the query, and each child restores the default
   flag value 10. This is the zero-setting uncached-walk control.
-Workaround: import Janus's `maplist/2` dependency once at binding boot. Do
-  not put the import on a query path or preload optional library helpers.
-Lifted when: Janus resolves this dependency before its first failed text
-  query, or SWI's autoload resolution no longer gives that query a cache-state
-  dependent inference cost. Equal warm and uncached costs answer `absent`.
+Patch: tests/checks/host_workarounds/swi-file-search-cache-autoload.patch, against
+  swipl-devel V10.1.14 packages/swipy janus/janus.pl: the library imports its
+  lists, apply, error, dicts and option dependencies when it loads instead of
+  declaring them for lazy autoloading, so the failed-query branch of
+  `py_call/4` resolves nothing at its first use. The reproduction answers
+  absent.
+Lifted when: janus.pl as shipped imports its failure-path dependencies eagerly; the
+  reproduction then answers absent and the patch and the entry go together.
 Record: docs/journal/2026-09-09-the-binding-collapse.md, first-use dependency
   attribution and deterministic 226/229 controls. The separate file-search
   cache maintenance sweep belongs to its own host-workaround entry.

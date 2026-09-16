@@ -6,6 +6,10 @@
 #   command=sh check.sh host-workarounds; fixture=Janus 1.5.3, SWI 10.1.13;
 #   commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 # Owns resources: each fresh Python child is joined; no engine source is loaded.
+# [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+#  absent on 10.1.14 built with tests/checks/host_workarounds/swi-file-search-cache-autoload.patch;
+#  command=sh check.sh host-workarounds;
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
 set -eu
 exec "${CHECK_PY:-python3}" - <<'PY'
 import json

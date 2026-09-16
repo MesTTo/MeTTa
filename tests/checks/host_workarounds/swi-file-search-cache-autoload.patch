@@ -1,0 +1,27 @@
+diff --git a/janus/janus.pl b/janus/janus.pl
+index 0cc38fd..b347a5b 100644
+--- a/janus/janus.pl
++++ b/janus/janus.pl
+@@ -86,12 +86,16 @@
+ :- meta_predicate py_with_gil(0).
+ 
+ :- use_module(library(apply_macros), []).
+-:- autoload(library(lists), [append/3, member/2, append/2, last/2]).
+-:- autoload(library(apply),
+-            [maplist/2, exclude/3, maplist/3, convlist/3, partition/4]).
+-:- autoload(library(error), [must_be/2, domain_error/2]).
+-:- autoload(library(dicts), [dict_keys/2]).
+-:- autoload(library(option), [dict_options/2, select_option/4, option/2]).
++% Imported rather than autoloaded: the failed-query branch of py_call/4
++% reaches maplist/2 first, and resolving it lazily walked the file search
++% path at a cost that depended on the search cache's age, so one query
++% cost a different number of inferences by the clock.
++:- use_module(library(lists), [append/3, member/2, append/2, last/2]).
++:- use_module(library(apply),
++              [maplist/2, exclude/3, maplist/3, convlist/3, partition/4]).
++:- use_module(library(error), [must_be/2, domain_error/2]).
++:- use_module(library(dicts), [dict_keys/2]).
++:- use_module(library(option), [dict_options/2, select_option/4, option/2]).
+ :- autoload(library(prolog_code), [comma_list/2]).
+ :- autoload(library(readutil), [read_line_to_string/2, read_file_to_string/3]).
+ :- autoload(library(wfs), [call_delays/2, delays_residual_program/2]).
