@@ -6,7 +6,7 @@
 %   [tested: space_retirement,
 %   extensions/python/tests/ch15_writing_transactions_and_worlds/test_space_retirement.py,
 %   extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_cleanup_failure_revokes_aliases_attempts_all_and_can_retry;
-%   commit=WORKTREE].
+%   commit=f9ef614a03bce1a1878d9b43fb7618df57ccfa21].
 % Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Owns resources: native_removal_reference/1 reads a per-thread control context,
