@@ -1,0 +1,60 @@
+diff --git a/library/prolog_wrap.pl b/library/prolog_wrap.pl
+index f9d7a98..669c5f8 100644
+--- a/library/prolog_wrap.pl
++++ b/library/prolog_wrap.pl
+@@ -125,30 +125,46 @@ current_predicate_wrapper(M:Head, Name, Wrapped, Body) :-
+     member(Name-CRef, Pairs),
+     clause(M:WHead, Body0, CRef),
+     WHead =.. [_|Args],
+-    body_closure(Body0, Wrapped, Body).
++    wrapped_closure_predicate(M:Head, PI),
++    body_closure(Body0, PI, Wrapped, Body).
+ 
+-body_closure(call(ClosureTerm), Wrapped, Wrapped) :-
++%!  wrapped_closure_predicate(:Head, -PI) is det.
++%
++%   The wrapped predicate as its closures name it: the implementation
++%   module and Name/Arity.  Only a closure over this predicate is the
++%   wrapper's hole; a wrapper body may hold closures over other
++%   predicates, which keep their identity on the round trip.
++
++wrapped_closure_predicate(M:Head, IM:Name/Arity) :-
++    functor(Head, Name, Arity),
++    (   predicate_property(M:Head, implementation_module(IM))
++    ->  true
++    ;   IM = M
++    ).
++
++body_closure(call(ClosureTerm), PI, Wrapped, Wrapped) :-
+     callable(ClosureTerm),
+     functor(ClosureTerm, Closure, _Arity),
+     blob(Closure, closure),
++    '$closure_predicate'(Closure, PI),
+     !.
+-body_closure(Body0, Wrapped, Body) :-
++body_closure(Body0, PI, Wrapped, Body) :-
+     compound(Body0),
+     !,
+     compound_name_arity(Body0, Name, Arity),
+     compound_name_arity(Body,  Name, Arity),
+-    body_closure_args(0, Arity, Body0, Wrapped, Body).
+-body_closure(Body, _, Body).
++    body_closure_args(0, Arity, Body0, PI, Wrapped, Body).
++body_closure(Body, _, _, Body).
+ 
+-body_closure_args(I, Arity, Body0, Closure, Body) :-
++body_closure_args(I, Arity, Body0, PI, Closure, Body) :-
+     I < Arity,
+     !,
+     I2 is I+1,
+     arg(I2, Body0, Arg0),
+     arg(I2, Body, Arg),
+-    body_closure(Arg0, Closure, Arg),
+-    body_closure_args(I2, Arity, Body0, Closure, Body).
+-body_closure_args(_, _, _, _, _).
++    body_closure(Arg0, PI, Closure, Arg),
++    body_closure_args(I2, Arity, Body0, PI, Closure, Body).
++body_closure_args(_, _, _, _, _, _).
+ 
+ 
+ %   Not for public docs!

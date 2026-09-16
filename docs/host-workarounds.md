@@ -245,17 +245,23 @@ Lifted when: ugraphs.pl as shipped declares `append/2`; the reproduction then an
 Record: docs/journal/2026-09-16-exec-modules-never-autoload.md.
 
 ## swi-wrapper-roundtrip-merges-closures
-Host: SWI-Prolog 10.1.13; `library/prolog_wrap.pl:body_closure/3` at
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, this tree running on 10.1.14 built with the patch below;; `library/prolog_wrap.pl:body_closure/3` at
   fc7ef84b949378b729052c3ade79c90ce5416abb.
 Defect: `current_predicate_wrapper/4` replaces every native closure in a
   wrapper body with the same variable. Reinstalling its documented round-trip
   result makes other retained definitions call the wrapper's own definition.
 Reproduction: tests/checks/host_workarounds/swi-wrapper-roundtrip-merges-closures.pl,
   an own/other union becomes own/own after the public round trip.
-Workaround: read the wrapper's clause reference through `'$wrapped_predicate'/2`
-  and copy its native body before reinstalling it to recover the original.
-Lifted when: the public round trip preserves distinct closure identities and
-  the reproduction prints absent.
+Patch: tests/checks/host_workarounds/swi-wrapper-roundtrip-merges-closures.patch,
+  against swipl-devel V10.1.14 library/prolog_wrap.pl: `body_closure//`
+  replaces only a closure over the wrapped predicate itself, identified
+  through `'$closure_predicate'/2` against the predicate's implementation
+  module and name/arity, so closures over other predicates keep their
+  identity on the round trip. The reproduction answers absent and SWI's
+  library group passes.
+Lifted when: the public round trip as shipped preserves distinct closure identities
+  and the reproduction prints absent; the patch and the entry go together
+  then.
 Record: docs/journal/2026-09-11-classes-on-metta.md, binding ownership spans the
   native transition and its closure reconstruction follow-up.
 

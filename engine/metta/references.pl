@@ -477,15 +477,12 @@ metta_reference_argument_guards([Input|Inputs], [Value|Values], Rest,
     metta_reference_argument_guards(Inputs, Values, Rest, Goal).
 
 % Reinstalling the unchanged native body returns its original definition,
-% including when the body never called that definition.
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_wrap.pl#L113-L145
+% including when the body never called that definition; the public round
+% trip keeps every other retained closure's identity (host ledger,
+% swi-wrapper-roundtrip-merges-closures).
 metta_reference_own_closure(Module, Head, Closure) :-
-    % Workaround: swi-wrapper-roundtrip-merges-closures - copy the native clause body without conflating its original with other retained closures.
-    (   '$wrapped_predicate'(Module:Head, Wrappers),
-        memberchk(metta_reference_union-Ref, Wrappers)
-    ->  clause(Module:WrappedHead, Body, Ref),
-        Head =.. [_|Args], WrappedHead =.. [_|Args],
-        wrap_predicate(Module:Head, metta_reference_union, Closure, Body)
+    (   current_predicate_wrapper(Module:Head, metta_reference_union, Closure, Body)
+    ->  wrap_predicate(Module:Head, metta_reference_union, Closure, Body)
     ;   % The capture wrapper exists only to hand out the closure: Setup
         % installs it and the cleanup removes it again.
         setup_call_cleanup(

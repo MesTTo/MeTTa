@@ -2,7 +2,11 @@
 % Guarantees: the last line is present when current_predicate_wrapper/4 loses
 %   the second closure's identity, absent when its documented round trip holds
 %   [tested: sh check.sh host-workarounds;
-%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1]
+%   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+%   absent on 10.1.14 built with tests/checks/host_workarounds/swi-wrapper-roundtrip-merges-closures.patch;
+%   command=sh check.sh host-workarounds;
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
 % Owns resources: fixture predicates and wrappers die with the probe process.
 
 :- use_module(library(prolog_wrap)).

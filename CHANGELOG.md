@@ -411,6 +411,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `library(ugraphs)` declares `append/2` on the patched host
   (`swi-ugraphs-implicit-append`), so the engine's boot import of it into
   that library is gone.
+- `current_predicate_wrapper/4` keeps every other retained closure's identity
+  on the patched host (`swi-wrapper-roundtrip-merges-closures`), so the
+  reference union reinstalls through the public round trip instead of copying
+  the clause body itself.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
