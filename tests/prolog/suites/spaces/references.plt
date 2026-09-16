@@ -373,8 +373,10 @@ test(the_bulk_data_loop_executes_from_and_internal_rows,
 
 test(visibility_is_a_checked_two_element_lattice,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-
-    metta_catalog_row([algebra, visibility, max, min, 'INTERNAL', 'PUBLIC',
-                       Laws, Carrier, Requires, global]),
+    % The catalog enumerates its rows; one lookup must find exactly this row.
+    findall(Rest, metta_catalog_row([algebra, visibility|Rest]), Rows),
+    assertion(Rows = [[max, min, 'INTERNAL', 'PUBLIC', _, _, _, global]]),
+    Rows = [[max, min, 'INTERNAL', 'PUBLIC', Laws, Carrier, Requires, global]],
     assertion(Carrier == [carrier,'INTERNAL','PUBLIC']),
     Row = [algebra, visibility, max, min, 'INTERNAL', 'PUBLIC', Laws, Carrier, Requires, global],
     spaces:metta_check_algebra_fields(visibility, max, min, 'INTERNAL', 'PUBLIC',
