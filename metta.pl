@@ -1735,6 +1735,12 @@ metta_engine_reexport(spaces, metta_module_space/2).
 metta_engine_reexport(spaces, metta_ordered_match_limit/6).
 metta_engine_reexport(spaces, metta_release_space/1).
 metta_engine_reexport(spaces, metta_release_space/2).
+% The owned-record host services declared in engine/ext_points.pl: a host reads
+% them through query strings, so a declared service is published whether or not
+% a Prolog clause reaches it [tested: engine_modules:every_declared_service_is_exported_to_the_host].
+metta_engine_reexport(spaces, metta_native_pair/4).
+metta_engine_reexport(spaces, metta_owned_clause/2).
+metta_engine_reexport(spaces, metta_owned_record_occurrences/3).
 metta_engine_reexport(spaces, metta_remove_atom/3).
 metta_engine_reexport(spaces, metta_require_algebra_value/3).
 metta_engine_reexport(spaces, metta_require_foreign_capability/2).
