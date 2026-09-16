@@ -358,8 +358,7 @@ must_be_support_node(Node) :-
 support_atomic(Goal) :-
     (   support_graph_locked
     ->  call(Goal)
-    ;   % Workaround: swi-cleanup-window - the lock marker unwinds on the trail.
-        with_mutex('$metta_support_graph',
+    ;   with_mutex('$metta_support_graph',
                    metta_with_trailed_enumeration('$metta_support_graph_locked', true,
                                                  support_transaction(Goal)))
     ).
@@ -373,8 +372,7 @@ support_transaction(Goal) :-
 with_support_repairs_deferred(Goal) :-
     (   support_repairs_deferred
     ->  call(Goal)
-    ;   % Workaround: swi-cleanup-window - abandoned deferral restores its marker.
-        metta_with_trailed_enumeration('$metta_support_repairs_deferred', true, Goal)
+    ;   metta_with_trailed_enumeration('$metta_support_repairs_deferred', true, Goal)
     ).
 
 % Replace the complete incoming support set of one derived artifact.

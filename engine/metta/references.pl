@@ -334,9 +334,7 @@ metta_reference_unsettled(Home, Name) :-
 metta_reference_force(Name) :-
     (   metta_reference_forcing(Name)
     ->  true
-    ;   ( nb_current('$metta_reference_forcing', Before) -> true ; Before = [] ),
-        % Workaround: swi-cleanup-window - a suspended force owns a trailed stack entry.
-        metta_with_trailed_enumeration('$metta_reference_forcing', [Name|Before],
+    ;   metta_with_trailed_push('$metta_reference_forcing', Name,
             forall(( metta_reference_roots(_, Name, _, Roots),
                      member(root(Home, Original, _, _), Roots) ),
                    ( metta_reference_wait(Home),

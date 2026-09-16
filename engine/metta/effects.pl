@@ -2424,30 +2424,12 @@ metta_with_under(Algebra, Goal) :-
     metta_with_evaluation_context(
         evaluation_context(Algebra, Limit, Direction), Goal).
 
+% The snapshot keeps the caller's later bindings out of the scoped root, as a
+% copying write would; the push shares the stack below it with the enclosing
+% evaluations and the cleanup pops it.
 metta_with_evaluation_context(Context, Goal) :-
-    setup_call_cleanup(
-        metta_evaluation_context_push(Context, Previous),
-        Goal,
-        metta_evaluation_context_pop(Previous)).
-
-% Workaround: swi-cleanup-window - trail the context push and let cleanup propagate inference-limit exceptions.
-metta_evaluation_context_push(Context, Previous) :-
-    (   nb_current('$metta_evaluation_contexts', Old)
-    ->  Previous = some(Old)
-    ;   Old = [], Previous = none
-    ),
-    % A limit can interrupt setup_call_cleanup before registration or during
-    % cleanup. Trail the scope, as metta_open_fuel_scope/0 does, so exception
-    % unwinding restores it independently. Keep nb_setval's input snapshot.
-    % SWI 10.1.13: boot/init.pl:setup_call_cleanup/3 and src/pl-gvar.c:setval
-    % at fc7ef84b949378b729052c3ade79c90ce5416abb.
     duplicate_term(Context, Snapshot),
-    b_setval('$metta_evaluation_contexts', [Snapshot|Old]).
-
-metta_evaluation_context_pop(some(Previous)) :- !,
-    nb_setval('$metta_evaluation_contexts', Previous).
-metta_evaluation_context_pop(none) :-
-    nb_delete('$metta_evaluation_contexts').
+    metta_with_trailed_push('$metta_evaluation_contexts', Snapshot, Goal).
 
 metta_evaluation_context(Context) :-
     nb_current('$metta_evaluation_contexts', [Context|_]).

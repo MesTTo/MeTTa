@@ -345,6 +345,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   cleanup owed; the patched 10.1.14 defers the limit past the region the way
   it defers a signal, and the 19 sites that keep scoped state as trailed
   writes stay marked until each is lifted.
+- Scoped roots derive from two doors: `metta_with_trailed_enumeration/3` keeps a
+  value for a goal's enumeration and the new `metta_with_trailed_push/3` pushes
+  one item onto a stack-shaped root for the same span; the reference finishing,
+  forcing and source-mapping stacks, the evaluation context and lib_memo's
+  reconciliation marker derive from them instead of carrying their own writes.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

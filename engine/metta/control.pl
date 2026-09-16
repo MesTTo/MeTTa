@@ -9,9 +9,11 @@
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
 %   commit=2d09b82e3ea1565d10fd8206e3b3cc9808ce6cb1].
 % Guarantees: metta_with_trailed/3 restores context at each answer;
-%   metta_with_trailed_enumeration/3 retains it until enumeration finishes.
-%   Both preserve linked payloads and unwind on inference cuts
-%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+%   metta_with_trailed_enumeration/3 retains it until enumeration finishes and
+%   metta_with_trailed_push/3 pushes one item onto a stack-shaped root for the
+%   same span. All three preserve linked payloads and retire under every
+%   inference cut [tested: tests/prolog/suites/evaluation/reference_scopes.plt;
+%   commit=WORKTREE].
 % Owns resources: scoped roots belong to their engine's trail. An unset key
 %   and [] mean inactive; a goal may mutate its payload but must not replace
 %   the scoped root with nb_setval/2, nb_linkval/2 or nb_delete/1.
@@ -785,8 +787,12 @@ metta_host_with_stack_limit(StackBytes, Goal) :-
                        Goal,
                        pop_prolog_flag(stack_limit)).
 
-% Workaround: swi-cleanup-window - the trail restores scoped roots after an abandoned call.
-% An answer restores the previous value; redo reinstates the inner value.
+% The value stands during each answer of Goal and the caller sees the previous
+% one between answers: the exit write restores it and backtracking into Goal
+% undoes that write, so a redo runs under the inner value again. Failure and
+% an exception unwind the trail past the entry write. Both writes are
+% b_setval/2, which stores the term itself, so a caller holding the value sees
+% the destructive updates a reader makes through the key.
 :- meta_predicate metta_with_trailed(+, ?, 0).
 metta_with_trailed(Key, Value, Goal) :-
     ( nb_current(Key, Previous) -> true ; Previous = [] ),
@@ -794,15 +800,27 @@ metta_with_trailed(Key, Value, Goal) :-
     call(Goal),
     b_setval(Key, Previous).
 
-% Workaround: swi-cleanup-window - register cleanup before the trailed entry write.
-% A generator keeps its context between answers. Completion, cut, failure or
-% exception restores the previous root once, matching setup_call_cleanup/3.
+% A generator keeps its context between answers: the write opens Goal and the
+% cleanup restores the previous root once Goal is finished, on completion, cut,
+% failure or exception. The shape is call_cleanup/2's, a `true` Setup with the
+% write as Goal's first step, because SWI-Prolog runs sig_atomic(true) without
+% a nested call and a Setup that writes costs one inference more on every use
+% [measured 2026-09-17: 9 against 10 inferences per deterministic use, 11
+% either way for a generator; command=swipl -g main ai_probe_scope_cost2.pl].
+% Nothing rests on the order any more: the host owes the cleanup under an
+% inference limit too (host ledger, swi-cleanup-window), and a trailed write
+% that never reached its cleanup is undone by the unwinding itself.
 :- meta_predicate metta_with_trailed_enumeration(+, ?, 0).
 metta_with_trailed_enumeration(Key, Value, Goal) :-
     ( nb_current(Key, Previous) -> true ; Previous = [] ),
-    setup_call_cleanup(true,
-                       ( b_setval(Key, Value), Goal ),
-                       b_setval(Key, Previous)).
+    setup_call_cleanup(true, ( b_setval(Key, Value), Goal ), b_setval(Key, Previous)).
+
+% A stack-shaped root: Item is pushed for Goal's enumeration and the stack
+% below it is what the cleanup restores. An unset key is the empty stack.
+:- meta_predicate metta_with_trailed_push(+, ?, 0).
+metta_with_trailed_push(Key, Item, Goal) :-
+    ( nb_current(Key, Stack) -> true ; Stack = [] ),
+    setup_call_cleanup(true, ( b_setval(Key, [Item|Stack]), Goal ), b_setval(Key, Stack)).
 
 %Every runnable uses one limit scope. Recursive clauses spend from its
 %backtrackable balance, so trying a sibling restores the balance it started

@@ -77,10 +77,8 @@ metta_reference_source_pending(Space, Origin, Policy, Term, Rewritten) :-
 metta_reference_source_current(Space, Map) :-
     ( metta_reference_source_mapping(Space)
     -> throw(error(metta_source_mapping_cycle(Space), none))
-    ; ( nb_current('$metta_reference_source_mapping', Before) -> true ; Before = [] ),
-      % Workaround: swi-cleanup-window - a suspended source-map read owns a trailed stack entry.
-      metta_with_trailed_enumeration('$metta_reference_source_mapping', [Space|Before],
-                                   metta_reference_source_current_face(Space, Map)) ).
+    ; metta_with_trailed_push('$metta_reference_source_mapping', Space,
+                              metta_reference_source_current_face(Space, Map)) ).
 
 metta_reference_source_current_face(Space, Map) :-
     flag('$metta_reference_epoch', Version, Version),
