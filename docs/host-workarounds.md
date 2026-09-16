@@ -396,51 +396,49 @@ Record: docs/journal/2026-09-09-the-binding-collapse.md, first-use dependency
   attribution and deterministic 226/229 controls. The separate file-search
   cache maintenance sweep belongs to its own host-workaround entry.
 ## swi-gc-in-frame-finished-listener-clears-a-live-slot
-Host: SWI-Prolog 10.1.13, commit fc7ef84b949378b729052c3ade79c90ce5416abb;
-  src/pl-wam.c:884-899, src/pl-vmi.c:1243-1263 and 2160-2207,
-  src/pl-gc.c:1886-1918, 2113-2117 and 3584-3694.
-Defect: debug mode exposes B_UNIFY_FV as a temporary unification frame.
-  prolog_frame_attribute/3 marks a frame for frame_finished notifications
-  (src/pl-trace.c:2503). The observer references it at the call port through
-  prolog_frame_attribute(Frame,pc,PC). On deterministic exit the parent has
-  resumed in SWI's saved registers before frameFinished calls the listeners.
-  Collection there rewinds the parent's saved PC to the completed B_UNIFY_FV,
-  then clears its first-write slot as uninitialised. The arithmetic goals in
-  translator:translate_clause_impl/4's slot 27 disappear at saved PC 209,
-  rewound to instruction 206. Debug mode with an unreferenced frame does not
-  notify the listener and preserves the value.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, this tree running on 10.1.14
+  built with the patch below; src/pl-gc.c setStartOfVMI() and
+  clearUninitialisedVarsFrame(), src/pl-vmi.c B_UNIFY_FF, B_UNIFY_FV,
+  B_UNIFY_FC, B_ARG_CF, A_ADD_FC and exit_continue, src/pl-wam.c
+  frameFinished(), at V10.1.14.
+Defect: the collector reads a saved PC at the end of an instruction as that
+  instruction in progress and starts its walk there, so the instruction's
+  first-var operand counts as unwritten and is cleared. That is right for an
+  instruction that requested stack space after reading its operands. It is
+  wrong after a call from inside the instruction returns to the same PC:
+  under the debugger, B_UNIFY_FF, B_UNIFY_FV, B_UNIFY_VF and B_UNIFY_FC call
+  =/2, B_ARG_CF and B_ARG_VF call arg/3 and A_ADD_FC calls is/2, each after
+  writing its first var, and the deterministic exit of that callee resumes
+  the caller in the VM registers before frameFinished() runs the
+  frame_finished listeners (exit_continue). prolog_frame_attribute/3 marks
+  the callee's frame for those notifications when the debugger references
+  it at the call port. Collection in the listener then clears the completed
+  slot: the arithmetic goals in translator:translate_clause_impl/4's slot 27
+  disappeared at saved PC 209, and every sample of the reproduction answers
+  a fresh variable.
 Reproduction: tests/checks/host_workarounds/swi-gc-in-frame-finished-listener-clears-a-live-slot.pl,
-  Plain SWI, a frame_finished listener that calls garbage_collect/0, and
-  sample([arithmetic],Output). The unreferenced debug control prints absent;
-  the referenced run's last line is present iff Output == [], absent
-  otherwise. Both verdicts exit 0.
-Workaround: the process-wide trace hook first tests the captured starting
-  thread's identity, then disables its gc flag at every exit port before
-  frame inspection or observer work. Every non-exit port, including call,
-  redo, fail, unify, exception and cut ports, restores the captured original
-  value. Consecutive exits retain the deferral; observation teardown restores
-  the original value even after a hook throws or execution is cancelled.
-  The gc flag gates implicit collection and explicit garbage_collect/0
-  (src/pl-gc.c:3827, 4418 and 4561-4577); this does not merely intercept
-  explicit calls. Stacks can still grow while collection is deferred.
-  The window starts at the exit hook's first call port and extends through
-  its own work and the finished listeners until the next port. Its excess is
-  the parent's straight-line VM instructions after the listeners return:
-  collection there requires an instruction's own space check, which restarts
-  that instruction, or the next port, so deferring it to that port loses no
-  collection opportunity. A collection already requested before the exit
-  hook can still run at its first call port, before the identity test and
-  flag write alike; only a host fix removes that residual boundary. The guard
-  adds no exposure there. Observation covers only the starting thread. Its
-  hooks inspect frames and update maps and never create threads; source code
-  reaches a restoring call port before thread creation. Other threads' flags
-  are never written by this hook.
-Lifted when: the reproduction prints absent because collection after a
-  referenced inline unification no longer reinterprets its completed
-  first-write instruction as pending. Fixing the saved-PC or live-slot
-  treatment also removes the pre-hook residual boundary; a timing change is
-  not evidence that the host condition has been repaired.
-Record: docs/journal/2026-09-10-the-observed-equation-loses-its-arithmetic.md.
+  plain SWI, a frame_finished listener that calls garbage_collect/0, a trace
+  hook that references every call-port frame, and one sample per
+  instruction. The unreferenced control must keep every value; `present`
+  iff a referenced sample answers something other than its expected value.
+Patch: tests/checks/host_workarounds/swi-gc-in-frame-finished-listener-clears-a-live-slot.patch,
+  against swipl-devel V10.1.14 src/pl-gc.c and src/pl-vmi.c: a saved PC
+  exactly at the end of one of those seven instructions is a return address,
+  so setStartOfVMI() starts the walk after it, as the walk of a parent frame
+  starts at its return address. The rule holds because none of the seven
+  requests space once its operands are read with the first var unwritten:
+  B_UNIFY_FC reserves its cell before reading its operands as B_UNIFY_FV and
+  B_UNIFY_FF do, and A_ADD_FC reserves the debugger's cells before its
+  operands and makes its result slot a variable before the two inline
+  requests that need one. The reproduction answers absent for all seven
+  samples and SWI's basic, core, db, attvar, debug, GC, compile, tabling,
+  transaction and engines groups pass.
+Lifted when: the collector as shipped starts after a completed first-var
+  instruction whose call returned to its end; the reproduction then answers
+  absent and the patch and the entry go together.
+Record: docs/journal/2026-09-10-the-observed-equation-loses-its-arithmetic.md
+  and docs/journal/2026-09-17-host-patches.md.
+
 ## swi-file-search-cache-sweep
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; boot/init.pl's file-search
   cache. This tree runs on 10.1.14 built with the patch below.

@@ -1,0 +1,130 @@
+diff --git a/src/pl-gc.c b/src/pl-gc.c
+--- a/src/pl-gc.c
++++ b/src/pl-gc.c
+@@ -3594,6 +3594,36 @@
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
+ 
++/* A saved PC at the end of an instruction normally means the instruction
++   is in progress: it requested stack space after reading its operands and
++   resumes with them, so the walk starts at the instruction and treats its
++   first-var operand as unwritten.  The instructions below write their
++   first-var operand and then call a predicate that returns to that same
++   PC (=/2, arg/3 and is/2 under the debugger, arg/3 when the inline arg
++   cannot answer), and they request space only before reading their
++   operands or with that operand holding a variable, so a saved PC at
++   their end is the return address of a completed instruction: the walk
++   starts after it, as it does for a parent frame's return address.
++   Starting at the instruction cleared the completed first-var slot when
++   a frame_finished listener collected at the exit of the debugger's
++   frame for =/2. */
++
++static bool
++returns_to_end_of_vmi(code op)
++{ switch(op)
++  { case B_UNIFY_FF:
++    case B_UNIFY_FV:
++    case B_UNIFY_VF:
++    case B_UNIFY_FC:
++    case B_ARG_CF:
++    case B_ARG_VF:
++    case A_ADD_FC:
++      return true;
++    default:
++      return false;
++  }
++}
++
+ static void
+ setStartOfVMI(vm_state *state)
+ { LocalFrame fr = state->frame;
+@@ -3609,10 +3639,13 @@
+     ep = PC + clause->code_size;
+ 
+     for( ; PC < ep; PC = next )
+-    { code op;
++    { code op = fetchop(PC);
+ 
+       next = stepPC(PC);
+ 
++      if ( next == state->pc && returns_to_end_of_vmi(op) )
++	continue;
++
+       if ( next >= state->pc )
+       {
+ #ifdef O_DEBUG
+@@ -3636,7 +3669,6 @@
+ 	return;
+       }
+ 
+-      op = fetchop(PC);
+       switch(op)
+       { case H_STRING:
+ 	case H_MPZ:
+diff --git a/src/pl-vmi.c b/src/pl-vmi.c
+--- a/src/pl-vmi.c
++++ b/src/pl-vmi.c
+@@ -1313,12 +1313,14 @@
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
+ VMI(B_UNIFY_FC, VIF_BREAK, 2, (CA1_FVAR, CA1_DATA))
+-{ Word f = varFrameP(FR, (int)*PC++);
++{ if ( LD->slow_unify )		/* before the operands: returns_to_end_of_vmi() */
++  { ENSURE_GLOBAL_SPACE(1, (void)0);
++  }
++  Word f = varFrameP(FR, (int)*PC++);
+   word c = code2word(*PC++);
+ 
+   if ( LD->slow_unify )
+-  { ENSURE_GLOBAL_SPACE(1, f = varFrameP(FR, PC[-2]));
+-    globaliseFirstVar(f);
++  { globaliseFirstVar(f);
+     ARGP = argFrameP(lTop, 0);
+     *ARGP++ = *f;
+     *ARGP++ = c;
+@@ -4023,7 +4025,13 @@
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
+ VMI(A_ADD_FC, VIF_BREAK, 3, (CA1_FVAR, CA1_VAR, CA1_INTEGER))
+-{ Word rp  = varFrameP(FR, *PC++);	/* A = */
++{
++#ifdef O_DEBUGGER
++  if ( unlikely(!truePrologFlag(PLFLAG_VMI_BUILTIN)) )
++  { ENSURE_GLOBAL_SPACE(4, (void)0);	/* before the operands: returns_to_end_of_vmi() */
++  }
++#endif
++  Word rp  = varFrameP(FR, *PC++);	/* A = */
+   Word np  = varFrameP(FR, *PC++);	/* B + */
+   intptr_t add = (intptr_t)*PC++;	/* <int> */
+ 
+@@ -4031,13 +4039,8 @@
+ 
+ #ifdef O_DEBUGGER
+   if ( unlikely(!truePrologFlag(PLFLAG_VMI_BUILTIN)) )
+-  { Word expr;
++  { Word expr = gTop;
+ 
+-    ENSURE_GLOBAL_SPACE(4,
+-			{ np = varFrameP(FR, PC[-2]);
+-			  rp = varFrameP(FR, PC[-3]);
+-			});
+-    expr = gTop;
+     gTop += 3;
+     expr[0] = FUNCTOR_plus2;
+     bArgVar(&expr[1], np);
+@@ -4064,6 +4067,7 @@
+     } else				/* but their sum might not fit */
+     { bool rc;
+ 
++      setVar(*rp);			/* a variable while space is requested */
+       SAVE_REGISTERS(QID);
+       rc = put_int64(&w, r);
+       LOAD_REGISTERS(QID);
+@@ -4078,6 +4082,7 @@
+     fid_t fid;
+     bool rc;
+ 
++    setVar(*rp);			/* a variable while space is requested */
+     SAVE_REGISTERS(QID);
+     if ( (fid = PL_open_foreign_frame()) )	/* Still needed? */
+     { rc = evalExpression(pushWordAsTermRef(np), &n);
