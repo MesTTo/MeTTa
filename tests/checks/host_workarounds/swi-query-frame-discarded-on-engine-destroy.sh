@@ -10,7 +10,7 @@
 #  absent on 10.1.14 built with
 #  tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-destroy.patch,
 #  three runs of three; command=sh check.sh host-workarounds;
-#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=a7f189e258b77930bd046a2f073e5cc1ffed8311]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}
