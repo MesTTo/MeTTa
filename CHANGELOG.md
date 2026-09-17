@@ -285,6 +285,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Compiled Python value calls execute through `_python-call-value`, the seam
+  that binds a callable value and evaluates it in its home for exactly one
+  answer; a stream operation called in value position still forks. The
+  keyword frame crosses the seam as pairs, and the callee receives the
+  Python values its twin computes with, the codec every prelude operator
+  applies: a grounded value unwrapped by identity, an expression as a tuple,
+  a symbol as a symbol, `None` as `None`, where the raw `py-call` floor
+  handed it strings, nested lists and `()`. That floor is unchanged for
+  `py-call` itself and for the iterable route.
 - Dropping a space inside a transaction is transactional. The engine retires
   the space's storage, models and ownership with the transaction and runs
   `seam:space_released/1`, the lifetime scope's record retirement and the
@@ -629,6 +638,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   constructor is a value call: the head's definition is followed and the
   application ranks dynamic, where the plan used to fail outright and refuse
   every class carrying such a method.
+- `clear()` forgets the cleared space's declaration ownership counts, so the
+  operations a later `define` links declare themselves again instead of
+  standing registered but declared nowhere.
 - A missing Prolog procedure is no longer recovered from as "no answer": the
   evaluator's catch-all rethrows `existence_error(procedure, _)`, because the
   boot forbids autoloading and a name nothing defines is a defect in the
