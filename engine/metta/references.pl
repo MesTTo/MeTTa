@@ -492,7 +492,7 @@ metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
 % The repair row stays dormant under the binding and re-arms inheritance when
 % the binding is retired, as it does after a local clause leaves
 % [tested: test_a_library_origin_binds_a_name_whose_local_definition_was_removed;
-% commit=WORKTREE].
+% commit=8f524d6df196ba4046fa6043c0a6a1b84c26b952].
 metta_reference_binding(_, Module, Name, Arity, [], _) :-
     \+ current_transaction(_), !,
     metta_reference_retire_binding(Module, Name, Arity, discard).
