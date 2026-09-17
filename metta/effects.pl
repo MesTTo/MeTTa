@@ -1721,11 +1721,19 @@ metta_effect_plan_source_head(Module, Head, Args, State0, State) :-
     length(Args, ArgCount),
     Arity is ArgCount + 1,
     metta_effect_plan_named_call(Module, Head, Arity, State0, State).
-metta_effect_plan_source_head(Module, Head, _, Queue-Effects0,
-                              Queue-Effects) :-
+%An application headed by another application, ((f 1) 2): the head is walked
+%as a source of its own, and when it names a defined function that walk
+%enqueues the definition (metta_effect_plan_named_call/5), so the queue
+%threads through the head. This clause used to demand the queue unchanged
+%around it, which made every such form fail the plan outright, and a compiled
+%`raise Error(message)` whose constructor is a value call is exactly that
+%shape [tested: an_application_headed_by_a_defined_call_follows_the_head_definition;
+%commit=WORKTREE]. The applied result is a callable the walk cannot see, so
+%the application itself is dynamic.
+metta_effect_plan_source_head(Module, Head, _, State0, Queue-Effects) :-
     Head = [_|_],
     !,
-    metta_effect_plan_source(Module, Head, Queue-Effects0, Queue-Mid),
+    metta_effect_plan_source(Module, Head, State0, Queue-Mid),
     metta_effect_plan_dynamic(Mid, Effects).
 %The provider can identify an applicable grounded head without applying it.
 %Use the same opaque effect as the compiled grounded_apply/3 path; other
