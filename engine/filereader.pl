@@ -1074,6 +1074,13 @@ with_source_definition_order(Id, Names, Goal) :-
 %for its next runnable or its exit; a write inside the batch pays its own
 %compilation and invalidation only. The load context files the repairs so the
 %batch drains them once, under transaction/1, as a file does at its exit.
+%The journal a file keeps for its reload (source_load_assertion/3 and its
+%siblings, one row per stored clause reference) is released with the batch:
+%a batch is no source a later load replaces, its atoms are their spaces' own,
+%and a journal that outlived the batch pinned every atom it named against
+%collection, 3,872 of a dropped scratch space's 4,000
+%[tested: test_dropping_a_space_reclaims_its_atoms after add(*atoms);
+%commit=WORKTREE].
 :- meta_predicate with_definition_batch(0).
 with_definition_batch(Goal) :-
     gensym(source_load_, LoadId),
@@ -1084,7 +1091,10 @@ with_definition_batch(Goal) :-
           run_source_repairs(LoadId) ),
         ( erase(LoadRef),
           retractall(source_load_repair(LoadId, _)),
-          retractall(support_recompile_pending(LoadId, _, _)) )).
+          retractall(support_recompile_pending(LoadId, _, _)),
+          retractall(source_load_assertion(LoadId, _, _)),
+          retractall(source_load_support_assertions(LoadId, _)),
+          retractall(source_load_resource(LoadId, _)) )).
 
 source_definition_arrived(F) :-
     active_source_program(Id),

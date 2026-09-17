@@ -592,8 +592,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   rows. Compiler collaborators are abstract methods, so an incomplete compiler
   class fails when instantiated.
 
+### Added
+
+- `del obj.field` on an entity or prototype class instance, live or compiled
+  inside a method, is the field record's delete door, `retire-<Class>-<field>`
+  beside the getter `<Class>-<field>` and the writer `<Class>-<field>!`: the
+  value goes, the owner and the other fields stay, a read of the deleted field
+  raises `AttributeError` as Python does for a missing instance attribute, a
+  second delete has nothing to remove, and a write brings the value back. A
+  value class refuses, its positions being fixed as they are for writes.
+
 ### Fixed
 
+- A bulk write, `add(*atoms)` and the doors over it such as `copy()`, publishes
+  its references once, at its end, as a Python transaction and a class
+  definition do: each `(from ...)` row it stored used to publish on its own and
+  walk every row before it, so copying a space that borrows from K homes cost
+  K squared (5, 10, 20 and 40 origins: 67,690, 211,905, 731,155 and 2,722,368
+  inferences; 18,291, 34,558, 67,393 and 133,953 after).
 - `copy()` copies a space's own rows, the enumeration `save()` persists, so
   an origin row `(from &provider)` copies and the declarations and `(@doc ...)`
   rows that origin projected are left to the clone's own origin. Copying the

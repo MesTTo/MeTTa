@@ -1914,6 +1914,14 @@ def copy(self: Space) -> Space:
 > stored Python objects keep their identity across the clone, the
 > shallow reading, and a deep clone of a live engine handle has no
 > meaning to promise.
+>
+> The contents are the space's OWN rows, the enumeration ``save()``
+> persists: an origin row ``(from ...)`` copies, and the declarations
+> and ``(@doc ...)`` rows that origin projected do not, because the
+> clone's origin projects them again; copying them too gave every
+> projected document a second, authored copy in the clone and a third
+> in a copy of the copy, while a projected declaration was shadowed by
+> its authored twin.
 
 ### `Channel.digest`
 
@@ -5549,6 +5557,14 @@ def copy(self: Space) -> Space:
 > stored Python objects keep their identity across the clone, the
 > shallow reading, and a deep clone of a live engine handle has no
 > meaning to promise.
+>
+> The contents are the space's OWN rows, the enumeration ``save()``
+> persists: an origin row ``(from ...)`` copies, and the declarations
+> and ``(@doc ...)`` rows that origin projected do not, because the
+> clone's origin projects them again; copying them too gave every
+> projected document a second, authored copy in the clone and a third
+> in a copy of the copy, while a projected declaration was shadowed by
+> its authored twin.
 
 ### `FutureSpace.digest`
 
