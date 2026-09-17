@@ -1848,7 +1848,14 @@ eval(C0, Out) :-
     metta_answer_graph(Source, EntryGraph),
     term_variables(EntryGraph, Variables),
     State = observation(0, none),
-    once((
+    %The whole answer set, wherever the door is called: a function frame
+    %installs minimal stepping for eval and evalc so chain can observe an
+    %irreducible step, and inside such a frame this door observed the
+    %source's body after one step and counted a zero-answer body as one
+    %answer. The frame's mode is suspended around the enumeration
+    %[tested: test_call_value.py::test_call_value_holds_native_results,
+    %test_call_value_refuses_zero_and_multiple_answers; commit=WORKTREE].
+    without_function_evaluation(once((
         eval(Source, Produced),
         arg(1, State, Count),
         (   Count == 0
@@ -1863,7 +1870,7 @@ eval(C0, Out) :-
             fail
         ;   nb_setarg(1, State, 2)
         )
-    ; true )),
+    ; true ))),
     arg(1, State, Observed),
     (   Observed == 1
     ->  arg(2, State, (SavedVariables-Value)-Attributes),
@@ -1875,6 +1882,16 @@ eval(C0, Out) :-
         throw(error(metta_cardinality_violation(Module, Source, one, Found),
                     context('eval-one'/2,
                             'evaluation must produce exactly one answer')))
+    ).
+
+:- meta_predicate without_function_evaluation(0).
+without_function_evaluation(Goal) :-
+    (   nb_current('$metta_function_evaluation', Previous)
+    ->  setup_call_cleanup(
+            nb_setval('$metta_function_evaluation', false),
+            Goal,
+            nb_setval('$metta_function_evaluation', Previous))
+    ;   call(Goal)
     ).
 
 metta_answer_graph(Term, Term-Attributes) :-
