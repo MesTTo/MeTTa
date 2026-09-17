@@ -594,6 +594,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library origin declared for a name whose local definition was removed
+  earlier binds the name to the library instead of refusing with `import/1: No
+  permission to import capture/2 into ... (already imported from ...)`. Removing
+  a local equation re-states the inherited definition as an explicit import
+  (the shadow repair); a reference binding now retires that import first, the
+  way a local equation written afterwards does, and the repair row stays
+  dormant under the binding. The ch15 space-retirement matrix and any run that
+  declared `(from (library lib_thread))` after such a removal were red on this.
 - The translator loaded on its own, as the Python shim's `use_module` loads it
   before `engine/metta.pl`, names the engine's C artifacts again: the
   translator umbrella now records the engine's directory the way `metta.pl`

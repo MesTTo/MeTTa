@@ -481,6 +481,18 @@ metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
 % Native imports share SWI's definition, with no forwarding clause. A source
 % with a wider public union must instead contribute its retained own closure.
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-modul.c
+%
+% A binding is a claim on the name in this module, as a local clause is, so a
+% repaired weak import of the name (spaces:metta_restore_inherited_predicate/3,
+% the explicit import the shadow repair re-states when a local definition is
+% removed) comes off first through the same door a local clause uses; SWI
+% refuses to import a name a module already imports from another source
+% (`No permission to import after/3 into ... (already imported from
+% '$metta_exec:&self')`), and a wrapper cannot be declared dynamic over one.
+% The repair row stays dormant under the binding and re-arms inheritance when
+% the binding is retired, as it does after a local clause leaves
+% [tested: test_a_library_origin_binds_a_name_whose_local_definition_was_removed;
+% commit=WORKTREE].
 metta_reference_binding(_, Module, Name, Arity, [], _) :-
     \+ current_transaction(_), !,
     metta_reference_retire_binding(Module, Name, Arity, discard).
@@ -499,14 +511,16 @@ metta_reference_binding(Space, Module, Name, Arity,
          current_predicate_wrapper(Module:Head, metta_reference_union, _, _) ),
     !,
     metta_reference_retire_binding(Module, Name, Arity, discard),
+    spaces:metta_prepare_local_predicate(Module, Head),
     metta_reference_reserve_binding(Module, Name, Arity),
     HomeModule:export(Predicate/Arity), Module:import(HomeModule:Predicate/Arity).
 metta_reference_binding(Space, Module, Name, Arity, Roots, Faces) :-
     metta_reference_reserve_binding(Module, Name, Arity),
     metta_reference_detach_import(Module, Name, Arity),
     compiled_function_name(Name, Predicate),
-    Module:dynamic(Predicate/Arity),
     functor(Head, Predicate, Arity),
+    spaces:metta_prepare_local_predicate(Module, Head),
+    Module:dynamic(Predicate/Arity),
     Head =.. [_|Args],
     metta_reference_goal_list(Roots, Space, Name, Args, Original, Faces, Goals),
     metta_reference_disjunction(Goals, Body),
