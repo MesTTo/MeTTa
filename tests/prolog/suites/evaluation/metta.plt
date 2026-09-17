@@ -8,7 +8,7 @@
 %     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - recovery never eats a missing procedure, which is a defect and not a
 %     property of the program under evaluation [tested:
-%     a_missing_procedure_is_a_defect_no_recovery_catch_eats; commit=WORKTREE].
+%     a_missing_procedure_is_a_defect_no_recovery_catch_eats; commit=689745c3bb9ef9a36b5427bb3e7289a69da9b71b].
 %   - test/3 displays host-only partial applications without claiming they are
 %     serializable MeTTa text [tested:
 %     a_partial_application_remains_visible_in_test_output; commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].
