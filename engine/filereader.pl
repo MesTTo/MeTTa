@@ -1080,7 +1080,7 @@ with_source_definition_order(Id, Names, Goal) :-
 %and a journal that outlived the batch pinned every atom it named against
 %collection, 3,872 of a dropped scratch space's 4,000
 %[tested: test_dropping_a_space_reclaims_its_atoms after add(*atoms);
-%commit=WORKTREE].
+%commit=14a44cfa4dfc67a9cd7c602fafe86dd8b377aaf9].
 :- meta_predicate with_definition_batch(0).
 with_definition_batch(Goal) :-
     gensym(source_load_, LoadId),
