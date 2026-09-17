@@ -1618,10 +1618,10 @@ metta_import_shared_registries(Subsystem) :-
 %
 %This file is the umbrella, so ITS load context is engine/ in both modes, and
 %that is the whole reason the fact is asserted here rather than beside each
-%consumer. engine/translator.pl and engine/spaces.pl, umbrellas in engine/ that
-%the Python shim or a suite can load without this file, record it the same
-%way. The guard keeps a fact already recorded, which is also what lets an
-%embedded engine name its own tree.
+%consumer. engine/translator.pl, an umbrella in engine/ that the Python shim
+%loads without this file, records it the same way; engine/spaces.pl does not,
+%because no load reaches it without this file. The guard keeps a fact already
+%recorded, which is also what lets an embedded engine name its own tree.
 :- dynamic metta_engine_src_dir/1.
 :- prolog_load_context(directory, Dir),
    (   metta_engine_src_dir(_) -> true
