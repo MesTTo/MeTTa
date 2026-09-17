@@ -471,6 +471,22 @@ specialize_call(HV, AVs, Out, Goal, CleanBindSet, MetaList,
 
 specialize_call_stable(HV, CleanBindSet, MetaList, HasDirectBenefit,
                        SpecName, Arity, Outcome) :-
+    specialize_call_attempt(HV, CleanBindSet, MetaList, HasDirectBenefit,
+                            SpecName, Arity, Outcome0),
+    %A construction the support graph invalidated while its clauses were
+    %being translated is attempted once more on the state that
+    %invalidated it, which is now settled; a second invalidation means the
+    %definitions are still moving, and this call runs generic without
+    %recording a failure, so the next call specializes.
+    (   Outcome0 == invalidated
+    ->  specialize_call_attempt(HV, CleanBindSet, MetaList, HasDirectBenefit,
+                                SpecName, Arity, Outcome1),
+        ( Outcome1 == invalidated -> Outcome = failed ; Outcome = Outcome1 )
+    ;   Outcome = Outcome0
+    ).
+
+specialize_call_attempt(HV, CleanBindSet, MetaList, HasDirectBenefit,
+                        SpecName, Arity, Outcome) :-
     %The mutex must be acquired before transaction/1 takes its snapshot. If
     %the order is reversed, a waiting transaction can still see the database
     %from before the first worker committed and publish a duplicate.
@@ -520,34 +536,36 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
     record_source_assertion(SpecializationRef),
     record_specialization_support(Module, HV, SpecName),
     register_arity(SpecName, Arity),
-    ( findall(TypeChain,
-              catch_recover(governing_type_declaration(HV, TypeChain), fail),
-              TypeChains),
-      forall(member(TypeChain, TypeChains),
-             add_sexp(Space, [':', SpecName, TypeChain])),
-      ( HasDirectBenefit == true
-        -> nb_setval('$metta_spec_needed', true)
-      ; true ),
-      maplist({SpecName}/[paired_meta(fun_meta(ArgsNorm,BodyExpr),
-                                      _SourceMeta,StoredMeta),
-                          clause_info(StoredInput,Clause)]>>
-              ( CompiledInput = [=,[SpecName|ArgsNorm],BodyExpr],
-                translate_specialized_clause(CompiledInput, Clause, false),
-                specialization_storage_input(SpecName, StoredMeta,
-                                             StoredInput) ),
-              MetaList, ClauseInfos),
-      nb_getval('$metta_spec_needed', true),
-      forall(member(clause_info(Input, Clause), ClauseInfos),
-             ( asserta(Module:Clause, Ref),
-               record_source_assertion(Ref),
-               record_translated_from(Ref, Input, SourceRef),
-               record_source_assertion(SourceRef),
-               add_sexp(Space, Input, SpaceRef),
-               record_source_assertion(SpaceRef),
-               format(atom(Label), "metta specialization (~w)", [SpecName]),
-               maybe_print_compiled_clause(Label, Input, Clause) ))
-    -> Outcome = ready
-    ; ( silent(true) -> true
+    (   specialization_clauses_translated(HV, MetaList, HasDirectBenefit,
+                                          SpecName, Space, ClauseInfos)
+    ->  (   ho_specialization(Module, HV, SpecName)
+        ->  forall(member(clause_info(Input, Clause), ClauseInfos),
+                   ( asserta(Module:Clause, Ref),
+                     record_source_assertion(Ref),
+                     record_translated_from(Ref, Input, SourceRef),
+                     record_source_assertion(SourceRef),
+                     add_sexp(Space, Input, SpaceRef),
+                     record_source_assertion(SpaceRef),
+                     format(atom(Label), "metta specialization (~w)", [SpecName]),
+                     maybe_print_compiled_clause(Label, Input, Clause) )),
+            Outcome = ready
+        ;   %Translating a body forces the deferred functions it calls, and a
+            %space that holds a reference row publishes its own heads into its
+            %face, so a materialisation there reports a face change whose
+            %forward closure reaches this specialization through the function
+            %it binds: the graph's action forgot the registrations above while
+            %the clauses were still being translated. Publishing them anyway
+            %left the clause and the natively stored equation standing behind
+            %no ho_specialization/3 row, an orphan a reload could not withdraw
+            %and the next call regenerated beside, answering twice. The rows
+            %this attempt wrote go, and the caller attempts again on the
+            %settled state [tested: specializer:
+            %a_specialization_invalidated_while_it_translates_is_rebuilt_once;
+            %commit=WORKTREE].
+            remove_every_sexp(Space, [':', SpecName, _]),
+            Outcome = invalidated
+        )
+    ;   ( silent(true) -> true
       ; format("Not specialized ~w~n", [SpecName/Arity]) ),
       forget_symbol(Module, SpecName),
       retractall(ho_specialization(Module, HV, SpecName)),
@@ -556,6 +574,34 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
       ; assertz(ho_specialization_failed(HV, Arity, CleanBindSet), FailedRef),
         record_source_assertion(FailedRef) ),
       Outcome = failed
+    ).
+
+specialization_clauses_translated(HV, MetaList, HasDirectBenefit, SpecName,
+                                  Space, ClauseInfos) :-
+    findall(TypeChain,
+            catch_recover(governing_type_declaration(HV, TypeChain), fail),
+            TypeChains),
+    forall(member(TypeChain, TypeChains),
+           add_sexp(Space, [':', SpecName, TypeChain])),
+    ( HasDirectBenefit == true
+      -> nb_setval('$metta_spec_needed', true)
+    ; true ),
+    maplist({SpecName}/[paired_meta(fun_meta(ArgsNorm,BodyExpr),
+                                    _SourceMeta,StoredMeta),
+                        clause_info(StoredInput,Clause)]>>
+            ( CompiledInput = [=,[SpecName|ArgsNorm],BodyExpr],
+              translate_specialized_clause(CompiledInput, Clause, false),
+              specialization_storage_input(SpecName, StoredMeta,
+                                           StoredInput) ),
+            MetaList, ClauseInfos),
+    nb_getval('$metta_spec_needed', true).
+
+%remove_sexp/3 takes one occurrence, which is what a removal means; a
+%construction sweeping its own rows takes every one it wrote.
+remove_every_sexp(Space, Pattern) :-
+    (   remove_sexp(Space, Pattern, true)
+    ->  remove_every_sexp(Space, Pattern)
+    ;   true
     ).
 
 specialization_goal(SpecName, AVs, Out, Goal) :-
