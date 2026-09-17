@@ -9,6 +9,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `_python-call-value Home Callable Positionals Keywords`: one held immediate
+  value from a native callable image or an exact host callable, observed
+  through eval-one outside any function frame; operational exceptions and
+  zero or several answers are terminal, returned Atom syntax stays data, and
+  host results keep their explicit images and object identity. The equation
+  is owned by the binder operation each linked space registers. Supplied
+  positional prefixes of a two-frame application project through the
+  canonical signature (`_positional_signature`), so a bound `*args` collector
+  survives and an impossible prefix refuses with `ValueError` on inspection
+  and `TypeError` on application. Python `test_call_value.py`,
+  `test_bound_prefixes.py` and their source suites.
+- `eval-one` observes its source's whole answer set inside a function frame
+  too: the frame's minimal stepping is suspended around the enumeration.
+
 - FROM source origins: a declaration-only `(from &home (rename ((Canonical Alias))))`
   now elaborates source uses of `Alias` at the receiving home to the provider's
   canonical constructor, so authored data, patterns and equations construct and
