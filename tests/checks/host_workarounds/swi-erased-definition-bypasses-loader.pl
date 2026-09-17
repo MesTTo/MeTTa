@@ -19,7 +19,7 @@
 %   its procedure, so the retained sample read absent while every tabled call
 %   made with the debugger on or a signal pending lost its answers; [ok] again
 %   with closures excluded from the count test; command=sh check.sh
-%   host-workarounds; fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   host-workarounds; fixture=SWI-Prolog 10.1.14 with the patch; commit=4c5039f5af47837646e1ab6ae3d61553cccf8056].
 
 :- dynamic ready/1, loaded/1.
 :- multifile user:exception/3.
