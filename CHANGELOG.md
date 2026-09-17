@@ -604,6 +604,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A specialization whose body translation forces a deferred function in a
+  space that holds a reference row is no longer left as an orphan: the
+  materialisation's face change invalidated the construction while its
+  clauses translated, so its registrations went while its clause and its
+  stored equation still landed, a reload could not withdraw it and the next
+  call answered beside a rebuilt clone. The construction now notices the
+  invalidation, removes the rows it wrote and is attempted once more on the
+  settled state. Native suite `specializer`, Python
+  `test_reload.py::test_reloading_invalidates_a_specialization_after_a_class_definition`.
+
 - A bulk write, `add(*atoms)` and the doors over it such as `copy()`, publishes
   its references once, at its end, as a Python transaction and a class
   definition do: each `(from ...)` row it stored used to publish on its own and

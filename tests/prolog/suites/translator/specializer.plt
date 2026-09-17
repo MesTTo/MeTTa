@@ -663,6 +663,57 @@ test(a_copied_space_adopts_its_specializations_instead_of_duplicating,
     spec_equation_count(Clone, CloneSpecsAfter),
     assertion(CloneSpecsAfter == SelfSpecs).
 
+% A space that holds a reference row publishes its own heads into its face,
+% and translating a specialization's body forces the deferred functions it
+% calls, so the materialisation reports a face change whose closure reaches
+% the specialization being built. Its registrations were forgotten while its
+% clauses were still translating, and publishing them anyway left an orphan
+% equation a removal could not withdraw and the next call regenerated beside.
+test(a_specialization_invalidated_while_it_translates_is_rebuilt_once,
+     [ setup(( retractall(silent(_)), assertz(silent(true)),
+               'new-space'(Origin), 'new-space'(Space) )),
+       cleanup(( metta_release_space(Space), metta_release_space(Origin),
+                 retractall(silent(_)), assertz(silent(false)) )) ]) :-
+    space_module(Space, Module),
+    metta_add_program_atoms(Origin, [[=, ['plunit-face-other', X0], X0]]),
+    % The program arrives deferred through the batch door, and the reference
+    % row after it: with the row's observers already installed the batch door
+    % compiles per atom, and a compiled function has nothing left to
+    % materialise at the call.
+    metta_add_program_atoms(Space,
+                           [[=, ['plunit-face-inc', X], [+, X, 1]],
+                            [=, ['plunit-face-hof', F, Y], [F, Y]]]),
+    assertion(spaces:deferred_metta_function('plunit-face-inc', Module,
+                                             Space, 1, _, _)),
+    'add-atom'(Space, [from, Origin], _),
+    with_metta_module(Module,
+        ( translate_expr(['plunit-face-hof', 'plunit-face-inc', 1], Goals, Out),
+          translator:goals_list_to_conj(Goals, Call),
+          findall(Out, call(Module:Call), Answers) )),
+    assertion(Answers == [2]),
+    ho_specialization(Module, 'plunit-face-hof', SpecName),
+    functor(SpecHead, SpecName, 3),
+    assertion(aggregate_all(count, ( clause(Module:SpecHead, _, Ref),
+                                     clause_property(Ref, module(Module)) ), 1)),
+    spec_equation_count(Space, Specs),
+    assertion(Specs == 1),
+    % The equation the clone came from goes, and the clone goes with it: an
+    % orphan row would survive this removal and answer beside a regenerated
+    % clone on the next call.
+    'remove-atom'(Space, [=, ['plunit-face-hof', F2, Y2], [F2, Y2]], _),
+    assertion(\+ ho_specialization(Module, 'plunit-face-hof', _)),
+    spec_equation_count(Space, AfterRemoval),
+    assertion(AfterRemoval == 0),
+    metta_add_program_atoms(Space, [[=, ['plunit-face-hof', F3, Y3], [F3, Y3]]]),
+    with_metta_module(Module,
+        ( translate_expr(['plunit-face-hof', 'plunit-face-inc', 1], Goals2, Out2),
+          translator:goals_list_to_conj(Goals2, Call2),
+          findall(Out2, call(Module:Call2), Again) )),
+    assertion(Again == [2]),
+    spec_equation_count(Space, AfterRebuild),
+    assertion(AfterRebuild == 1),
+    !.
+
 test(a_copied_specialization_materializes_before_its_call,
      [ forall(member(History, [fresh, retired])),
        setup(( retractall(silent(_)), assertz(silent(true)),

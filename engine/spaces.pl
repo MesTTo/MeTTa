@@ -426,6 +426,7 @@
             'remove-atom'/3,
             'subtract-atom'/3,
             remove_sexp/2,
+            remove_sexp/3,
             restricted_callable_name/1,
             restricted_dispatch_name/1,
             space_argument_error/3,
