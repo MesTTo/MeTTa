@@ -422,6 +422,22 @@
 :- use_module(library(assoc)).
 :- use_module(library(ansi_term)).
 
+%The engine's directory for the units below: runtime.pl names engine/mbr.so
+%from it, and a unit cannot compute it from its own load context (see
+%engine/metta.pl, where the fact is declared). This file is an umbrella in
+%engine/ too, so its load context is engine/ in both modes, and the Python
+%shim's `use_module` loads it before engine/metta.pl, which is how the two
+%suites under tests/prolog/suites/host reached runtime.pl's directive with the
+%fact unrecorded and lost the artifact path without a word. The guard keeps a
+%fact metta.pl or a host already recorded, so every recording agrees
+%[tested: shared_decode_index:the_translator_loaded_through_the_shim_names_the_engine_artifacts;
+%commit=WORKTREE].
+:- dynamic metta_engine:metta_engine_src_dir/1.
+:- prolog_load_context(directory, Dir),
+   (   metta_engine:metta_engine_src_dir(_) -> true
+   ;   assertz(metta_engine:metta_engine_src_dir(Dir))
+   ).
+
 :- consult('translator/analysis.pl').
 :- consult('translator/folding.pl').
 :- consult('translator/constructors.pl').
