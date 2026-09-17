@@ -285,6 +285,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A function change drops the tables that can have read it and no other. A
+  declared table is a node in the support graph that its function supports,
+  so the invalidation wave a definition change starts, bounded to the modules
+  the change can reach, abolishes the tables of every function whose compiled
+  body reaches the changed one and no other; the changed function's own
+  tables go by name, and a table whose reach the effect planner ranks
+  unbounded (a variable head, an `eval` of a computed term, a read whose
+  template is a variable) goes on any change. That verdict is planned once per
+  table and forgotten when the wave reaches the table. A reference face
+  refresh, which dirties every node that resolved a name through the face so
+  the repair can recompile them, is not a definition change and leaves the
+  tables alone (`metta_reference_face_wave/0`); a head the refresh rebinds
+  announces itself. Before, `lib_tabling`
+  abolished every declared table on every announcement, so the first compile
+  of a deferred library function, or any definition in any space, emptied
+  tables filled a moment earlier; and a definition still costs the same in
+  the eighth live space as in the second while a table stands. Native suite
+  `lib_tabling`, Python `test_tabling_control.py::test_an_unrelated_definition_keeps_the_table`
+  and `test_shared_head_cost.py::test_a_declared_table_keeps_a_shared_heads_definition_cost_flat`.
 - A foreign-space question costs three inferences instead of twelve: the
   Python bridge answers `seam:foreign_space/1` from the engine's claim
   registry, which the registration door already claims in the transaction

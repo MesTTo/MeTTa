@@ -363,9 +363,10 @@ reaches(prelude, metta, 'the prelude vocabulary is written in the core\'s own op
 reaches(prelude, spaces, 'match-types unifies two types through the matcher, and type-cast prunes the empty answers out of a collapse').
 reaches(prelude, translator, 'a masked operand is collapsed and a masked result re-entered through the translator\'s own runtime doors, which is what the equations these bodies replace compiled to').
 reaches(lib_tabling, ext_points, 'declared ownership and event seams route tabled calls and retire their registrations').
-reaches(lib_tabling, metta, 'declared context, effect-walk and cache-policy services decide the executable owner and admissible table').
+reaches(lib_tabling, metta, 'declared context, effect-walk, effect-plan and cache-policy services decide the executable owner, the admissible table and how far a table can read').
 reaches(lib_tabling, parser, 'the published writer renders a rejected reflection row in the language\'s syntax').
 reaches(lib_tabling, spaces, 'declared space, storage and module services resolve table dependencies; the ordinary atom doors store reflection rows').
+reaches(lib_tabling, support_graph, 'a declared table is a node the tabled function supports, so the engine\'s invalidation wave abolishes the tables a change can have left stale').
 reaches(materialize, ext_points, 'admission preserves existing dispatch ownership').
 reaches(materialize, metta, 'module context, type declarations, algebra and reduction bounds gate relation construction and lookup').
 reaches(materialize, spaces, 'native storage, compiled source signatures and dispatch policies define the relation being materialized').

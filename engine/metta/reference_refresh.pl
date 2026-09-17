@@ -97,7 +97,21 @@ metta_reference_invalidate(Spaces) :-
     findall(derived(Module, reference_face),
             ( member(Space, Spaces), metta_reference_seen_space(Space, Module) ),
             Roots),
-    support_graph:support_invalidate_many(Roots).
+    metta_with_trailed_enumeration('$metta_reference_face_wave', true,
+                                   support_graph:support_invalidate_many(Roots)).
+
+%The invalidation wave running now is a reference face's. It dirties every
+%node that resolved a name through the face, so the repair recompiles them
+%against whatever the face resolves to next, and says nothing about whether
+%a definition moved: a head whose binding the refresh then changes announces
+%itself, and that announcement's wave starts at the head. A cache keyed on
+%behaviour rather than resolution, lib_tabling's table node, ignores this
+%wave and follows that one, which is what keeps a table through the first
+%compile of a deferred library function in a space holding a `from` row
+%[tested: test_a_reference_refresh_that_changes_nothing_keeps_the_table;
+%commit=WORKTREE].
+metta_reference_face_wave :-
+    nb_current('$metta_reference_face_wave', true).
 
 metta_reference_refresh :-
     (   metta_reference_refreshing

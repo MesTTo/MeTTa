@@ -331,6 +331,19 @@ support_node(memo(Module, Name, Arity)) :-
     atom(Name),
     integer(Arity),
     Arity >= 0.
+% A tabled function's answer trie, supported by the function it tables, so
+% the wave a definition change starts reaches the tables that read the
+% changed function through the same edges that reach their callers and
+% nothing else: lib_tabling records the node when it installs a table and
+% abolishes the trie in its invalidation action, the shape lib_memo's memo
+% node already has [tested: lib_tabling:a_callees_change_drops_its_callers_table,
+% lib_tabling:an_unrelated_functions_change_keeps_the_tables,
+% test_a_declared_table_keeps_a_shared_heads_definition_cost_flat; commit=WORKTREE].
+support_node(table(Module, Name, Arity)) :-
+    atom(Module),
+    atom(Name),
+    integer(Arity),
+    Arity >= 0.
 support_node(compiled_function(Module, Name)) :-
     atom(Module),
     atom(Name).
@@ -682,6 +695,7 @@ support_module_pattern(Module, function(Module, _)).
 support_module_pattern(Module, function_view(Module, _)).
 support_module_pattern(Module, specialization(Module, _)).
 support_module_pattern(Module, memo(Module, _, _)).
+support_module_pattern(Module, table(Module, _, _)).
 support_module_pattern(Module, compiled_function(Module, _)).
 support_module_pattern(Module, translated_form(Module, _)).
 support_module_pattern(Module, type_marker(Module, _)).

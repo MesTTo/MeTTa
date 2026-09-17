@@ -13,8 +13,15 @@
 %     a_pure_body_inside_a_wrapper_still_tables_incrementally,
 %     an_effectful_body_tables_plain, a_higher_order_body_tables_plain;
 %     commit=ccad9f6d588270ec2f0810fc56c30e9e59207e7c]
-%   - changing an equation drops every table
-%     [tested: tabling_equation_change_drops_tables]
+%   - changing a tabled function's equation drops its table, a callee's change
+%     drops the tables of the functions that reach it, an unrelated change
+%     keeps every table, a body whose reach is unbounded loses its table on
+%     any change, and a static reach is remembered until its program moves
+%     [tested: tabling_equation_change_drops_tables,
+%     a_callees_change_drops_its_callers_table,
+%     an_unrelated_functions_change_keeps_the_tables,
+%     an_unbounded_body_drops_on_any_change,
+%     a_static_reach_is_remembered_until_its_program_moves; commit=WORKTREE]
 %   - the change hook does not prune the handlers loaded after it, so a dual
 %     built while tabling is declared is still dropped when its function
 %     changes [tested: duals_survive_tabling]
@@ -46,6 +53,9 @@ tabling_definitions("
 (= (plt-tab-bounded $k) (once (match &plt_tab_space (fact $k $v) $v)))
 (= (plt-tab-foreign $k) (match &plt_tab_foreign (fact $k $v) $v))
 (= (plt-tab-computed $s) (match $s (fact $k $v) $v))
+(= (plt-tab-caller $n) (plt-tab-callee $n))
+(= (plt-tab-callee $n) (* $n 2))
+(= (plt-tab-dynamic $f $x) ($f $x))
 ").
 
 seam:foreign_space('&plt_tab_foreign').
@@ -153,12 +163,14 @@ test(tabling_holds_a_declaration_until_its_function_arrives,
     assertion(lib_tabling:metta_tabling_registration('plt-tab-late', _, _)),
     assertion(\+ lib_tabling:metta_tabling_held(['plt-tab-late', _])).
 
-% Deciding WHICH tables could have read a given equation needs a call graph
-% over compiled clauses the engine does not keep, and answering it wrongly is
-% a stale answer with no symptom, so every table goes.
+% The tables a change can have left stale go, and no other: the changed
+% function's own, those of the functions whose compiled bodies reach it
+% through the support graph, and those whose reach is unbounded. The suite's
+% caller reads plt-tab-callee, plain reads nothing, and dynamic applies its
+% input, which the effect planner ranks at oracleIO.
 test(tabling_equation_change_drops_tables,
      [ cleanup(( catch(metta_untabled_decl(['plt-tab-plain', _], true), _, true),
-                 'remove-atom'('&self', [=, ['plt-tab-changed', 1], 9], _) )) ]) :-
+                 'remove-atom'('&self', [=, ['plt-tab-plain', 7], 0], _) )) ]) :-
     metta_tabled_decl(['plt-tab-plain', _], true),
     %A compiled MeTTa function lives in its space's module, so a test that
     %calls it as a Prolog predicate has to name that module.
@@ -166,11 +178,63 @@ test(tabling_equation_change_drops_tables,
     Self:'plt-tab-plain'(1, _),
     tabling_table_count(Before),
     assertion(Before > 0),
-    % Any equation, not this function's: the invalidation is deliberately
-    % coarse and the hook fires for every compiled equation.
+    'add-atom'('&self', [=, ['plt-tab-plain', 7], 0], _),
+    tabling_table_count(After),
+    assertion(After =:= 0).
+
+test(a_callees_change_drops_its_callers_table,
+     [ cleanup(( catch(metta_untabled_decl(['plt-tab-caller', _], true), _, true),
+                 'remove-atom'('&self', [=, ['plt-tab-callee', 1], 9], _) )) ]) :-
+    metta_tabled_decl(['plt-tab-caller', _], true),
+    metta_self_module(Self),
+    Self:'plt-tab-caller'(1, _),
+    tabling_table_count(Before),
+    assertion(Before > 0),
+    'add-atom'('&self', [=, ['plt-tab-callee', 1], 9], _),
+    tabling_table_count(After),
+    assertion(After =:= 0).
+
+test(an_unrelated_functions_change_keeps_the_tables,
+     [ cleanup(( catch(metta_untabled_decl(['plt-tab-caller', _], true), _, true),
+                 'remove-atom'('&self', [=, ['plt-tab-changed', 1], 9], _) )) ]) :-
+    metta_tabled_decl(['plt-tab-caller', _], true),
+    metta_self_module(Self),
+    Self:'plt-tab-caller'(1, _),
+    tabling_table_count(Before),
+    assertion(Before > 0),
+    'add-atom'('&self', [=, ['plt-tab-changed', 1], 9], _),
+    tabling_table_count(After),
+    assertion(After =:= Before).
+
+test(an_unbounded_body_drops_on_any_change,
+     [ cleanup(( catch(metta_untabled_decl(['plt-tab-dynamic', _, _], true), _, true),
+                 'remove-atom'('&self', [=, ['plt-tab-changed', 1], 9], _) )) ]) :-
+    metta_tabled_decl(['plt-tab-dynamic', _, _], true),
+    metta_self_module(Self),
+    Self:'plt-tab-dynamic'('plt-tab-plain', 1, _),
+    tabling_table_count(Before),
+    assertion(Before > 0),
     'add-atom'('&self', [=, ['plt-tab-changed', 1], 9], _),
     tabling_table_count(After),
     assertion(After =:= 0).
+
+% The verdict is planned on the first change the wave does not carry to the
+% table (the callee's own lazy compile is one such change, so the row may
+% already stand after the first call), forgotten when the wave reaches the
+% table, and planned again on the same change's announcement, over the
+% program as it now stands: a callee that grows a dynamic clause turns its
+% caller's reach unbounded.
+test(a_static_reach_is_remembered_until_its_program_moves,
+     [ cleanup(( catch(metta_untabled_decl(['plt-tab-caller', _], true), _, true),
+                 'remove-atom'('&self', [=, ['plt-tab-changed', 1], 9], _),
+                 'remove-atom'('&self', [=, ['plt-tab-callee', _], [eval, _]], _) )) ]) :-
+    metta_tabled_decl(['plt-tab-caller', _], true),
+    metta_self_module(Self),
+    Self:'plt-tab-caller'(1, _),
+    'add-atom'('&self', [=, ['plt-tab-changed', 1], 9], _),
+    assertion(lib_tabling:metta_tabling_reach('plt-tab-caller', Self, 2, static)),
+    'add-atom'('&self', [=, ['plt-tab-callee', N], [eval, N]], _),
+    assertion(lib_tabling:metta_tabling_reach('plt-tab-caller', Self, 2, unbounded)).
 
 % The incremental guarantee was testable only by its EFFECT, a fresh answer,
 % which a table rebuilt from scratch produces just as well. tableutil counts
