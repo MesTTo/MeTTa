@@ -594,6 +594,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The translator loaded on its own, as the Python shim's `use_module` loads it
+  before `engine/metta.pl`, names the engine's C artifacts again: the
+  translator and spaces umbrellas now record the engine's directory the way
+  `metta.pl` does, so `engine/translator/runtime.pl`'s directive no longer
+  fails with `metta_engine_src_dir/1` unknown and the plunit lane's two host
+  suites load without an error.
 - Importing a MeTTa library with type declarations from an `initialization/1`
   directive, a plunit suite's setup, or any goal that runs while the VM is
   alerted (a pending signal, the debugger) no longer loses the library on the

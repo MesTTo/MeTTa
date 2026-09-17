@@ -2,11 +2,26 @@
 % seeded Python wire decoders.
 % Guarantees: indexed roots agree with the seeded decoder on generated wires
 % and refuse contradictory occurrences of one name
-% [tested: shared_decode_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
+% [tested: shared_decode_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179];
+% the translator loaded through the shim alone, without engine/metta.pl, still
+% names the engine's artifacts from the engine's directory
+% [tested: the_translator_loaded_through_the_shim_names_the_engine_artifacts;
+% commit=WORKTREE].
 
 :- consult('../../../../extensions/python/metta/_binding/shim.pl').
 
 :- begin_tests(shared_decode_index).
+
+% The shim's use_module loads engine/translator.pl before engine/metta.pl,
+% the umbrella that records the engine's directory, so the translator umbrella
+% records it too; without that, runtime.pl's directive fails at load and the
+% analyzer's artifact is never named.
+test(the_translator_loaded_through_the_shim_names_the_engine_artifacts) :-
+    translator:metta_mbr_artifact(MbrSo),
+    file_base_name(MbrSo, 'mbr.so'),
+    file_directory_name(MbrSo, EngineDir),
+    file_base_name(EngineDir, engine),
+    metta_engine:metta_engine_src_dir(EngineDir).
 
 test(the_first_decode_does_not_pay_for_dependency_loading) :-
     Wire = [e, [[v, x], [v, y]]],

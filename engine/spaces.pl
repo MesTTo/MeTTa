@@ -488,6 +488,19 @@ native_storage_functor(Space, '$metta_parametric_atom') :-
 space_canonical_atom(Space, Encoded) :-
     with_output_to(atom(Encoded), write_canonical(Space)).
 
+%The engine's directory for the units below: bounded_matching.pl names
+%engine/empty_prune.so from it. This file is an umbrella in engine/, so its
+%load context is engine/ in both modes; it records the fact the way
+%engine/translator.pl does, for a load that reaches it without engine/metta.pl,
+%and the guard keeps a fact already recorded
+%[tested: shared_decode_index:the_translator_loaded_through_the_shim_names_the_engine_artifacts;
+%commit=WORKTREE].
+:- dynamic metta_engine:metta_engine_src_dir/1.
+:- prolog_load_context(directory, Dir),
+   (   metta_engine:metta_engine_src_dir(_) -> true
+   ;   assertz(metta_engine:metta_engine_src_dir(Dir))
+   ).
+
 :- consult('spaces/tokens.pl').
 :- consult('spaces/receipts.pl').
 :- consult('spaces/catalog.pl').
