@@ -9,6 +9,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Classes: the special methods and decorators of a declared class. A special
+  method Python routes syntax to compiles under its word (`__add__` is
+  `Vector-add`, `__len__` is `Stack-len`), and the compiler lowers that
+  syntax to the class's dispatch entry when the operand's static type is
+  declared: binary, reflected, in-place and unary operators, comparisons
+  (with the reference's reflection and `!=` from `eq`), `len`, `abs`, `str`,
+  `repr`, `int`, `float`, `round`, `bool`, `iter`, `next`, `reversed`,
+  subscripts and their writes and deletes, containment, truth, calls on an
+  instance, `for` over a generator `__iter__`, `with` through `__enter__` and
+  `__exit__`, and `case C(x=0, y=y)` through `__match_args__`. Python's own
+  operators on the instance reach the same equation. `property` publishes
+  its getter, setter (`C-name!`) and deleter (`retire-C-name`);
+  `cached_property`, `functools.cache` and `lru_cache` memoize through
+  lib_memo; `staticmethod` is an equation without a receiver; `classmethod`
+  takes the class symbol; `abstractmethod` and `Protocol` members publish an
+  arrow that a concrete subclass must implement; `typing.final` seals;
+  `@dataclass(order=True)` and `functools.total_ordering` derive the missing
+  comparisons; `singledispatchmethod` chooses by `get-type`; `partialmethod`
+  curries; `__del__` refuses with the scope remedy. A string annotation is a
+  forward reference. Python `test_class_protocols.py`.
+- A returned answer view crosses a value call by identity, so `len(m.match(...))`
+  in a compiled body counts it; observation stays with term construction.
+
 - `_python-call-value Home Callable Positionals Keywords`: one held immediate
   value from a native callable image or an exact host callable, observed
   through eval-one outside any function frame; operational exceptions and

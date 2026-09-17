@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 329 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 334 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -2992,6 +2992,40 @@ Only DECLARED classes and REAL bases become edges, which keeps `object`, a
 NamedTuple's `tuple`, an enum's `Enum` and a virtual `abc` registration out.
 `m.type(atom)` is the other verb and is unrelated: it answers that atom's first
 `get-type`.
+The grain is read off the class: a frozen dataclass, a NamedTuple or an Enum
+is a VALUE, the constructor term itself (`(Point 1 2)`); any other class is an
+ENTITY, a handle around one of the engine's tokens whose fields are facts in
+the class's own space (`(_field-balance (Account (t ...)) 100)` in
+`&Account`), read by an indexed match and written inside the caller's
+transaction; a class inheriting `metta.Space` is a PROTOTYPE, a handle around
+a space of its own that holds its facts and private rules. Every class
+declares into a space of its own, `&Point`, which the declaring space
+references with `(from &Point)`. Methods compile through the same compiler
+with `self` as the first parameter: `self.x` is the accessor, `self.x = v` the
+writer on an entity (and a refusal naming `dataclasses.replace` on a value),
+`other.m()` the method's dispatch entry, `super().m()` the base's qualified
+spelling, `type(x)` and `isinstance` are `get-type` with the `:<` edges. A
+special method compiles under its word (`__add__` is `Vector-add`, `__len__`
+is `Stack-len`) and the compiler lowers the syntax Python routes to it when
+the operand's static type is declared: `a + b`, `a < b`, `-a`, `len(a)`,
+`abs(a)`, `str(a)`, `a[i]`, `a[i] = v`, `del a[i]`, `x in a`, `if a:`,
+`a(x)`, `for x in a` (a generator `__iter__`), `with a as v:` (enter, then
+exit in a finally arm) and `case C(x=0, y=y)` (through `__match_args__`); an
+operand of unknown type keeps the builtin. Python's own operators on the
+instance reach the same equation. Decorators are rows: `@property` publishes
+its getter, setter (`C-name!`) and deleter (`retire-C-name`);
+`@cached_property`, `@functools.cache` and `@lru_cache` memoize the method
+through lib_memo; `@staticmethod` is an equation with no receiver;
+`@classmethod` takes the class symbol as its first argument
+(`(Circle-unit Circle)`); `@abstractmethod` and a `Protocol` member publish
+the arrow alone and a concrete subclass that leaves it unwritten refuses;
+`@typing.final` seals a method and a class; `@dataclass(order=True)` and
+`@functools.total_ordering` derive the missing comparisons from CPython's own
+formulas; `@singledispatchmethod` chooses by `get-type` of its first
+argument; `partialmethod` curries; `__del__` refuses with the scope remedy.
+The five examples of `examples/ch17-concurrency-and-the-loop/09-class_values.metta`
+through `13-class_decorators.metta` write each mapping's rows by hand beside
+the Python twin that derives them.
 The class door carries PEP 681's `typing.dataclass_transform`, so a checker
 synthesises the constructor `install_type` builds and `Point(1.0, 2.0)` checks
 and completes. Mypy reads that declaration on the module-level `metta._declare.define`

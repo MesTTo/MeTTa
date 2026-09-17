@@ -208,6 +208,46 @@ m = space()
 assert sorted(a.value for a in m.eval(S.superpose((1, 2, 3)))) == [1, 2, 3]
 ```
 
+A class declares the same way. `@m.define` on a class reads its grain off
+the class (a frozen dataclass is a constructor term, an ordinary class an
+entity whose fields are facts in the class's own space, a `Space` subclass a
+prototype owning a space of its own), compiles each method with `self` as its
+first parameter, and lowers the syntax Python routes to a special method to
+that method's equation: `a + b` on two `Vector`s is `Vector-add`, `len(s)` is
+`Stack-len`, `with s as v:` is enter and exit. Properties, class and static
+methods, `functools.cache`, `total_ordering`, abstract methods and
+`singledispatchmethod` are rows the engine already has. Python's own
+operators on the instance reach the same equations, so one object has two
+notations:
+
+```python
+from dataclasses import dataclass
+
+from metta import S, space
+
+m = space()
+
+@m.define
+@dataclass(frozen=True)
+class Vector:
+    x: int
+    y: int
+
+    def __add__(self, other: "Vector") -> "Vector":   # -> (= (Vector-add (Vector $x $y) (Vector $x2 $y2)) ...)
+        return Vector(self.x + other.x, self.y + other.y)
+
+@m.define
+def doubled(v: Vector) -> Vector:                     # -> (Vector:dispatch:add $v $v), the method's own entry
+    return v + v
+
+assert Vector(1, 2) + Vector(3, 4) == Vector(4, 6)
+assert m.eval(S.doubled(Vector(1, 2))) == [S.Vector(2, 4)]
+```
+
+The five examples under `examples/ch17-concurrency-and-the-loop/09-class_values.metta`
+to `15-class_decorators.metta` write each mapping's rows by hand beside the
+Python twin that derives them.
+
 The program is data. An equation is an atom, so adding one at run time changes
 what the program means, and the equations are queryable like anything else:
 
