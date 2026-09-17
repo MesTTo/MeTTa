@@ -285,6 +285,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A foreign-space question costs three inferences instead of twelve: the
+  Python bridge answers `seam:foreign_space/1` from the engine's claim
+  registry, which the registration door already claims in the transaction
+  that writes the provider record, instead of a general native match over
+  the catalog on every ask; the engine asks it at every native match and
+  twice per door call. The dispatch read of a provider reads the catalog row
+  through `metta_contract_fact/1` rather than validating the whole owned
+  record under a snapshot on every crossing.
 - Compiled Python value calls execute through `_python-call-value`, the seam
   that binds a callable value and evaluates it in its home for exactly one
   answer; a stream operation called in value position still forks. The
