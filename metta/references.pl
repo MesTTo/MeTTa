@@ -497,7 +497,7 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
              %compiles, so a space holding one `from` row lost its tables the
              %first time it asked table-stats [tested:
              %test_a_reference_refresh_that_changes_nothing_keeps_the_table;
-             %commit=WORKTREE]. A change in a HOME's definition reaches this
+             %commit=689745c3bb9ef9a36b5427bb3e7289a69da9b71b]. A change in a HOME's definition reaches this
              %module through its own announcement and the support graph, not
              %through the refresh, so nothing is lost by standing still.
              ( metta_reference_roots(Module, Name, Arity, Previous) -> true

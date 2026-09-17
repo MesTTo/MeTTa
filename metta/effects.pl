@@ -1728,7 +1728,7 @@ metta_effect_plan_source_head(Module, Head, Args, State0, State) :-
 %around it, which made every such form fail the plan outright, and a compiled
 %`raise Error(message)` whose constructor is a value call is exactly that
 %shape [tested: an_application_headed_by_a_defined_call_follows_the_head_definition;
-%commit=WORKTREE]. The applied result is a callable the walk cannot see, so
+%commit=689745c3bb9ef9a36b5427bb3e7289a69da9b71b]. The applied result is a callable the walk cannot see, so
 %the application itself is dynamic.
 metta_effect_plan_source_head(Module, Head, _, State0, Queue-Effects) :-
     Head = [_|_],
