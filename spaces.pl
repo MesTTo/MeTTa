@@ -298,6 +298,7 @@
             metta_exec_module_known/2,
             metta_exec_module_generation/2,
             metta_existing_import/3,
+            metta_prepare_local_predicate/2,
             metta_forget_space_parent/1,
             metta_host_clear_defined/1,
             metta_host_clear_space/1,
