@@ -156,17 +156,24 @@ Defect: abolish can leave erased clauses linked to a definition. S_VIRGIN
   Repeating abolish resets the supervisor but retains the same condition.
 Reproduction: tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.pl,
   a compiled call after abolish while an earlier call retains its logical
-  update view. A fresh predicate verifies the same loader independently.
+  update view, and a tabled predicate declared ahead of its clause called
+  under the debugger, the patch's own hazard. A fresh predicate verifies the
+  same loader independently.
 Patch: tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch,
   against swipl-devel V10.1.14 src/pl-wam.c and src/pl-vmi.c: one test,
   `undefinedForCall()`, says a call must resolve its definition first when the
   predicate is not declared and either has no definition or is a clause
   predicate with no live clause, whatever erased clauses it still links; the
-  VM's call sites and `getProcDefinedDefinition()` use it in place of the raw
-  first-clause pointer, so the loader (exception/3, autoload) is consulted for
-  a reset predicate and a loader that defines nothing still ends in the
-  undefined supervisor. The reproduction answers absent; SWI's core, db,
-  transaction, tabling, save, files and compile groups pass on the build.
+  count is read from a clause list only, never from a foreign, thread-local
+  or closure definition, since a closure (pl-wrap.c) copies the wrapped
+  definition and carries the count it had when it was wrapped, 0 for a
+  table/1 or wrap_predicate/4 ahead of the clauses, and the debugger's and
+  the alerted call port resolve closures too; the VM's call sites and
+  `getProcDefinedDefinition()` use it in place of the raw first-clause
+  pointer, so the loader (exception/3, autoload) is consulted for a reset
+  predicate and a loader that defines nothing still ends in the undefined
+  supervisor. The reproduction answers absent on both samples; SWI's core,
+  db, transaction, tabling, save, files and compile groups pass on the build.
 Lifted when: SWI-Prolog as shipped consults the loader for a reset predicate
   despite retained erased clauses, so the reproduction prints absent; the
   patch and the entry go together then.

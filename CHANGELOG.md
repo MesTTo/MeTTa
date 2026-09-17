@@ -594,6 +594,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Importing a MeTTa library with type declarations from an `initialization/1`
+  directive, a plunit suite's setup, or any goal that runs while the VM is
+  alerted (a pending signal, the debugger) no longer loses the library on the
+  patched host. The host's undefined-call test read a tabling closure's copied
+  clause count as "no clauses" (0 for a `:- table` declared ahead of its
+  clause), resolved the closure through its procedure and handed the tabling
+  wrapper its own closure, so `type_syntax_analysis/3` completed an empty table,
+  `prepare_metta_source_in/4` failed without a word and the import answered
+  `[]`. `undefinedForCall()` now reads the count from clause lists only
+  (`tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch`),
+  and the entry's reproduction gains the closure sample. The lib_thread_scope,
+  lib_soft, lib_strategy and lib_thread_scope_deferred suites are green on the
+  rebuilt host.
 - An error raised with a MeTTa head as its context renders as `head: message`
   on every SWI-Prolog version: the engine renders its own contexts through
   `prolog:message_location//1`, where 10.1.14 would print `head/0: message`.

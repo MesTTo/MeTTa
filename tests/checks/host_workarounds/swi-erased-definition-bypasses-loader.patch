@@ -1,8 +1,8 @@
 diff --git a/src/pl-wam.c b/src/pl-wam.c
-index 1cc1aa7..13f1a30 100644
+index 1cc1aa7..3aa1ef3 100644
 --- a/src/pl-wam.c
 +++ b/src/pl-wam.c
-@@ -1665,10 +1676,27 @@ getProcDefinitionForThread(Definition def, size_t tid)
+@@ -1665,10 +1665,36 @@ getProcDefinitionForThread(Definition def, size_t tid)
  }
  
  
@@ -11,7 +11,15 @@ index 1cc1aa7..13f1a30 100644
 +   count is zero.  A definition abolished while an older frame keeps its
 +   logical update view still links its erased clauses, so the raw pointer
 +   alone reported it defined, the loader (exception/3, autoload) was never
-+   consulted and the supervisor then found no clause and raised. */
++   consulted and the supervisor then found no clause and raised.  The count
++   is read from a clause list only: a foreign or thread-local definition
++   keeps another union member there, and so does a closure (pl-wrap.c), a
++   copy of the wrapped definition whose impl.wrapped overwrites the first
++   two clause-list words and leaves the count at the value the predicate
++   had when it was wrapped, 0 for a table/1 or wrap_predicate/4 that ran
++   ahead of the clauses.  A closure names the definition it calls and is
++   never undefined; resolving it through the procedure would hand the
++   wrapper its own closure. */
 +#define undefinedForCall(def) LDFUNC(undefinedForCall, def)
 +static inline bool
 +undefinedForCall(DECL_LD Definition def)
@@ -20,6 +28,7 @@ index 1cc1aa7..13f1a30 100644
 +  if ( !def->impl.any.defined )
 +    return true;
 +  return ( isoff(def, P_FOREIGN|P_THREAD_LOCAL) &&
++	   def->codes != SUPERVISOR(wrapper) &&
 +	   def->impl.clauses.number_of_clauses == 0 );
 +}
 +
@@ -32,7 +41,7 @@ index 1cc1aa7..13f1a30 100644
  
  #ifdef O_PLMT
 diff --git a/src/pl-vmi.c b/src/pl-vmi.c
-index f64f4e1..b077402 100644
+index f64f4e1..2658c7f 100644
 --- a/src/pl-vmi.c
 +++ b/src/pl-vmi.c
 @@ -2507,7 +2507,7 @@ VMI(I_LCALL, 0, 1, (CA1_LPROC))
