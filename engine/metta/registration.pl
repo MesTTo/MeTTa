@@ -998,10 +998,29 @@ runtime_type_guarded(xor).
 runtime_type_guarded(implies).
 
 %The evaluator's catch-all: real errors take the recovery, control
-%signals keep flying.
+%signals keep flying, and so does a missing procedure. The boot forbids
+%autoloading and the gate's list_undefined lane requires every name the
+%engine reaches to be declared, so existence_error(procedure, _) is never a
+%property of the program under evaluation: it is a defect in the engine, a
+%binding or a library declaration, and recovering from it turns a route that
+%cannot run into one that declines. metta_py_query_repeatable did exactly
+%that from 2026-09-02 until 98540fdb2 declared goals_list_to_conj/2 where the
+%door called it: every guarded len() fell back to the cursor route, whose
+%work runs in an SWI engine the caller's inference counter cannot see, and the
+%query-where pin followed it down 22x [measured 2026-09-17: 1266947 at
+%e2f8d009a, 58291 at 6872eee94, 1329387 once the name was declared;
+%commit=98540fdb2].
+%A site that legitimately probes for a predicate asks current_predicate/1 or
+%catches at the call, as metta_contract_fact/1 does.
 :- meta_predicate catch_recover(0, 0).
 catch_recover(Goal, Recovery) :-
-    catch(Goal, E, ( control_exception(E) -> throw(E) ; call(Recovery) )).
+    catch(Goal, E,
+          (   ( control_exception(E) ; missing_procedure(E) )
+          ->  throw(E)
+          ;   call(Recovery)
+          )).
+
+missing_procedure(error(existence_error(procedure, _), _)).
 
 %Whether a symbol is callable from where we are: a process-wide function that
 %no named equation module claims, a function this module defines, or one &self

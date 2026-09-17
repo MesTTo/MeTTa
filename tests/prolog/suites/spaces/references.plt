@@ -135,6 +135,32 @@ test(one_face_publication_recompiles_a_shared_caller_once,
         unwrap_predicate(filereader:recompile_function_in_module_stable(_, _),
                          reference_repairs)).
 
+%A refresh that finds the same roots for an imported head announces no
+%change for it. The announcement abolishes every declared table and forgets
+%every specialization, and a refresh runs whenever a deferred translation
+%settles, so a space holding one `from` row lost its tables the first time
+%any library function compiled
+%[tested: test_a_reference_refresh_that_changes_nothing_keeps_the_table].
+test(a_refresh_that_finds_the_same_roots_announces_nothing,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_add(1, [=, ['reference-left'], 2]),
+    reference_from(2, 1),
+    reference_answers(2, ['reference-left'], Bag), assertion(Bag == [2]),
+    reference_space(2, Target), space_module(Target, Module),
+    flag(reference_announcements, _, 0),
+    setup_call_cleanup(
+        wrap_predicate(spaces:announce_function_changed(Owner, Name),
+                       reference_announcements, Original,
+                       ( ( Owner == Module
+                         -> flag(reference_announcements, N, N+1) ; true ),
+                         call(Original) )),
+        ( metta_engine:metta_reference_changed(Target),
+          metta_engine:metta_reference_refresh,
+          flag(reference_announcements, Count, Count), assertion(Count == 0),
+          reference_answers(2, ['reference-left'], Again), assertion(Again == [2]) ),
+        unwrap_predicate(spaces:announce_function_changed(_, _),
+                         reference_announcements)).
+
 test(data_mutations_keep_compiled_clauses_and_retire_only_removed_grades,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-
     reference_add(3, [=, ['reference-callee'], true]), reference_from(1, 3),

@@ -6,6 +6,9 @@
 % Guarantees:
 %   - recovery preserves the engine's bound-control exceptions [tested:
 %     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=bbb512316280110a747e31c26adfc31e8c5104be].
+%   - recovery never eats a missing procedure, which is a defect and not a
+%     property of the program under evaluation [tested:
+%     a_missing_procedure_is_a_defect_no_recovery_catch_eats; commit=WORKTREE].
 %   - test/3 displays host-only partial applications without claiming they are
 %     serializable MeTTa text [tested:
 %     a_partial_application_remains_visible_in_test_output; commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].
@@ -2750,6 +2753,16 @@ test(limit_expiry_is_a_control_signal_no_recovery_catch_eats) :-
                           error(metta_control_signal(time_limit, 1.0), c)]),
            ( catch(catch_recover(throw(Error), fail), Caught, true),
              assertion(Caught == Error) )).
+
+%A missing procedure is a defect in the engine, a binding or a library
+%declaration, never a property of the program under evaluation: the boot
+%forbids autoloading, so recovery must not read it as "no answer". The goal
+%is built at run time so the undefined-name lane does not see a literal call.
+test(a_missing_procedure_is_a_defect_no_recovery_catch_eats) :-
+    Goal =.. ['no-such-predicate-recovery-probe', 1],
+    catch(catch_recover(Goal, fail), Caught, true),
+    assertion(Caught = error(existence_error(procedure, _), _)),
+    \+ catch_recover(throw(error(type_error(integer, a), c)), fail).
 
 test(with_pragma_refuses_a_malformed_setting,
      [throws(error(domain_error(metta_pragma_setting, _), _))]) :-

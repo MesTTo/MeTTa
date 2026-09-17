@@ -128,6 +128,10 @@ metta_reference_refresh_now :-
         % Publish all bindings and metadata before repairing a shared caller.
         % A defining home's face may be needed to select its own closure;
         % reading that context does not publish the unmodified home.
+        % The spaces this drain refreshes, read by the publication loop: a
+        % head imported from one of them is rebound and announced even when
+        % its roots are unchanged, because the home's definitions may have.
+        b_setval('$metta_reference_draining', Pending),
         with_typing_policy_stable(support_graph:with_support_repairs_deferred(
             ( flag('$metta_reference_epoch', Current, Current),
               ( Current =:= Version
@@ -146,6 +150,7 @@ metta_reference_refresh_now :-
                  metta_reference_consumed(Pending),
                  Result = published
               ; Result = changed ) ))),
+        b_setval('$metta_reference_draining', []),
         ( Result == published
         -> forall(support_graph:support_repair_invalidations, true)
         ; true ),

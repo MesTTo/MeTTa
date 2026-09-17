@@ -48,7 +48,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OPT_OUT = "artifact-path-created"
-SKIP_PARTS = ("/ai-tmp/", "/.claude/", "/node_modules/", "/build/", "/.git/")
+# .mutmut/ is the mutation lane's workspace of copied test files, whose relative
+# paths resolve only from their originals.
+SKIP_PARTS = ("/ai-tmp/", "/.claude/", "/node_modules/", "/build/", "/.git/", "/.mutmut/")
 
 
 def folded(node: ast.BinOp, source: Path) -> Path | None:

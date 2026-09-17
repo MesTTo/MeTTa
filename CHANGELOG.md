@@ -618,6 +618,27 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A reference-face refresh that finds the same roots for an imported head no
+  longer rebinds it and announces it as changed. Every settled deferred
+  translation refreshes the faces of spaces holding a `from` row, and each
+  announcement abolished every declared table and forgot every
+  specialization, so a class definition in a space emptied the table a live
+  tabled call had just filled the first time `table-stats` compiled.
+- The effect planner accepts an application headed by a defined call,
+  `((f 1) 2)`, the shape a compiled `raise Error(message)` takes when its
+  constructor is a value call: the head's definition is followed and the
+  application ranks dynamic, where the plan used to fail outright and refuse
+  every class carrying such a method.
+- A missing Prolog procedure is no longer recovered from as "no answer": the
+  evaluator's catch-all rethrows `existence_error(procedure, _)`, because the
+  boot forbids autoloading and a name nothing defines is a defect in the
+  engine, a binding or a library declaration rather than a property of the
+  program. From 2026-09-02 the guarded count door called `goals_list_to_conj/2`
+  where nothing defined it, the recovery read that as "not repeatable", and
+  every guarded `len()` materialised its cursor instead of counting; the
+  query-where benchmark followed that route down 22x, since a cursor's work
+  runs in an SWI engine the caller's inference counter cannot see, and it
+  re-pins at the count route's cost.
 - A specialization whose body translation forces a deferred function in a
   space that holds a reference row is no longer left as an orphan: the
   materialisation's face change invalidated the construction while its

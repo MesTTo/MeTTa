@@ -466,6 +466,20 @@ test(a_compiled_goal_plan_follows_raw_definitions_and_joins_operations,
     assertion(memberchk(['add-atom', writesState], Both)),
     assertion(BothEffect == writesState).
 
+%An application whose HEAD is itself a defined call, ((f 1) 2): the head's
+%definition is followed like any named call. Following it pushes the
+%definition onto the walk's queue, and the head clause used to demand the
+%queue unchanged, so every such form failed the plan; a compiled
+%`raise Error(message)` whose constructor is a value call has this shape.
+test(an_application_headed_by_a_defined_call_follows_the_head_definition,
+     [ setup(effect_plan_definitions), cleanup(effect_plan_cleanup) ]) :-
+    effect_goal_plan([['plunit-plan-caller', 1], 2], Operations, Effect),
+    assertion(memberchk(['add-atom', writesState], Operations)),
+    assertion(memberchk(['<dynamic-operation>', oracleIO], Operations)),
+    % Applying the head's result is a call the walk cannot see, and that
+    % dynamic row sits at the lattice's top, so it is the join.
+    assertion(Effect == oracleIO).
+
 %FAIL CLOSED, both ways an unclassified grounded call can arrive. A bridge
 %dispatch whose recovered operation has no declaration is oracleIO under that
 %operation's OWN name, so the row a host reads names what the program wrote;
