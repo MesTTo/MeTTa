@@ -594,6 +594,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `copy()` copies a space's own rows, the enumeration `save()` persists, so
+  an origin row `(from &provider)` copies and the declarations and `(@doc ...)`
+  rows that origin projected are left to the clone's own origin. Copying the
+  projections too gave the clone a second document for every documented name
+  and a copy of the copy a third, while a projected declaration was shadowed
+  by its authored twin; `&self` and its clone then disagreed on exactly the
+  documents of every class defined earlier in the process
+  (`test_aio_structural_surface_behaves` under the eight-chapter battery).
 - A library origin declared for a name whose local definition was removed
   earlier binds the name to the library instead of refusing with `import/1: No
   permission to import capture/2 into ... (already imported from ...)`. Removing
