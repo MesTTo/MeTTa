@@ -1854,7 +1854,7 @@ eval(C0, Out) :-
     %source's body after one step and counted a zero-answer body as one
     %answer. The frame's mode is suspended around the enumeration
     %[tested: test_call_value.py::test_call_value_holds_native_results,
-    %test_call_value_refuses_zero_and_multiple_answers; commit=WORKTREE].
+    %test_call_value_refuses_zero_and_multiple_answers; commit=d78d867637047c164be4bc1ab63c40b46d2cff5d].
     without_function_evaluation(once((
         eval(Source, Produced),
         arg(1, State, Count),
