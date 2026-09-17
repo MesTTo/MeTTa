@@ -360,6 +360,7 @@
             metta_reference_restored/2,
             metta_reference_retired/2,
             metta_reference_definition_changed/1,
+            metta_reference_face_wave/0,
             metta_reference_prepare/3,
             metta_source_singleflight/2,
             metta_graded_pair/5,
