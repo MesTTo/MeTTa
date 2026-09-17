@@ -494,7 +494,7 @@ space_canonical_atom(Space, Encoded) :-
 %engine/translator.pl does, for a load that reaches it without engine/metta.pl,
 %and the guard keeps a fact already recorded
 %[tested: shared_decode_index:the_translator_loaded_through_the_shim_names_the_engine_artifacts;
-%commit=WORKTREE].
+%commit=fc549f6519bb2eed55e94b40e6e11200687cf147].
 :- dynamic metta_engine:metta_engine_src_dir/1.
 :- prolog_load_context(directory, Dir),
    (   metta_engine:metta_engine_src_dir(_) -> true
