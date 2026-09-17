@@ -21,7 +21,7 @@
 %   - lib_tabling itself is in the measured graph and reaches exactly the five
 %     reviewed engine surfaces named by reaches/3, the support graph's
 %     dependents closure among them
-%     [tested: lib_tabling_reaches_only_its_declared_surfaces; commit=WORKTREE]
+%     [tested: lib_tabling_reaches_only_its_declared_surfaces; commit=0cb96b1823038ffb8084168a7103dfac9eef0daa]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

@@ -21,7 +21,7 @@
 %     a_callees_change_drops_its_callers_table,
 %     an_unrelated_functions_change_keeps_the_tables,
 %     an_unbounded_body_drops_on_any_change,
-%     a_static_reach_is_remembered_until_its_program_moves; commit=WORKTREE]
+%     a_static_reach_is_remembered_until_its_program_moves; commit=0cb96b1823038ffb8084168a7103dfac9eef0daa]
 %   - the change hook does not prune the handlers loaded after it, so a dual
 %     built while tabling is declared is still dropped when its function
 %     changes [tested: duals_survive_tabling]

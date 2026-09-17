@@ -109,7 +109,7 @@ metta_reference_invalidate(Spaces) :-
 %wave and follows that one, which is what keeps a table through the first
 %compile of a deferred library function in a space holding a `from` row
 %[tested: test_a_reference_refresh_that_changes_nothing_keeps_the_table;
-%commit=WORKTREE].
+%commit=0cb96b1823038ffb8084168a7103dfac9eef0daa].
 metta_reference_face_wave :-
     nb_current('$metta_reference_face_wave', true).
 
