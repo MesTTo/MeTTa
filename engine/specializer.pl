@@ -561,7 +561,7 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
             %this attempt wrote go, and the caller attempts again on the
             %settled state [tested: specializer:
             %a_specialization_invalidated_while_it_translates_is_rebuilt_once;
-            %commit=WORKTREE].
+            %commit=30c0526413e5daacc2efe3c29fd392d6cf86abb9].
             remove_every_sexp(Space, [':', SpecName, _]),
             Outcome = invalidated
         )
