@@ -6,7 +6,7 @@
 % the translator loaded through the shim alone, without engine/metta.pl, still
 % names the engine's artifacts from the engine's directory
 % [tested: the_translator_loaded_through_the_shim_names_the_engine_artifacts;
-% commit=WORKTREE].
+% commit=fc549f6519bb2eed55e94b40e6e11200687cf147].
 
 :- consult('../../../../extensions/python/metta/_binding/shim.pl').
 
