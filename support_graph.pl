@@ -338,7 +338,7 @@ support_node(memo(Module, Name, Arity)) :-
 % abolishes the trie in its invalidation action, the shape lib_memo's memo
 % node already has [tested: lib_tabling:a_callees_change_drops_its_callers_table,
 % lib_tabling:an_unrelated_functions_change_keeps_the_tables,
-% test_a_declared_table_keeps_a_shared_heads_definition_cost_flat; commit=WORKTREE].
+% test_a_declared_table_keeps_a_shared_heads_definition_cost_flat; commit=0cb96b1823038ffb8084168a7103dfac9eef0daa].
 support_node(table(Module, Name, Arity)) :-
     atom(Module),
     atom(Name),
