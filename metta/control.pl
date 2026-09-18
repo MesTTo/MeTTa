@@ -643,17 +643,21 @@ metta_inference_budget_spent(_, Base, Inferences) :-
 %losers leaves its creator's tally alone, and its creator's counter never
 %saw that credit, since a joined child brings its own count and not its
 %children's.
-%The three join doors below are NOT exported from metta_engine; lib_thread
-%calls them module-qualified. The tally door metta_discarded_inferences/1 IS
-%exported, as the seam requires of a declared host service. Adding the four
-%names to the export list, with the doors defined or not, moved every seat
-%row measured in a fresh process (engine translate +1.2% instructions, MORK
-%conjunction +4% per operation, the C term-in +0.4%); the doors defined
-%without the exports moved nothing, four other names of any arity moved
-%nothing, and the tally door exported alone moved nothing, so the cost is
-%the join doors' names in the list and not any row's path [measured
+%The three join doors below are exported and declared services, and the
+%export has a measured price the seat ledgers carry: the four counter names
+%in metta_engine's export list, with the doors defined or not, move every
+%seat row measured in a fresh process (engine translate +1.4%
+%instructions, MORK conjunction +4% per operation, the C term-in +0.4%);
+%the doors defined without the exports move nothing, four other names of
+%any arity move nothing, and the tally door exported alone moves nothing,
+%so the cost is these three names in the list and not any row's path. The
+%price is paid because a library may call only published engine services
+%(the lib-surface lane) and a published service must be exported
+%(engine_modules:every_declared_service_is_exported_to_the_host); the
+%alternative, the join brackets living in lib_thread over an exported
+%discard door, is the revisit if the price ever matters [measured
 %2026-09-19: A/B rounds 3 to 7 on the tip, wt-battery-2 ai-ab-remedy-3.log
-%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=e81e5369ecce854c09c75113cf1ca30e76d06154].
+%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=WORKTREE].
 metta_join_measured(Thread, Status, Credit) :-
     statistics(inferences, Before),
     thread_join(Thread, Status),

@@ -1356,6 +1356,12 @@ kind(metta_host_inference_budget/3, host_service).
 %branch's spend (engine/metta/control.pl, metta_join_measured/3); the host
 %reads it beside the interrupt poll's term and takes the delta out.
 kind(metta_discarded_inferences/1, host_service).
+%The join brackets lib_thread settles its workers through: a bracketed
+%thread_join/2 answering the joined worker's credit, the same bracket that
+%discards it, and the discarding write (engine/metta/control.pl).
+kind(metta_join_measured/3, service).
+kind(metta_join_discarding/2, service).
+kind(metta_discard_inferences/1, service).
 %The same bargain on the other axis. A wall-clock bound cannot be placed around
 %engine_next/2 either, and for a sharper reason: call_with_time_limit/2 cannot
 %interrupt a goal running inside an engine, so a host that wraps its pull loop
