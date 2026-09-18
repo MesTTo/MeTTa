@@ -1,3 +1,7 @@
+% Guarantees: metta_with_trailed/3 owns specialization recursion and checking
+%   roots; mark_specialization_needed/0 mutates only the retained payload
+%   [source: engine/specializer.pl:maybe_specialize_call/4; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: specialize higher-order MeTTa calls and invalidate generated
 %   functions when their source equations change.
 % Guarantees: specialization_goal/4 materializes retained source before
@@ -5,6 +9,9 @@
 %   abolished [tested:
 %   specializer_invalidation:a_copied_specialization_materializes_before_its_call;
 %   commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee].
+% Guarantees: forget_symbol/2 retires its selected executable references through
+%   filereader:retire_translated_clauses/2, preserving provenance and callback
+%   order [tested: source_retirement, specializer_invalidation; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: segment_specialization/4 compiles an arriving arity once and
 %   uses the existing source rollback and specialization invalidation owner
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -112,7 +119,8 @@
 :- dynamic ho_specialization_unverified/2.
 %Held while a specialization's own check is running, so the recursive
 %calls inside it do not each start another check.
-:- dynamic ho_specialization_checking/1.
+:- seam:context_reader(ho_specialization_checking(Name),
+                       '$metta_specialization_checking', stack(Name)).
 %The report lifecycle, distinct from the per-specialization memo tables: the
 %marker says this run opted into a coverage statement and still needs one.
 :- dynamic metta_specializations_verified/0.
@@ -144,17 +152,14 @@ maybe_specialize_call(HV, AVs, Out, Goal) :-
     ( active_specialization(HV, Stack, ActiveKey, ActiveSpecName)
       -> CleanBindSet =@= ActiveKey,
          specialization_goal(ActiveSpecName, AVs, Out, Goal),
-         nb_setval('$metta_spec_needed', true)
-    ; capture_nb_state('$metta_spec_needed', PreviousNeeded),
-      setup_call_cleanup(
-          ( nb_setval('$metta_spec_needed', false),
-            nb_setval('$metta_spec_stack',
-                      [specializing(HV, CleanBindSet, SpecName)|Stack]) ),
-          specialize_call(HV, AVs, Out, Goal, CleanBindSet, MetaList,
-                          HasDirectBenefit, SpecName, Arity),
-          ( nb_setval('$metta_spec_stack', Stack),
-            restore_nb_state('$metta_spec_needed', PreviousNeeded) )),
-      nb_setval('$metta_spec_needed', true)
+         mark_specialization_needed
+    ; % Workaround: swi-cleanup-window - trail both roots and mutate only the needed cell.
+      metta_with_trailed('$metta_spec_needed', needed(false),
+          metta_with_trailed('$metta_spec_stack',
+              [specializing(HV, CleanBindSet, SpecName)|Stack],
+              specialize_call(HV, AVs, Out, Goal, CleanBindSet, MetaList,
+                              HasDirectBenefit, SpecName, Arity))),
+      mark_specialization_needed
     ).
 
 % Arity is static; argument values remain dynamic. Register the residual
@@ -171,13 +176,12 @@ segment_specialization(Fun, Args, Out, Goal) :-
     ->  true
     ;   ( nb_current('$metta_segment_stack', Stack) -> true ; Stack = [] ),
         \+ memberchk(Module-Fun, Stack),
-        setup_call_cleanup(
-            nb_setval('$metta_segment_stack', [Module-Fun|Stack]),
+        % Workaround: swi-cleanup-window - the arriving-shape recursion stack is trailed.
+        metta_with_trailed('$metta_segment_stack', [Module-Fun|Stack],
             with_typing_policy_stable(
                 with_mutex('$metta_specializer',
                     transaction(segment_specialization_locked(
-                        Module, Fun, N, Name)))),
-            nb_setval('$metta_segment_stack', Stack))
+                        Module, Fun, N, Name)))))
     ),
     specialization_goal(Name, Args, Out, Goal).
 
@@ -229,12 +233,10 @@ active_specialization(HV, [specializing(ActiveHV, Key, SpecName)|_],
 active_specialization(HV, [_|Stack], Key, SpecName) :-
     active_specialization(HV, Stack, Key, SpecName).
 
-capture_nb_state(Name, present(Value)) :- nb_current(Name, Value), !.
-capture_nb_state(_, absent).
-
-restore_nb_state(Name, present(Value)) :- !, nb_setval(Name, Value).
-restore_nb_state(Name, absent) :-
-    ( nb_current(Name, _) -> nb_delete(Name) ; true ).
+mark_specialization_needed :-
+    ( nb_current('$metta_spec_needed', Cell), Cell = needed(_)
+    -> nb_setarg(1, Cell, true)
+    ; true ).
 
 % Keep the established readable name for the injective singleton-atom case.
 % The delimiter cannot occur in HV and the closing bracket cannot occur in
@@ -584,7 +586,7 @@ specialization_clauses_translated(HV, MetaList, HasDirectBenefit, SpecName,
     forall(member(TypeChain, TypeChains),
            add_sexp(Space, [':', SpecName, TypeChain])),
     ( HasDirectBenefit == true
-      -> nb_setval('$metta_spec_needed', true)
+      -> mark_specialization_needed
     ; true ),
     maplist({SpecName}/[paired_meta(fun_meta(ArgsNorm,BodyExpr),
                                     _SourceMeta,StoredMeta),
@@ -594,7 +596,7 @@ specialization_clauses_translated(HV, MetaList, HasDirectBenefit, SpecName,
               specialization_storage_input(SpecName, StoredMeta,
                                            StoredInput) ),
             MetaList, ClauseInfos),
-    nb_getval('$metta_spec_needed', true).
+    nb_current('$metta_spec_needed', needed(true)).
 
 %remove_sexp/3 takes one occurrence, which is what a removal means; a
 %construction sweeping its own rows takes every one it wrote.
@@ -723,9 +725,10 @@ metta_verified_specialization(SpecName, Spec) :-
         %[measured 2026-08-18]. The specializer's own compile-time
         %recursion guard ($metta_spec_stack) is the same pattern.
         call(Spec)
-    ;   setup_call_cleanup(assertz(ho_specialization_checking(SpecName)),
-                           metta_check_specialization(SpecName, Spec),
-                           retractall(ho_specialization_checking(SpecName))),
+    ;   ( nb_current('$metta_specialization_checking', Names) -> true ; Names = [] ),
+        % Workaround: swi-cleanup-window - recursive verification follows a trailed stack.
+        metta_with_trailed('$metta_specialization_checking', [SpecName|Names],
+                           metta_check_specialization(SpecName, Spec)),
         call(Spec)
     ).
 
@@ -981,12 +984,7 @@ forget_symbol(Module, Name) :-
     %of it failed with it [tested:
     %extensions/python/tests/ch19_spaces_backed_by_anything/test_import_reuse.py::
     %test_import_translation_leaves_variable_heads_dynamic].
-    forall(member(R, Refs),
-           (   translated_from(R, Term)
-           ->  forget_translated_from(Module, R, Term),
-               erase(R)
-           ;   erase(R)
-           )),
+    filereader:retire_translated_clauses(Module, Refs),
     %Withdraw the ownership rows before invalidating the generated function's
     %own dependents. A compatibility cycle can otherwise re-enter this action
     %through the opposite row before either side has retired.

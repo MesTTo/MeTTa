@@ -1,3 +1,11 @@
+% Guarantees: working_dir/1, active_source_load/1, active_source_program/1 and
+%   source_recompile_context/2 read stacks scoped by metta_with_trailed/3, and
+%   each is a declared context reader compiled to its read at every call site
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+% Guarantees: active_source_load/1 and with_working_directory/2 are exported
+%   to their compiler and manifest consumers [tested: engine_layering;
+%   commit=cdcb23421809ec3a493059a381e0245cf08a1984].
+%
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
 % Assumes: source_origins.pl keeps supplied-value origins beside parsed terms;
@@ -20,6 +28,16 @@
 %   registry artifact without replacing its clause reference
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
 %   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
+% Guarantees: run_source_runnable/2 executes the translator's fixed answer,
+%   name and fuel envelope from compiled clauses while each form keeps its
+%   source-prefix translation, effects and observation boundary
+%   [tested: source_runnable_envelope, source_observation, fuel; commit=e246959279271d22f166a1c8fb1840896295a020].
+% Guarantees: retire_translated_clauses/2 consumes an ordered list of exact
+%   executable references, stopping at the first failed erase or callback
+%   [tested: source_retirement; commit=e246959279271d22f166a1c8fb1840896295a020].
+% Owns resources: a trailed publication context selects a source's journal
+%   owners for its lexical scope; source rows remain transactional
+%   [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: plain_source_declarations/3 validates splice syntax before
 %   any source effect runs [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarded by: import_when/4 claims one source; runnable forms run outside the
@@ -308,6 +326,7 @@
             '$metta_equation_token'/4,
             stored_equation_source/4,
             forget_translated_from/3,
+            retire_translated_clauses/2,
             forget_space_source_loads/1,
             recompile_function_impl/1,
             recompile_function_impl_in/2,
@@ -328,17 +347,19 @@
             %and engine/translator.pl asks whether a source load is active
             %before it defers a runnable's definition.
             load_metta_file/2,
+            active_source_load/1,
             active_source_program/1,
             source_definition_arrived/1,
             process_metta_string/2,
             %source_pending_definition/2 is the translator's question about a
             %definition later in the file it is compiling; translated_from/2 is
             %the compiled clause's source equation, which the specializer and
-            %the tracer both read; working_dir/1 is the relative-path base a
-            %parity driver asserts from outside.
+            %the tracer both read; working_dir/1 reads the relative-path base
+            %that a driver scopes through with_working_directory/2.
             source_pending_definition/2,
             translated_from/2,
             working_dir/1,
+            with_working_directory/2,
             %The engine-wide print-suppression flag, READ by
             %engine/translator.pl, engine/specializer.pl and engine/metta.pl as
             %well as by the three printers here, so there has to be exactly one
@@ -457,14 +478,15 @@ metta_host_set_silent(Silent) :-
     retractall(silent(_)),
     assertz(silent(Silent)).
 
-:- thread_local working_dir/1.
+%The loader's contexts are trailed stacks read at every stored atom and
+%every compiled equation, so each reader is declared and compiled to its read
+%(engine/ext_points.pl, context_reader/4).
+:- seam:context_reader(working_dir(Directory), '$metta_working_dirs', stack(Directory)).
 :- dynamic compiled_metta_source/1.
-:- thread_local active_source_load/1.
 :- dynamic source_load_assertion/3.
 :- dynamic source_load_support_assertions/2.
 :- dynamic source_load_resource/2.
 :- dynamic source_load_repair/2.
-:- thread_local source_recompile_context/2.
 %What a file put where, so that loading it again can REPLACE that rather than
 %add to it. SWI states the rule this implements: "clauses are owned by the file
 %in which they are defined. This information is used to replace the old
@@ -552,14 +574,17 @@ metta_octets_digest(Payload, Digest) :-
 %one]. Paid here instead, where it belongs.
 :- metta_text_digest("", _).
 
-push_working_dir(Filename) :- file_directory_name(Filename, Dir0),
-                              ( absolute_file_name(Dir0, Dir, [file_type(directory), file_errors(fail)])
-                                -> true
-                                 ; Dir = Dir0 ),
-                              asserta(working_dir(Dir)).
+:- meta_predicate with_file_directory(+, 0), with_working_directory(+, 0).
+with_file_directory(Filename, Goal) :-
+    file_directory_name(Filename, Dir0),
+    ( absolute_file_name(Dir0, Dir, [file_type(directory), file_errors(fail)])
+    -> true ; Dir = Dir0 ),
+    with_working_directory(Dir, Goal).
 
-pop_working_dir :- retract(working_dir(_)), !.
-pop_working_dir.
+with_working_directory(Directory, Goal) :-
+    ( nb_current('$metta_working_dirs', Directories) -> true ; Directories = [] ),
+    % Workaround: swi-cleanup-window - nested import directories are a trailed stack.
+    metta_with_trailed('$metta_working_dirs', [Directory|Directories], Goal).
 
 %Read Filename into string S and process it (S holds MeTTa code):
 load_metta_file(Filename, Results) :- load_metta_file(Filename, Results, '&self').
@@ -575,10 +600,9 @@ load_entry_metta_file(Filename, Results, Space) :-
     ( var(Results) -> Results = [] ; true ).
 
 load_metta_file_impl(Filename, Results, Space) :-
-    setup_call_cleanup(push_working_dir(Filename),
-                       ( read_metta_source(Filename, S),
-                         process_loader_string(S, Results, Space) ),
-                       pop_working_dir).
+    with_file_directory(Filename,
+                        ( read_metta_source(Filename, S),
+                          process_loader_string(S, Results, Space) )).
 
 %One answer GROUP per runnable form, in source order, which the flattening
 %above deliberately loses: a program wants every answer and nothing else, and
@@ -608,9 +632,7 @@ load_entry_metta_source_groups(Filename, Space, Groups) :-
                 load_imported_metta_source_groups(CanonPath, Groups, Space)).
 
 load_metta_source_groups_impl(Filename, Space, Groups) :-
-    setup_call_cleanup(push_working_dir(Filename),
-                       read_metta_source_groups(Filename, Space, Groups),
-                       pop_working_dir).
+    with_file_directory(Filename, read_metta_source_groups(Filename, Space, Groups)).
 
 read_metta_source_groups(Filename, Space, Groups) :-
     read_metta_source(Filename, Source),
@@ -678,7 +700,7 @@ metta_host_rethrow_syntax(syntax_error(M)) :- !,
 metta_host_rethrow_syntax(Caught) :-
     throw(Caught).
 
-%The CLI asserts working_dir/1 from the file it loads and import! reads it
+%The CLI scopes working_dir/1 from the file it loads and import! reads it
 %unconditionally, so a string run needs one too; the process's own
 %directory is the honest analogue of "the file's directory" for source
 %with no file.
@@ -686,7 +708,7 @@ metta_host_default_working_dir :-
     (   working_dir(_)
     ->  true
     ;   working_directory(Dir, Dir),
-        assertz(working_dir(Dir))
+        nb_setval('$metta_working_dirs', [Dir])
     ).
 
 %Run source with one answer group per runnable form, in source order.
@@ -799,18 +821,14 @@ metta_host_load_file(File, Space, Groups) :-
     ( atom(File) -> FA = File ; atom_string(FA, File) ),
     absolute_file_name(FA, CanonPath, [access(read)]),
     file_directory_name(CanonPath, Dir),
-    findall(W, working_dir(W), Saved),
-    setup_call_cleanup(
-        ( retractall(working_dir(_)),
-          assertz(working_dir(Dir)) ),
+    % Workaround: swi-cleanup-window - a host file load trails its replacement directory.
+    metta_with_trailed('$metta_working_dirs', [Dir],
         import_when(true, Space, CanonPath,
             replacing_previous_load(CanonPath, Space,
                 load_imported_metta_file_impl(CanonPath, _),
                 with_source_load(CanonPath, Space,
                     ( read_metta_source(CanonPath, S),
-                      metta_host_run_source(S, Space, [], Groups) )))),
-        ( retractall(working_dir(_)),
-          forall(member(W, Saved), assertz(working_dir(W))) )).
+                      metta_host_run_source(S, Space, [], Groups) ))))).
 
 %Every form as a [Kind, Text] pair, none compiled, stored, or run: the
 %boot-manifest door. Text is the form's own source, which keeps the
@@ -1024,7 +1042,7 @@ source_summary_of_forms(Forms, Sigs, Decls) :-
 %the latter must still know which names have no equation in the source prefix
 %that has run so far. A keyed thread-local context survives every source door,
 %nests safely across imports, and disappears even when a form throws.
-:- thread_local active_source_program/1.
+:- seam:context_reader(active_source_program(Id), '$metta_source_programs', stack(Id)).
 :- thread_local source_pending_definition/2.
 :- thread_local source_compiled_definition/1.
 :- meta_predicate with_source_program_order(+, +, 0).
@@ -1059,14 +1077,19 @@ with_named_definition_order(Names, Goal) :-
     with_source_definition_order(Id, Names, Goal).
 
 with_source_definition_order(Id, Names, Goal) :-
+    ( nb_current('$metta_source_programs', Programs) -> true ; Programs = [] ),
+    % Workaround: swi-cleanup-window - register retirement before the trailed context.
     setup_call_cleanup(
-        asserta(active_source_program(Id), ContextRef),
-        ( forall(member(F, Names), assertz(source_pending_definition(Id, F))),
-          call(Goal),
-          flush_source_program_analysis_if_needed ),
-        ( erase(ContextRef),
-          retractall(source_pending_definition(Id, _)),
-          retractall(source_compiled_definition(Id)) )).
+        true,
+        metta_with_trailed('$metta_source_programs', [Id|Programs],
+            ( forall(member(F, Names), assertz(source_pending_definition(Id, F))),
+              call(Goal), flush_source_program_analysis_if_needed )),
+        catch(retire_source_program(Id), Ball,
+              (retire_source_program(Id), throw(Ball)))).
+
+retire_source_program(Id) :-
+    retractall(source_pending_definition(Id, _)),
+    retractall(source_compiled_definition(Id)).
 
 %A batch of definitions arriving through host doors rather than from a file.
 %Reference publication and dependent recompilation wait for the first door
@@ -1085,12 +1108,16 @@ with_source_definition_order(Id, Names, Goal) :-
 with_definition_batch(Goal) :-
     gensym(source_load_, LoadId),
     gensym(source_program_, ProgramId),
+    % The batch owns its definitions the way a source load owns its clauses:
+    % through the publication context, where active_source_load/1 reads the
+    % owner pin and the recorders unwrap it. The context is a trailed scope,
+    % so the batch's rows below are the only state a cleanup has to clear.
     setup_call_cleanup(
-        asserta(active_source_load(LoadId), LoadRef),
-        ( with_source_definition_order(ProgramId, [], Goal),
-          run_source_repairs(LoadId) ),
-        ( erase(LoadRef),
-          retractall(source_load_repair(LoadId, _)),
+        true,
+        with_owning_source_load(LoadId,
+            ( with_source_definition_order(ProgramId, [], Goal),
+              run_source_repairs(LoadId) )),
+        ( retractall(source_load_repair(LoadId, _)),
           retractall(support_recompile_pending(LoadId, _, _)),
           retractall(source_load_assertion(LoadId, _, _)),
           retractall(source_load_support_assertions(LoadId, _)),
@@ -1548,9 +1575,9 @@ recompile_function_in_module_stable(Module, G) :-
                  %clause body; commit=e8270f8551083f236ce5134ca299adf5347d6898].
                  metta_instrument_recursive_clause(Fresh, RawClause, Clause),
                  assertz(Module:Clause, NewRef),
-                 record_recompiled_source_assertion(Owners, NewRef),
+                 record_source_assertion(NewRef),
                  record_translated_from(NewRef, Term, StoredRef, NewSourceRef),
-                 record_recompiled_source_assertion(Owners, NewSourceRef) ))).
+                 record_source_assertion(NewSourceRef) ))).
 
 % Preserve arrival groups only while the written declaration set is unchanged.
 % Alias edits change expansions, not those raw groups. A declaration edit still
@@ -1595,20 +1622,19 @@ translate_recompiled_clause(Module, G, Term, types(Types), Clause) :-
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 :- meta_predicate with_source_recompile_owners(+, 0).
 with_source_recompile_owners(Owners, Goal) :-
-    recompile_load_context(Context),
-    setup_call_cleanup(asserta(source_recompile_context(Context, Owners), ContextRef),
-                       call(Goal),
-                       erase(ContextRef)).
+    b_getval('$metta_source_publication', source_context(Loads, Recompiles, _, Stored)),
+    ( Loads = [Load|_] -> Context = load(Load) ; Context = none ),
+    with_source_publication_context(
+        source_context(Loads, [recompile(Context, Owners)|Recompiles], Owners, Stored), Goal).
 
 % Forcing a deferred dependency pushes its own source pin. It must not inherit
 % the recompile owner of the caller that happened to force it.
 % [tested: test_source_replacement_retains_recompiled_binding_ownership; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
 source_recompile_owners(Owners) :-
-    source_recompile_context(Context, Owners), !,
-    recompile_load_context(Context).
-
-recompile_load_context(Context) :-
-    ( active_source_load(Load) -> Context = load(Load) ; Context = none ).
+    b_getval('$metta_source_publication',
+             source_context(Loads, Recompiles, _, _)),
+    member(recompile(Context, Owners), Recompiles), !,
+    ( Loads = [Load|_] -> Context = load(Load) ; Context = none ).
 
 % Compatibility name for the former name-index walk. Every compiled form now
 % records its supports at record_translated_from/3, so one indexed forward
@@ -1629,9 +1655,7 @@ record_translated_from(Ref, Term, SourceRef) :-
 record_equation_token(Ref, Name, Token) :-
     clause_property(Ref, module(Module)),
     assertz('$metta_equation_token'(Module, Name, Ref, Token), TokenRef),
-    ( source_recompile_owners(Owners)
-    -> record_recompiled_source_assertion(Owners, TokenRef)
-    ; record_source_assertion(TokenRef) ).
+    record_source_assertion(TokenRef).
 
 % A binding row records what arrival-time rewriting did to the occurrence
 % BEYOND resolving &self: a bound token, a form rewriter. &self itself needs
@@ -1787,6 +1811,17 @@ forget_translated_from(Module, Ref, [=, [G|_], _]) :-
 forget_translated_from(_, Ref, _) :-
     forget_translated_equation_binding(Ref),
     retractall(translated_from(Ref, _)).
+
+% Retire the selected executable list in its supplied order. Each provenance
+% withdrawal stays adjacent to its erase, so a callback sees the same prefix
+% and a refusal leaves the same unvisited suffix. The traversal is linear:
+% every retained reference still requires its own erase and callbacks.
+retire_translated_clauses(_, []).
+retire_translated_clauses(Module, [Ref|Refs]) :-
+    ( translated_from(Ref, Term) -> forget_translated_from(Module, Ref, Term)
+    ; true ),
+    erase(Ref),
+    retire_translated_clauses(Module, Refs).
 
 forget_translated_equation_binding(Ref) :-
     forall(clause('$metta_equation_token'(_, _, Ref, _), true, TokenRef),
@@ -2008,7 +2043,7 @@ process_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
     with_metta_module(Module,
                       translate_runnable_expr(BoundTerm, Names, Goals, Result)),
     print_runnable_form(FormStr, Goals),
-    call_goals_in(Module, Goals).
+    call_goals_in(Module, [filereader:run_source_runnable(Module, Goals)]).
 process_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|Args], _],
     must_be(atom, F),
@@ -2056,7 +2091,7 @@ process_loader_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
     with_metta_module(Module,
                       translate_runnable_expr(BoundTerm, Names, Goals, Result)),
     print_runnable_form(FormStr, Goals),
-    call_goals_in(Module, Goals).
+    call_goals_in(Module, [filereader:run_source_runnable(Module, Goals)]).
 process_loader_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|_], _],
     add_sexp(Space, Term, SpaceRef),
@@ -2068,6 +2103,32 @@ process_loader_form(Space, parsed(function, FormStr, Term), []) :-
 process_loader_form(_, In, _) :-
     throw(error(metta_translation_failed(In),
                 context(process_loader_form/3, 'could not translate MeTTa form'))).
+
+% Unpack the fixed envelope emitted by translate_runnable_expr/4 as data.
+% Its controls are compiled here once; only the current form's conjunction
+% remains a runtime goal. SWI's I_CALL1 compiles a control term at each call:
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-vmi.c#L5457
+% Keep call_goals_in/2 outside this executor: pragma limits and source
+% observation own that boundary, and the original goals still print there.
+run_source_runnable(Module, [(Collect, metta_prune_empty_answers(All, Out))]) :-
+    !,
+    collect_source_answers(Module, Collect),
+    spaces:metta_prune_empty_answers(All, Out).
+run_source_runnable(Module, [Collect]) :-
+    collect_source_answers(Module, Collect).
+
+collect_source_answers(_, Out = []) :- !, Out = [].
+collect_source_answers(Module,
+        findall(Template, metta_run_with_fuel(Value, Fuel, Boundary), Out)) :-
+    findall(Template,
+            metta_engine:metta_run_with_fuel(Value, Fuel,
+                filereader:run_source_answer(Module, Boundary)), Out).
+
+run_source_answer(Module,
+        (metta_run_named(Names, Conj, Generated),
+         (Value == '$metta_not_reducible' -> Boundary = Form ; Boundary = Value))) :-
+    spaces:metta_run_named(Names, Module:Conj, Generated),
+    ( Value == '$metta_not_reducible' -> Boundary = Form ; Boundary = Value ).
 
 print_expression_form(_) :- silent(true), !.
 print_expression_form(Term) :-

@@ -60,9 +60,21 @@ metta_erase_storage_ref(Ref) :-
     ;   true
     ).
 
+% The owner is probed once for the whole selected set: the surrounding
+% transaction cannot finish while its traversal runs, and nested callback
+% transactions keep the same owner and transactional journal, so the first
+% reference's scope is every reference's [tested:
+% source_retirement:the_owner_probe_runs_once_for_the_selected_set; commit=WORKTREE].
 metta_retract_storage(Head) :-
     (   current_transaction(_)
-    ->  forall(clause(Head, true, Ref), metta_erase_storage_ref(Ref))
+    ->  Context = receipt_scope(_),
+        forall(clause(Head, true, Ref),
+               ( erase(Ref),
+                 arg(1, Context, Scope),
+                 ( nonvar(Scope) -> true
+                 ; metta_receipt_transaction_scope(Owner),
+                   nb_setarg(1, Context, Owner), Scope = Owner ),
+                 assertz(metta_receipt_erased(Scope, Ref)) ))
     ;   retractall(Head)
     ).
 
@@ -168,10 +180,8 @@ metta_boot_receipts :-
     ( Ready == 1 -> true
     ; engine_create(_, spaces:metta_receipt_loop, _,
                     [alias('$metta_occurrence_receipts')]),
-      prolog_listen(frame_finished, spaces:metta_receipt_frame_finished,
-                    [name(metta_occurrence_transaction)]),
-      prolog_listen(metta_receipt_marker/2, spaces:metta_receipt_marker_changed,
-                    [name(metta_occurrence_rollback)]),
+      metta_listen(frame_finished, spaces:metta_receipt_frame_finished),
+      metta_listen(metta_receipt_marker/2, spaces:metta_receipt_marker_changed),
       flag('$metta_occurrence_receipts_ready', _, 1) ).
 
 :- metta_boot_receipts.

@@ -1,3 +1,7 @@
+% Guarantees: metta_with_source_effect_program/3, metta_with_evaluation_context/2
+%   and metta_bridge_descend/1 restore roots through metta_with_trailed/3
+%   [source: engine/metta/effects.pl:metta_with_evaluation_context/2; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
@@ -161,11 +165,15 @@ metta_effect_goal(Goal, Goal).
 %so an argument that is a TEMPLATE rather than a goal cannot be walked as one:
 %findall/3 holds a goal in argument two and terms in one and three.
 %
-%What is deliberately NOT here is as load-bearing as what is. foldall/4,
-%with_mutex/2 and transaction/1 are refused today purely by being absent, and
-%that stays: a refusal is loud and someone fixes it, where a wrong entry here
-%is a silent wrong answer. This is the allow-list asymmetry the seam is built
-%on, applied to the walk as well as to the names.
+%A construct that is not here is not thereby refused: the last clause reads
+%SWI's own meta_predicate declaration, so foldall/4, with_mutex/2,
+%transaction/1, snapshot/1 and aggregate_all/3 are walked through their
+%declared goal arguments without appearing above. What the explicit rows buy
+%is exactness where the declaration is not enough: findall/3's template is not
+%a goal, catch/3's ball is not a goal, and take/2 and top/3 have a matching
+%form the classifier judges from its shape. A row here that named the wrong
+%argument would be a silent wrong answer, which is why each one is written as
+%the construct's own shape.
 metta_effect_construct((A, B), [A, B]).
 metta_effect_construct((A ; B), [A, B]).
 metta_effect_construct((A -> B), [A, B]).
@@ -236,7 +244,15 @@ metta_effect_construct(_:Goal, [Goal]).
 %defect the paragraph above records. It answers the library's module for 33
 %inferences without loading it, so the ask below still autoloads exactly when
 %it used to [source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2].
-metta_effect_construct(Meta, [Goal]) :-
+%EVERY goal argument the declaration names, not the first one. The walk
+%commits to this clause's first solution, so a clause that answered one
+%argument at a time left the rest of a construct unseen: with
+%`setup_call_cleanup(0, 0, 0)` it yielded the Setup and nothing else, and an
+%impure Goal or Cleanup inside it read as pure, which is the collapse defect
+%in a third wrapper. `setup_call_catcher_cleanup/4` hid three of its four the
+%same way [tested: lib_tabling_purity:every_goal_argument_of_a_meta_predicate_is_walked;
+%commit=3a931690116abfa8a5a37ecba3fe179d826cd712].
+metta_effect_construct(Meta, Goals) :-
     functor(Meta, Name, Arity),
     functor(Head, Name, Arity),
     (   current_predicate(Name/Arity)
@@ -246,11 +262,14 @@ metta_effect_construct(Meta, [Goal]) :-
         Home \== Here
     ),
     predicate_property(Head, meta_predicate(Spec)),
-    arg(Position, Spec, Extra),
-    integer(Extra),
-    arg(Position, Meta, Closure),
-    nonvar(Closure),
-    metta_effect_closure(Closure, Extra, Goal).
+    findall(Goal,
+            ( arg(Position, Spec, Extra),
+              integer(Extra),
+              arg(Position, Meta, Closure),
+              nonvar(Closure),
+              metta_effect_closure(Closure, Extra, Goal) ),
+            Goals),
+    Goals \== [].
 
 %A closure applied to the arguments its meta-predicate will add. The already
 %bound arguments are KEPT, which is what makes the two-step case work:
@@ -1133,7 +1152,8 @@ metta_host_source_effect_plan(Module, Source, Operations, Effect) :-
 % yet. Only the source lookup changes; masks, compiler actions and the effect
 % join remain the ordinary planner's. No candidate equation is compiled here.
 :- use_module(library(pairs), [group_pairs_by_key/2]).
-:- thread_local metta_effect_source_program/2.
+:- seam:context_reader(metta_effect_source_program(Module, Index),
+                       '$metta_effect_source_program', stack(Module-Index)).
 :- meta_predicate metta_with_source_effect_program(+, +, 0).
 
 metta_with_source_effect_program(Module, Forms, Goal) :-
@@ -1142,8 +1162,9 @@ metta_with_source_effect_program(Module, Forms, Goal) :-
               metta_effect_program_entry(Term, Key, Value) ), Pairs),
     keysort(Pairs, Ordered), group_pairs_by_key(Ordered, Grouped),
     assoc:list_to_assoc(Grouped, Index),
-    setup_call_cleanup(asserta(metta_effect_source_program(Module, Index), Ref),
-                       call(Goal), erase(Ref)).
+    ( nb_current('$metta_effect_source_program', Programs) -> true ; Programs = [] ),
+    % Workaround: swi-cleanup-window - candidate programs live in a trailed stack.
+    metta_with_trailed('$metta_effect_source_program', [Module-Index|Programs], Goal).
 
 metta_effect_program_entry([=,[Name|Args],Body], definition(Name), source([Name|Args],Body)) :-
     atom(Name).
@@ -2453,6 +2474,9 @@ metta_annotations_resolved([First, Second|Rest], Ctx, _) :-
 %commit=c7468b2789746bcf95c4bacc0e2d517ec4d972fa].
 :- meta_predicate metta_with_under(+, 0),
                   metta_with_evaluation_context(+, 0).
+%Declared before its first reader below, so that call compiles to the read.
+:- seam:context_reader(metta_evaluation_context(Context),
+                       '$metta_evaluation_contexts', value([Context|_])).
 
 metta_with_under(Algebra, Goal) :-
     (   metta_evaluation_context(evaluation_context(_, Limit, Direction))
@@ -2468,9 +2492,6 @@ metta_with_under(Algebra, Goal) :-
 metta_with_evaluation_context(Context, Goal) :-
     duplicate_term(Context, Snapshot),
     metta_with_trailed_push('$metta_evaluation_contexts', Snapshot, Goal).
-
-metta_evaluation_context(Context) :-
-    nb_current('$metta_evaluation_contexts', [Context|_]).
 
 metta_effective_algebra(_, Algebra) :-
     metta_evaluation_context(evaluation_context(Algebra, _, _)), !.
@@ -3099,17 +3120,15 @@ metta_bridge_apply(Pattern, Term, Op) :-
     ).
 
 metta_bridge_descend(Op) :-
-    (   nb_current('$metta_bridge_depth', Depth0)
+    (   nb_current('$metta_bridge_depth', depth(Depth0))
     ->  true
     ;   Depth0 = 0
     ),
     Depth is Depth0 + 1,
     (   Depth > 32
     ->  throw(error(metta_bridge_cascade(Op), none))
-    ;   setup_call_cleanup(
-            b_setval('$metta_bridge_depth', Depth),
-            metta_bridge_op(Op),
-            b_setval('$metta_bridge_depth', Depth0))
+    ;   % Workaround: swi-cleanup-window - the cascade depth is trailed.
+        metta_with_trailed('$metta_bridge_depth', depth(Depth), metta_bridge_op(Op))
     ).
 
 metta_bridge_op([insert, Target, Template]) :- !,

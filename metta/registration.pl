@@ -1,3 +1,7 @@
+% Guarantees: with_metta_module/2 scopes through metta_with_trailed/3 and
+%   current_metta_module/1 treats the inactive root as the self module
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
 % Guarantees: process registration retains exactly the names and arities it
 %   adopts, including registry facts introduced by a temporary MeTTa source
@@ -286,7 +290,8 @@ register_process_function(Name, Arities) :-
 %here and having two places that decide the name
 %[tested: metta_module_context:the_default_context_is_selfs_own_module].
 current_metta_module(Module) :-
-    ( nb_current('$metta_module', M) -> Module = M ; metta_self_module(Module) ).
+    ( nb_current('$metta_module', M), M \== []
+    -> Module = M ; metta_self_module(Module) ).
 
 %Skipping the switch when Module is already in force was tried and taken back
 %out. It saved 4 inferences on every Python evaluation and cost 2 on every
@@ -309,10 +314,11 @@ with_metta_module(Module, Goal) :-
                             'space_module/2 maps a space to the module its \c
                              clauses are in; pass that, not the space')))
     ),
-    current_metta_module(Previous),
-    setup_call_cleanup(b_setval('$metta_module', Module),
-                       Goal,
-                       b_setval('$metta_module', Previous)).
+    % The module covers every answer of Goal: the binding's solution
+    % generator runs under it, and its collector reads nothing between
+    % answers that the per-answer restore would serve.
+    % Workaround: swi-cleanup-window - the execution module restores on unwind.
+    metta_with_trailed_enumeration('$metta_module', Module, Goal).
 
 %Control signals pass through every recovery catch: a caught abort, limit,
 %alarm, or interrupt is a stopped program pretending it succeeded. This is
