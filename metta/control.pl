@@ -653,7 +653,7 @@ metta_inference_budget_spent(_, Base, Inferences) :-
 %nothing, and the tally door exported alone moved nothing, so the cost is
 %the join doors' names in the list and not any row's path [measured
 %2026-09-19: A/B rounds 3 to 7 on the tip, wt-battery-2 ai-ab-remedy-3.log
-%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=WORKTREE].
+%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=e81e5369ecce854c09c75113cf1ca30e76d06154].
 metta_join_measured(Thread, Status, Credit) :-
     statistics(inferences, Before),
     thread_join(Thread, Status),
