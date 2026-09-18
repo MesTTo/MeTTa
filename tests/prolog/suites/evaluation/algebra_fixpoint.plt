@@ -4,6 +4,11 @@
 %   acyclic one is exact under every shipped carrier, the formula carrier's
 %   model count is the exact probability, and a relation the program never
 %   names answers nothing [tested: run_tests(algebra_fixpoint); commit=55368cb4eeb641d2325194eff9d0925048814b76].
+% Guarantees: a rule's (where G) guard drops the instances G refuses and a
+%   guard answering no truth value is refused by name; the polynomial
+%   carrier's tag lists every witness with its multiplicity and a formula's
+%   witnesses are its minimal derivations [tested: run_tests(algebra_fixpoint);
+%   commit=WORKTREE].
 % Owns resources: each test releases its space; the formula tables are
 %   cleared after the suite.
 
@@ -130,5 +135,98 @@ test(the_fixpoint_module_is_gone_after_the_call,
     metta_algebra_fixpoint(Space, bool, [path, a, c], _),
     atom_concat(metta_algebra_fixpoint_, Before, Module),
     assertion(\+ current_module(Module)).
+
+
+%A guard is the rule's side condition over its premise tags: the instance
+%exists only where the guard answers True.
+test(a_guard_drops_the_instances_it_refuses,
+     [ setup(( 'new-space'(Space),
+               'add-atom'(Space, ['=', ['plunit-above-half', S], [>, S, 0.5]], _),
+               'add-atom'(Space, [fact, 0.6, [score, a]], _),
+               'add-atom'(Space, [fact, 0.3, [score, b]], _),
+               'add-atom'(Space, [rule, 1, [trusted, X], [premises, [score, X]],
+                                  [where, 'plunit-above-half']], _) )),
+       cleanup(metta_release_space(Space)) ]) :-
+    space_module(Space, Module),
+    with_metta_module(Module,
+        metta_algebra_fixpoint(Space, prob, [trusted, _], Answers)),
+    Answers = [[[trusted, Who], Tag]],
+    assertion(Who == a),
+    assertion(near(0.6, Tag)).
+
+test(a_guard_that_answers_no_truth_value_is_refused_by_name,
+     [ setup(( 'new-space'(Space),
+               'add-atom'(Space, ['=', ['plunit-doubled', S], [*, S, 2]], _),
+               'add-atom'(Space, [fact, 0.6, [score, a]], _),
+               'add-atom'(Space, [rule, 1, [trusted, X], [premises, [score, X]],
+                                  [where, 'plunit-doubled']], _) )),
+       cleanup(metta_release_space(Space)),
+       throws(error(metta_algebra_guard_not_boolean(prob, 'plunit-doubled', [0.6], 1.2), _)) ]) :-
+    space_module(Space, Module),
+    with_metta_module(Module,
+        metta_algebra_fixpoint(Space, prob, [trusted, _], _)).
+
+%The polynomial carrier's tag is the polynomial of every derivation: on the
+%DAG, path a c has the direct edge and the two-step path, each once, the
+%first over two sources (the rule instance and the edge) and the second over
+%four.
+test(the_polynomial_carrier_answers_every_witness_with_its_multiplicity,
+     [ setup(dag_space(Space)), cleanup(metta_release_space(Space)) ]) :-
+    metta_algebra_fixpoint(Space, polynomial, [path, a, c], [[_, [poly|Monomials]]]),
+    length(Monomials, Count),
+    assertion(Count == 2),
+    findall(Coefficient-Arity,
+            ( member([Coefficient|Variables], Monomials), length(Variables, Arity) ),
+            Shapes0),
+    msort(Shapes0, Shapes),
+    assertion(Shapes == [1-2, 1-4]),
+    findall(W, ( member([_|Vs], Monomials), member([var, [src, Space, _], W], Vs) ), Ws0),
+    msort(Ws0, Ws),
+    assertion(Ws == [0.2, 0.5, 0.6]).
+
+%A formula's witnesses are its prime implicants: on the two-cycle, path a c
+%holds through the direct edge or through a b and b c, and the round trip
+%through b a adds no minimal derivation.
+test(a_formula_answers_its_minimal_derivations_as_witnesses,
+     [ setup(cycle_space(Space)), cleanup(metta_release_space(Space)) ]) :-
+    metta_algebra_fixpoint(Space, formula, [path, a, c], [[_, Formula]]),
+    metta_formula_witnesses(Formula, Witnesses),
+    length(Witnesses, Count),
+    assertion(Count == 2),
+    findall(Ws,
+            ( member(Witness, Witnesses),
+              findall(W, member([[src, Space, _], W], Witness), Ws0),
+              msort(Ws0, Ws) ),
+            Sources0),
+    msort(Sources0, Sources),
+    assertion(Sources == [[0.2], [0.3, 0.6]]).
+
+%A product carrier pairs each answer's record with its witnesses: under
+%(product prob polynomial) the guard reads prob's tags and admits a alone,
+%and the polynomial half names that one derivation's fact and rule
+%instance; a plain polynomial run hands the guard a polynomial and refuses.
+test(a_product_carrier_pairs_the_record_with_its_witnesses,
+     [ setup(( 'new-space'(Space),
+               'add-atom'(Space, ['=', ['plunit-above-half', S], [>, S, 0.5]], _),
+               'add-atom'(Space, [fact, 0.6, [score, a]], _),
+               'add-atom'(Space, [fact, 0.3, [score, b]], _),
+               'add-atom'(Space, [rule, 1, [trusted, X], [premises, [score, X]],
+                                  [where, 'plunit-above-half']], _) )),
+       cleanup(metta_release_space(Space)) ]) :-
+    space_module(Space, Module),
+    with_metta_module(Module,
+        metta_algebra_fixpoint(Space, [product, prob, polynomial], [trusted, _], Answers)),
+    Answers = [[[trusted, Who], [pair, Record, [poly, [1|Variables]]]]],
+    assertion(Who == a),
+    assertion(near(0.6, Record)),
+    findall(Kind, member([var, [Kind|_], _], Variables), Kinds),
+    msort(Kinds, SortedKinds),
+    assertion(SortedKinds == [rule, src]),
+    catch(( with_metta_module(Module,
+                metta_algebra_fixpoint(Space, polynomial, [trusted, _], _)),
+            Refused = none ),
+          error(metta_algebra_guard_not_boolean(polynomial, _, _, _), _),
+          Refused = by_name),
+    assertion(Refused == by_name).
 
 :- end_tests(algebra_fixpoint).

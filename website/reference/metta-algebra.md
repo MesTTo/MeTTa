@@ -365,24 +365,40 @@ def plan(self) -> tuple[PlanDecision, ...]:
 ### `TaggedAnswer.why`
 
 ```python
-def why(self) -> AlgebraDerivation:
+def why(self, *, timeout: float | None = None, inferences: int | None = None) -> AlgebraDerivation:
 ```
 
 > Return the derivation captured by the original ask.
+>
+> An answer the engine's tabled fixpoint produced kept no proof tree,
+> so its derivation is asked again from the engine as witnesses: the
+> sources each derivation uses. An acyclic program answers them under
+> the polynomial carrier, the free semiring, each witness with how
+> many derivations use exactly it; a cyclic program has infinitely
+> many derivations and answers its minimal ones, the formula's prime
+> implicants. `timeout` and `inferences` bound that second ask.
 
 ### `TaggedAnswer.under`
 
 ```python
-def under(self, carrier: Any) -> TaggedAnswer:
+def under(
+    self,
+    carrier: Any,
+    *,
+    timeout: float | None = None,
+    inferences: int | None = None,
+) -> TaggedAnswer:
 ```
 
-> Interpret this answer under another algebra, no requery.
+> Interpret this answer under another algebra.
 >
 > A formula tag under a carrier with a negation is its weighted model
 > count, exact where a sum over proofs would count a shared fact twice;
-> a retained derivation folds through the carrier's operations; an
-> engine-fixpoint answer under any other carrier kept nothing to fold
-> and refuses by name.
+> a retained derivation folds through the carrier's operations with no
+> requery; an engine-fixpoint answer kept nothing to fold and asks the
+> fixpoint again under the carrier, which `timeout` and `inferences`
+> bound, since a carrier with no fixpoint over cyclic data runs until
+> they stop it.
 
 ## `current_algebra`
 
@@ -469,6 +485,18 @@ def formula_variables(metta: Space, formula: Atom) -> list[tuple[Atom, Atom]]:
 >
 > metta may be a context or a space.
 
+## `formula_witnesses`
+
+```python
+def formula_witnesses(metta: Space, formula: Atom) -> list[list[tuple[Atom, Atom]]]:
+```
+
+> The minimal derivations a formula tag holds by, each a list of (key, weight).
+>
+> They are the formula's prime implicants: the smallest sets of sources
+> whose truth alone makes the proposition true. metta may be a context or
+> a space.
+
 ## `resolve`
 
 ```python
@@ -507,7 +535,11 @@ def tagged_fact(tag: Any, proposition: Any) -> Expression:
 ## `tagged_rule`
 
 ```python
-def tagged_rule(tag: Any, head: Any, *premises: Any) -> Expression:
+def tagged_rule(tag: Any, head: Any, *premises: Any, where: Any = None) -> Expression:
 ```
 
 > Build the once-ever algebra-agnostic threading form for one rule.
+>
+> `where` names the rule's side condition, a function applied to the
+> premise tags in order that must answer True for an instance to exist;
+> it is stored as a fifth element, `(where <function>)`.

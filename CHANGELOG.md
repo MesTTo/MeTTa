@@ -35,6 +35,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   fixpoint, one `(proposition tag)` answer per derived proposition, with
   `(formula prob)` as the exact two-stage carrier; example
   `examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta`.
+- A tagged rule may carry a side condition, `(rule tag head (premises ...)
+  (where G))` and `add_tagged_rule(..., where=G)`: an instance exists only
+  where G, applied to the premise tags in order under the carrier, answers
+  True, on the derived route and on the engine's fixpoint alike; a callable
+  guard registers like a callable tag, `why()` shows the guard that held,
+  `.under(other)` refuses a guarded instance by name, and a guard answering
+  no truth value is refused by name. A thirteenth carrier, `polynomial`,
+  is the free semiring over the program's facts and rule instances: a tag
+  is the canonical polynomial of every derivation, one monomial per
+  witness with its multiplicity. An answer the engine's fixpoint produced
+  no longer refuses `why()` and `.under(other)`: `why()` asks the engine
+  for its witnesses (an acyclic program's under `polynomial`, a cyclic
+  program's minimal derivations as the formula's prime implicants) and
+  `.under(other)` is the other carrier's own fixpoint for the proposition,
+  each bounded by its `timeout=` and `inferences=`.
 - The algebra package asks the catalog by pattern where it read every row
   into Python: the annotations row a context declares for a carrier, an
   algebra's own row, its semiring claims and the algebra-law aliases were

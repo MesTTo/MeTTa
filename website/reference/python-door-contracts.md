@@ -5293,7 +5293,7 @@ Evidence: `extensions/python/tests/ch18_performance/test_algebra_rates.py::test_
 ## space:add-tagged-rule
 
 ```python
-add_tagged_rule(tag: Any, head: Any, *premises: Any) -> Atom
+add_tagged_rule(tag: Any, head: Any, *premises: Any, where: Any=None) -> Atom
 ```
 
 Kind: `write`. Answer: `Atom`. Effect: `writesState`. Determinism: `det`.
@@ -5309,6 +5309,7 @@ Assumes receiver state `live`.
 | `tag` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
 | `head` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
 | `premises` | `%Undefined%` | `required` | `values` | `var_positional` |
+| `where` | `%Undefined%` | `None` | `values` | `keyword_only` |
 
 Guarantees result type `Atom` with the answer shape, effect, and determinism above.
 
@@ -5319,7 +5320,10 @@ Implementation failures propagate, including failures from callees and providers
 > A callable ``tag`` labels each instance with its result over the premise
 > tags in order, in place of the carrier's extend fold: it registers under
 > its own name and the rule stores ``(function <name>)``, the spelling a
-> MeTTa equation of the same shape takes directly.
+> MeTTa equation of the same shape takes directly. ``where`` is the rule's
+> side condition over the premise tags in order, a callable registered the
+> same way or the name of a MeTTa function, stored as ``(where <name>)``:
+> an instance exists only where it answers True.
 
 Evidence: `extensions/python/tests/ch06_many_answers/test_under_algebra.py::test_tagged_derivations_flow_through_match_and_reinterpret_without_requery`, `extensions/python/tests/ch14_seeing_your_program/test_features.py::test_tagged_algebra_debits_inferences_across_operations`, `extensions/python/tests/ch14_seeing_your_program/test_features.py::test_tagged_algebra_forwards_bounds_to_every_evaluating_door`.
 

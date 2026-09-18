@@ -240,3 +240,71 @@ match, a bare `ordered` in a second) and the algebra-law aliases (a segment
 variable for the expansion). The twin measures 26374 after, 0.85x its
 original; the matespace twin, whose counting goes through the engine
 aggregate, is unchanged at 24123226.
+
+## 2026-09-18, guards and witnesses
+Goal: the two rungs recorded above as not built, asked for: a rule's side
+condition over its labels, and derivations from the engine route.
+Decided: `(rule Tag Head (premises ...) (where G))`, `add_tagged_rule(...,
+where=G)`: an instance exists only where G over the premise tags in order,
+evaluated under the carrier like a `(function F)` label, answers True. That
+is the rule form of a labelled deductive system (Gabbay, LDS, OUP 1996:
+labelled premises, a label function and a condition on the labels), so the
+guard completes the LDS rung rather than exceeding it; generalized annotated
+programs (Kifer and Subrahmanian) are its lattice-valued special case with
+lower-bound guards. What sits above LDS is the label algebra's universality,
+not the rule format: the free semiring N[X] (Green, Karvounarakis and
+Tannen, PODS 2007) and, with fixed points, the absorptive polynomials Sorp[X]
+(Dannert, Grädel, Naaf and Tannen, CSL 2021), from which every carrier's
+value is a homomorphic image; a proof term as the label (LeaTTa's
+`(proof goal (via tag subtrees))`, tests/regression/proof_carrying_answers.metta)
+is the non-commutative free object above both. Negation and aggregation
+leave the monotone setting (Grädel and Tannen's dual indeterminates,
+stratified or well-founded semantics) and are not built.
+Decided: on the derived route the guard reads each derivation's own premise
+tags, per proof; on the fixpoint route a premise's tag is its table's value,
+the join of every derivation so far, so a guard reads an aggregate, and a
+non-monotone guard on a premise inside the rule's own cycle can flip as the
+table grows. Rejected: refusing that upfront by a strongly connected
+component analysis of the rule graph, or a declared `monotone` flag
+(Ross and Sagiv's monotonic aggregation would license the lattice case),
+because the language does not stop a loop written by hand either (the user,
+2026-09-18): the caller's `timeout=` and `inferences=` bound it, and the
+engine's truth atoms are `true` and `false`, so a guard answering anything
+else is refused by name rather than read as a weight. `under=counting` on a
+guarded program derives through the general route, since the proof-tree
+counter never computes the tags a guard reads.
+Decided: a thirteenth carrier, `polynomial` (the name `derivation` is the
+proof-tree module's, metta/derivation.py), the free commutative semiring
+over the program's facts and rule instances, its values canonical
+polynomials `[poly, [Coefficient, [var, Key, Weight] ...] ...]` merged by
+keysort (the `BTreeMap<Monomial, u64>` of mettail-rust's
+prattail/src/provenance.rs, read for the shape): plus adds coefficients of
+equal monomials, times multiplies every pair. `why()` on a tabled answer asks
+the engine again: an acyclic program under `polynomial`, one witness per
+monomial with its multiplicity; a cyclic program under `formula`, whose
+prime implicants (Coudert and Madre, DAC 1992: an implicant of the high
+branch that no implicant of the low branch absorbs takes the node's
+variable, memoised per node) are its minimal derivations, since the
+fixpoint builds only positive diagrams. `under(other)` on a tabled answer
+is the other carrier's own fixpoint for the proposition, the polynomial's
+image under the one homomorphism, computed by the engine rather than by
+folding a term; the formula-with-negation model count stays first, exact
+on cyclic data where a non-idempotent carrier has no fixpoint. Both take
+`timeout=` and `inferences=`, since a second ask is an ask.
+Decided: a carrier may be a product, `(product Left Right)`, one door
+for one concept: the fixpoint's operations are derived from the carrier
+term (metta_algebra_operations/2, nested as deep as written), tags are
+pairs joined and extended componentwise, the guards and label functions
+read the left component and the right follows the derivations the left
+admits. A guard reads the labels of the carrier the program is asked in
+(under counting every fact is one, so a probability threshold admits
+everything; under polynomial a numeric guard is refused by name), which
+is why `why()` on a tabled answer runs `(product own witness)` and reads
+the right half, and why a separate witnesses door, a second binding door
+and a `(witnesses ...)` form were removed after being written: the
+product is derivable from the fixpoint, so it is not a new mechanism.
+Measured: algebra_fixpoint 13/13 (the DAG's polynomial has two monomials,
+coefficients 1 over 2 and 4 variables, source weights 0.2, 0.5, 0.6; the
+two-cycle's formula has two witnesses, sources 0.2 and 0.3, 0.6, the round
+trip through b absorbed); the derived and fixpoint routes agree on the
+guarded threshold program (a at 0.6, b absent).

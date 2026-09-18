@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 335 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 336 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -41,7 +41,7 @@ re-runs them.
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
-| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the 23 `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, completion, algebra_operations, algebra_formula, algebra_fixpoint, space_hooks, runtime, control, interop, references, reference_sources, reference_loading, reference_refresh, properties, registration, prelude), `engine/translator.pl` compilation facade over the seven `engine/translator/*.pl` units (analysis, lowering, folding, constructors, special_forms, typing, runtime), `engine/spaces.pl` store facade over the twelve `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
+| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the 24 `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, completion, algebra_operations, algebra_formula, algebra_fixpoint, space_hooks, runtime, control, interop, references, reference_sources, reference_loading, reference_refresh, properties, registration, prelude), `engine/translator.pl` compilation facade over the seven `engine/translator/*.pl` units (analysis, lowering, folding, constructors, special_forms, typing, runtime), `engine/spaces.pl` store facade over the twelve `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
 | `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 133, `service` 71, `ownership` 41, `event` 23, `declaration` 19. Ownership, event and declaration clauses are contributed by an extension; the two service kinds are defined by the engine and called by an extension (`clauses_from/2`). `metta_space_registered/1` reflects existing native and foreign namespaces independently of their value species. `metta_with_trailed/3` restores context at each answer; `metta_with_trailed_enumeration/3` retains it until the generator finishes; `metta_with_trailed_push/3` pushes one item onto a stack-shaped root for that span. `metta_atom_index_new/1`, `metta_atom_index_bind/4` and `metta_atom_index_get/3` own temporary atom-key bindings with original values and trailed insertion. A `seam:context_reader/3` directive derives the callable reader and its inline read from one `context_reader/4` declaration. The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 22 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
@@ -1047,7 +1047,7 @@ Store ``(fact tag proposition)``, the normative annotation form.
 `space:add-tagged-rule`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
 
 ```python
-add_tagged_rule(tag: Any, head: Any, *premises: Any) -> Atom
+add_tagged_rule(tag: Any, head: Any, *premises: Any, where: Any=None) -> Atom
 ```
 
 Store one rule generated by the algebra-agnostic tag threader.
@@ -2352,7 +2352,7 @@ Variables shared across query patterns join: `m.match(S.p(V.x,V.y), S.p(V.y,V.z)
 constructor expression captured in one column.
 
 `under=` changes the annotation algebra for either a relational match or a
-call. Twelve carriers ship. The answers below are one program's: two facts tagged
+call. Thirteen carriers ship. The answers below are one program's: two facts tagged
 `0.6` and `0.3` reaching one head through a rule tagged `1.0`.
 
 | carrier | combine, extend | answers | |
@@ -2368,14 +2368,15 @@ call. Twelve carriers ship. The answers below are one program's: two facts tagge
 | `budget` | `min` `+` | `1.3` | ascending like tropical, spent rather than distance |
 | `prov` | `plus` `times` | `(plus (times 1.0 0.6) (times 1.0 0.3))` | a TERM, not a number |
 | `formula` | `formula-or` `formula-and` | `(formula 5)` | a decision diagram over the facts; `.under(prob)` is its exact model count, `0.72` here, where `prob` sums proofs to `0.9` |
+| `polynomial` | `polynomial-plus` `polynomial-times` | `(poly (1 (var (src &s 0) 0.6) (var (rule &s 2 (h)) 1.0)) (1 (var (src &s 1) 0.3) (var (rule &s 2 (h)) 1.0)))` | the free semiring: one monomial per derivation, its sources as variables, its coefficient how many derivations use exactly them |
 | `amplitude` | `amplitude-add` `amplitude-multiply` | refuses | outside its declared fragment |
 
-Twelve are objects: `metta.bool`, `.visibility`, `.bag`, `.counting`, `.set`, `.ranked`,
-`.tropical`, `.prob`, `.prov`, `.budget`, `.formula` and `.amplitude`. The bare name works
+Thirteen are objects: `metta.bool`, `.visibility`, `.bag`, `.counting`, `.set`, `.ranked`,
+`.tropical`, `.prob`, `.prov`, `.budget`, `.formula`, `.polynomial` and `.amplitude`. The bare name works
 wherever an object does, `under="budget"`.
 
 `metta.vocabularies.Semiring` names the closed set: `bool`, `visibility`, `bag`, `counting`,
-`set`, `ranked`, `tropical`, `prob`, `prov`, `budget`, `formula`, `amplitude`.
+`set`, `ranked`, `tropical`, `prob`, `prov`, `budget`, `formula`, `polynomial`, `amplitude`.
 
 A tagged program is evaluated on one of two routes, and `derivations=` on
 `match` and `metta.algebra.evaluate` chooses. Left alone, a program whose
@@ -2383,8 +2384,13 @@ rules form a cycle, under a carrier whose `combine` is idempotent (`bool`,
 `set`, `tropical`, `budget`, `ranked`, `visibility`, `formula`) or that
 declares a saturation, takes the engine's tabled fixpoint: each relation
 becomes a tabled predicate whose tag is a lattice-moded argument joined by
-the carrier's `combine`, so the program converges, keeps no proof tree, and
-`why()` on its answers refuses by name. Every other program takes the
+the carrier's `combine`, so the program converges and keeps no proof tree;
+`why()` on its answers asks the engine again for the witnesses, the sources
+each derivation uses (a cyclic program's minimal derivations, the formula's
+prime implicants; an acyclic program's every derivation with its
+multiplicity, the `polynomial` carrier's value), and `.under(other)`
+is the other carrier's own fixpoint for the proposition, both bounded by
+their `timeout=` and `inferences=`. Every other program takes the
 derived route with retained derivations, as before, which refuses a cycle
 after its round bound. `derivations=False` forces the fixpoint, the route
 that scales and is exact for every carrier on acyclic data; a carrier whose
@@ -2432,6 +2438,30 @@ program: NARS-style deduction, induction and abduction each carry their own
 truth function. Such a label computes in the carrier it was evaluated under
 and is not reinterpreted by `.under(other)`; the function's monotonicity is
 what makes the fixpoint converge, and is the author's.
+
+A rule may also carry a side condition: `add_tagged_rule(1, S.trusted(V.x),
+S.score(V.x), where=S["above-half"])` stores `(rule 1 (trusted $x) (premises
+(score $x)) (where above-half))`, and an instance exists only where the
+guard, applied to the premise tags in order under the carrier, answers
+True; a callable `where=` registers like a callable tag. That is the rule
+form of Gabbay's labelled deductive systems, labelled premises, a label
+function and a condition on the labels. On the derived route the guard
+reads each derivation's own premise tags; on the fixpoint route a premise's
+tag is its table's value, the join of every derivation so far, so the guard
+reads an aggregate, and a non-monotone guard on a premise inside the rule's
+own cycle is the author's loop, bounded by the call as any other. `why()`
+shows the guard that held and `.under(other)` refuses a guarded instance by
+name. A guard answering anything but True or False is refused by name. A
+guard reads the labels of the carrier the program is asked in: under
+`counting` every fact is one, so a probability threshold admits every
+instance, and under a carrier whose labels are formulas or polynomials a
+numeric guard is refused; `why()` on a tabled answer therefore runs the
+program under the product of the answer's own carrier, which reads the
+guards and label functions, and the witness carrier, which follows the
+derivations it admits. A carrier may be written `(product Left Right)`
+anywhere a carrier goes on the fixpoint route, its tags `(pair L R)`, so
+`(match-under &self (product prob polynomial) (trusted a))` answers
+`((trusted a) (pair 0.6 (poly ...)))`.
 
 `metta.vocabularies.AlgebraLaw` names the accepted set: `combine-associative`,
 `combine-commutative`, `extend-associative`, `extend-commutative`,
