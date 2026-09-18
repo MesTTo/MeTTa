@@ -456,7 +456,7 @@ def _discovery_stays_cheap(roster: list[Member], root: Path) -> list[Finding]:
     if finished.returncode != 0:
         return [
             Finding(
-                "extensions/python/ext",
+                "ext",
                 f"importing every advertised member failed: "
                 f"{finished.stderr.strip().splitlines()[-1] if finished.stderr else 'no output'}",
             )
@@ -467,7 +467,7 @@ def _discovery_stays_cheap(roster: list[Member], root: Path) -> list[Finding]:
         return []
     return [
         Finding(
-            "extensions/python/ext",
+            "ext",
             f"importing the advertised members loads metta._spaces.handle and "
             f"{lines[0]} modules in all; discovery loads every advertised "
             f"package on the first dispatch, so the facade would be dragged "

@@ -1297,7 +1297,7 @@ Implementation failures propagate, including failures from callees and providers
 > then the handle refuses other operations. Outside a transaction the
 > drop completes before returning.
 
-Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays.py::test_dropping_the_space_retires_its_installation_row`, `extensions/python/tests/ch04_spaces_and_matching/test_algebra_lifecycle.py::test_drop_retires_algebra_before_redeclaration`, `extensions/python/tests/ch04_spaces_and_matching/test_drop_recovery.py::test_backing_close_failure_keeps_the_name_and_cleanup_retryable`.
+Evidence: `ext/metta-arrays/tests/test_arrays.py::test_dropping_the_space_retires_its_installation_row`, `extensions/python/tests/ch04_spaces_and_matching/test_algebra_lifecycle.py::test_drop_retires_algebra_before_redeclaration`, `extensions/python/tests/ch04_spaces_and_matching/test_drop_recovery.py::test_backing_close_failure_keeps_the_name_and_cleanup_retryable`.
 
 ## space:dropped
 
@@ -4244,7 +4244,7 @@ Implementation failures propagate, including failures from callees and providers
 > target. An import is an effect, so it refuses to hide inside an atom
 > batch or share a call with stored atoms.
 
-Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays.py::test_embedding_store_validates_added_vectors`, `extensions/python/tests/ch04_spaces_and_matching/test_r2_space_handle.py::test_add_atom_accepts_a_computed_space_handle`, `extensions/python/tests/ch04_spaces_and_matching/test_space.py::test_add_query_atoms`.
+Evidence: `ext/metta-arrays/tests/test_arrays.py::test_embedding_store_validates_added_vectors`, `extensions/python/tests/ch04_spaces_and_matching/test_r2_space_handle.py::test_add_atom_accepts_a_computed_space_handle`, `extensions/python/tests/ch04_spaces_and_matching/test_space.py::test_add_query_atoms`.
 
 ## space:from-
 
@@ -5360,7 +5360,7 @@ Implementation failures propagate, including failures from callees and providers
 > replaces the earlier one, so an attached provider reads one policy.
 > Use ``_`` as the type name for a context-wide fallback.
 
-Evidence: `extensions/python/ext/metta-pydantic/tests/test_pydantic.py::test_the_row_is_registered_against_the_image_point`, `extensions/python/tests/ch11_python_as_a_notation/test_integrate.py::test_a_failed_integration_restores_registry_preimages`, `extensions/python/tests/ch20_extending_the_engine/test_catalog_kinds.py::test_the_image_declaration_is_catalog_validated`.
+Evidence: `ext/metta-pydantic/tests/test_pydantic.py::test_the_row_is_registered_against_the_image_point`, `extensions/python/tests/ch11_python_as_a_notation/test_integrate.py::test_a_failed_integration_restores_registry_preimages`, `extensions/python/tests/ch20_extending_the_engine/test_catalog_kinds.py::test_the_image_declaration_is_catalog_validated`.
 
 ## space:sample
 
@@ -5553,7 +5553,7 @@ Implementation failures propagate, including failures from callees and providers
 > an undeclared one refuses under negation loudly. Native spaces
 > are the engine's own database and closed by construction.
 
-Evidence: `extensions/python/tests/ch04_spaces_and_matching/test_answer_protocol.py::test_declare_context_validates`, `extensions/python/ext/metta-otel/tests/test_otel.py::test_spans_nest_by_the_events_own_depth`, `extensions/python/tests/ch04_spaces_and_matching/test_answer_protocol.py::test_explain_answers_the_route_and_the_route_is_honest`.
+Evidence: `extensions/python/tests/ch04_spaces_and_matching/test_answer_protocol.py::test_declare_context_validates`, `ext/metta-otel/tests/test_otel.py::test_spans_nest_by_the_events_own_depth`, `extensions/python/tests/ch04_spaces_and_matching/test_answer_protocol.py::test_explain_answers_the_route_and_the_route_is_honest`.
 
 ## space:agenda
 
@@ -6994,7 +6994,7 @@ Implementation failures propagate, including failures from callees and providers
 > with-block: the session holds a wrapper on every compiled function
 > until it does.
 
-Evidence: `extensions/python/ext/metta-otel/tests/test_otel.py::test_observing_inside_a_debug_session_refuses`, `extensions/python/tests/ch14_seeing_your_program/test_debug.py::test_a_breakpoint_inside_a_host_operation_refuses_with_its_remedy`, `extensions/python/tests/ch14_seeing_your_program/test_debug.py::test_a_breakpoint_suspends_the_program_and_resuming_carries_it_on`.
+Evidence: `ext/metta-otel/tests/test_otel.py::test_observing_inside_a_debug_session_refuses`, `extensions/python/tests/ch14_seeing_your_program/test_debug.py::test_a_breakpoint_inside_a_host_operation_refuses_with_its_remedy`, `extensions/python/tests/ch14_seeing_your_program/test_debug.py::test_a_breakpoint_suspends_the_program_and_resuming_carries_it_on`.
 
 ## space:explain
 
@@ -7295,7 +7295,7 @@ Implementation failures propagate, including failures from callees and providers
 > None records all functions; [] records none. Selection happens before
 > the recording bounds, while excluded calls still execute and add depth.
 
-Evidence: `extensions/python/ext/metta-otel/tests/test_otel.py::test_a_reduction_a_bound_cut_ends_with_the_trace`, `extensions/python/ext/metta-otel/tests/test_otel.py::test_a_trace_becomes_one_span_per_reduction`, `extensions/python/ext/metta-otel/tests/test_otel.py::test_a_trace_inside_an_observed_block_refuses`.
+Evidence: `ext/metta-otel/tests/test_otel.py::test_a_reduction_a_bound_cut_ends_with_the_trace`, `ext/metta-otel/tests/test_otel.py::test_a_trace_becomes_one_span_per_reduction`, `ext/metta-otel/tests/test_otel.py::test_a_trace_inside_an_observed_block_refuses`.
 
 ## space:lint
 
@@ -8020,7 +8020,7 @@ Implementation failures propagate, including failures from callees and providers
 > dropping the space retires the row with it. Two spaces may therefore hold
 > two libraries at once, in either install order, each answering its own.
 
-Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
+Evidence: `ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
 
 ## arrays:uninstall
 
@@ -8077,7 +8077,7 @@ Implementation failures propagate, including failures from callees and providers
 >
 > m may be a context or a space, as `install` takes either.
 
-Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
+Evidence: `ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
 
 ## arrays:ops
 
@@ -8118,7 +8118,7 @@ Implementation failures propagate, including failures from callees and providers
 > ordinary matchable data: `!(match &metta (array-backend &s $lib $ops) $ops)`.
 > A space with no install refuses, naming install as the remedy.
 
-Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
+Evidence: `ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
 
 ## arrays:backend
 
@@ -8151,7 +8151,7 @@ Implementation failures propagate, including failures from callees and providers
 > the row behind both is `(array-backend <space> <library> (ops ...))` in
 > `&metta`.
 
-Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
+Evidence: `ext/metta-arrays/tests/test_arrays_doors.py::test_array_namespace_preserves_installation_and_withdrawal`.
 
 ## live:view
 
@@ -8189,7 +8189,7 @@ Implementation failures propagate, including failures from callees and providers
 > changes() reads its progress and deltas. strategy selects pattern, heads,
 > or tabled maintenance; omitting it selects from the query's shape.
 
-Evidence: `extensions/python/ext/metta-live/tests/test_live_doors.py::test_live_namespace_preserves_view_lifecycle`.
+Evidence: `ext/metta-live/tests/test_live_doors.py::test_live_namespace_preserves_view_lifecycle`.
 
 ## tables:to-df
 
@@ -8219,7 +8219,7 @@ Implementation failures propagate, including failures from callees and providers
 
 > These rows as a pandas DataFrame; the declared point rows.to('pandas').
 
-Evidence: `extensions/python/ext/metta-pandas/tests/test_pandas_doors.py::test_pandas_namespace_and_short_sugars_share_the_row`.
+Evidence: `ext/metta-pandas/tests/test_pandas_doors.py::test_pandas_namespace_and_short_sugars_share_the_row`.
 
 ## rows:to-df
 
@@ -8249,7 +8249,7 @@ Implementation failures propagate, including failures from callees and providers
 
 > These rows as a pandas DataFrame; the declared point rows.to('pandas').
 
-Evidence: `extensions/python/ext/metta-pandas/tests/test_pandas_doors.py::test_pandas_namespace_and_short_sugars_share_the_row`.
+Evidence: `ext/metta-pandas/tests/test_pandas_doors.py::test_pandas_namespace_and_short_sugars_share_the_row`.
 
 ## answers:to-df
 
@@ -8279,7 +8279,7 @@ Implementation failures propagate, including failures from callees and providers
 
 > These rows as a pandas DataFrame; the declared point rows.to('pandas').
 
-Evidence: `extensions/python/ext/metta-pandas/tests/test_pandas_doors.py::test_pandas_namespace_and_short_sugars_share_the_row`.
+Evidence: `ext/metta-pandas/tests/test_pandas_doors.py::test_pandas_namespace_and_short_sugars_share_the_row`.
 
 ## tables:to-pl
 
@@ -8309,7 +8309,7 @@ Implementation failures propagate, including failures from callees and providers
 
 > These rows as a polars DataFrame; the declared point rows.to('polars').
 
-Evidence: `extensions/python/ext/metta-polars/tests/test_polars_doors.py::test_polars_namespace_and_short_sugars_share_the_row`.
+Evidence: `ext/metta-polars/tests/test_polars_doors.py::test_polars_namespace_and_short_sugars_share_the_row`.
 
 ## rows:to-pl
 
@@ -8339,7 +8339,7 @@ Implementation failures propagate, including failures from callees and providers
 
 > These rows as a polars DataFrame; the declared point rows.to('polars').
 
-Evidence: `extensions/python/ext/metta-polars/tests/test_polars_doors.py::test_polars_namespace_and_short_sugars_share_the_row`.
+Evidence: `ext/metta-polars/tests/test_polars_doors.py::test_polars_namespace_and_short_sugars_share_the_row`.
 
 ## answers:to-pl
 
@@ -8369,7 +8369,7 @@ Implementation failures propagate, including failures from callees and providers
 
 > These rows as a polars DataFrame; the declared point rows.to('polars').
 
-Evidence: `extensions/python/ext/metta-polars/tests/test_polars_doors.py::test_polars_namespace_and_short_sugars_share_the_row`.
+Evidence: `ext/metta-polars/tests/test_polars_doors.py::test_polars_namespace_and_short_sugars_share_the_row`.
 
 ## remote:connect
 
@@ -8412,7 +8412,7 @@ Implementation failures propagate, including failures from callees and providers
 > An unadvertised extension leaves mutations unkeyed, and OutcomeUnknown
 > refuses to resend those requests after a lost response.
 
-Evidence: `extensions/python/ext/metta-remote/tests/test_remote_doors.py::test_remote_namespace_preserves_transport_and_server_lifetimes`.
+Evidence: `ext/metta-remote/tests/test_remote_doors.py::test_remote_namespace_preserves_transport_and_server_lifetimes`.
 
 ## remote:serve
 
@@ -8480,7 +8480,7 @@ Implementation failures propagate, including failures from callees and providers
 >
 > m may be a context or a space, as Gateway takes either.
 
-Evidence: `extensions/python/ext/metta-remote/tests/test_remote_doors.py::test_remote_namespace_preserves_transport_and_server_lifetimes`.
+Evidence: `ext/metta-remote/tests/test_remote_doors.py::test_remote_namespace_preserves_transport_and_server_lifetimes`.
 
 ## tables:add
 
@@ -8507,7 +8507,7 @@ Guarantees result type `Number` with the answer shape, effect, and determinism a
 
 Declared local refusals:
 
-- `type`: `extensions/python/ext/metta-tables/tests/test_tables_doors.py::test_tables_add_refuses_an_unsupported_source`.
+- `type`: `ext/metta-tables/tests/test_tables_doors.py::test_tables_add_refuses_an_unsupported_source`.
 
 Implementation failures propagate, including failures from callees and providers.
 
@@ -8527,7 +8527,7 @@ Implementation failures propagate, including failures from callees and providers
 > than memory loads, and the writes are one transaction each; wrap the call
 > in ``m.transaction(...)`` to make the whole load one.
 
-Evidence: `extensions/python/ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
+Evidence: `ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
 
 ## tables:declare
 
@@ -8559,7 +8559,7 @@ Implementation failures propagate, including failures from callees and providers
 >
 > m may be a context or a space.
 
-Evidence: `extensions/python/ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
+Evidence: `ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
 
 ## tables:accessors
 
@@ -8602,7 +8602,7 @@ Implementation failures propagate, including failures from callees and providers
 > so a third one installs `df.metta` by registering
 > (`metta.seam.frame.register(...)`, or the `metta.extensions` entry point).
 
-Evidence: `extensions/python/ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
+Evidence: `ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
 
 ## tables:sql-function
 
@@ -8630,7 +8630,7 @@ Guarantees result type `String` with the answer shape, effect, and determinism a
 
 Declared local refusals:
 
-- `type`: `extensions/python/ext/metta-tables/tests/test_tables_doors.py::test_tables_sql_function_refuses_noncallable_heads`.
+- `type`: `ext/metta-tables/tests/test_tables_doors.py::test_tables_sql_function_refuses_noncallable_heads`.
 
 Implementation failures propagate, including failures from callees and providers.
 
@@ -8655,4 +8655,4 @@ Implementation failures propagate, including failures from callees and providers
 > function has one result per row; a SQL NULL argument reaches the head as
 > `Grounded(None)` and MeTTa decides what it means.
 
-Evidence: `extensions/python/ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.
+Evidence: `ext/metta-tables/tests/test_tables_doors.py::test_table_namespace_preserves_ingestion_and_conversions`.

@@ -42,7 +42,7 @@ name = "pymetta"
 solar = ["metta-solars"]
 
 [tool.uv.workspace]
-members = ["extensions/python/ext/metta-*"]
+members = ["ext/metta-*"]
 
 [tool.uv.sources]
 metta-solars = { workspace = true }
@@ -241,13 +241,13 @@ def main() -> int:
         # distribution un-releasable separately.
         found = _reported(
             scratch,
-            "extensions/python/ext/metta-solars/metta_solars.py",
+            "ext/metta-solars/metta_solars.py",
             "from metta._spaces.handle import Space\n\n\ndef door():\n    return Space\n",
         )
         assert any("the core's private name" in line for line in found), found
 
         found = _reported(
-            scratch, "extensions/python/ext/metta-solars/metta_solars.py",
+            scratch, "ext/metta-solars/metta_solars.py",
             "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from metta._spaces.handle import Space\n",
         )
         assert any("the core's private name" in line for line in found), found
@@ -257,7 +257,7 @@ def main() -> int:
         # its first dispatch, whatever the dispatch was for.
         found = _reported(
             scratch,
-            "extensions/python/ext/metta-solars/metta_solars.py",
+            "ext/metta-solars/metta_solars.py",
             "import metta._spaces.handle\n\n\ndef door():\n    return metta._spaces.handle\n",
         )
         assert any("loads metta._spaces.handle" in line for line in found), found
@@ -265,7 +265,7 @@ def main() -> int:
         # 3. A member names a second library without declaring it.
         found = _reported(
             scratch,
-            "extensions/python/ext/metta-solars/metta_solars.py",
+            "ext/metta-solars/metta_solars.py",
             "import solarsdb\nimport lunardb\n\n\ndef door():\n    return solarsdb, lunardb\n",
         )
         assert any("names 'lunardb' and does not declare it" in line for line in found), found
@@ -287,14 +287,14 @@ def main() -> int:
         # 5. A member missing its parts: no entry point, so nothing discovers it.
         found = _reported(
             scratch,
-            "extensions/python/ext/metta-solars/pyproject.toml",
+            "ext/metta-solars/pyproject.toml",
             MEMBER_MANIFEST.replace('metta-solars = "metta_solars"', 'wrong = "metta_solars"'),
         )
         assert any("advertises nothing at all" in line for line in found), found
 
         # A lightweight metadata module may be the entry point while the
         # primary implementation remains dormant until a caller needs it.
-        manifest = scratch / "extensions/python/ext/metta-solars/pyproject.toml"
+        manifest = scratch / "ext/metta-solars/pyproject.toml"
         original = manifest.read_text(encoding="utf-8")
         metadata_module = manifest.parent / "metta_solars_doors.py"
         metadata_module.write_text(MEMBER, encoding="utf-8")

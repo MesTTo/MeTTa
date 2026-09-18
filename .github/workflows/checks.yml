@@ -509,7 +509,7 @@ jobs:
         # here with no edit: the members are what the workspace glob matches.
         run: |
           set -eu
-          for member in extensions/python/ext/metta-*; do
+          for member in ext/metta-*; do
               python -m build --wheel --outdir dist/ext "$member"
           done
           /tmp/wheeltest/bin/pip install --no-deps dist/ext/*.whl
@@ -522,7 +522,7 @@ jobs:
           from metta import seam
 
           checkout = Path(os.environ['GITHUB_WORKSPACE'])
-          expected = {path.name for path in checkout.glob('extensions/python/ext/metta-*')}
+          expected = {path.name for path in checkout.glob('ext/metta-*')}
           advertised = seam.advertised()
           assert set(advertised) == expected, (sorted(advertised), sorted(expected))
           # And each one LOADS through the entry point it advertised, which is

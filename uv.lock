@@ -1229,7 +1229,7 @@ wheels = [
 [[package]]
 name = "metta-arrays"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-arrays" }
+source = { editable = "ext/metta-arrays" }
 dependencies = [
     { name = "array-api-compat" },
     { name = "pymetta" },
@@ -1238,24 +1238,24 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "array-api-compat" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-benchmarking"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-benchmarking" }
+source = { editable = "ext/metta-benchmarking" }
 dependencies = [
     { name = "pymetta" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-duckdb"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-duckdb" }
+source = { editable = "ext/metta-duckdb" }
 dependencies = [
     { name = "duckdb" },
     { name = "pymetta" },
@@ -1264,13 +1264,13 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "duckdb" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-faiss"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-faiss" }
+source = { editable = "ext/metta-faiss" }
 dependencies = [
     { name = "faiss-cpu" },
     { name = "numpy" },
@@ -1281,13 +1281,13 @@ dependencies = [
 requires-dist = [
     { name = "faiss-cpu" },
     { name = "numpy" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-graphql"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-graphql" }
+source = { editable = "ext/metta-graphql" }
 dependencies = [
     { name = "graphql-core" },
     { name = "pymetta" },
@@ -1296,24 +1296,24 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "graphql-core", specifier = ">=3.2" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-live"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-live" }
+source = { editable = "ext/metta-live" }
 dependencies = [
     { name = "pymetta" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-nanoarrow"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-nanoarrow" }
+source = { editable = "ext/metta-nanoarrow" }
 dependencies = [
     { name = "nanoarrow" },
     { name = "pymetta" },
@@ -1322,13 +1322,13 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "nanoarrow", specifier = ">=0.9" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-numpy"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-numpy" }
+source = { editable = "ext/metta-numpy" }
 dependencies = [
     { name = "numpy" },
     { name = "pymetta" },
@@ -1343,14 +1343,14 @@ test = [
 requires-dist = [
     { name = "hypothesis", marker = "extra == 'test'", specifier = ">=6.165" },
     { name = "numpy" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 provides-extras = ["test"]
 
 [[package]]
 name = "metta-otel"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-otel" }
+source = { editable = "ext/metta-otel" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "pymetta" },
@@ -1365,14 +1365,14 @@ test = [
 requires-dist = [
     { name = "opentelemetry-api", specifier = ">=1.30" },
     { name = "opentelemetry-sdk", marker = "extra == 'test'", specifier = ">=1.30" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 provides-extras = ["test"]
 
 [[package]]
 name = "metta-pandas"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-pandas" }
+source = { editable = "ext/metta-pandas" }
 dependencies = [
     { name = "pandas" },
     { name = "pymetta" },
@@ -1381,13 +1381,13 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "pandas" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-polars"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-polars" }
+source = { editable = "ext/metta-polars" }
 dependencies = [
     { name = "polars" },
     { name = "pymetta" },
@@ -1396,13 +1396,13 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "polars", specifier = ">=1.3" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-pyarrow"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-pyarrow" }
+source = { editable = "ext/metta-pyarrow" }
 dependencies = [
     { name = "pyarrow" },
     { name = "pymetta" },
@@ -1411,13 +1411,13 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "pyarrow", specifier = ">=15" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-pydantic"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-pydantic" }
+source = { editable = "ext/metta-pydantic" }
 dependencies = [
     { name = "pydantic" },
     { name = "pymetta" },
@@ -1426,46 +1426,46 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "pydantic", specifier = ">=2" },
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
 ]
 
 [[package]]
 name = "metta-remote"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-remote" }
+source = { editable = "ext/metta-remote" }
 dependencies = [
     { name = "pymetta" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-sqlite"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-sqlite" }
+source = { editable = "ext/metta-sqlite" }
 dependencies = [
     { name = "pymetta" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-tables"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-tables" }
+source = { editable = "ext/metta-tables" }
 dependencies = [
     { name = "pymetta" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-websocket"
 version = "0.8.0"
-source = { editable = "extensions/python/ext/metta-websocket" }
+source = { editable = "ext/metta-websocket" }
 dependencies = [
     { name = "pymetta" },
     { name = "websocket-client" },
@@ -1473,7 +1473,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pymetta", specifier = "==0.8.0" },
+    { name = "pymetta", editable = "." },
     { name = "websocket-client" },
 ]
 
@@ -2339,25 +2339,25 @@ requires-dist = [
     { name = "import-linter", marker = "extra == 'checks'", specifier = ">=2.13" },
     { name = "interrogate", marker = "extra == 'checks'", specifier = ">=1.7" },
     { name = "janus-swi", marker = "extra == 'engine'", specifier = ">=1.5.2" },
-    { name = "metta-arrays", marker = "extra == 'arrays'", editable = "extensions/python/ext/metta-arrays" },
-    { name = "metta-benchmarking", marker = "extra == 'test'", editable = "extensions/python/ext/metta-benchmarking" },
-    { name = "metta-duckdb", marker = "extra == 'sql'", editable = "extensions/python/ext/metta-duckdb" },
-    { name = "metta-faiss", marker = "extra == 'arrays'", editable = "extensions/python/ext/metta-faiss" },
-    { name = "metta-graphql", marker = "extra == 'graphql'", editable = "extensions/python/ext/metta-graphql" },
-    { name = "metta-live", marker = "extra == 'live'", editable = "extensions/python/ext/metta-live" },
-    { name = "metta-nanoarrow", marker = "extra == 'arrow'", editable = "extensions/python/ext/metta-nanoarrow" },
-    { name = "metta-numpy", marker = "extra == 'arrays'", editable = "extensions/python/ext/metta-numpy" },
-    { name = "metta-otel", marker = "extra == 'otel'", editable = "extensions/python/ext/metta-otel" },
-    { name = "metta-otel", extras = ["test"], marker = "extra == 'test'", editable = "extensions/python/ext/metta-otel" },
-    { name = "metta-pandas", marker = "extra == 'dataframes'", editable = "extensions/python/ext/metta-pandas" },
-    { name = "metta-polars", marker = "extra == 'dataframes'", editable = "extensions/python/ext/metta-polars" },
-    { name = "metta-pyarrow", marker = "extra == 'arrow'", editable = "extensions/python/ext/metta-pyarrow" },
-    { name = "metta-pydantic", marker = "extra == 'models'", editable = "extensions/python/ext/metta-pydantic" },
-    { name = "metta-remote", marker = "extra == 'remote'", editable = "extensions/python/ext/metta-remote" },
-    { name = "metta-sqlite", marker = "extra == 'sql'", editable = "extensions/python/ext/metta-sqlite" },
-    { name = "metta-tables", marker = "extra == 'dataframes'", editable = "extensions/python/ext/metta-tables" },
-    { name = "metta-tables", marker = "extra == 'sql'", editable = "extensions/python/ext/metta-tables" },
-    { name = "metta-websocket", marker = "extra == 'das'", editable = "extensions/python/ext/metta-websocket" },
+    { name = "metta-arrays", marker = "extra == 'arrays'", editable = "ext/metta-arrays" },
+    { name = "metta-benchmarking", marker = "extra == 'test'", editable = "ext/metta-benchmarking" },
+    { name = "metta-duckdb", marker = "extra == 'sql'", editable = "ext/metta-duckdb" },
+    { name = "metta-faiss", marker = "extra == 'arrays'", editable = "ext/metta-faiss" },
+    { name = "metta-graphql", marker = "extra == 'graphql'", editable = "ext/metta-graphql" },
+    { name = "metta-live", marker = "extra == 'live'", editable = "ext/metta-live" },
+    { name = "metta-nanoarrow", marker = "extra == 'arrow'", editable = "ext/metta-nanoarrow" },
+    { name = "metta-numpy", marker = "extra == 'arrays'", editable = "ext/metta-numpy" },
+    { name = "metta-otel", marker = "extra == 'otel'", editable = "ext/metta-otel" },
+    { name = "metta-otel", extras = ["test"], marker = "extra == 'test'", editable = "ext/metta-otel" },
+    { name = "metta-pandas", marker = "extra == 'dataframes'", editable = "ext/metta-pandas" },
+    { name = "metta-polars", marker = "extra == 'dataframes'", editable = "ext/metta-polars" },
+    { name = "metta-pyarrow", marker = "extra == 'arrow'", editable = "ext/metta-pyarrow" },
+    { name = "metta-pydantic", marker = "extra == 'models'", editable = "ext/metta-pydantic" },
+    { name = "metta-remote", marker = "extra == 'remote'", editable = "ext/metta-remote" },
+    { name = "metta-sqlite", marker = "extra == 'sql'", editable = "ext/metta-sqlite" },
+    { name = "metta-tables", marker = "extra == 'dataframes'", editable = "ext/metta-tables" },
+    { name = "metta-tables", marker = "extra == 'sql'", editable = "ext/metta-tables" },
+    { name = "metta-websocket", marker = "extra == 'das'", editable = "ext/metta-websocket" },
     { name = "mutmut", marker = "extra == 'checks'", specifier = ">=3.7" },
     { name = "mypy", marker = "extra == 'checks'", specifier = ">=1.18" },
     { name = "networkx", marker = "extra == 'test'", specifier = ">=3.6,<4" },
@@ -2365,8 +2365,8 @@ requires-dist = [
     { name = "perflint", marker = "extra == 'checks'", specifier = ">=0.8" },
     { name = "pip-audit", marker = "extra == 'checks'", specifier = ">=2.9" },
     { name = "pylint", marker = "extra == 'checks'", specifier = ">=3.3,<4" },
-    { name = "pymetta", extras = ["arrays", "arrow", "das", "dataframes", "graphql", "live", "models", "otel", "remote", "sql"], marker = "extra == 'test'" },
-    { name = "pymetta", extras = ["test"], marker = "extra == 'checks'" },
+    { name = "pymetta", extras = ["arrays", "arrow", "das", "dataframes", "graphql", "live", "models", "otel", "remote", "sql"], marker = "extra == 'test'", editable = "." },
+    { name = "pymetta", extras = ["test"], marker = "extra == 'checks'", editable = "." },
     { name = "pyright", marker = "extra == 'checks'", specifier = ">=1.1.411" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.4.2" },
     { name = "pytest-benchmark", marker = "extra == 'test'", specifier = ">=5.2" },

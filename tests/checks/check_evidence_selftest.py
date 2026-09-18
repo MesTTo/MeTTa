@@ -629,7 +629,7 @@ def tracked_probe_complaints() -> list[str]:
     """
     complaints = []
     for name in ("extensions/python/benchmarks/probes/probe.py",
-                 "extensions/python/ext/metta-fixture/library/__init__.py",
+                 "ext/metta-fixture/library/__init__.py",
                  "tests/data/prologface/fixture.pl",
                  "tests/data/prologface/fixture.metta",
                  "tests/prolog/suites/libraries/support/fixture.pl",

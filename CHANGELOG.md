@@ -2140,7 +2140,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Python-side doc atom is built in; a parameter the source describes now reads
   as prose, and a parameter it says nothing about reads as its type.
 - Fourteen extension distributions, one per library, under
-  `extensions/python/ext/`. `metta-pandas`, `metta-polars`, `metta-duckdb`,
+  `ext/`. `metta-pandas`, `metta-polars`, `metta-duckdb`,
   `metta-sqlite`, `metta-numpy`, `metta-faiss`, `metta-nanoarrow`,
   `metta-pyarrow`, `metta-websocket`, `metta-pydantic` and `metta-graphql`
   each register ONE row against a declared extension point and are found

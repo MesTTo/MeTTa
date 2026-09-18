@@ -482,8 +482,8 @@ test -d "$scratch/site/solars-0.1.0.dist-info"
 # --python, because a member declares requires-python and uv would otherwise
 # resolve against whatever interpreter it found.
 uv pip install --quiet --python "$CHECK_PY" --target "$scratch/site" --no-deps \
-    "$project_dir/extensions/python/ext/metta-arrays" \
-    "$project_dir/extensions/python/ext/metta-numpy"
+    "$project_dir/ext/metta-arrays" \
+    "$project_dir/ext/metta-numpy"
 test -d "$scratch/site/metta_arrays-0.8.0.dist-info"
 
 run_with_solars() {

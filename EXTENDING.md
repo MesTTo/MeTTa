@@ -929,7 +929,7 @@ clauses explain the behavior callers can rely on.
 
 Python frameworks keep their faces in their own distributions. The existing
 `facegen.py` generator reads `Import:` declarations under both `lib/` and
-`extensions/python/ext/`. A distribution packages its generated `.metta` file
+`ext/`. A distribution packages its generated `.metta` file
 as package data and advertises a directory function through `metta.libraries`.
 The `metta-arrays` wheel demonstrates that contract with
 `lib_arrays = "metta_arrays_library:sources"`. Its wheel test builds the
@@ -4265,9 +4265,9 @@ again on their next call, so withdrawal raises and replacement takes effect.
 #### Your library is a package, and so is ours
 
 Every library this repository ships support for is one of those packages, in
-`extensions/python/ext/`, one directory per library:
+`ext/`, one directory per library:
 
-    extensions/python/ext/metta-pandas/
+    ext/metta-pandas/
       pyproject.toml        name, version, `dependencies = ["pymetta", "pandas"]`,
                             and the one `metta.extensions` entry point
       metta_pandas.py       the row, and the two callables it holds

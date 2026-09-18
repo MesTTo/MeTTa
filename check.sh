@@ -632,7 +632,7 @@ run GATE no-hardcoded-integration-selftest "$PY" "$HERE/tests/checks/check_hardc
 # workspace's two layers hold: the core imports no extension distribution, and
 # no distribution reaches the core's private names. Both are derived from the
 # `[tool.uv.workspace] members` glob, so a package added under
-# `extensions/python/ext/` is gated with no edit to either.
+# `ext/` is gated with no edit to either.
 run GATE layering "$PY" "$HERE/tests/checks/check_layering.py"
 run GATE layering-selftest "$PY" "$HERE/tests/checks/check_layering_selftest.py"
 
@@ -951,7 +951,7 @@ run GATE   docs        check_docs_site
 # look wrong, and its entries are bare names because codespell prunes a walked
 # directory by NAME, so a ./-prefixed skip stops matching the moment a runner
 # passes explicit paths.
-run GATE   codespell   sh -c "cd '$HERE' && '$PY' -m codespell_lib extensions/python/metta extensions/python/ext extensions/python/bench.py extensions/python/examples extensions/python/notebooks extensions/python/tests extensions/python/tools engine lib extensions/mork extensions/node extensions/cmetta examples tests website .github *.md"
+run GATE   codespell   sh -c "cd '$HERE' && '$PY' -m codespell_lib extensions/python/metta ext extensions/python/bench.py extensions/python/examples extensions/python/notebooks extensions/python/tests extensions/python/tools engine lib extensions/mork extensions/node extensions/cmetta examples tests website .github *.md"
 # The remaining clones are small facade, protocol, and test-fixture mirrors;
 # extracting them would couple layers or hide the local contract.
 run REPORT jscpd       sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --format python --min-lines 8 --ignore '**/__pycache__/**' extensions/python/metta extensions/python/tests"

@@ -11,7 +11,7 @@
 #   both directions.
 #
 #   The environment is built rather than assumed. `PYTHONPATH` is the seat's
-#   own directory and nothing else, so none of `extensions/python/ext/` is
+#   own directory and nothing else, so none of `ext/` is
 #   importable and `importlib.metadata` finds no `metta.extensions` entry
 #   point; the second half installs two members into a scratch --target
 #   directory, which is a real distribution with real entry points, so the
@@ -182,7 +182,7 @@ PYTHONPATH="$project_dir/extensions/python" "$CHECK_PY" "$scratch/none.py"
 # resolve against whatever interpreter it found rather than the one running the
 # proof.
 uv pip install --quiet --python "$CHECK_PY" --target "$scratch/site" --no-deps \
-    "$project_dir/extensions/python/ext/metta-pandas"
+    "$project_dir/ext/metta-pandas"
 test -d "$scratch/site/metta_pandas-0.8.0.dist-info"
 
 PYTHONPATH="$scratch/site:$project_dir/extensions/python" "$CHECK_PY" "$scratch/subset.py"

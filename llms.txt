@@ -4072,7 +4072,7 @@ registration the caller lacks.
 
 **pymetta names no third-party library.** Not in a branch, not in a row, not
 in an allowlist: every library the Python seat can be extended by is its own
-distribution under `extensions/python/ext/`, one directory per library, found
+distribution under `ext/`, one directory per library, found
 through the `metta.extensions` entry point exactly as a stranger's package is.
 There is no built-in tier. This is the shape Apache Airflow's providers have
 (the core knows no cloud; `apache-airflow[amazon]` is the extra that installs

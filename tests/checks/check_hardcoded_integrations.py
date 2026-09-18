@@ -7,7 +7,7 @@ that line at a REGISTRANT MODULE: a library could be named there and nowhere
 else, and the table below carried one entry per library saying so. The ruling
 that day removed the exception. pymetta ships zero integrations; every library
 the Python seat can be extended by is its own distribution under
-`extensions/python/ext/`, found through the `metta.extensions` entry-point
+`ext/`, found through the `metta.extensions` entry-point
 group exactly as a stranger's package is, and there is no site in the core
 where a library may be named at all.
 
@@ -364,7 +364,7 @@ def _seat_findings(seat: str, sources: list[Path], names) -> list[Finding]:
                         line,
                         f"the {seat} seat's core names {library!r} here; "
                         f"{NOT_A_DEPENDENCY}. Move this to a package under "
-                        f"extensions/python/ext/ that depends on "
+                        f"ext/ that depends on "
                         f"{library!r} and registers a ROW against a declared "
                         f"point, the way every library this repository ships "
                         f"already arrives",

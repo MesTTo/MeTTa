@@ -112,7 +112,7 @@ engine = [
 ]
 #: EVERY extra below installs PACKAGES, never libraries. pymetta ships zero
 #: integrations (the ruling of 2026-09-07): each library the Python seat can be
-#: extended by is its own distribution under `extensions/python/ext/`,
+#: extended by is its own distribution under `ext/`,
 #: advertising one `metta.extensions` entry point and found the way a
 #: stranger's package is found. An extra is the convenience name for a set of
 #: them, which is the shape `apache-airflow[amazon]` has for the same reason:
@@ -262,20 +262,25 @@ checks = [
 ]
 
 #: This repository is a uv WORKSPACE: pymetta at the root, and one member per
-#: extension package under `extensions/python/ext/`. `uv sync --all-packages`
+#: extension package under `ext/`. `uv sync --all-packages`
 #: installs every member from the checkout, and an extra above resolves its
 #: members here rather than from an index, which is what lets
 #: `pip install 'pymetta[dataframes]'` mean the same thing before and after a
 #: release [source: https://docs.astral.sh/uv/concepts/projects/workspaces/].
 #: The membership is a GLOB, so a new package is a directory and no edit here.
 [tool.uv.workspace]
-members = ["extensions/python/ext/metta-*"]
+members = ["ext/metta-*"]
 
 #: Every member resolves from the workspace. Written per name because uv takes
 #: no glob here; `tests/checks/check_layering.py` refuses a member the
 #: workspace does not list and a listing with no member, so the two cannot
 #: drift apart.
 [tool.uv.sources]
+#: The core itself, which every distribution below depends on exactly. It was implicit
+#: while they sat inside its own directory; with `ext/` a sibling of `extensions/` they
+#: are outside it, and uv asks for the mapping rather than guessing
+#: [tested: uv lock --offline --check; commit=WORKTREE].
+pymetta = { workspace = true }
 metta-arrays = { workspace = true }
 metta-benchmarking = { workspace = true }
 metta-duckdb = { workspace = true }

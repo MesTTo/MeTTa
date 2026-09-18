@@ -218,7 +218,7 @@ def main() -> int:
             if finding.library == "pandas" and finding.path.endswith("returned.py")
         )
         assert "own distribution" in returned.reason, returned
-        assert "extensions/python/ext/" in returned.reason, returned
+        assert "ext/" in returned.reason, returned
 
         # The finding names the door to use, which is what makes it actionable.
         coupling = next(finding for finding in found if finding.library == "solarsdb")
