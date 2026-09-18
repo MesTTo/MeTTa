@@ -4,7 +4,7 @@
 ; Guarantees: (where G) keeps only the instances G admits, on the derived
 ;   route and on the engine's fixpoint alike, and (product prob polynomial)
 ;   pairs each answer with every derivation the guard admitted.
-; [tested: examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/08-guarded_rules.metta; commit=WORKTREE]
+; [tested: examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/08-guarded_rules.metta; commit=49478d67a10793a114d27d01a51f09a685d5136a]
 
 ;Two scored facts and a threshold written as an ordinary function.
 (fact 0.6 (score a))

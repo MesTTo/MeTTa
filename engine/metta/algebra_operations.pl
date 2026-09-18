@@ -10,7 +10,7 @@
 %   otherwise [tested: test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76];
 %   the polynomial carrier's plus, times and var are the free semiring's
 %   [tested: algebra_fixpoint:the_polynomial_carrier_answers_every_witness_with_its_multiplicity;
-%   commit=WORKTREE].
+%   commit=49478d67a10793a114d27d01a51f09a685d5136a].
 % Decides: a custom operation runs under the requested algebra after boot.
 
 metta_apply_algebra_operation(formula, 'formula-or', A, B, R) :-

@@ -8,7 +8,7 @@
 %   guard answering no truth value is refused by name; the polynomial
 %   carrier's tag lists every witness with its multiplicity and a formula's
 %   witnesses are its minimal derivations [tested: run_tests(algebra_fixpoint);
-%   commit=WORKTREE].
+%   commit=49478d67a10793a114d27d01a51f09a685d5136a].
 % Owns resources: each test releases its space; the formula tables are
 %   cleared after the suite.
 
