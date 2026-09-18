@@ -4245,7 +4245,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   band keeps its pin, and the two boot rows keep theirs until measured from
   a canonical checkout. The twins lane's per-definition authoring allowance
   is re-derived on the merged tree (305 once plus 1642 per definition), and
-  the corpus is re-pinned with the merge as its mechanism.
+  the corpus is re-pinned with the merge as its mechanism. The four counter
+  doors are not exported from the engine module (exporting their names, and
+  no other four, moved every seat row measured in a fresh process; their
+  callers name the module), KERNEL.md lists `match-under`, the parity
+  baseline re-freezes the ch22 examples the algebra work moved, and
+  EXTENDING.md's cost table row the moved extension pin derives is
+  regenerated. A benchmark row's every comparison now reaches the log:
+  `BenchmarkBaseline.collecting()` records each failed comparison in its
+  block and raises one error naming all of them, so a failed count no
+  longer hides a stale slope pin or a later tier.
 
 ### Fixed
 

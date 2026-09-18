@@ -90,9 +90,9 @@ metta_formula_apply(Op, [formula, A], [formula, B], Out) :-
     ->  Out = [formula, Terminal]
     ;   '$metta_formula_cache'(Op, A, B, Cached)
     ->  Out = [formula, Cached]
-    ;   metta_formula_top(A, B, Var, ALo, AHi, BLo, BHi),
-        metta_formula_apply(Op, [formula, ALo], [formula, BLo], Lo),
-        metta_formula_apply(Op, [formula, AHi], [formula, BHi], Hi),
+    ;   metta_formula_top(A, B, Var, LoA, HiA, LoB, HiB),
+        metta_formula_apply(Op, [formula, LoA], [formula, LoB], Lo),
+        metta_formula_apply(Op, [formula, HiA], [formula, HiB], Hi),
         metta_formula_node(Var, Lo, Hi, Out),
         Out = [formula, Id],
         with_mutex(metta_formula, assertz('$metta_formula_cache'(Op, A, B, Id)))
@@ -110,12 +110,12 @@ metta_formula_terminal(or, A, 0, A) :- !.
 
 %The smaller variable is the earlier seen one; a terminal, or a node below
 %that variable, keeps both cofactors as itself.
-metta_formula_top(A, B, Var, ALo, AHi, BLo, BHi) :-
+metta_formula_top(A, B, Var, LoA, HiA, LoB, HiB) :-
     metta_formula_variable_of(A, VarA),
     metta_formula_variable_of(B, VarB),
     Var is min(VarA, VarB),
-    metta_formula_cofactors(A, Var, ALo, AHi),
-    metta_formula_cofactors(B, Var, BLo, BHi).
+    metta_formula_cofactors(A, Var, LoA, HiA),
+    metta_formula_cofactors(B, Var, LoB, HiB).
 
 metta_formula_variable_of(Id, Var) :-
     (   '$metta_formula_node'(Id, Var0, _, _)

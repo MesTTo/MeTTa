@@ -68,7 +68,7 @@ marginal cost of **one call** rather than of the loop around it.
 | @m.define, annotated | 3.00 | 1.00x | 0.08 | 1.15x |
 | Python operation, transport="raw" | 11.00 | 3.67x | 1.15 | 15.69x |
 | Python operation, encoded | 19.00 | 6.33x | 4.27 | 58.15x |
-| @m.define, no annotations | 27.00 | 9.00x | 5.64 | 76.77x |
+| @m.define, no annotations | 32.00 | 10.67x | 6.55 | 115.38x |
 
 Six of each operation row's inferences are the scheduler admission probe: every
 operation call asks the effect and lane question that lets an `oracleIO` call
@@ -223,10 +223,10 @@ pre-add hook with the `space-admission-verdict` judge.
 
 | write door | inferences/add | vs plain add | microseconds/add | vs plain add |
 |---|---|---|---|---|
-| add-atom, no claims on the space | 35.00 | 1.00x | 1.72 | 1.00x |
-| add-atom through an accept-all pre-add hook | 52.00 | 1.49x | 2.62 | 1.53x |
-| add-atom into a pool with a declared admits type | 64.00 | 1.83x | 3.27 | 1.90x |
-| add-atom into a pool with a declared capacity | 72.00 | 2.06x | 5.03 | 2.92x |
+| add-atom, no claims on the space | 33.00 | 1.00x | 1.45 | 1.00x |
+| add-atom through an accept-all pre-add hook | 50.00 | 1.52x | 2.08 | 1.44x |
+| add-atom into a pool with a declared admits type | 62.00 | 1.88x | 2.53 | 1.75x |
+| add-atom into a pool with a declared capacity | 89.00 | 2.70x | 5.35 | 3.69x |
 
 Each accepted native occurrence now allocates a process-wide generation through
 SWI's mutex-protected `flag/3`, adding five inferences per write. The hook and

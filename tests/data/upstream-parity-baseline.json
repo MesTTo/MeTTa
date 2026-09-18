@@ -3,16 +3,16 @@
   "annotated_arrow_product_repin": "RE-PINNED 2026-09-05 after three source-only before/after samples at the canonical checkout path, warm QLF, against 763b7f2d1b0c6882b171cfa0e6a56374e0e8d167. All four old inference bands also fail on that unmodified base. Only these four within-tree inference pins change; upstream fields, recorded instruction fields, waivers and allowances remain untouched. examples/ch09-types/02-builin_types.metta: base/product inferences 54589/55949; net instruction minima 42624311/43898010; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta: base/product inferences 87799/87797; net instruction minima 108030420/113627817; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta: base/product inferences 93598/93596; net instruction minima 115393277/120765591; examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta: base/product inferences 324825344/324827492; net instruction minima 156378969117/155175829651. [measured: three processes per example; command=ai-tmp/ai-remaining-ab.py; fixture=identical native artifacts, canonical path, warmed source-only base/product; commit=bbb512316280110a747e31c26adfc31e8c5104be]",
   "null_program_correction": "REBUILT 2026-09-06 by the null-program correction, which is a MEASUREMENT change and not an engine change: every field in this file moved, and no engine, library or Python-seat source did. The subtrahend was the boot fixture tests/fixtures/parity_boot.pl, a second process that reached neither engine's per-run setup and, having a different command line, did not measure the same fixed cost either: 4,594,811 instructions BELOW upstream's real one and 8,661,096 ABOVE ours, a 13,255,907 bias in this tree's favour on every row, against a corpus whose smallest row is 225,455. It is now the EMPTY PROGRAM through the same driver at the same path length and directory count, median of three processes and of seven when the three disagree, after one process that is run and discarded; a program of no content nets between -13,405 and +12,852 here and between -7,446 and -705 on upstream's across nine corpus shapes, which is this method's resolution. The recorded our_inferences move on 135 of the 148 rows measured in both files, 84 of them DOWNWARD, and not one exceeds the old pin's 2% + 200, so this is the stale half of the 0.8.0 re-pin being brought to this tip rather than any drift: that re-pin advanced thirteen inference fields and left the rest at their 2026-08-31 values. Seven rows the old file recorded with a net at or below zero, between -94,022 and -50,470,138, are measured here for the first time. examples/ch11-python-as-a-notation/07-torch.metta leaves the comparable set: seven processes of it spread 7.46% on upstream and 6.80% here with no mode, so its old 2.07% flag was a minimum read off a distribution rather than a cost. examples/ch20-extending-the-engine/20-06-files-and-processes/_fixtures/exit-status.metta leaves it too, by name, because it terminates its own process at its second form here and runs three forms upstream. [measured 2026-09-06: one discarded process then three fresh ones per program per engine, seven where the three disagreed; command=$CHECK_PY tests/checks/check_upstream_parity.py --rebaseline; fixture=../pnull, a sibling clone of this branch whose absolute path is the same 29 characters as the repository root, with the five engine C artifacts, the three chapter-19 artifacts, libcmetta.so, both MORK artifacts and the git-import fixture cache present, the QLF purged and warmed, loadavg 34 to 54; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]",
   "our_null": {
-   "at_longest_path": 1048776168,
-   "at_shortest_path": 1048174808,
+   "at_longest_path": 1457506894,
+   "at_shortest_path": 1454863329,
    "longest_path": [
-    142,
+    162,
     5
    ],
-   "median": 1048438941,
-   "shapes": 71,
+   "median": 1455278425,
+   "shapes": 81,
    "shortest_path": [
-    64,
+    84,
     0
    ]
   },
@@ -20,1600 +20,1571 @@
   "status": "meta",
   "translator_rule_home_repin": "RE-PINNED 2026-09-03 while closing module-owned translator rules. Clean 12771f41 already exceeds the frozen inference pins on specializefunctiontypes, recursive_types2, types_dependent, types_nondet, nilbc, plntest and plntestdirect; the changed tree adds only its deterministic delta to those standing drifts. forall is the one newly displaced row because it compiles the prelude translator-rule path. Retired-instruction comparison and answer parity remain governed by their existing fields. [measured: full parity/performance lane on clean 12771f41 and the changed tree; command=$CHECK_PY tests/checks/check_upstream_parity.py; fixture=warm main-checkout engine artifacts; commit=d1318d20b5d89d33079c49d0e94aa29e12685664]",
   "upstream_null": {
-   "at_longest_path": 257393519,
-   "at_shortest_path": 257090841,
+   "at_longest_path": 262263252,
+   "at_shortest_path": 261944662,
    "longest_path": [
-    142,
+    162,
     5
    ],
-   "median": 257236862,
-   "shapes": 71,
+   "median": 262114927,
+   "shapes": 81,
    "shortest_path": [
-    64,
+    84,
     0
    ]
   },
   "wave3_merge_repin": "RE-PINNED 2026-09-07, the within-tree inference tripwire only; no instruction number and no upstream number is touched. Thirteen rows had drifted, twelve of them by between +1,823 and +2,957, which is one fixed per-program cost rather than thirteen causes. Two were laddered through this file's own driver over the first-parent chain with every component rebuilt at each point (ai-tmp/hy-parity-ladder.sh in the branch's ladder worktree): 07-datetime and 09-tabling_fib both read 28,313 and 80,102 at 5aca9b64 and at 699c8b4a, and 31,173 and 83,056 at 468350eb, the immediate first-parent successor and the soft/provider/import doors merge, so that step is one commit. 09-tabling_fib takes a second step at 5621c456, the cache-policies merge, to 138,172, and a third of +823 from this branch's own autoload declaration for call_delays/2, which the no-autoload lane required; 2,954 + 26 + 55,090 + 823 is its whole +58,893. Every value here was read twice through the driver and agreed to the digit, and 07-datetime reads 31,173 in a pristine worktree of 97c96e91 as well, which is the control that says an inference pin may be taken from a worktree at all. 06-git_import is pinned at its WARM reading, 38,451, stable over five runs; the 38,679 the lane reported once is the first-touch cache write this file's own note on the three import rows already records. Moved: 07-datetime.metta 28313 to 31173 (+2860); 01-memo_multi_answer.metta 28047 to 30947 (+2900); 02-memo_aggregate.metta 28783 to 31740 (+2957); 03-memo_per_arity.metta 30209 to 33105 (+2896); 04-memo_same_name_multi_arity.metta 35022 to 37957 (+2935); 05-memo_variant_nonground.metta 27650 to 30544 (+2894); 06-memo_dependency_invalidation.metta 27331 to 30223 (+2892); 08-memo_stats.metta 27830 to 30726 (+2896); 09-tabling_fib.metta 80102 to 138995 (+58893); 01-c_extension.metta 92738 to 95664 (+2926); 02-handle.metta 98604 to 101536 (+2932); 06-git_import.metta 36628 to 38451 (+1823); 01-newtons_method.metta 39707 to 42621 (+2914)."
  },
  "examples/ch01-getting-started/01-hello.metta": {
-  "our_inferences": 1900,
-  "our_instructions": 743778,
-  "our_null": 1048241970,
-  "status": "measured",
-  "upstream_instructions": 8892079,
-  "upstream_null": 257124203
+  "detail": "null 1454978684..1455036315, median 1455003217 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch01-getting-started/02-checking-an-answer.metta": {
+  "detail": "275222575,,instructions:u,22290728,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch01-getting-started/_fixtures/01-reaches-forward.metta": {
-  "status": "upstream-error"
+  "detail": "",
+  "status": "upstream-nondeterministic"
  },
  "examples/ch02-programming-a-family-tree/01-facts.metta": {
+  "detail": "265567649,,instructions:u,22843584,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch02-programming-a-family-tree/02-a-query.metta": {
-  "our_inferences": 2865,
-  "our_instructions": 1943766,
-  "our_null": 1048287599,
-  "status": "measured",
-  "upstream_instructions": 8256026,
-  "upstream_null": 257166711
+  "detail": "null 1455024408..1455069307, median 1455043323 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch02-programming-a-family-tree/03-a-rule.metta": {
-  "our_inferences": 6466,
-  "our_instructions": 5707816,
-  "our_null": 1048287778,
-  "status": "measured",
-  "upstream_instructions": 11834706,
-  "upstream_null": 257162915
+  "detail": "null 1455018445..1455037847, median 1455022829 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch02-programming-a-family-tree/04-the-whole-program.metta": {
-  "our_inferences": 7846,
-  "our_instructions": 7074646,
-  "our_null": 1048348444,
-  "status": "measured",
-  "upstream_instructions": 13856104,
-  "upstream_null": 257201139
+  "detail": "null 1455085573..1455118173, median 1455093720 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch03-atoms-and-expressions/01-comments.metta": {
-  "our_inferences": 2001,
-  "our_instructions": 1501548,
-  "our_null": 1048274890,
-  "status": "measured",
-  "upstream_instructions": 2981000,
-  "upstream_null": 257151156
+  "detail": "null 1455033074..1455090179, median 1455036631 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch03-atoms-and-expressions/02-string.metta": {
-  "our_inferences": 990,
-  "our_instructions": 269710,
-  "our_null": 1048263863,
+  "our_inferences": 4172,
+  "our_instructions": 279850,
+  "our_null": 1455072793,
   "status": "measured",
-  "upstream_instructions": 828571,
-  "upstream_null": 257150558
+  "upstream_instructions": 817379,
+  "upstream_null": 262017587
  },
  "examples/ch03-atoms-and-expressions/03-string_comments.metta": {
-  "our_inferences": 3750,
-  "our_instructions": 2989723,
-  "our_null": 1048319885,
-  "status": "measured",
-  "upstream_instructions": 7229843,
-  "upstream_null": 257181945
+  "detail": "null 1455059424..1455078601, median 1455064845 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch03-atoms-and-expressions/04-repr.metta": {
-  "our_inferences": 3193,
-  "our_instructions": 1515955,
-  "our_null": 1048246265,
-  "status": "measured",
-  "upstream_instructions": 14906795,
-  "upstream_null": 257132219
+  "detail": "null 1455017928..1455052898, median 1455051067 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch03-atoms-and-expressions/05-parse.metta": {
+  "detail": "285478141,,instructions:u,23138344,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch03-atoms-and-expressions/06-reading_forms.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: expected '(' or '!(', line 14:\n)\n262760508,,instructions:u,21562659,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/01-spaces.metta": {
-  "our_inferences": 3052,
-  "our_instructions": 2606312,
-  "our_null": 1048541713,
+  "our_inferences": 6376,
+  "our_instructions": 3232218,
+  "our_null": 1455296652,
   "status": "measured",
-  "upstream_instructions": 4984831,
-  "upstream_null": 257293188
+  "upstream_instructions": 6533535,
+  "upstream_null": 262149223
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/02-spaces2.metta": {
-  "our_inferences": 3291,
-  "our_instructions": 2366763,
-  "our_null": 1048549383,
+  "our_inferences": 6674,
+  "our_instructions": 3002098,
+  "our_null": 1455329255,
   "status": "measured",
-  "upstream_instructions": 7701773,
-  "upstream_null": 257294088
+  "upstream_instructions": 9300910,
+  "upstream_null": 262151247
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/03-spaces3.metta": {
-  "our_inferences": 3650,
-  "our_instructions": 2109445,
-  "our_null": 1048549383,
-  "status": "measured",
-  "upstream_instructions": 15776306,
-  "upstream_null": 257294088
+  "detail": "null 1455295050..1455321321, median 1455297447 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/04-spaces_find.metta": {
-  "our_inferences": 7598,
-  "our_instructions": 8104268,
-  "our_null": 1048581589,
-  "status": "measured",
-  "upstream_instructions": 23553851,
-  "upstream_null": 257300139
+  "detail": "null 1455326957..1455361218, median 1455338707 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/05-spaces_succeedspredicate.metta": {
-  "our_inferences": 7251,
-  "our_instructions": 7513565,
-  "our_null": 1048667446,
-  "status": "measured",
-  "upstream_instructions": 20473400,
-  "upstream_null": 257353223
+  "detail": "null 1455436386..1455474883, median 1455474360 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/06-spaces_removeallatoms.metta": {
-  "our_inferences": 11136,
-  "our_instructions": 10666287,
-  "our_null": 1048639785,
+  "our_inferences": 15519,
+  "our_instructions": 15607686,
+  "our_null": 1455408810,
   "status": "measured",
-  "upstream_instructions": 25660486,
-  "upstream_null": 257341016,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 10271 to 11136. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "upstream_instructions": 31970746,
+  "upstream_null": 262212250
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/07-add_atom_fun_space.metta": {
-  "our_inferences": 3236,
-  "our_instructions": 2393045,
-  "our_null": 1048616612,
-  "status": "measured",
-  "upstream_instructions": 5580892,
-  "upstream_null": 257327896
+  "detail": "null 1455361977..1455398639, median 1455370973 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/08-spacefunction.metta": {
-  "our_inferences": 5220,
-  "our_instructions": 3335653,
-  "our_null": 1048580838,
-  "status": "measured",
-  "upstream_instructions": 9121562,
-  "upstream_null": 257311533,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 4766 to 5220. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455327351..1455373516, median 1455333473 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/09-selfprog.metta": {
-  "our_inferences": 3255,
-  "our_instructions": 2422622,
-  "our_null": 1048544607,
-  "status": "measured",
-  "upstream_instructions": 5125615,
-  "upstream_null": 257288770
+  "detail": "null 1455292732..1455342244, median 1455302094 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/10-subtract_atom.metta": {
+  "detail": "272267649,,instructions:u,22147618,100.00,,",
   "status": "upstream-error"
  },
+ "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta": {
+  "detail": "282841352,,instructions:u,22678606,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/12-add_reducts_and_containment.metta": {
+  "detail": "290898957,,instructions:u,22824684,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/13-migrating_and_counting.metta": {
+  "detail": "null 1455419831..1455467944, median 1455465387 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/01-matchsingle.metta": {
-  "our_inferences": 5054,
-  "our_instructions": 4462514,
-  "our_null": 1048506459,
-  "status": "measured",
-  "upstream_instructions": 9582747,
-  "upstream_null": 257264574
+  "detail": "null 1455269084..1455321758, median 1455285978 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/02-matchnested.metta": {
-  "our_inferences": 4396,
-  "our_instructions": 3034124,
-  "our_null": 1048506459,
-  "status": "measured",
-  "upstream_instructions": 11511220,
-  "upstream_null": 257264574,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 4087 to 4396. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455266328..1455321402, median 1455267408 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/03-matchnested2.metta": {
-  "our_inferences": 4461,
-  "our_instructions": 3092653,
-  "our_null": 1048510695,
-  "status": "measured",
-  "upstream_instructions": 11328854,
-  "upstream_null": 257268902,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 4151 to 4461. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 262142007..262164413, median 262146538 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/04-match_snapshot.metta": {
+  "detail": "273024924,,instructions:u,21909529,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/05-constanthead.metta": {
-  "our_inferences": 2740,
-  "our_instructions": 2077874,
-  "our_null": 1048510695,
-  "status": "measured",
-  "upstream_instructions": 5675497,
-  "upstream_null": 257268902
+  "detail": "null 1455277053..1455306390, median 1455278425 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/06-listhead.metta": {
-  "our_inferences": 4804,
-  "our_instructions": 3989057,
-  "our_null": 1048483491,
-  "status": "measured",
-  "upstream_instructions": 8396938,
-  "upstream_null": 257258679
+  "detail": "null 1455248689..1455276477, median 1455274813 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/07-unify.metta": {
+  "detail": "275081574,,instructions:u,21920368,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/08-unify_eval_branches.metta": {
-  "our_inferences": 4524,
-  "our_instructions": 3875080,
-  "our_null": 1048544607,
+  "our_inferences": 33560,
+  "our_instructions": 32446373,
+  "our_null": 1455314812,
   "status": "measured",
-  "upstream_instructions": 50708400,
-  "upstream_null": 257288770
+  "upstream_instructions": 57340536,
+  "upstream_null": 262156932
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta": {
-  "our_inferences": 2315,
-  "our_instructions": 1716818,
-  "our_null": 1048541377,
-  "status": "measured",
-  "upstream_instructions": 4934576,
-  "upstream_null": 257281280
+  "detail": "null 1455282496..1455335214, median 1455287439 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": {
-  "our_inferences": 4701,
-  "our_instructions": 4505903,
-  "our_null": 1048541377,
+  "our_inferences": 8026,
+  "our_instructions": 5617415,
+  "our_null": 1455278815,
   "status": "measured",
-  "upstream_instructions": 4225208,
-  "upstream_null": 257281280
+  "upstream_instructions": 5780635,
+  "upstream_null": 262142150
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/03-program_order.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main findall_loop/4: Unknown procedure: 'p121-example-respond'/2\n275674420,,instructions:u,22110118,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/04-partialdef.metta": {
-  "our_inferences": 5582,
-  "our_instructions": 5358079,
-  "our_null": 1048549383,
-  "status": "measured",
-  "upstream_instructions": 7138559,
-  "upstream_null": 257294088
+  "detail": "null 1455285378..1455327028, median 1455326207 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/05-smartdispatch.metta": {
-  "our_inferences": 8698,
-  "our_instructions": 9136193,
-  "our_null": 1048566072,
-  "status": "measured",
-  "upstream_instructions": 10364988,
-  "upstream_null": 257302484
+  "detail": "null 1455312259..1455358666, median 1455343587 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/06-functionhead.metta": {
-  "our_inferences": 7103,
-  "our_instructions": 7580977,
-  "our_null": 1048549174,
+  "our_inferences": 10625,
+  "our_instructions": 8762306,
+  "our_null": 1455312977,
   "status": "measured",
-  "upstream_instructions": 11705745,
-  "upstream_null": 257292942
+  "upstream_instructions": 15025571,
+  "upstream_null": 262162388
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/07-functionhead2.metta": {
-  "our_inferences": 11336,
-  "our_instructions": 12142051,
-  "our_null": 1048566072,
-  "status": "measured",
-  "upstream_instructions": 14240057,
-  "upstream_null": 257302484
+  "detail": "null 1455327462..1455366218, median 1455328214 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/08-functionhead3.metta": {
-  "our_inferences": 7907,
-  "our_instructions": 7017479,
-  "our_null": 1048566072,
+  "our_inferences": 11214,
+  "our_instructions": 8016488,
+  "our_null": 1455325542,
   "status": "measured",
-  "upstream_instructions": 12761198,
-  "upstream_null": 257302484
+  "upstream_instructions": 16059083,
+  "upstream_null": 262160627
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/09-multicall.metta": {
-  "our_inferences": 3191,
-  "our_instructions": 2440887,
-  "our_null": 1048541713,
+  "our_inferences": 6520,
+  "our_instructions": 3162889,
+  "our_null": 1455293368,
   "status": "measured",
-  "upstream_instructions": 6021284,
-  "upstream_null": 257293188
+  "upstream_instructions": 9258151,
+  "upstream_null": 262148630
+ },
+ "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/10-unwind_cleanup.metta": {
+  "detail": "275823997,,instructions:u,22637556,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/11-single_answer.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(function,(= (unique-value) (superpose ())),[=,[unique-value],[superpose,[]]])\n267173965,,instructions:u,21294672,100.00,,",
+  "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/01-dispatch_policies.metta": {
-  "our_inferences": 4188,
-  "our_instructions": 3255852,
-  "our_null": 1048579654,
+  "our_inferences": 7452,
+  "our_instructions": 3796129,
+  "our_null": 1455331146,
   "status": "measured",
-  "upstream_instructions": 8765386,
-  "upstream_null": 257301878
+  "upstream_instructions": 12067236,
+  "upstream_null": 262171741
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/02-functionremoval.metta": {
-  "our_inferences": 12173,
-  "our_instructions": 9799921,
-  "our_null": 1048566072,
-  "status": "measured",
-  "upstream_instructions": 11868268,
-  "upstream_null": 257302484,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 10980 to 12173. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455330520..1455359647, median 1455340387 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/03-functionremovalspec.metta": {
-  "our_inferences": 11959,
-  "our_instructions": 10786017,
-  "our_null": 1048584114,
-  "status": "measured",
-  "upstream_instructions": 10547671,
-  "upstream_null": 257312830,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 11129 to 11959. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455335357..1455378080, median 1455367591 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/04-specialize.metta": {
-  "our_inferences": 78172,
-  "our_instructions": 75112862,
-  "our_null": 1048541377,
-  "status": "measured",
-  "upstream_instructions": 43783025,
-  "upstream_null": 257281280
+  "detail": "null 1455290129..1455332535, median 1455313322 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/05-specialize_recursive_wrap.metta": {
-  "our_inferences": 7926,
-  "our_instructions": 7822692,
-  "our_null": 1048629747,
-  "status": "measured",
-  "upstream_instructions": 9265350,
-  "upstream_null": 257338534
+  "detail": "null 1455407647..1455446336, median 1455445925 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/06-specializecyclic.metta": {
-  "our_inferences": 19290,
-  "our_instructions": 20969228,
-  "our_null": 1048581589,
-  "status": "measured",
-  "upstream_instructions": 13333760,
-  "upstream_null": 257300139
+  "detail": "null 1455303407..1455355799, median 1455309160 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/07-specializefunctiontypes.metta": {
-  "our_inferences": 5355,
-  "our_instructions": 4856929,
-  "our_null": 1048616612,
-  "status": "measured",
-  "upstream_instructions": 8394812,
-  "upstream_null": 257327896
+  "detail": "null 1455378436..1455411875, median 1455409408 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-03-the-number-library/01-math.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (/)/2: Arithmetic: evaluation error: `zero_divisor'\n301115091,,instructions:u,25438987,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-03-the-number-library/02-math_exp_random.metta": {
+  "detail": "267854483,,instructions:u,22748085,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch05-equations-and-evaluation/05-03-the-number-library/03-exp_and_seeded_randomness.metta": {
+  "detail": "287380349,,instructions:u,26521403,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch05-equations-and-evaluation/05-03-the-number-library/04-bit_operations.metta": {
+  "detail": "271374624,,instructions:u,24822257,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/01-backward_arithmetic.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arguments are not sufficiently instantiated\n285245296,,instructions:u,26134433,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/02-relational_arithmetic.metta": {
+  "detail": "319048184,,instructions:u,25411416,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/03-constraint_domains.metta": {
+  "detail": "295901570,,instructions:u,25079737,100.00,,",
   "status": "upstream-error"
  },
+ "examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/04-relational_integer_division.metta": {
+  "detail": "null 1455468477..1455505083, median 1455501848 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
  "examples/ch06-many-answers/01-superpose_nested.metta": {
-  "our_inferences": 3846,
-  "our_instructions": 3871692,
-  "our_null": 1048271354,
-  "status": "measured",
-  "upstream_instructions": 6977678,
-  "upstream_null": 257152067
+  "detail": "null 1455023418..1455079055, median 1455066170 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/02-casenew.metta": {
-  "our_inferences": 4678,
-  "our_instructions": 4567346,
-  "our_null": 1048216980,
-  "status": "measured",
-  "upstream_instructions": 4500639,
-  "upstream_null": 257122197
+  "detail": "null 1454977690..1455023777, median 1454982160 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/03-collapse.metta": {
-  "our_inferences": 1074,
-  "our_instructions": 281267,
-  "our_null": 1048241970,
+  "our_inferences": 4273,
+  "our_instructions": 355494,
+  "our_null": 1454998794,
   "status": "measured",
-  "upstream_instructions": 968417,
-  "upstream_null": 257124203
+  "upstream_instructions": 961806,
+  "upstream_null": 261992406
  },
  "examples/ch06-many-answers/04-supercollapse.metta": {
-  "our_inferences": 6070,
-  "our_instructions": 6290880,
-  "our_null": 1048246265,
-  "status": "measured",
-  "upstream_instructions": 8368966,
-  "upstream_null": 257132219
+  "detail": "null 1455007796..1455047309, median 1455029585 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/05-empty.metta": {
-  "our_inferences": 2229,
-  "our_instructions": 1607252,
-  "our_null": 1048214564,
-  "status": "measured",
-  "upstream_instructions": 2966138,
-  "upstream_null": 257112343
+  "detail": "null 1454973446..1455005644, median 1454974214 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/06-once.metta": {
-  "our_inferences": 3134,
-  "our_instructions": 2567024,
-  "our_null": 1048222716,
+  "our_inferences": 6470,
+  "our_instructions": 3185860,
+  "our_null": 1454959562,
   "status": "measured",
-  "upstream_instructions": 7256822,
-  "upstream_null": 257110572
+  "upstream_instructions": 10483695,
+  "upstream_null": 261972911
  },
  "examples/ch06-many-answers/07-tests.metta": {
-  "our_inferences": 8171,
-  "our_instructions": 8553135,
-  "our_null": 1048214564,
-  "status": "measured",
-  "upstream_instructions": 12709620,
-  "upstream_null": 257112343
+  "detail": "null 1454965239..1455020834, median 1454985680 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/08-permutations.metta": {
-  "our_inferences": 24245851,
-  "our_instructions": 22294172970,
-  "our_null": 1048260374,
-  "status": "measured",
-  "upstream_instructions": 12561837339,
-  "upstream_null": 257125244
+  "detail": "null 1400793659..1455067565, median 1455035860 over 7 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/09-streamops.metta": {
-  "our_inferences": 4854,
-  "our_instructions": 3184772,
-  "our_null": 1048222577,
-  "status": "measured",
-  "upstream_instructions": 14893674,
-  "upstream_null": 257126451
+  "detail": "null 1454991534..1455034312, median 1454998245 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch06-many-answers/10-mettaset.metta": {
-  "our_inferences": 2415,
-  "our_instructions": 1340726,
-  "our_null": 1048241970,
-  "status": "measured",
-  "upstream_instructions": 10571962,
-  "upstream_null": 257124203
+  "detail": "null 1454960888..1454992096, median 1454984101 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/01-ifsimple.metta": {
-  "our_inferences": 1004,
-  "our_instructions": 225455,
-  "our_null": 1048405474,
-  "status": "measured",
-  "upstream_instructions": 535151,
-  "upstream_null": 257208019
+  "detail": "null 1455155376..1455179086, median 1455176008 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/02-if.metta": {
-  "our_inferences": 1346,
-  "our_instructions": 436571,
-  "our_null": 1048356412,
-  "status": "measured",
-  "upstream_instructions": 5638429,
-  "upstream_null": 257183110
+  "detail": "null 1455124318..1455143871, median 1455140552 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/03-if2.metta": {
-  "our_inferences": 1723,
-  "our_instructions": 571957,
-  "our_null": 1048368579,
-  "status": "measured",
-  "upstream_instructions": 8384318,
-  "upstream_null": 257188889
+  "detail": "null 1455103546..1455139776, median 1455107042 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/04-if3.metta": {
-  "our_inferences": 1468,
-  "our_instructions": 490780,
-  "our_null": 1048368579,
-  "status": "measured",
-  "upstream_instructions": 7128965,
-  "upstream_null": 257188889
+  "detail": "null 1455109380..1455146432, median 1455125612 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/05-if4.metta": {
-  "our_inferences": 1531,
-  "our_instructions": 512255,
-  "our_null": 1048368579,
+  "our_inferences": 4756,
+  "our_instructions": 687232,
+  "our_null": 1455144879,
   "status": "measured",
-  "upstream_instructions": 7510790,
-  "upstream_null": 257188889
+  "upstream_instructions": 12075151,
+  "upstream_null": 262050529
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/06-if_branch_binding.metta": {
+  "detail": "276128638,,instructions:u,22493927,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/07-and_or.metta": {
-  "our_inferences": 1848,
-  "our_instructions": 678413,
-  "our_null": 1048391510,
-  "status": "measured",
-  "upstream_instructions": 6908975,
-  "upstream_null": 257205880
+  "detail": "null 1455115593..1455161061, median 1455131408 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/08-booleansolver.metta": {
-  "our_inferences": 2039,
-  "our_instructions": 814044,
-  "our_null": 1048436697,
-  "status": "measured",
-  "upstream_instructions": 7547977,
-  "upstream_null": 257224040
+  "detail": "null 1455191253..1455235726, median 1455200678 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/09-xor.metta": {
-  "our_inferences": 3925,
-  "our_instructions": 3446477,
-  "our_null": 1048368579,
-  "status": "measured",
-  "upstream_instructions": 6763599,
-  "upstream_null": 257188889
+  "detail": "null 1455106678..1455144485, median 1455132616 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/10-and_then_or_else.metta": {
-  "our_inferences": 11551,
-  "our_instructions": 8892308,
-  "our_null": 1048450922,
-  "status": "measured",
-  "upstream_instructions": 26976090,
-  "upstream_null": 257236862
+  "detail": "null 1455208203..1455249231, median 1455247969 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta": {
+  "detail": "null 1455204524..1455248184, median 1455241167 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch07-control-flow/07-01-if-and-booleans/12-implication_and_unifiability.metta": {
+  "detail": "298546307,,instructions:u,23085294,100.00,,",
+  "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-02-case/01-case.metta": {
-  "our_inferences": 2527,
-  "our_instructions": 2165240,
-  "our_null": 1048301372,
+  "our_inferences": 5807,
+  "our_instructions": 2704845,
+  "our_null": 1455100010,
   "status": "measured",
-  "upstream_instructions": 5673005,
-  "upstream_null": 257157958
+  "upstream_instructions": 8895973,
+  "upstream_null": 262022297
  },
  "examples/ch07-control-flow/07-02-case/02-case2.metta": {
-  "our_inferences": 2648,
-  "our_instructions": 2231960,
-  "our_null": 1048306432,
-  "status": "measured",
-  "upstream_instructions": 6118141,
-  "upstream_null": 257163673
+  "detail": "null 1455063002..1455114066, median 1455099760 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-02-case/03-caseconstrain.metta": {
-  "our_inferences": 1061,
-  "our_instructions": 275723,
-  "our_null": 1048356412,
-  "status": "measured",
-  "upstream_instructions": 900144,
-  "upstream_null": 257183110
+  "detail": "null 1455091793..1455137692, median 1455135545 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-02-case/04-caseempty.metta": {
-  "our_inferences": 5067,
-  "our_instructions": 4863156,
-  "our_null": 1048325436,
-  "status": "measured",
-  "upstream_instructions": 5339382,
-  "upstream_null": 257173473
+  "detail": "null 1455047580..1455073557, median 1455066886 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-02-case/05-casecomputed.metta": {
+  "detail": " user:process_metta_string('<garbage_collected>', _280, '&self')\nERROR: [Thread main] \nERROR: [Thread main] Use the --stack_limit=size[KMG] command line option or\nERROR: [Thread main] ?- set_prolog_flag(stack_limit, 2_147_483_648). to double the limit.\n56741645244,,instructions:u,2249467798,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-02-case/06-ifcasenondet.metta": {
-  "our_inferences": 5181,
-  "our_instructions": 4945042,
-  "our_null": 1048352049,
-  "status": "measured",
-  "upstream_instructions": 7940843,
-  "upstream_null": 257181172
+  "detail": "null 1455083744..1455130451, median 1455086584 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-02-case/07-let_superpose_if_case.metta": {
-  "our_inferences": 4498,
-  "our_instructions": 4515256,
-  "our_null": 1048420304,
+  "our_inferences": 7845,
+  "our_instructions": 5468176,
+  "our_null": 1455164582,
   "status": "measured",
-  "upstream_instructions": 9027792,
-  "upstream_null": 257214039
+  "upstream_instructions": 12281887,
+  "upstream_null": 262074466
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/01-letstar.metta": {
-  "our_inferences": 1252,
-  "our_instructions": 370267,
-  "our_null": 1048420304,
-  "status": "measured",
-  "upstream_instructions": 5588238,
-  "upstream_null": 257214039
+  "detail": "null 1455164800..1455202649, median 1455167040 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/02-letlet.metta": {
-  "our_inferences": 2313,
-  "our_instructions": 1962666,
-  "our_null": 1048405573,
-  "status": "measured",
-  "upstream_instructions": 3835440,
-  "upstream_null": 257215310
+  "detail": "null 1455168383..1455188851, median 1455172990 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/03-letext.metta": {
-  "our_inferences": 1581,
-  "our_instructions": 513862,
-  "our_null": 1048405573,
-  "status": "measured",
-  "upstream_instructions": 7476254,
-  "upstream_null": 257215310
+  "detail": "null 1455127190..1455188801, median 1455141634 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/04-letstarcomputed.metta": {
+  "detail": "279298095,,instructions:u,20919082,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/05-metta4_prog.metta": {
-  "our_inferences": 1568,
-  "our_instructions": 744022,
-  "our_null": 1048427127,
-  "status": "measured",
-  "upstream_instructions": 3212260,
-  "upstream_null": 257237896
+  "detail": "null 1455201222..1455239758, median 1455238225 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/06-chain.metta": {
-  "our_inferences": 2449,
-  "our_instructions": 998206,
-  "our_null": 1048405474,
-  "status": "measured",
-  "upstream_instructions": 12153555,
-  "upstream_null": 257208019
+  "detail": "null 1455138493..1455178622, median 1455140324 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/07-eval.metta": {
-  "our_inferences": 10218,
-  "our_instructions": 9393076,
-  "our_null": 1048388585,
-  "status": "measured",
-  "upstream_instructions": 11628477,
-  "upstream_null": 257215703,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 9604 to 10218. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455126866..1455182763, median 1455142851 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/08-sealed.metta": {
+  "detail": "276468406,,instructions:u,22424567,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/09-walrus.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (<)/2: Type error: `character' expected, found `'floor-div'' (an atom)\n274158719,,instructions:u,21001440,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch07-control-flow/07-03-let-and-sequencing/10-chain_is_let.metta": {
+  "detail": "null 1455210959..1455271115, median 1455247908 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch07-control-flow/07-03-let-and-sequencing/11-nop.metta": {
+  "detail": "269484533,,instructions:u,20402103,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/01-forall.metta": {
-  "our_inferences": 20147,
-  "our_instructions": 19252097,
-  "our_null": 1048483491,
-  "status": "measured",
-  "upstream_instructions": 28261924,
-  "upstream_null": 257258679,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 19450 to 20147. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455240717..1455297754, median 1455246626 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/02-metta4_streams.metta": {
-  "our_inferences": 8407,
-  "our_instructions": 7694176,
-  "our_null": 1048541377,
-  "status": "measured",
-  "upstream_instructions": 13206012,
-  "upstream_null": 257281280
+  "detail": "null 1455279054..1455325761, median 1455305006 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/03-take.metta": {
+  "detail": "272442963,,instructions:u,21483138,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/04-cut.metta": {
-  "our_inferences": 3295,
-  "our_instructions": 2777278,
-  "our_null": 1048464713,
-  "status": "measured",
-  "upstream_instructions": 7798836,
-  "upstream_null": 257249557
+  "detail": "null 262110723..262132973, median 262112215 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/05-foldall.metta": {
-  "our_inferences": 17904,
-  "our_instructions": 14594078,
-  "our_null": 1048492166,
-  "status": "measured",
-  "upstream_instructions": 25311229,
-  "upstream_null": 257259444,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 17237 to 17904. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455233821..1455278343, median 1455269102 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/06-foldallmatch.metta": {
-  "our_inferences": 4272,
-  "our_instructions": 3277162,
-  "our_null": 1048518638,
-  "status": "measured",
-  "upstream_instructions": 9588490,
-  "upstream_null": 257274750
+  "detail": "null 1455281058..1455342818, median 1455298108 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/07-foldallspacecount.metta": {
-  "our_inferences": 4141,
-  "our_instructions": 4117268,
-  "our_null": 1048544607,
+  "our_inferences": 7527,
+  "our_instructions": 5281142,
+  "our_null": 1455299034,
   "status": "measured",
-  "upstream_instructions": 5576580,
-  "upstream_null": 257288770
+  "upstream_instructions": 7159606,
+  "upstream_null": 262155527
  },
  "examples/ch07-control-flow/07-05-recursion/01-factorial.metta": {
-  "our_inferences": 3895,
-  "our_instructions": 3215153,
-  "our_null": 1048368579,
-  "status": "measured",
-  "upstream_instructions": 5911303,
-  "upstream_null": 257188889
+  "detail": "null 1455091654..1455146589, median 1455095069 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-05-recursion/02-fib.metta": {
+  "detail": "7476055929,,instructions:u,305789393,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-05-recursion/03-fibsmart.metta": {
-  "our_inferences": 5694,
-  "our_instructions": 5084815,
-  "our_null": 1048356412,
-  "status": "measured",
-  "upstream_instructions": 7266707,
-  "upstream_null": 257183110
+  "detail": "null 1455090151..1455139028, median 1455131757 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-05-recursion/04-fibsmartimport.metta": {
-  "our_inferences": 7909,
-  "our_instructions": 7055129,
-  "our_null": 1048405474,
+  "our_inferences": 11272,
+  "our_instructions": 8755503,
+  "our_null": 1455143288,
   "status": "measured",
-  "upstream_instructions": 11953453,
-  "upstream_null": 257208019
+  "upstream_instructions": 16916070,
+  "upstream_null": 262067277
  },
  "examples/ch07-control-flow/07-05-recursion/05-iter.metta": {
-  "our_inferences": 4100,
-  "our_instructions": 3545568,
-  "our_null": 1048325436,
-  "status": "measured",
-  "upstream_instructions": 8823289,
-  "upstream_null": 257173473
+  "detail": "null 1455061044..1455116344, median 1455088254 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-05-recursion/06-peano.metta": {
-  "our_inferences": 1506830,
-  "our_instructions": 36117270713,
-  "our_null": 1048340158,
-  "status": "measured",
-  "upstream_instructions": 35883967097,
-  "upstream_null": 257179267
+  "detail": "null 1455071633..1455124806, median 1455083672 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch07-control-flow/07-05-recursion/07-invertpeanoplus.metta": {
-  "our_inferences": 8799,
-  "our_instructions": 6282696,
-  "our_null": 1048405573,
-  "status": "measured",
-  "upstream_instructions": 21559649,
-  "upstream_null": 257215310
+  "detail": "null 1455153440..1455181940, median 1455161311 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/01-nestedcons.metta": {
-  "our_inferences": 2378,
-  "our_instructions": 1790326,
-  "our_null": 1048405474,
-  "status": "measured",
-  "upstream_instructions": 5354180,
-  "upstream_null": 257208019
+  "detail": "null 1455143546..1455164512, median 1455159535 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/02-holfunctions.metta": {
-  "our_inferences": 16885,
-  "our_instructions": 17370158,
-  "our_null": 1048420304,
-  "status": "measured",
-  "upstream_instructions": 17067487,
-  "upstream_null": 257214039,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 16351 to 16885. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455135405..1455157074, median 1455153525 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": {
-  "our_inferences": 10993,
-  "our_instructions": 11319082,
-  "our_null": 1048492166,
+  "our_inferences": 14635,
+  "our_instructions": 12996513,
+  "our_null": 1455264236,
   "status": "measured",
-  "upstream_instructions": 10184408,
-  "upstream_null": 257259444
+  "upstream_instructions": 13412810,
+  "upstream_null": 262128287
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/04-curry.metta": {
-  "our_inferences": 12998,
-  "our_instructions": 11725180,
-  "our_null": 1048368579,
+  "our_inferences": 16682,
+  "our_instructions": 13760380,
+  "our_null": 1455141283,
   "status": "measured",
-  "upstream_instructions": 20381362,
-  "upstream_null": 257188889
+  "upstream_instructions": 23851762,
+  "upstream_null": 262048856
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/05-lambda.metta": {
-  "our_inferences": 15092,
-  "our_instructions": 14689404,
-  "our_null": 1048368136,
-  "status": "measured",
-  "upstream_instructions": 19308868,
-  "upstream_null": 257195852
+  "detail": "null 1455086939..1455144569, median 1455124151 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/06-invertfunction.metta": {
-  "our_inferences": 5432,
-  "our_instructions": 5275640,
-  "our_null": 1048438941,
-  "status": "measured",
-  "upstream_instructions": 10558175,
-  "upstream_null": 257226870
+  "detail": "null 1455190811..1455236135, median 1455195174 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/07-atomops.metta": {
+  "detail": "336112904,,instructions:u,27629978,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/08-alpha_member.metta": {
-  "our_inferences": 16943,
-  "our_instructions": 9195291,
-  "our_null": 1048420304,
-  "status": "measured",
-  "upstream_instructions": 59199700,
-  "upstream_null": 257214039,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 16321 to 16943. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455156586..1455204204, median 1455186074 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/09-alpha_unique_atom.metta": {
-  "our_inferences": 12949,
-  "our_instructions": 6810975,
-  "our_null": 1048449187,
-  "status": "measured",
-  "upstream_instructions": 67976511,
-  "upstream_null": 257239286,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 12294 to 12949. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 262097492..262113895, median 262098127 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/10-multiset_operations.metta": {
-  "our_inferences": 5865,
-  "our_instructions": 2910776,
-  "our_null": 1048459243,
+  "our_inferences": 9539,
+  "our_instructions": 3502665,
+  "our_null": 1455223917,
   "status": "measured",
-  "upstream_instructions": 21387713,
-  "upstream_null": 257244168
+  "upstream_instructions": 34045210,
+  "upstream_null": 262105941
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/11-patrick.metta": {
-  "our_inferences": 16054,
-  "our_instructions": 17129047,
-  "our_null": 1048388869,
-  "status": "measured",
-  "upstream_instructions": 25468770,
-  "upstream_null": 257194294
+  "detail": "null 1455113925..1455174829, median 1455115430 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/12-patrick_iterate_fib.metta": {
-  "our_inferences": 14108,
-  "our_instructions": 14682031,
-  "our_null": 1048459243,
+  "our_inferences": 17957,
+  "our_instructions": 17247658,
+  "our_null": 1455199733,
   "status": "measured",
-  "upstream_instructions": 23716846,
-  "upstream_null": 257244168
+  "upstream_instructions": 30171922,
+  "upstream_null": 262105649
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/13-patrick_iterate_quad.metta": {
-  "our_inferences": 10525771,
-  "our_instructions": 5344234048,
-  "our_null": 1048464713,
-  "status": "measured",
-  "upstream_instructions": 12202919446,
-  "upstream_null": 257249557
+  "detail": "null 1455227261..1455271576, median 1455234087 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/14-lib_roman_pair_helpers.metta": {
-  "our_inferences": 17466,
-  "our_instructions": 28643365,
-  "our_null": 1048483273,
-  "status": "measured",
-  "upstream_instructions": 72572630,
-  "upstream_null": 257247572,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 16506 to 17466. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455229414..1455277807, median 1455262102 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/15-roman.metta": {
-  "our_inferences": 266175,
-  "our_instructions": 244980740,
-  "our_null": 1048368579,
-  "status": "measured",
-  "upstream_instructions": 103207724,
-  "upstream_null": 257188889
+  "detail": "null 1455093747..1455137822, median 1455098601 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/16-if_decons_expr.metta": {
+  "detail": "271181172,,instructions:u,22353697,100.00,,",
   "status": "upstream-error"
  },
+ "examples/ch08-data/08-01-atoms-lists-and-folds/17-swi_term_doors.metta": {
+  "detail": "382727333,,instructions:u,30569375,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-01-atoms-lists-and-folds/18-sorting_and_deduplication.metta": {
+  "detail": "null 1455253827..1455303867, median 1455285692 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch08-data/08-01-atoms-lists-and-folds/19-decons_and_substitution.metta": {
+  "detail": "313044055,,instructions:u,25254385,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-01-atoms-lists-and-folds/20-roman_general_operators.metta": {
+  "detail": "353627222,,instructions:u,27786536,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-01-atoms-lists-and-folds/21-compose.metta": {
+  "detail": "null 1455117820..1455161269, median 1455120580 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
  "examples/ch08-data/08-02-sequence-variables/01-segments.metta": {
+  "detail": "277025920,,instructions:u,23890301,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-02-sequence-variables/02-in-an-equation-head.metta": {
+  "detail": "281243700,,instructions:u,23881831,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-02-sequence-variables/03-the-one-sided-fragment.metta": {
+  "detail": "278220554,,instructions:u,26080692,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta": {
+  "detail": "278515358,,instructions:u,26944449,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-02-sequence-variables/05-the-fence.metta": {
+  "detail": "290183747,,instructions:u,26004384,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/01-library.metta": {
-  "our_inferences": 16324,
-  "our_instructions": 27143698,
-  "our_null": 1048388869,
-  "status": "measured",
-  "upstream_instructions": 70470225,
-  "upstream_null": 257194294,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 15318 to 16324. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455109870..1455174924, median 1455170040 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/02-datastructures_fingertree.metta": {
+  "detail": "298243350,,instructions:u,24757908,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/03-text_lib.metta": {
+  "detail": "301209663,,instructions:u,26318912,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/04-regex_lib.metta": {
+  "detail": "278038609,,instructions:u,23564172,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/05-json_lib.metta": {
+  "detail": "283412209,,instructions:u,24866538,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/06-crypto_lib.metta": {
+  "detail": "277273853,,instructions:u,28463353,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta": {
-  "our_inferences": 31173,
-  "our_instructions": 32691697,
-  "our_null": 1048391510,
+  "our_inferences": 21651,
+  "our_instructions": 34409467,
+  "our_null": 1455211892,
   "status": "measured",
-  "upstream_instructions": 59323159,
-  "upstream_null": 257205880
+  "upstream_instructions": 71284643,
+  "upstream_null": 262056437
  },
  "examples/ch08-data/08-03-the-shipped-libraries/08-doc_lib.metta": {
+  "detail": "281639883,,instructions:u,25417115,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/09-conformance.metta": {
+  "detail": "280688988,,instructions:u,25105866,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/10-documentation_as_data.metta": {
+  "detail": "292406392,,instructions:u,25291003,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/11-combinatorics_lib.metta": {
+  "our_inferences": 78161,
+  "our_instructions": 92299870,
+  "our_null": 1455194053,
+  "status": "measured",
+  "upstream_instructions": 47760640,
+  "upstream_null": 262098372
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/12-dict_lib.metta": {
+  "detail": "288666934,,instructions:u,25210946,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta": {
+  "detail": "null 1455087920..1455121857, median 1455100015 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/14-reflect_lib.metta": {
+  "detail": "299035869,,instructions:u,24992438,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/15-fingertree_internals.metta": {
+  "detail": "307107828,,instructions:u,26937151,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch08-data/08-03-the-shipped-libraries/16-the_prolog_rung.metta": {
+  "detail": "360561685,,instructions:u,33133416,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/01-types.metta": {
-  "our_inferences": 11863,
-  "our_instructions": 8412518,
-  "our_null": 1048174808,
+  "our_inferences": 16976,
+  "our_instructions": 10877969,
+  "our_null": 1454863329,
   "status": "measured",
-  "upstream_instructions": 15058853,
-  "upstream_null": 257090841
+  "upstream_instructions": 18423898,
+  "upstream_null": 261944662
  },
  "examples/ch09-types/02-builin_types.metta": {
-  "our_inferences": 59248,
-  "our_instructions": 43564590,
-  "our_null": 1048214564,
-  "status": "measured",
-  "upstream_instructions": 49565008,
-  "upstream_null": 257112343,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 57346 to 59248. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1454913897..1454962369, median 1454926294 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/03-functiontypes.metta": {
+  "detail": "278900208,,instructions:u,25129085,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/04-outputtype.metta": {
+  "detail": "274980417,,instructions:u,27817587,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/05-meta_types.metta": {
-  "our_inferences": 1944,
-  "our_instructions": 967056,
-  "our_null": 1048201311,
+  "our_inferences": 5127,
+  "our_instructions": 981807,
+  "our_null": 1454915262,
   "status": "measured",
-  "upstream_instructions": 14630533,
-  "upstream_null": 257108117
+  "upstream_instructions": 24622039,
+  "upstream_null": 261973444
  },
  "examples/ch09-types/06-dont_eval_type.metta": {
+  "detail": "271948900,,instructions:u,23082374,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/07-metatype_of_a_name.metta": {
+  "detail": "295218697,,instructions:u,25260257,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/08-parametric_types.metta": {
-  "our_inferences": 5757,
-  "our_instructions": 4781666,
-  "our_null": 1048222577,
-  "status": "measured",
-  "upstream_instructions": 7550083,
-  "upstream_null": 257126451
+  "detail": "null 1454935383..1454989323, median 1454941928 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/09-recursive_types.metta": {
-  "our_inferences": 4326,
-  "our_instructions": 2318683,
-  "our_null": 1048241970,
-  "status": "measured",
-  "upstream_instructions": 8021082,
-  "upstream_null": 257124203
+  "detail": "null 1454936617..1455017358, median 1454973658 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/10-recursive_types2.metta": {
-  "our_inferences": 8791,
-  "our_instructions": 6817484,
-  "our_null": 1048222577,
-  "status": "measured",
-  "upstream_instructions": 9006021,
-  "upstream_null": 257126451
+  "detail": "null 1454939754..1454982508, median 1454949726 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/11-subtyping.metta": {
+  "detail": "277805530,,instructions:u,24020051,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/12-types_dependent.metta": {
-  "our_inferences": 13962,
-  "our_instructions": 11076762,
-  "our_null": 1048241970,
-  "status": "measured",
-  "upstream_instructions": 12374247,
-  "upstream_null": 257124203
+  "detail": "null 1454920886..1454978836, median 1454936286 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/13-types_nondet.metta": {
-  "our_inferences": 8712,
-  "our_instructions": 6156592,
-  "our_null": 1048214564,
-  "status": "measured",
-  "upstream_instructions": 11283230,
-  "upstream_null": 257112343
+  "detail": "null 1454910737..1454937306, median 1454921438 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/14-matchtypes.metta": {
-  "our_inferences": 6166,
-  "our_instructions": 4379115,
-  "our_null": 1048201311,
-  "status": "measured",
-  "upstream_instructions": 10436709,
-  "upstream_null": 257108117
+  "detail": "null 1454889498..1454957821, median 1454916914 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/15-engine_surface.metta": {
+  "detail": "291448261,,instructions:u,27583747,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/16-typing_rules.metta": {
+  "detail": "275834056,,instructions:u,23045875,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/17-verify-discharges.metta": {
+  "detail": "284561190,,instructions:u,24325779,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch09-types/18-compiled_overloads.metta": {
-  "our_inferences": 5105,
-  "our_instructions": 3590140,
-  "our_null": 1048240710,
-  "status": "measured",
-  "upstream_instructions": 8319988,
-  "upstream_null": 257135100
+  "detail": "null 1454952832..1454992671, median 1454980443 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch09-types/19-union-types.metta": {
+  "detail": "296766154,,instructions:u,26244772,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/20-type_casts_that_hold.metta": {
+  "detail": "278592457,,instructions:u,23388623,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/21-a_librarys_declared_types.metta": {
+  "detail": "288661718,,instructions:u,23697852,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/22-variadic_arrow_signature.metta": {
+  "detail": "276086533,,instructions:u,26166793,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/23-variadic_arrow_faces.metta": {
+  "detail": "283828927,,instructions:u,23656681,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/24-sorted_constructors.metta": {
+  "detail": "284189129,,instructions:u,22845424,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch10-errors-and-refusals/01-he_error.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arithmetic: `a/0' is not a function\n312714216,,instructions:u,26736730,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch10-errors-and-refusals/02-throwing_and_tracing.metta": {
+  "detail": "273911992,,instructions:u,24491687,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/01-python.metta": {
+  "detail": "387083378,,instructions:u,40246190,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/02-python_booleans.metta": {
+  "detail": "353056702,,instructions:u,34449152,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/03-python_import.metta": {
-  "our_inferences": 11847,
-  "our_instructions": 146369694,
-  "our_null": 1048295024,
-  "status": "measured",
-  "upstream_instructions": 172306722,
-  "upstream_null": 257171456
+  "detail": "null 1454986250..1455044998, median 1454988041 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch11-python-as-a-notation/04-py_surface.metta": {
+  "detail": "306841166,,instructions:u,28905572,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/05-py_numpy.metta": {
+  "detail": "281072079,,instructions:u,23392094,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/06-door_combinations.metta": {
-  "our_inferences": 19066,
-  "our_instructions": 154365064,
-  "our_null": 1048316890,
-  "status": "measured",
-  "upstream_instructions": 170498907,
-  "upstream_null": 257176288
+  "detail": "null 1455042341..1455075294, median 1455061792 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch11-python-as-a-notation/07-torch.metta": {
+  "detail": "1 of 7 runs within 0.1% of the median 9356642871: [8933434345, 9121251088, 9186463127, 9356642871, 9429657515, 9453500530, 9498826804]",
   "status": "upstream-unstable"
  },
  "examples/ch11-python-as-a-notation/08-torch_lib.metta": {
+  "detail": "280978309,,instructions:u,23614923,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/09-compiled_structural_vocabulary.metta": {
+  "detail": "tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(function,(= (absent)\n   (case (superpose ()) ((1 Unexpected) (Empty Missing)))),[=,[absent],[case,[superpose,[]],[[1,Unexpected],[Empty,Missing]]]])\n277294821,,instructions:u,24035150,100.00,,",
   "status": "upstream-error"
  },
+ "examples/ch11-python-as-a-notation/10-torch-library-surface.metta": {
+  "detail": "2 of 7 runs within 0.1% of the median 9401012922: [9173482100, 9283332662, 9348532079, 9401012922, 9402100733, 9449026098, 9524980214]",
+  "status": "upstream-unstable"
+ },
  "examples/ch12-testing/01-he_assert.metta": {
+  "detail": "316819814,,instructions:u,28287774,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch12-testing/02-he_equalreduct.metta": {
-  "our_inferences": 4188,
-  "our_instructions": 3719068,
-  "our_null": 1048222577,
-  "status": "measured",
-  "upstream_instructions": 39232029,
-  "upstream_null": 257126451
+  "detail": "null 1454938021..1454976538, median 1454943176 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch12-testing/03-assertion_difference.metta": {
+  "detail": "292441569,,instructions:u,24700629,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch12-testing/04-assert_answers.metta": {
+  "detail": "281421329,,instructions:u,24819047,100.00,,",
+  "status": "upstream-error"
  },
  "examples/ch14-seeing-your-program/01-time_and_pragmas.metta": {
+  "detail": "292965157,,instructions:u,28812314,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch14-seeing-your-program/02-repl.metta": {
+  "detail": "ERROR: [Thread main]   Stack depth: 505,199, last-call: 0%, Choice points: 1,010,357\nERROR: [Thread main]   Probable infinite recursion (cycle):\nERROR: [Thread main]     [505,196] user:console(_396)\nERROR: [Thread main]     [505,195] user:console(_414)\n27235222746,,instructions:u,2772856800,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch14-seeing-your-program/03-the_clock_and_the_command_line.metta": {
+  "detail": "309363098,,instructions:u,26454019,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch15-writing-transactions-and-worlds/01-mutex_and_transaction.metta": {
+  "detail": "",
   "status": "upstream-nondeterministic"
  },
  "examples/ch15-writing-transactions-and-worlds/02-state.metta": {
+  "detail": "297077435,,instructions:u,25267566,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch15-writing-transactions-and-worlds/03-pre_add_hooks.metta": {
+  "detail": "274225984,,instructions:u,23761692,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch15-writing-transactions-and-worlds/04-admission_pools.metta": {
+  "detail": "293920198,,instructions:u,24130970,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch15-writing-transactions-and-worlds/05-post_add_hooks.metta": {
+  "detail": "280314585,,instructions:u,27096541,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta": {
+  "detail": "268471050,,instructions:u,24998838,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch15-writing-transactions-and-worlds/07-owned_records.metta": {
+  "detail": "281639242,,instructions:u,24794127,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch16-events-and-standing-queries/01-event_catalog.metta": {
+  "detail": "278325436,,instructions:u,26049312,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/01-thread_lib.metta": {
+  "detail": "299189013,,instructions:u,26835130,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/02-thread_linda.metta": {
+  "detail": "284008030,,instructions:u,25764104,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/03-hyperpose_primes.metta": {
+  "detail": "",
   "status": "upstream-nondeterministic"
  },
  "examples/ch17-concurrency-and-the-loop/04-thin_forms.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(runnable,(test-no-answer (superpose ())),[test-no-answer,[superpose,[]]])\n290001087,,instructions:u,25474406,100.00,,",
   "status": "upstream-error"
  },
- "examples/ch18-performance/18-01-larger-workloads/01-scale.metta": {
-  "our_inferences": 26213949,
-  "our_instructions": 25217146612,
-  "our_null": 1048388869,
+ "examples/ch17-concurrency-and-the-loop/05-channels_pools_and_the_machine.metta": {
+  "detail": "298990035,,instructions:u,27105478,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/06-the_prolog_rung_under_lib_thread.metta": {
+  "detail": "304725612,,instructions:u,24937198,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/07-scopes_and_captured_calls.metta": {
+  "detail": "288851641,,instructions:u,24564069,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/08-class_grains.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['new-space']' (a list)\n380724810,,instructions:u,31104185,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/09-class_values.metta": {
+  "detail": "null 1455025061..1455055590, median 1455028402 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch17-concurrency-and-the-loop/10-class_entities.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-atom,[2])' expected, found `3'\n334337399,,instructions:u,29996868,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta": {
+  "detail": "343042919,,instructions:u,27711828,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/12-class_prototypes.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['new-space']' (a list)\n312148930,,instructions:u,24751718,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch17-concurrency-and-the-loop/13-class_decorators.metta": {
+  "our_inferences": 284283,
+  "our_instructions": 253906909,
+  "our_null": 1455035440,
   "status": "measured",
-  "upstream_instructions": 15303131403,
-  "upstream_null": 257194294,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 21213635 to 26213949. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "upstream_instructions": 144014469,
+  "upstream_null": 262050832
+ },
+ "examples/ch18-performance/18-01-larger-workloads/01-scale.metta": {
+  "detail": "null 1455070916..1455092864, median 1455076389 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta": {
+  "detail": "25828943723,,instructions:u,1666938235,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-01-larger-workloads/03-superpose_primes.metta": {
+  "detail": "406653075,,instructions:u,29256271,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-01-larger-workloads/04-peanofast.metta": {
-  "our_inferences": 65665,
-  "our_instructions": 5936406671,
-  "our_null": 1048405573,
-  "status": "measured",
-  "upstream_instructions": 5908206275,
-  "upstream_null": 257215310,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 53024 to 65665. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1455093666..1455143834, median 1455101008 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-01-larger-workloads/05-matespacefast.metta": {
+  "detail": "[27] '$bags':findall_loop(_782, '<garbage_collected>', _786, [])\nERROR: [Thread main] \nERROR: [Thread main] Use the --stack_limit=size[KMG] command line option or\nERROR: [Thread main] ?- set_prolog_flag(stack_limit, 2_147_483_648). to double the limit.\n58893777711,,instructions:u,3696459969,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-01-larger-workloads/06-a-gap-query-and-its-index.metta": {
+  "detail": "283388323,,instructions:u,22235748,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/01-memo_multi_answer.metta": {
-  "our_inferences": 30947,
-  "our_instructions": 33584943,
-  "our_null": 1048506459,
-  "status": "measured",
-  "upstream_instructions": 79991948,
-  "upstream_null": 257264574
+  "detail": "null 1455211771..1455245965, median 1455220976 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/02-memo_aggregate.metta": {
-  "our_inferences": 31740,
-  "our_instructions": 34032770,
-  "our_null": 1048483491,
-  "status": "measured",
-  "upstream_instructions": 80137323,
-  "upstream_null": 257258679
+  "detail": "null 1455201499..1455241654, median 1455231277 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/03-memo_per_arity.metta": {
-  "our_inferences": 33105,
-  "our_instructions": 34970308,
-  "our_null": 1048483491,
+  "our_inferences": 24867,
+  "our_instructions": 37675041,
+  "our_null": 1455234545,
   "status": "measured",
-  "upstream_instructions": 81753255,
-  "upstream_null": 257258679
+  "upstream_instructions": 92518217,
+  "upstream_null": 262123606
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/04-memo_same_name_multi_arity.metta": {
-  "our_inferences": 37957,
-  "our_instructions": 39322288,
-  "our_null": 1048549174,
-  "status": "measured",
-  "upstream_instructions": 84700828,
-  "upstream_null": 257292942
+  "detail": "null 1455273835..1455297503, median 1455294404 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/05-memo_variant_nonground.metta": {
-  "our_inferences": 30544,
-  "our_instructions": 33190203,
-  "our_null": 1048541377,
+  "our_inferences": 22223,
+  "our_instructions": 35640359,
+  "our_null": 1455272411,
   "status": "measured",
-  "upstream_instructions": 79464252,
-  "upstream_null": 257281280
+  "upstream_instructions": 90053169,
+  "upstream_null": 262143679
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/06-memo_dependency_invalidation.metta": {
-  "our_inferences": 30223,
-  "our_instructions": 32830600,
-  "our_null": 1048581589,
-  "status": "measured",
-  "upstream_instructions": 78985255,
-  "upstream_null": 257300139
+  "detail": "null 1455281098..1455319187, median 1455298872 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/07-memo_spaces.metta": {
+  "detail": "356968192,,instructions:u,26840349,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/08-memo_stats.metta": {
-  "our_inferences": 30726,
-  "our_instructions": 33223093,
-  "our_null": 1048459243,
-  "status": "measured",
-  "upstream_instructions": 79436684,
-  "upstream_null": 257244168
+  "detail": "null 1455157444..1455201720, median 1455174822 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta": {
-  "our_inferences": 138995,
-  "our_instructions": 83947901,
-  "our_null": 1048464713,
-  "status": "measured",
-  "upstream_instructions": 20494562,
-  "upstream_null": 257249557
+  "detail": "null 1455759259..1455802866, median 1455792676 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/10-tabling_equation_change.metta": {
+  "detail": "290258618,,instructions:u,22869704,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/11-tabling_space_write.metta": {
+  "detail": "% Reconsult: removed tabling for reach/3\n% Reconsult: removed tabling for twohop/3\n299368927,,instructions:u,24045131,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/12-tabling_statistics.metta": {
+  "detail": "299006525,,instructions:u,22472916,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-02-memoisation-and-tabling/13-cache_policy_monotonic.metta": {
+  "detail": "k depth: 9,472,884, last-call: 0%, Choice points: 16\nERROR: [Thread main]   Probable infinite recursion (cycle):\nERROR: [Thread main]     [9,472,883] user:connected(_682, _684, _686)\nERROR: [Thread main]     [9,472,882] user:connected(_704, _706, _708)\n92281997156,,instructions:u,4356322266,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-02-memoisation-and-tabling/14-cache_policy_lattice.metta": {
+  "detail": "   [29] '$bags':findall_loop(_914, <compound (:)/2>, _918, [])\nERROR: [Thread main] \nERROR: [Thread main] Use the --stack_limit=size[KMG] command line option or\nERROR: [Thread main] ?- set_prolog_flag(stack_limit, 2_147_483_648). to double the limit.\n301526345122,,instructions:u,12841821281,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-02-memoisation-and-tabling/15-cache_policy_subsumptive.metta": {
+  "detail": "293365000,,instructions:u,22271397,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-02-memoisation-and-tabling/16-cache_policy_restraints.metta": {
+  "detail": "294363381,,instructions:u,24117219,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-02-memoisation-and-tabling/17-memo_controls.metta": {
+  "detail": "357251460,,instructions:u,28044185,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch18-performance/18-02-memoisation-and-tabling/18-tabling_doors.metta": {
+  "detail": "315695100,,instructions:u,25419086,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/01-inherited_spaces.metta": {
+  "detail": "271586639,,instructions:u,22103227,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/02-restricted_spaces.metta": {
+  "detail": "284733253,,instructions:u,21882789,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/03-parametric_spaces.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `[cache,'&primary-kb',100]' (a list)\n272442861,,instructions:u,21346510,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/04-super.metta": {
+  "detail": "  [23] '$bags':findall_loop(_354, '<garbage_collected>', _358, [])\nERROR: [Thread main] \nERROR: [Thread main] Use the --stack_limit=size[KMG] command line option or\nERROR: [Thread main] ?- set_prolog_flag(stack_limit, 2_147_483_648). to double the limit.\n7225070019,,instructions:u,539019272,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/05-evalc.metta": {
+  "detail": "289524655,,instructions:u,22232768,100.00,,",
   "status": "upstream-error"
+ },
+ "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/06-a-shared-space-on-redis.metta": {
+  "detail": "null 1457277118..1457316295, median 1457311797 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch19-spaces-backed-by-anything/19-02-a-space-in-c/01-c_space.metta": {
   "detail": "",
   "status": "nondeterministic"
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta": {
-  "our_inferences": 95664,
-  "our_instructions": 120826661,
-  "our_null": 1048497437,
-  "status": "measured",
-  "upstream_instructions": 47747945,
-  "upstream_null": 257263304
+  "detail": "null 1457220306..1457255628, median 1457231434 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta": {
-  "our_inferences": 101536,
-  "our_instructions": 128015944,
-  "our_null": 1048464713,
-  "status": "measured",
-  "upstream_instructions": 55090151,
-  "upstream_null": 257249557
+  "detail": "null 1457222277..1457242232, median 1457227227 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch19-spaces-backed-by-anything/19-04-a-space-on-mork/01-mm2-operators.metta": {
+  "detail": "299483005,,instructions:u,22652717,100.00,,",
+  "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/01-translatorrule.metta": {
+  "detail": "274640443,,instructions:u,20272544,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/02-translatorrule_direction.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-translator-rule!,[1])' expected, found `2'\n277908639,,instructions:u,20373554,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/03-translatorrule_guard.metta": {
+  "detail": "284587811,,instructions:u,21026131,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/04-translatorrule_cost.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-translator-rule!,[1])' expected, found `2'\n275798194,,instructions:u,20439704,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/05-translatorrule_for.metta": {
+  "detail": "274223501,,instructions:u,20563013,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/06-translatorrule_fib.metta": {
-  "our_inferences": 7858,
-  "our_instructions": 7662595,
-  "our_null": 1048518638,
+  "our_inferences": 11300,
+  "our_instructions": 9651461,
+  "our_null": 1457278103,
   "status": "measured",
-  "upstream_instructions": 9171842,
-  "upstream_null": 257274750
+  "upstream_instructions": 12655113,
+  "upstream_null": 262142733
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/07-translatorrule_refusal.metta": {
+  "detail": "273855712,,instructions:u,20549963,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta": {
-  "our_inferences": 8689,
-  "our_instructions": 8302413,
-  "our_null": 1048492166,
-  "status": "measured",
-  "upstream_instructions": 20156346,
-  "upstream_null": 257259444
+  "detail": "null 1457211241..1457255851, median 1457255201 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/01-callquoteevalreduce.metta": {
+  "detail": "291458807,,instructions:u,23702451,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/02-callquoteevalreduce2.metta": {
-  "our_inferences": 29205,
-  "our_instructions": 26421055,
-  "our_null": 1048581589,
-  "status": "measured",
-  "upstream_instructions": 13339552,
-  "upstream_null": 257300139
+  "detail": "null 1457297151..1457329656, median 1457319607 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/03-myinterpreter.metta": {
-  "our_inferences": 6114,
-  "our_instructions": 5682756,
-  "our_null": 1048528483,
+  "our_inferences": 9541,
+  "our_instructions": 7023606,
+  "our_null": 1457257498,
   "status": "measured",
-  "upstream_instructions": 10079041,
-  "upstream_null": 257288256
+  "upstream_instructions": 13265973,
+  "upstream_null": 262139260
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/04-minimal_metta.metta": {
+  "detail": "304526533,,instructions:u,21912668,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/05-he_minimalmetta.metta": {
+  "detail": "32123263779,,instructions:u,1703899171,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/06-he_evaluation.metta": {
-  "our_inferences": 5781,
-  "our_instructions": 5130645,
-  "our_null": 1048528483,
-  "status": "measured",
-  "upstream_instructions": 41384211,
-  "upstream_null": 257288256
+  "detail": "null 1457249699..1457292785, median 1457289524 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/07-he_quoting.metta": {
-  "our_inferences": 5279,
-  "our_instructions": 4126653,
-  "our_null": 1048510695,
-  "status": "measured",
-  "upstream_instructions": 40816120,
-  "upstream_null": 257268902
+  "detail": "null 262134472..262154039, median 262135705 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta": {
-  "status": "upstream-error"
+  "detail": "null 1457252428..1457283190, median 1457279637 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/09-he_types.metta": {
+  "detail": "314718281,,instructions:u,23771592,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/10-he_math.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arithmetic: evaluation error: `undefined'\n285398833,,instructions:u,21050093,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta": {
+  "detail": "316909148,,instructions:u,23171994,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/12-interpret_and_metta_thread.metta": {
+  "detail": "286659961,,instructions:u,21561490,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/13-strategy_internals.metta": {
+  "detail": "292310426,,instructions:u,22300898,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/01-translatepredicate.metta": {
-  "our_inferences": 1064,
-  "our_instructions": 307843,
-  "our_null": 1048528483,
-  "status": "measured",
-  "upstream_instructions": 1291401,
-  "upstream_null": 257288256
+  "detail": "null 1457248952..1457273254, median 1457272845 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/02-prologimport.metta": {
+  "detail": "7548897623,,instructions:u,291073746,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/03-foreign_rules.metta": {
+  "detail": "e: metta_extension/2\nWarning: /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/rule_provider.pl:5:\nWarning:    Goal (directive) failed: user:metta_extension(rule_demo,[version('1.0.0')])\n334905281,,instructions:u,25962564,100.00,,",
   "status": "upstream-error"
  },
+ "examples/ch20-extending-the-engine/20-03-prolog-underneath/04-registering_prolog_predicates.metta": {
+  "detail": "336082621,,instructions:u,24212878,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-03-prolog-underneath/05-the-module-doors.metta": {
+  "detail": "346803763,,instructions:u,25691504,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/rung_library.metta": {
+  "detail": "null 1457266452..1457304134, median 1457271016 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.metta": {
+  "detail": "null 1457270970..1457301992, median 1457278629 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/01-import_order_independence.metta": {
+  "detail": "278120921,,instructions:u,25906763,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/02-import_relative_nested.metta": {
+  "detail": "278291485,,instructions:u,23355292,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/03-import_duplicate_cycle.metta": {
+  "detail": "277060040,,instructions:u,24319549,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/04-import_error_surface.metta": {
+  "detail": "308787708,,instructions:u,25956194,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/05-import_space_identity.metta": {
+  "detail": "331354471,,instructions:u,30526745,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/06-git_import.metta": {
-  "our_inferences": 38451,
-  "our_instructions": 61853259,
-  "our_null": 1048511136,
-  "status": "measured",
-  "upstream_instructions": 91721065,
-  "upstream_null": 257261391
+  "detail": "null 1457250569..1457275850, median 1457251729 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/07-git_import2.metta": {
+  "detail": "279898522,,instructions:u,25837283,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/08-catalog.metta": {
+  "detail": "272954953,,instructions:u,23042664,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/09-carrier_vocabulary.metta": {
+  "detail": "275976265,,instructions:u,23010834,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/10-include.metta": {
+  "detail": "271256562,,instructions:u,24071569,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/11-reference_rows.metta": {
+  "detail": "299980040,,instructions:u,25035506,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta": {
+  "detail": "276879393,,instructions:u,27057068,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/13-reference_loading.metta": {
+  "detail": "270628067,,instructions:u,24586439,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_error_broken.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: missing ')', starting at line 1:\n= (broken-import) a\n259143970,,instructions:u,23625463,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/defines.metta": {
-  "our_inferences": 1124,
-  "our_instructions": 662788,
-  "our_null": 1048746976,
-  "status": "measured",
-  "upstream_instructions": 719096,
-  "upstream_null": 257373485
+  "detail": "null 1457467112..1457510501, median 1457478377 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/index.metta": {
+  "detail": "273924950,,instructions:u,25926123,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/uses.metta": {
-  "our_inferences": 1124,
-  "our_instructions": 659319,
-  "our_null": 1048714300,
-  "status": "measured",
-  "upstream_instructions": 773289,
-  "upstream_null": 257372247
+  "detail": "null 1457446646..1457491441, median 1457451866 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/cycle_a.metta": {
+  "detail": "",
   "status": "upstream-timeout"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/cycle_b.metta": {
+  "detail": "",
   "status": "upstream-timeout"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/duplicate.metta": {
-  "our_inferences": 1124,
-  "our_instructions": 667081,
-  "our_null": 1048721093,
-  "status": "measured",
-  "upstream_instructions": 698903,
-  "upstream_null": 257371361
+  "detail": "null 1457455172..1457493555, median 1457488085 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/space_payload.metta": {
-  "our_inferences": 1169,
-  "our_instructions": 681896,
-  "our_null": 1048766616,
-  "status": "measured",
-  "upstream_instructions": 889193,
-  "upstream_null": 257390233
+  "detail": "null 1457486900..1457531990, median 1457524796 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/root.metta": {
-  "our_inferences": 15049,
-  "our_instructions": 152177028,
-  "our_null": 1048680316,
-  "status": "measured",
-  "upstream_instructions": 140871829,
-  "upstream_null": 257354456
+  "detail": "null 1457397471..1457456608, median 1457420254 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/second.metta": {
-  "our_inferences": 1124,
-  "our_instructions": 658299,
-  "our_null": 1048714869,
-  "status": "measured",
-  "upstream_instructions": 577906,
-  "upstream_null": 257360760
+  "detail": "null 1457460700..1457503532, median 1457483611 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/subdir/parent.metta": {
-  "our_inferences": 12221,
-  "our_instructions": 148064023,
-  "our_null": 1048772366,
-  "status": "measured",
-  "upstream_instructions": 167699748,
-  "upstream_null": 257398678
+  "detail": "null 1457490905..1457553730, median 1457532252 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/subdir/sibling.metta": {
-  "our_inferences": 1124,
-  "our_instructions": 661313,
-  "our_null": 1048776168,
-  "status": "measured",
-  "upstream_instructions": 598024,
-  "upstream_null": 257393519
+  "detail": "null 1457495232..1457546684, median 1457506894 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/included/rows.metta": {
+  "detail": "null 1457321638..1457392564, median 1457349023 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/included/silent.metta": {
+  "detail": "null 1457347662..1457393270, median 1457390838 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/background.metta": {
+  "detail": "null 1457418776..1457453201, median 1457421424 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/effectful.metta": {
+  "detail": "null 1457375460..1457404554, median 1457392397 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/maps.metta": {
+  "detail": "null 1457372540..1457406729, median 1457390747 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch20-extending-the-engine/20-05-observing-execution/01-filtered-trace.metta": {
+  "detail": "287013978,,instructions:u,22889695,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-05-observing-execution/02-source-coverage.metta": {
+  "detail": "283579421,,instructions:u,22009607,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-05-observing-execution/03-source-errors.metta": {
+  "detail": "288166794,,instructions:u,22749686,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-06-files-and-processes/01-files-and-paths.metta": {
+  "detail": "284478677,,instructions:u,22332757,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-06-files-and-processes/02-standard-streams.metta": {
+  "detail": "278070869,,instructions:u,22365697,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-06-files-and-processes/03-a-fresh-directory.metta": {
+  "detail": "282443854,,instructions:u,22258716,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-06-files-and-processes/04-stream-handles.metta": {
+  "detail": "282100482,,instructions:u,22070408,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-06-files-and-processes/05-seeking-and-sizing.metta": {
+  "detail": "294184330,,instructions:u,22598676,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-06-files-and-processes/_fixtures/exit-status.metta": {
   "detail": "the fixture's whole purpose is to terminate its own process with status 17 at its second form, which this engine does and upstream, having no exit!, does not: upstream runs three forms and this tree runs two, so there is no common program to price. The driver reads the exit status, so the row would otherwise record `ours-fails` against an engine doing exactly what the fixture asks",
   "status": "unmeasurable"
  },
+ "examples/ch20-extending-the-engine/20-07-tokens-and-the-reader/01-reader-tokens.metta": {
+  "detail": "285018429,,instructions:u,22540487,100.00,,",
+  "status": "upstream-error"
+ },
  "examples/ch20-extending-the-engine/20-08-csv-row-spaces/01-csv-space.metta": {
+  "detail": "293667529,,instructions:u,23166714,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-08-csv-row-spaces/02-csv-snapshot.metta": {
+  "detail": "304671598,,instructions:u,23394753,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/01-logicprog.metta": {
-  "our_inferences": 8343,
-  "our_instructions": 7946549,
-  "our_null": 1048483273,
-  "status": "measured",
-  "upstream_instructions": 12860138,
-  "upstream_null": 257247572
+  "detail": "null 1457191960..1457232551, median 1457195900 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/02-logicprogset.metta": {
-  "our_inferences": 4916,
-  "our_instructions": 4104362,
-  "our_null": 1048497437,
-  "status": "measured",
-  "upstream_instructions": 6460610,
-  "upstream_null": 257263304
+  "detail": "null 262095555..262132622, median 262132239 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta": {
+  "detail": "337016514,,instructions:u,25073886,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": {
-  "our_inferences": 332597186,
-  "our_instructions": 160402285960,
-  "our_null": 1048450922,
-  "status": "measured",
-  "upstream_instructions": 11592875186,
-  "upstream_null": 257236862
+  "detail": "null 262100499..262116830, median 262114927 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['context-space']' (a list)\n302513606,,instructions:u,23468023,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/06-case-duals.metta": {
+  "detail": "275955424,,instructions:u,22254208,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta": {
+  "detail": "275592498,,instructions:u,21645089,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/08-guarded_rules.metta": {
+  "detail": "274409515,,instructions:u,21231661,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/01-measure.metta": {
+  "detail": "293919935,,instructions:u,22952894,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/02-soft.metta": {
+  "detail": "301477826,,instructions:u,22926694,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/03-plntest.metta": {
-  "our_inferences": 27600,
-  "our_instructions": 30061674,
-  "our_null": 1048483273,
-  "status": "measured",
-  "upstream_instructions": 30032944,
-  "upstream_null": 257247572
+  "detail": "null 1457195573..1457247016, median 1457198772 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/04-plntestdirect.metta": {
-  "our_inferences": 30301,
-  "our_instructions": 31007739,
-  "our_null": 1048511136,
-  "status": "measured",
-  "upstream_instructions": 30352969,
-  "upstream_null": 257261391
+  "detail": "null 1457242321..1457281480, median 1457244593 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/05-pln_direct.metta": {
+  "detail": "509473566,,instructions:u,34572012,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/06-pln_roman.metta": {
+  "detail": "1555738237,,instructions:u,84757024,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/07-pln_tuffy.metta": {
-  "our_inferences": 291206,
-  "our_instructions": 294963481,
-  "our_null": 1048492166,
+  "our_inferences": 301563,
+  "our_instructions": 312391922,
+  "our_null": 1457216555,
   "status": "measured",
-  "upstream_instructions": 308780527,
-  "upstream_null": 257259444
+  "upstream_instructions": 317398420,
+  "upstream_null": 262128981
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/08-nars_direct.metta": {
+  "detail": "493010139,,instructions:u,33518456,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/09-nars_tuffy.metta": {
-  "our_inferences": 4607851,
-  "our_instructions": 3030312499,
-  "our_null": 1048497437,
-  "status": "measured",
-  "upstream_instructions": 5443511287,
-  "upstream_null": 257263304
+  "detail": "null 1457221047..1457272908, median 1457224597 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/10-pln2-ctv.metta": {
+  "detail": "289280089,,instructions:u,22732215,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/11-weighted_subset_posterior.metta": {
+  "detail": "302792851,,instructions:u,23107854,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/12-distribution.metta": {
+  "detail": "291781467,,instructions:u,22513557,100.00,,",
   "status": "upstream-error"
  },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/13-the_measure_algebra_underneath.metta": {
+  "detail": "289973990,,instructions:u,21796639,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/14-soft_aggregation_underneath.metta": {
+  "detail": "288903508,,instructions:u,21546851,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/15-independent_supports.metta": {
+  "detail": "285105384,,instructions:u,22770964,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/16-nars_truth_functions.metta": {
+  "detail": "null 1457267850..1457321747, median 1457281674 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/17-nars_derivation_control.metta": {
+  "detail": "null 262169211..262186032, median 262171705 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "upstream-unmeasurable-null"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/18-pln_formulas.metta": {
+  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (/)/2: Arithmetic: evaluation error: `zero_divisor'\n526726015,,instructions:u,34805511,100.00,,",
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/19-pln_derivation_control.metta": {
+  "detail": "null 1457275134..1457319613, median 1457317104 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
+ },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/01-newtons_method.metta": {
-  "our_inferences": 42621,
-  "our_instructions": 44358350,
-  "our_null": 1048459243,
-  "status": "measured",
-  "upstream_instructions": 83147453,
-  "upstream_null": 257244168
+  "detail": "null 1457160693..1457228978, median 1457208120 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/02-tilepuzzle.metta": {
-  "our_inferences": 31053090,
-  "our_instructions": 30594446676,
-  "our_null": 1048436697,
-  "status": "measured",
-  "upstream_instructions": 24167484926,
-  "upstream_null": 257224040,
-  "tokens_merge_performance_repin_comment": "RE-PINNED 2026-09-09: our_inferences 29962368 to 31053090. Token-backed atoms carry identity and receipt ownership through source publication, typing and exact withdrawal. The direct mutation body removes the public wrapper; repeated reservation and image synchronization are removed. The controlled program profiles separate publication, compilation and typing costs; the approved four waiver rows remain root-caused waivers. See docs/journal/2026-09-08-what-the-waivers-were-paying-for.md and the retained ai-tmp/ai-program-profiles.json, ai-tmp/ai-parity-causal.json and ai-tmp/ai-parity-repin.json. Only our inference point changes; upstream pins, instruction observations and all allowances remain published. [measured: minimum of three fresh processes; command=python ai-tmp/ai-parity-repin.py; fixture=provisioned engine and MORK, warm QLF; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]"
+  "detail": "null 1457184393..1457214355, median 1457187562 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/03-matespace.metta": {
-  "our_inferences": 19518529,
-  "our_instructions": 103039368322,
-  "our_null": 1048438941,
-  "status": "measured",
-  "upstream_instructions": 97937366591,
-  "upstream_null": 257226870
+  "detail": "null 1457156066..1457187500, median 1457181555 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/04-matespace2.metta": {
-  "our_inferences": 29061695,
-  "our_instructions": 162219931861,
-  "our_null": 1048436697,
-  "status": "measured",
-  "upstream_instructions": 146976116302,
-  "upstream_null": 257224040
+  "detail": "null 1457156975..1457219876, median 1457197495 over 3 runs exceeds resolution -13405/+12852; refusing this instruction comparison",
+  "status": "unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/05-fibadd.metta": {
+  "detail": "7640814251,,instructions:u,296995105,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/06-greedy_chess.metta": {
+  "detail": "",
   "status": "upstream-timeout"
  }
 }

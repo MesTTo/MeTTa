@@ -1,8 +1,8 @@
 # The kernel and the forms built on it
 
-The translator gives 68 heads a meaning of their own. 60 of them are clauses
-of `translate_special_dl/5` in `engine/translator/special_forms.pl`, 65 clauses
-over those 60 heads, and the remaining 8 are Prolog bodies in
+The translator gives 69 heads a meaning of their own. 61 of them are clauses
+of `translate_special_dl/5` in `engine/translator/special_forms.pl`, 66 clauses
+over those 61 heads, and the remaining 8 are Prolog bodies in
 `engine/prelude.pl` registered with `add-translator-rule!`. Ask the engine
 rather than this paragraph: `metta_special_form_head/1` is
 `clause(translate_special_dl(Name,_,_,_,_), _)` and answers the first number,
@@ -48,7 +48,7 @@ derived form that is already a prelude rule says `prelude`; a derived form
 still fused into the compiler says why, and every one of those reasons is
 measured.
 
-## `translate_special_dl/5`, 60 heads
+## `translate_special_dl/5`, 61 heads
 
 | head | kind | reason |
 |---|---|---|
@@ -65,6 +65,7 @@ measured.
 | `metta-thread` | core, counterpart `metta` | the nested full evaluator keeps its Atom operand written while it evaluates eager positions to a fixpoint; compiled and runtime doors both preserve `(quote (+ 1 2))` through an Atom result where an ordinary eager call would consume it [tested: `metta_thread:eager_arguments_reach_a_fixpoint_and_atom_arguments_stay_written`] |
 | `return` | core, counterpart `return` | only a `function` frame consumes it as the structural `[return, Value]` instruction; outside that compile-time frame it remains an ordinary polymorphic call, so the compiler context is the distinction |
 | `match` | core, follow-up | matching semantics is a named follow-up presentation; this is the space query |
+| `match-under` | core, algebra | the space query under a carrier: `(match-under &space carrier pattern)` evaluates a tagged program to its fixpoint and answers the carrier's combination of its answers rather than an enumeration, the language's door onto `engine/metta/algebra_fixpoint.pl` |
 | `get-atoms` | core, follow-up | enumerates the selected space; fused so `translate_space_expr_dl/4` preserves a registered expression as a space identity instead of evaluating its callable head |
 | `space-atom-count` | core, follow-up | counts atoms the native space itself owns from per-predicate clause metadata, refusing a foreign enumeration that would lie about the cost; the enumerating predecessor cost 4,569.70 inferences per add at 1,000 atoms where a plain add cost 49.01, while this path is independent of atom count [measured 2026-08-20] |
 | `space-contains` | core, follow-up | one indexed membership probe about an Atom as written, with a registered expression preserved as the space identity; its set-semantics caller costs 57.01 inferences per add at 2,000 atoms and 57.00 at 10,000 [measured 2026-08-21] |

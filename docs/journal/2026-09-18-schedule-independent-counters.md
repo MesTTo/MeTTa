@@ -173,3 +173,45 @@ the observation refutes the claim for them; and pooling the old ranges into
 the new, because the old ranges were the pre-remedy engine's.
 Open: a schedule-independent counter for message passing and timers (the
 2026-09-08 thread's three remedies, still the user's ruling).
+Found: the gate on 10da82e4a read the seat rows past their pins after the
+commit (engine translate +1.44% instructions, C term-in +0.41%, MORK
+match rows +17.6k and conjunction rows +3.8% to +4.2% proportional to
+size, the direct-join and prepared-join slopes -3,720 and -1,872, the
+extension add-atom tier -1999 inferences). A/B on the tip in wt-battery-2,
+the index reset between runs (ai-ab-remedy-3.log to -6.log; the first two
+rounds restored files from a moved index and measured one tree twice,
+recorded in the ledger journal): lib_thread's rewrite reverted alone moves
+nothing; the ext-points row reverted alone leaves the rows moved; the
+four doors defined but NOT exported read every row at its pin (translate
+327,107,206 against the pin 328,195,107; MORK conjunction-400 4,807,021
+against 4,826,988); the four names exported with the doors undefined move
+the rows (translate 332,096,887); four dummy names exported, of arity 0 or
+of arity 1 to 3, defined, read every row at its pin (326,049,869 and
+326,889,743). So the cost is the presence of these four names in
+metta_engine's export list, not their count, arity, definition or the
+ext-points row.
+The tally door metta_discarded_inferences/1 exported alone reads every
+row at its pin too (wt-battery-3 ai-ab-remedy-7.log: translate
+327,014,703), and the seam requires a declared host service to be exported
+(engine_modules:every_declared_service_is_exported_to_the_host).
+Decided: the three join doors stay in engine/metta/control.pl and leave
+the export list, lib_thread calls them metta_engine-qualified; the tally
+door stays exported and its callers unqualified; the seat rows measured
+in a fresh process keep the pins measured on 4c0533704 and the seat
+re-pins written for them are withdrawn.
+Found (the Python-seat rows): direct-join and prepared-join's slope pins
+and the extension add-atom tier's pin were stale, not moved: on 4c0533704
+with a purged QLF set the same test's point-count assertion failed first
+and masked them, and the tool's table read 33.00 per add there as on the
+tip; source-load alone moves +15 at 323356870 (260,317 on 4c0533704,
+55d451b67 and 43800c685; 260,332 on the tip) and the commit's seat files,
+lib_thread, the door exports and the ext-points row each reverted alone
+still read 260,332, so it is the commit's as a whole and inside the
+accepted cost difference. Both are re-pinned with that as the mechanism;
+the harness gains BenchmarkBaseline.collecting() so a row's every
+comparison reaches the log (the ledger journal).
+Open: why exporting these four names costs a fresh process 5.7M
+instructions and a MORK conjunction 4% per operation while four other
+names do not; the shape fits the functors' placement in a procedure table
+the evaluator probes on every meta-call, which is the host's and is not
+pursued further under the engine's retirement.
