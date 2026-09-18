@@ -892,7 +892,7 @@ reduce([F|Args], Out, Status) :- !,
         %instructions [measured 2026-08-16: 3.70 to 4.45 billion]. A grounded
         %value is atomic, so one O(1) test excludes every list and compound.
         atomic(F), \+ atom(F),
-        seam:grounded_apply(F, Args, Applied)
+        seam:grounded_apply(F, Args, [], Applied)
     ->  Out = Applied,
         Status = reduced
     ;   % --- Case 3b: a WRITTEN LAMBDA head ---
@@ -1228,6 +1228,18 @@ apply_translator_rule_dl(HV, Declarations, RuleModule,
     translate_expr_dl(Rewritten, AfterArgs, Goals, Out),
     refuse_seam_expanded_to_data(HV, Out).
 
+%A written tail whose LAST element is a literal `(Kwargs (name value) ...)`,
+%the language's keyword spelling for a grounded callable. Only source decides
+%this: a variable in last position is not a keyword frame, whatever it holds
+%at run time, and the pairs are checked for shape when they are translated.
+keyword_tail(T, Positional, Pairs) :-
+    is_list(T),
+    append(Positional, [Last], T),
+    nonvar(Last),
+    Last = [KwargsHead|Pairs],
+    KwargsHead == 'Kwargs',
+    is_list(Pairs).
+
 %Turn a MeTTa S-expression into a goal list. The internal difference list
 %keeps a nested call from copying every goal produced below it.
 
@@ -1253,6 +1265,22 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
         %that argument literal makes its translation stable after those names
         %have become registered functions during an earlier space life.
         ; translate_prolog_import_dl(HV, T, AfterHead, Goals, Out) -> true
+        %A `(Kwargs ...)` written LAST after an untyped known head: the idiom
+        %`(= py-round (py-atom round))` then `(py-round 3.14159 (Kwargs
+        %(ndigits 2)))`, where the equation eta-expands the callable into
+        %clauses whose arguments arrive as values. The keyword door below
+        %reads the source here, evaluates the head alone, and applies a
+        %grounded callable with the pairs as keywords; any other head takes
+        %the ordinary call with the written `(Kwargs ...)` as data. A typed
+        %head never takes Python keywords, so its site is untouched.
+        ; keyword_tail(T, Positional, Pairs),
+          atom(HV), fun_here(HV), \+ runnable_head_awaits_its_definition(HV),
+          collect_governing_type_chains(HV, _, []),
+          \+ runtime_guarded_builtin_call(HV)
+          -> note_symbol_head(HV),
+             translate_args_dl(Positional, AfterHead, AfterPositional, PositionalValues),
+             translate_keyword_pairs_dl(Pairs, AfterPositional, AfterPairs, PairValues),
+             AfterPairs = [metta_dynamic_keyword_value_call(HV, T, PositionalValues, PairValues, Out)|Goals]
         %--- Automatic 'smart' dispatch, translator deciding when to create a predicate call, data list, or dynamic dispatch: ---
         ; %Known function => direct call:
           ( is_list(T),
@@ -1314,13 +1342,30 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
           %10.49 million times for 1.57 million data pairs, four times its
           %pre-protocol wall clock, with the translation identical on every
           %pass because a call site's written tail never changes.
-          ; translate_args_dl(T, ValueGoalList, [], AVs),
-            goals_list_to_conj(ValueGoalList, ValueGoals),
-            AfterHead = [( metta_dynamic_head_masks(HV)
-                         -> metta_dynamic_call(HV, T, Out)
-                         ;  ValueGoals,
-                            metta_dynamic_value_call(HV, T, AVs, Out)
-                         )|Goals] )).
+          %A `(Kwargs (name value) ...)` written LAST at the site is the
+          %language's keyword spelling for a grounded callable head. The
+          %decision is made HERE, from the source: the names stay names,
+          %only the values compile, and the two keyword doors in runtime.pl
+          %receive the pairs beside the positional values. A `(Kwargs ...)`
+          %that reaches a call through a variable or a runtime-built term is
+          %therefore data and never control
+          %[tested: test_grounded_applications_read_keywords_only_where_written].
+          ; ( keyword_tail(T, Positional, Pairs)
+            -> translate_args_dl(Positional, ValueGoalList, AfterPositional, PositionalValues),
+               translate_keyword_pairs_dl(Pairs, AfterPositional, [], PairValues),
+               goals_list_to_conj(ValueGoalList, ValueGoals),
+               AfterHead = [( metta_dynamic_head_masks(HV)
+                            -> metta_dynamic_keyword_call(HV, Positional, Pairs, Out)
+                            ;  ValueGoals,
+                               metta_dynamic_keyword_value_call(HV, T, PositionalValues, PairValues, Out)
+                            )|Goals]
+            ;  translate_args_dl(T, ValueGoalList, [], AVs),
+               goals_list_to_conj(ValueGoalList, ValueGoals),
+               AfterHead = [( metta_dynamic_head_masks(HV)
+                            -> metta_dynamic_call(HV, T, Out)
+                            ;  ValueGoals,
+                               metta_dynamic_value_call(HV, T, AVs, Out)
+                            )|Goals] ) )).
 
 %A source's signature pre-pass makes a later equation's name visible before
 %the equation itself runs. That visibility is metadata, not a time machine:

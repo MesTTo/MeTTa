@@ -1198,7 +1198,7 @@ metta_dynamic_value_call(Head, Written, Values, Out) :-
         ;   Out = [Head|Values]
         )
     ;   nonvar(Head), atomic(Head)
-    ->  (   seam:grounded_apply(Head, Values, Applied)
+    ->  (   seam:grounded_apply(Head, Values, [], Applied)
         ->  Out = Applied
         ;   Out = [Head|Values]
         )
@@ -1209,6 +1209,57 @@ metta_dynamic_value_call(Head, Written, Values, Out) :-
                                  Produced, Out)
     ;   Out = [Head|Values]
     ).
+
+%The keyword doors. lowering.pl emits them for one source shape only, a
+%`(Kwargs (name value) ...)` written LAST at a call site, so a `(Kwargs ...)`
+%that reaches a call in a value, through a variable or a runtime-built term,
+%takes the doors above and is the data it is. The pair NAMES are names and
+%only the VALUES evaluate: `(Kwargs (reverse true))` is the keyword `reverse`
+%whatever a function `reverse` means, and `(Kwargs (n (+ 1 2)))` binds `n`
+%to 3 [tested: test_grounded_applications_read_keywords_only_where_written].
+translate_keyword_pairs_dl([], Goals, Goals, []).
+translate_keyword_pairs_dl([Pair|Pairs], Goals0, Goals, [[Name, Value]|Values]) :-
+    (   nonvar(Pair), Pair = [Name, Written], nonvar(Name), \+ is_list(Name)
+    ->  translate_eager_argument_dl(Written, Goals0, AfterValue, Value),
+        translate_keyword_pairs_dl(Pairs, AfterValue, Goals, Values)
+    ;   throw(error(type_error(keyword_argument, Pair),
+                    context('Kwargs'/1, 'takes (name value) pairs')))
+    ).
+
+%The written half, taken when the head masks an argument: the positional
+%tail and the pair values are translated under the mask at run time.
+metta_dynamic_keyword_call(Head, Positional, Pairs, Out) :-
+    translate_args(Positional, Goals, Values),
+    translate_keyword_pairs_dl(Pairs, PairGoals, [], PairValues),
+    current_metta_module(Module),
+    call_goals_in_(Module, Goals),
+    call_goals_in_(Module, PairGoals),
+    append(Positional, [['Kwargs'|Pairs]], Written),
+    metta_dynamic_keyword_value_call(Head, Written, Values, PairValues, Out).
+
+%The value half. A grounded callable head receives the pairs as keywords;
+%any other head is an ordinary dynamic call whose last value is the written
+%`(Kwargs ...)`, evaluated pair values and all, as data.
+metta_dynamic_keyword_value_call(Head, Written, Values, Pairs, Out) :-
+    (   metta_grounded_callable(Head, Callable),
+        seam:grounded_apply(Callable, Values, Pairs, Applied)
+    ->  Out = Applied
+    ;   append(Values, [['Kwargs'|Pairs]], AllValues),
+        metta_dynamic_value_call(Head, Written, AllValues, Out)
+    ).
+
+%The head a keyword call applies. A grounded value stands for itself. A
+%symbol with meaning is evaluated ALONE first, so `(py-round 3.14 (Kwargs
+%(ndigits 2)))` reaches the callable `(= py-round (py-atom round))` names;
+%a symbol whose own value is not a grounded callable is not a keyword head.
+metta_grounded_callable(Head, Head) :-
+    nonvar(Head), atomic(Head), \+ atom(Head), !,
+    seam:grounded_applicable(Head).
+metta_grounded_callable(Head, Callable) :-
+    atom(Head),
+    metta_evaluate_symbol(Head, Callable),
+    nonvar(Callable), atomic(Callable), \+ atom(Callable),
+    seam:grounded_applicable(Callable).
 
 head_has_dynamic_meaning(Head) :-
     current_metta_module(Module),
@@ -1240,7 +1291,7 @@ metta_dynamic_call(Head, Args, Out) :-
     ->  translate_args(Args, Goals, Values),
         current_metta_module(Module),
         call_goals_in_(Module, Goals),
-        (   seam:grounded_apply(Head, Values, Applied)
+        (   seam:grounded_apply(Head, Values, [], Applied)
         ->  Out = Applied
         ;   Out = [Head|Values]
         )
