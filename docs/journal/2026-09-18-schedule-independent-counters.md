@@ -117,7 +117,7 @@ spends, and a stopped branch's spend was spent.
 Tried: the join-window reproduction on the current host (10.1.14 with the
 ledger's earlier patches) -> present, three runs of three
 (tests/checks/host_workarounds/swi-thread-join-detach-window.sh). The patch
-is applied to /home/user/Dev/swipl-devel's working tree beside the other
+is applied to the swipl-devel clone's working tree beside the other
 patches and not yet built: a rebuild under the running lane would change
 the host mid-corpus.
 Open: the measurement on the rebuilt host: the two lib_thread tests, the
@@ -128,7 +128,7 @@ first on PATH (wt-battery-6, ai-remedy-lanes.log) -> shell and examples
 green; plunit red on lib_thread's churn regression with a SIGSEGV and a
 glibc malloc assertion from the crash reporter. The core
 (coredumpctl 3220344) names the executable
-/home/user/Dev/swipl-patched/lib/swipl/bin/x86_64-linux/swipl, the
+the patched host's swipl, the
 installed unpatched host, and its trace is __pthread_clockjoin_ex under
 pl_thread_join2_va, the null-tid join the entry describes: the runner
 takes the venv's swipl ahead of PATH, so the lane ran the poll-free join on

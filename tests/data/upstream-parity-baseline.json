@@ -88,7 +88,7 @@
   "status": "upstream-error"
  },
  "examples/ch03-atoms-and-expressions/06-reading_forms.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: expected '(' or '!(', line 14:\n)\n262760508,,instructions:u,21562659,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Syntax error: expected '(' or '!(', line 14:\n)\n262760508,,instructions:u,21562659,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/01-spaces.metta": {
@@ -204,7 +204,7 @@
   "upstream_null": 262142150
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/03-program_order.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main findall_loop/4: Unknown procedure: 'p121-example-respond'/2\n275674420,,instructions:u,22110118,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main findall_loop/4: Unknown procedure: 'p121-example-respond'/2\n275674420,,instructions:u,22110118,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/04-partialdef.metta": {
@@ -248,7 +248,7 @@
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/11-single_answer.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(function,(= (unique-value) (superpose ())),[=,[unique-value],[superpose,[]]])\n267173965,,instructions:u,21294672,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(function,(= (unique-value) (superpose ())),[=,[unique-value],[superpose,[]]])\n267173965,,instructions:u,21294672,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/01-dispatch_policies.metta": {
@@ -284,7 +284,7 @@
   "status": "unmeasurable-null"
  },
  "examples/ch05-equations-and-evaluation/05-03-the-number-library/01-math.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (/)/2: Arithmetic: evaluation error: `zero_divisor'\n301115091,,instructions:u,25438987,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (/)/2: Arithmetic: evaluation error: `zero_divisor'\n301115091,,instructions:u,25438987,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-03-the-number-library/02-math_exp_random.metta": {
@@ -300,7 +300,7 @@
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/01-backward_arithmetic.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arguments are not sufficiently instantiated\n285245296,,instructions:u,26134433,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arguments are not sufficiently instantiated\n285245296,,instructions:u,26134433,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/02-relational_arithmetic.metta": {
@@ -484,7 +484,7 @@
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/09-walrus.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (<)/2: Type error: `character' expected, found `'floor-div'' (an atom)\n274158719,,instructions:u,21001440,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (<)/2: Type error: `character' expected, found `'floor-div'' (an atom)\n274158719,,instructions:u,21001440,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/10-chain_is_let.metta": {
@@ -856,7 +856,7 @@
   "status": "upstream-error"
  },
  "examples/ch10-errors-and-refusals/01-he_error.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arithmetic: `a/0' is not a function\n312714216,,instructions:u,26736730,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arithmetic: `a/0' is not a function\n312714216,,instructions:u,26736730,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch10-errors-and-refusals/02-throwing_and_tracing.metta": {
@@ -976,7 +976,7 @@
   "status": "upstream-nondeterministic"
  },
  "examples/ch17-concurrency-and-the-loop/04-thin_forms.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(runnable,(test-no-answer (superpose ())),[test-no-answer,[superpose,[]]])\n290001087,,instructions:u,25474406,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Syntax error: failed to process form: parsed(runnable,(test-no-answer (superpose ())),[test-no-answer,[superpose,[]]])\n290001087,,instructions:u,25474406,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/05-channels_pools_and_the_machine.metta": {
@@ -992,7 +992,7 @@
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/08-class_grains.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['new-space']' (a list)\n380724810,,instructions:u,31104185,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['new-space']' (a list)\n380724810,,instructions:u,31104185,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/09-class_values.metta": {
@@ -1000,7 +1000,7 @@
   "status": "unmeasurable-null"
  },
  "examples/ch17-concurrency-and-the-loop/10-class_entities.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-atom,[2])' expected, found `3'\n334337399,,instructions:u,29996868,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-atom,[2])' expected, found `3'\n334337399,,instructions:u,29996868,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta": {
@@ -1008,7 +1008,7 @@
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/12-class_prototypes.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['new-space']' (a list)\n312148930,,instructions:u,24751718,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['new-space']' (a list)\n312148930,,instructions:u,24751718,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch17-concurrency-and-the-loop/13-class_decorators.metta": {
@@ -1132,7 +1132,7 @@
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/03-parametric_spaces.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `[cache,'&primary-kb',100]' (a list)\n272442861,,instructions:u,21346510,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `[cache,'&primary-kb',100]' (a list)\n272442861,,instructions:u,21346510,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/04-super.metta": {
@@ -1168,7 +1168,7 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/02-translatorrule_direction.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-translator-rule!,[1])' expected, found `2'\n277908639,,instructions:u,20373554,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-translator-rule!,[1])' expected, found `2'\n277908639,,instructions:u,20373554,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/03-translatorrule_guard.metta": {
@@ -1176,7 +1176,7 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/04-translatorrule_cost.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-translator-rule!,[1])' expected, found `2'\n275798194,,instructions:u,20439704,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Domain error: `function_input_arities(add-translator-rule!,[1])' expected, found `2'\n275798194,,instructions:u,20439704,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/05-translatorrule_for.metta": {
@@ -1240,7 +1240,7 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/10-he_math.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arithmetic: evaluation error: `undefined'\n285398833,,instructions:u,21050093,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (is)/2: Arithmetic: evaluation error: `undefined'\n285398833,,instructions:u,21050093,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta": {
@@ -1264,7 +1264,7 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/03-foreign_rules.metta": {
-  "detail": "e: metta_extension/2\nWarning: /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/rule_provider.pl:5:\nWarning:    Goal (directive) failed: user:metta_extension(rule_demo,[version('1.0.0')])\n334905281,,instructions:u,25962564,100.00,,",
+  "detail": "e: metta_extension/2\nWarning: examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/rule_provider.pl:5:\nWarning:    Goal (directive) failed: user:metta_extension(rule_demo,[version('1.0.0')])\n334905281,,instructions:u,25962564,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/04-registering_prolog_predicates.metta": {
@@ -1336,7 +1336,7 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_error_broken.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main Syntax error: missing ')', starting at line 1:\n= (broken-import) a\n259143970,,instructions:u,23625463,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main Syntax error: missing ')', starting at line 1:\n= (broken-import) a\n259143970,,instructions:u,23625463,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/defines.metta": {
@@ -1468,7 +1468,7 @@
   "status": "upstream-unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['context-space']' (a list)\n302513606,,instructions:u,23468023,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (=..)/2: Type error: `atom' expected, found `['context-space']' (a list)\n302513606,,instructions:u,23468023,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/06-case-duals.metta": {
@@ -1556,7 +1556,7 @@
   "status": "upstream-unmeasurable-null"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/18-pln_formulas.metta": {
-  "detail": "ERROR: [Thread main] /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-battery-3/tests/fixtures/parity_driver.pl:88: user:main (/)/2: Arithmetic: evaluation error: `zero_divisor'\n526726015,,instructions:u,34805511,100.00,,",
+  "detail": "ERROR: [Thread main] tests/fixtures/parity_driver.pl:88: user:main (/)/2: Arithmetic: evaluation error: `zero_divisor'\n526726015,,instructions:u,34805511,100.00,,",
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/19-pln_derivation_control.metta": {
