@@ -31,6 +31,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   tagged `(function F)`, or added with a callable tag, labels each instance
   with F over its premise tags in place of the extend fold, on both routes,
   which is a generalized annotated program (Kifer and Subrahmanian, 1992).
+- The algebra package asks the catalog by pattern where it read every row
+  into Python: the annotations row a context declares for a carrier, an
+  algebra's own row, its semiring claims and the algebra-law aliases were
+  each found by walking all 1,558 catalog atoms, about 146,000 inferences per
+  tagged evaluation, and are each one match now, about 60. The new
+  tagged-fixpoint twin fell from 757,958 inferences to 26,374, below its
+  MeTTa original.
 - Classes: the special methods and decorators of a declared class. A special
   method Python routes syntax to compiles under its word (`__add__` is
   `Vector-add`, `__len__` is `Stack-len`), and the compiler lowers that

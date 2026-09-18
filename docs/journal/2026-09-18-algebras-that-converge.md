@@ -214,3 +214,18 @@ Decided: a callable rule tag registers with `arities=[len(premises)]`, the
 one call form a label function serves, since the op door refuses a bare
 variadic; `metta.formula` joins the hand-kept carrier imports of
 `__init__.pyi` from which rootgen derives the root table.
+
+Measured (the new twin, `twin_coverage.py --measure --rounds 3`): 757958
+inferences against the example's 30891, 24.5x, where the lane's band is
+about one. Split with `metta.stats()`: the fixpoint door itself 3837, and
+`_require_context_capabilities` 146403, which read every one of the
+catalog's 1558 atoms into Python to find one `(annotations Ctx Algebra ...)`
+row; one pattern match for that row costs 57. Decided: the algebra package
+asks the catalog by pattern (`_catalog_rows`, under `scope.plain()` so a
+surrounding `with metta.under(...)` cannot turn a catalog row into a tagged
+answer, which three context tests caught) for the
+annotations row, the algebra row, the semiring claims (the valued ones in one
+match, a bare `ordered` in a second) and the algebra-law aliases (a segment
+variable for the expansion). The twin measures 26374 after, 0.85x its
+original; the matespace twin, whose counting goes through the engine
+aggregate, is unchanged at 24123226.
