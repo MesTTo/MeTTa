@@ -64,7 +64,7 @@ metta_erase_storage_ref(Ref) :-
 % transaction cannot finish while its traversal runs, and nested callback
 % transactions keep the same owner and transactional journal, so the first
 % reference's scope is every reference's [tested:
-% source_retirement:the_owner_probe_runs_once_for_the_selected_set; commit=WORKTREE].
+% source_retirement:the_owner_probe_runs_once_for_the_selected_set; commit=f97c4b0a3997b3628179170d502bcd35f517c80f].
 metta_retract_storage(Head) :-
     (   current_transaction(_)
     ->  Context = receipt_scope(_),
