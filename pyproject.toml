@@ -594,8 +594,10 @@ python_version = "3.12"
 # The core AND every extension package: a member is shipped code, and the
 # overrides below are what let it name its own library without a stub package
 # in the checks extra. Spelled as the directory, so a package added under
-# `ext/` is checked with no edit here.
-files = ["metta", "ext"]
+# `ext/` is checked with no edit here. The path reaches out of the seat because
+# the distributions are a sibling of `extensions/` now, and this lane runs
+# inside the seat so `metta` resolves as it always has.
+files = ["metta", "../../ext"]
 # A member's own suite, for the same reason the core's is not checked: this
 # gate is about the surface a program imports, and a test's local bindings are
 # not that. And setuptools' own scratch, which the two shell proofs leave
@@ -603,7 +605,7 @@ files = ["metta", "ext"]
 # is a second module of the same name and mypy stops on the collision before
 # it checks anything [measured 2026-09-08, `Duplicate module named
 # "metta_arrays"`]. Written as a regex over the path, which is mypy's spelling.
-exclude = "ext/[^/]+/(tests|build)/"
+exclude = "(^|/)ext/[^/]+/(tests|build)/"
 explicit_package_bases = true
 mypy_path = "."
 warn_unused_configs = true
@@ -662,7 +664,10 @@ min_confidence = 60
 # only by the Arrow producer package, and without the members in the scan the
 # core's own doors read as dead the moment their one caller became a
 # distribution. Reading both is what makes the answer true.
-paths = ["metta", "ext", "bench.py", "vulture_whitelist.py", "tools/bindinggen.py"]
+# The path reaches out of the seat for the reason the mypy one does, and the
+# two stay in ONE scan for the reason above rather than becoming a lane each:
+# split, the core's doors read as dead again.
+paths = ["metta", "../../ext", "bench.py", "vulture_whitelist.py", "tools/bindinggen.py"]
 # The generated vocabulary and function-mention modules are data: every member is read by VALUE
 # (membership, iteration, the wire), so name-reachability is the wrong
 # question for it and each catalog row would need a fresh whitelist line.

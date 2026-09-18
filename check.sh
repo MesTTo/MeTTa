@@ -392,6 +392,7 @@ run GATE build sh -c "cd '$HERE' && sh tests/shell/test_build_is_idempotent_and_
 # and one exit status, and keeps every lane's text where the evidence gate can
 # read it.
 for component_check in "$HERE"/engine/check.sh \
+                       "$HERE"/ext/check.sh \
                        "$HERE"/extensions/*/check.sh; do
     [ -f "$component_check" ] || continue
     . "$component_check"
