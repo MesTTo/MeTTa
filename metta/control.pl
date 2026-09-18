@@ -657,7 +657,7 @@ metta_inference_budget_spent(_, Base, Inferences) :-
 %alternative, the join brackets living in lib_thread over an exported
 %discard door, is the revisit if the price ever matters [measured
 %2026-09-19: A/B rounds 3 to 7 on the tip, wt-battery-2 ai-ab-remedy-3.log
-%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=WORKTREE].
+%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=1ccbb142315d16a719807cd2c9754e4a2fcefdf1].
 metta_join_measured(Thread, Status, Credit) :-
     statistics(inferences, Before),
     thread_join(Thread, Status),
