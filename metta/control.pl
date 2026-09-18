@@ -619,6 +619,48 @@ metta_inference_budget_spent(_, Base, Inferences) :-
     ;   metta_inference_bound_exceeded(Inferences)
     ).
 
+%The counter law for joined workers. The host credits a joined child's
+%inferences to the thread that created it and joins it
+%[source: swipl-devel V10.1.14 src/pl-thread.c, thread_join adding
+%info->statistics.inferences to LD->thread.child_inferences when
+%info->joined_by_creator; commit=55d451b670949c2dc9d2ab7bc678f33f21094bd2], so waiting for a worker's answer
+%is paying for its work. A worker whose answer the caller did not use, a
+%race's loser, a cancelled future, a stopped timer, is joined through the
+%measured door and its credit added to this thread's discarded tally, which
+%the seat's counters take back out beside the interrupt poll's charge
+%(extensions/python/metta/_binding/control.pl, metta_py_stats/1 and
+%metta_py_work/2), so a block is charged for its own thread's work and for
+%the workers whose answers it used; a stopped branch's spend, which only
+%the schedule sizes, is nobody's measurement
+%(docs/journal/2026-09-18-schedule-independent-counters.md).
+%The bracket is exact: after the first read, the join's call port and the
+%second read's own are the two inferences between the reads that are the
+%joiner's, and everything else is the joinee's credit
+%[tested: lib_thread:a_discarding_join_takes_out_exactly_the_credit;
+%commit=55d451b670949c2dc9d2ab7bc678f33f21094bd2].
+%The tally is a global variable, per thread in SWI, because the credit went
+%to this thread's counter and no other's: a worker that discards its own
+%losers leaves its creator's tally alone, and its creator's counter never
+%saw that credit, since a joined child brings its own count and not its
+%children's.
+metta_join_measured(Thread, Status, Credit) :-
+    statistics(inferences, Before),
+    thread_join(Thread, Status),
+    statistics(inferences, After),
+    Credit is After - Before - 2.
+
+metta_join_discarding(Thread, Status) :-
+    metta_join_measured(Thread, Status, Credit),
+    metta_discard_inferences(Credit).
+
+metta_discard_inferences(Credit) :-
+    metta_discarded_inferences(Sum),
+    Total is Sum + Credit,
+    nb_setval('$metta_discarded_inferences', Total).
+
+metta_discarded_inferences(Sum) :-
+    ( nb_current('$metta_discarded_inferences', Sum) -> true ; Sum = 0 ).
+
 %The one spelling of the reserved envelope, so a pragma bound, a per-call
 %kwarg bound and a cursor budget all classify identically one level up.
 metta_inference_bound_exceeded(Limit) :-
