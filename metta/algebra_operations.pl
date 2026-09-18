@@ -7,7 +7,7 @@
 %   the formula carrier's or, and, not and var are the decision diagram's,
 %   and a carrier's negation is native where the engine knows it, complement
 %   over a number and not over a formula, and its declared operation
-%   otherwise [tested: test_the_formula_carrier_counts_each_proof_once; commit=WORKTREE].
+%   otherwise [tested: test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76].
 % Decides: a custom operation runs under the requested algebra after boot.
 
 metta_apply_algebra_operation(formula, 'formula-or', A, B, R) :-

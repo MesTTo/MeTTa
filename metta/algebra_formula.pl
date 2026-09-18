@@ -13,19 +13,19 @@
 %     over one space mint the same variable for the same fact, and a space
 %     name reused after a drop reads its current program [tested:
 %     test_the_formula_carrier_counts_each_proof_once,
-%     test_a_cyclic_program_is_exact_under_formula; commit=WORKTREE].
+%     test_a_cyclic_program_is_exact_under_formula; commit=55368cb4eeb641d2325194eff9d0925048814b76].
 %   - or, and and not are the reduced ordered diagram's apply, memoised on
 %     (operation, left, right), so two structurally equal formulas are one
 %     node id and a repeated combination costs one table lookup (Bryant 1986,
 %     Graph-based algorithms for Boolean function manipulation, IEEE TC 35(8),
 %     10.1109/TC.1986.1676819) [tested:
-%     test_the_formula_carrier_counts_each_proof_once; commit=WORKTREE].
+%     test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76].
 %   - the model count under a carrier with a negation is exact:
 %     wmc(node) = w ⊗ wmc(hi) ⊕ negate(w) ⊗ wmc(lo), memoised per node, so it
 %     is linear in the diagram's size (aProbLog, Kimmig, Van den Broeck and
 %     De Raedt, AAAI 2011, 10.1609/aaai.v25i1.7852) [tested:
 %     test_the_formula_carrier_counts_each_proof_once,
-%     test_a_cyclic_program_converges_under_every_shipped_carrier; commit=WORKTREE].
+%     test_a_cyclic_program_converges_under_every_shipped_carrier; commit=55368cb4eeb641d2325194eff9d0925048814b76].
 % Owns resources: the four dynamic tables below are process-global memory
 %   released only by metta_formula_clear/0; a program that mints variables
 %   forever grows them, as a program that asserts forever grows the database.

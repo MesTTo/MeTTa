@@ -16,7 +16,7 @@
 %     combine followed by its saturation test, which is the PITA
 %     transformation (Riguzzi and Swift, TPLP 2011, 10.1017/S147106841100010X)
 %     [tested: test_a_cyclic_program_converges_under_every_shipped_carrier;
-%     commit=WORKTREE].
+%     commit=55368cb4eeb641d2325194eff9d0925048814b76].
 %   - the fixpoint is exact when combine is idempotent, or when no ground
 %     subgoal depends on itself: a completed table is read by its consumers
 %     once, at its final answer; inside a strongly connected component of
@@ -27,13 +27,13 @@
 %     10.1145/3643027: convergence iff the semiring is stable) [tested:
 %     algebra_fixpoint:an_acyclic_program_is_exact_under_a_sum,
 %     algebra_fixpoint:a_sum_over_a_cycle_has_no_fixpoint_and_the_budget_stops_it,
-%     test_a_cyclic_program_converges_under_every_shipped_carrier; commit=WORKTREE].
+%     test_a_cyclic_program_converges_under_every_shipped_carrier; commit=55368cb4eeb641d2325194eff9d0925048814b76].
 %   - a carrier declaring a variable operation receives each fact, and each
 %     ground rule instance, as a variable of its own with the written tag as
 %     its weight, keyed [src, Space, N] and [rule, Space, N, Head], the keys
 %     the derived route mints, so the formula carrier is the free Boolean
 %     algebra over the program's facts on either route [tested:
-%     test_the_formula_carrier_counts_each_proof_once; commit=WORKTREE].
+%     test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76].
 %   - a rule tagged (function F) labels each instance with F applied to its
 %     premise tags in order, evaluated under the carrier, in place of the
 %     extend fold: Kifer and Subrahmanian's generalized annotated programs
@@ -41,7 +41,7 @@
 %     own label function and the fixpoint is over the carrier's join, whose
 %     convergence is the author's obligation as monotonicity of F is theirs
 %     [tested: algebra_fixpoint:a_rule_may_label_its_instances_by_a_function_of_its_premise_tags;
-%     commit=WORKTREE].
+%     commit=55368cb4eeb641d2325194eff9d0925048814b76].
 % Fails when: a proposition's head is not a symbol, which the reader refuses
 %   by name; a carrier with no fixpoint over cyclic data runs until the
 %   caller's timeout or inference budget stops it, as any other unbounded
