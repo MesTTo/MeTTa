@@ -27,6 +27,10 @@
 %   preliminary clear, final release and retries [tested: release_preparation,
 %   lib_thread_cancellation; commit=0891c522503ca9856fb654f306364f4ae9736b22].
 % Guarantees:
+%   - extensions share the engine's console rendering and IEEE exception
+%     recovery [tested: engine_modules:every_declared_service_is_exported_to_the_host,
+%     lib_string_surface:template_uses_engine_rendering_and_host_grammar,
+%     lib_vector_surface:nonfinite_reductions; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
 %   - metta_apply_algebra_operation/5 exposes the native carrier operation
 %     semantics to host bindings [tested:
 %     test_visibility_operations_share_the_native_carrier; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
@@ -1669,6 +1673,9 @@ kind(swrite/2, service).
 %described above.
 kind(sdisplay/2, service).
 kind(sdisplay_with_names/3, service).
+% Console interpolation leaves a string's characters unquoted; other values
+% use the same presentation writer as the engine's format-args operation.
+kind(metta_console_text/2, service).
 kind(sread/2, service).
 %Moved from the host_service list on 2026-08-20: the host bindings read
 %source through metta_host_run_source/4 and its siblings now, and the
@@ -1736,6 +1743,9 @@ kind(foreign_provides/2, service).
 %already made into the data that the checker reads.
 kind(throw_metta_type_error/3, service).
 kind(rethrow_metta_operation_error/2, service).
+% Native arithmetic kernels share the engine's IEEE retry and flag restoration
+% rather than defining a second policy for non-finite floating results.
+kind(metta_saturating_recover/4, service).
 
 %CONTEXT. Which module the call site is in. A named space compiles its
 %equations into a module of its own, so a function name alone does not identify
