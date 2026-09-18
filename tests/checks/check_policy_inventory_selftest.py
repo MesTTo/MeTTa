@@ -286,10 +286,14 @@ def test_semiring_claims_are_derived_and_validated() -> None:
         # Each ordered semiring claims its direction beside orderedness:
         # ranked and prob count down from the best, tropical and budget up
         # from the cheapest, mirroring the shipped catalog rows.
+        # A claim of another kind (negation, saturation, variable) names an
+        # operation, not a direction, and is not judged as an ordering law.
         good = [
             {"semiring": "budget", "laws": ["ordered", "ascending"]},
             {"semiring": "ranked", "laws": ["ordered", "descending"]},
             {"semiring": "prob", "laws": ["ordered", "descending"]},
+            {"semiring": "prob", "laws": ["negation", "complement"]},
+            {"semiring": "bool", "laws": ["negation", "complement"]},
             {"semiring": "tropical", "laws": ["ordered", "ascending"]},
         ]
         declared = ["bool", "ranked", "prob", "tropical", "budget"]

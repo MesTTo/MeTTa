@@ -317,3 +317,9 @@ evidence, init-stub, door-sync and closed-sets green; the example
 pinned at 23621 with an overrun of 538 (re-priced to 3385 the same day in
 the twins-lane entry: the 538 was priced with an authoring allowance the
 twin no longer earns).
+Found: the policy-inventory lane read every `(claim semiring ...)` row as an
+ordering law, so the negation, saturation and variable kinds 55368cb4e
+added made it red on every gate since (f06186a96, 558f40c9c) and it went
+unread among the known reds. It now judges the `ordered` kind alone
+(tests/checks/check_policy_inventory.py), the other kinds being the
+catalog suite's; the two policy lanes and ruff pass on the fix.

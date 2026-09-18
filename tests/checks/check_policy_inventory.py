@@ -9,8 +9,10 @@ Assumes:
 Guarantees:
   - the runtime publishes exactly the twenty required axes, with one row
     per axis and the knob/default pair recorded in POLICY_SEAMS; the semiring
-    rows also derive and validate each shipped ordering claim [tested:
-    tests/checks/check_policy_inventory.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
+    rows also derive and validate each shipped ordering claim, a row of the
+    `ordered` kind, and leave the negation, saturation and variable kinds to
+    the catalog suite [tested: test_semiring_claims_are_derived_and_validated;
+    commit=WORKTREE]
   - unannotated Python Literal alternatives and list/set membership, plus
     single- or multiline Prolog member/2 and memberchk/2 lists, are reported
     with path, line and values; an exemption is accepted only when immediately
@@ -101,6 +103,7 @@ EXCLUDED_PATHS = frozenset(
 # ordered alone does not say which end a top-k slice takes: ranked and prob
 # count down from the best, tropical counts up from the cheapest. The rows are
 # engine/spaces/catalog.pl's own claim presets.
+ORDERING_CLAIM_KIND = "ordered"
 REQUIRED_SEMIRING_CLAIMS = {
     "ranked": frozenset({"ordered", "descending"}),
     "prob": frozenset({"ordered", "descending"}),
@@ -318,6 +321,15 @@ def validate_semiring_claims(
             continue
         if semiring not in semirings:
             findings.append(f"&metta: semiring claim row names undeclared semiring {semiring!r}")
+        # A claim row is a kind and its value: (claim semiring ranked ordered
+        # descending), (claim semiring prob negation complement), (claim
+        # semiring formula variable formula-var). This lane judges the ordering
+        # kind, whose value is the end a top-k slice takes; the negation,
+        # saturation and variable kinds name operations, and the catalog suite
+        # checks those against the algebra's natives
+        # (algebra_law_vocabulary_and_alias_claims_are_exact).
+        if laws[:1] != [ORDERING_CLAIM_KIND]:
+            continue
         observed.setdefault(semiring, []).extend(laws)
 
     for semiring, required in REQUIRED_SEMIRING_CLAIMS.items():
