@@ -12,7 +12,7 @@
 %   expansion put it there, and retiring it evicts the template
 %   [tested: a_generated_name_in_a_rule_expansion_is_a_dependency,
 %   the_emitted_dependencies_cover_every_generated_name_in_the_code;
-%   commit=WORKTREE].
+%   commit=a9e2c06d337ff1f15a56d02a48a9ce14a307da68].
 
 % Guarantees: ordinary eval preserves attributed-variable identity, sharing,
 %   delayed hook counts and binding-time exceptions, including after a plain
