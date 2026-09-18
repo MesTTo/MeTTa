@@ -1273,16 +1273,24 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
         %grounded callable with the pairs as keywords; any other head takes
         %the ordinary call with the written `(Kwargs ...)` as data. A typed
         %head never takes Python keywords, so its site is untouched.
-        ; keyword_tail(T, Positional, Pairs),
-          atom(HV), fun_here(HV), \+ runnable_head_awaits_its_definition(HV),
-          collect_governing_type_chains(HV, _, []),
-          \+ runtime_guarded_builtin_call(HV)
+        %The tail is read ONCE per site: the walk that finds a last `(Kwargs
+        %...)` costs the site's arity, and both doors below ask the same
+        %question, so the answer is kept rather than recomputed for a head
+        %that falls through to the runtime dispatch.
+        ; ( keyword_tail(T, Positional0, Pairs0)
+          -> Keywords = keywords(Positional0, Pairs0)
+          ;  Keywords = none
+          ),
+          ( Keywords = keywords(Positional, Pairs),
+            atom(HV), fun_here(HV), \+ runnable_head_awaits_its_definition(HV),
+            collect_governing_type_chains(HV, _, []),
+            \+ runtime_guarded_builtin_call(HV)
           -> note_symbol_head(HV),
              translate_args_dl(Positional, AfterHead, AfterPositional, PositionalValues),
              translate_keyword_pairs_dl(Pairs, AfterPositional, AfterPairs, PairValues),
              AfterPairs = [metta_dynamic_keyword_value_call(HV, T, PositionalValues, PairValues, Out)|Goals]
         %--- Automatic 'smart' dispatch, translator deciding when to create a predicate call, data list, or dynamic dispatch: ---
-        ; %Known function => direct call:
+          ; %Known function => direct call:
           ( is_list(T),
             ( atom(HV), fun_here(HV),
               \+ runnable_head_awaits_its_definition(HV),
@@ -1350,7 +1358,7 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
           %that reaches a call through a variable or a runtime-built term is
           %therefore data and never control
           %[tested: test_grounded_applications_read_keywords_only_where_written].
-          ; ( keyword_tail(T, Positional, Pairs)
+          ; ( Keywords = keywords(Positional, Pairs)
             -> translate_args_dl(Positional, ValueGoalList, AfterPositional, PositionalValues),
                translate_keyword_pairs_dl(Pairs, AfterPositional, [], PairValues),
                goals_list_to_conj(ValueGoalList, ValueGoals),
@@ -1365,7 +1373,7 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
                             -> metta_dynamic_call(HV, T, Out)
                             ;  ValueGoals,
                                metta_dynamic_value_call(HV, T, AVs, Out)
-                            )|Goals] ) )).
+                            )|Goals] ) ) )).
 
 %A source's signature pre-pass makes a later equation's name visible before
 %the equation itself runs. That visibility is metadata, not a time machine:
