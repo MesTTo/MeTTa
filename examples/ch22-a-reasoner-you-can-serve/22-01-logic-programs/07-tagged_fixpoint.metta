@@ -3,7 +3,7 @@
 ; Guarantees: bool and tropical converge on the two-cycle, formula then prob
 ;   reads the exact probability where a sum over proofs would count a shared
 ;   path twice, and counting counts the derivations of an acyclic program.
-; [tested: examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta; commit=WORKTREE]
+; [tested: examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta; commit=12609a929638e7a2b08d3ff8f517abc1a399e7a9]
 
 ;A tagged program is ordinary atoms: (fact tag proposition) and
 ;(rule tag head (premises ...)). This graph has a cycle, a -> b -> a, and two
