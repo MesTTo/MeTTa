@@ -12,7 +12,7 @@ Guarantees:
     rows also derive and validate each shipped ordering claim, a row of the
     `ordered` kind, and leave the negation, saturation and variable kinds to
     the catalog suite [tested: test_semiring_claims_are_derived_and_validated;
-    commit=WORKTREE]
+    commit=a2903424e3d5fe8176d6e57ea2d88ccf703400fe]
   - unannotated Python Literal alternatives and list/set membership, plus
     single- or multiline Prolog member/2 and memberchk/2 lists, are reported
     with path, line and values; an exemption is accepted only when immediately
