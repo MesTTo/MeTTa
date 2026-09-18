@@ -49,6 +49,27 @@
 %     convergence is the author's obligation as monotonicity of F is theirs
 %     [tested: algebra_fixpoint:a_rule_may_label_its_instances_by_a_function_of_its_premise_tags;
 %     commit=55368cb4eeb641d2325194eff9d0925048814b76].
+%   - a rule written (rule Tag Head (premises ...) (where G)) derives an
+%     instance only when G, applied to the premise tags in order under
+%     the carrier, answers True: the side condition of a labelled
+%     deductive system's rule (Gabbay, Labelled Deductive Systems, OUP
+%     1996). On this route a premise's tag is its table's value, the join
+%     of every derivation so far, so a guard reads an aggregate; a
+%     non-monotone guard on a premise inside the rule's own cycle is the
+%     author's loop, bounded by the caller as any other [tested:
+%     algebra_fixpoint:a_guard_drops_the_instances_it_refuses,
+%     algebra_fixpoint:a_guard_that_answers_no_truth_value_is_refused_by_name;
+%     commit=WORKTREE].
+%   - a carrier written (product Left Right) is the product semiring, its
+%     tags [pair, L, R] joined and extended componentwise, nested as deep
+%     as written: the guards and the (function F) labels read the left
+%     component and the right follows the same derivations structurally,
+%     so (product prob polynomial) answers, beside each probability, the
+%     derivations prob's guards admitted, which is how a tabled answer
+%     explains itself. A product of semirings is a semiring, and the join
+%     saturates when both components do [tested:
+%     algebra_fixpoint:a_product_carrier_pairs_the_record_with_its_witnesses;
+%     commit=WORKTREE].
 % Fails when: a proposition's head is not a symbol, which the reader refuses
 %   by name; a carrier with no fixpoint over cyclic data runs until the
 %   caller's timeout or inference budget stops it, as any other unbounded
@@ -64,8 +85,8 @@
 %metta_algebra_fixpoint(+Space, +Algebra, +Goal, -Answers): every proposition
 %the program derives that matches Goal, each once, paired with its tag at the
 %fixpoint, as [[Proposition, Tag], ...] in the order the tables answer.
-metta_algebra_fixpoint(Space, Algebra, Goal, Answers) :-
-    metta_algebra_descriptor(Algebra, Combine, Extend, _, _, _, _, _),
+metta_algebra_fixpoint(Space, Carrier, Goal, Answers) :-
+    metta_algebra_operations(Carrier, Ops),
     metta_algebra_program(Space, Facts, Rules),
     flag('$metta_algebra_fixpoint', N, N + 1),
     % A plain name: a module named with a leading $ is a system module, and
@@ -73,8 +94,7 @@ metta_algebra_fixpoint(Space, Algebra, Goal, Answers) :-
     atom_concat(metta_algebra_fixpoint_, N, Module),
     setup_call_cleanup(
         ( set_module(Module:class(temporary)),
-          metta_algebra_load_program(Module, Space, Algebra, Combine, Extend,
-                                     Facts, Rules) ),
+          metta_algebra_load_program(Module, Space, Ops, Facts, Rules) ),
         metta_algebra_query(Module, Goal, Answers),
         metta_algebra_unload_program(Module)).
 
@@ -93,7 +113,10 @@ metta_algebra_program_([Atom|Atoms], N, Facts, Rules) :-
         Facts = [fact(N, Coefficient, Proposition)|Facts1], Rules = Rules1
     ;   Atom = [rule, Tag, Head, [premises|Premises]]
     ->  metta_algebra_coefficient(Tag, Coefficient),
-        Facts = Facts1, Rules = [rule(N, Coefficient, Head, Premises)|Rules1]
+        Facts = Facts1, Rules = [rule(N, Coefficient, Head, Premises, none)|Rules1]
+    ;   Atom = [rule, Tag, Head, [premises|Premises], [where, Guard]]
+    ->  metta_algebra_coefficient(Tag, Coefficient),
+        Facts = Facts1, Rules = [rule(N, Coefficient, Head, Premises, Guard)|Rules1]
     ;   Facts = Facts1, Rules = Rules1
     ),
     metta_algebra_program_(Atoms, N1, Facts1, Rules1).
@@ -115,29 +138,93 @@ metta_algebra_literal(Proposition, Tag, Goal) :-
     append(Args, [Tag], Slots),
     Goal =.. [Name|Slots].
 
-metta_algebra_load_program(Module, Space, Algebra, Combine, Extend, Facts, Rules) :-
+metta_algebra_load_program(Module, Space, Ops, Facts, Rules) :-
     % The program's clauses call the engine's operations unqualified, so the
     % fresh module imports from the module this unit is loaded into.
     context_module(Engine),
     add_import_module(Module, Engine, start),
-    assertz(Module:('$join'(Old, New, Out) :-
-                        metta_algebra_join(Algebra, Combine, Old, New, Out))),
-    assertz(Module:('$extend'(Left, Right, Out) :-
-                        metta_apply_algebra_operation(Algebra, Extend, Left, Right, Out))),
-    (   metta_algebra_claim(Algebra, variable, VariableOp)
-    ->  assertz(Module:('$variable'(Key, Weight, Out) :-
-                            metta_apply_algebra_operation(Algebra, VariableOp, Key, Weight, Out)))
-    ;   assertz(Module:('$variable'(_, Weight, Weight)))
-    ),
-    assertz(Module:('$label'(Function, Tags, Out) :-
-                        metta_algebra_label(Algebra, Function, Tags, Out))),
+    metta_algebra_load_operations(Module, Ops),
     metta_algebra_relations(Facts, Rules, Relations),
     forall(member(Name/Arity, Relations),
            metta_algebra_table(Module, Name, Arity)),
     forall(member(fact(N, Tag, Proposition), Facts),
            metta_algebra_assert_fact(Module, Space, N, Tag, Proposition)),
-    forall(member(rule(N, Tag, Head, Premises), Rules),
-           metta_algebra_assert_rule(Module, Space, N, Tag, Head, Premises)).
+    forall(member(rule(N, Tag, Head, Premises, Guard), Rules),
+           metta_algebra_assert_rule(Module, Space, Ops, N, Tag, Head, Premises, Guard)).
+
+%A carrier term's operations: a name is one carrier from the catalog;
+%(product Left Right) is the product of the two, nested as deep as
+%written.
+metta_algebra_operations([product, Left, Right], product(LeftOps, RightOps)) :-
+    !,
+    metta_algebra_operations(Left, LeftOps),
+    metta_algebra_operations(Right, RightOps).
+metta_algebra_operations(Algebra, single(Algebra, Combine, Extend)) :-
+    metta_algebra_descriptor(Algebra, Combine, Extend, _, _, _, _, _).
+
+%The five doors a program's clauses call, closed over the carrier's
+%operations: join, extend, variable, label and guard.
+metta_algebra_load_operations(Module, Ops) :-
+    assertz(Module:('$join'(Old, New, Out) :-
+                        metta_algebra_ops_join(Ops, Old, New, Out))),
+    assertz(Module:('$extend'(Left, Right, Out) :-
+                        metta_algebra_ops_extend(Ops, Left, Right, Out))),
+    assertz(Module:('$variable'(Key, Weight, Out) :-
+                        metta_algebra_ops_variable(Ops, Key, Weight, Out))),
+    assertz(Module:('$label'(Function, Tags, Start, Out) :-
+                        metta_algebra_ops_label(Ops, Function, Tags, Start, Out))),
+    assertz(Module:('$guard'(Guard, Tags) :-
+                        metta_algebra_ops_guard(Ops, Guard, Tags))).
+
+%Under a product the tags are [pair, Left, Right], joined and extended
+%componentwise. The guard and the label function read the left component,
+%the record; the right component of a labelled instance is its own
+%variable extended by the premises' right components, the structure a
+%label function computes over, so a witness carrier on the right follows
+%the derivations the record admits.
+metta_algebra_ops_join(single(Algebra, Combine, _), Old, New, Out) :-
+    metta_algebra_join(Algebra, Combine, Old, New, Out).
+metta_algebra_ops_join(product(L, R), [pair, L1, R1], [pair, L2, R2], [pair, LOut, ROut]) :-
+    metta_algebra_ops_join(L, L1, L2, LOut),
+    metta_algebra_ops_join(R, R1, R2, ROut).
+
+metta_algebra_ops_extend(single(Algebra, _, Extend), Left, Right, Out) :-
+    metta_apply_algebra_operation(Algebra, Extend, Left, Right, Out).
+metta_algebra_ops_extend(product(L, R), [pair, L1, R1], [pair, L2, R2], [pair, LOut, ROut]) :-
+    metta_algebra_ops_extend(L, L1, L2, LOut),
+    metta_algebra_ops_extend(R, R1, R2, ROut).
+
+metta_algebra_ops_variable(single(Algebra, _, _), Key, Weight, Out) :-
+    metta_algebra_variable(Algebra, Key, Weight, Out).
+metta_algebra_ops_variable(product(L, R), Key, Weight, [pair, LOut, ROut]) :-
+    metta_algebra_ops_variable(L, Key, Weight, LOut),
+    metta_algebra_ops_variable(R, Key, Weight, ROut).
+
+metta_algebra_ops_label(single(Algebra, _, _), Function, Tags, _, Out) :-
+    metta_algebra_label(Algebra, Function, Tags, Out).
+metta_algebra_ops_label(product(L, R), Function, Tags, [pair, LStart, RStart], [pair, LOut, ROut]) :-
+    metta_algebra_pairs(Tags, Ls, Rs),
+    metta_algebra_ops_label(L, Function, Ls, LStart, LOut),
+    foldl([Tag, Acc, Next]>>metta_algebra_ops_extend(R, Acc, Tag, Next), Rs, RStart, ROut).
+
+metta_algebra_ops_guard(single(Algebra, _, _), Guard, Tags) :-
+    metta_algebra_guard(Algebra, Guard, Tags).
+metta_algebra_ops_guard(product(L, _), Guard, Tags) :-
+    metta_algebra_pairs(Tags, Ls, _),
+    metta_algebra_ops_guard(L, Guard, Ls).
+
+metta_algebra_pairs([], [], []).
+metta_algebra_pairs([[pair, L, R]|Pairs], [L|Ls], [R|Rs]) :-
+    metta_algebra_pairs(Pairs, Ls, Rs).
+
+%A fact's or a rule instance's tag under a carrier: its variable, minted
+%from the key, where the carrier declares a variable operation; its
+%written weight otherwise.
+metta_algebra_variable(Algebra, Key, Weight, Out) :-
+    (   metta_algebra_claim(Algebra, variable, VariableOp)
+    ->  metta_apply_algebra_operation(Algebra, VariableOp, Key, Weight, Out)
+    ;   Out = Weight
+    ).
 
 %Every relation a head, a fact or a premise names, so a premise nobody
 %derives is a tabled predicate with no clauses, which fails, rather than an
@@ -145,8 +232,8 @@ metta_algebra_load_program(Module, Space, Algebra, Combine, Extend, Facts, Rules
 metta_algebra_relations(Facts, Rules, Relations) :-
     findall(Name/Arity,
             ( ( member(fact(_, _, Proposition), Facts)
-              ; member(rule(_, _, Proposition, _), Rules)
-              ; member(rule(_, _, _, Premises), Rules),
+              ; member(rule(_, _, Proposition, _, _), Rules)
+              ; member(rule(_, _, _, Premises, _), Rules),
                 member(Proposition, Premises) ),
               metta_algebra_relation(Proposition, Name, Args),
               length(Args, Arity) ),
@@ -174,13 +261,25 @@ metta_algebra_assert_fact(Module, Space, N, Tag, Proposition) :-
 %variables gets one per ground head instance, minted after the premises have
 %bound the head, which is ProbLog's variable per ground clause. A rule tagged
 %(function F) labels the instance with F over the premise tags instead.
-metta_algebra_assert_rule(Module, Space, N, Tag, Head, Premises) :-
+metta_algebra_assert_rule(Module, Space, Ops, N, Tag, Head, Premises, Guard) :-
     metta_algebra_literal(Head, Out, HeadGoal),
     % Built by recursion, not findall, so the premises keep sharing their
     % variables with the head.
-    metta_algebra_premise_literals(Premises, Goals, PremiseTags),
+    metta_algebra_premise_literals(Premises, PremiseGoals, PremiseTags),
+    % The guard sits after the premises, whose tags it reads, and before
+    % the instance takes its own tag.
+    (   Guard == none
+    ->  Goals = PremiseGoals
+    ;   append(PremiseGoals, ['$guard'(Guard, PremiseTags)], Goals)
+    ),
     (   Tag = [function, Function]
-    ->  append(Goals, ['$label'(Function, PremiseTags, Out)], Body)
+    ->  (   Ops = single(_, _, _)
+        ->  append(Goals, ['$label'(Function, PremiseTags, none, Out)], Body)
+        ;   % Under a product the right half still needs the instance's
+            % own variable, which the left half's label function does not.
+            append(Goals, ['$variable'([rule, Space, N, Head], Tag, Start),
+                           '$label'(Function, PremiseTags, Start, Out)], Body)
+        )
     ;   metta_algebra_extend_chain(PremiseTags, Start, Out, Chain),
         append(Goals, ['$variable'([rule, Space, N, Head], Tag, Start)|Chain], Body)
     ),
@@ -193,6 +292,23 @@ metta_algebra_label(Algebra, Function, Tags, Label) :-
     (   once(metta_with_under(Algebra, eval([Function|Tags], Label0)))
     ->  Label = Label0
     ;   throw(error(metta_algebra_operation_failed(Algebra, Function, Tags), none))
+    ).
+
+%metta_algebra_guard(+Algebra, +Guard, +Tags): a rule's side condition,
+%the guard applied to the premise tags in order under the carrier; True
+%keeps the instance, False drops it (the engine spells MeTTa's truth
+%values as the atoms true and false), and any other answer is refused
+%by name, since a guard that is not a truth value is a mistake and not
+%a weight.
+metta_algebra_guard(Algebra, Guard, Tags) :-
+    (   once(metta_with_under(Algebra, eval([Guard|Tags], Verdict)))
+    ->  (   Verdict == true
+        ->  true
+        ;   Verdict == false
+        ->  fail
+        ;   throw(error(metta_algebra_guard_not_boolean(Algebra, Guard, Tags, Verdict), none))
+        )
+    ;   throw(error(metta_algebra_operation_failed(Algebra, Guard, Tags), none))
     ).
 
 metta_algebra_premise_literals([], [], []).

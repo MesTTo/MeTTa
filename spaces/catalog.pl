@@ -2762,6 +2762,7 @@ metta_catalog_preset([claim, semiring, formula, variable, 'formula-var']).
 %was written with, so its fixpoint is the number of derivations, the answer
 %the engine's counting aggregate gives.
 metta_catalog_preset([claim, semiring, counting, variable, 'counting-one']).
+metta_catalog_preset([claim, semiring, polynomial, variable, 'polynomial-var']).
 %budget is ordered the way tropical is, min over the reals with an ascending
 %reading, and declares order=ascending in its own preset. Its claim row was
 %the one an ordered carrier was missing.
@@ -2860,6 +2861,20 @@ metta_catalog_preset([algebra, formula, 'formula-or', 'formula-and',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
+                      [carrier], [requires], global]).
+%polynomial: the free commutative semiring over the program's facts and
+%rule instances, its values canonical polynomials ([poly Monomial ...],
+%a monomial [Coefficient (var Key Weight) ...]), so an answer's tag is
+%every witness of its derivation with multiplicity, and every other
+%carrier's value is that polynomial evaluated
+%[source: engine/metta/algebra_polynomial.pl].
+metta_catalog_preset([algebra, polynomial, 'polynomial-plus', 'polynomial-times',
+                      [poly], [poly, [1]],
+                      [laws, 'combine-associative', 'combine-commutative',
+                       'extend-associative', 'extend-commutative',
+                       'left-distributive', 'right-distributive',
+                       'combine-zero-identity', 'extend-one-identity',
+                       'extend-zero-annihilates', contraction],
                       [carrier], [requires], global]).
 metta_catalog_preset([algebra, amplitude, 'amplitude-add',
                       'amplitude-multiply', [complex, 0, 0], [complex, 1, 0],

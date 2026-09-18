@@ -446,6 +446,7 @@
             metta_formula_clear/0,
             metta_formula_model_count/3,
             metta_formula_variables/2,
+            metta_formula_witnesses/2,
             metta_current_algebra/3,
             metta_effect_compose/2,
             metta_effect_construct/2,
@@ -1638,6 +1639,7 @@ metta_import_shared_registries(Subsystem) :-
 
 :- consult('metta/algebra_operations.pl').
 :- consult('metta/algebra_formula.pl').
+:- consult('metta/algebra_polynomial.pl').
 :- consult('metta/algebra_fixpoint.pl').
 :- ensure_loaded([atom_index, parser, type_rules, translator, translator_rules,
                   support_graph, specializer, materialize, filereader,

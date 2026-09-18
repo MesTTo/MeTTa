@@ -26,6 +26,14 @@
 %     De Raedt, AAAI 2011, 10.1609/aaai.v25i1.7852) [tested:
 %     test_the_formula_carrier_counts_each_proof_once,
 %     test_a_cyclic_program_converges_under_every_shipped_carrier; commit=55368cb4eeb641d2325194eff9d0925048814b76].
+%   - the witnesses of a positive formula are its prime implicants, the
+%     minimal variable sets whose truth alone makes it true, read off the
+%     diagram with one memo per node: an implicant of the high branch
+%     that no implicant of the low branch absorbs takes the node's
+%     variable (Coudert and Madre, DAC 1992, 10.1109/DAC.1992.227866),
+%     which for the fixpoint's positive formulas is every minimal
+%     derivation [tested: algebra_fixpoint:a_formula_answers_its_minimal_derivations_as_witnesses;
+%     commit=WORKTREE].
 % Owns resources: the four dynamic tables below are process-global memory
 %   released only by metta_formula_clear/0; a program that mints variables
 %   forever grows them, as a program that asserts forever grows the database.
@@ -169,6 +177,41 @@ metta_formula_model_count_(Id, Ops, Count, Memo0, Memo) :-
         metta_apply_algebra_operation(Algebra, Extend, Complement, LoCount, LoTerm),
         metta_apply_algebra_operation(Algebra, Combine, HiTerm, LoTerm, Count),
         put_assoc(Id, Memo2, Count, Memo)
+    ).
+
+%metta_formula_witnesses(+Formula, -Witnesses): the prime implicants of a
+%positive formula, each the [Key, Weight] pairs of its variables in
+%variable order, the witnesses in standard order. The fixpoint builds its
+%formulas from or, and and var alone, so every implicant is a set of
+%sources sufficient for the answer and minimal among such sets.
+%Time: one visit per node, each joining its branches' implicant lists
+%with an absorption check, so the product of their sizes at a node;
+%the output can be as large as the number of minimal derivations.
+metta_formula_witnesses([formula, Id], Witnesses) :-
+    empty_assoc(Memo0),
+    metta_formula_implicants_(Id, Sets, Memo0, _),
+    findall(Rows,
+            ( member(Set, Sets),
+              findall([Key, Weight],
+                      ( member(Var, Set), '$metta_formula_variable'(Key, Var, Weight) ),
+                      Rows) ),
+            Witnesses).
+
+metta_formula_implicants_(0, [], Memo, Memo) :- !.
+metta_formula_implicants_(1, [[]], Memo, Memo) :- !.
+metta_formula_implicants_(Id, Sets, Memo0, Memo) :-
+    (   get_assoc(Id, Memo0, Cached)
+    ->  Sets = Cached, Memo = Memo0
+    ;   '$metta_formula_node'(Id, Var, Lo, Hi),
+        metta_formula_implicants_(Lo, LoSets, Memo0, Memo1),
+        metta_formula_implicants_(Hi, HiSets, Memo1, Memo2),
+        findall([Var|Set],
+                ( member(Set, HiSets),
+                  \+ ( member(Absorbing, LoSets), subset(Absorbing, Set) ) ),
+                WithVar),
+        append(LoSets, WithVar, Sets0),
+        sort(Sets0, Sets),
+        put_assoc(Id, Memo2, Sets, Memo)
     ).
 
 %metta_formula_variables(+Formula, -Variables): the [Key, Weight] pairs of the

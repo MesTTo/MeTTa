@@ -7,7 +7,10 @@
 %   the formula carrier's or, and, not and var are the decision diagram's,
 %   and a carrier's negation is native where the engine knows it, complement
 %   over a number and not over a formula, and its declared operation
-%   otherwise [tested: test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76].
+%   otherwise [tested: test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76];
+%   the polynomial carrier's plus, times and var are the free semiring's
+%   [tested: algebra_fixpoint:the_polynomial_carrier_answers_every_witness_with_its_multiplicity;
+%   commit=WORKTREE].
 % Decides: a custom operation runs under the requested algebra after boot.
 
 metta_apply_algebra_operation(formula, 'formula-or', A, B, R) :-
@@ -21,6 +24,15 @@ metta_apply_algebra_operation(formula, 'formula-var', Key, Weight, R) :-
     metta_formula_variable(Key, Weight, R).
 metta_apply_algebra_operation(counting, 'counting-one', _, _, 1) :-
     !.
+metta_apply_algebra_operation(polynomial, 'polynomial-plus', A, B, R) :-
+    !,
+    metta_polynomial_plus(A, B, R).
+metta_apply_algebra_operation(polynomial, 'polynomial-times', A, B, R) :-
+    !,
+    metta_polynomial_times(A, B, R).
+metta_apply_algebra_operation(polynomial, 'polynomial-var', Key, Weight, R) :-
+    !,
+    metta_polynomial_variable(Key, Weight, R).
 metta_apply_algebra_operation(visibility, min, A, B, R) :-
     !,
     must_be(oneof(['INTERNAL', 'PUBLIC']), A),
