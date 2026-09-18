@@ -1,9 +1,9 @@
-;Under most of these libraries is a Prolog predicate, imported by name, and
-;the MeTTa spelling is one equation over it. Both spellings are callable and
-;both are the same operation: the hyphenated one is the language's, the
-;underscore one is the rung below it, and this file calls the lower rung
-;directly so that a reader can see the ladder rather than being told about
-;it.
+; Purpose: compare retained Prolog spellings with their MeTTa library names.
+; Guarantees: the paired calls below agree on their results.
+; [tested: examples/ch08-data/08-03-the-shipped-libraries/16-the_prolog_rung.metta; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+; The libraries retain underscore spellings beside their MeTTa names. Both
+; are callable; the assertions show when they share an operation. Their
+; source declarations publish both spellings.
 ;
 ;A library does that with `import_prolog_functions_from_file`, which names
 ;the file and the predicates, so the names a library publishes are written
@@ -14,8 +14,7 @@
 !(import! &self (library lib_datetime))
 !(import! &self (library lib_conformance))
 
-;lib_regex's six. `re-match` is `(= (re-match $p $t) (regex_match $p $t))`
-;and nothing else, so the two answer the same thing for every input.
+;The regex aliases retain the native operation's results.
 !(test (regex_match "(?i)^needle" "Needle in a haystack") True)
 !(test (== (regex_match "^x" "abc") (re-match "^x" "abc")) True)
 !(test (collapse (regex_find "\\d+" "a1 b22 c333")) ("1" "22" "333"))
@@ -32,8 +31,8 @@
 !(test (== (crypto_hash sha256 "text") (crypto-hash sha256 "text")) True)
 !(test (== (crypto_hash sha256 "text") (crypto_hash sha256 "other")) False)
 
-;Randomness is the other way round: `crypto-random-hex` answers two hex
-;characters per byte asked for, and never the same ones twice.
+;`crypto-random-hex` answers two hex characters per byte. The fixture checks
+;the output lengths and compares two independent sixteen-byte draws.
 !(test (string-length (crypto-random-hex 8)) 16)
 !(test (string-length (crypto_random_hex 16)) 32)
 !(test (== (crypto-random-hex 16) (crypto-random-hex 16)) False)

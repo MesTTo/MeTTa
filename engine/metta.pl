@@ -24,9 +24,9 @@
 %   - materialize.pl loads before source processing and shares the engine's
 %     runtime context [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 %   - The engine/metta/ units compile into metta_engine in source
-%     order. Engine and library definitions stay out of user except SWI's
-%     exception/3, thread_message_hook/3 and prolog_trace_interception/4 hooks.
-%     [tested: engine_modules; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
+%     order. Engine and library definitions stay in their owning modules;
+%     designated SWI protocol hooks live in user.
+%     [tested: engine_modules; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without
@@ -520,6 +520,10 @@
             refuse_untypable_declaration/2,
             rethrow_metta_operation_error/2,
             throw_missing_import/1,
+            %
+            % Shared native policies: presentation and IEEE arithmetic recovery.
+            metta_console_text/2,
+            metta_saturating_recover/4,
             %
             % IMPORTS, SOURCES AND EXTENSIONS: what a MeTTa source pulls in, where a
             % host loader puts it, and the seat census behind require-extension!.
@@ -1204,6 +1208,23 @@ metta_platform_capability(deadlines, library(time),
 metta_platform_capability(subprocess, library(process),
                           '(git-import! ...), and anything else that starts \c
                            a program').
+% HTTP's optional TLS transport does not remove plain HTTP when SSL is absent.
+% [tested: lib_http:http_capabilities_are_separate; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
+metta_platform_capability(http,
+                          [library(http/http_open), library(http/thread_httpd),
+                           library(http/http_client), library(socket), library(uri)],
+                          'lib_http client requests, response streams and local servers').
+metta_platform_capability(https,
+                          [library(http/http_ssl_plugin), library(ssl)],
+                          'HTTPS client requests; plain HTTP remains available').
+% URI percent encoding is supplied by the native clib provider.
+% [tested: lib_uri:uri_capability_is_declared; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
+metta_platform_capability(uri, library(uri),
+                          'lib_uri percent encoding and URI reference operations').
+% Sockets use the native clib transport and the shared File handle owner.
+% [tested: lib_socket:socket_capability_is_declared; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
+metta_platform_capability(socket, library(socket),
+                          'lib_socket TCP, UDP and socket readiness').
 metta_platform_capability(regex, library(pcre),
                           'lib_regex, so (re-match ...), (re-find ...), \c
                            (re-captures ...), (re-split ...), \c
@@ -1212,9 +1233,51 @@ metta_platform_capability(regex, library(pcre),
                            own; and importing re_replace as a Prolog \c
                            function. lib_text''s plain string forms still \c
                            work').
+%library(unicode) is SWI's ext/utf8proc pack rather than its core, and is absent
+%from swipl-wasm, so a build can be complete without it. Nothing else provides
+%normalization or the character database: code_type/2 answers the classes and
+%string_upper/2 the case conversions, both of which stay.
+%library(unix) is SWI's ext/clib pack, absent from swipl-wasm. environ/1 is the
+%only name any of this tree's code wants out of it, and it is the only way to
+%enumerate the whole environment: getenv/2 answers one variable a caller can
+%already name.
+metta_platform_capability('environment-listing', library(unix),
+                          'lib_system\'s (env-all ...), which lists every \c
+                           variable; (env-get ...), (env-set! ...) and \c
+                           (env-unset! ...) name one variable each and still work').
+%library(sgml) and library(xpath) are SWI's ext/sgml pack, absent from
+%swipl-wasm. Nothing else parses XML or HTML here.
+metta_platform_capability(markup, [library(sgml), library(sgml_write), library(xpath)],
+                          'lib_markup, so (markup-parse-xml ...), \c
+                           (markup-parse-html ...), (markup-write ...), \c
+                           (markup-select ...), (markup-attribute ...) and \c
+                           (markup-text ...); lib_json and lib_yaml still read \c
+                           their own formats').
+%library(yaml) is SWI's ext/yaml pack over libyaml, absent from swipl-wasm and
+%from a build without the C library. Nothing else reads YAML here; lib_json's
+%doors read the format a YAML document can always be converted to.
+metta_platform_capability(yaml, library(yaml),
+                          'lib_yaml, so (yaml-decode ...), (yaml-encode ...), \c
+                           (yaml-read! ...) and (yaml-write! ...); lib_json\'s \c
+                           own doors still read and write JSON').
+metta_platform_capability(unicode, library(unicode),
+                          'lib_unicode, so (unicode-normalize ...), \c
+                           (unicode-casefold ...), (unicode-map ...), \c
+                           (unicode-property ...), (unicode-graphemes ...) and \c
+                           the Unicode version; lib_string\'s (string-upper ...), \c
+                           (string-lower ...) and (string-chars ...) still work').
 metta_platform_capability('compressed-sources', library(zlib),
-                          'reading or writing a .gz program or space file; \c
+                          'lib_compression gzip/zlib operations and reading \c
+                           or writing a .gz program or space file; \c
                            the same content uncompressed still loads').
+% [tested: lib_compression; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
+metta_platform_capability('memory-files', library(memfile),
+                          'lib_compression byte encoding through owned memory streams').
+metta_platform_capability(archive, library(archive),
+                          'lib_compression archive metadata, entry reads and extraction').
+% [tested: lib_database; commit=060bea3199e9f504c6d425f60841f229fc96e861].
+metta_platform_capability(persistency, [library(persistency),library(shlib)],
+                          'lib_database independent journals and owned file locks').
 %One capability over two libraries, because engine/filereader.pl imports both
 %and the cache is what a user loses when either goes. The row is CONSERVATIVE
 %about fastrw and deliberately so: fast_read/2 and fast_write/2 are SWI core

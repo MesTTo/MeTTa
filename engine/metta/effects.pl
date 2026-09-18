@@ -18,6 +18,15 @@
 % Guarantees: reference plans follow canonical source bodies in their own
 %   modules, including recursive aliases and wrapped unions
 %   [tested: reference_effects; commit=89084b43ff1a758f703ce77cd96b026f56510116].
+% Guarantees: seam:extension_builtin/2 declarations loaded after startup reach
+% effect plans while native floors and cache admission retain their policy.
+% [tested: effects_lattice:late_library_declarations_reach_effect_plans,
+% effects_lattice:late_library_profiles_bound_catalog_declarations;
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
+% Guarantees: a computed function head retains queued definition analysis and
+% still treats its returned callable as dynamic.
+% [tested: effects_lattice:a_computed_head_keeps_its_queued_definitions;
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: inspecting a produced Error is inert and cannot mask the called
@@ -666,10 +675,16 @@ metta_declared_operation_effect(Name, Effect) :-
         Effect = pureStructural
     ).
 
+% A library imported after startup is registered by import_prolog_function/2
+% as an ordinary function. Its provider declaration still supplies a fixed
+% effect; the startup builtin registry does not determine that declaration's
+% lifetime. Native and semantic profiles below retain precedence.
 metta_fixed_operation_effect(Name, Effect) :-
     (   metta_semantic_effect(Name, Semantic)
     ->  Effect = Semantic
-    ;   metta_builtin_effect(Name, Effect)
+    ;   metta_builtin_effect(Name, Builtin)
+    ->  Effect = Builtin
+    ;   seam:extension_builtin(Name, Effect)
     ).
 
 %The native vocabulary has the same closed effect boundary as registered host

@@ -37,6 +37,9 @@ Decides:
   - only ``metta_catalog_preset/1`` terms in ``engine/spaces.pl`` are catalog
     authority; unrelated closed lists in that file remain findings, while
     ``extensions/python/metta/vocabularies.py`` is generated and excluded
+  - vendor directories retain third-party policy; adjacent first-party adapters
+    remain checked [tested: test_vendor_ownership_does_not_exempt_local_adapters;
+    commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -585,7 +588,7 @@ def scan_closed_lists(root: Path) -> list[str]:
             continue
         for path in sorted(p for p in directory.rglob("*") if p.suffix in {".pl", ".py"}):
             relative = path.relative_to(root)
-            if relative in EXCLUDED_PATHS or "__pycache__" in relative.parts:
+            if relative in EXCLUDED_PATHS or {"__pycache__", "vendor"}.intersection(relative.parts):
                 continue
             text = path.read_text(encoding="utf-8")
             lines = text.splitlines()

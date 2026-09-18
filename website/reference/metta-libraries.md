@@ -10,71 +10,883 @@ beside its definitions.
 | library | names | documented |
 |---|---|---|
 | lib_builtin_types | 195 | 0 |
-| lib_combinatorics | 8 | 0 |
+| lib_cli | 4 | 4 |
+| lib_combinatorics | 14 | 14 |
+| lib_compression | 8 | 8 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
-| lib_crypto | 4 | 0 |
-| lib_csv | 2 | 2 |
-| lib_datastructures | 26 | 9 |
-| lib_datetime | 5 | 0 |
+| lib_crypto | 12 | 12 |
+| lib_csv | 7 | 7 |
+| lib_database | 7 | 7 |
+| lib_datastructures | 48 | 31 |
+| lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
-| lib_dict | 7 | 0 |
-| lib_distribution | 7 | 0 |
+| lib_dict | 11 | 4 |
 | lib_doc | 0 | 0 |
-| lib_file | 32 | 18 |
+| lib_encoding | 6 | 6 |
+| lib_file | 55 | 55 |
+| lib_functional | 17 | 17 |
 | lib_gitimport | 0 | 0 |
+| lib_graph | 15 | 15 |
 | lib_he | 18 | 0 |
+| lib_http | 9 | 9 |
 | lib_import | 8 | 4 |
-| lib_json | 5 | 0 |
+| lib_json | 13 | 13 |
+| lib_logging | 7 | 7 |
+| lib_markup | 6 | 6 |
+| lib_math | 13 | 13 |
 | lib_measure | 17 | 0 |
 | lib_memo | 9 | 0 |
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
+| lib_pairs | 9 | 9 |
+| lib_parsing | 5 | 5 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
+| lib_process | 7 | 7 |
+| lib_random | 13 | 13 |
 | lib_redis | 2 | 0 |
-| lib_reflect | 19 | 10 |
-| lib_regex | 12 | 0 |
+| lib_reflect | 21 | 12 |
+| lib_regex | 18 | 18 |
 | lib_roman | 36 | 0 |
+| lib_sets | 11 | 11 |
+| lib_socket | 11 | 11 |
 | lib_soft | 9 | 1 |
-| lib_spaces | 5 | 0 |
-| lib_strategy | 24 | 0 |
-| lib_string | 19 | 0 |
+| lib_spaces | 10 | 5 |
+| lib_statistics | 31 | 31 |
+| lib_strategy | 26 | 26 |
+| lib_string | 34 | 34 |
+| lib_system | 8 | 8 |
 | lib_tabling | 11 | 0 |
+| lib_testing | 1 | 1 |
 | lib_thread | 62 | 6 |
 | lib_torch | 20 | 19 |
-| lib_vector | 5 | 0 |
+| lib_unicode | 8 | 8 |
+| lib_uri | 9 | 9 |
+| lib_uuid | 11 | 11 |
+| lib_vector | 13 | 13 |
+| lib_yaml | 4 | 4 |
 | lib_zar | 4 | 0 |
+
+## lib_cli
+
+### `cli-arguments!`
+
+*lib_cli.metta:11*
+
+```metta
+(: cli-arguments! (-> Expression))
+```
+
+The host process argument vector as Strings, preserving numeric spelling, empty tokens and order. Runner arguments remain present; the caller selects the tokens that belong to its application before passing them to cli-parse. This reads argv directly and performs no shell tokenization or process exit.
+
+Returns: Arguments
+
+### `cli-help`
+
+*lib_cli.metta:17*
+
+```metta
+(: cli-help (-> Atom String))
+```
+
+Validate the same held declarations as cli-parse and render their aliases, types, literal defaults, metavariables and help. meta is a String label; help is a String or an expression of String lines. Empty and flagless declarations produce empty help. Custom converters do not run. Default type validation follows the ordinary type rules and can run a Predicate refinement.
+
+1. Specification
+
+Returns: Help
+
+### `cli-parse`
+
+*lib_cli.metta:23*
+
+```metta
+(: cli-parse (-> Atom Expression Symbol Expression))
+```
+
+Parse a held String argument vector into (Pairs Operands), where each pair is (Key Value). Bind computed declarations and arguments with let. A row is an expression of fields, for example ((opt count) (type integer) (shortflags (n)) (longflags (count)) (default 1) (help "Item count")). opt is required; the other fields are type, shortflags, longflags, default, meta and help. Each field occurs at most once. Type defaults to string; flags and help default to empty. Keys and complete dashed names are unique. Names are Strings or atoms. Short names have one character and cannot be a dash. Names contain no whitespace, control character or equals sign; digits and punctuation are otherwise permitted. Short and long namespaces are separate. Flagless default rows are allowed. Built-in types come from cli-types. boolean accepts lowercase true/false tokens and returns True/False; integer and float use native numeric parsing; atom returns a native atom, including its Boolean atoms true/false; string retains text; metta reads one literal form without evaluating it. A (parse Type Function) type applies the held function to the quoted String token in the calling module, requiring exactly one acyclic answer. Names, lambdas and partial applications work. The result and declared default must pass the engine's live argument-type check, including aliases, refinements and gradual typing. Defaults are ground literal values. Accept --name=value, --name value, -nvalue and -n value. A bare Boolean is true; --no-name is false unless that complete name has its own declaration. Short names do not cluster and -n=value is refused. -- ends option parsing; a lone dash and unclaimed signed numeric operands are data. Attach a dash-led value with equals or directly to a short name. Explicit empty tokens remain empty. Duplicates is keepfirst, keeplast or keepall. Defaults precede supplied occurrences; retained supplied occurrences keep their input order. An absent option without a default contributes no pair. Validate syntax, then convert every occurrence before selecting repeats. An invalid earlier value cannot hide behind a later one. Errors retain their cause, name the option and give the repair. Parsing itself prints nothing; custom functions keep their effects.
+
+1. Specification
+2. Arguments
+3. Duplicates
+
+Returns: Parsed
+
+### `cli-types`
+
+*lib_cli.metta:29*
+
+```metta
+(: cli-types (-> Expression))
+```
+
+The built-in option conversion names, in declaration order. A custom (parse Type Function) descriptor also accepts any ordinary held MeTTa function.
+
+Returns: Types
+
+## lib_combinatorics
+
+### `range`
+
+*lib_combinatorics.metta:13*
+
+```metta
+(: range (-> Number Number Number))
+```
+
+Answer numbers from K to the excluded N in unit steps; the unit-stride specialization of range-step.
+
+1. K
+2. N
+
+Returns: Value
+
+### `choose2`
+
+*lib_combinatorics.metta:25*
+
+```metta
+(: choose2 (-> Expression Expression))
+```
+
+Choose two positions, the later index varying slowest. Duplicate values at distinct positions remain separate choices.
+
+1. Items
+
+Returns: Pair
+
+### `choose2l`
+
+*lib_combinatorics.metta:32*
+
+```metta
+(: choose2l (-> Expression Expression))
+```
+
+The existing collected spelling of choose2: collapse its answer stream.
+
+1. Items
+
+Returns: Pairs
+
+### `chooseK`
+
+*lib_combinatorics.metta:50*
+
+```metta
+(: chooseK (-> Expression Number Expression))
+```
+
+Choose a nonnegative integer Count of the positions, keeping input order. Each choice is an answer, so once can stop before later choices are built. Zero gives one empty choice; too many gives no answers.
+
+1. Items
+2. Count
+
+Returns: Choice
+
+### `chooseKl`
+
+*lib_combinatorics.metta:57*
+
+```metta
+(: chooseKl (-> Expression Number Expression))
+```
+
+The existing collected spelling of chooseK: collapse its answer stream.
+
+1. Items
+2. Count
+
+Returns: Choices
+
+### `takeK`
+
+*lib_combinatorics.metta:70*
+
+```metta
+(: takeK (-> Number Expression Expression))
+```
+
+The first K items, or the whole expression when it is shorter. Zero or a negative count gives the empty prefix.
+
+1. Count
+2. Items
+
+Returns: Prefix
+
+### `range-step`
+
+*lib_combinatorics.metta:84*
+
+```metta
+(: range-step (-> Number Number Number Number))
+```
+
+Answer numbers from From toward the excluded To, moving by a nonzero integer Step. Endpoints may be finite fractions. Refuse non-finite endpoints and a step too small to change the current float. A step pointing away from To has no answers.
+
+1. From
+2. To
+3. Step
+
+Returns: Value
+
+### `tuples`
+
+*lib_combinatorics.metta:96*
+
+```metta
+(: tuples (-> Expression Expression))
+```
+
+Choose one literal value from every population, the last varying fastest. Validate every population before enumerating. An empty population gives no answers; no populations gives one empty tuple. Variable sharing is retained.
+
+1. Sets
+
+Returns: Tuple
+
+### `cartesian-power`
+
+*lib_combinatorics.metta:110*
+
+```metta
+(: cartesian-power (-> Expression Number Expression))
+```
+
+The Cartesian product of Length copies of Items, retaining literal values and variable sharing. A nonnegative integer length of zero gives one empty tuple. An empty population at a positive length gives no answers.
+
+1. Items
+2. Length
+
+Returns: Tuple
+
+### `permutations`
+
+*lib_combinatorics.metta:122*
+
+```metta
+(: permutations (-> Expression Expression))
+```
+
+Every ordering of the items, one per answer, in the host's own order: the items as given first, then the orderings that swap the latest elements. A repeated item makes repeated answers, because a permutation counts positions and not values. Empty items have exactly one permutation, the empty one.
+
+1. Items
+
+Returns: Permutation
+
+### `subsets`
+
+*lib_combinatorics.metta:135*
+
+```metta
+(: subsets (-> Expression Expression))
+```
+
+Every subset, one per answer, each keeping the items' own order: the powerset, so n items give 2^n answers, starting with the whole set and ending with the empty one. A repeated item is a distinct position, so (a a) has four subsets.
+
+1. Items
+
+Returns: Subset
+
+### `permutation-count`
+
+*lib_combinatorics.metta:148*
+
+```metta
+(: permutation-count (-> Number Number Number))
+```
+
+How many ordered choices of Chosen items there are among Count of them, exactly: Count falling by one, Chosen times. Choosing more than there are is 0, and choosing none is 1.
+
+1. Count
+2. Chosen
+
+Returns: Result
+
+### `factorial`
+
+*lib_combinatorics.metta:156*
+
+```metta
+(: factorial (-> Number Number))
+```
+
+The exact factorial of a nonnegative integer, with zero giving one. This specializes permutation-count to choose every position.
+
+1. Number
+
+Returns: Result
+
+### `binomial`
+
+*lib_combinatorics.metta:166*
+
+```metta
+(: binomial (-> Number Number Number))
+```
+
+The exact number of unordered choices. Divide a falling product by its factorial over the smaller side. An integer Chosen outside zero through Count gives zero; a negative Count or non-integer raises.
+
+1. Count
+2. Chosen
+
+Returns: Result
+
+## lib_compression
+
+### `archive-entries!`
+
+*lib_compression.metta:11*
+
+```metta
+(: archive-entries! (-> %Undefined% Expression))
+```
+
+Inspect every entry as (archive-entry Index NameString PropertyPairs), with zero-based ordinals and archive order, retaining duplicate names. Properties are native filetype, mtime, size, optional link_target, format and permissions. Textual link targets and format descriptions are Strings; a native unknown filetype remains its integer code. Inspection creates no extracted paths. Native name conversion uses a call-local UTF8 character locale, preserving the process locale. Unflagged ZIP names use CP437; UTF8 flags and Unicode extra fields retain native precedence. Unconvertible pathnames raise before returning. All entry data is consumed to surface native read errors. Gzip layers are checked through zlib, including gzip inside other compression filters.
+
+1. Path
+
+Returns: Entries
+
+### `archive-extract!`
+
+*lib_compression.metta:17*
+
+```metta
+(: archive-extract! (-> %Undefined% %Undefined% Bool))
+```
+
+Publish regular files and directories into a missing or empty destination directory. Its parent must exist. Build a separate tree first; errors leave the destination unchanged. Links, unknown kinds, devices and pipes raise. Modes, ownership and times are not restored. File duplicates and file/tree collisions raise; repeated directories and ./ directory entries are valid. Names must be portable relative paths: no .. components, absolute paths, backslashes, controls, Windows device names, reserved punctuation or trailing dots/spaces. Empty and . components are normalized. Inspection retains names that extraction refuses. Input files must remain unchanged during the call. Archives containing gzip use temporary seekable files for validation; only adjacent decoded layers coexist. Other archives use the linked reader directly.
+
+1. Path
+2. Destination
+
+Returns: Done
+
+### `archive-read!`
+
+*lib_compression.metta:23*
+
+```metta
+(: archive-read! (-> %Undefined% Number Expression))
+```
+
+Read one regular entry by its zero-based ordinal. Ordinals distinguish equal names. An absent ordinal or a nonregular entry raises. Other entries are consumed as well, so a later archive read error is not hidden by selection.
+
+1. Path
+2. Index
+
+Returns: Bytes
+
+### `compress-bytes`
+
+*lib_compression.metta:29*
+
+```metta
+(: compress-bytes (-> Symbol Number Expression Expression))
+```
+
+Compress integers 0..255 using gzip or zlib and level 0..9. Level 0 stores data; higher levels trade encoding work for size. Empty input produces a complete empty member. The result is bytes, independent of locale and text encoding.
+
+1. Format
+2. Level
+3. Bytes
+
+Returns: Compressed
+
+### `compress-file!`
+
+*lib_compression.metta:35*
+
+```metta
+(: compress-file! (-> Symbol Number %Undefined% %Undefined% Bool))
+```
+
+Stream a file into gzip or zlib and replace Destination after all streams close successfully. Its parent must exist. Source and Destination may be the same path. A failure before publication preserves the old destination.
+
+1. Format
+2. Level
+3. Source
+4. Destination
+
+Returns: Done
+
+### `compression-formats`
+
+*lib_compression.metta:41*
+
+```metta
+(: compression-formats (-> Expression))
+```
+
+Return the byte/file envelope names gzip and zlib. These use native zlib; archive operations separately detect formats supported by linked libarchive.
+
+Returns: Formats
+
+### `decompress-bytes`
+
+*lib_compression.metta:47*
+
+```metta
+(: decompress-bytes (-> Symbol Expression Expression))
+```
+
+Decode complete gzip or zlib members, concatenating their bytes. Empty input, a different envelope, truncation, checksum errors and trailing junk raise. A compressed empty member returns (). Results require memory proportional to the input and decoded bytes; use the file operation for streaming output.
+
+1. Format
+2. Compressed
+
+Returns: Bytes
+
+### `decompress-file!`
+
+*lib_compression.metta:53*
+
+```metta
+(: decompress-file! (-> Symbol %Undefined% %Undefined% Bool))
+```
+
+Stream complete gzip/zlib members into one file, replacing Destination after checksum validation and close. The input may name Destination. Its parent must exist; malformed input preserves an existing destination. Memory use is bounded by decoder/stream buffers instead of the decoded file's length.
+
+1. Format
+2. Source
+3. Destination
+
+Returns: Done
+
+## lib_crypto
+
+### `crypto-hash`
+
+*lib_crypto.metta:12*
+
+```metta
+(: crypto-hash (-> %Undefined% %Undefined% String))
+```
+
+Hash UTF-8 text, with the same contract as crypto_hash.
+
+1. Algorithm
+2. Text
+
+Returns: Hex
+
+### `crypto-hash-bytes`
+
+*lib_crypto.metta:18*
+
+```metta
+(: crypto-hash-bytes (-> %Undefined% Expression String))
+```
+
+Hash an expression of byte integers 0..255 without text transcoding. Empty bytes are valid. Algorithms and reduced-platform support match crypto-hash.
+
+1. Algorithm
+2. Bytes
+
+Returns: Hex
+
+### `crypto-hash-file!`
+
+*lib_crypto.metta:24*
+
+```metta
+(: crypto-hash-file! (-> %Undefined% %Undefined% String))
+```
+
+Hash a file's bytes through a bounded buffer. Missing files and read failures raise. The binary stream closes on every exit; the file is never modified.
+
+1. Algorithm
+2. Path
+
+Returns: Hex
+
+### `crypto-hmac`
+
+*lib_crypto.metta:30*
+
+```metta
+(: crypto-hmac (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Authenticate UTF-8 text with a UTF-8 key and a fixed-output digest. The result is lowercase hexadecimal. Empty keys/text are valid. Without crypto, sha1 and sha256 remain available; other algorithms name the missing capability.
+
+1. Algorithm
+2. Key
+3. Text
+
+Returns: Hex
+
+### `crypto-hmac-bytes`
+
+*lib_crypto.metta:36*
+
+```metta
+(: crypto-hmac-bytes (-> %Undefined% Expression Expression String))
+```
+
+Authenticate raw bytes with a raw byte key; both expressions contain only integers 0..255. Algorithms and reduced support match crypto-hmac.
+
+1. Algorithm
+2. Key
+3. Bytes
+
+Returns: Hex
+
+### `crypto-password-hash`
+
+*lib_crypto.metta:43*
+
+```metta
+(: crypto-password-hash (-> %Undefined% Number String))
+```
+
+```metta
+(: crypto-password-hash (-> %Undefined% String))
+```
+
+Derive a PBKDF2-SHA512 password record from UTF-8 Password with 16 random salt bytes and 2^Cost iterations. Default Cost is 18 (262144 iterations). Explicit costs must fit the provider's positive C int iteration count (0..30 on this ABI); low costs are for fixtures, not stored credentials. The record preserves SWI's format. Native failures and absent crypto capability raise.
+
+1. Password
+2. Cost
+
+Returns: Record
+
+### `crypto-password-verify`
+
+*lib_crypto.metta:49*
+
+```metta
+(: crypto-password-verify (-> %Undefined% %Undefined% Bool))
+```
+
+Verify a PBKDF2-SHA512 record, returning True or False for a valid record. Malformed records, invalid iteration counts and native failures raise. Legacy salt lengths remain valid. Parsing checks the complete envelope and canonical unpadded Base64; the equal-length digest comparison uses CRYPTO_memcmp.
+
+1. Password
+2. Record
+
+Returns: Matches
+
+### `crypto-random-bytes`
+
+*lib_crypto.metta:55*
+
+```metta
+(: crypto-random-bytes (-> Number Expression))
+```
+
+Return Count cryptographically secure byte integers. Zero returns (). Negative or unrepresentable sizes raise; native allocation and entropy failures raise.
+
+1. Count
+
+Returns: Bytes
+
+### `crypto-random-hex`
+
+*lib_crypto.metta:61*
+
+```metta
+(: crypto-random-hex (-> Number String))
+```
+
+Return secure random hexadecimal, with the same contract as crypto_random_hex.
+
+1. Count
+
+Returns: Hex
+
+### `crypto-random-integer`
+
+*lib_crypto.metta:67*
+
+```metta
+(: crypto-random-integer (-> Number Number Number))
+```
+
+Uniformly sample Lower <= Value < Upper with secure randomness. Bounds may be arbitrary-size signed integers. Empty/reversed intervals raise. A singleton returns its sole integer without drawing entropy. Requires crypto capability.
+
+1. Lower
+2. Upper
+
+Returns: Value
+
+### `crypto_hash`
+
+*lib_crypto.metta:73*
+
+```metta
+(: crypto_hash (-> %Undefined% %Undefined% String))
+```
+
+Hash UTF-8 text to lowercase hexadecimal. Text may be a String, Symbol or character-code expression. Use a fixed-output OpenSSL digest name such as sha256, sha512, sha3_256 or blake2b512. Unknown algorithms raise. A platform without crypto retains sha1, sha224, sha256, sha384 and sha512 through sha.
+
+1. Algorithm
+2. Text
+
+Returns: Hex
+
+### `crypto_random_hex`
+
+*lib_crypto.metta:79*
+
+```metta
+(: crypto_random_hex (-> Number String))
+```
+
+Return Count secure random bytes as 2*Count lowercase hexadecimal characters. Count may be zero. Negative counts and absent crypto capability raise.
+
+1. Count
+
+Returns: Hex
 
 ## lib_csv
 
-### `csv-space`
+### `csv-append!`
 
-*lib_csv.metta:22*
+*lib_csv.metta:14*
 
-A read-only CSV row space; each query streams the file anew, every cell is a String, and the first record is data
+```metta
+(: csv-append! (-> %Undefined% Expression Bool))
+```
 
-1. a readable UTF-8 CSV file path
+```metta
+(: csv-append! (-> %Undefined% Expression Expression Bool))
+```
 
-Returns: Space
+Append field lists as one atomic file transaction and return True. Create a missing file. Validate existing CSV, retain its bytes and width, and add a terminator after a valid unterminated last record when needed. Options are csv-space's. Cost is linear in old and new bytes; batch related rows. A persistent .metta-csv.lock coordinates writers using the same path.
+
+1. Path
+2. Rows
+3. Options
+
+Returns: Written
+
+### `csv-encode`
+
+*lib_csv.metta:21*
+
+```metta
+(: csv-encode (-> Expression Expression String))
+```
+
+```metta
+(: csv-encode (-> Expression String))
+```
+
+Encode field lists as CSV. Every field must be a String. Quote and escape fields when needed, including a singleton empty field. Options are csv-space's; newline selects CRLF, LF or CR output and skip only affects reading. Empty rows encode as blank records. Empty input produces "".
+
+1. Rows
+2. Options
+
+Returns: Text
+
+### `csv-parse`
+
+*lib_csv.metta:28*
+
+```metta
+(: csv-parse (-> %Undefined% Expression))
+```
+
+```metta
+(: csv-parse (-> %Undefined% Expression Expression))
+```
+
+Parse text into a list of field lists. Preserve empty fields, duplicates, Unicode, whitespace, NUL and quoted newlines. A blank record has zero fields; a quoted empty field has one. Options are csv-space's. Malformed records raise with their logical number; empty input produces an empty list.
+
+1. Text
+2. Options
+
+Returns: Rows
+
+### `csv-read!`
+
+*lib_csv.metta:35*
+
+```metta
+(: csv-read! (-> %Undefined% Expression))
+```
+
+```metta
+(: csv-read! (-> %Undefined% Expression Expression))
+```
+
+Stream one field list per answer from a UTF-8 file, preserving order and duplicates. Options are csv-space's. Width checking precedes answer filtering. Only consumed records are validated. Exhaustion, cut and cancellation close the traversal's independent stream.
+
+1. Path
+2. Options
+
+Returns: Fields
 
 ### `csv-snapshot!`
 
-*lib_csv.metta:26*
+*lib_csv.metta:42*
 
-Read a CSV file ONCE into an ordinary space of (row Number Field...) atoms; the record number is 1-based, the rows do not change under the program, and repeated queries pay one parse between them
+```metta
+(: csv-snapshot! (-> %Undefined% Expression SpaceType))
+```
 
-1. a readable UTF-8 CSV file path
+```metta
+(: csv-snapshot! (-> %Undefined% SpaceType))
+```
+
+Read once into a fresh mutable space of (row Number Field...) atoms. Number is the file's one-based logical record number, including skipped headers. Preserve duplicates and Strings. Options are csv-space's. Failed reads, writes, cancellation and output matching release the new space.
+
+1. Path
+2. Options
 
 Returns: Space
+
+### `csv-space`
+
+*lib_csv.metta:49*
+
+```metta
+(: csv-space (-> %Undefined% Expression SpaceType))
+```
+
+```metta
+(: csv-space (-> %Undefined% SpaceType))
+```
+
+Return a live read-only space of (row Field...) atoms. Each query reopens the UTF-8 file and preserves order and duplicate rows. Fields are Strings. Options are unique (separator String), (quote String), (newline String), (width infer|any|Number), and (skip Number) expressions. Defaults are comma, double quote, CRLF, inferred width and zero skipped records. An empty quote disables quoting. Skipped records still establish and validate width. Quote literal option data, for example (quote ((quote ""))). The parameter evaluates, so a function may also compute and return the complete options.
+
+1. Path
+2. Options
+
+Returns: Space
+
+### `csv-write!`
+
+*lib_csv.metta:56*
+
+```metta
+(: csv-write! (-> %Undefined% Expression Bool))
+```
+
+```metta
+(: csv-write! (-> %Undefined% Expression Expression Bool))
+```
+
+Atomically replace a UTF-8 CSV file with field lists and return True. Options are csv-space's; skip does not discard output. Validate Strings and widths, close staging, then publish. Failures before publication preserve the destination. A staging-cleanup error reports whether publication occurred. Writers coordinate through a persistent sibling .metta-csv.lock file.
+
+1. Path
+2. Rows
+3. Options
+
+Returns: Written
+
+## lib_database
+
+### `database-add!`
+
+*lib_database.metta:11*
+
+```metta
+(: database-add! (-> %Undefined% Atom Bool))
+```
+
+Append one held value, retaining duplicate occurrences. Values may contain native Symbols, Strings, Numbers, plain Variables and proper expressions. Each occurrence owns fresh variables, preserving sharing within that value. Equations remain passive syntax until a caller explicitly evaluates them. Attributed variables, cycles and foreign resource/Python objects raise before writing. Bind computed values before this held argument. A write error closes the store; its journal may need repair before reopening.
+
+1. Handle
+2. Value
+
+Returns: Done
+
+### `database-atoms`
+
+*lib_database.metta:17*
+
+```metta
+(: database-atoms (-> %Undefined% Expression))
+```
+
+Return an expression containing every stored value in insertion order, including duplicates. Each value has fresh variables on each snapshot, with sharing preserved within that value. Binding a snapshot never changes the store. Nothing is evaluated. Compose selection and joins with let segment patterns, and explicit rule reconstruction with eval or add-atom. Snapshot memory is proportional to the complete stored syntax.
+
+1. Handle
+
+Returns: Rows
+
+### `database-close!`
+
+*lib_database.metta:23*
+
+```metta
+(: database-close! (-> %Undefined% Bool))
+```
+
+Finish journal, schema and lock cleanup before answering. Requests already waiting on the native engine serialize with close; later requests raise. Close is idempotent for completed handles. A close error is propagated after cleanup, retaining any earlier operation error in database_cleanup/2.
+
+1. Handle
+
+Returns: Done
+
+### `database-open!`
+
+*lib_database.metta:29*
+
+```metta
+(: database-open! (-> %Undefined% Symbol %Undefined%))
+```
+
+Open or create a store directory and return an opaque native handle. The directory contains journal.pl and a permanent lock file. A second owner, including one reached through a directory alias, raises immediately. Keep the directory and its contents unchanged through other tools while open. Sync is none, flush or close from journal-sync: buffer writes, flush each write, or close its journal stream after each write. Flushing does not fsync. Close explicitly or use with-database to surface close errors. Atom garbage collection releases abandoned engines asynchronously. Malformed journals raise before native replay; repair from a verified copy before reopening.
+
+1. Directory
+2. Sync
+
+Returns: Handle
+
+### `database-remove!`
+
+*lib_database.metta:35*
+
+```metta
+(: database-remove! (-> %Undefined% Atom Bool))
+```
+
+Remove one alpha-identical held occurrence, returning False if absent. Variable names may differ, but their sharing must agree. Variables are data, not deletion wildcards. Duplicates need one removal each; integer 1 and float 1.0 remain distinct. A native write failure closes the store and propagates.
+
+1. Handle
+2. Value
+
+Returns: Removed
+
+### `database-sync!`
+
+*lib_database.metta:41*
+
+```metta
+(: database-sync! (-> %Undefined% Bool))
+```
+
+Flush and close the journal stream while retaining the store's lifetime lock. Subsequent writes reopen that stream under the selected sync policy. An I/O failure ends the attachment. This is a flush boundary, not fsync or a transaction commit; process or machine failure can still lose data.
+
+1. Handle
+
+Returns: Done
+
+### `with-database`
+
+*lib_database.metta:47*
+
+```metta
+(: with-database (-> %Undefined% Symbol Atom %Undefined%))
+```
+
+Own opening directly, apply held Function to the native handle in the calling module, and yield its answers. Close on exhaustion, cut, failure or exception. Writes made before callback failure remain persistent. A callback may close early; closing an already completed store succeeds. Returned handles are closed when this scope ends.
+
+1. Directory
+2. Sync
+3. Function
+
+Returns: Answer
 
 ## lib_datastructures
 
 ### `ft-empty`
 
-*lib_datastructures.metta:45*
+*lib_datastructures.metta:57*
 
 The empty finger tree; every other tree grows from it with ft-push-front and ft-push-back.
 
@@ -82,7 +894,7 @@ Returns: FTEmpty
 
 ### `ft-is-empty`
 
-*lib_datastructures.metta:50*
+*lib_datastructures.metta:62*
 
 Whether a finger tree holds nothing.
 
@@ -92,7 +904,7 @@ Returns: True or False
 
 ### `ft-pop-front`
 
-*lib_datastructures.metta:79*
+*lib_datastructures.metta:91*
 
 The front element and the remaining tree, as the pair ($x $rest). Popping the empty tree has no answer.
 
@@ -102,7 +914,7 @@ Returns: ($front $rest)
 
 ### `ft-pop-back`
 
-*lib_datastructures.metta:100*
+*lib_datastructures.metta:112*
 
 The back element and the remaining tree, as the pair ($x $rest): ft-pop-front's mirror.
 
@@ -112,7 +924,7 @@ Returns: ($back $rest)
 
 ### `ft-front`
 
-*lib_datastructures.metta:119*
+*lib_datastructures.metta:131*
 
 The front element, the tree untouched.
 
@@ -122,7 +934,7 @@ Returns: the first element
 
 ### `ft-back`
 
-*lib_datastructures.metta:126*
+*lib_datastructures.metta:138*
 
 The back element, the tree untouched.
 
@@ -132,7 +944,7 @@ Returns: the last element
 
 ### `ft-from-list`
 
-*lib_datastructures.metta:136*
+*lib_datastructures.metta:148*
 
 A finger tree holding the expression's elements in order.
 
@@ -142,7 +954,7 @@ Returns: a finger tree
 
 ### `ft-to-list`
 
-*lib_datastructures.metta:146*
+*lib_datastructures.metta:158*
 
 The elements front to back, as an expression: ft-from-list's inverse.
 
@@ -152,7 +964,7 @@ Returns: an expression
 
 ### `ft-concat`
 
-*lib_datastructures.metta:197*
+*lib_datastructures.metta:209*
 
 Both trees' elements, left then right, in O(log n): the operation finger trees exist to make cheap.
 
@@ -161,7 +973,560 @@ Both trees' elements, left then right, in O(log n): the operation finger trees e
 
 Returns: one finger tree
 
+### `map-empty`
+
+*lib_datastructures.metta:220*
+
+```metta
+(: map-empty (-> Expression))
+```
+
+The empty sorted map. Every other map grows from it with map-put, and two empty maps are the same value.
+
+Returns: Map
+
+### `map-from-pairs`
+
+*lib_datastructures.metta:230*
+
+```metta
+(: map-from-pairs (-> Expression Expression))
+```
+
+A map holding every (Key Value) pair. A repeated key raises, because two values for one key is not a map; put the second one with map-put to say which wins.
+
+1. Pairs
+
+Returns: Map
+
+### `map-get`
+
+*lib_datastructures.metta:238*
+
+```metta
+(: map-get (-> %Undefined% %Undefined% %Undefined%))
+```
+
+The value Key holds. An absent key has no answer, so absence and a stored value are different things; map-get-or takes a default instead.
+
+1. Map
+2. Key
+
+Returns: Value
+
+### `map-get-or`
+
+*lib_datastructures.metta:248*
+
+```metta
+(: map-get-or (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+The value Key holds, or Default when the key is absent.
+
+1. Map
+2. Key
+3. Default
+
+Returns: Value
+
+### `map-has`
+
+*lib_datastructures.metta:256*
+
+```metta
+(: map-has (-> %Undefined% %Undefined% Bool))
+```
+
+True when the map holds Key, False otherwise.
+
+1. Map
+2. Key
+
+Returns: Answer
+
+### `map-keys`
+
+*lib_datastructures.metta:263*
+
+```metta
+(: map-keys (-> %Undefined% Expression))
+```
+
+Every key, in the standard order of terms.
+
+1. Map
+
+Returns: Keys
+
+### `map-max`
+
+*lib_datastructures.metta:272*
+
+```metta
+(: map-max (-> %Undefined% Expression))
+```
+
+The (Key Value) pair with the largest key. An empty map has no answer.
+
+1. Map
+
+Returns: Pair
+
+### `map-min`
+
+*lib_datastructures.metta:281*
+
+```metta
+(: map-min (-> %Undefined% Expression))
+```
+
+The (Key Value) pair with the smallest key. An empty map has no answer.
+
+1. Map
+
+Returns: Pair
+
+### `map-pairs`
+
+*lib_datastructures.metta:288*
+
+```metta
+(: map-pairs (-> %Undefined% Expression))
+```
+
+Every (Key Value) pair, in key order. This is the shape map-from-pairs reads, so a map round-trips through it.
+
+1. Map
+
+Returns: Pairs
+
+### `map-put`
+
+*lib_datastructures.metta:298*
+
+```metta
+(: map-put (-> %Undefined% %Undefined% %Undefined% Expression))
+```
+
+The map with Key holding Value, replacing whatever Key held. The input map is unchanged, because a map is a value.
+
+1. Map
+2. Key
+3. Value
+
+Returns: Result
+
+### `map-remove`
+
+*lib_datastructures.metta:308*
+
+```metta
+(: map-remove (-> %Undefined% %Undefined% Expression))
+```
+
+The map without Key. Removing a key that is absent answers the same map, so a caller need not look first.
+
+1. Map
+2. Key
+
+Returns: Result
+
+### `map-size`
+
+*lib_datastructures.metta:315*
+
+```metta
+(: map-size (-> %Undefined% Number))
+```
+
+How many keys the map holds.
+
+1. Map
+
+Returns: Size
+
+### `map-values`
+
+*lib_datastructures.metta:322*
+
+```metta
+(: map-values (-> %Undefined% Expression))
+```
+
+Every value, in its key's order.
+
+1. Map
+
+Returns: Values
+
+### `pq-empty`
+
+*lib_datastructures.metta:329*
+
+```metta
+(: pq-empty (-> Expression))
+```
+
+The empty priority queue. Every other queue grows from it with pq-insert.
+
+Returns: Queue
+
+### `pq-from-pairs`
+
+*lib_datastructures.metta:340*
+
+```metta
+(: pq-from-pairs (-> Expression Expression))
+```
+
+A queue holding every (Priority Value) pair, repeated priorities included. Stable sorting preserves input order among equal priorities.
+
+1. Pairs
+
+Returns: Queue
+
+### `pq-insert`
+
+*lib_datastructures.metta:349*
+
+```metta
+(: pq-insert (-> %Undefined% %Undefined% %Undefined% Expression))
+```
+
+The queue with Value added at Priority, after existing entries of that priority. Every occurrence is kept; the input queue is unchanged.
+
+1. Queue
+2. Priority
+3. Value
+
+Returns: Result
+
+### `pq-merge`
+
+*lib_datastructures.metta:360*
+
+```metta
+(: pq-merge (-> (:seg %Undefined%) Expression))
+```
+
+One queue holding every entry of zero or more queues. Zero returns the empty queue; one returns an equal value. Equal priorities retain left-to-right input order. Pass a runtime collection through apply-to.
+
+1. Queues
+
+Returns: Result
+
+### `pq-min`
+
+*lib_datastructures.metta:369*
+
+```metta
+(: pq-min (-> %Undefined% Expression))
+```
+
+The (Priority Value) pair at the smallest priority, without removing it. An empty queue has no answer.
+
+1. Queue
+
+Returns: Pair
+
+### `pq-pairs`
+
+*lib_datastructures.metta:376*
+
+```metta
+(: pq-pairs (-> %Undefined% Expression))
+```
+
+Every (Priority Value) pair in priority order, which is the sorted sequence the queue exists to produce. This is the shape pq-from-pairs reads.
+
+1. Queue
+
+Returns: Pairs
+
+### `pq-pop`
+
+*lib_datastructures.metta:386*
+
+```metta
+(: pq-pop (-> %Undefined% Expression))
+```
+
+The (Priority Value Rest) triple: the first entry at the smallest priority and the queue without that occurrence. An empty queue has no answer.
+
+1. Queue
+
+Returns: Answer
+
+### `pq-remove`
+
+*lib_datastructures.metta:398*
+
+```metta
+(: pq-remove (-> %Undefined% %Undefined% %Undefined% Expression))
+```
+
+The queue without the first entry holding this identical priority and value. Remove one occurrence without binding variables. An absent entry has no answer.
+
+1. Queue
+2. Priority
+3. Value
+
+Returns: Result
+
+### `pq-size`
+
+*lib_datastructures.metta:405*
+
+```metta
+(: pq-size (-> %Undefined% Number))
+```
+
+How many entries the queue holds, counting repeated priorities separately.
+
+1. Queue
+
+Returns: Size
+
 Undocumented: `FTDeep`, `FTEmpty`, `FTSingle`, `FTree`, `add-unique-or-fail`, `dequeue`, `empty-queue`, `enqueue`, `ft-app3`, `ft-borrow-l`, `ft-borrow-r`, `ft-node-digit`, `ft-nodes`, `ft-push-back`, `ft-push-front`, `ft-push-list-back`, `ft-push-list-front`
+
+## lib_datetime
+
+### `date-add`
+
+*lib_datetime.metta:10*
+
+```metta
+(: date-add (-> Number Expression %Undefined% Number))
+```
+
+Add (Years Months Days Hours Minutes Seconds) in Zone's calendar, then normalize overflow. January 31 plus one month can enter March. Local time recomputes daylight saving using the host's mktime policy; fixed offsets stay fixed. The first five deltas are integers; seconds may be fractional.
+
+1. Timestamp
+2. Delta
+3. Zone
+
+Returns: Shifted
+
+### `date-field`
+
+*lib_datetime.metta:16*
+
+```metta
+(: date-field (-> Expression Symbol %Undefined%))
+```
+
+Read year, month, day, hour, minute, second, utc_offset, time_zone, daylight_saving, date or time. Missing or unknown fields have no answer; date and time fields are visible expressions.
+
+1. Parts
+2. Field
+
+Returns: Value
+
+### `date-fields`
+
+*lib_datetime.metta:22*
+
+```metta
+(: date-fields (-> Expression Expression))
+```
+
+Enumerate (Field Value) pairs from a date record, omitting unknown zone/DST.
+
+1. Parts
+
+Returns: Pair
+
+### `date-timestamp`
+
+*lib_datetime.metta:28*
+
+```metta
+(: date-timestamp (-> Expression Number))
+```
+
+Convert (date Y M D) at UTC midnight or a full timestamp-date record to Unix seconds. Overflowing calendar fields normalize, as in SWI date_time_stamp.
+
+1. Parts
+
+Returns: Timestamp
+
+### `date-weekday`
+
+*lib_datetime.metta:34*
+
+```metta
+(: date-weekday (-> Expression Number))
+```
+
+Return the weekday of a normalized calendar date: Monday 1 through Sunday 7.
+
+1. Parts
+
+Returns: Day
+
+### `date-year-day`
+
+*lib_datetime.metta:40*
+
+```metta
+(: date-year-day (-> Expression Number))
+```
+
+Return the one-based day of the normalized year, including leap days.
+
+1. Parts
+
+Returns: Day
+
+### `day-of-week`
+
+*lib_datetime.metta:46*
+
+```metta
+(: day-of-week (-> Number Symbol))
+```
+
+Return the UTC weekday name, with the same contract as day_of_week.
+
+1. Timestamp
+
+Returns: Day
+
+### `day_of_week`
+
+*lib_datetime.metta:52*
+
+```metta
+(: day_of_week (-> Number Symbol))
+```
+
+Return the UTC weekday name in the process locale as a Symbol.
+
+1. Timestamp
+
+Returns: Day
+
+### `format-date`
+
+*lib_datetime.metta:58*
+
+```metta
+(: format-date (-> Number %Undefined% Symbol))
+```
+
+Format Timestamp in UTC as a Symbol, with the same contract as format_date.
+
+1. Timestamp
+2. Pattern
+
+Returns: Formatted
+
+### `format-datetime`
+
+*lib_datetime.metta:64*
+
+```metta
+(: format-datetime (-> Number %Undefined% %Undefined% String))
+```
+
+Format Timestamp as String in UTC, local, or integer seconds west of UTC. Zone may be a Symbol or String; unsupported zones raise a native domain error.
+
+1. Timestamp
+2. Pattern
+3. Zone
+
+Returns: Text
+
+### `format_date`
+
+*lib_datetime.metta:70*
+
+```metta
+(: format_date (-> Number %Undefined% Symbol))
+```
+
+Format Timestamp in UTC using SWI strftime directives; return a Symbol.
+
+1. Timestamp
+2. Pattern
+
+Returns: Formatted
+
+### `leap-year`
+
+*lib_datetime.metta:76*
+
+```metta
+(: leap-year (-> Number Bool))
+```
+
+Test the proleptic Gregorian leap-year rule, including negative years.
+
+1. Year
+
+Returns: Leap
+
+### `month-days`
+
+*lib_datetime.metta:82*
+
+```metta
+(: month-days (-> Number Number Number))
+```
+
+Count days in Month 1 through 12 of the proleptic Gregorian Year.
+
+1. Year
+2. Month
+
+Returns: Days
+
+### `now`
+
+*lib_datetime.metta:88*
+
+```metta
+(: now (-> Number))
+```
+
+Read Unix seconds from the system wall clock. Clock adjustments can move it backwards.
+
+Returns: Timestamp
+
+### `parse-date`
+
+*lib_datetime.metta:95*
+
+```metta
+(: parse-date (-> %Undefined% Number))
+```
+
+```metta
+(: parse-date (-> %Undefined% Symbol Number))
+```
+
+Parse ISO 8601, RFC 1123, RFC 1036 or asctime text, optionally selecting iso_8601, rfc_1123, rfc_1036 or asctime. Invalid text or format raises. ISO dates alone use UTC; a time without a zone uses the process local zone.
+
+1. Text
+2. Format
+
+Returns: Timestamp
+
+### `timestamp-date`
+
+*lib_datetime.metta:101*
+
+```metta
+(: timestamp-date (-> Number %Undefined% Expression))
+```
+
+Convert Unix seconds to (date Y M D H Min S Offset Zone DST). The input zone is UTC, local or integer seconds west of UTC. Unknown Zone and DST fields are the Symbol -. Fractional seconds survive at the host clock precision.
+
+1. Timestamp
+2. Zone
+
+Returns: Parts
 
 ## lib_derived
 
@@ -179,181 +1544,1574 @@ The first answer of an expression, and no more. Derived here as (take 1 ...); th
 
 Returns: Its first answer
 
+## lib_dict
+
+### `dict-get`
+
+*lib_dict.metta:116*
+
+```metta
+(: dict-get (-> SpaceType %Undefined% %Undefined% %Undefined%))
+```
+
+The key's value, or the supplied default when the key is absent. dict-values answers nothing for an absent key; this answers something a caller can use.
+
+1. the dict
+2. the key
+3. the value to answer when the key is absent
+
+Returns: the value or the default
+
+### `dict-update`
+
+*lib_dict.metta:120*
+
+```metta
+(: dict-update (-> SpaceType %Undefined% %Undefined% SpaceType))
+```
+
+Apply a function to the key's current value and put the result back, answering the dict. An absent key leaves the dict unchanged.
+
+1. the dict
+2. the key
+3. the function to apply to the value
+
+Returns: the dict
+
+### `dict-merge`
+
+*lib_dict.metta:124*
+
+```metta
+(: dict-merge (-> SpaceType SpaceType SpaceType))
+```
+
+Put every pair of the second dict into the first, so the second's value wins on a shared key. Answers the dict written into.
+
+1. the dict to write into
+2. the dict to read
+
+Returns: the dict written into
+
+### `dict-pop`
+
+*lib_dict.metta:128*
+
+```metta
+(: dict-pop (-> SpaceType %Undefined% %Undefined%))
+```
+
+The key's value, removed from the dict. An absent key has no answer, which is how it differs from a stored value.
+
+1. the dict
+2. the key
+
+Returns: the removed value
+
+Undocumented: `dict-has`, `dict-pairs`, `dict-put`, `dict-remove`, `dict-remove-pair`, `dict-size`, `dict-values`
+
+## lib_encoding
+
+### `base64-decode`
+
+*lib_encoding.metta:15*
+
+```metta
+(: base64-decode (-> Symbol String Expression))
+```
+
+The bytes that base64 spells under the named host decoder policy. Rejected text raises a named domain error. The host URL decoder also accepts classic digits; this operation does not impose an additional canonical-spelling check.
+
+1. Alphabet
+2. Text
+
+Returns: Bytes
+
+### `base64-encode`
+
+*lib_encoding.metta:21*
+
+```metta
+(: base64-encode (-> Symbol Expression String))
+```
+
+The bytes as base64 in one of the two RFC 4648 alphabets: `standard`, padded with `=` as mail and JSON carry it, or `url`, which uses `-` and `_` and no padding, as a URL and a file name carry it. An alphabet the library does not know is refused with both named.
+
+1. Alphabet
+2. Bytes
+
+Returns: Text
+
+### `utf8-decode`
+
+*lib_encoding.metta:27*
+
+```metta
+(: utf8-decode (-> Expression String))
+```
+
+The text those UTF-8 bytes spell. A byte sequence that is not UTF-8 is refused, because the alternative is a string holding whatever the bytes happened to mean.
+
+1. Bytes
+
+Returns: Text
+
+### `utf8-encode`
+
+*lib_encoding.metta:33*
+
+```metta
+(: utf8-encode (-> String Expression))
+```
+
+The UTF-8 bytes of the text, as an expression of Numbers from 0 to 255. This is the length a wire format and a file both count in: an accented letter is two bytes, an emoji four, where string-length counts one character each.
+
+1. Text
+
+Returns: Bytes
+
+### `hex-encode`
+
+*lib_encoding.metta:44*
+
+```metta
+(: hex-encode (-> Expression String))
+```
+
+The bytes as hexadecimal, two lower-case digits each and nothing between them, which is how a hash, a key and a wire dump are all written.
+
+1. Bytes
+
+Returns: Text
+
+### `hex-decode`
+
+*lib_encoding.metta:52*
+
+```metta
+(: hex-decode (-> String Expression))
+```
+
+The bytes that hexadecimal spells, in either case. An odd number of digits or a character outside 0-9a-fA-F is refused naming it, because a truncated or mistyped dump is not bytes.
+
+1. Text
+
+Returns: Bytes
+
 ## lib_file
 
-### `make-dir!`
+### `append-bytes!`
 
-*lib_file.metta:64*
+*lib_file.metta:21*
 
-Create a directory and missing parents; an existing directory succeeds
+```metta
+(: append-bytes! (-> %Undefined% Expression Bool))
+```
 
-1. directory path
+Append an expression of integers 0 to 255 to the file at Path, creating it when absent. The bytes are validated before the file is touched.
 
-Returns: Bool
+1. Path
+2. Bytes
 
-### `delete-dir!`
+Returns: Done
 
-*lib_file.metta:65*
+### `append-file!`
 
-Remove an empty directory; missing or nonempty directories raise
+*lib_file.metta:27*
 
-1. directory path
+```metta
+(: append-file! (-> %Undefined% %Undefined% Bool))
+```
 
-Returns: Bool
+Append UTF-8 text to the file at Path, creating it when absent.
+
+1. Path
+2. Content
+
+Returns: Done
+
+### `copy-dir!`
+
+*lib_file.metta:33*
+
+```metta
+(: copy-dir! (-> %Undefined% %Undefined% Bool))
+```
+
+Copy a directory tree to a new path: the contents of Source become the contents of Destination, which must not exist; missing parents of Destination are created. Regular files are copied byte for byte, symbolic links are recreated with the text they hold, and a FIFO, socket or device raises. The tree is built in a staging directory beside Destination and published with one rename, so a reader sees no tree or the whole tree, and a failure leaves nothing behind. A destination inside the source raises before anything is written. Ownership, modes and times are not copied.
+
+1. Source
+2. Destination
+
+Returns: Done
 
 ### `copy-file!`
 
-*lib_file.metta:66*
+*lib_file.metta:39*
 
-Copy bytes to a destination filename with staged replacement; copying onto the source raises
+```metta
+(: copy-file! (-> %Undefined% %Undefined% Bool))
+```
 
-1. source file
-2. destination filename
+Copy bytes to a destination filename with staged replacement: the copy is written beside the destination, both streams close, and one rename publishes it, so an existing destination is replaced only after the complete copy succeeds. A directory destination and copying a file onto itself are errors.
 
-Returns: Bool
+1. Source
+2. Destination
 
-### `file-metadata!`
+Returns: Done
 
-*lib_file.metta:67*
+### `delete-dir!`
 
-Snapshot kind, modified Unix time and file size as queryable atoms in a new space
+*lib_file.metta:45*
 
-1. file or directory path
+```metta
+(: delete-dir! (-> %Undefined% Bool))
+```
 
-Returns: Space
+Remove an empty directory; missing or nonempty directories raise. delete-tree! removes a directory with its contents.
 
-### `path-join`
+1. Path
 
-*lib_file.metta:68*
+Returns: Done
 
-Join lexical paths; an absolute second path replaces the first
+### `delete-file!`
 
-1. directory
-2. name
+*lib_file.metta:51*
 
-Returns: String
+```metta
+(: delete-file! (-> %Undefined% Bool))
+```
 
-### `path-parent`
+Remove a regular file; an absent file is already removed and answers True.
 
-*lib_file.metta:69*
+1. Path
 
-Lexical parent directory; a bare filename has parent dot
+Returns: Done
 
-1. path
+### `delete-tree!`
 
-Returns: String
+*lib_file.metta:57*
 
-### `path-name`
+```metta
+(: delete-tree! (-> %Undefined% Bool))
+```
 
-*lib_file.metta:70*
+Remove whatever is at Path: a directory with everything under it, a file, or a symbolic link, which is unlinked without touching its target. A missing path raises.
 
-Lexical final path component
+1. Path
 
-1. path
-
-Returns: String
-
-### `path-extension`
-
-*lib_file.metta:71*
-
-Text after the final dot in the filename, without the dot; empty when absent
-
-1. path
-
-Returns: String
-
-### `temp-dir!`
-
-*lib_file.metta:72*
-
-A unique fresh directory in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns it and removes it with delete-dir!
-
-1. a name prefix, which may not contain a path separator
-
-Returns: String
-
-### `stdin`
-
-*lib_file.metta:73*
-
-The handle for standard input, which is 0; every handle operation takes it, so (file-read-to-string! (stdin)) reads standard input through EOF
-
-Returns: Number
-
-### `stdout`
-
-*lib_file.metta:74*
-
-The handle for standard output, which is 1; (file-write! (stdout) $text) writes without a newline
-
-Returns: Number
-
-### `stderr`
-
-*lib_file.metta:75*
-
-The handle for standard error, which is 2; (file-write! (stderr) $text) is stderr! reached through the handle surface
-
-Returns: Number
-
-### `stderr!`
-
-*lib_file.metta:76*
-
-Write text to stderr and flush, without adding a newline
-
-1. text
-
-Returns: Bool
-
-### `stdin-to-string!`
-
-*lib_file.metta:77*
-
-Consume standard input through EOF as UTF-8 text
-
-Returns: String
-
-### `exit!`
-
-*lib_file.metta:78*
-
-Terminate the entire process with integer status 0 through 255; not an application-level return
-
-1. process status
-
-### `temp-path!`
-
-*lib_file.metta:82*
-
-A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file
-
-1. a name prefix for the path
-
-Returns: String
-
-### `file-exists`
-
-*lib_file.metta:86*
-
-True when a regular file exists at the path, False otherwise
-
-1. the path
-
-Returns: Bool
+Returns: Done
 
 ### `dir-exists`
 
-*lib_file.metta:90*
+*lib_file.metta:63*
 
-True when a directory exists at the path, False otherwise
+```metta
+(: dir-exists (-> %Undefined% Bool))
+```
 
-1. the path
+True when a directory exists at the path, following links, False otherwise.
 
-Returns: Bool
+1. Path
 
-Undocumented: `append-file!`, `delete-file!`, `file-close!`, `file-get-size!`, `file-lines!`, `file-open!`, `file-read-exact!`, `file-read-to-string!`, `file-seek!`, `file-space!`, `file-write!`, `list-dir!`, `read-file!`, `write-file!`
+Returns: Answer
+
+### `dir-glob`
+
+*lib_file.metta:70*
+
+```metta
+(: dir-glob (-> %Undefined% %Undefined% Expression String))
+```
+
+```metta
+(: dir-glob (-> %Undefined% %Undefined% String))
+```
+
+Answer every path under Directory matching a relative pattern of slash-separated components, in depth-first codepoint order. A component uses the host's wildcard grammar: * and ? match within a name, [abc] and [a-c] match one character, {alt,alt} alternates, and \ escapes the next character. The component ** matches zero or more directory levels, so "**/*.txt" finds every text file below Directory. A wildcard skips names beginning with a dot unless Options holds (hidden True) or the component itself begins with a dot; ** enters symbolic links only under (follow-links True) and never re-enters a directory on its chain. A literal component is looked up without listing, so a pattern without wildcards answers the path exactly when it exists. An absolute or empty pattern and a malformed component raise. Each path is answered once.
+
+1. Directory
+2. Pattern
+3. Options
+
+Returns: Path
+
+### `dir-walk`
+
+*lib_file.metta:77*
+
+```metta
+(: dir-walk (-> %Undefined% Expression String))
+```
+
+```metta
+(: dir-walk (-> %Undefined% String))
+```
+
+Answer every descendant of a directory, one full path per answer, depth first with each directory's names in codepoint order. A symbolic link is reported and not entered unless Options holds (follow-links True); a link whose target is a directory already on the current chain is then reported and still not entered, so a cycle cannot loop. Hidden names are included. An unreadable directory raises.
+
+1. Path
+2. Options
+
+Returns: Entry
+
+### `exit!`
+
+*lib_file.metta:83*
+
+```metta
+(: exit! (-> Number %Undefined%))
+```
+
+Terminate the entire process with integer status 0 through 255, including an embedding host; not an application-level return, so MeTTa catch does not turn it into a local value.
+
+1. Status
+
+Returns: Never
+
+### `file-close!`
+
+*lib_file.metta:89*
+
+```metta
+(: file-close! (-> Number Bool))
+```
+
+Close a handle file-open! gave. Closing twice is silent, because a cleanup path should not have to check first; a failed close raises by name, because a write that never reached the disk is data lost. The three standard streams are refused: the process owns them and a closed one cannot be put back. Not in HE's stdlib. A process that can open files and never close them leaks descriptors until it dies, so this exists.
+
+1. Handle
+
+Returns: Done
+
+### `file-exists`
+
+*lib_file.metta:95*
+
+```metta
+(: file-exists (-> %Undefined% Bool))
+```
+
+True when a regular file exists at the path, following links, False otherwise. No ! because it changes nothing.
+
+1. Path
+
+Returns: Answer
+
+### `file-get-size!`
+
+*lib_file.metta:101*
+
+```metta
+(: file-get-size! (-> Number Number))
+```
+
+Answer the size of the whole file in bytes, not of what is left to read, so seeking does not change the answer; a handle without a file name measures the stream position instead.
+
+1. Handle
+
+Returns: Size
+
+### `file-kind`
+
+*lib_file.metta:107*
+
+```metta
+(: file-kind (-> %Undefined% Symbol))
+```
+
+Classify the entry at Path without following it: link for a symbolic link, dangling or not; directory; file; other for an entry that exists and is none of those, such as a FIFO, socket or device; missing when nothing is observable at the path.
+
+1. Path
+
+Returns: Kind
+
+### `file-lines!`
+
+*lib_file.metta:113*
+
+```metta
+(: file-lines! (-> %Undefined% Expression))
+```
+
+The lines of a UTF-8 file as an expression of Strings, split on LF with one terminal empty line omitted; CR and NUL stay data. file-space! is the form that makes the lines matchable.
+
+1. Path
+
+Returns: Lines
+
+### `file-metadata!`
+
+*lib_file.metta:119*
+
+```metta
+(: file-metadata! (-> %Undefined% %Undefined%))
+```
+
+Snapshot kind, modified Unix time and file size as queryable atoms in a new space: (kind file|directory), (modified Seconds) and, for a file, (size Bytes). Links are followed; file-kind classifies the entry itself.
+
+1. Path
+
+Returns: Space
+
+### `file-open!`
+
+*lib_file.metta:125*
+
+```metta
+(: file-open! (-> %Undefined% %Undefined% Number))
+```
+
+Open a file and answer a handle. The option letters are HE's: r read, w write, c create if absent, a append, t truncate; c demands w or a, so "rc" is refused loudly rather than quietly opening for reading. The letter b opens the file for bytes, so file-read-bytes! and file-write-bytes! apply and the text operations refuse; without it the handle carries UTF-8 text.
+
+1. Path
+2. Options
+
+Returns: Handle
+
+### `file-read-bytes!`
+
+*lib_file.metta:132*
+
+```metta
+(: file-read-bytes! (-> Number Expression))
+```
+
+```metta
+(: file-read-bytes! (-> Number Number Expression))
+```
+
+Read the remaining bytes, or at most Count bytes, from a binary handle's cursor as an expression of integers 0 to 255. A short read at the end of the file is the answer. A text handle refuses.
+
+1. Handle
+2. Count
+
+Returns: Bytes
+
+### `file-read-exact!`
+
+*lib_file.metta:138*
+
+```metta
+(: file-read-exact! (-> Number Number String))
+```
+
+Read at most Count characters from a text handle's cursor, HE's contract: a short read near the end of the file is the answer, not an error.
+
+1. Handle
+2. Count
+
+Returns: Content
+
+### `file-read-to-string!`
+
+*lib_file.metta:144*
+
+```metta
+(: file-read-to-string! (-> Number String))
+```
+
+Read from the cursor to the end of a text handle as one String.
+
+1. Handle
+
+Returns: Content
+
+### `file-seek!`
+
+*lib_file.metta:150*
+
+```metta
+(: file-seek! (-> Number Number Bool))
+```
+
+Move the cursor to a byte offset from the start of the file, so the next read starts there; a negative position moves to the start.
+
+1. Handle
+2. Position
+
+Returns: Done
+
+### `file-space!`
+
+*lib_file.metta:156*
+
+```metta
+(: file-space! (-> %Undefined% %Undefined%))
+```
+
+A file as a SPACE, the mettafied reading of reading a file: its lines become (line Number Text) atoms in a fresh space, so the file is queryable with match instead of being one long string to take apart. The line number is kept because a space is unordered, and losing which line came first would make the space strictly less useful than the string it replaced. (let $log (file-space! "app.log") (match $log (line $n $text) ($n $text)))
+
+1. Path
+
+Returns: Space
+
+### `file-write!`
+
+*lib_file.metta:162*
+
+```metta
+(: file-write! (-> Number %Undefined% Bool))
+```
+
+Write text to a text handle and flush, adding no newline.
+
+1. Handle
+2. Content
+
+Returns: Done
+
+### `file-write-bytes!`
+
+*lib_file.metta:168*
+
+```metta
+(: file-write-bytes! (-> Number Expression Bool))
+```
+
+Write an expression of integers 0 to 255 to a binary handle and flush. The bytes are validated before anything is written. A text handle refuses.
+
+1. Handle
+2. Bytes
+
+Returns: Done
+
+### `list-dir!`
+
+*lib_file.metta:174*
+
+```metta
+(: list-dir! (-> %Undefined% Expression))
+```
+
+The names in a directory, without . and .., as Strings sorted by codepoint. A missing directory raises.
+
+1. Path
+
+Returns: Entries
+
+### `make-dir!`
+
+*lib_file.metta:180*
+
+```metta
+(: make-dir! (-> %Undefined% Bool))
+```
+
+Create a directory and missing parents; an existing directory succeeds.
+
+1. Path
+
+Returns: Done
+
+### `make-link!`
+
+*lib_file.metta:186*
+
+```metta
+(: make-link! (-> %Undefined% %Undefined% Bool))
+```
+
+Create a symbolic link at Path holding Target exactly as written; a relative target is read relative to the link's own directory. The target need not exist. An existing entry at Path raises.
+
+1. Target
+2. Path
+
+Returns: Done
+
+### `path-absolute`
+
+*lib_file.metta:192*
+
+```metta
+(: path-absolute (-> %Undefined% String))
+```
+
+Anchor a relative path to the process working directory and normalize it lexically, as CPython's posixpath.abspath does; no links are resolved.
+
+1. Path
+
+Returns: Absolute
+
+### `path-extension`
+
+*lib_file.metta:198*
+
+```metta
+(: path-extension (-> %Undefined% String))
+```
+
+Text after the final dot in the filename, without the dot; empty when absent. A name that is only an extension, such as .env, has extension env.
+
+1. Path
+
+Returns: Extension
+
+### `path-join`
+
+*lib_file.metta:204*
+
+```metta
+(: path-join (-> %Undefined% %Undefined% String))
+```
+
+Join lexical paths; an absolute second path replaces the first.
+
+1. Directory
+2. Name
+
+Returns: Path
+
+### `path-name`
+
+*lib_file.metta:210*
+
+```metta
+(: path-name (-> %Undefined% String))
+```
+
+Lexical final path component.
+
+1. Path
+
+Returns: Name
+
+### `path-normalize`
+
+*lib_file.metta:216*
+
+```metta
+(: path-normalize (-> %Undefined% String))
+```
+
+Collapse repeated separators and dot components and resolve .. lexically, as CPython's posixpath.normpath does: "a/./b/../c" is "a/c", ".." stays at the start of a relative path, "/.." is "/", exactly two leading slashes are kept, and "" is ".". No filesystem lookup occurs, so a .. across a symbolic link is resolved as if the link were a directory; path-resolve consults the filesystem.
+
+1. Path
+
+Returns: Normalized
+
+### `path-parent`
+
+*lib_file.metta:222*
+
+```metta
+(: path-parent (-> %Undefined% String))
+```
+
+Lexical parent directory; a bare filename has parent dot.
+
+1. Path
+
+Returns: Parent
+
+### `path-parts`
+
+*lib_file.metta:228*
+
+```metta
+(: path-parts (-> %Undefined% Expression))
+```
+
+The components of a path as an expression of Strings: "/" first for an absolute path, empty and dot components dropped, .. kept. "" answers ().
+
+1. Path
+
+Returns: Parts
+
+### `path-relative`
+
+*lib_file.metta:234*
+
+```metta
+(: path-relative (-> %Undefined% %Undefined% String))
+```
+
+The path from the directory Start to Path, lexically, as CPython's posixpath.relpath does: both are made absolute, the common prefix is dropped, and one .. is written per remaining component of Start; the same place is ".". An empty Path raises.
+
+1. Path
+2. Start
+
+Returns: Relative
+
+### `path-resolve`
+
+*lib_file.metta:240*
+
+```metta
+(: path-resolve (-> %Undefined% String))
+```
+
+The absolute path with every symbolic link on the way replaced by what it points to, as CPython's non-strict posixpath.realpath does: a relative path starts at the process working directory, a link's target is read before any later .. applies, a link loop or a missing component is kept as written, and the result is normalized.
+
+1. Path
+
+Returns: Resolved
+
+### `path-stem`
+
+*lib_file.metta:246*
+
+```metta
+(: path-stem (-> %Undefined% String))
+```
+
+The final path component without its extension, the complement of path-extension: "a/b.tar.gz" has stem "b.tar", and ".env" has stem "".
+
+1. Path
+
+Returns: Stem
+
+### `read-bytes!`
+
+*lib_file.metta:252*
+
+```metta
+(: read-bytes! (-> %Undefined% Expression))
+```
+
+Read a whole file as an expression of integers 0 to 255. A missing file is an error rather than a failure.
+
+1. Path
+
+Returns: Bytes
+
+### `read-file!`
+
+*lib_file.metta:258*
+
+```metta
+(: read-file! (-> %Undefined% String))
+```
+
+Read a whole UTF-8 file as one String without the open/close dance. A missing file is an error rather than a failure, so it can never be mistaken for an empty file. Not HE's, and named so it cannot be mistaken for HE's.
+
+1. Path
+
+Returns: Content
+
+### `read-link`
+
+*lib_file.metta:264*
+
+```metta
+(: read-link (-> %Undefined% String))
+```
+
+The text a symbolic link holds, exactly as it was written, relative or absolute; a path that is not a link raises with its kind.
+
+1. Path
+
+Returns: Target
+
+### `rename-file!`
+
+*lib_file.metta:270*
+
+```metta
+(: rename-file! (-> %Undefined% %Undefined% Bool))
+```
+
+Rename a file or directory within one filesystem, the host's own rename: a file replaces an existing file and a directory replaces an existing empty directory in one step, so a reader sees the old entry or the new one. A missing source, a same-file rename, a file onto a directory, a directory onto a file or a nonempty directory, and a destination on another filesystem raise; nothing is ever copied.
+
+1. Source
+2. Destination
+
+Returns: Done
+
+### `replace-file!`
+
+*lib_file.metta:276*
+
+```metta
+(: replace-file! (-> %Undefined% %Undefined% Bool))
+```
+
+Publish a new file at Path by rename: the content is written to a staging file beside the destination, closed, and renamed over Path in one step, so a reader sees the old file or the complete new one and never a partial write. A String, Symbol or Number is UTF-8 text; an expression of integers 0 to 255 is bytes. A failed write, close or rename keeps the old file.
+
+1. Path
+2. Content
+
+Returns: Done
+
+### `same-file`
+
+*lib_file.metta:282*
+
+```metta
+(: same-file (-> %Undefined% %Undefined% Bool))
+```
+
+True when both paths name one physical file or directory, through links, hard links and different spellings; False when they differ or either is missing.
+
+1. Left
+2. Right
+
+Returns: Answer
+
+### `stderr`
+
+*lib_file.metta:288*
+
+```metta
+(: stderr (-> Number))
+```
+
+The handle for standard error, which is 2; (file-write! (stderr) $text) is stderr! reached through the handle surface.
+
+Returns: Handle
+
+### `stderr!`
+
+*lib_file.metta:294*
+
+```metta
+(: stderr! (-> %Undefined% Bool))
+```
+
+Write text to stderr and flush, without adding a newline.
+
+1. Content
+
+Returns: Done
+
+### `stdin`
+
+*lib_file.metta:300*
+
+```metta
+(: stdin (-> Number))
+```
+
+The handle for standard input, which is 0; every handle operation takes it, so (file-read-to-string! (stdin)) reads standard input through EOF.
+
+Returns: Handle
+
+### `stdin-to-string!`
+
+*lib_file.metta:306*
+
+```metta
+(: stdin-to-string! (-> String))
+```
+
+Consume standard input through EOF as UTF-8 text.
+
+Returns: Content
+
+### `stdout`
+
+*lib_file.metta:312*
+
+```metta
+(: stdout (-> Number))
+```
+
+The handle for standard output, which is 1; (file-write! (stdout) $text) writes without a newline.
+
+Returns: Handle
+
+### `temp-dir!`
+
+*lib_file.metta:318*
+
+```metta
+(: temp-dir! (-> %Undefined% String))
+```
+
+A unique fresh directory in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns it and removes it with delete-dir! or delete-tree!. The prefix names the directory and may not contain a separator.
+
+1. Prefix
+
+Returns: Path
+
+### `temp-path!`
+
+*lib_file.metta:324*
+
+```metta
+(: temp-path! (-> %Undefined% String))
+```
+
+A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file from that point (write-file! truncates it, delete-file! ends it). The prefix names the file and may not contain a separator.
+
+1. Prefix
+
+Returns: Path
+
+### `with-file`
+
+*lib_file.metta:330*
+
+```metta
+(: with-file (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Open Path with file-open!'s option letters, apply Function to the handle and answer every result of that application; the handle closes when the answers are exhausted, when the caller stops after one, and when the body raises. Function is a lambda, a function name or a partial application, as par-map takes. A close failure raises unless the body already raised.
+
+1. Path
+2. Options
+3. Function
+
+Returns: Answer
+
+### `with-temp-dir`
+
+*lib_file.metta:336*
+
+```metta
+(: with-temp-dir (-> %Undefined% %Undefined% %Undefined%))
+```
+
+Mint a fresh directory with temp-dir!, apply Function to its path and answer every result; the directory and everything under it are removed when the answers are exhausted, when the caller stops after one, and when the body raises. A body that already removed or renamed the directory is fine.
+
+1. Prefix
+2. Function
+
+Returns: Answer
+
+### `write-bytes!`
+
+*lib_file.metta:342*
+
+```metta
+(: write-bytes! (-> %Undefined% Expression Bool))
+```
+
+Create or truncate the file at Path in place and write an expression of integers 0 to 255. The bytes are validated before the file is touched.
+
+1. Path
+2. Bytes
+
+Returns: Done
+
+### `write-file!`
+
+*lib_file.metta:348*
+
+```metta
+(: write-file! (-> %Undefined% %Undefined% Bool))
+```
+
+Create or truncate the file at Path in place and write UTF-8 text. An open handle or a hard link to the file keeps seeing it; replace-file! is the form that publishes a new file by rename instead.
+
+1. Path
+2. Content
+
+Returns: Done
+
+## lib_functional
+
+### `while`
+
+*lib_functional.metta:46*
+
+```metta
+(: while (-> Atom Atom %Undefined%))
+```
+
+Evaluate the held body while the held condition answers True, answering each body result. The condition is asked again after every body, so a condition that never changes never stops.
+
+1. the held condition
+2. the held body
+
+Returns: each body result
+
+### `repeat`
+
+*lib_functional.metta:50*
+
+```metta
+(: repeat (-> Number Atom %Undefined%))
+```
+
+Evaluate the held body that many times, answering each result. A count of zero or less answers nothing.
+
+1. how many times
+2. the held body
+
+Returns: each body result
+
+### `unless`
+
+*lib_functional.metta:54*
+
+```metta
+(: unless (-> Atom Atom %Undefined%))
+```
+
+Evaluate the held body when the held condition answers False, and answer nothing when it answers True: if with one arm, read the other way round.
+
+1. the held condition
+2. the held body
+
+Returns: the body's answers, or none
+
+### `zip`
+
+*lib_functional.metta:66*
+
+```metta
+(: zip (-> Expression Expression Expression))
+```
+
+The pairs of corresponding elements, truncating at the shorter collection, so zipping a long one with a short one answers the short one's length. unzip inverts it.
+
+1. Left
+2. Right
+
+Returns: Pairs
+
+### `unzip`
+
+*lib_functional.metta:79*
+
+```metta
+(: unzip (-> Expression Expression))
+```
+
+The two collections a zip was made from, as (Lefts Rights). Every element must be a two-element expression; anything else raises.
+
+1. Pairs
+
+Returns: Sides
+
+### `drop`
+
+*lib_functional.metta:91*
+
+```metta
+(: drop (-> Expression Number Expression))
+```
+
+The collection without its first Count elements, and empty when there are fewer than that. Dropping a negative count raises; the PREFIX is takeK, which lib_combinatorics already publishes.
+
+1. Items
+2. Count
+
+Returns: Rest
+
+### `chunk`
+
+*lib_functional.metta:107*
+
+```metta
+(: chunk (-> Expression Number Expression))
+```
+
+The collection cut into pieces of that size, in order, with a shorter last piece when the size does not divide the length. A size of zero or less raises, because it would never finish; an empty collection has no chunks.
+
+1. Items
+2. Size
+
+Returns: Chunks
+
+### `window`
+
+*lib_functional.metta:123*
+
+```metta
+(: window (-> Expression Number Expression))
+```
+
+Every run of that many consecutive elements, overlapping by all but one: the sliding window a moving average or a bigram is written over. A collection shorter than the window has none. A size of zero or less raises.
+
+1. Items
+2. Size
+
+Returns: Windows
+
+### `flatten-once`
+
+*lib_functional.metta:134*
+
+```metta
+(: flatten-once (-> Expression Expression))
+```
+
+One level of nesting removed: the elements of every element that is itself a collection, in order, with anything else kept as it is. flatten-deep removes every level, and the bare name flatten is the host's own every-level one, which is why neither of these is spelled that way.
+
+1. Items
+
+Returns: Flat
+
+### `flatten-deep`
+
+*lib_functional.metta:146*
+
+```metta
+(: flatten-deep (-> Expression Expression))
+```
+
+Every level of nesting removed, so the answer holds only the leaves, in order. An empty collection nested anywhere contributes nothing; flatten-once removes exactly one.
+
+1. Items
+
+Returns: Flat
+
+### `partition`
+
+*lib_functional.metta:159*
+
+```metta
+(: partition (-> %Undefined% Expression Expression))
+```
+
+Split Items into (Yes No), preserving input order. The predicate runs in input order; an item belongs to Yes when some answer is True, and otherwise to No. Predicate search bindings remain local to that question.
+
+1. Test
+2. Items
+
+Returns: Sides
+
+### `unfold`
+
+*lib_functional.metta:172*
+
+```metta
+(: unfold (-> %Undefined% %Undefined% Expression))
+```
+
+Grow a collection from a seed. Each step answer must be (Value NextSeed); no answer ends that path. Multiple step answers produce multiple collections. Malformed results raise. A step that never stops never completes its collection.
+
+1. Step
+2. Seed
+
+Returns: Items
+
+### `group-by`
+
+*lib_functional.metta:195*
+
+```metta
+(: group-by (-> %Undefined% Expression Expression))
+```
+
+Gather items into (Key Members) groups in first-appearance order. Compute keys in input order and preserve each function answer as an alternative grouping. Members retain their order and variable identity.
+
+1. Key
+2. Items
+
+Returns: Groups
+
+### `sort-by`
+
+*lib_functional.metta:205*
+
+```metta
+(: sort-by (-> %Undefined% Expression Expression))
+```
+
+Compute a key for each item, sort the groups by term order and concatenate their members. Equal keys retain input order and duplicates. Alternative key answers give alternative stable sorts.
+
+1. Key
+2. Items
+
+Returns: Sorted
+
+### `scan`
+
+*lib_functional.metta:217*
+
+```metta
+(: scan (-> %Undefined% %Undefined% Expression Expression))
+```
+
+Every running fold result, beginning with Start. Each callback answer extends a history, so a branching function produces alternative histories and a function with no answer ends that history.
+
+1. Function
+2. Start
+3. Items
+
+Returns: Running
+
+### `pipe`
+
+*lib_functional.metta:227*
+
+```metta
+(: pipe (-> Atom %Undefined% %Undefined%))
+```
+
+Pass Value through a held collection of functions from left to right. Evaluate each function entry, then apply the resulting function to the current literal value. Preserve zero or many answers from every application.
+
+1. Functions
+2. Value
+
+Returns: Result
+
+### `apply-to`
+
+*lib_functional.metta:237*
+
+```metta
+(: apply-to (-> %Undefined% Expression %Undefined%))
+```
+
+Apply Function to zero or more literal argument values. Build the application with cons-atom and take its reduce step; the arguments already are values, so eval and per-argument quote wrappers would reinterpret them as syntax. Held/eager functions, lambdas and partial applications preserve all answers, literal runnable contents and variable sharing. Functional's callback operators share this boundary.
+
+1. Function
+2. Arguments
+
+Returns: Result
+
+## lib_graph
+
+### `graph-add-edges`
+
+*lib_graph.metta:20*
+
+```metta
+(: graph-add-edges (-> Expression Expression Expression))
+```
+
+Add edges written (From To), including their endpoints as vertices. Duplicates do not change the graph.
+
+1. Graph
+2. Edges
+
+Returns: Bigger
+
+### `graph-add-vertices`
+
+*lib_graph.metta:32*
+
+```metta
+(: graph-add-vertices (-> Expression Expression Expression))
+```
+
+Add vertices, retaining existing edges. A new vertex has no neighbours.
+
+1. Graph
+2. Vertices
+
+Returns: Bigger
+
+### `graph-closure`
+
+*lib_graph.metta:50*
+
+```metta
+(: graph-closure (-> Expression Expression))
+```
+
+The transitive closure: an edge for every path of one or more steps. Fold intermediate vertices and rewrite neighbour sets with set union. A vertex on a cycle reaches itself.
+
+1. Graph
+
+Returns: Closure
+
+### `graph-edges`
+
+*lib_graph.metta:57*
+
+```metta
+(: graph-edges (-> Expression Expression))
+```
+
+Every edge as a (From To) pair, ordered by tail and then head. The result is an ordinary relation for Pairs operations.
+
+1. Graph
+
+Returns: Edges
+
+### `graph-is`
+
+*lib_graph.metta:78*
+
+```metta
+(: graph-is (-> %Undefined% Bool))
+```
+
+Whether a finite expression consists of (Vertex Neighbours) rows with canonical vertex and neighbour sets, and every neighbour identical to a vertex. Variables are never unified with different vertices.
+
+1. Value
+
+Returns: Answer
+
+### `graph-is-acyclic`
+
+*lib_graph.metta:86*
+
+```metta
+(: graph-is-acyclic (-> Expression Bool))
+```
+
+Whether no vertex reaches itself through one or more edges. This shares closure with reachability and the ordering's cycle refusal.
+
+1. Graph
+
+Returns: Answer
+
+### `graph-neighbours`
+
+*lib_graph.metta:99*
+
+```metta
+(: graph-neighbours (-> Expression %Undefined% Expression))
+```
+
+The vertex's outgoing neighbours as a set. An absent vertex raises with (unknown-vertex Vertex), including a fresh variable distinct from every stored vertex. An existing sink returns the empty set.
+
+1. Graph
+2. Vertex
+
+Returns: Neighbours
+
+### `graph-of`
+
+*lib_graph.metta:117*
+
+```metta
+(: graph-of (-> Expression Expression Expression))
+```
+
+Build canonical (Vertex Neighbours) rows from (From To) edges and extra isolated vertices. Every endpoint becomes a vertex; duplicate edges collapse. Quote runnable vertices and rows to keep them as data.
+
+1. Vertices
+2. Edges
+
+Returns: Graph
+
+### `graph-reachable`
+
+*lib_graph.metta:126*
+
+```metta
+(: graph-reachable (-> Expression %Undefined% Expression))
+```
+
+Every reachable vertex, including the origin, as a set. Select the origin's closure row and insert the origin. The recipe is an ordinary equation that matching can reconstruct or specialize.
+
+1. Graph
+2. Vertex
+
+Returns: Reachable
+
+### `graph-remove-edges`
+
+*lib_graph.metta:139*
+
+```metta
+(: graph-remove-edges (-> Expression Expression Expression))
+```
+
+Remove the named edges, retaining every vertex. Absent edges change nothing; malformed edge expressions refuse.
+
+1. Graph
+2. Edges
+
+Returns: Smaller
+
+### `graph-remove-vertices`
+
+*lib_graph.metta:155*
+
+```metta
+(: graph-remove-vertices (-> Expression Expression Expression))
+```
+
+Remove vertices and every incident edge. Compare identity without binding variables; removing an absent vertex changes nothing.
+
+1. Graph
+2. Vertices
+
+Returns: Smaller
+
+### `graph-topological-order`
+
+*lib_graph.metta:176*
+
+```metta
+(: graph-topological-order (-> Expression Expression))
+```
+
+Unfold zero-indegree layers and concatenate them. Each layer is in canonical vertex order; every edge's tail precedes its head. A cycle raises with (cyclic-graph Vertex), naming a vertex actually on a cycle.
+
+1. Graph
+
+Returns: Order
+
+### `graph-transpose`
+
+*lib_graph.metta:186*
+
+```metta
+(: graph-transpose (-> Expression Expression))
+```
+
+Reverse every edge, retaining all vertices. Union with this transpose gives the graph's undirected reading.
+
+1. Graph
+
+Returns: Transposed
+
+### `graph-union`
+
+*lib_graph.metta:198*
+
+```metta
+(: graph-union (-> (:seg Expression) Expression))
+```
+
+Unite zero or more graphs. Zero returns the empty graph, one preserves its input, and duplicates do not change the result. apply-to supplies a runtime collection of graph arguments.
+
+1. Graphs
+
+Returns: Union
+
+### `graph-vertices`
+
+*lib_graph.metta:205*
+
+```metta
+(: graph-vertices (-> Expression Expression))
+```
+
+Every vertex in canonical term order. The expression is a set and accepts ordinary Sets operations.
+
+1. Graph
+
+Returns: Vertices
+
+## lib_http
+
+### `http-header`
+
+*lib_http.metta:12*
+
+```metta
+(: http-header (-> Expression String %Undefined%))
+```
+
+Enumerate every matching parsed field, case-insensitively and in received order. Missing fields give no answers. Values retain their parsed structure.
+
+1. Fields
+2. Name
+
+Returns: Value
+
+### `http-methods`
+
+*lib_http.metta:18*
+
+```metta
+(: http-methods (-> Expression))
+```
+
+The installed client's method symbols, including extensions registered with its native method map. The standard provider supplies delete/get/head/post/ put/patch/options. A request refuses a method outside this catalog.
+
+Returns: Methods
+
+### `http-open!`
+
+*lib_http.metta:24*
+
+```metta
+(: http-open! (-> Symbol String Expression Expression))
+```
+
+Open (http-response Status Fields Handle). Handle is a binary File handle; file-read-bytes! reads it and file-close! releases it. HEAD and no-content statuses expose an empty stream. Status codes, including errors, are data. Options are (header Name Value), (body MediaType Bytes), (timeout Seconds), (redirect Bool) and (max-redirect Count). Headers repeat; other options do not. Timeout accepts positive seconds or infinite; the default is native infinite. Redirect defaults to False, with the native maximum of ten when enabled. Host, Connection, Content-Length and Transfer-Encoding belong to the client; Content-Type comes from body, and a User-Agent header replaces its default. Fields are String-key pairs in received order. Names use the native lowercase hyphen spelling. Values preserve parsed numbers, Strings, lists and compound structures, whose first element is their String name. Cookies and media preferences therefore remain data; fields are not the original wire text.
+
+1. Method
+2. URL
+3. Options
+
+Returns: Response
+
+### `http-request!`
+
+*lib_http.metta:30*
+
+```metta
+(: http-request! (-> Symbol String Expression Expression))
+```
+
+Read (http-response Status Fields Bytes) and close its stream before returning. The arguments and parsed fields are those of http-open!. Encode/decode text with lib_encoding, JSON with lib_json, and store bytes through lib_file.
+
+1. Method
+2. URL
+3. Options
+
+Returns: Response
+
+### `http-server-start!`
+
+*lib_http.metta:36*
+
+```metta
+(: http-server-start! (-> String Number Atom Expression Expression))
+```
+
+Listen at Host and Port; zero asks the OS for a free port. Return (http-server Host BoundPort ID). ID distinguishes later reuse of the same port. The caller must stop it. Options are (workers Count), (timeout Seconds) and (keep-alive-timeout Seconds), retaining the native defaults of five workers, sixty seconds and two seconds. Handler and its calling module travel to each worker. Handler accepts an evaluated (http-request Method Path Target Fields Bytes), where Path is decoded and Target is the raw request URI. It supplies its first (http-response Status Headers Bytes). Routes are ordinary MeTTa equations. Headers are String/String pairs, with one optional Content-Type; other framing, Connection, Status and Date fields are owned by the server. Final statuses range 200..599. Statuses 204/205/304 require empty bytes. HEAD sends only the metadata of the returned bytes. An empty answer stream gives 404; malformed answers and handler exceptions become the host's error responses. Handler printing goes to standard error; only its response defines the wire. Start and stop refuse inside a transaction: its database snapshot cannot share lifecycle changes with workers. Start outside it and scope requests.
+
+1. Host
+2. Port
+3. Handler
+4. Options
+
+Returns: Server
+
+### `http-server-stop!`
+
+*lib_http.metta:42*
+
+```metta
+(: http-server-stop! (-> Expression Bool))
+```
+
+Finish active requests and release the server's workers, queue and listener. Repeated stop is harmless. A worker cannot stop its own server, and a handle whose ID is no longer live cannot stop a later server on the same port. Pending connections follow native stop. Stop refuses inside a transaction, whose database snapshot cannot observe the workers' lifecycle changes.
+
+1. Server
+
+Returns: Done
+
+### `http-server-url`
+
+*lib_http.metta:48*
+
+```metta
+(: http-server-url (-> Expression String))
+```
+
+The server's HTTP origin, with IPv6 brackets when needed and a trailing slash. It remains endpoint data after the server stops; it does not check liveness.
+
+1. Server
+
+Returns: URL
+
+### `with-http`
+
+*lib_http.metta:54*
+
+```metta
+(: with-http (-> Symbol String Expression Atom %Undefined%))
+```
+
+Apply a held Function to the evaluated streaming response and yield every answer. Its handle closes on exhaustion, early cut and exception. Function takes an Expression parameter; the response is quoted at the call boundary.
+
+1. Method
+2. URL
+3. Options
+4. Function
+
+Returns: Answer
+
+### `with-http-server`
+
+*lib_http.metta:60*
+
+```metta
+(: with-http-server (-> String Number Atom Expression Atom %Undefined%))
+```
+
+Apply held Function to the evaluated server value and yield every answer. Stop on exhaustion, cut or exception. Handler and Function take Expression parameters; their values are quoted at their respective call boundaries.
+
+1. Host
+2. Port
+3. Handler
+4. Options
+5. Function
+
+Returns: Answer
 
 ## lib_import
 
@@ -402,6 +3160,584 @@ Returns: true
 
 Undocumented: `consult_global`, `static-import!`, `use-module!`, `use_module_global`
 
+## lib_json
+
+### `dict-space`
+
+*lib_json.metta:17*
+
+```metta
+(: dict-space (-> Expression SpaceType))
+```
+
+Build a fresh object space from (Key Value) pairs. Keys and values are data, including from and internal. Duplicate pairs stay distinct. Validate the whole list before allocation; failed construction releases every space it created.
+
+1. Pairs
+
+Returns: Space
+
+### `get-keys`
+
+*lib_json.metta:23*
+
+```metta
+(: get-keys (-> SpaceType %Undefined%))
+```
+
+Enumerate object keys in storage order, preserving duplicates. Use collapse to collect them. Non-pair atoms do not participate in this pattern query.
+
+1. Space
+
+Returns: Key
+
+### `get-value`
+
+*lib_json.metta:29*
+
+```metta
+(: get-value (-> SpaceType %Undefined% %Undefined%))
+```
+
+Enumerate values whose keys unify with Key. A missing key has no answers. Symbols and Strings are distinct keys, as in an ordinary space query.
+
+1. Space
+2. Key
+
+Returns: Value
+
+### `json-at`
+
+*lib_json.metta:35*
+
+```metta
+(: json-at (-> %Undefined% Expression %Undefined%))
+```
+
+Follow object keys and zero-based array indexes. An empty Path returns Value. Object keys use get-value's unification and preserve duplicate alternatives. Missing keys or indexes have no answers; invalid indexes and scalar traversal raise.
+
+1. Value
+2. Path
+
+Returns: Found
+
+### `json-decode`
+
+*lib_json.metta:41*
+
+```metta
+(: json-decode (-> %Undefined% %Undefined%))
+```
+
+Decode one JSON document. Objects become spaces, arrays become expressions, strings and numbers retain their types, and literals become True, False and Null. Duplicate fields remain queryable. Malformed or trailing content raises.
+
+1. Text
+
+Returns: Value
+
+### `json-encode`
+
+*lib_json.metta:47*
+
+```metta
+(: json-encode (-> %Undefined% String))
+```
+
+Encode one compact JSON document. Objects are spaces of (Key Value) fields; every stored atom must be a pair. Repeated aliases are valid, but cyclic objects or expressions raise cyclic_json_value. Non-finite numbers raise.
+
+1. Value
+
+Returns: Text
+
+### `json-lines-decode`
+
+*lib_json.metta:53*
+
+```metta
+(: json-lines-decode (-> %Undefined% %Undefined%))
+```
+
+Enumerate JSON values from LF or CRLF lines. Empty input has no records; blank lines and a BOM are errors naming the line. A final newline is optional. Returned objects remain caller-owned when enumeration advances or is cut.
+
+1. Text
+
+Returns: Value
+
+### `json-lines-encode`
+
+*lib_json.metta:59*
+
+```metta
+(: json-lines-encode (-> Expression String))
+```
+
+Encode each value as one compact JSON line, ending every record with LF. Empty Values returns the empty String. Validate the complete proper list; each record follows json-encode's value and error contracts.
+
+1. Values
+
+Returns: Text
+
+### `json-lines-read!`
+
+*lib_json.metta:65*
+
+```metta
+(: json-lines-read! (-> %Undefined% %Undefined%))
+```
+
+Stream UTF-8 JSON Lines from Path, reading at most one record ahead. Invalid bytes, JSON and blank lines raise with their line number. Close on exhaustion, cut or error; already returned object spaces remain caller-owned.
+
+1. Path
+
+Returns: Value
+
+### `json-lines-write!`
+
+*lib_json.metta:71*
+
+```metta
+(: json-lines-write! (-> %Undefined% Expression Bool))
+```
+
+Atomically replace Path with UTF-8 JSON Lines, serializing one record at a time. Every record ends in LF; empty Values writes an empty file. Publication and failure cleanup follow json-write!.
+
+1. Path
+2. Values
+
+Returns: Written
+
+### `json-pretty`
+
+*lib_json.metta:78*
+
+```metta
+(: json-pretty (-> %Undefined% Number String))
+```
+
+```metta
+(: json-pretty (-> %Undefined% String))
+```
+
+Format JSON with a nonnegative target column width. Zero selects compact encoding; one puts nonempty containers on multiple lines. Width is a layout target, not a truncation limit. The value and error contracts match json-encode.
+
+Format JSON with SWI's default target width of 72 columns and two-space indentation. Short documents can remain on one line; long strings are not split.
+
+1. Value
+2. Width
+
+Returns: Text
+
+### `json-read!`
+
+*lib_json.metta:84*
+
+```metta
+(: json-read! (-> %Undefined% %Undefined%))
+```
+
+Read one UTF-8 JSON file, closing it before creating object spaces. Malformed UTF-8, a BOM, invalid JSON and trailing content raise; no partial value is returned.
+
+1. Path
+
+Returns: Value
+
+### `json-write!`
+
+*lib_json.metta:90*
+
+```metta
+(: json-write! (-> %Undefined% %Undefined% Bool))
+```
+
+Atomically replace Path with one compact UTF-8 JSON document. Stage beside the destination and publish after close succeeds. A failed conversion, write, close or rename preserves an existing destination and removes staging.
+
+1. Path
+2. Value
+
+Returns: Written
+
+## lib_logging
+
+### `log!`
+
+*lib_logging.metta:12*
+
+```metta
+(: log! (-> String Symbol Atom Expression))
+```
+
+Send a held payload through print_message/2 when its topic is enabled. The structured host term contains (log-event Topic Level Payload). Host hooks can capture it; otherwise the host prints the diagnostic text from log-format.
+
+1. Topic
+2. Level
+3. Payload
+
+Returns: Unit
+
+### `log-enabled`
+
+*lib_logging.metta:18*
+
+```metta
+(: log-enabled (-> String Bool))
+```
+
+Whether the exact topic is enabled. An unknown topic answers False without registering it. The setting is sampled once for each log! or log-to! call.
+
+1. Topic
+
+Returns: Enabled
+
+### `log-format`
+
+*lib_logging.metta:24*
+
+```metta
+(: log-format (-> String Symbol Atom String))
+```
+
+The message's diagnostic text, whether or not its topic is enabled. It uses the engine's display syntax for the held payload, not a serialization format.
+
+1. Topic
+2. Level
+3. Payload
+
+Returns: Text
+
+### `log-levels`
+
+*lib_logging.metta:30*
+
+```metta
+(: log-levels (-> Expression))
+```
+
+The supported host message levels. informational follows SWI's verbose flag; unhandled warnings and errors follow the host on_warning and on_error flags.
+
+Returns: Levels
+
+### `log-to!`
+
+*lib_logging.metta:36*
+
+```metta
+(: log-to! (-> Atom String Symbol Atom Expression))
+```
+
+Send through the host message mechanism with an explicit MeTTa handler. It takes an evaluated Expression (log-event Topic Level Payload) and answers True to consume or False to leave the host printer and later hooks active. The event is quoted at the call boundary to preserve its held payload; Atom-typed parameters retain that written quote by normal argument rules. Only the first verdict is used. Missing/non-Bool answers and exceptions raise. Earlier host hooks retain precedence. Disabled topics never apply Handler.
+
+1. Handler
+2. Topic
+3. Level
+4. Payload
+
+Returns: Unit
+
+### `log-topic!`
+
+*lib_logging.metta:42*
+
+```metta
+(: log-topic! (-> String Bool Expression))
+```
+
+Enable or disable this exact topic for every level. Settings are process-wide in the host debug registry under metta_log(Topic); unrelated host topics are untouched. Configured topics remain discoverable when disabled.
+
+1. Topic
+2. Enabled
+
+Returns: Unit
+
+### `log-topics`
+
+*lib_logging.metta:48*
+
+```metta
+(: log-topics (-> Expression))
+```
+
+A sorted snapshot of configured (log-topic Name Enabled) rows. The names are Strings and disabled topics remain in the snapshot.
+
+Returns: Topics
+
+## lib_markup
+
+### `markup-attribute`
+
+*lib_markup.metta:35*
+
+```metta
+(: markup-attribute (-> Expression Atom String))
+```
+
+One attribute's value as a String, with no answer when the element does not carry it, which is the shape a lookup has here and in lib_pairs. The name is HELD, which an attribute name has to be: one is often called id, class or type, and each of those is also a name the engine knows. Declared Symbol the call was refused with a BadArgType naming the identity function's arrow, and declared %Undefined% the name was evaluated and matched nothing [measured 2026-09-12: both, over (markup-attribute $doc id)].
+
+1. Element
+2. Name
+
+Returns: Value
+
+### `markup-parse-html`
+
+*lib_markup.metta:41*
+
+```metta
+(: markup-parse-html (-> String Expression))
+```
+
+One HTML document in the same shape. HTML's own rules are the host's: an omitted end tag that HTML allows is not an error, so `<p>one<p>two` parses, while a stray close tag or unparsable text is still a refusal.
+
+1. Text
+
+Returns: Element
+
+### `markup-parse-xml`
+
+*lib_markup.metta:47*
+
+```metta
+(: markup-parse-xml (-> String Expression))
+```
+
+One XML document as (element Name Attributes Children): the name a Symbol, each attribute an (attr Name Value) row and the children an expression of elements and Strings. The attribute row is tagged so that a document holding an `id` or a `class` is inert data rather than a call. The parse is STRICT. The host's parser repairs a missing end tag, a stray close tag and character data outside any element, warns on stderr and answers a DOM anyway; every one of those becomes a refusal here, because a document that needed repair is a document the sender got wrong. An external SYSTEM entity is refused for the same reason, which is also what keeps a parse from fetching a file or a URL the document names.
+
+1. Text
+
+Returns: Element
+
+### `markup-select`
+
+*lib_markup.metta:53*
+
+```metta
+(: markup-select (-> Expression Atom %Undefined%))
+```
+
+Every match of the selector, one answer each and in document order. A selector that matches nothing has no answer, which is what makes a selection compose with collapse and with an if over it. The selector is an expression, and a collection of steps is a path: (descendant Name) is every element of that name at any depth, (child Name) every immediate child of that name, and (self Name) the element itself when it carries that name. The other three MODIFY the step they follow: (index N) takes the Nth match counting from one, (attribute Name) answers that attribute's value as a String and (text) answers the element's text content. An unknown form is refused with the five listed.
+
+1. Element
+2. Selector
+
+Returns: Selected
+
+### `markup-text`
+
+*lib_markup.metta:59*
+
+```metta
+(: markup-text (-> Expression String))
+```
+
+Every text node under the element, in document order, joined: the content a reader sees with the markup taken out. An element with no text answers the empty String.
+
+1. Element
+
+Returns: Text
+
+### `markup-write`
+
+*lib_markup.metta:65*
+
+```metta
+(: markup-write (-> Expression String))
+```
+
+The element as XML text, without the declaration the host writes by default and without layout, so the text is exactly the element's own markup and parses back to it.
+
+1. Element
+
+Returns: Text
+
+## lib_math
+
+### `math-gcd`
+
+*lib_math.metta:13*
+
+```metta
+(: math-gcd (-> Expression Number))
+```
+
+The nonnegative greatest common divisor of a finite expression of integers. Empty input and all zeros give zero. Validate every integer before the Euclidean fold; signs do not affect the result.
+
+1. Integers
+
+Returns: Divisor
+
+### `math-lcm`
+
+*lib_math.metta:23*
+
+```metta
+(: math-lcm (-> Expression Number))
+```
+
+The nonnegative least common multiple. Empty input gives one; any zero gives zero after every input has been validated. Derive the fold from math-gcd and exact integer division.
+
+1. Integers
+
+Returns: Multiple
+
+### `math-factor-pairs`
+
+*lib_math.metta:42*
+
+```metta
+(: math-factor-pairs (-> Number Expression))
+```
+
+Stream positive (A B) factor pairs of a positive integer with A<=B, in ascending A order. A square's equal pair appears once. Derive candidates from range up to math-integer-root and retain exact divisors. Zero raises because it has infinitely many factor pairs.
+
+1. Value
+
+Returns: Pair
+
+### `math-float`
+
+*lib_math.metta:49*
+
+```metta
+(: math-float (-> Number Number))
+```
+
+Convert a Number to binary64 by scaling one coordinate by 1.0. Vector supplies nearest rounding with ties to even, signed zero, subnormals, infinities and NaNs. Overflow saturates to signed infinity; underflow preserves the sign.
+
+1. Value
+
+Returns: Float
+
+### `math-class`
+
+*lib_math.metta:61*
+
+```metta
+(: math-class (-> Number Symbol))
+```
+
+The numeric species: integer, rational, or a host float class of zero, subnormal, normal, infinite or nan. Both signs of zero have class zero.
+
+1. Value
+
+Returns: Class
+
+### `math-integer-root`
+
+*lib_math.metta:67*
+
+```metta
+(: math-integer-root (-> Number Number Expression))
+```
+
+Exact (Root Remainder) with Root^Degree+Remainder=Value. Degree is positive. For nonnegative Value, Root is the floor of the real root. A negative Value requires odd Degree and gives negative Root and Remainder, toward zero. The host degree parameter must fit its native signed long; Value is unbounded.
+
+1. Degree
+2. Value
+
+Returns: RootAndRemainder
+
+### `math-power-mod`
+
+*lib_math.metta:73*
+
+```metta
+(: math-power-mod (-> Number Number Number Number))
+```
+
+Compute Base^Exponent modulo a positive Modulus using native modular exponentiation, without constructing the full power. Exponent is nonnegative; any signed integer Base is reduced modulo Modulus before the host call.
+
+1. Base
+2. Exponent
+3. Modulus
+
+Returns: Result
+
+### `math-ratio`
+
+*lib_math.metta:79*
+
+```metta
+(: math-ratio (-> Number Expression))
+```
+
+The exact (Numerator Denominator) of a finite Number. For a float these represent its binary value, so 0.1 has a larger denominator than 1/10. Both floating zeros give (0 1). NaN and infinities raise.
+
+1. Value
+
+Returns: Parts
+
+### `math-rational`
+
+*lib_math.metta:85*
+
+```metta
+(: math-rational (-> Number Number))
+```
+
+```metta
+(: math-rational (-> Number Number Number))
+```
+
+Construct an exact reduced Number with a positive denominator. Whole results are integers. A zero denominator or host policy that approximates the exact result raises. The unary MeTTa form converts a finite Number to its exact binary rational value through math-ratio; rationalize is the approximation. Use math-ratio to recover the parts; rationals have no signed zero.
+
+1. Numerator
+2. Denominator
+
+Returns: Value
+
+### `math-rationalize`
+
+*lib_math.metta:91*
+
+```metta
+(: math-rationalize (-> Number Number))
+```
+
+Preserve exact numbers and approximate finite floats within the host's floating rounding error, often with a much smaller denominator. Thus 0.1 becomes exactly 1/10. math-ratio instead preserves the exact binary value. Both zeros become integer zero; NaN and infinities raise.
+
+1. Value
+
+Returns: Rational
+
+### `math-real`
+
+*lib_math.metta:97*
+
+```metta
+(: math-real (-> Symbol Expression Number))
+```
+
+Apply one function listed by math-real-functions to its numeric arguments. Each argument first passes through math-float; the native function then uses the host arithmetic error policy. Empty arguments select a constant. Unknown names, wrong arities, nonnumbers and native domain errors raise.
+
+1. Function
+2. Arguments
+
+Returns: Result
+
+### `math-real-functions`
+
+*lib_math.metta:103*
+
+```metta
+(: math-real-functions (-> Expression))
+```
+
+The native floating functions provided here as (math-function Name Arity) rows. Each row describes one accepted math-real call. Existing core trig, arithmetic and bit heads keep their names; factorial and binomial come from the imported combinatorics face.
+
+Returns: Functions
+
+### `math-sqrt`
+
+*lib_math.metta:109*
+
+```metta
+(: math-sqrt (-> Number Number))
+```
+
+Correctly rounded floating square root of a nonnegative finite Number. Take the root before rounding, so huge or tiny exact inputs can still have representable roots. Reuse Vector's fractional-root kernel and final IEEE saturation. Preserve the sign of floating zero. A negative or nonfinite input raises.
+
+1. Value
+
+Returns: Root
+
 ## lib_observe
 
 ### `trace-source`
@@ -437,35 +3773,532 @@ Run source with coverage and error diagnostics. Source coordinates are one-based
 
 Returns: a queryable space of observation-status, observation-answer, observation-exception, source-coverage, source-coverage-unavailable, source-function-unavailable, source-error, source-frame, and source-frame-unavailable atoms
 
+## lib_pairs
+
+### `pairs-group`
+
+*lib_pairs.metta:18*
+
+```metta
+(: pairs-group (-> Expression Expression))
+```
+
+The relation as a multimap: every key once, in the standard order of terms, with every value it has as (Key Values). The sort is this head's own and is stable, so the values arrive in the relation's own order; the host's group_pairs_by_key/2 groups only ADJACENT pairs and answers a key twice for an unsorted relation, which is why this one sorts first.
+
+1. Pairs
+
+Returns: Groups
+
+### `pairs-is`
+
+*lib_pairs.metta:32*
+
+```metta
+(: pairs-is (-> %Undefined% Bool))
+```
+
+Whether the value is a relation: a collection whose every element is a two-element expression. This is the question every other head asks before it walks one, asked out loud.
+
+1. Value
+
+Returns: Answer
+
+### `pairs-keys`
+
+*lib_pairs.metta:39*
+
+```metta
+(: pairs-keys (-> Expression Expression))
+```
+
+The key of every pair, in order and with duplicates kept, so the length is the relation's own. unzip answers both sides at once; this is the one projection.
+
+1. Pairs
+
+Returns: Keys
+
+### `pairs-lookup`
+
+*lib_pairs.metta:49*
+
+```metta
+(: pairs-lookup (-> Expression %Undefined% %Undefined%))
+```
+
+Every value whose key is identical to Key, in input order. An absent key has no answer. A variable key matches only the same variable in the relation, without binding it to a different key.
+
+1. Pairs
+2. Key
+
+Returns: Value
+
+### `pairs-sort-by-key`
+
+*lib_pairs.metta:58*
+
+```metta
+(: pairs-sort-by-key (-> Expression Expression))
+```
+
+The relation ordered by key in the standard order of terms, STABLY: pairs with equal keys keep their relative order, and none is dropped.
+
+1. Pairs
+
+Returns: Sorted
+
+### `pairs-sort-by-value`
+
+*lib_pairs.metta:67*
+
+```metta
+(: pairs-sort-by-value (-> Expression Expression))
+```
+
+The relation ordered stably by its values in the standard order of terms. This specializes sort-by to the second component; duplicates and equal-value order survive.
+
+1. Pairs
+
+Returns: Sorted
+
+### `pairs-swap`
+
+*lib_pairs.metta:77*
+
+```metta
+(: pairs-swap (-> Expression Expression))
+```
+
+The converse relation with the order kept: every (Key Value) becomes (Value Key) where it stands. pairs-sort-by-key over the answer is the sorted converse, which is what transposing a relation usually means.
+
+1. Pairs
+
+Returns: Swapped
+
+### `pairs-ungroup`
+
+*lib_pairs.metta:90*
+
+```metta
+(: pairs-ungroup (-> Expression Expression))
+```
+
+The relation a multimap holds: one (Key Value) per value, keys in the multimap's order and values in each group's order. This inverts pairs-group, and a group whose values are not a collection raises.
+
+1. Groups
+
+Returns: Pairs
+
+### `pairs-values`
+
+*lib_pairs.metta:97*
+
+```metta
+(: pairs-values (-> Expression Expression))
+```
+
+The value of every pair, in order and with duplicates kept.
+
+1. Pairs
+
+Returns: Values
+
+## lib_parsing
+
+### `grammar-parser`
+
+*lib_parsing.metta:26*
+
+```metta
+(: grammar-parser (-> Atom %Undefined%))
+```
+
+Prepare a held grammar as an ordinary unary function over a finite expression of input tokens. Each answer is (Contribution Remainder), with () for a skipped contribution or (Value) for a retained literal value. Apply it with apply-to, compose it with let, or inspect and rewrite its ordinary equations. The function checks result shape and finite remainders. Grammar preparation never runs a parsing callback or ref target; parsing-form metadata supplies names, argument kinds and parsing functions.
+
+1. Grammar
+
+Returns: Parser function
+
+### `grammar-parse`
+
+*lib_parsing.metta:37*
+
+```metta
+(: grammar-parse (-> Atom String %Undefined%))
+```
+
+Parse the whole String with a held grammar. Return one literal value per successful parse and no answer for a mismatch. Validate the grammar before consuming text. Alternatives retain duplicates; many and sep-by try longer parses first. A skipped result surfaces as (). Numeric and text primitives compose String operations; ASCII classes do not depend on the locale.
+
+1. Grammar
+2. Text
+
+Returns: Value
+
+### `grammar-parse-prefix`
+
+*lib_parsing.metta:50*
+
+```metta
+(: grammar-parse-prefix (-> Atom String Expression))
+```
+
+Parse a prefix and return (Value UnreadString), one answer per match. Repetition keeps longest-first order and all shorter alternatives. Literal Error, Empty, executable expressions and shared variables remain values. A repeated parser that fails to shorten its input raises an assertion with an input-consumption remedy.
+
+1. Grammar
+2. Text
+
+Returns: Value and remainder
+
+### `grammar-is`
+
+*lib_parsing.metta:61*
+
+```metta
+(: grammar-is (-> Atom Bool))
+```
+
+Whether the held value is a well-formed grammar under parsing-form metadata. Validate argument count, literal String fields and recursive grammar positions; callback and tag values remain opaque. Ref targets and parsing functions do not run. Empty cat and alt are valid. Host-injected cycles or improper expression tails refuse before traversal.
+
+1. Grammar
+
+Returns: Boolean
+
+### `grammar-forms`
+
+*lib_parsing.metta:72*
+
+```metta
+(: grammar-forms (-> Expression))
+```
+
+Return the (Name Arity) rows from the same parsing-form metadata that prepares grammars. Cat and alt accept zero or any number of grammars and report *. The stock vocabulary has fourteen primitives and twelve combinators; a new distinct metadata name can supply an ordinary parsing function with the same contribution/remainder contract.
+
+Returns: Grammar forms
+
+## lib_process
+
+### `process-run!`
+
+*lib_process.metta:31*
+
+```metta
+(: process-run! (-> String Expression Expression))
+```
+
+Run the program with those arguments, wait for it, and answer (process-result Code Output Error): the exit code as a Number, and everything it wrote to its two streams as Strings. A nonzero code is a STATUS, because a program that ran and failed is not the same as one that could not run; only a launch that could not happen raises, naming the program. The arguments are a collection and never a command line, so nothing in them can become a second command. Both streams are read to completion before the wait, which is what keeps a program that fills a pipe from deadlocking.
+
+1. Program
+2. Arguments
+
+Returns: Result
+
+### `process-run-input!`
+
+*lib_process.metta:37*
+
+```metta
+(: process-run-input! (-> String Expression String Expression))
+```
+
+The same, with that text written to the program's standard input and the stream closed, which is how a program that reads its input is fed without a temporary file.
+
+1. Program
+2. Arguments
+3. Input
+
+Returns: Result
+
+### `process-signal!`
+
+*lib_process.metta:43*
+
+```metta
+(: process-signal! (-> Number Symbol Bool))
+```
+
+Send one of the signals this library names: `term` asks a program to stop, `kill` takes it away without asking, `int` is what a terminal's interrupt sends and `hup` is what a closed terminal sends. A signal the library does not know is refused with the four listed; the process still has to be waited for afterwards.
+
+1. Process
+2. Signal
+
+Returns: Done
+
+### `process-signals`
+
+*lib_process.metta:49*
+
+```metta
+(: process-signals (-> Expression))
+```
+
+Every signal process-signal! sends, as data: the same list its refusal names.
+
+Returns: Signals
+
+### `process-start!`
+
+*lib_process.metta:55*
+
+```metta
+(: process-start! (-> String Expression Number))
+```
+
+Start the program and answer its identifier without waiting. Its three streams are this process's own, so what it writes appears where this program's output does; a run whose output matters is process-run!'s job. The caller has to wait for it or signal it: until it does, the host keeps the exit status.
+
+1. Program
+2. Arguments
+
+Returns: Process
+
+### `process-status`
+
+*lib_process.metta:61*
+
+```metta
+(: process-status (-> Number %Undefined%))
+```
+
+Whether the process is still running, without waiting for it: the Symbol `running` while it is, and its exit code once it is not. This is what a program polls.
+
+1. Process
+
+Returns: Status
+
+### `process-wait!`
+
+*lib_process.metta:67*
+
+```metta
+(: process-wait! (-> Number Number))
+```
+
+Wait for the process and answer its exit code, or the negative of the signal that ended it. Waiting twice for one process raises, because the host has already forgotten it.
+
+1. Process
+
+Returns: Code
+
+## lib_random
+
+### `random-choice`
+
+*lib_random.metta:20*
+
+```metta
+(: random-choice (-> Atom Expression))
+```
+
+A sample program that chooses one occurrence uniformly from held, nonempty Items. Construction validates without drawing. eval runs one choice; repeat streams choices and map-atom builds a collection while retaining variable sharing. Runnable terms remain literal data. Equal values at different positions remain separate choices; a singleton uses no entropy.
+
+1. Items
+
+Returns: Program
+
+### `random-sample!`
+
+*lib_random.metta:43*
+
+```metta
+(: random-sample! (-> Atom Number Expression))
+```
+
+Select Count ordered, distinct positions from held Items. Duplicate values remain separate occurrences and caller variables keep their identity. Validate the finite population and nonnegative integer count before drawing; Count cannot exceed its size. Zero returns empty. An unfold removes one selected position per step, using immutable expressions in O(n*Count) work. For replacement, compose random-choice with repeat or map-atom.
+
+1. Items
+2. Count
+
+Returns: Sample
+
+### `random-shuffle!`
+
+*lib_random.metta:51*
+
+```metta
+(: random-shuffle! (-> Atom Expression))
+```
+
+A permutation of all held occurrences, derived by sampling the population size without replacement. The input remains unchanged. Empty and singleton populations consume no entropy.
+
+1. Items
+
+Returns: Shuffled
+
+### `random-uniform`
+
+*lib_random.metta:62*
+
+```metta
+(: random-uniform (-> Number Number Expression))
+```
+
+A uniform sample program between finite Low and High, with Low<=High. Equal bounds consume no entropy and retain the floating value's sign. Interpolation rounds only its final result, including opposite bounds near binary64 limits. Rounding may reach an endpoint.
+
+1. Low
+2. High
+
+Returns: Program
+
+### `random-normal`
+
+*lib_random.metta:73*
+
+```metta
+(: random-normal (-> Number Number Expression))
+```
+
+A normal sample program with finite Mean and nonnegative StandardDeviation. Zero deviation returns Mean without entropy, including negative zero. Box-Muller uses two open-unit core draws with no cached spare. The final affine transform rounds once and may saturate.
+
+1. Mean
+2. StandardDeviation
+
+Returns: Program
+
+### `random-lognormal`
+
+*lib_random.metta:82*
+
+```metta
+(: random-lognormal (-> Number Number Expression))
+```
+
+Exponentiate the program made by random-normal. MeanOfLog and StandardDeviationOfLog describe the logarithm. Construction validates without entropy; evaluation may underflow to zero or overflow to infinity.
+
+1. MeanOfLog
+2. StandardDeviationOfLog
+
+Returns: Program
+
+### `random-exponential`
+
+*lib_random.metta:94*
+
+```metta
+(: random-exponential (-> Number Expression))
+```
+
+An exponential sample program with a finite positive Rate. Divide the inverse-transform logarithm by Rate exactly before final binary64 rounding.
+
+1. Rate
+
+Returns: Program
+
+### `random-triangular`
+
+*lib_random.metta:115*
+
+```metta
+(: random-triangular (-> Number Number Number Expression))
+```
+
+A triangular sample program with finite Low<=Mode<=High. Equal bounds consume no entropy. Compute the mode position exactly before conversion and share uniform's final interpolation so extreme finite bounds remain usable.
+
+1. Low
+2. High
+3. Mode
+
+Returns: Program
+
+### `random-gamma`
+
+*lib_random.metta:128*
+
+```metta
+(: random-gamma (-> Number Number Expression))
+```
+
+A gamma sample program with finite positive Shape and Scale. Marsaglia/Tsang rejection and shape boosting keep multiplicative factors separate from the power correction until Scale is applied. This retains results which premature underflow or overflow would lose, including subnormal shapes.
+
+1. Shape
+2. Scale
+
+Returns: Program
+
+### `random-beta`
+
+*lib_random.metta:139*
+
+```metta
+(: random-beta (-> Number Number Expression))
+```
+
+A beta sample program with finite positive Alpha and Beta. Compose two gamma factor/correction values. Equal corrections use an exact product ratio; otherwise a bounded logistic transform of exact log differences preserves extreme shapes. Rounding may reach zero or one.
+
+1. Alpha
+2. Beta
+
+Returns: Program
+
+### `random-bernoulli`
+
+*lib_random.metta:152*
+
+```metta
+(: random-bernoulli (-> Number Expression))
+```
+
+A Bool sample program with finite Probability in [0,1]. Zero and one are constant programs and consume no entropy.
+
+1. Probability
+
+Returns: Program
+
+### `random-pareto`
+
+*lib_random.metta:164*
+
+```metta
+(: random-pareto (-> Number Expression))
+```
+
+A Pareto sample program with finite positive Shape and minimum one. The inverse transform may saturate to infinity for small shapes.
+
+1. Shape
+
+Returns: Program
+
+### `random-weibull`
+
+*lib_random.metta:178*
+
+```metta
+(: random-weibull (-> Number Number Expression))
+```
+
+A Weibull sample program with finite positive Scale and Shape. Keep the logarithmic power correction until applying Scale, preserving representable final values across extreme parameters.
+
+1. Scale
+2. Shape
+
+Returns: Program
+
 ## lib_reflect
 
 ### `builtins`
 
-*lib_reflect.metta:33*
+*lib_reflect.metta:43*
 
 Every builtin name, one per solution
 
 ### `special-forms`
 
-*lib_reflect.metta:36*
+*lib_reflect.metta:46*
 
 Every translator special form, one per solution. These are compiled rather than called, so they are in no registry
 
 ### `functions`
 
-*lib_reflect.metta:40*
+*lib_reflect.metta:50*
 
 Every function the engine knows, builtin or not
 
 ### `user-functions`
 
-*lib_reflect.metta:43*
+*lib_reflect.metta:53*
 
 Every function this space defines itself
 
 ### `arity-of`
 
-*lib_reflect.metta:46*
+*lib_reflect.metta:56*
 
 The registered arities for a name, one per solution
 
@@ -475,7 +4308,7 @@ Returns: an arity
 
 ### `knows?`
 
-*lib_reflect.metta:52*
+*lib_reflect.metta:62*
 
 Whether the engine knows a name at all, as True or False
 
@@ -485,7 +4318,7 @@ Returns: True or False
 
 ### `origin-of`
 
-*lib_reflect.metta:60*
+*lib_reflect.metta:70*
 
 ```metta
 (: origin-of (-> Atom Expression))
@@ -495,7 +4328,7 @@ The (origin space file line) rows from get-property, one per defining occurrence
 
 ### `extension-points`
 
-*lib_reflect.metta:72*
+*lib_reflect.metta:82*
 
 Every extension point the engine declares, as (name arity kind), one per solution
 
@@ -503,7 +4336,7 @@ Returns: (name arity kind)
 
 ### `surface-counts`
 
-*lib_reflect.metta:77*
+*lib_reflect.metta:87*
 
 How many builtins, special forms, functions and user functions
 
@@ -511,13 +4344,642 @@ Returns: ((key count) ...)
 
 ### `surface-json`
 
-*lib_reflect.metta:84*
+*lib_reflect.metta:94*
 
 The engine's whole surface as a JSON string, for external tools
 
 Returns: a JSON string
 
+### `atom-variables`
+
+*lib_reflect.metta:115*
+
+```metta
+(: atom-variables (-> Atom Expression))
+```
+
+Every written variable once, in first-appearance order, preserving its identity and sharing with the original term. Inspect literal contents, including expression heads and binder syntax. This is structural inspection, not lexical free-variable analysis.
+
+1. Term
+
+Returns: Variables
+
+### `atom-replace`
+
+*lib_reflect.metta:125*
+
+```metta
+(: atom-replace (-> Atom Atom %Undefined%))
+```
+
+Replace exact subterms through a literal (From To) relation. A matching root wins over its descendants; replacement terms are final for this pass. Preserve every matching row as an alternative, including duplicates, and form all combinations across different occurrences. Compare by identity without unifying unrelated variables. Empty relations return the original term; malformed rows and cyclic host terms raise. This does not implement lexical capture avoidance.
+
+1. Term
+2. Replacements
+
+Returns: Every simultaneously replaced term
+
 Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engine-function`, `engine-knows`, `engine-origin`, `engine-special-form`, `engine-surface-counts`, `engine-user-function`
+
+## lib_regex
+
+### `re-captures`
+
+*lib_regex.metta:12*
+
+```metta
+(: re-captures (-> %Undefined% %Undefined% Expression))
+```
+
+Return the first match's capture pairs, with the regex_captures contract.
+
+1. Pattern
+2. Text
+
+Returns: Groups
+
+### `re-compile`
+
+*lib_regex.metta:18*
+
+```metta
+(: re-compile (-> %Undefined% %Undefined%))
+```
+
+Compile pattern text to an immutable native regex value accepted by every regex operation. It can be stored, passed between functions and reused across threads. Inline flags belong to Pattern. Invalid pattern syntax raises.
+
+1. Pattern
+
+Returns: Compiled
+
+### `re-count`
+
+*lib_regex.metta:24*
+
+```metta
+(: re-count (-> %Undefined% %Undefined% Number))
+```
+
+Count matches using re-find's empty-match progression. This does not collect answers or parse typed capture values; counting needs constant auxiliary space.
+
+1. Pattern
+2. Text
+
+Returns: Count
+
+### `re-escape`
+
+*lib_regex.metta:30*
+
+```metta
+(: re-escape (-> %Undefined% String))
+```
+
+Quote literal text for a PCRE2 pattern, including whitespace in extended mode and embedded \E quoting terminators. The result matches exactly that text when used with re-fullmatch.
+
+1. Text
+
+Returns: Pattern
+
+### `re-find`
+
+*lib_regex.metta:36*
+
+```metta
+(: re-find (-> %Undefined% %Undefined% String))
+```
+
+Enumerate every whole match, with the regex_find contract.
+
+1. Pattern
+2. Text
+
+Returns: Match
+
+### `re-fullmatch`
+
+*lib_regex.metta:42*
+
+```metta
+(: re-fullmatch (-> %Undefined% %Undefined% Bool))
+```
+
+Return whether one match covers all Text. Native anchoring applies to the entire pattern, including every alternative, without adding capture groups.
+
+1. Pattern
+2. Text
+
+Returns: Answer
+
+### `re-match`
+
+*lib_regex.metta:48*
+
+```metta
+(: re-match (-> %Undefined% %Undefined% Bool))
+```
+
+Return whether Pattern matches anywhere in Text, with the regex_match contract.
+
+1. Pattern
+2. Text
+
+Returns: Answer
+
+### `re-ranges`
+
+*lib_regex.metta:54*
+
+```metta
+(: re-ranges (-> %Undefined% %Undefined% Expression))
+```
+
+Enumerate (Start Length) records for whole matches in Unicode characters, starting at zero. Empty matches have length zero. A byte-oriented \C match that splits a Unicode character raises regex_character_boundary.
+
+1. Pattern
+2. Text
+
+Returns: Range
+
+### `re-replace`
+
+*lib_regex.metta:60*
+
+```metta
+(: re-replace (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace the first match, with the regex_replace contract.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `re-replace-all`
+
+*lib_regex.metta:66*
+
+```metta
+(: re-replace-all (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace every match, with the regex_replace_all contract.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `re-scan`
+
+*lib_regex.metta:72*
+
+```metta
+(: re-scan (-> %Undefined% %Undefined% Expression))
+```
+
+Enumerate capture-pair records for every match in order. The capture shape and typed suffixes follow re-captures; match progression follows re-find.
+
+1. Pattern
+2. Text
+
+Returns: Groups
+
+### `re-split`
+
+*lib_regex.metta:78*
+
+```metta
+(: re-split (-> %Undefined% %Undefined% Expression))
+```
+
+Split Text into skipped/matched parts, with the regex_split contract.
+
+1. Pattern
+2. Text
+
+Returns: Parts
+
+### `regex_captures`
+
+*lib_regex.metta:84*
+
+```metta
+(: regex_captures (-> %Undefined% %Undefined% Expression))
+```
+
+Return the first match as ((Key Value) ...) pairs. Key 0 names the whole match; other keys are group numbers or names. Unmatched optional groups are omitted. Suffixes _S/_A/_R select String/Symbol/(- Start Length), and _I/_F/_N/_T parse a native Prolog term. Compounds become (Functor Argument ...) expressions; proper lists remain expressions and improper lists become (cons Head Tail). Invalid text and cyclic terms raise; no match has no answer.
+
+1. Pattern
+2. Text
+
+Returns: Groups
+
+### `regex_find`
+
+*lib_regex.metta:90*
+
+```metta
+(: regex_find (-> %Undefined% %Undefined% String))
+```
+
+Enumerate every whole match in left-to-right order, preserving repeated and empty answers. After an empty match, try a nonempty alternative at the same position before advancing one character. The final empty match is included.
+
+1. Pattern
+2. Text
+
+Returns: Match
+
+### `regex_match`
+
+*lib_regex.metta:96*
+
+```metta
+(: regex_match (-> %Undefined% %Undefined% Bool))
+```
+
+Return whether Pattern matches anywhere in Text. Pattern is text or a compiled re-compile value. Invalid patterns and native matching failures raise.
+
+1. Pattern
+2. Text
+
+Returns: Answer
+
+### `regex_replace`
+
+*lib_regex.metta:102*
+
+```metta
+(: regex_replace (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace the first match. With references captures as $name, $1 or \1; braces can delimit the name. Double a dollar or backslash to quote it. Missing or unbound groups raise. Typed captures substitute their parsed value, so 007 with _I becomes 7; compound values use native quoted term syntax.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `regex_replace_all`
+
+*lib_regex.metta:108*
+
+```metta
+(: regex_replace_all (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace every match, including empty matches and a nonempty alternative at the same position. With follows the regex_replace capture-reference syntax.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `regex_split`
+
+*lib_regex.metta:114*
+
+```metta
+(: regex_split (-> %Undefined% %Undefined% Expression))
+```
+
+Return alternating skipped and matched Strings, beginning and ending with a skipped part. The list always has odd length, including for an empty pattern.
+
+1. Pattern
+2. Text
+
+Returns: Parts
+
+## lib_sets
+
+### `set-difference`
+
+*lib_sets.metta:17*
+
+```metta
+(: set-difference (-> Expression Expression Expression))
+```
+
+The elements of the first that the second does not hold. The order matters: this is not symmetric, and set-symmetric-difference is the one that is.
+
+1. Left
+2. Right
+
+Returns: Rest
+
+### `set-disjoint`
+
+*lib_sets.metta:25*
+
+```metta
+(: set-disjoint (-> Expression Expression Bool))
+```
+
+Whether they share no element. The empty set is disjoint from everything, including itself.
+
+1. Left
+2. Right
+
+Returns: Answer
+
+### `set-insert`
+
+*lib_sets.metta:32*
+
+```metta
+(: set-insert (-> Expression %Undefined% Expression))
+```
+
+The set with the element added, which is the set itself when it was already there. The input is left alone, as every operation here leaves its inputs.
+
+1. Set
+2. Element
+
+Returns: Bigger
+
+### `set-intersection`
+
+*lib_sets.metta:45*
+
+```metta
+(: set-intersection (-> (:seg Expression) Expression))
+```
+
+The elements every argument holds, once. Accept one or more canonical sets; one returns that set. Zero arguments raises because no universe was supplied. Pass a runtime collection through apply-to.
+
+1. Sets
+
+Returns: Common
+
+### `set-is`
+
+*lib_sets.metta:56*
+
+```metta
+(: set-is (-> %Undefined% Bool))
+```
+
+Whether the value is a set: an expression in the standard order of terms with no duplicates. This is the question every other head asks before it merges, asked out loud.
+
+1. Value
+
+Returns: Answer
+
+### `set-member`
+
+*lib_sets.metta:65*
+
+```metta
+(: set-member (-> Expression %Undefined% Bool))
+```
+
+Whether the term belongs to the canonical set. Compare terms by identity, without unifying a variable with a different member.
+
+1. Set
+2. Element
+
+Returns: Answer
+
+### `set-of`
+
+*lib_sets.metta:74*
+
+```metta
+(: set-of (-> Expression Expression))
+```
+
+Canonicalize an expression through unique-atom and sort-atom: each literal term once, in the standard order of terms. Variables are compared by identity and remain the caller's variables.
+
+1. Items
+
+Returns: Set
+
+### `set-remove`
+
+*lib_sets.metta:81*
+
+```metta
+(: set-remove (-> Expression %Undefined% Expression))
+```
+
+The set without the element, which is the set itself when it was not there, so removing something absent is not an error.
+
+1. Set
+2. Element
+
+Returns: Smaller
+
+### `set-subset`
+
+*lib_sets.metta:89*
+
+```metta
+(: set-subset (-> Expression Expression Bool))
+```
+
+Whether every element of the first is in the second. A set is a subset of itself, and the empty set is a subset of everything.
+
+1. Left
+2. Right
+
+Returns: Answer
+
+### `set-symmetric-difference`
+
+*lib_sets.metta:99*
+
+```metta
+(: set-symmetric-difference (-> Expression Expression Expression))
+```
+
+The elements exactly one of them holds, which is the union of the two differences and the same set whichever way round the arguments go.
+
+1. Left
+2. Right
+
+Returns: Either
+
+### `set-union`
+
+*lib_sets.metta:109*
+
+```metta
+(: set-union (-> (:seg Expression) Expression))
+```
+
+Every element of any canonical input set, once and in term order. Accept zero or more sets; zero returns the empty set. Pass a runtime collection through apply-to.
+
+1. Sets
+
+Returns: Union
+
+## lib_socket
+
+### `socket-endpoint`
+
+*lib_socket.metta:12*
+
+```metta
+(: socket-endpoint (-> Number Symbol Expression))
+```
+
+Return (endpoint ipv4|ipv6 NumericHostString Port) for local or peer. IPv6 scoped addresses retain their zone suffix. An unconnected socket has no peer and raises instead of inventing an address. Ephemeral ports are actual OS values.
+
+1. Handle
+2. Side
+
+Returns: Endpoint
+
+### `socket-kind`
+
+*lib_socket.metta:18*
+
+```metta
+(: socket-kind (-> Number Symbol))
+```
+
+Return listener, tcp or udp from the live descriptor. A closed handle or an ordinary File stream raises. File's single table owns all three kinds.
+
+1. Handle
+
+Returns: Kind
+
+### `socket-shutdown!`
+
+*lib_socket.metta:24*
+
+```metta
+(: socket-shutdown! (-> Number Symbol Bool))
+```
+
+Shut down a TCP connection's read, write or both directions. Flush before a write shutdown so the peer receives pending bytes followed by EOF. The handle and descriptor remain owned until file-close!; a write shutdown retains input.
+
+1. Handle
+2. Direction
+
+Returns: Done
+
+### `socket-wait!`
+
+*lib_socket.metta:30*
+
+```metta
+(: socket-wait! (-> Expression %Undefined% Expression))
+```
+
+Wait for readable sockets using nonnegative finite seconds or infinite. Zero polls once; an empty list returns immediately. Ready preserves input order and duplicate handles. Listener readiness means accept can proceed; TCP EOF is readable. Readiness alone does not promise a full application message. Waits check cancellation between native intervals of at most a quarter second.
+
+1. Handles
+2. Timeout
+
+Returns: Ready
+
+### `tcp-accept!`
+
+*lib_socket.metta:36*
+
+```metta
+(: tcp-accept! (-> Number Number))
+```
+
+Wait for one connection and return its independent binary File handle. socket-endpoint peer reads the peer's actual address and source port. Closing the listener does not close accepted connections. Cancellation releases an accepted stream if its transfer to File has not completed. Keep the listener open until its acceptors have completed or have been cancelled and joined.
+
+1. Listener
+
+Returns: Handle
+
+### `tcp-connect!`
+
+*lib_socket.metta:42*
+
+```metta
+(: tcp-connect! (-> Expression Number))
+```
+
+Connect to (endpoint ipv4|ipv6 HostString Port), resolving Host in that family. Port is 1..65535. Return a binary File handle: file-write-bytes! flushes bytes, file-read-bytes! reads a count or through EOF, and file-close! releases it. Native direct TCP bypasses proxy hooks. Openers refuse database transactions, whose rollback would lose File's ownership record without closing the socket.
+
+1. Endpoint
+
+Returns: Handle
+
+### `tcp-listen!`
+
+*lib_socket.metta:48*
+
+```metta
+(: tcp-listen! (-> Expression Number Number))
+```
+
+Bind and listen at an endpoint, allowing port zero to request a free port. socket-endpoint local returns the actual bound address. Backlog is nonnegative; the OS applies its queue bound. tcp-accept! receives one connection at a time. The caller closes the listener with file-close!; accepted sockets live separately.
+
+1. Endpoint
+2. Backlog
+
+Returns: Handle
+
+### `udp-bind!`
+
+*lib_socket.metta:54*
+
+```metta
+(: udp-bind! (-> Expression Number))
+```
+
+Bind an IPv4 or IPv6 datagram socket, allowing port zero. Return a File handle closed by file-close!. Use udp-send!/udp-receive! to preserve datagram boundaries; File's byte stream operations are intended for TCP connections.
+
+1. Endpoint
+
+Returns: Handle
+
+### `udp-receive!`
+
+*lib_socket.metta:60*
+
+```metta
+(: udp-receive! (-> Number Expression))
+```
+
+Wait for (datagram Endpoint Bytes), retaining a complete numeric sender endpoint, empty packets and arbitrary bytes. Receive up to the ordinary UDP protocol bound; oversized packets raise instead of returning truncated data. Use socket-wait! for a finite readiness wait. Native input is nonblocking; concurrent readers retry through readiness and cancellation remains observable.
+
+1. Handle
+
+Returns: Datagram
+
+### `udp-send!`
+
+*lib_socket.metta:66*
+
+```metta
+(: udp-send! (-> Number Expression Expression Bool))
+```
+
+Send one datagram, including an empty one. Validate every byte in 0..255 before sending. The destination family must match the socket; its port is positive. Oversized packets and network failures raise the native error.
+
+1. Handle
+2. Endpoint
+3. Bytes
+
+Returns: Done
+
+### `with-socket`
+
+*lib_socket.metta:72*
+
+```metta
+(: with-socket (-> Atom Atom %Undefined%))
+```
+
+Evaluate held Acquire once and take ownership of its returned socket handle. Apply held Function to that integer in the calling module and yield every answer. Close on exhaustion, cut, exception or an invalid acquired File kind. Acquisition runs with signals enabled. Until it returns, the scope owns new sockets opened in that calling engine; a failed acquisition closes them all. Separate cursors and worker tasks remain responsible for their allocations. After selection it owns the returned socket, and other acquisition effects remain the acquisition's responsibility. Exception cleanup shuts down TCP before close; buffered output is not promised delivery on an exceptional exit. Cleanup failures retain the original outcome and every failed handle in error(socket_cleanup(Outcome,Failures),Context), after all closes were attempted. Nest scopes to keep listeners, clients and accepted connections independent. Cancel and join operations borrowing a handle before its owner closes it.
+
+1. Acquire
+2. Function
+
+Returns: Answer
 
 ## lib_soft
 
@@ -536,6 +4998,1569 @@ Tests written symbol representation, regardless of function registration
 Returns: True for a symbol, False otherwise
 
 Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-score`, `soft-score-by`, `soft-walk`, `sym-sim`
+
+## lib_spaces
+
+### `space-copy`
+
+*lib_spaces.metta:80*
+
+```metta
+(: space-copy (-> SpaceType SpaceType Atom %Undefined%))
+```
+
+Copy the atoms matching a pattern into another space, leaving the source unchanged; one answer per atom copied. A bare variable pattern copies the whole space, which is how two spaces merge.
+
+1. the source space
+2. the destination space
+3. the pattern to copy
+
+Returns: the destination write's verdict, once per atom
+
+### `move-atoms`
+
+*lib_spaces.metta:84*
+
+```metta
+(: move-atoms (-> SpaceType SpaceType Atom %Undefined%))
+```
+
+Add the atoms matching a pattern to another space and remove them from the source; one answer per atom moved. This is what migrateAtoms' name promises; migrateAtoms keeps upstream's own equation, which drains the source instead.
+
+1. the source space
+2. the destination space
+3. the pattern to move
+
+Returns: the removal's verdict, once per atom
+
+### `space-drain`
+
+*lib_spaces.metta:88*
+
+```metta
+(: space-drain (-> SpaceType Atom %Undefined%))
+```
+
+Remove the atoms matching a pattern and answer each removed atom, so a caller sees what left.
+
+1. the space
+2. the pattern to remove
+
+Returns: each removed atom
+
+### `space-snapshot`
+
+*lib_spaces.metta:92*
+
+```metta
+(: space-snapshot (-> SpaceType SpaceType))
+```
+
+A fresh space holding a copy of every atom, so what a space holds now survives later writes to it. The two spaces are independent from that point.
+
+1. the space to copy
+
+Returns: the new space
+
+### `space-subtract`
+
+*lib_spaces.metta:96*
+
+```metta
+(: space-subtract (-> SpaceType SpaceType %Undefined%))
+```
+
+Remove from a space every atom another space holds; one answer per atom attempted, including an atom the space did not hold.
+
+1. the space to remove from
+2. the space whose atoms to remove
+
+Returns: the removal's verdict, once per atom
+
+Undocumented: `find`, `match-count`, `migrateAtoms`, `remove-all-atoms`, `succeedsPredicate`
+
+## lib_statistics
+
+### `weighted-subset-mass-independent`
+
+*lib_statistics.metta:30*
+
+```metta
+(: weighted-subset-mass-independent (-> Atom Number Expression))
+```
+
+Exact mass of an independent additive observation, as a reduced (ratio N D). Hold Candidates as literal (candidate ID LOSS (ratio N D)) rows with distinct ground acyclic IDs, nonnegative integer losses and integer 0<=N<=D with D>0. Target is a nonnegative integer on the same scale. Fold sparse ordered coefficient rows, merging equal sums and discarding sums above Target; an unreachable target has mass (ratio 0 1). Integer coefficients avoid host rational approximation.
+
+1. Candidates
+2. Target
+
+Returns: Exact mass
+
+### `weighted-subset-posterior-independent`
+
+*lib_statistics.metta:53*
+
+```metta
+(: weighted-subset-posterior-independent (-> Atom Number Expression))
+```
+
+Return (subset-posterior Mass ((candidate-posterior ID Ratio) ...)) in candidate order under the mass operation's exact-input contract. Unfold sparse prefix and suffix rows, then map two-pointer coefficient joins to recover every marginal. For N candidates and maximum reachable row width R, coefficient arithmetic and retained row cells are O(NR); integer bit cost grows with prior denominator products. Zero-mass conditioning refuses and names weighted-subset-mass-independent. Recipes and coefficient rows remain ordinary inspectable MeTTa data.
+
+1. Candidates
+2. Target
+
+Returns: Mass and exact marginals
+
+### `stats-correlation`
+
+*lib_statistics.metta:184*
+
+```metta
+(: stats-correlation (-> Expression Expression Number))
+```
+
+Pearson correlation, correctly rounded into [-1,1] from exact paired moments. Both finite expressions need equal lengths, at least two observations and nonzero variance. Constant input raises. Compose stats-ranks on both inputs to obtain Spearman correlation with averaged ties.
+
+1. Left
+2. Right
+
+Returns: Correlation
+
+### `stats-covariance`
+
+*lib_statistics.metta:190*
+
+```metta
+(: stats-covariance (-> Expression Expression Number Number))
+```
+
+Paired covariance, dividing the sum of centered products by N-DegreesOfFreedom. The finite expressions have equal lengths and N must exceed the nonnegative integer DegreesOfFreedom. Exact paired moments and final rounding follow stats-variance; choose 0 for population covariance or 1 for a sample estimate.
+
+1. Left
+2. Right
+3. DegreesOfFreedom
+
+Returns: Covariance
+
+### `stats-geometric-mean`
+
+*lib_statistics.metta:196*
+
+```metta
+(: stats-geometric-mean (-> Expression Number))
+```
+
+Floating geometric mean of nonnegative finite observations. Validate the whole expression before returning zero for a zero observation. Empty or negative input raises. Sum binary exponents separately from mantissa logs, so huge and tiny exact observations can cancel without an overflowing product. Native log/exp precision applies; bound the approximation by the observed minimum and maximum before final rounding. Equal observations retain their rounded value. A result outside binary64 rounds to zero or infinity.
+
+1. Data
+
+Returns: Mean
+
+### `stats-harmonic-mean`
+
+*lib_statistics.metta:202*
+
+```metta
+(: stats-harmonic-mean (-> Expression Number))
+```
+
+N divided by the sum of reciprocals, for nonnegative finite observations. A zero makes the mean zero after every observation is validated. Empty or negative input raises. Exact inputs retain an exact result.
+
+1. Data
+
+Returns: Mean
+
+### `stats-mean`
+
+*lib_statistics.metta:208*
+
+```metta
+(: stats-mean (-> Expression Number))
+```
+
+Arithmetic mean of a nonempty finite expression, with stats-sum's exact accumulation and result type. A sum may exceed binary64 while its mean fits.
+
+1. Data
+
+Returns: Mean
+
+### `stats-median`
+
+*lib_statistics.metta:214*
+
+```metta
+(: stats-median (-> Expression Number))
+```
+
+Middle observation, or the exact mean of the two middle observations. Empty input raises. Numeric result types follow stats-sum, including mixed inputs.
+
+1. Data
+
+Returns: Median
+
+### `stats-mode`
+
+*lib_statistics.metta:220*
+
+```metta
+(: stats-mode (-> Atom %Undefined%))
+```
+
+Every most frequent held term, once, in first-occurrence order. Terms compare by identity, so 1 and 1.0 count separately and runnable expressions stay data. Collapse collects ties; once selects the first mode. Empty and cyclic data raise. Stable grouping and identity comparisons derive the counts; all tied terms remain alternative answers.
+
+1. Data
+
+Returns: Mode
+
+### `stats-quantile`
+
+*lib_statistics.metta:226*
+
+```metta
+(: stats-quantile (-> Expression Number Symbol Number))
+```
+
+Linearly interpolate sorted observations at Probability in [0,1]. Inclusive places the minimum at 0 and maximum at 1. Exclusive places sorted observation i at i/(N+1), extrapolating with the nearest endpoint pair outside those positions. A singleton returns its observation. Empty input or an unknown method raises. Exact observations retain exact interpolation; a float observation rounds once.
+
+1. Data
+2. Probability
+3. Method
+
+Returns: Value
+
+### `stats-quantiles`
+
+*lib_statistics.metta:232*
+
+```metta
+(: stats-quantiles (-> Expression Number Symbol Expression))
+```
+
+The Partitions-1 cut points at i/Partitions, using stats-quantile's inclusive or exclusive interpolation. Partitions must be positive. One partition gives empty cuts after validating the nonempty data and method. Sort once, then derive each cut with ordinary indexing and exact interpolation.
+
+1. Data
+2. Partitions
+3. Method
+
+Returns: Cuts
+
+### `stats-ranks`
+
+*lib_statistics.metta:238*
+
+```metta
+(: stats-ranks (-> Expression Expression))
+```
+
+One-based numeric ranks in input order. Tied numeric values receive their exact mean rank, so 1 and 1.0 tie. Empty input returns empty. Count smaller and equal observations for each input through ordinary predicates; no observation is dropped.
+
+1. Data
+
+Returns: Ranks
+
+### `stats-regression`
+
+*lib_statistics.metta:244*
+
+```metta
+(: stats-regression (-> Expression Expression Bool Expression))
+```
+
+Least-squares (linear-fit Slope Intercept) from finite paired observations. False fits an affine line and needs at least two observations with nonconstant x. True fits through the origin and needs at least one observation with nonzero sum of squared x values. Lengths match. Coefficients use exact moments and retain exact results unless either expression contains a float.
+
+1. Independent
+2. Dependent
+3. Proportional
+
+Returns: Fit
+
+### `stats-stdev`
+
+*lib_statistics.metta:250*
+
+```metta
+(: stats-stdev (-> Expression Number Number))
+```
+
+Correctly rounded floating square root of the exact variance. The same sample-size rules as stats-variance apply. Take the root before rounding, so a representable deviation survives an unrepresentable floating variance.
+
+1. Data
+2. DegreesOfFreedom
+
+Returns: Deviation
+
+### `stats-sum`
+
+*lib_statistics.metta:256*
+
+```metta
+(: stats-sum (-> Expression Number))
+```
+
+Sum finite observations exactly before any rounding. Empty input returns 0. All integer/rational observations produce an exact result; any float makes the result a float rounded once. Every numeric head refuses NaN and infinity.
+
+1. Data
+
+Returns: Total
+
+### `stats-variance`
+
+*lib_statistics.metta:262*
+
+```metta
+(: stats-variance (-> Expression Number Number))
+```
+
+Sum of squared deviations divided by N-DegreesOfFreedom. Use 0 for a whole population and 1 for the usual sample estimate. DegreesOfFreedom is a nonnegative integer and N must exceed it. Exact moments prevent cancellation; result types follow stats-sum, with only the final result rounded.
+
+1. Data
+2. DegreesOfFreedom
+
+Returns: Variance
+
+### `ws-map-independent`
+
+*lib_statistics.metta:287*
+
+```metta
+(: ws-map-independent (-> %Undefined% (:seg Expression) %Undefined%))
+```
+
+Push a function through zero or more independent finite laws. Normalize each input in order and preserve the first refusal. Enumerate product tuples in input order, multiply their masses and merge equal outputs. With no inputs, apply the nullary function and give its result unit mass. Function alternatives produce alternative complete laws; they do not acquire probabilities. Correlated inputs belong in one joint law passed to ws-map.
+
+1. Function
+2. Distributions
+
+Returns: Law or refusal
+
+### `ws-map`
+
+*lib_statistics.metta:294*
+
+```metta
+(: ws-map (-> %Undefined% Expression %Undefined%))
+```
+
+Push a function through one finite law. Equal mapped outcomes merge at their first occurrence. Each alternative mapping remains a separate normalized law. This is the single-input case of ws-map-independent.
+
+1. Function
+2. Law
+
+Returns: Law or refusal
+
+### `ws-mass-at-least`
+
+*lib_statistics.metta:302*
+
+```metta
+(: ws-mass-at-least (-> Expression Number %Undefined%))
+```
+
+Inclusive upper-tail probability P(X>=Threshold) of a numeric finite law.
+
+1. Law
+2. Threshold
+
+Returns: Mass or refusal
+
+### `ws-mass-at-most`
+
+*lib_statistics.metta:310*
+
+```metta
+(: ws-mass-at-most (-> Expression Number %Undefined%))
+```
+
+Inclusive cumulative probability P(X<=Threshold) of a numeric finite law.
+
+1. Law
+2. Threshold
+
+Returns: Mass or refusal
+
+### `ws-prob-gt-independent`
+
+*lib_statistics.metta:319*
+
+```metta
+(: ws-prob-gt-independent (-> Expression Expression %Undefined%))
+```
+
+Strict independent win probability P(X>Y). Ties contribute zero. This does not test stochastic dominance and cannot recover correlation from marginals.
+
+1. Left
+2. Right
+
+Returns: Probability or refusal
+
+### `ws-condition-joint`
+
+*lib_statistics.metta:334*
+
+```metta
+(: ws-condition-joint (-> Expression Atom %Undefined%))
+```
+
+Condition a joint law of (Pair Input Output) values on the held observed Input, using term identity. Return the Output law. An absent observation refuses because it has no positive conditional mass.
+
+1. Joint
+2. Observed
+
+Returns: Conditional law or refusal
+
+### `ws-average-independent`
+
+*lib_statistics.metta:346*
+
+```metta
+(: ws-average-independent (-> Expression %Undefined%))
+```
+
+The law of the arithmetic mean of a nonempty expression of mutually independent numeric laws. A variadic function composes stats-mean with the independent product operation, retaining its exact or floating result type. Preserve the first input refusal.
+
+1. Laws
+
+Returns: Mean law or refusal
+
+### `ws-add-bernoulli-independent`
+
+*lib_statistics.metta:357*
+
+```metta
+(: ws-add-bernoulli-independent (-> Expression Number %Undefined%))
+```
+
+Add one independent Bernoulli trial with finite Probability in [0,1] to every numeric outcome. Compose the two-point law with ws-map-independent.
+
+1. Law
+2. Probability
+
+Returns: Law or refusal
+
+### `ws-central-moment`
+
+*lib_statistics.metta:374*
+
+```metta
+(: ws-central-moment (-> Expression Number %Undefined%))
+```
+
+The nonnegative integer Degree moment about a numeric law's mean. Degree zero is 1.0 and degree one is exactly 0.0 after validating the law and its finite numeric support. Degree two is variance. Other degrees map centered powers and take their expectation.
+
+1. Law
+2. Degree
+
+Returns: Moment or refusal
+
+### `ws-variance`
+
+*lib_statistics.metta:381*
+
+```metta
+(: ws-variance (-> Expression %Undefined%))
+```
+
+The second central moment of a numeric finite law. Center before squaring to avoid subtracting two nearly equal floating moments.
+
+1. Law
+
+Returns: Variance or refusal
+
+### `ws-deviation`
+
+*lib_statistics.metta:390*
+
+```metta
+(: ws-deviation (-> Expression %Undefined%))
+```
+
+The floating square root of ws-variance, in the outcome's units.
+
+1. Law
+
+Returns: Deviation or refusal
+
+### `ws-quantile`
+
+*lib_statistics.metta:404*
+
+```metta
+(: ws-quantile (-> Expression Number %Undefined%))
+```
+
+The smallest supported value whose cumulative mass reaches the finite Level in (0,1]. This inverse CDF retains supported values, whereas stats-quantile interpolates observations. At level one, the last supported value absorbs final cumulative rounding.
+
+1. Law
+2. Level
+
+Returns: Value or refusal
+
+### `ws-median`
+
+*lib_statistics.metta:411*
+
+```metta
+(: ws-median (-> Expression %Undefined%))
+```
+
+The finite law's inverse CDF at one half.
+
+1. Law
+
+Returns: Value or refusal
+
+### `ws-support`
+
+*lib_statistics.metta:422*
+
+```metta
+(: ws-support (-> Expression %Undefined%))
+```
+
+The law's supported values, once each, in increasing term order.
+
+1. Law
+
+Returns: Support or refusal
+
+### `ws-sum-independent`
+
+*lib_statistics.metta:437*
+
+```metta
+(: ws-sum-independent (-> Expression Number %Undefined%))
+```
+
+The law of a total of Count independent draws. Count is a nonnegative integer. Zero draws give unit mass at zero. Normalize and merge equal partial totals after each convolution, rather than retaining all draw tuples.
+
+1. Law
+2. Count
+
+Returns: Total law or refusal
+
+## lib_strategy
+
+### `strategy-eval`
+
+*lib_strategy.metta:69*
+
+```metta
+(: strategy-eval (-> Atom Atom %Undefined%))
+```
+
+Apply a held rewrite plan or callable value to a literal term. Named functions, lambdas and partial applications use ordinary application. An unbound strategy declines. Preserve every answer and its bindings, including literal Empty; (empty) produces no answer.
+
+1. Strategy
+2. Term
+
+Returns: Rewritten term
+
+### `strategy-choice-tail`
+
+*lib_strategy.metta:82*
+
+```metta
+(: strategy-choice-tail (-> Atom Atom %Undefined%))
+```
+
+Apply held strategies in order until one has answers, then return that complete bag. An empty sequence declines. Shared bindings survive collapse-bind and superpose-bind.
+
+1. Strategies
+2. Term
+
+Returns: First nonempty answer bag
+
+### `strategy-all`
+
+*lib_strategy.metta:90*
+
+```metta
+(: strategy-all (-> Atom Atom %Undefined%))
+```
+
+Rewrite every immediate child, including an expression's head. A leaf and the empty expression are identities. A declining child ends that combination; branching children produce every combination.
+
+1. Strategy
+2. Term
+
+Returns: Rebuilt term
+
+### `strategy-all-tail`
+
+*lib_strategy.metta:98*
+
+```metta
+(: strategy-all-tail (-> Atom Atom %Undefined%))
+```
+
+Map a strategy over a literal expression through map-atom. Unlike strategy-all, a non-expression declines.
+
+1. Strategy
+2. Items
+
+Returns: Rebuilt expression
+
+### `strategy-one`
+
+*lib_strategy.metta:108*
+
+```metta
+(: strategy-one (-> Atom Atom %Undefined%))
+```
+
+Rewrite exactly one immediate child, answering every successful position from left to right. Preserve other children literally. Leaves, empty expressions and all-declining children have no answer.
+
+1. Strategy
+2. Term
+
+Returns: One-position rewrite
+
+### `strategy-apply`
+
+*lib_strategy.metta:116*
+
+```metta
+(: strategy-apply (-> Atom Atom %Undefined%))
+```
+
+Lower a held strategy application to strategy-eval through the ordinary translator-rule door.
+
+1. Strategy
+2. Term
+
+Returns: Every rewrite
+
+### `fail`
+
+*lib_strategy.metta:123*
+
+```metta
+(: fail (-> Atom %Undefined%))
+```
+
+Decline every term.
+
+1. Term
+
+Returns: No answer
+
+### `seq`
+
+*lib_strategy.metta:127*
+
+```metta
+(: seq (-> Atom (:seg Atom) %Undefined%))
+```
+
+Apply zero or more held strategies from left to right to the final literal term. Zero strategies is identity. A runtime plan is (seq Rule ...).
+
+1. Strategies
+2. Term
+
+Returns: Every composed rewrite
+
+### `choice`
+
+*lib_strategy.metta:134*
+
+```metta
+(: choice (-> Atom (:seg Atom) %Undefined%))
+```
+
+Use the first strategy with any answers and preserve its whole bag. Accept zero or more held strategies before the final literal term; zero strategies declines.
+
+1. Strategies
+2. Term
+
+Returns: First nonempty answer bag
+
+### `try`
+
+*lib_strategy.metta:141*
+
+```metta
+(: try (-> Atom Atom %Undefined%))
+```
+
+Apply the strategy, or return the original term when it has no answers.
+
+1. Strategy
+2. Term
+
+Returns: Rewrite or original
+
+### `gtry`
+
+*lib_strategy.metta:147*
+
+```metta
+(: gtry (-> Atom Atom %Undefined%))
+```
+
+The generic try spelling: apply a strategy or preserve the original term when it declines.
+
+1. Strategy
+2. Term
+
+Returns: Rewrite or original
+
+### `strategy-repeat`
+
+*lib_strategy.metta:153*
+
+```metta
+(: strategy-repeat (-> Atom Atom %Undefined%))
+```
+
+Repeat a rewrite until it declines, retaining every resulting normal form. A rule that always succeeds, including identity, does not terminate. The reified plan is (repeat Rule); numeric repeat remains Functional's operation.
+
+1. Strategy
+2. Term
+
+Returns: Normal form
+
+### `all`
+
+*lib_strategy.metta:159*
+
+```metta
+(: all (-> Atom Atom %Undefined%))
+```
+
+Apply a strategy to all immediate children. Leaves and empty expressions are identities.
+
+1. Strategy
+2. Term
+
+Returns: Rebuilt term
+
+### `one`
+
+*lib_strategy.metta:165*
+
+```metta
+(: one (-> Atom Atom %Undefined%))
+```
+
+Apply a strategy at exactly one child position, preserving every successful position as an answer.
+
+1. Strategy
+2. Term
+
+Returns: One-position rewrite
+
+### `topdown`
+
+*lib_strategy.metta:171*
+
+```metta
+(: topdown (-> Atom Atom %Undefined%))
+```
+
+Rewrite the root, then recursively visit the children of each result. All visited nodes must succeed; compose try for identity on a declining node. Newly introduced subterms are visited.
+
+1. Strategy
+2. Term
+
+Returns: Preorder rewrite
+
+### `bottomup`
+
+*lib_strategy.metta:177*
+
+```metta
+(: bottomup (-> Atom Atom %Undefined%))
+```
+
+Recursively rewrite children, then their rebuilt parent. All visited nodes must succeed; compose try for identity on a declining node.
+
+1. Strategy
+2. Term
+
+Returns: Postorder rewrite
+
+### `innermost`
+
+*lib_strategy.metta:183*
+
+```metta
+(: innermost (-> Atom Atom %Undefined%))
+```
+
+Rewrite children before parents and revisit every reduct until no rule applies.
+
+1. Strategy
+2. Term
+
+Returns: Normal form
+
+### `alltd`
+
+*lib_strategy.metta:189*
+
+```metta
+(: alltd (-> Atom Atom %Undefined%))
+```
+
+Return every root rewrite when the strategy has answers; otherwise descend into every child. A successful replacement is final for this pass, so root matches take precedence over descendant matches. Leaves with no match stay unchanged.
+
+1. Strategy
+2. Term
+
+Returns: Topmost rewrites
+
+### `stratego-all`
+
+*lib_strategy.metta:195*
+
+```metta
+(: stratego-all (-> Atom Atom %Undefined%))
+```
+
+The Stratego spelling of all: rewrite all immediate children, preserving leaves.
+
+1. Strategy
+2. Term
+
+Returns: Rebuilt term
+
+### `stratego-one`
+
+*lib_strategy.metta:201*
+
+```metta
+(: stratego-one (-> Atom Atom %Undefined%))
+```
+
+The Stratego spelling of one: answer every successful single-child rewrite.
+
+1. Strategy
+2. Term
+
+Returns: One-position rewrite
+
+### `TP`
+
+*lib_strategy.metta:211*
+
+```metta
+(: TP Type)
+```
+
+The type-preserving strategy scheme: accept a declared arrow with the same input and output sort.
+
+### `TU`
+
+*lib_strategy.metta:212*
+
+```metta
+(: TU (-> Type Type))
+```
+
+The type-unifying strategy scheme: accept a declared arrow whose output has the supplied sort.
+
+1. Result sort
+
+Returns: Strategy scheme
+
+### `◁`
+
+*lib_strategy.metta:224*
+
+```metta
+(: ◁ (-> Atom Type Atom %Undefined%))
+```
+
+Apply a declared strategy through TP or TU(ResultSort), filtering its input by the term's type in the current space. Unknown schemes and incompatible types decline.
+
+1. Strategy
+2. Scheme
+3. Term
+
+Returns: Typed rewrite
+
+### `strategy-typed-tp`
+
+*lib_strategy.metta:234*
+
+```metta
+(: strategy-typed-tp (-> Atom Atom %Undefined%))
+```
+
+Match a strategy's equal input and output sorts, then apply it when the term fits that sort.
+
+1. Strategy
+2. Term
+
+Returns: Typed rewrite
+
+### `strategy-typed-tu`
+
+*lib_strategy.metta:243*
+
+```metta
+(: strategy-typed-tu (-> Atom Type Atom %Undefined%))
+```
+
+Match a strategy's declared output against the requested result sort, then check its input sort and apply it.
+
+1. Strategy
+2. Result sort
+3. Term
+
+Returns: Typed rewrite
+
+### `strategy-typed-apply`
+
+*lib_strategy.metta:257*
+
+```metta
+(: strategy-typed-apply (-> Atom Type Atom %Undefined%))
+```
+
+Apply a strategy when match-types accepts the term's current-space type against the expected sort. Preserve type errors as values; an incompatible type declines.
+
+1. Strategy
+2. Expected sort
+3. Term
+
+Returns: Typed rewrite
+
+## lib_string
+
+### `string-contains`
+
+*lib_string.metta:13*
+
+```metta
+(: string-contains (-> %Undefined% %Undefined% Bool))
+```
+
+Test the shared search index for a literal occurrence, including an empty Part.
+
+1. Value
+2. Part
+
+Returns: Answer
+
+### `string-starts-with`
+
+*lib_string.metta:20*
+
+```metta
+(: string-starts-with (-> %Undefined% %Undefined% Bool))
+```
+
+Test whether the first literal occurrence is at index zero. An empty prefix matches.
+
+1. Value
+2. Prefix
+
+Returns: Answer
+
+### `string-ends-with`
+
+*lib_string.metta:31*
+
+```metta
+(: string-ends-with (-> %Undefined% %Undefined% Bool))
+```
+
+Compare the final codepoint slice with the coerced suffix. An empty suffix matches; a longer suffix does not.
+
+1. Value
+2. Suffix
+
+Returns: Answer
+
+### `string-from-chars`
+
+*lib_string.metta:38*
+
+```metta
+(: string-from-chars (-> Expression String))
+```
+
+Join text items with an empty separator. Accept zero or several characters per item, Symbols and Numbers; code inside a literal expression stays data and is refused as nontext.
+
+1. Chars
+
+Returns: Text
+
+### `string-repeat`
+
+*lib_string.metta:50*
+
+```metta
+(: string-repeat (-> %Undefined% Number String))
+```
+
+Collect a range of text copies and join once. Validate text and integer Times even when the result is empty. Zero and negative counts produce an empty String; empty text needs no traversal. Invalid counts raise a named assertion.
+
+1. Value
+2. Times
+
+Returns: Text
+
+### `string-pad-left`
+
+*lib_string.metta:58*
+
+```metta
+(: string-pad-left (-> %Undefined% Number %Undefined% String))
+```
+
+Assign all missing padding to the left through the shared MeTTa padding equation. Repeat and truncate a multicharacter filler. Empty filler or a width no greater than the input leaves it unchanged; both texts and the integer width still validate.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Text
+
+### `string-pad-right`
+
+*lib_string.metta:66*
+
+```metta
+(: string-pad-right (-> %Undefined% Number %Undefined% String))
+```
+
+Assign no padding to the left, using string-pad-left's width and filler rules. The shared string-pad assertion refuses noninteger widths.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Text
+
+### `string-center`
+
+*lib_string.metta:74*
+
+```metta
+(: string-center (-> %Undefined% Number %Undefined% String))
+```
+
+Assign half the missing codepoints to the left; an odd extra character goes on the right. Each side restarts Pad. Empty filler leaves the input unchanged; the shared assertion still validates Width as an integer.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Text
+
+### `string-similarity`
+
+*lib_string.metta:84*
+
+```metta
+(: string-similarity (-> %Undefined% %Undefined% Number))
+```
+
+Normalize the shared exact edit distance as 1 - distance/max(lengths), in [0,1]. Two empty Strings score 1.0. An ordinary equation preserves the metric's codepoint and coercion rules.
+
+1. First
+2. Second
+
+Returns: Score
+
+### `number-to-string`
+
+*lib_string.metta:96*
+
+```metta
+(: number-to-string (-> Number String))
+```
+
+Return the host String representation of a Number, including rationals.
+
+1. Number
+
+Returns: Out
+
+### `parse-number`
+
+*lib_string.metta:102*
+
+```metta
+(: parse-number (-> %Undefined% Number))
+```
+
+Parse the host numeric syntax. Ordinary nonnumbers produce no answer; type, resource and interruption exceptions remain visible.
+
+1. Value
+
+Returns: Number
+
+### `string-chars`
+
+*lib_string.metta:108*
+
+```metta
+(: string-chars (-> %Undefined% Expression))
+```
+
+Return one-character Strings, preserving Unicode and embedded NUL.
+
+1. Value
+
+Returns: Chars
+
+### `string-codes`
+
+*lib_string.metta:114*
+
+```metta
+(: string-codes (-> %Undefined% Expression))
+```
+
+Return Unicode scalar integers. NUL is 0; supplementary characters count once.
+
+1. Value
+
+Returns: Codes
+
+### `string-count`
+
+*lib_string.metta:121*
+
+```metta
+(: string-count (-> %Undefined% %Undefined% Bool Number))
+```
+
+```metta
+(: string-count (-> %Undefined% %Undefined% Number))
+```
+
+Count literal occurrences, nonoverlapping by default. True enables overlap. An empty Part counts every boundary, including both ends, giving length+1.
+
+1. Value
+2. Part
+3. Overlap
+
+Returns: Count
+
+### `string-dedent`
+
+*lib_string.metta:127*
+
+```metta
+(: string-dedent (-> %Undefined% String))
+```
+
+Remove the common literal space/tab prefix of nonblank LF-separated lines. Blank lines become empty and the final LF is preserved. Tabs are not expanded.
+
+1. Value
+
+Returns: Out
+
+### `string-edit-distance`
+
+*lib_string.metta:133*
+
+```metta
+(: string-edit-distance (-> %Undefined% %Undefined% Number))
+```
+
+Return exact unit-cost Levenshtein distance over Unicode codepoints. NUL is data. No normalization or score cutoff changes the comparison.
+
+1. First
+2. Second
+
+Returns: Distance
+
+### `string-from-codes`
+
+*lib_string.metta:139*
+
+```metta
+(: string-from-codes (-> Expression String))
+```
+
+Build a String from Unicode scalar integers. Reject improper lists, nonintegers, surrogates and values outside 0 through 0x10FFFF.
+
+1. Codes
+
+Returns: Out
+
+### `string-indent`
+
+*lib_string.metta:145*
+
+```metta
+(: string-indent (-> %Undefined% %Undefined% String))
+```
+
+Prefix each LF-separated line except lines containing only spaces and tabs. Preserve blank-line contents and a final LF.
+
+1. Prefix
+2. Value
+
+Returns: Out
+
+### `string-index-of`
+
+*lib_string.metta:151*
+
+```metta
+(: string-index-of (-> %Undefined% %Undefined% Number))
+```
+
+Return the first zero-based codepoint index, or -1. An empty Part returns 0.
+
+1. Value
+2. Part
+
+Returns: Index
+
+### `string-isub`
+
+*lib_string.metta:158*
+
+```metta
+(: string-isub (-> %Undefined% %Undefined% Expression Number))
+```
+
+```metta
+(: string-isub (-> %Undefined% %Undefined% Number))
+```
+
+Return SWI's substring-based ontology-label ISub score, preserving complete text. Unique options are (normalize Bool), (zero-to-one Bool) and (substring-threshold Number), defaulting to False, False and 2. Threshold is nonnegative; matched substrings must be longer than it. Normalization lowercases and removes dot, underscore and ASCII space. The usual range is [-1,1], or [0,1] with zero-to-one. Both empty score 1; one empty scores 0.
+
+1. First
+2. Second
+3. Options
+
+Returns: Score
+
+### `string-join`
+
+*lib_string.metta:164*
+
+```metta
+(: string-join (-> %Undefined% Expression String))
+```
+
+Join coerced text parts once with Separator; an empty list produces "".
+
+1. Separator
+2. Parts
+
+Returns: Out
+
+### `string-last-index-of`
+
+*lib_string.metta:170*
+
+```metta
+(: string-last-index-of (-> %Undefined% %Undefined% Number))
+```
+
+Return the last zero-based codepoint index, including overlapping matches, or -1. An empty Part returns the input length.
+
+1. Value
+2. Part
+
+Returns: Index
+
+### `string-length`
+
+*lib_string.metta:176*
+
+```metta
+(: string-length (-> %Undefined% Number))
+```
+
+Count Unicode codepoints, including embedded NUL. Text coercions apply.
+
+1. Value
+
+Returns: Length
+
+### `string-lines`
+
+*lib_string.metta:182*
+
+```metta
+(: string-lines (-> %Undefined% Expression))
+```
+
+Split at LF and omit one terminal empty component. Empty input gives (). CR and NUL remain data. Duplicate and internal empty lines survive.
+
+1. Value
+
+Returns: Lines
+
+### `string-lower`
+
+*lib_string.metta:188*
+
+```metta
+(: string-lower (-> %Undefined% String))
+```
+
+Apply the host Unicode lowercase mapping and return a String.
+
+1. Value
+
+Returns: Out
+
+### `string-replace`
+
+*lib_string.metta:194*
+
+```metta
+(: string-replace (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace every nonoverlapping literal occurrence. An empty From preserves the original input. Matching and output assembly do not copy shrinking suffixes.
+
+1. Value
+2. From
+3. To
+
+Returns: Out
+
+### `string-slice`
+
+*lib_string.metta:200*
+
+```metta
+(: string-slice (-> %Undefined% Number Number String))
+```
+
+Return the half-open codepoint interval [From,To). Clamp each endpoint to the input; negative starts and reversed or beyond-end intervals are safe.
+
+1. Value
+2. From
+3. To
+
+Returns: Out
+
+### `string-split`
+
+*lib_string.metta:206*
+
+```metta
+(: string-split (-> %Undefined% %Undefined% Expression))
+```
+
+Split on each character in Separators, retaining empty fields. An empty separator set returns the whole input; NUL splits only when explicitly listed.
+
+1. Separators
+2. Value
+
+Returns: Parts
+
+### `string-split-exact`
+
+*lib_string.metta:212*
+
+```metta
+(: string-split-exact (-> %Undefined% %Undefined% Expression))
+```
+
+Split at nonoverlapping occurrences of the complete, nonempty Separator. Preserve empty fields and text verbatim. An empty separator raises.
+
+1. Separator
+2. Value
+
+Returns: Parts
+
+### `string-template`
+
+*lib_string.metta:218*
+
+```metta
+(: string-template (-> %Undefined% Expression String))
+```
+
+Replace {Name} or {Name,Default} using unique (Name Value) pairs. Names are Prolog variable identifiers. Render values through the engine's console renderer. Missing names raise; unrecognized braces remain literal. Goals never run.
+
+1. Template
+2. Bindings
+
+Returns: Out
+
+### `string-trim`
+
+*lib_string.metta:224*
+
+```metta
+(: string-trim (-> %Undefined% String))
+```
+
+Remove ASCII space, tab, LF and CR from both ends. Interior text and NUL stay.
+
+1. Value
+
+Returns: Out
+
+### `string-unlines`
+
+*lib_string.metta:230*
+
+```metta
+(: string-unlines (-> Expression String))
+```
+
+Append LF to every coerced line and concatenate. An empty list produces "".
+
+1. Lines
+
+Returns: Out
+
+### `string-upper`
+
+*lib_string.metta:236*
+
+```metta
+(: string-upper (-> %Undefined% String))
+```
+
+Apply the host Unicode uppercase mapping and return a String.
+
+1. Value
+
+Returns: Out
+
+### `string-wrap`
+
+*lib_string.metta:243*
+
+```metta
+(: string-wrap (-> %Undefined% Number %Undefined% String))
+```
+
+```metta
+(: string-wrap (-> %Undefined% Number String))
+```
+
+Greedily wrap words to a positive codepoint width. Collapse ASCII space, tab, LF and CR. Keep long words whole. Alignment is left (default), right, center or justify. The final justified line aligns left; no final LF is added.
+
+1. Value
+2. Width
+3. Alignment
+
+Returns: Out
+
+## lib_system
+
+### `change-directory!`
+
+*lib_system.metta:25*
+
+```metta
+(: change-directory! (-> String Bool))
+```
+
+Change the process's current directory. This is process-wide, like the environment: every space and every later relative path sees it. A path that is not a directory raises, naming it.
+
+1. Path
+
+Returns: Done
+
+### `env-all`
+
+*lib_system.metta:31*
+
+```metta
+(: env-all (-> Expression))
+```
+
+The whole environment as a relation of (Name Value) pairs, names and values both Strings, in the order the host reports. This is lib_pairs' shape, so pairs-lookup and pairs-sort-by-key answer over it.
+
+Returns: Variables
+
+### `env-get`
+
+*lib_system.metta:37*
+
+```metta
+(: env-get (-> String String))
+```
+
+One environment variable's value, with NO answer when it is not set: unset and empty are different states, and a program that defaults one has to be able to tell. A collapse over this is the presence test, and if-empty over the collapse is the default.
+
+1. Name
+
+Returns: Value
+
+### `env-set!`
+
+*lib_system.metta:43*
+
+```metta
+(: env-set! (-> String String Bool))
+```
+
+Set the variable for this PROCESS: every space sees it and so does every child process started afterwards. Answers True, because a set that failed raises.
+
+1. Name
+2. Value
+
+Returns: Done
+
+### `env-unset!`
+
+*lib_system.metta:49*
+
+```metta
+(: env-unset! (-> String Bool))
+```
+
+Remove the variable from this process. Removing one that is not set is silent, because a cleanup path should not have to check first.
+
+1. Name
+
+Returns: Done
+
+### `platform-info`
+
+*lib_system.metta:55*
+
+```metta
+(: platform-info (-> Symbol %Undefined%))
+```
+
+What the host says about itself: the architecture, the operating-system family, the SWI-Prolog version as a String and as its three numbers, this process's identifier, how many cores the host reports, whether integers are bounded, and the executable and home directory of the running system. The host NAME is not among them: gethostname/1 is library(socket)'s, and a whole network library is too much to link for one string. A key the library does not know is refused with every key listed, because a typo would otherwise read as a platform that does not have it.
+
+1. Key
+
+Returns: Value
+
+### `platform-keys`
+
+*lib_system.metta:61*
+
+```metta
+(: platform-keys (-> Expression))
+```
+
+Every key platform-info answers for, as data: the same list its refusal names.
+
+Returns: Keys
+
+### `working-directory`
+
+*lib_system.metta:67*
+
+```metta
+(: working-directory (-> String))
+```
+
+The process's current directory, as an absolute path with no trailing separator. Every relative path a program writes is read against this one.
+
+Returns: Path
+
+## lib_testing
+
+### `lib_testing`
+
+*lib_testing.metta:8*
+
+Compose finite generators with core assertions. (forall (range 0 4) (|-> ($x) (test (>= $x 0) True))) checks four inputs. Use assertEqualToResult for an entire answer bag, retaining duplicates; forall itself asks whether the predicate has a True answer. foldall counts with (|-> ($value $count) (+ $count 1)). once commits to the first answer of a filtered generator. range excludes its upper bound; cartesian-power supplies lists of a chosen length. Quote runnable expressions when they are data, use index-atom to select them, and request fresh variables explicitly with copy_term. No specialized test-forall or witness operation is needed.
 
 ## lib_thread
 
@@ -572,6 +6597,10 @@ Returns: (evalc expression space)
 *lib_thread.metta:210*
 
 ```metta
+(: scope-defer (-> %Undefined% Atom Bool))
+```
+
+```metta
 (: scope-defer (-> %Undefined% Atom Atom Bool))
 ```
 
@@ -586,6 +6615,10 @@ Returns: True
 ### `scope_defer`
 
 *lib_thread.metta:211*
+
+```metta
+(: scope_defer (-> %Undefined% Atom Bool))
+```
 
 ```metta
 (: scope_defer (-> %Undefined% Atom Atom Bool))
@@ -650,6 +6683,22 @@ Returns: %Undefined%
 *lib_torch.metta:39*
 
 ```metta
+(: torch-zeros (-[det,writesState]-> %Undefined%))
+```
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
 (: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
 ```
 
@@ -665,6 +6714,22 @@ Returns: %Undefined%
 ### `torch-ones`
 
 *lib_torch.metta:51*
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined%))
+```
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
 
 ```metta
 (: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -684,6 +6749,22 @@ Returns: %Undefined%
 *lib_torch.metta:63*
 
 ```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined%))
+```
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
 (: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
 ```
 
@@ -699,6 +6780,14 @@ Returns: %Undefined%
 ### `torch-arange`
 
 *lib_torch.metta:73*
+
+```metta
+(: torch-arange (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-arange (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
 
 ```metta
 (: torch-arange (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -872,6 +6961,10 @@ Returns: %Undefined%
 *lib_torch.metta:127*
 
 ```metta
+(: torch-requires-grad (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
 (: torch-requires-grad (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
 ```
 
@@ -885,6 +6978,22 @@ Returns: %Undefined%
 ### `torch-backward`
 
 *lib_torch.metta:136*
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
+```
 
 ```metta
 (: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -911,3 +7020,657 @@ This attribute is ``None`` by default and becomes a Tensor the first time a call
 1. %Undefined%
 
 Undocumented: `torch-relu`
+
+## lib_unicode
+
+### `unicode-casefold`
+
+*lib_unicode.metta:29*
+
+```metta
+(: unicode-casefold (-> String String))
+```
+
+The text case-folded for caseless comparison, which is NOT a lowercasing: it maps to whatever compares equal regardless of case, so German sharp s becomes two letters and the answer may be longer than the input. lib_string's string-lower is the lowercasing.
+
+1. Text
+
+Returns: Folded
+
+### `unicode-codepoint-valid`
+
+*lib_unicode.metta:35*
+
+```metta
+(: unicode-codepoint-valid (-> Number Bool))
+```
+
+Whether the database ASSIGNS this number a character: in range, not a surrogate half, and not unassigned or a noncharacter. It is stricter than "a scalar value": U+D7FF and U+10FFFF are in range and are not surrogates, and both are unassigned, so both answer False, while a private-use code point is assigned and answers True. The same question through the database is whether unicode-property answers a category at all [measured 2026-09-12: unicode_codepoint_valid/1 answers false for 55295, 65534 and 1114111, each of which has no category, and true for 57344, whose category is Co].
+
+1. Code
+
+Returns: Answer
+
+### `unicode-graphemes`
+
+*lib_unicode.metta:41*
+
+```metta
+(: unicode-graphemes (-> String Expression))
+```
+
+The user-perceived characters of UAX#29, one string each: a base character with its combining marks is ONE answer, where string-chars answers a code point each. This is the length a person counts and the boundary a cursor moves over.
+
+1. Text
+
+Returns: Graphemes
+
+### `unicode-is`
+
+*lib_unicode.metta:47*
+
+```metta
+(: unicode-is (-> %Undefined% Symbol Bool))
+```
+
+Whether the character belongs to a class the Unicode database defines: letter, upper, lower, title, digit, number, mark, punctuation, symbol, separator, white-space, control, ascii or assigned. Each is a general category or a group of them, white-space is the standard's own White_Space list, and ascii is the range; none of them consults the process locale, which is what code_type/2 does and why it is not the mechanism here. This is the question a lexer asks per character, a Bool rather than a failure so it composes with if, and an unknown class is refused with the names listed.
+
+1. Character
+2. Class
+
+Returns: Answer
+
+### `unicode-map`
+
+*lib_unicode.metta:53*
+
+```metta
+(: unicode-map (-> String Expression String))
+```
+
+The text transformed by a collection of flags in ONE pass, which is the general operation the normalizations and the fold are compositions of: stable, compat, compose, decompose, ignore, rejectna, nlf2ls, nlf2ps, nlf2lf, stripcc, casefold, charbound, lump and stripmark. Stripping accents is (compose stripmark); normalising typographic quotes and dashes to ASCII is (lump). An unknown flag is refused with the fourteen listed, and so are the two combinations the host refuses with nothing but a domain error: compose together with decompose, which asks for both directions at once, and stripmark without either, which has no form to strip marks from.
+
+1. Text
+2. Flags
+
+Returns: Mapped
+
+### `unicode-normalize`
+
+*lib_unicode.metta:59*
+
+```metta
+(: unicode-normalize (-> Symbol String String))
+```
+
+The text in one of the five standard forms: nfc and nfd are the canonical composition and decomposition of UAX#15, nfkc and nfkd their compatibility counterparts, and nfkc-casefold the caseless identifier form of UAX#31. Each is one composition of unicode-map's flags, named; an unknown form is refused with the five listed.
+
+1. Form
+2. Text
+
+Returns: Normalized
+
+### `unicode-property`
+
+*lib_unicode.metta:65*
+
+```metta
+(: unicode-property (-> %Undefined% Symbol %Undefined%))
+```
+
+What the database says about one character: its general category, combining class, bidi class and mirroring, compatibility decomposition type, default ignorability, grapheme boundary class, display width, East-Asian ambiguity, its three single-character case mappings and its Indic conjunct break. A property the character has no value for has NO answer, which is data about the character; an unknown property name is refused, which is a mistake in the program. A case mapping answers the code point, because the mapping is defined on code points and not every one has a single-character mapping.
+
+1. Character
+2. Property
+
+Returns: Value
+
+### `unicode-version`
+
+*lib_unicode.metta:71*
+
+```metta
+(: unicode-version (-> String))
+```
+
+The version of the Unicode database every other answer here comes from. A normalization is reproducible only beside the version that produced it, which is why this is a head rather than a comment.
+
+Returns: Version
+
+## lib_uri
+
+### `uri-build`
+
+*lib_uri.metta:11*
+
+```metta
+(: uri-build (-> Expression String))
+```
+
+Compose encoded String pairs. Their order is immaterial; missing path means empty. Unknown or repeated keys and ambiguous component separators raise. Encode component data before building; this operation does not encode it.
+
+1. Parts
+
+Returns: URI
+
+### `uri-contexts`
+
+*lib_uri.metta:17*
+
+```metta
+(: uri-contexts (-> Expression))
+```
+
+Encoding contexts: path keeps slash; segment encodes it; query-value protects pair separators and plus; fragment retains its own reserved punctuation.
+
+Returns: Contexts
+
+### `uri-decode`
+
+*lib_uri.metta:23*
+
+```metta
+(: uri-decode (-> String String))
+```
+
+Decode percent octets exactly once as strict UTF8. Literal plus stays plus. Malformed escapes, overlong UTF8, surrogate scalars and truncated sequences raise. Unescaped Unicode and encoded NUL survive. Decode after splitting the reference, since decoding a reserved slash or question mark changes structure.
+
+1. Encoded
+
+Returns: Text
+
+### `uri-encode`
+
+*lib_uri.metta:29*
+
+```metta
+(: uri-encode (-> Symbol String String))
+```
+
+Encode Unicode text as UTF8 percent octets in a context from uri-contexts. A literal percent is encoded too; encode raw data exactly once. NUL is %00.
+
+1. Context
+2. Text
+
+Returns: Encoded
+
+### `uri-normalize`
+
+*lib_uri.metta:35*
+
+```metta
+(: uri-normalize (-> String String))
+```
+
+Lowercase the scheme and host, decode unreserved percent bytes and uppercase other escape digits. Preserve userinfo case, reserved bytes and empty query delimiters. Remove dot segments from anchored paths; a relative path keeps its dots until uri-resolve supplies a base. No scheme-specific port or URN namespace rules are guessed, and percent bytes need not represent UTF8.
+
+1. URI
+
+Returns: Normalized
+
+### `uri-parts`
+
+*lib_uri.metta:41*
+
+```metta
+(: uri-parts (-> String Expression))
+```
+
+Encoded String pairs in scheme/authority/path/query/fragment order. Path is always present. Other missing components have no row; ("query" "") retains the question mark. URNs have an ordinary opaque path. References use ASCII URI spelling and valid percent triples; uri-encode carries Unicode data. Authorities remain encoded text: this is not a DNS or IP address validator.
+
+1. URI
+
+Returns: Parts
+
+### `uri-query-build`
+
+*lib_uri.metta:47*
+
+```metta
+(: uri-query-build (-> Symbol Expression String))
+```
+
+Encode String pairs in order using the native query-value safe characters. uri spells spaces %20; form spells them plus. Literal plus and pair separators are always escaped. Slash and question mark can remain within a value. Every pair gets an equals sign, including an empty key or value.
+
+1. Style
+2. Pairs
+
+Returns: Query
+
+### `uri-query-parse`
+
+*lib_uri.metta:53*
+
+```metta
+(: uri-query-parse (-> Symbol String Expression))
+```
+
+Decode an ampersand-separated query into String pairs, preserving order, duplicates and empty values. Bare keys get an empty value; empty segments are ignored. uri preserves literal plus; form reads plus as space in both keys and values. A semicolon is data. Escapes and UTF8 are checked strictly.
+
+1. Style
+2. Query
+
+Returns: Pairs
+
+### `uri-resolve`
+
+*lib_uri.metta:59*
+
+```metta
+(: uri-resolve (-> String String String))
+```
+
+Resolve by RFC3986 section5.2. Base must have a scheme. An explicit reference scheme wins, including http:g; empty query replaces the base query. Resolution removes literal dot segments but does not decode percent escapes or fold case.
+
+1. Reference
+2. Base
+
+Returns: Absolute
+
+## lib_uuid
+
+### `uuid-is`
+
+*lib_uuid.metta:14*
+
+```metta
+(: uuid-is (-> %Undefined% Bool))
+```
+
+Whether Text is a UUID String with exactly 8-4-4-4-12 hexadecimal digits, accepting either case. This checks representation, not uniqueness or origin. Nil and reserved version/variant bit patterns remain valid 128-bit values.
+
+1. Text
+
+Returns: Valid
+
+### `uuid-random!`
+
+*lib_uuid.metta:20*
+
+```metta
+(: uuid-random! (-> String))
+```
+
+Generate a version 4 random identifier. A UUID is not a secret; use crypto-random-bytes when unpredictability is a security requirement.
+
+Returns: UUID
+
+### `uuid-time!`
+
+*lib_uuid.metta:26*
+
+```metta
+(: uuid-time! (-> String))
+```
+
+Generate a version 1 identifier using the host's OSSP provider. It contains a timestamp and may expose the host's MAC address. A host without that provider raises; uuid-random! is available independently of version 1 support.
+
+Returns: UUID
+
+### `uuid-timestamp`
+
+*lib_uuid.metta:32*
+
+```metta
+(: uuid-timestamp (-> String Number))
+```
+
+Seconds since the Unix epoch for an RFC version 1 UUID. Other layouts and versions have no answer. Malformed text raises, so absence is not a parse error.
+
+1. UUID
+
+Returns: Timestamp
+
+### `uuid-name`
+
+*lib_uuid.metta:44*
+
+```metta
+(: uuid-name (-> Number %Undefined% String String))
+```
+
+Derive a version 3 (MD5) or version 5 (SHA-1) UUID from a namespace and the complete UTF-8 name. Namespace is dns, url, oid or x500, or any UUID String. Equal inputs give equal identifiers. Empty names and embedded NULs are valid. Version 3 requires the crypto capability; these digests identify names and provide no authentication. Prefer version 5 for new name-based identifiers.
+
+1. Version
+2. Namespace
+3. Name
+
+Returns: UUID
+
+### `uuid-namespaces`
+
+*lib_uuid.metta:71*
+
+```metta
+(: uuid-namespaces (-> Expression))
+```
+
+The predefined namespace Symbols accepted by uuid-name. A UUID String supplies an application namespace, so identifiers can themselves name further namespaces.
+
+Returns: Namespaces
+
+### `uuid-nil`
+
+*lib_uuid.metta:78*
+
+```metta
+(: uuid-nil (-> String))
+```
+
+The all-zero identifier, distinct from a missing answer.
+
+Returns: UUID
+
+### `uuid-bytes`
+
+*lib_uuid.metta:85*
+
+```metta
+(: uuid-bytes (-> String Expression))
+```
+
+The 16 bytes of a UUID in network order. These compose with hex-encode, base64-encode and write-bytes!, which use the same byte expression.
+
+1. UUID
+
+Returns: Bytes
+
+### `uuid-of-bytes`
+
+*lib_uuid.metta:95*
+
+```metta
+(: uuid-of-bytes (-> Expression String))
+```
+
+Exactly 16 byte integers as a canonical lower-case UUID String. Every 128-bit value is preserved; this conversion does not change version or variant bits.
+
+1. Bytes
+
+Returns: UUID
+
+### `uuid-version`
+
+*lib_uuid.metta:115*
+
+```metta
+(: uuid-version (-> String Number))
+```
+
+The four version bits as a Number from 0 to 15. Nil has zero; a bit pattern is not evidence that the identifier was generated according to that version.
+
+1. UUID
+
+Returns: Version
+
+### `uuid-variant`
+
+*lib_uuid.metta:122*
+
+```metta
+(: uuid-variant (-> String Symbol))
+```
+
+The layout selected by the variant bits: ncs, rfc, microsoft or future. Versions 1, 3, 4 and 5 generated here use rfc; nil uses ncs.
+
+1. UUID
+
+Returns: Variant
+
+## lib_vector
+
+### `cosine-of-normalized`
+
+*lib_vector.metta:12*
+
+```metta
+(: cosine-of-normalized (-> Expression Expression Number))
+```
+
+The dot specialization used for normalized vectors, as an ordinary equation. No unit-length check: (3 4) with itself gives 25.0. Numeric and dimension errors come from dot.
+
+1. Left
+2. Right
+
+Returns: Product
+
+### `vector-fill`
+
+*lib_vector.metta:25*
+
+```metta
+(: vector-fill (-> Number Number Expression))
+```
+
+Collect Count copies of Value from a MeTTa range. Count must be a nonnegative integer and Value a Number, including when Count is zero. Preserve its numeric type and signed zero. Invalid counts raise a named assertion; vector-scale supplies numeric validation.
+
+1. Count
+2. Value
+
+Returns: Vector
+
+### `random-normal-vector`
+
+*lib_vector.metta:47*
+
+```metta
+(: random-normal-vector (-> Number Expression))
+```
+
+```metta
+(: random-normal-vector (-> Number Expression Expression))
+```
+
+Fold Count fresh positive uniform draws onto Accumulator with cons-atom, then normalize. The default accumulator is empty; negative integer counts draw nothing. Validate every literal component before core random-float and with-seed draws; code inside an accumulator is refused without running it. An empty accumulator projects the positive cube, neither Gaussian nor a uniform spherical direction. Count and expression errors are named assertions; numeric errors come from vector-scale.
+
+1. Count
+2. Accumulator
+
+Returns: Vector
+
+### `cosine`
+
+*lib_vector.metta:59*
+
+```metta
+(: cosine (-> Expression Expression Number))
+```
+
+Return the cosine similarity of equal-dimensional numeric expressions. Compute the exact finite ratio before rounding, even if a norm would overflow or underflow. Zero or nonfinite vectors produce NaN.
+
+1. Left
+2. Right
+
+Returns: Similarity
+
+### `dot`
+
+*lib_vector.metta:65*
+
+```metta
+(: dot (-> Expression Expression Number))
+```
+
+Return the dot product as a float. Accumulate exact finite products before one rounding; preserve IEEE infinities and NaNs. Empty inputs return 0.0. Both complete numeric expressions must have the same dimension.
+
+1. Left
+2. Right
+
+Returns: Product
+
+### `norm`
+
+*lib_vector.metta:71*
+
+```metta
+(: norm (-> Expression Number))
+```
+
+Return the correctly rounded Euclidean length of a numeric expression. Exact squared sums avoid intermediate overflow and underflow. Empty inputs return 0.0; NaN propagates and infinity without NaN returns infinity.
+
+1. Vector
+
+Returns: Length
+
+### `vector-add`
+
+*lib_vector.metta:77*
+
+```metta
+(: vector-add (-> Expression Expression Expression))
+```
+
+Add equal-dimensional numeric expressions component by component. Exact operands stay exact; a floating operand makes that result a float rounded once. Preserve IEEE signed zeros, infinities and NaNs.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+### `vector-distance`
+
+*lib_vector.metta:83*
+
+```metta
+(: vector-distance (-> Expression Expression Number))
+```
+
+Return the correctly rounded Euclidean distance of equal-dimensional numeric expressions. Subtract and sum squared differences exactly before the final root; preserve IEEE infinity and NaN behavior. Empty returns 0.0.
+
+1. Left
+2. Right
+
+Returns: Distance
+
+### `vector-divide`
+
+*lib_vector.metta:89*
+
+```metta
+(: vector-divide (-> Expression Expression Expression))
+```
+
+Divide corresponding components. Exact operands return exact rationals; an exact zero divisor raises for the whole operation. A floating operand selects rounded floating results and IEEE zero division. Dimensions match.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+### `vector-multiply`
+
+*lib_vector.metta:95*
+
+```metta
+(: vector-multiply (-> Expression Expression Expression))
+```
+
+Multiply corresponding components, with vector-add's exact, floating and dimension rules. Use dot to sum the exact products before rounding.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+### `vector-normalize`
+
+*lib_vector.metta:101*
+
+```metta
+(: vector-normalize (-> Expression Expression))
+```
+
+Return floating coordinates in the same direction with unit length, rounding each exact finite ratio once. Keep direction when a rounded norm would overflow or underflow. Empty stays empty; zero vectors yield NaNs. An infinite norm maps finite coordinates to signed zero and infinities to NaN; a NaN norm yields NaNs. Signed zero coordinates keep their signs.
+
+1. Vector
+
+Returns: Unit
+
+### `vector-scale`
+
+*lib_vector.metta:107*
+
+```metta
+(: vector-scale (-> Expression Number Expression))
+```
+
+Multiply every component by Factor, with vector-multiply's number rules. Validate Factor even when the vector is empty.
+
+1. Vector
+2. Factor
+
+Returns: Scaled
+
+### `vector-subtract`
+
+*lib_vector.metta:113*
+
+```metta
+(: vector-subtract (-> Expression Expression Expression))
+```
+
+Subtract Right from Left component by component, with vector-add's exact, floating and dimension rules.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+## lib_yaml
+
+### `yaml-read!`
+
+*lib_yaml.metta:36*
+
+```metta
+(: yaml-read! (-> %Undefined% %Undefined%))
+```
+
+One YAML document read from a file, as yaml-decode answers it. The file is read whole through read-file!, so its encoding and refusals are lib_file's.
+
+1. the path
+
+Returns: the document's value
+
+### `yaml-write!`
+
+*lib_yaml.metta:40*
+
+```metta
+(: yaml-write! (-> %Undefined% %Undefined% Bool))
+```
+
+One YAML document written to a file, published atomically through replace-file!: the destination is replaced only after the whole document is written, so a reader never sees half of one.
+
+1. the path
+2. the value
+
+Returns: True
+
+### `yaml-decode`
+
+*lib_yaml.metta:52*
+
+```metta
+(: yaml-decode (-> String %Undefined%))
+```
+
+One YAML document as a MeTTa value: a mapping becomes a space of (Key Value) atoms, a sequence an expression, a string a String, a number a Number, the booleans True and False, and null Null. An empty document is Null, because that is what YAML says an empty document holds. A stream holding more than one document is refused naming the marker: the host's reader loads exactly one and fails on the rest, so answering the first would be answering less than the text says. An unsupported tag, a duplicate key and malformed text are each refused, the last with the line the host reports.
+
+1. Text
+
+Returns: Value
+
+### `yaml-encode`
+
+*lib_yaml.metta:58*
+
+```metta
+(: yaml-encode (-> %Undefined% String))
+```
+
+One YAML document as text: a space becomes a mapping of its (Key Value) atoms, an expression a sequence, a String a string, a Number a number, True and False the booleans and Null the null scalar. The text ends in a newline, as a YAML document does, and keys come out in the host writer's order rather than the space's.
+
+1. Value
+
+Returns: Text

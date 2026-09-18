@@ -7,6 +7,14 @@
 %   floors, cache-purity projection, and deprecation explanation agree.
 % [tested: tests/prolog/suites/evaluation/effects.plt;
 % commit=173eeed021beb360b5e5f9f8461889e27190affc]
+% Guarantees: late library declarations contribute an effect floor without
+% startup builtin registration or broader cache admission.
+% [tested: effects_lattice:late_library_declarations_reach_effect_plans,
+% effects_lattice:late_library_profiles_bound_catalog_declarations;
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
+% Guarantees: computed heads retain the effects of their definition bodies.
+% [tested: effects_lattice:a_computed_head_keeps_its_queued_definitions;
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -20,6 +28,11 @@
 :- multifile seam:extension_builtin/2.
 seam:extension_builtin('planted-backend-write', writesState).
 :- register_builtin_fun('planted-backend-write').
+
+% Libraries loaded after engine startup contribute the same declarations,
+% while import_prolog_function/2 registers their names as ordinary functions.
+seam:extension_builtin('planted-late-library-pure', pureStructural).
+seam:extension_builtin('planted-late-library-write', writesState).
 
 % A bridge's own dispatch goal, planted the way the backend builtin above is.
 % The engine knows no bridge by name and asks seam:effect_operation_name/3 to
@@ -225,11 +238,29 @@ test(every_translator_special_form_has_a_canonical_effect_profile) :-
 % answer the oracleIO floor and fail loudly.
 % The plant arrives the way a real backend's declaration does, as a load-time
 % multifile clause rather than an assertz: the seam is multifile and NOT
-% dynamic, which is itself part of the contract (a backend declares at load,
-% and nothing can install a builtin's effect class while a program runs).
+% dynamic: providers declare their classification when their source loads.
 test(a_backend_declares_the_effect_of_the_builtin_it_registers) :-
     assertion(metta_operation_effect('planted-backend-write', writesState)),
     assertion(\+ metta_operation_effect('planted-backend-write', oracleIO)).
+
+test(late_library_declarations_reach_effect_plans) :-
+    assertion(\+ builtin_fun('planted-late-library-pure')),
+    assertion(\+ builtin_fun('planted-late-library-write')),
+    assertion(metta_operation_effect('planted-late-library-pure', pureStructural)),
+    assertion(metta_operation_effect('planted-late-library-write', writesState)),
+    assertion(metta_operation_plan_effect(['planted-late-library-pure',
+                                           'planted-late-library-write'],
+                                          writesState)),
+    assertion(\+ seam:pure_operation('planted-late-library-pure')),
+    assertion(\+ metta_operation_effect('planted-undeclared-library', _)).
+
+test(late_library_profiles_bound_catalog_declarations,
+     [ cleanup((effect_test_clear('planted-late-library-pure'),
+                effect_test_clear('planted-late-library-write'))) ]) :-
+    effect_test_add('planted-late-library-pure', oracleIO),
+    effect_test_add('planted-late-library-write', pureStructural),
+    assertion(metta_operation_effect('planted-late-library-pure', oracleIO)),
+    assertion(metta_operation_effect('planted-late-library-write', writesState)).
 
 test(every_native_builtin_has_exactly_one_reviewed_effect_profile) :-
     findall(Name,
@@ -479,6 +510,17 @@ test(an_application_headed_by_a_defined_call_follows_the_head_definition,
     % Applying the head's result is a call the walk cannot see, and that
     % dynamic row sits at the lattice's top, so it is the join.
     assertion(Effect == oracleIO).
+test(a_computed_head_keeps_its_queued_definitions,
+     [ setup(effect_plan_definitions), cleanup(effect_plan_cleanup) ]) :-
+    metta_self_module(Module),
+    forall(member(Name-Expected,
+                  ['plunit-plan-pure'-[+, pureStructural],
+                   'plunit-plan-caller'-['add-atom', writesState]]),
+           ( metta_host_source_effect_plan(Module, [[Name, 1], 2],
+                                            Operations, Effect),
+             assertion(memberchk(Expected, Operations)),
+             assertion(memberchk(['<dynamic-operation>', oracleIO], Operations)),
+             assertion(Effect == oracleIO) )).
 
 %FAIL CLOSED, both ways an unclassified grounded call can arrive. A bridge
 %dispatch whose recovered operation has no declaration is oracleIO under that

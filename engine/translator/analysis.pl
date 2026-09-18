@@ -5,6 +5,8 @@
 %   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: retain function metadata, translation caches, symbol analysis, and callable-head discovery
+% Guarantees: segment-body continuations are protected from user equation
+%   capture [tested: segment_equations; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   Deferred and eager equation metadata retain only declarations that govern
@@ -813,6 +815,7 @@ seam:engine_emitted(metta_space_update_atom/1).
 seam:engine_emitted(collapse_runtime/2).
 seam:engine_emitted(metta_segment_dispatch/4).
 seam:engine_emitted(metta_segment_rule_result/6).
+seam:engine_emitted(metta_segment_body_result/4).
 %The result half of the evaluation mask. engine/translator/special_forms.pl's
 %masked_result_goal/3 writes it into every compiled body whose declared result
 %re-enters evaluation, so a MeTTa function named metta_masked_result at two

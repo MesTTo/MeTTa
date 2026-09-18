@@ -19,6 +19,10 @@
 %     (timeout 5 (+ 1 2)) answered 3 on a platform that was supposed to
 %     have no library(time); commit=87d998c24278fc7f020ccb0e408ebcd9332b63eb]
 % Guarantees:
+%   - fast_cache_probe/0 saves and restores a private typed bag and releases
+%     both spaces, preserving duplicate data while avoiding a second source's
+%     declaration ownership [tested: platform_capabilities_reduced;
+%     commit=28c6146d805b5adba3047ffc72b2508c11816636].
 %   - the four file_search_path/2 clauses that reach SWI's own library tree,
 %     two under the `library` alias and two under `autoload`, are replaced by
 %     the farms before any engine file loads, so absence is real rather than
@@ -184,15 +188,31 @@ compressed_source_probe :-
     ;   format("platform compressed-sources unprobed no-fixture~n")
     ).
 
-%The two host doors the fast cache is reached through, probed the way a
-%binding reaches them rather than as MeTTa forms, because that is the only
-%surface they have.
+%The capability probe owns its source and destination. Restoring a snapshot
+%over earlier probes duplicates their declarations and correctly warns.
 fast_cache_probe :-
     child_fixture('probe.fast', Path),
-    capability_service('fast-cache', 'fast-save',
-                       metta_host_save_fast(Path, '&self', Saved), Saved),
-    capability_service('fast-cache', 'fast-load',
-                       metta_host_load_fast(Path, '&self'), loaded).
+    setup_call_cleanup(
+        'new-space'(Source),
+        ( metta_host_run_source(
+              "(: reduced-probe Number)\n(reduced-probe 37)\n(reduced-probe 37)",
+              Source, [], []),
+          capability_service('fast-cache', 'fast-save',
+                             ( metta_host_save_fast(Path, Source, Saved),
+                               Saved == saved(3) ), Saved),
+          setup_call_cleanup(
+              'new-space'(Target),
+              capability_service('fast-cache', 'fast-load',
+                  ( metta_host_load_fast(Path, Target),
+                    metta_host_run_source("!(match &self $atom $atom)",
+                                          Target, [], [Answers]),
+                    maplist(metta_answer_term, Answers, Atoms),
+                    msort(Atoms, Sorted),
+                    Sorted == [[':', 'reduced-probe', 'Number'],
+                               ['reduced-probe', 37], ['reduced-probe', 37]]
+                  ), loaded),
+              metta_release_space(Target)) ),
+        metta_release_space(Source)).
 
 %A form that must still work. Its answers prove the engine did not merely
 %stop: a census that refused everything would pass the refusal checks alone.

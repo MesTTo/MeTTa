@@ -352,6 +352,463 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   calling `system:'$translated_source'/2` per path, which every process then
   pays for. Its selftest plants one SWI compiled in one directory and found in
   another. The header reader is shared with the parity selftest's digest.
+- Native extensions can call the engine's console renderer and IEEE exception
+  recovery through the published service table and module exports.
+- The library authoring guide now documents MeTTa derivation, reflective
+  equations, segments, variadic inputs and shared native boundaries. The final
+  catalog includes builtin types and String, consolidates finite laws in
+  Statistics and composes Testing from generators and core assertions. Every
+  direct and transitive paired consumer of a changed library was remeasured;
+  sixteen inference points were refreshed without changing content pins.
+- Encoding derives hex from MeTTa arithmetic, segments and one ASCII alphabet;
+  UUID derives seven operations from shared byte boundaries, namespace pairs,
+  Crypto and one field layout. Their equations can be inspected and called as
+  data. Names preserve complete UTF8 and NUL. The existing public surfaces remain
+  six and eleven heads. Decoder cancellation and resource exceptions now retain
+  their original terms; only malformed-input exceptions become codec errors.
+- String derives nine text recipes from MeTTa equations and shared native
+  boundaries. Padding uses a function to split the missing width between sides;
+  repetition composes with answer streams and can be reconstructed from its
+  stored equation. Unicode, NUL, coercion and empty-input contracts remain.
+  Empty text and filler need no traversal for large counts. Invalid construction
+  counts raise named assertions, and recordings conservatively refuse replay.
+- Vector derives fill, positive random directions and normalized-dot from MeTTa
+  answer streams and the existing numerical kernels. Construction equations can
+  be inspected and reconstructed. Exact rational values, signed zeros, seeded
+  draw order and validation before entropy consumption are preserved. Invalid
+  counts raise named MeTTa assertions; numeric refusals identify the supplying
+  vector-scale or dot operation. Construction recordings conservatively refuse
+  replay because assertions may print diagnostics; the dot specialization
+  remains replayable.
+- Parsing prepares grammar data as written MeTTa lambdas. String conversions
+  supply its host boundary; ordinary equations compose alternatives, sequences,
+  repetitions and callbacks. One metadata relation defines and extends its
+  vocabulary. Parser values survive Python round trips and retain literal code
+  and shared variables. An optional contribution separates skipping from every
+  payload, including `Empty`, `Error` and `$skip`. Empty `alt` is valid and has
+  no answers. Repeated steps that consume no input raise a named assertion.
+  `grammar-is` holds its argument and never runs parsing functions or ref targets.
+- Statistics owns the two exact weighted-subset operations formerly imported
+  through Combinatorics. MeTTa folds and unfolds replace their native provider,
+  retaining sparse target-truncated coefficient rows and forward/backward
+  marginal joins. Candidate identities remain literal data, integer ratios
+  remain exact, and callers can reconstruct the equation as a function.
+  Invalid domains and zero-mass conditioning use ordinary assertion refusals,
+  exposed as `AssertionFailure` by the Python binding, with the same remedies.
+  Functional's callback operators share `apply-to`, which reduces an application
+  of finished values and preserves held/eager, lambda and partial callbacks.
+  Grouping binds a key before comparing it, so a literal `Error` key remains data.
+- Reflect adds `atom-variables` and `atom-replace` as MeTTa compositions over
+  Functional, Pairs and Strategy. They preserve literal code and shared variable
+  identity. Replacement uses ordinary pairs, prefers a matching root, leaves
+  replacements final and retains duplicate alternatives at every occurrence.
+  Strategy accepts lambdas and partial applications through ordinary bound-value
+  application. Variadic `seq` and `choice` remove their fixed arities; `alltd`
+  supplies topmost traversal. The direct repeat spelling is `strategy-repeat`,
+  resolving its collision with Functional's numeric `repeat`; held rewrite
+  plans keep `(repeat Rule)`. Typed selection remains an inspectable composition.
+  Strategies decline with `(empty)`; the symbol `Empty` is a literal result,
+  so code-as-data replacement has no reserved failure symbol.
+- Immutable maps and priority queues are MeTTa equations over ordered pair
+  expressions. Their distinct tags retain the difference between unique keys
+  and queued occurrences. Variable keys compare by identity, duplicate variable
+  keys and unbound pairs are refused, and literal programs remain data.
+  `pq-merge` accepts zero or any number of queues; ties retain insertion order
+  and left-to-right merge order. These values replace the native AVL and
+  pairing-heap representation. The existing MeTTa finger tree remains available
+  for both-end access and concatenation.
+- Random's eleven constructors return inspectable sample programs. MeTTa's
+  `eval`, `repeat`, `collapse` and `once` control sampling and demand; matching
+  can reconstruct constructors or rewrite their returned code. Distinct-position
+  sampling uses `unfold` and segment removal, preserving literal values and
+  variable sharing. `random-choice!`, `random-draw!`, `random-distributions` and
+  the replacement flag are replaced by these compositions. All ten numeric
+  families retain finite validation, extreme-value arithmetic and seeded cleanup.
+  Native numeric providers declare their effects, and the engine reads late
+  declarations and retains definition analysis for computed function heads.
+- Graph operations are MeTTa equations over Sets, Pairs and Functional. Closure
+  folds intermediate vertices; reachability and cycle detection share that
+  inspectable recipe, and topology unfolds canonical zero-indegree layers.
+  Graph union accepts zero or any number of arguments. Vertex identity replaces
+  native unification, so a fresh variable cannot act as a lookup wildcard or an
+  unknown neighbour. Quoted runnable vertices remain data. Core refusals name
+  absent vertices and actual cycle vertices. The host graph library remains an
+  independent test oracle; its missing-import workaround moves to that suite.
+- `lib_statistics` consolidates sample summaries and finite probability laws.
+  Its sample calculations are MeTTa equations over exact numbers, collections
+  and the shared rounding provider. Matching can reconstruct or specialize a
+  recipe as a function. `ws-map-independent` replaces `ws-map2-independent`
+  and accepts any number of independent laws. Function rewrites produce
+  alternative complete laws, preserving their probability masses. Import
+  `lib_statistics` in place of `lib_distribution`. Independent averages inherit
+  the sample mean's exact or floating result type. Central moment one is exactly
+  zero, and nonfinite levels and noninteger counts refuse before traversal.
+- Math derives gcd/lcm folds, factor choices and floating conversion in MeTTa.
+  Unary `math-rational` preserves a finite value's exact binary representation;
+  `math-sqrt` reuses Vector's root-before-rounding kernel and retains signed
+  zero. Collection consumers share one native finite-expression check that
+  rejects host-injected cycles, improper lists and open tails without binding
+  caller variables.
+- Combinatorics, Functional, Pairs and Sets now derive their collection behavior
+  from MeTTa matching, folds, function application and answer streams. Segment
+  patterns express position choice and slicing; zip, chunk and window reuse
+  unfold. Callback alternatives, quoted runnable values and variable identity
+  survive composition. chooseK streams its choices and chooseKl collects them.
+  Set union and intersection accept variable numbers of arguments, replacing
+  their separate all-forms; apply-to supplies a runtime argument collection.
+  Two general segment fixes admit nested empty expressions and make generated
+  body continuations available in execution modules. Model suites exercise the
+  public MeTTa surface against independent list, arithmetic and set operations.
+  Shared native suite helpers participate in evidence and provenance checking.
+- `lib_cli` parses typed options and literal argument vectors, with explicit
+  repeat policies, separate short/long namespaces, defaults and positional
+  operands. Custom converters are ordinary held functions checked against the
+  declared language type. Bounded answer collection releases generators on
+  every exit, and conversion precedes repeat selection. Help shares declaration
+  validation; raw process arguments retain empty and numeric spellings. Seven
+  native optparse corrections have tracked reproductions and lift conditions.
+- `lib_testing` imports the finite generators used by property checks. General
+  `forall` and core assertions express universal checks; `foldall` counts and
+  `once` selects the first filtered answer. Domains, traversal and verdicts vary
+  independently. The example documents literal values, explicit variable copies,
+  exact answer bags and ordinary selected bindings. Native and Python model
+  tests cover products, multiplicity, calling modules and generator cleanup.
+- `lib_database` owns independent persistent stores through opaque native engines.
+  Native syntax retains order, duplicates and variable sharing. `database-atoms`
+  replaces `database-query`: snapshots compose with MeTTa segment patterns for
+  selection and joins, and stored equations can be reconstructed as functions.
+  Removal deletes one alpha-identical occurrence; variables are not wildcards.
+  Old ground journals reopen unchanged. Journals containing variables require
+  this codec, which rejects noncanonical encodings before replay. Directory locks
+  exclude competing handles and processes. Sync selects native journal buffering;
+  scopes and close release schemas, registrations and streams, retaining combined
+  operation and cleanup errors. Opening rejects malformed UTF8 and unsupported
+  journal records before native replay. Six tracked host reproductions cover
+  failed-write memory, permissive replay, interrupted stream registration,
+  failed detach, UTF8 repair and pathname truncation at NUL. The private lock
+  provider uses the shared native build and installed-wheel path. Concurrent
+  build probes own separate lock streams so the publication check does not
+  mistake correct store-lock contention for a build failure.
+- `lib_compression` encodes complete gzip/zlib byte members and streams file
+  replacement through File's shared staged publisher. Archive inspection keeps
+  entry ordinals and duplicate names; extraction publishes validated regular
+  files and directories, refusing unsafe paths, links, special kinds and path
+  collisions. Every gzip layer checks integrity, including gzip inside other
+  filters. Native UTF8 name decoding preserves the process locale and restores
+  the caller's thread locale. Unflagged ZIP names use CP437; UTF8 flags and
+  Unicode extra fields take precedence. The private archive binding refuses
+  unconvertible names before string conversion. A pinned private provider fixes
+  Unicode extra-field CRC checks after character conversion. Six host reproductions
+  cover gzip integrity, stream-error cleanup, locale conversion, default ZIP encoding,
+  a null-pathname crash and the extra-field CRC error. CMake builds the provider
+  through the shared native builder's locking and atomic publication protocol.
+  Compression and Socket quote their relative provider paths so SWI resolves
+  each library's own source; a seventh host reproduction covers that cache bug.
+  Evidence checks now reach CMake recipes, provider configuration headers and
+  nested host fixtures, and pin CMake comments while preserving argument data.
+- `lib_socket` connects, listens and accepts TCP, exchanges complete UDP packets
+  and reads actual IPv4/IPv6 endpoints. File handles own sockets and carry TCP
+  bytes; readiness, directional shutdown and cancellable acquisition compose
+  with scopes. Cleanup releases partial native streams and retains the original
+  outcome if closing also fails. Failed Socket and HTTP publication now removes
+  its File record before closing the stream. Tracked host reproductions cover
+  incorrect IPv6 TCP peers and the native IPv6 UDP assertion.
+- `lib_uri` composes encoded components, normalizes identifying URI text,
+  resolves RFC3986 references and preserves empty delimiters and duplicate query
+  keys. Encoding contexts distinguish paths, segments, query values and fragments;
+  decoding is strict UTF8, and query pairs choose literal or form-style plus.
+  Four tracked native URI defects cover lost queries, resolved paths and
+  namespace content, and normalization that changes identifying data.
+- `lib_http` sends HTTP byte requests and exposes parsed headers, status codes
+  and owned response streams. Local servers route through MeTTa equations;
+  scopes close streams and stop servers, and server IDs protect reused ports.
+  HTTP owns framing, redirects are explicit, and HTTPS uses the native TLS
+  provider when installed. File now exposes native stream adoption and claims
+  a handle under its mutex before closing, so concurrent closes succeed once.
+  Tracked host reproductions cover partial HTTP startup and stale shutdown
+  acknowledgements; the library releases failed starts and isolates stop mailboxes.
+- `lib_statistics` computes totals, three means, median, quantiles, tied modes,
+  variance, deviation, covariance, correlation, ranks and linear regression.
+  Exact stored observations prevent cancellation and intermediate overflow;
+  degrees of freedom and quantile interpolation are explicit parameters.
+  Standard deviation and correlation share Vector's existing fraction root,
+  now exported as a native service. Generated property checks compare the
+  arithmetic with Fraction and Decimal references.
+- `lib_math` composes the existing factorial/binomial heads with exact gcd/lcm,
+  rational construction and decomposition, explicit rationalization, integer
+  roots, modular powers and a factor-pair answer stream. Its scalar conversion
+  shares Vector's signed-zero and final subnormal rounding policy. One catalog
+  provides native floating functions and their arities; exact construction
+  refuses a host policy that would approximate its result.
+- `lib_logging` sends structured topic/level events through host message hooks,
+  with process-wide topic controls, pure diagnostic formatting and explicit
+  MeTTa capture handlers. Each message carries its handler and calling module;
+  payloads stay unevaluated, and handler errors propagate.
+- The graph library's existing topological-sort import repair now has a tracked
+  host reproduction and ledger entry, so the host-workarounds gate detects when
+  the host no longer needs it.
+- `lib_uuid` provides explicit version 4 random and version 1 time identifiers,
+  deterministic version 3/5 names in standard or application UUID namespaces,
+  strict text validation, version/variant inspection, version-1 timestamps,
+  nil and 16-byte conversion. Names preserve complete UTF-8 text and NULs through
+  the existing encoding and crypto libraries. Version 1 documents its timestamp
+  and possible MAC disclosure. Two tracked host reproductions cover invalid
+  hyphen acceptance and the OSSP name-encoding boundary.
+- `lib_process` is a new library for running a program: `process-run!`,
+  `process-run-input!`, `process-start!`, `process-wait!`, `process-status`,
+  `process-signal!` and `process-signals`. A program is NAMED and its arguments are a
+  collection, so a file called `; rm -rf /` is an argument and never a second command;
+  running a shell is the caller's explicit choice in the program's own name,
+  `(process-run! "sh" ("-c" "..."))`. A captured run answers
+  `(process-result Code Output Error)`, so a nonzero exit is a status rather than an
+  error and a signalled death is the negative of its signal number, the way every
+  shell reports it; only a launch that could not happen raises, and it names the
+  program rather than the search form. Both pipes are read to completion before the
+  wait, which is what keeps a program whose output is larger than the pipe buffer from
+  deadlocking, and the launch is the cleanup's setup, so no descriptor outlives the
+  call. A started process is the caller's: `process-status` polls it without blocking,
+  `process-signal!` sends one of four named signals and refuses any other with all
+  four listed, and `process-wait!` collects it. The library rests on the existing
+  `subprocess` capability, so it refuses to load on a build without
+  `library(process)`.
+- `lib_system` is a new library over the environment, the working directory and the
+  platform: `env-get`, `env-all`, `env-set!`, `env-unset!`, `platform-info`,
+  `platform-keys`, `working-directory` and `change-directory!`. A variable that is
+  not set has no answer, where an empty value answers the empty String, so unset and
+  empty stay different states; the whole environment is a `lib_pairs` relation with
+  String names, which is what keeps it inert. `platform-info` takes one of ten
+  keys and refuses an unknown one with all of them listed; the host NAME is not
+  among them, because `gethostname/1` is `library(socket)`'s and a whole network
+  library is too much to link for one string. `env-all` rests on `library(unix)`'s
+  `environ/1` through the new `environment-listing` capability and refuses by name
+  on a build without it. There is no shell: no head here hands text to one, which is
+  the line between running a program and letting a string become one.
+- `lib_encoding` is a new library of the three encodings a program moves bytes
+  through: `utf8-encode`, `utf8-decode`, `hex-encode`, `hex-decode`,
+  `base64-encode` and `base64-decode`. Bytes are an expression of Numbers from 0 to
+  255, which is `lib_file`'s own byte shape, so a file's bytes are these heads'
+  input; the UTF-8 codec is `lib_csv`'s vendored one rather than a second
+  implementation. Base64 takes its alphabet as an argument, `standard` padded or
+  `url` unpadded, and encodes BYTES: the host's own `base64_encoded/3` defaults to
+  UTF-8 text, so `(255 254)` came out as the base64 of four bytes until the
+  `iso_latin_1` encoding was named. Hex answers lower case and reads either case.
+  Bytes that are not UTF-8, hex of odd length or with a stray character, base64 the
+  decoder rejects, an unknown alphabet and a number that is not a byte are each
+  refused naming what was wrong.
+- `lib_pairs`' and `lib_graph`' refusals name the cause when a key or a vertex
+  names a function. `((id 1) (b 2))` reaches `pairs-keys` as `(1 (b 2))`, because
+  the engine read `(id 1)` as a call to the identity function where the relation
+  was written, and the old message named only the shape it expected. Both now say
+  so and give the remedy: write such a key as a String, or tag the row.
+- `lib_markup` is a new library reading and writing XML and HTML:
+  `markup-parse-xml`, `markup-parse-html`, `markup-write`, `markup-select`,
+  `markup-attribute` and `markup-text`. An element is
+  `(element Name Attributes Children)` with each attribute an `(attr Name Value)`
+  row, so a document is inert data a program pattern-matches: the tag is what
+  keeps `(id "7")` from being read as a call to the identity function. The
+  selector language is an expression converted to the host's XPath term, with
+  `(descendant Name)`, `(child Name)` and `(self Name)` as steps and
+  `(index N)`, `(attribute Name)` and `(text)` as modifiers on the step they
+  follow; every match is an answer, in document order. Every parse is strict: a
+  missing end tag, a stray close tag, text outside any element and an external
+  SYSTEM entity are each refused, where the host's reader repairs the first three
+  with a warning on stderr and drops the entity's content silently. The library
+  declares the new `markup` platform capability.
+- `lib_yaml` is a new library reading and writing YAML: `yaml-decode`,
+  `yaml-encode`, and `yaml-read!` and `yaml-write!` derived from `lib_file`'s
+  `read-file!` and `replace-file!`, so the library holds no second copy of the
+  publication protocol. A mapping becomes a space of (Key Value) atoms, which is
+  `lib_json`'s own shape, so `get-keys`, `get-value` and `json-at` query a YAML
+  document; a sequence becomes an expression and the scalars keep their types,
+  with null and an empty document answering `Null`. Four refusals the host only
+  fails or answers opaquely at: a stream with more than one document, an
+  unsupported tag, a duplicate key and malformed text, the last with the line the
+  reader stopped on. A key written with no value decodes as the empty string, not
+  null, because the host's reader cannot tell it from `note: ""`. The library
+  declares the new `yaml` platform capability.
+- `lib_parsing` is a new library of grammars as values: `grammar-parse`,
+  `grammar-parse-prefix`, `grammar-forms` and `grammar-is` over fourteen
+  primitives (`lit`, `any`, `char-in`, `char-not-in`, `char-if`, `digits`,
+  `integer`, `number`, `blanks`, `nonblanks`, `until`, `quoted`, `eos`, `rest`)
+  and twelve combinators (`cat`, `alt`, `many`, `many1`, `optional`, `sep-by`,
+  `between`, `skip`, `map`, `as`, `token`, `ref`). A grammar is an expression, so
+  a program builds and inspects one; every way it matches is an answer and a text
+  it does not match is no answer, which is what makes `alt` and `optional`
+  compose. `(ref f)` evaluates a function to a grammar when the parse reaches it,
+  so a recursive language is expressible; `map` and `as` make the answer a parse
+  tree; the character classes are ASCII and never the locale, and a Unicode class
+  is `(char-if f)` over `lib_unicode`'s `unicode-is`. A form the library does not
+  know is refused before any text is read, naming it with the vocabulary beside
+  it.
+- `lib_functional`'s `partition` reads its test's verdict and compares it, where
+  it used to pass `True` in as the expected answer. A test whose own head is
+  declared deterministic then failed with its output already bound instead of
+  answering `False`, which SWI reports as `Deterministic procedure ... failed`:
+  `(partition (|-> ($c) (unicode-is $c letter)) ("a" "1"))` raised rather than
+  splitting the two.
+- `lib_unicode` is a new library over the host's Unicode database (utf8proc):
+  `unicode-version`, `unicode-normalize` in the five forms nfc, nfd, nfkc, nfkd
+  and nfkc-casefold, `unicode-casefold`, the general `unicode-map` with
+  utf8proc's fourteen flags, `unicode-property` for thirteen per-character
+  properties, `unicode-is` for fourteen character classes, `unicode-graphemes`
+  and `unicode-codepoint-valid`. Each head takes its variant as an argument and
+  refuses an unknown one with the names listed. The classes are the database's
+  general categories and never the process locale, so a letter is a letter
+  under `LC_ALL=C` too, where `code_type/2` says otherwise. The library declares
+  the new `unicode` platform capability, so a build without SWI's utf8proc pack
+  refuses it by name before it loads.
+- `lib_graph` is a new library of directed graphs as expressions: `graph-of`,
+  `graph-is`, `graph-vertices`, `graph-edges`, `graph-neighbours`,
+  `graph-add-vertices`, `graph-remove-vertices`, `graph-add-edges`,
+  `graph-remove-edges`, `graph-transpose`, `graph-union`, `graph-closure`,
+  `graph-reachable`, `graph-topological-order` and `graph-is-acyclic`. A graph is
+  a collection of (Vertex Neighbours) pairs, so its vertices are a `lib_sets` set
+  and its edges a `lib_pairs` relation. Two refusals the host does not make: a
+  vertex the graph does not hold is named rather than answered as a sink, and a
+  cycle refuses the topological order naming a vertex that reaches itself, where
+  `top_sort/2` only fails.
+- `lib_pairs` is a new library that reads a collection of (Key Value) pairs as a
+  relation: `pairs-is`, `pairs-keys`, `pairs-values`, `pairs-swap`,
+  `pairs-sort-by-key`, `pairs-sort-by-value`, `pairs-group`, `pairs-ungroup` and
+  `pairs-lookup`. Duplicates survive every operation, both orderings are stable,
+  and `pairs-lookup` answers once per value a key has, so an absent key has no
+  answer at all. `pairs-group` sorts by key itself, because the host's
+  `group_pairs_by_key/2` groups only adjacent pairs and answers the same key
+  twice for an unsorted relation.
+- `lib_sets` is a new library of sets as ordered expressions: `set-of`,
+  `set-is`, `set-member`, `set-insert`, `set-remove`, `set-union`,
+  `set-intersection`, `set-difference`, `set-symmetric-difference`,
+  `set-union-all`, `set-intersection-all`, `set-subset` and `set-disjoint`. A
+  set IS an expression in the standard order of terms with no duplicates, so
+  `()` is the empty set, `size-atom` is the cardinality and `==` is equality;
+  each merge is one pass down both sets. Membership compares terms rather than
+  unifying, so a variable is not a member of a set of numbers, and every head
+  refuses an argument that is not a set, which is where the host's own merge
+  answers `(2 1 1)` for `(2 1)` and `(1)` with nothing said.
+- `lib_functional` is a new library of the collection operations a program
+  writes over and over, each one pass over an expression: `zip`, `unzip`,
+  `drop`, `chunk`, `window`, `flatten-once`, `flatten-deep`, `partition`,
+  `group-by`, `sort-by`, `scan`, `unfold`, `pipe` and `apply-to`, plus the three
+  held control forms `while`, `repeat` and `unless`. Every head that takes a
+  function applies it through the evaluator, so a lambda, a defined name and a
+  partial application all work; `group-by` keeps its keys in first-appearance
+  order and `sort-by` is stable. The control forms hold their body and their
+  condition, which is what lets a loop decide whether to run the body at all.
+  Neither flatten takes the bare name `flatten`, which is the host's own
+  every-level one, and `sh check.sh lib-autoload` now refuses a published
+  library head that a module above `lib/` answers instead of the library.
+  `lib_patrick` keeps its four idioms and stays a separate import.
+- `lib_distribution` adds `ws-variance`, `ws-deviation`, `ws-central-moment`,
+  `ws-mass-at-most`, `ws-quantile`, `ws-median`, `ws-support` and
+  `ws-sum-independent`, each a fold over the normalized finite support rather
+  than a sample of it. The variance is computed about the mean in two passes,
+  because the one-pass form loses every significant digit at a large mean; a
+  quantile level outside (0, 1] and a negative draw count refuse with a remedy.
+- `lib_combinatorics` adds `permutations`, `subsets`, `tuples`,
+  `cartesian-power` and `range-step`, each answering one choice per answer, and
+  the exact counts `factorial`, `binomial` and `permutation-count`, which never
+  build what they count. Its two weighted-subset heads now declare their modes,
+  so the whole library's face is generated from the source.
+- `lib_datastructures` adds a sorted map and a priority queue as immutable
+  values: `map-empty`, `map-put`, `map-get`, `map-get-or`, `map-remove`,
+  `map-has`, `map-size`, `map-keys`, `map-values`, `map-pairs`,
+  `map-from-pairs`, `map-min`, `map-max`, `pq-empty`, `pq-insert`, `pq-min`,
+  `pq-pop`, `pq-remove`, `pq-size`, `pq-merge`, `pq-pairs` and
+  `pq-from-pairs`. Their nodes are MeTTa expressions, so `bind!` stores one and
+  a program prints, compares and walks one; the algorithms are SWI's own AVL
+  tree and pairing heap, adapted to that shape under `vendor/` and checked
+  against `library(assoc)` and `library(heaps)` over generated key sequences. A
+  lookup, a minimum and a removal of something absent have no answer; a
+  repeated key is refused where it is written and a repeated priority is kept.
+- `lib_spaces` adds `space-copy`, `move-atoms`, `space-drain`,
+  `space-snapshot` and `space-subtract` over whole spaces, each answering once
+  per atom it touched. `move-atoms` is what `migrateAtoms`' name promises;
+  `migrateAtoms` keeps upstream's own equation, which drains the source.
+- `lib_dict` adds `dict-get` with a default, `dict-update` over the stored
+  value, `dict-merge` and `dict-pop`. A key still holds one value, and an
+  absent key still has no answer where the operation answers values.
+- `lib_file` publishes 56 heads at 60 arities where it published 32: whole-file
+  and handle byte operations with text and byte handles kept apart by name,
+  `replace-file!` publishing by rename beside the in-place writers,
+  `rename-file!` as the host's rename with no copy fallback, `copy-dir!` and
+  `delete-tree!` over whole trees with symbolic links preserved as their text,
+  `dir-walk` and `dir-glob` answering one path per answer with declared link,
+  hidden-name and cycle policies, `path-normalize`, `path-absolute`,
+  `path-relative`, `path-resolve`, `path-stem` and `path-parts`, `file-kind`,
+  `same-file`, `read-link` and `make-link!`, and `with-file` and
+  `with-temp-dir` releasing their resource on exhaustion, cut and exception.
+  `file-close!` now reports a failed close instead of swallowing it,
+  `list-dir!` answers names in codepoint order, `file-space!` answers a
+  registered space for an empty file, and `temp-path!` refuses a prefix holding
+  a separator.
+- `lib_vector` adds validated component arithmetic, scaling, normalization,
+  distance and fill. Finite reductions use exact stored values and round once,
+  retaining cancellation residuals and finite directions across extreme ranges.
+  Generated imports, types and docs cover thirteen heads at fourteen arities.
+  Dimension mismatches raise by name. Existing shortcut, IEEE and random-draw
+  semantics remain; random counts now require integers and its documentation
+  identifies the positive-cube projection distribution.
+- Python atoms decoded from native rationals retain their numeric wire, value
+  identity, hashing, ordering and pickle across subsequent calls. Python-created
+  `Fraction` objects retain their existing opaque identity. Native number sorting
+  includes rational/float ties, NaN and signed zero. The optional mypyc codec
+  executes annotation builders through a deferred import instead of raising
+  from a branch omitted by type analysis; its build test now runs the artifact.
+- `lib_string` adds scalar-code conversion, exact splitting, last-index search,
+  overlap-aware counts, centering, lines, indentation, wrapping, named templates,
+  exact Levenshtein distance and ISub similarity. Literal operations share a
+  linear KMP traversal; text boundaries preserve NUL. Generated imports, types
+  and documentation cover all 34 heads. The C++ provider ships its source,
+  header dependencies and licenses; changed or missing headers invalidate the
+  native build cache. Unexpected `parse-number` exceptions now propagate.
+- Provenance pinning recognizes C++ comments and preserves C/C++ string,
+  raw-string, macro and header data. Malformed lexical forms refuse before
+  any file is rewritten.
+- `lib_csv` parses and encodes text, streams field lists, and atomically writes
+  or appends UTF-8 files. Every head accepts an explicit dialect. Fields retain
+  Unicode, NUL, quoted line endings and duplicates. Blank records now contain
+  zero fields; a quoted empty field contains one. Live views retain bounded
+  traversal storage; snapshots allocate fresh names and preserve logical record
+  numbers. Concurrent writers coordinate through a persistent sibling lock.
+  Failed constructors retain primary and cleanup errors through a shared
+  resource guard, including JSON object construction.
+- The Python twin audit follows locally assigned factory and source-door
+  aliases, including destructuring, and retains findings for ambiguous or
+  rebound names.
+- `lib_crypto` provides byte and streamed file digests, HMAC, secure byte
+  expressions and arbitrary-size integer intervals, PBKDF2-SHA512 password
+  records and Boolean verification. A checked OpenSSL 3 adapter propagates
+  provider failures and compares password digests through `CRYPTO_memcmp`.
+  Zero-sized random requests are valid. Reduced platforms retain five SHA
+  digests and SHA-1/SHA-256 HMAC. Regex and crypto share atomic native building;
+  current objects load without the optional subprocess library. Native C
+  support files now participate in evidence and provenance checks.
+- `lib_json` provides native JSON formatting, UTF-8 document files, streaming
+  JSON Lines and structural path lookup. File writes publish atomically after
+  close. Object construction reserves fresh names, stores special keys as data
+  and releases allocations on failure. Encoding preserves duplicate fields and
+  repeated aliases, and now rejects cyclic values and non-pair object atoms
+  instead of looping or silently discarding fields.
+- `lib_regex` provides compiled pattern values, full matching, capture scans,
+  character ranges, counting and literal quoting. Empty matches retain valid
+  nonempty alternatives; optional captures, typed substitutions and embedded
+  NUL text keep their values. All matching operations accept compiled patterns.
+  Compound captures retain their functor as an expression in every seat.
+  Its private PCRE2 binding builds locally on first import and reports missing
+  build dependencies. Portable wheels carry the source and build recipe.
+  Python native handles also retain a usable representation inside containers.
+- `lib_datetime` provides parsing, explicit-zone formatting, visible date
+  records, field queries, Gregorian calendar queries and calendar addition.
+  Existing clock and formatting names retain their results.
+- Prolog library faces derive imports, types and help from module exports and
+  typed PlDoc modes. The `prolog-face` gate refuses incomplete or stale faces.
+  Python faces also ship inside independent distributions; `metta-arrays`
+  advertises its generated library through `metta.libraries`. Evidence checks
+  cover nested distribution packages and the native declaration fixtures.
+
+- A standard-library census maps language concerns to the installed SWI-Prolog
+  libraries and records the implementation order, existing heads and boundaries.
+
 - A concurrency example exercises scope answer multiplicity, child joining,
   resource release and transfer, the `scope_body` longhand, and deferred
   evaluation through a captured space.
@@ -810,6 +1267,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the Python benchmark rows the wave moved; the automatic-tabling pins;
   memory-scale `support-drop-spaces`; the Node rows; the C boot row. Each row
   carries the ladder across the wave's landing tips that attributes its move.
+- Library reference entries and cards retain every declared overload.
+  `HeadCard.types` replaces the scalar `HeadCard.arrow` field with the complete
+  tuple of declarations. Source rosters,
+  counts and the example README can be regenerated from their existing
+  checkers and lineage generator. The twin idiom checker now verifies that
+  suggested attribute names preserve exact symbols, including `-`.
+
 - The evidence, provenance-pin and spec-status gates read the set git tracks
   for the root they scan, keyed by that root, so a selftest's planted tree is
   a repository and a stale build copy under an ignored directory is never a
@@ -1140,6 +1604,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   carry, so every profile door raised an engine error on a box quiet enough to
   finish the profiled goal inside one sampling period. The answer is recorded
   beside the run and an empty profile keeps its call rows.
+- The grammar reader reports Unicode code-point offsets, so astral characters
+  preserve token alignment with the Python lexer. Annotation builders retain
+  deferred dependency loading in both interpreted and compiled codecs.
+- Generator dependency discovery includes repository checker helpers. Protocol
+  list checks retain first-party adapters while preserving vendored providers;
+  generated function declarations reflect the current callable catalog.
+- The upstream removal fixture records the expanded Spaces library's exact
+  output: 26 removed atoms instead of 11, with the same removal equation and
+  all three upstream assertions passing. Further output drift still fails.
+- The library boundary checks use declared module ownership and inherited
+  namespaces, including private support providers and SWI message hooks.
+  File's socket-entry fixture works under long scratch paths by binding in
+  an owned child process's working directory.
+- Socket and Database cancellation fixtures observe worker completion through
+  their milestone channels, so an early worker failure is reported instead
+  of leaving the parent waiting for a message that cannot arrive.
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
   fixture producer uses the shared process bound. The syntax introduction

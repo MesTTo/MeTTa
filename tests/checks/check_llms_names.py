@@ -101,6 +101,7 @@ Open Obligations:
 
 from __future__ import annotations
 
+import argparse
 import inspect
 import os
 import re
@@ -231,6 +232,8 @@ _ROSTER = re.compile(
 )
 #: The same count where the sources table states it a second time.
 _TABLE_COUNT = re.compile(r"\|\s*`lib/lib_\*/`\s*\|\s*(?P<count>\d+) MeTTa libraries")
+ROSTER_BEGIN = "<!-- begin generated library roster -->"
+ROSTER_END = "<!-- end generated library roster -->"
 
 #: Closed-value prose is parsed only at a labelled contract. Pulling every
 #: backticked word from a whole section would admit examples, aliases and
@@ -281,6 +284,11 @@ _CAPABILITY_ROSTER = re.compile(
 #: Word forms are included because the prose uses them for several small
 #: counts; treating only decimal digits as claims was the original blind spot.
 _COUNT_CLAIMS = (
+    (
+        "Prolog library halves",
+        re.compile(r"\| `lib/lib_\*/` \|[^\n]*?all (?P<count>\d+) shipped Prolog halves"),
+        "prolog_library_halves",
+    ),
     (
         "executable example programs",
         re.compile(r"\| `examples/\*\*/\*\.metta` \| (?P<count>\d+) executable programs"),
@@ -712,6 +720,7 @@ def source_counts(root: Path = REPO) -> dict[str, int]:
             kind = match.group("kind")
             extension_kinds[kind] = extension_kinds.get(kind, 0) + 1
     counts = {
+        "prolog_library_halves": len(list((root / "lib").glob("*/*.pl"))),
         "example_programs": len(examples),
         "example_chapters": len(chapters),
         "highest_example_chapter": max(int(path.name[2:4]) for path in chapters),
@@ -737,6 +746,47 @@ def _number(written: str) -> int:
     if normalized.isdecimal():
         return int(normalized)
     return _NUMBER_WORDS[normalized]
+
+
+def refresh_source_claims(text: str, root: Path = REPO) -> str:
+    """Refresh derived numbers and the library roster, retaining authored notes.
+
+    The checker remains the authority for which prose makes a count claim.
+    Missing claim anchors refuse regeneration rather than discarding prose
+    [tested: tests/checks/check_llms_selftest.py; commit=9b22993447a5ddba93643895e3025661ba9f693e].
+    """
+    counts = source_counts(root)
+    shipped = sorted(path.name for path in (root / "lib").glob("lib_*") if path.is_dir())
+    changes = []
+    for label, pattern, key in _COUNT_CLAIMS:
+        match = pattern.search(text)
+        if match is None:
+            message = f"missing source-table count: {label}"
+            raise ValueError(message)
+        if _number(match.group("count")) != counts[key]:
+            changes.append((*match.span("count"), str(counts[key])))
+    changes.extend((*match.span("count"), str(len(shipped))) for match in _TABLE_COUNT.finditer(text))
+    for start, end, value in sorted(changes, reverse=True):
+        text = text[:start] + value + text[end:]
+    roster = _ROSTER.search(text)
+    if roster is None:
+        message = "missing library roster; restore its authored context before regeneration"
+        raise ValueError(message)
+    names = ", ".join(f"`{name}`" for name in shipped)
+    body = (f"{len(shipped)} libraries load with `!(import! &self (library lib_x))`:\n"
+            f"{names}. Scored answers and every documented head are listed in\n"
+            "`website/reference/metta-libraries.md`.\n")
+    generated = ROSTER_BEGIN + "\n" + body + ROSTER_END
+    if ROSTER_BEGIN in text or ROSTER_END in text:
+        begin, end = text.find(ROSTER_BEGIN), text.find(ROSTER_END)
+        if text.count(ROSTER_BEGIN) != 1 or text.count(ROSTER_END) != 1 or begin >= end:
+            message = "missing, reversed or repeated generated library roster markers"
+            raise ValueError(message)
+        return text[:begin] + generated + text[end + len(ROSTER_END):]
+    # Preserve the former roster's descriptive contracts as authored prose.
+    # The short roster above is the only membership claim after this migration.
+    notes = "Library contracts: " + roster.group("names").strip() + ". Scored"
+    return text[:roster.start()] + generated + "\n\n" + notes + text[roster.end():]
 
 
 def count_findings(
@@ -1348,7 +1398,18 @@ def omitted_head_findings(
 
 def main(argv: list[str] | None = None) -> int:
     """Report every stale claim, or say what was checked."""
-    del argv
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--write", action="store_true", help="regenerate source counts and the library roster")
+    arguments = parser.parse_args(argv)
+    if arguments.write:
+        try:
+            current = _ROOT_SHEET.read_text(encoding="utf-8")
+            wanted = refresh_source_claims(current)
+            if wanted != current:
+                _ROOT_SHEET.write_text(wanted, encoding="utf-8")
+        except (OSError, ValueError) as error:
+            print(f"llms: {error}", file=sys.stderr)
+            return 1
     findings: list[str] = []
     known: set[str] | None
     corpus_known: set[str] | None

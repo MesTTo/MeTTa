@@ -179,11 +179,10 @@ class HeadCard:
 
 > One head, as its library declares it and this engine classifies it.
 >
-> `arrow` is the type the library declares: an arrow for a function, which
-> is the case the name is for, `Type` for a type it defines, a plain type
-> for a value, and the LAST `(: ...)` row where a library writes more than
-> one, which is the declaration a reader of the source ends up with. `doc`
-> is the `(@doc ...)` prose formatted the way `help()` prints it. `effect`
+> `types` retains every type the library declares, including overloaded
+> function arrows, `Type` for a type it defines and plain types for values
+> .
+> `doc` is the `(@doc ...)` prose formatted the way `help()` prints it. `effect`
 > and `cost` are the live engine's answers and are None for a head it has
 > not classified, which includes every head of a library this process has
 > not imported.
@@ -202,7 +201,15 @@ def origin_text(self) -> str:
 def signature(self) -> str:
 ```
 
-> The head with its declared type, or the head alone.
+> Every declared type of the head, or the head alone.
+
+### `HeadCard.type_text`
+
+```python
+def type_text(self) -> str:
+```
+
+> The declared types in one table cell, retaining their source order.
 
 ### `HeadCard.__str__`
 

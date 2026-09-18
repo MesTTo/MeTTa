@@ -70,6 +70,7 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     operator_word_findings,
     operator_words,
     path_findings,
+    refresh_source_claims,
     return_findings,
 )
 
@@ -413,6 +414,10 @@ def main() -> int:
     # COUNTS: use the real table as the clean control, then corrupt one claim
     # in memory. The production derivation still reads the named source.
     source_text = SHEET.read_text(encoding="utf-8")
+    refreshed = refresh_source_claims(source_text)
+    expect(count_findings(SHEET, refreshed) == [], "regenerated source counts disagreed with their checker")
+    expect(library_findings(SHEET, refreshed) == [], "regenerated library roster disagreed with its checker")
+    expect(refresh_source_claims(refreshed) == refreshed, "source claim regeneration was not idempotent")
     expect(
         count_findings(SHEET, source_text) == [],
         "the sources table's exact counts were reported",
@@ -430,6 +435,10 @@ def main() -> int:
                 for finding in count_findings(SHEET, planted)
             ),
             "a wrong source-table count was NOT reported",
+        )
+        expect(
+            refresh_source_claims(planted) == refreshed,
+            "regeneration did not repair a planted count while preserving the sheet",
         )
 
     # The engine half must not fail OPEN: a swipl that ran and failed is a

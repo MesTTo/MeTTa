@@ -1,9 +1,9 @@
 ; Purpose: exercise strategy application, traversal and exact type selection.
 ; Guarantees: a subject with no matching type declines the typed strategy
-; [tested: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/13-strategy_internals.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+; [tested: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/13-strategy_internals.metta; commit=505ce25b9384e782afa26f621527d4b1fd695924].
 
 ;lib_strategy from the inside. The file before this one uses the combinators;
-;these are the seven operations they are written over, and they are ordinary
+;these are the application, traversal and type operations they use, and they are ordinary
 ;functions rather than a hidden layer, which is the library's whole claim:
 ;applying a strategy lowers to a MeTTa call and never installs a host
 ;callback.
@@ -11,11 +11,15 @@
 
 (= (mark $x) (marked $x))
 
-;`strategy-eval` is application itself: a strategy NAME and a term, answering
+;`strategy-eval` is application itself: a strategy value and a term, answering
 ;what the strategy answers. Every combinator bottoms out here.
 !(test (strategy-eval mark a) (marked a))
 !(test (strategy-eval id a) a)
 !(test (== (strategy-eval mark a) (strategy-apply mark a)) True)
+
+; Runtime strategy collections use the same first-nonempty-bag rule as choice.
+!(test (strategy-choice-tail (fail id mark) (+ 1 2)) (noeval (+ 1 2)))
+!(test (collapse (strategy-choice-tail () a)) ())
 
 ;`strategy-all` is `all`: the strategy at every immediate child, including
 ;the written expression head, because a head is a child in MeTTa's flat term
@@ -24,10 +28,9 @@
 !(test (strategy-all mark leaf) leaf)
 !(test (strategy-all mark ()) ())
 
-;`strategy-all-tail` is the recursion inside it: `strategy-all` takes the
-;head off, rewrites it, and hands the TAIL to this one, so the two agree on
-;an expression and differ on everything else. It is a tail rather than a
-;term, so a leaf has no answer here where `strategy-all` answers the leaf.
+;`strategy-all-tail` maps the strategy over an expression through map-atom.
+;It is the expression-only operation under strategy-all, so a leaf has no
+;answer here where strategy-all answers that leaf unchanged.
 !(test (strategy-all-tail mark (a b)) ((marked a) (marked b)))
 !(test (strategy-all-tail mark ()) ())
 !(test (== (strategy-all-tail mark (a b))

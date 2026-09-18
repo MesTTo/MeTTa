@@ -60,6 +60,21 @@ class ManifestTests(unittest.TestCase):
         for path, text in model.projections(self.root, self.rows).items():
             path.write_text(text, encoding="utf-8")
 
+    def test_planned_content_selects_header_owned_outputs(self) -> None:
+        """A new or migrating file selects one producer before its marker exists."""
+        first = replace(self.rows[0], outputs=(model.Output("new.txt", contains="first"),))
+        second = replace(self.rows[1], outputs=(model.Output("new.txt", contains="second"),))
+        rows = (first, second)
+        for present in (False, True):
+            if present:
+                (self.root / "new.txt").write_text("authored prefix", encoding="utf-8")
+            self.assertEqual(model.owner("new.txt", rows, self.root, content="second").name, second.name)
+            self.assertIn(second.name, model.notice("new.txt", rows, self.root, content="second"))
+            with self.assertRaises(KeyError):
+                model.owner("new.txt", rows, self.root, content="neither")
+            with self.assertRaises(KeyError):
+                model.owner("new.txt", rows, self.root, content="first second")
+
     def problems(self, rows=None) -> str:
         """Collect the actual checker's diagnostics for the selected declarations."""
         return "\n".join(model.findings(self.root, self.rows if rows is None else rows))

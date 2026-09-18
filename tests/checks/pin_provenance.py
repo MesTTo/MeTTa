@@ -30,12 +30,16 @@ than per byte:
   .sh .mk       the same rule with `#`, and a Makefile by NAME, since it
   Makefile      carries the same contract header its neighbours do and has no
                 suffix at all to key on.
-  .ts .mjs      the same rule with `//`, plus `/* ... */` blocks. The C seat
-  .c .h .rs     writes its whole contract in one leading `/* ... */`, so the
-                block half is not a fallback there but the usual case.
+  .ts .mjs .rs  the same rule with `//`, plus `/* ... */` blocks.
+  .c .h .cpp    C and C++ comments are located after consuming literal and
+  .cc .cxx      preprocessing tokens. Comment markers inside ordinary, raw
+  .hpp .hh .hxx and macro strings remain data; continued comments retain
+                their physical source positions.
   .json         commentless, so the measurement prose is the only place a pin
                 can be, and every placeholder in one is a pin. This is the rule
                 check_evidence_tags.provenance_sites already applies to them.
+  .cmake        CMakeLists.txt shares CMake's line and bracket comments;
+                quoted, bracket and escaped unquoted arguments remain data.
 
 Anything else is REFUSED by name rather than guessed at, and every occurrence
 the pass declines is printed with its reason, so a file class that starts
@@ -64,12 +68,18 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - a commit that does not resolve is refused before any file is opened
     [tested: tests/checks/check_pin_provenance_selftest.py]
-  - Rust line and block header pins resolve through the same comment rule
-    as C, while bare string literals stay unchanged
+  - Rust line and block header pins resolve while bare string literals
+    stay unchanged
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - TOML substitutions preserve the parsed configuration; keys and values
     cannot be rewritten as header comments
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=f88b11ae305c4e1bfafa8387d1f24e51d0d8cb92]
+  - C and C++ pins resolve inside comments while quoted and raw strings,
+    macro strings and header names retain their bytes
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
+  - CMake comment pins resolve while all three argument forms retain their
+    bytes; unterminated quotes and brackets refuse before writing
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.
@@ -87,6 +97,7 @@ import re
 import subprocess
 import sys
 import tomllib
+from bisect import bisect_left
 from functools import cache
 from pathlib import Path
 
@@ -116,7 +127,9 @@ BLANK_LINE = re.compile(r"\n[ \t]*\n")
 #: `/* ... */` form is what a file whose top level is markup can carry.
 PERCENT_COMMENT = (".pl", ".plt")
 HASH_COMMENT = (".sh", ".mk")
-SLASH_COMMENT = (".ts", ".mjs", ".js", ".c", ".h", ".rs", ".vue")
+SLASH_COMMENT = (".ts", ".mjs", ".js", ".rs", ".vue")
+C_COMMENT = (".c", ".h")
+CPP_COMMENT = (".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".C")
 SEMICOLON_COMMENT = (".metta",)
 MAKEFILE_NAMES = ("Makefile", "GNUmakefile")
 
@@ -134,15 +147,166 @@ BLOCK_GRAMMARS = ("//", "%")
 #: replace.
 LINE_ONLY_GRAMMARS = ("#", ";")
 
+# Consume literal and preprocessing tokens before considering their markers.
+# Line splices are reversed inside raw strings as C++23 N4950 requires:
+# https://timsong-cpp.github.io/cppwp/n4950/lex.pptoken#3.1
+C_SPLICE = re.compile(r"\\[ \t\v\f]*\r?\n")
+C_TOKEN = re.compile(
+    r"(?P<space>\s+)|(?P<comment>//|/\*)|"
+    r'(?P<raw>(?:u8|[uUL])?R")|'
+    r'''(?P<quoted>"(?:\\[^\n]|[^"\\\n])*"|'(?:\\[^\n]|[^'\\\n])*')|'''
+    r"(?P<number>(?:[0-9]|\.[0-9])(?:[eEpP][+-]|[\w.'])*)|"
+    r"(?P<word>[^\W\d]\w*)|(?P<other>.)",
+    re.DOTALL,
+)
+# The delimiter's sixteen-character bound and alphabet are the language's.
+# https://timsong-cpp.github.io/cppwp/n4950/lex.string#2
+C_RAW_DELIMITER = re.compile(r"([\x21-\x27\x2a-\x5b\x5d-\x7e]{0,16})\(")
+
+
+def _c_comment_spans(path: Path, text: str) -> list[tuple[int, int]]:
+    """Locate C-family comment prose while preserving physical source offsets."""
+    chunks: list[str] = []
+    offsets: list[int] = []
+    last = 0
+    for splice in C_SPLICE.finditer(text):
+        chunks.append(text[last:splice.start()])
+        offsets.extend(range(last, splice.start()))
+        last = splice.end()
+    chunks.append(text[last:])
+    offsets.extend(range(last, len(text) + 1))
+    logical = "".join(chunks)
+    comments: list[tuple[int, int]] = []
+    position, previous_end = 0, 0
+    context = "line"
+
+    def refuse(at: int, description: str) -> None:
+        line = text.count("\n", 0, offsets[at]) + 1
+        message = f"pin_provenance: {path}:{line}: {description}"
+        raise SystemExit(message)
+
+    while position < len(logical):
+        # Header names have no escape syntax. Consume them before the quoted
+        # literal rule, which would give a backslash a different meaning.
+        if context == "header" and logical[position] in ('<', '"'):
+            closing = ">" if logical[position] == "<" else '"'
+            end = logical.find(closing, position + 1)
+            newline = logical.find("\n", position + 1)
+            if end < 0 or 0 <= newline < end:
+                refuse(position, "unterminated C/C++ header name")
+            position, context = end + 1, ""
+            continue
+        token = C_TOKEN.match(logical, position)
+        assert token is not None
+        kind, value = token.lastgroup, token.group()
+        start, position = token.span()
+        if kind == "space":
+            if "\n" in value:
+                context = "line"
+            continue
+        if kind == "comment":
+            closing = "\n" if value == "//" else "*/"
+            end = logical.find(closing, position)
+            if end < 0 and value == "/*":
+                refuse(start, "unterminated C/C++ block comment")
+            position = len(logical) if end < 0 else end + (2 if value == "/*" else 0)
+            span = (offsets[start], offsets[position])
+            if comments and not logical[previous_end:start].strip():
+                comments[-1] = (comments[-1][0], span[1])
+            else:
+                comments.append(span)
+            previous_end = position
+            continue
+        if kind == "raw":
+            opening = offsets[position - 1] + 1
+            delimiter = C_RAW_DELIMITER.match(text, opening)
+            if delimiter is None:
+                refuse(start, "invalid C++ raw-string delimiter")
+            closing = ")" + delimiter[1] + '"'
+            end = text.find(closing, delimiter.end())
+            if end < 0:
+                refuse(start, "unterminated C++ raw string")
+            position = bisect_left(offsets, end + len(closing))
+        elif value in ('"', "'"):
+            refuse(start, "unterminated C/C++ string or character literal")
+        if value == "#" and context == "line":
+            context = "directive"
+        elif kind == "word" and context == "directive" and value in ("include", "include_next", "import"):
+            context = "header"
+        elif kind == "word" and value in ("__has_include", "__has_include_next"):
+            context = "has_include"
+        elif value == "(" and context == "has_include":
+            context = "header"
+        elif value == "export" and context == "line" and path.suffix in CPP_COMMENT:
+            context = "export"
+        elif value == "import" and context in ("line", "export") and path.suffix in CPP_COMMENT:
+            context = "header"
+        else:
+            context = ""
+    return comments
+
+
+# Consume complete unquoted arguments before looking for brackets or comments.
+# These productions follow CMake 3.18's lexer, including its legacy arguments:
+# https://github.com/Kitware/CMake/blob/v3.18.0/Source/LexerParser/cmListFileLexer.in.l#L76-L79
+CMAKE_MAKEVAR = r"\$\([A-Za-z0-9_]*\)"
+CMAKE_UNQUOTED = r'(?:[^ \0\t\r\n()#\\"\[=]|\\[^\0\n])'
+CMAKE_LEGACY = rf'(?:{CMAKE_MAKEVAR}|{CMAKE_UNQUOTED}|"(?:{CMAKE_MAKEVAR}|{CMAKE_UNQUOTED}|[ \t\[=])*")'
+CMAKE_WORD = re.compile(rf'(?:{CMAKE_MAKEVAR}|{CMAKE_UNQUOTED}|=|\[=*{CMAKE_LEGACY})(?:{CMAKE_LEGACY}|[\[=])*')
+CMAKE_BRACKET = re.compile(r"#?\[(=*)\[")
+CMAKE_QUOTED = re.compile(r'"(?:\\[\s\S]|[^"\\\0])*"')
+
+
+def _cmake_comment_spans(path: Path, text: str) -> list[tuple[int, int]]:
+    """Locate comments after consuming CMake's bracket, quoted and bare tokens."""
+    comments = []
+    position = 0
+
+    def refuse(description: str) -> None:
+        line = text.count("\n", 0, position) + 1
+        message = f"pin_provenance: {path}:{line}: {description}"
+        raise SystemExit(message)
+
+    while position < len(text):
+        start = position
+        if text[position] == "\0":
+            refuse("NUL in CMake source")
+        if bracket := CMAKE_BRACKET.match(text, position):
+            closing = "]" + bracket[1] + "]"
+            end = text.find(closing, bracket.end())
+            if end < 0:
+                refuse("unterminated CMake bracket argument or comment")
+            position = end + len(closing)
+            if text[start] == "#":
+                comments.append((start, position))
+        elif text[position] == "#":
+            end = text.find("\n", position)
+            position = len(text) if end < 0 else end
+            comments.append((start, position))
+        elif text[position] == '"':
+            quoted = CMAKE_QUOTED.match(text, position)
+            if quoted is None:
+                refuse("unterminated CMake quoted argument")
+            position = quoted.end()
+        elif word := CMAKE_WORD.match(text, position):
+            position = word.end()
+        else:
+            position += 1
+    return comments
+
 
 def _grammar(path: Path) -> str | None:
     """The comment rule this file's class implies, or None to refuse it."""
     if path.suffix == ".py":
         return "py"
+    if path.name == "CMakeLists.txt" or path.suffix == ".cmake":
+        return "cmake"
     if path.suffix in PERCENT_COMMENT:
         return "%"
     if path.suffix in HASH_COMMENT or path.name in MAKEFILE_NAMES:
         return "#"
+    if path.suffix in (*C_COMMENT, *CPP_COMMENT):
+        return "c"
     if path.suffix in SLASH_COMMENT:
         return "//"
     if path.suffix in SEMICOLON_COMMENT:
@@ -264,6 +428,10 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
     configuration = tomllib.loads(text, parse_float=str) if grammar == "toml" else None
     if grammar == "py":
         skip = _docstring_spans(text)
+    elif grammar == "c":
+        skip = _c_comment_spans(path, text)
+    elif grammar == "cmake":
+        skip = _cmake_comment_spans(path, text)
     elif grammar in BLOCK_GRAMMARS:
         skip = [match.span() for match in BLOCK_COMMENT.finditer(text)]
     elif grammar == "md":
@@ -274,7 +442,14 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         at = match.start()
         line = text.count("\n", 0, at) + 1
         reason: str | None = None
-        if _backticked(text, at):
+        if grammar in ("c", "cmake"):
+            comment = next(((low, high) for low, high in skip if low <= at < high), None)
+            if comment is None:
+                language = "C/C++" if grammar == "c" else "CMake"
+                reason = f"outside a {language} comment: this code emits or matches pins"
+            elif _backticked(text[comment[0]:comment[1]], at - comment[0]):
+                reason = "a backticked mention of the placeholder, not a pin"
+        elif _backticked(text, at):
             reason = "a backticked mention of the placeholder, not a pin"
         elif grammar == "toml":
             candidate = text[:at] + "commit=PROVENANCE" + text[match.end():]

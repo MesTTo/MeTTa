@@ -50,3 +50,26 @@
 ;dictionary API would offer: which key holds a given value.
 !(bind! &stock (dict-space ((apple 12) (pear 12) (plum 4))))
 !(test (sort-atom (collapse (match &stock ($k 12) $k))) (apple pear))
+
+;`dict-get` answers a value where `dict-values` and `get-value` answer nothing:
+;a lookup that has to produce something takes the default with it.
+!(test (dict-get &stock apple 0) 12)
+!(test (dict-get &stock durian 0) 0)
+
+;`dict-update` applies a function to the value that is there and puts the
+;result back, so a read, a call and a write are one operation. An absent key
+;leaves the dict alone, because there is no value to apply the function to.
+!(test (dict-get (dict-update &stock plum (|-> ($v) (+ $v 6))) plum 0) 10)
+!(test (dict-get (dict-update &stock durian (|-> ($v) (+ $v 6))) durian absent) absent)
+
+;`dict-merge` puts every pair of the second dict into the first, so the
+;second's value wins on a key they share.
+!(bind! &delivery (dict-space ((pear 20) (fig 2))))
+!(test (sort-atom (dict-pairs (dict-merge &stock &delivery)))
+       ((apple 12) (fig 2) (pear 20) (plum 10)))
+
+;`dict-pop` reads and removes in one operation. An absent key has no answer,
+;which is what tells it apart from a stored value.
+!(test (dict-pop &stock fig) 2)
+!(test (dict-has &stock fig) False)
+!(test (collapse (dict-pop &stock fig)) ())

@@ -189,6 +189,8 @@ decons-atom                       08-01-19
 get-metatype                      08-02-01
 format-args                       08-03-03
 sort-strings                      08-03-03
+from                              08-03-05
+internal                          08-03-05
 get-doc                           08-03-08
 undocumented                      08-03-08
 defined-name                      08-03-10
@@ -201,7 +203,10 @@ get-doc-single-atom               08-03-10
 get-doc-space                     08-03-10
 help!                             08-03-10
 undocumented-space                08-03-10
-get-type                          09-00-01
+get-type                          08-03-36
+timeout                           08-03-38
+transaction                       08-03-38
+assertEqualToResult               08-03-43
 new-state                         09-00-15
 add-typing-rule!                  09-00-16
 remove-typing-rule!               09-00-16
@@ -225,7 +230,6 @@ assertAlphaEqualMsg               12-00-01
 assertAlphaEqualToResult          12-00-01
 assertAlphaEqualToResultMsg       12-00-01
 assertEqualMsg                    12-00-01
-assertEqualToResult               12-00-01
 assertEqualToResultMsg            12-00-01
 assertIncludes                    12-00-01
 if-equal                          12-00-02
@@ -237,13 +241,11 @@ evalc                             14-00-01
 inferences                        14-00-01
 metta                             14-00-01
 sleep                             14-00-01
-timeout                           14-00-01
 read-form!                        14-00-02
 argv                              14-00-03
 current-time                      14-00-03
 format-time                       14-00-03
 hyperpose                         15-00-01
-transaction                       15-00-01
 with_mutex                        15-00-01
 change-state!                     15-00-02
 declare-pre-add!                  15-00-03

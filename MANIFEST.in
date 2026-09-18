@@ -9,6 +9,7 @@ recursive-exclude lib __pycache__ *.py[co]
 # binary in a py3-none-any package.
 recursive-exclude engine *.qlf .qlf-stamp *.so *.o
 recursive-exclude lib *.qlf *.so *.o
+prune lib/*/.native
 include extensions/python/helper.pl
 include CHANGELOG.md
 include CITATION.cff

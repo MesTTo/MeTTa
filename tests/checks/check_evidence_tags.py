@@ -6,6 +6,12 @@ history, including all four cited by the engine pool's Guarantees block. A
 claim with nothing behind it is indistinguishable from the many that are real,
 which is what makes it corrosive rather than untidy.
 
+Guarantees: nested distribution modules, native library and suite support,
+CMake recipes, vendor configuration headers and nested host reproductions participate in
+the same evidence and provenance checks as their callers
+[tested: tests/checks/check_evidence_selftest.py,
+tests/checks/check_pin_provenance_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
+
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
 reader [tested: test_contract_checks_detect_signature_and_evidence_drift,
@@ -189,6 +195,9 @@ GUARANTEE_SOURCES = (
     "engine/*.h",
     "extensions/*/extension.pl",
     "lib/*/*.pl",
+    "lib/*/support/*.pl",
+    "lib/*/support/*.c",
+    "lib/*/support/*.cpp",
     "lib/*/*.py",
     # A library's MeTTa half makes the same claims its Prolog half does,
     # and pin_provenance reported them as "OUTSIDE the evidence gate's
@@ -203,9 +212,8 @@ GUARANTEE_SOURCES = (
     # library's row now lives, so leaving them out would make the ruling of
     # 2026-09-08 the one change whose evidence nothing reads [measured
     # 2026-09-08 by tests/checks/pin_provenance.py: 24 placeholders in fourteen
-    # files sat outside these globs before the two lines below].
-    "extensions/python/ext/metta-*/*.py",
-    "extensions/python/ext/metta-*/tests/*.py",
+    # files sat outside these globs before distribution sources were included].
+    "extensions/python/ext/metta-*/**/*.py",
     # And the two files above them: the hook that puts a member on the path for
     # the suite, and the one implementation both it and the benchmark drivers
     # call.
@@ -215,6 +223,8 @@ GUARANTEE_SOURCES = (
     "extensions/mork/tests/*.py",
     "extensions/python/tools/*.py",
     "extensions/python/tools/*.pl",
+    "tests/data/prologface/*.pl",
+    "tests/data/prologface/*.metta",
     "tests/checks/*.py",
     # The Python suites carry 536 tags of their own, the largest block
     # the lane could not see.
@@ -229,6 +239,8 @@ GUARANTEE_SOURCES = (
     # The plunit suites make the same claims their subjects do, in their
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
+    # Shared suite helpers carry contracts even when they declare no test unit.
+    "tests/prolog/suites/**/*.pl",
     # The module-boundary fixtures carry their own test-backed contracts
     # [source: tests/prolog/suites/seams/engine_modules.plt; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
     "tests/prolog/module_fixtures/*.pl",
@@ -239,8 +251,9 @@ GUARANTEE_SOURCES = (
     # A host-workaround reproduction is the same class, tracked so its
     # `present`/`absent` answer can be re-run; its header states what was
     # measured [source: docs/host-workarounds.md; commit=2bd6b250a22d9898ced449595c168a8dc3a78768].
-    "tests/checks/host_workarounds/*.pl",
-    "tests/checks/host_workarounds/*.sh",
+    "tests/checks/host_workarounds/**/*.pl",
+    "tests/checks/host_workarounds/**/*.sh",
+    "tests/checks/host_workarounds/**/*.py",
     # And the Python half of the same class, which the seat grew on 2026-09-07.
     # A probe is where a measurement's reproduction is TRACKED rather than left
     # in a checkout, which is what the scratch rule below asks authors to do, so
@@ -321,6 +334,10 @@ GUARANTEE_SOURCES = (
 #: `tests/prolog/vendor/*.pl` 3; `tests/fixtures/*.pl` 2; `engine/*.metta` 1;
 #: `extensions/cmetta/kit/*.c` 1; `tests/conformance/*.py` 1.
 CLAIM_SOURCES = (
+    # Native build recipes and their handwritten provider configuration.
+    "**/CMakeLists.txt",
+    "**/*.cmake",
+    "lib/*/vendor/*.h",
     # Root build hooks state the resources their distributions contain.
     "*.py",
     # THE GATE'S OWN RUNNERS. Every shell script the repository ships, which

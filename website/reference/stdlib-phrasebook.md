@@ -66,8 +66,8 @@ Provenance: 384 distinct stdlib names, each with one row.
 
 Section 9e claims that a structure operation on an atom already held in Python
 costs no engine crossing at all. Measured over the rows that run both sides:
-the MeTTa forms cost 38,511,739 engine inferences and the Python spellings
-cost 39,720,760, and 87 of the 136 rows cost the engine EXACTLY
+the MeTTa forms cost 35,763,265 engine inferences and the Python spellings
+cost 36,975,688, and 87 of the 136 rows cost the engine EXACTLY
 NOTHING. `e[0]`, `e[1:]`, `len(e)`, `max([...])` and `S.f(1)` each read the same
 count as an empty measurement block, so the claim holds: the work never reaches
 the engine at all.
@@ -161,7 +161,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 
 - `abs-math` `(-> Number Number)` &mdash; Python's builtin `abs`.
 - `sqrt-math` `(-> Number Number)` &mdash; `math.sqrt`.
-- `pow-math` `(-> Number Number Number)` &mdash; Python's `**` operator. MeTTa answers a float where Python's integer power answers an integer, so the row raises a float.
+- `pow-math` `(-> Number Number Number)` &mdash; Python's `**` operator. Both preserve integer powers for integer operands; this row uses a floating base and returns a float.
 - `log-math` `(-> Number Number Number)` &mdash; `math.log(x, base)`, with the arguments the other way round: MeTTa takes the base first.
 - `sin-math` `(-> Number Number)` &mdash; `math.sin`.
 - `cos-math` `(-> Number Number)` &mdash; `math.cos`.
@@ -287,7 +287,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `quote` `(-> Atom Atom)` &mdash; There is nothing to quote: building a term with `S[...]` never evaluates it, so the quoting question does not arise. `S.quote(x)` builds the term itself where a program needs the constructor. Where they differ: a wrapper-keeping quote answers (quote (+ 1 2)); this engine and Python answer (+ 1 2), which is upstream's own lowering, `Out = Expr` [source: PeTTa@ae66fa8 src/translator.pl:320-322].
 - `noeval` `(-> Atom Atom)` &mdash; The same point as `quote`: a built term is already unevaluated.
 - `unquote` `(-> %Undefined% %Undefined%)` &mdash; Reducing a quoted term is `m.eval`, primitive 4.
-- `gtry` `(-> Atom Atom Atom)` &mdash; the guarded try is lib_strategy's binary failure-to-identity spelling. Python builds the same gtry atom and evaluates it in the space.
+- `gtry` `(-> Atom Atom %Undefined%)` &mdash; the guarded try is lib_strategy's binary failure-to-identity spelling. Python builds the same gtry atom and evaluates it in the space.
 - `case%` `(-> Atom Expression %Undefined%)` &mdash; the `%`-suffixed variant, the error-transparent twin of `case`. This engine ships no `%` family. The form is shown but not run here: this engine leaves the call unreduced.
 - `let%` `(-> Atom %Undefined% Atom %Undefined%)` &mdash; the error-transparent twin of `let`. The form is shown but not run here: this engine leaves the call unreduced.
 - `let*%` `(-> Expression Atom %Undefined%)` &mdash; the error-transparent twin of `let*`. The form is shown but not run here: this engine leaves the call unreduced.
@@ -351,7 +351,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 | `!(get-type PairType)` | &mdash; | &mdash; | absent |
 | `!(skel-swap-pair (Pair 1 2))` | &mdash; | &mdash; | absent |
 | `!(skel-swap-pair-native (Pair 1 2))` | &mdash; | &mdash; | absent |
-| `!(get-type ◁)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.eval(S['get-type'](S['◁']))` | `(-> Atom Type Atom Atom)` | method |
+| `!(get-type ◁)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.eval(S['get-type'](S['◁']))` | `(-> Atom Type Atom %Undefined%)` | method |
 
 - `get-type` `(-> Atom %Undefined%)` &mdash; Declared types are space-relative, so `space.type(atom)` asks the space. Class declarations use the consolidated `@space.define` decorator.
 - `get-type-space` `(-> SpaceType Atom Atom)` &mdash; The same question asked of a named space through that handle's `space.type(atom)` method.
@@ -366,7 +366,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `PairType` `(-> $ta $tb Type)` &mdash; The parameterised type of `Pair`, from the same module. The form is shown but not run here: this engine does not declare the name.
 - `skel-swap-pair` `(-> (PairType $ta $tb) (PairType $tb $ta))` &mdash; The `skel` module's worked equation, the demonstration that a built-in module can ship both a MeTTa and a native implementation. The form is shown but not run here: this engine does not declare the name.
 - `skel-swap-pair-native` `(-> (PairType $ta $tb) (PairType $tb $ta))` &mdash; The native half of the same demonstration. The form is shown but not run here: this engine does not declare the name.
-- `◁` `(-> Atom Type Atom Atom)` &mdash; The typed strategy-application atom selects the TP or TU scheme before running the named strategy.
+- `◁` `(-> Atom Type Atom %Undefined%)` &mdash; The typed strategy-application atom selects the TP or TU scheme before running the named strategy.
 
 ## The state cell
 
@@ -500,11 +500,11 @@ Python side does not move. Within one run the counts are exact: three fresh
 
 | MeTTa | Python | answers | bucket |
 |---|---|---|---|
-| `(= (pb-try-step strategy-a) strategy-b) ⏎ (= (pb-try-step $x) Empty) ⏎ !(strategy-apply (try pb-try-step) strategy-a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-try-step strategy-a) strategy-b) (= (pb-try-step $x) Empty)') ⏎ space.eval(S['strategy-apply'](strategy.try_(S['pb-try-step']), S['strategy-a']))` | `strategy-b` | method |
-| `(= (pb-repeat-step strategy-a) strategy-b) ⏎ (= (pb-repeat-step strategy-b) strategy-c) ⏎ (= (pb-repeat-step $x) Empty) ⏎ !(strategy-apply (repeat pb-repeat-step) strategy-a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-repeat-step strategy-a) strategy-b) (= (pb-repeat-step strategy-b) strategy-c) (= (pb-repeat-step $x) Empty)') ⏎ space.eval(S['strategy-apply'](strategy.repeat(S['pb-repeat-step']), S['strategy-a']))` | `strategy-c` | method |
-| `(= (pb-topdown-step strategy-a) strategy-b) ⏎ (= (pb-topdown-step $x) Empty) ⏎ !(strategy-apply (topdown (try pb-topdown-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-topdown-step strategy-a) strategy-b) (= (pb-topdown-step $x) Empty)') ⏎ plan = strategy.topdown(strategy.try_(S['pb-topdown-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `(strategy-node strategy-b)` | method |
-| `(= (pb-bottomup-step strategy-a) strategy-b) ⏎ (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) ⏎ (= (pb-bottomup-step $x) Empty) ⏎ !(strategy-apply (bottomup (try pb-bottomup-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-bottomup-step strategy-a) strategy-b) (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) (= (pb-bottomup-step $x) Empty)') ⏎ plan = strategy.bottomup(strategy.try_(S['pb-bottomup-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-bottomup-root` | method |
-| `(= (pb-innermost-step strategy-a) strategy-b) ⏎ (= (pb-innermost-step strategy-b) strategy-c) ⏎ (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) ⏎ (= (pb-innermost-step $x) Empty) ⏎ !(strategy-apply (innermost pb-innermost-step) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-innermost-step strategy-a) strategy-b) (= (pb-innermost-step strategy-b) strategy-c) (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) (= (pb-innermost-step $x) Empty)') ⏎ plan = strategy.innermost(S['pb-innermost-step']) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-innermost-root` | method |
+| `(= (pb-try-step strategy-a) strategy-b) ⏎ (= (pb-try-step $x) (empty)) ⏎ !(strategy-apply (try pb-try-step) strategy-a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-try-step strategy-a) strategy-b) (= (pb-try-step $x) (empty))') ⏎ space.eval(S['strategy-apply'](strategy.try_(S['pb-try-step']), S['strategy-a']))` | `strategy-b` | method |
+| `(= (pb-repeat-step strategy-a) strategy-b) ⏎ (= (pb-repeat-step strategy-b) strategy-c) ⏎ (= (pb-repeat-step $x) (empty)) ⏎ !(strategy-apply (repeat pb-repeat-step) strategy-a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-repeat-step strategy-a) strategy-b) (= (pb-repeat-step strategy-b) strategy-c) (= (pb-repeat-step $x) (empty))') ⏎ space.eval(S['strategy-apply'](S.repeat(S['pb-repeat-step']), S['strategy-a']))` | `strategy-c` | method |
+| `(= (pb-topdown-step strategy-a) strategy-b) ⏎ (= (pb-topdown-step $x) (empty)) ⏎ !(strategy-apply (topdown (try pb-topdown-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-topdown-step strategy-a) strategy-b) (= (pb-topdown-step $x) (empty))') ⏎ plan = strategy.topdown(strategy.try_(S['pb-topdown-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `(strategy-node strategy-b)` | method |
+| `(= (pb-bottomup-step strategy-a) strategy-b) ⏎ (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) ⏎ (= (pb-bottomup-step $x) (empty)) ⏎ !(strategy-apply (bottomup (try pb-bottomup-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-bottomup-step strategy-a) strategy-b) (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) (= (pb-bottomup-step $x) (empty))') ⏎ plan = strategy.bottomup(strategy.try_(S['pb-bottomup-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-bottomup-root` | method |
+| `(= (pb-innermost-step strategy-a) strategy-b) ⏎ (= (pb-innermost-step strategy-b) strategy-c) ⏎ (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) ⏎ (= (pb-innermost-step $x) (empty)) ⏎ !(strategy-apply (innermost pb-innermost-step) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-innermost-step strategy-a) strategy-b) (= (pb-innermost-step strategy-b) strategy-c) (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) (= (pb-innermost-step $x) (empty))') ⏎ plan = strategy.innermost(S['pb-innermost-step']) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-innermost-root` | method |
 | `!(stratego-all id (f a b))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ plan = strategy.stratego_all(metta.fn.id) ⏎ space.eval(S['strategy-apply'](plan, S.f(S.a, S.b)))` | `(f a b)` | method |
 | `!(stratego-one id (f a b))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ plan = strategy.stratego_one(metta.fn.id) ⏎ space.eval(S['strategy-apply'](plan, S.f(S.a, S.b)))` | `(f a b), (f a b), (f a b)` | method |
 | `!(stratego-some id (f a b))` | &mdash; | &mdash; | absent |
@@ -513,51 +513,53 @@ Python side does not move. Within one run the counts are exact: three fresh
 | `!(reduce-via-match (+ 1 2) x)` | &mdash; | &mdash; | absent |
 
 MeTTa's complete shipped basis is reified below. Every plan cell is ordinary
-queryable atom data, and every row is exercised by
-`examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta` through the normal library runner.
+queryable atom data. The Strategy examples exercise its traversal and type
+laws; the Reflect example composes topmost traversal with literal replacement.
 
 Each row is projected from the library's own source: the name and the form
 from its `(: ...)` declaration, one argument per position of the declared
-arrow, and the Python spelling from the face's own attribute map. `face` is
+arrow, its description from `@doc`, and its Python spelling from the face. `face` is
 `metta.library.face("lib_strategy")`, the library's own heads as Python
 names; `fn` is `metta.fn`, the engine's.
 
 | public name | reified plan or MeTTa form | Python atom | law |
 |---|---|---|---|
 | `id` | `id` | `fn.id` | `id(t) = t` |
-| `strategy-eval` | `(strategy-eval $a $b)` | `face.strategy_eval` | the evaluator every plan is applied through |
-| `strategy-all` | `(strategy-all $a $b)` | `face.strategy_all` | the evaluator's own all-children step |
-| `strategy-all-tail` | `(strategy-all-tail $a $b)` | `face.strategy_all_tail` | the evaluator's own child-list recursion |
-| `strategy-one` | `(strategy-one $a $b)` | `face.strategy_one` | the evaluator's own one-child step |
-| `strategy-apply` | `(strategy-apply $a $b)` | `face.strategy_apply` | translator-lowers to the atom `(strategy-eval s t)` |
-| `fail` | `(fail $a)` | `face.fail` | answers no result |
-| `seq` | `(seq $a $b $c)` | `face.seq` | `s2(s1(t))` |
-| `choice` | `(choice $a $b $c)` | `face.choice` | complete left result bag, or `right(t)` only when that bag is empty |
-| `try` | `(try $a $b)` | `face.try_` | `choice(s, id)` |
-| `gtry` | `(gtry $a $b)` | `face.gtry` | `gtry(s, t) = try(s)(t)`, the direct call form |
-| `repeat` | `(repeat $a $b)` | `face.repeat` | `try(seq(s, repeat(s)))` |
-| `all` | `(all $a $b)` | `face.all` | apply `s` to every immediate child |
-| `one` | `(one $a $b)` | `face.one` | enumerate each successful one-child rewrite |
-| `topdown` | `(topdown $a $b)` | `face.topdown` | `seq(s, all(topdown(s)))` |
-| `bottomup` | `(bottomup $a $b)` | `face.bottomup` | `seq(all(bottomup(s)), s)` |
-| `innermost` | `(innermost $a $b)` | `face.innermost` | `bottomup(try(seq(s, innermost(s))))` |
-| `stratego-all` | `(stratego-all $a $b)` | `face.stratego_all` | public alias of `all(s)` |
-| `stratego-one` | `(stratego-one $a $b)` | `face.stratego_one` | public alias of `one(s)` |
-| `TP` | `TP` | `face.TP` | type-preserving strategy scheme |
-| `TU` | `(TU $a)` | `face.TU` | type-unifying strategy scheme |
-| `◁` | `(◁ $a $b $c)` | `face['◁']` | apply only when the declared strategy arrow fits the scheme |
-| `strategy-typed-tp` | `(strategy-typed-tp $a $b)` | `face.strategy_typed_tp` | the evaluator's `TP` scheme check |
-| `strategy-typed-tu` | `(strategy-typed-tu $a $b $c)` | `face.strategy_typed_tu` | the evaluator's `TU` scheme check |
-| `strategy-typed-apply` | `(strategy-typed-apply $a $b $c)` | `face.strategy_typed_apply` | the evaluator's scheme-checked application |
+| `strategy-eval` | `(strategy-eval $arg1 $arg2)` | `face.strategy_eval` | Apply a held rewrite plan or callable value to a literal term. Named functions, lambdas and partial applications use ordinary application. An unbound strategy declines. Preserve every answer and its bindings, including literal Empty; (empty) produces no answer. |
+| `strategy-all` | `(strategy-all $arg1 $arg2)` | `face.strategy_all` | Rewrite every immediate child, including an expression's head. A leaf and the empty expression are identities. A declining child ends that combination; branching children produce every combination. |
+| `strategy-all-tail` | `(strategy-all-tail $arg1 $arg2)` | `face.strategy_all_tail` | Map a strategy over a literal expression through map-atom. Unlike strategy-all, a non-expression declines. |
+| `strategy-one` | `(strategy-one $arg1 $arg2)` | `face.strategy_one` | Rewrite exactly one immediate child, answering every successful position from left to right. Preserve other children literally. Leaves, empty expressions and all-declining children have no answer. |
+| `strategy-apply` | `(strategy-apply $arg1 $arg2)` | `face.strategy_apply` | Lower a held strategy application to strategy-eval through the ordinary translator-rule door. |
+| `strategy-choice-tail` | `(strategy-choice-tail $arg1 $arg2)` | `face.strategy_choice_tail` | Apply held strategies in order until one has answers, then return that complete bag. An empty sequence declines. Shared bindings survive collapse-bind and superpose-bind. |
+| `fail` | `(fail $arg1)` | `face.fail` | Decline every term. |
+| `seq` | `(seq $arg1 (:seg $arg2))` | `face.seq` | Apply zero or more held strategies from left to right to the final literal term. Zero strategies is identity. A runtime plan is (seq Rule ...). |
+| `choice` | `(choice $arg1 (:seg $arg2))` | `face.choice` | Use the first strategy with any answers and preserve its whole bag. Accept zero or more held strategies before the final literal term; zero strategies declines. |
+| `try` | `(try $arg1 $arg2)` | `face.try_` | Apply the strategy, or return the original term when it has no answers. |
+| `gtry` | `(gtry $arg1 $arg2)` | `face.gtry` | The generic try spelling: apply a strategy or preserve the original term when it declines. |
+| `strategy-repeat` | `(strategy-repeat $arg1 $arg2)` | `face.strategy_repeat` | Repeat a rewrite until it declines, retaining every resulting normal form. A rule that always succeeds, including identity, does not terminate. The reified plan is (repeat Rule); numeric repeat remains Functional's operation. |
+| `all` | `(all $arg1 $arg2)` | `face.all` | Apply a strategy to all immediate children. Leaves and empty expressions are identities. |
+| `one` | `(one $arg1 $arg2)` | `face.one` | Apply a strategy at exactly one child position, preserving every successful position as an answer. |
+| `topdown` | `(topdown $arg1 $arg2)` | `face.topdown` | Rewrite the root, then recursively visit the children of each result. All visited nodes must succeed; compose try for identity on a declining node. Newly introduced subterms are visited. |
+| `bottomup` | `(bottomup $arg1 $arg2)` | `face.bottomup` | Recursively rewrite children, then their rebuilt parent. All visited nodes must succeed; compose try for identity on a declining node. |
+| `innermost` | `(innermost $arg1 $arg2)` | `face.innermost` | Rewrite children before parents and revisit every reduct until no rule applies. |
+| `alltd` | `(alltd $arg1 $arg2)` | `face.alltd` | Return every root rewrite when the strategy has answers; otherwise descend into every child. A successful replacement is final for this pass, so root matches take precedence over descendant matches. Leaves with no match stay unchanged. |
+| `stratego-all` | `(stratego-all $arg1 $arg2)` | `face.stratego_all` | The Stratego spelling of all: rewrite all immediate children, preserving leaves. |
+| `stratego-one` | `(stratego-one $arg1 $arg2)` | `face.stratego_one` | The Stratego spelling of one: answer every successful single-child rewrite. |
+| `TP` | `TP` | `face.TP` | The type-preserving strategy scheme: accept a declared arrow with the same input and output sort. |
+| `TU` | `(TU $arg1)` | `face.TU` | The type-unifying strategy scheme: accept a declared arrow whose output has the supplied sort. |
+| `◁` | `(◁ $arg1 $arg2 $arg3)` | `face['◁']` | Apply a declared strategy through TP or TU(ResultSort), filtering its input by the term's type in the current space. Unknown schemes and incompatible types decline. |
+| `strategy-typed-tp` | `(strategy-typed-tp $arg1 $arg2)` | `face.strategy_typed_tp` | Match a strategy's equal input and output sorts, then apply it when the term fits that sort. |
+| `strategy-typed-tu` | `(strategy-typed-tu $arg1 $arg2 $arg3)` | `face.strategy_typed_tu` | Match a strategy's declared output against the requested result sort, then check its input sort and apply it. |
+| `strategy-typed-apply` | `(strategy-typed-apply $arg1 $arg2 $arg3)` | `face.strategy_typed_apply` | Apply a strategy when match-types accepts the term's current-space type against the expected sort. Preserve type errors as values; an incompatible type declines. |
 
-- `try` `TP | (-> Atom Atom)` &mdash; Stratego's `try(s) = s <+ id`. This engine reifies `s` in the plan and the mechanised interpreter specialises the same law to one equality rewrite. Unary form: `(= strategy-a strategy-b) ⏎ !(try strategy-a)`.
-- `repeat` `TP | (-> Atom Atom)` &mdash; Stratego's `repeat(s) = try(s ; repeat(s))`, root steps to a normal form. Unary form: `(= strategy-a strategy-b) ⏎ (= strategy-b strategy-c) ⏎ !(repeat strategy-a)`.
-- `topdown` `TP | (-> Atom Atom)` &mdash; Stratego's `topdown(s) = s ; all(topdown(s))`, preorder traversal. Unary form: `(= strategy-a strategy-b) ⏎ (= (strategy-node strategy-b) strategy-bottomup-root) ⏎ !(topdown (strategy-node strategy-a))`.
-- `bottomup` `TP | (-> Atom Atom)` &mdash; Stratego's `bottomup(s) = all(bottomup(s)) ; s`, postorder traversal. Unary form: `(= strategy-a strategy-b) ⏎ (= (strategy-node strategy-b) strategy-bottomup-root) ⏎ !(bottomup (strategy-node strategy-a))`.
-- `innermost` `TP | (-> Atom Atom)` &mdash; Stratego's `innermost(s) = bottomup(try(s ; innermost(s)))`. Unary form: `(= strategy-a strategy-b) ⏎ (= strategy-b strategy-c) ⏎ (= (strategy-node strategy-c) strategy-innermost-root) ⏎ !(innermost (strategy-node strategy-a))`.
-- `stratego-all` `(-> Atom Atom Atom)` &mdash; Stratego's `all(s)`, applying a strategy to every immediate child.
-- `stratego-one` `(-> Atom Atom Atom)` &mdash; Stratego's `one(s)`, applying to one child. the mechanised interpreter deliberately diverges from Stratego's committed choice by answering EVERY successful position through MeTTa's own nondeterminism.
-- `stratego-some` `(-> Atom Atom Atom)` &mdash; Stratego's `some(s)`, the third traversal primitive beside `all` and `one`: apply the strategy to every immediate child it succeeds on, keep each declining child as written, and fail when no child succeeded. The non-emptiness guard is the whole content, since `all` composed with `gtry` can never fail. A the mechanised interpreter extension beyond corelib. The form is shown but not run here: this engine leaves the call unreduced.
+- `try` `(-> Atom Atom %Undefined%)` &mdash; Stratego's `try(s) = s <+ id`. The held plan uses ordinary MeTTa application and returns the original term when the rule has no answers.
+- `repeat` `(-> Number Atom %Undefined%)` &mdash; The held `(repeat Rule)` plan takes root steps to a normal form. Its direct call is strategy-repeat; the displayed repeat signature belongs to Functional's numeric operation. The example holds a rewrite plan as data.
+- `topdown` `(-> Atom Atom %Undefined%)` &mdash; Stratego's `topdown(s) = s ; all(topdown(s))`, preorder traversal.
+- `bottomup` `(-> Atom Atom %Undefined%)` &mdash; Stratego's `bottomup(s) = all(bottomup(s)) ; s`, postorder traversal.
+- `innermost` `(-> Atom Atom %Undefined%)` &mdash; Stratego's `innermost(s) = bottomup(try(s ; innermost(s)))`.
+- `stratego-all` `(-> Atom Atom %Undefined%)` &mdash; Stratego's `all(s)`, applying a strategy to every immediate child.
+- `stratego-one` `(-> Atom Atom %Undefined%)` &mdash; Stratego's `one(s)`, applying to one child. MeTTa's nondeterminism retains every successful position, whereas Stratego commits to one.
+- `stratego-some` `(-> Atom Atom Atom)` &mdash; Stratego's `some(s)`, the third traversal primitive beside `all` and `one`: apply the strategy to every immediate child it succeeds on, keep each declining child as written, and fail when no child succeeded. The non-emptiness guard is the whole content, since `all` composed with `gtry` can never fail. The shipped Strategy library does not declare this operation. The form is shown but not run here: this engine leaves the call unreduced.
 - `eval-via-match` `(-> Atom %Undefined%)` &mdash; The one-step rewriting strategy the whole basis is specialised to. The form is shown but not run here: this engine leaves the call unreduced.
 - `eval-via-unify` `(-> Atom %Undefined%)` &mdash; The unification-directed sibling of `eval-via-match`. The form is shown but not run here: this engine leaves the call unreduced.
 - `reduce-via-match` `(-> Atom Atom %Undefined%)` &mdash; The reduction form of the same strategy. The form is shown but not run here: this engine leaves the call unreduced.

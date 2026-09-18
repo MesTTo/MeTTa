@@ -1,5 +1,6 @@
-% Purpose: the text and file libraries, tested at the predicate level so a
-%   defect points at the operation rather than at a whole MeTTa example.
+% Purpose: test String recipes through MeTTa and retained text/file predicates directly.
+% Guarantees: original String, File and JSON cases retain their exact outcomes.
+% [tested: lib_string, lib_file, lib_json; commit=118b805aedbee6de22be4f6131d97c3d6b9156de].
 %
 %   Load into user BEFORE begin_tests: begin_tests/1 switches to the plunit
 %   module, and loading the engine after it puts every builtin there instead.
@@ -10,6 +11,8 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(collection_test_support).
+:- load_collection_library(lib_string).
 :- initialization(consult('../../lib/lib_string/lib_string.pl')).
 :- initialization(consult('../../lib/lib_file/lib_file.pl')).
 :- initialization(consult('../../lib/lib_json/lib_json.pl')).
@@ -68,14 +71,14 @@ test(case_changes_are_inverses_on_ascii) :-
 % ------------------------------------------------------------------- tests
 
 test(prefix_and_suffix_answer_booleans) :-
-    'string-starts-with'("hello", "he", A), A == true,
-    'string-starts-with'("hello", "lo", B), B == false,
-    'string-ends-with'("hello", "lo", C), C == true,
-    'string-contains'("hello", "ell", D), D == true,
-    'string-contains'("hello", "zzz", E), E == false.
+    invoke('string-starts-with'("hello", "he", A)), A == true,
+    invoke('string-starts-with'("hello", "lo", B)), B == false,
+    invoke('string-ends-with'("hello", "lo", C)), C == true,
+    invoke('string-contains'("hello", "ell", D)), D == true,
+    invoke('string-contains'("hello", "zzz", E)), E == false.
 
 test(every_string_starts_with_the_empty_string) :-
-    'string-starts-with'("hello", "", A), A == true.
+    invoke('string-starts-with'("hello", "", A)), A == true.
 
 % -1 rather than failing: a caller asking where something is wants an answer
 % either way.
@@ -102,17 +105,17 @@ test(chars_are_strings_and_round_trip) :-
     'string-chars'("abc", Chars),
     Chars == ["a", "b", "c"],
     forall(member(C, Chars), string(C)),
-    'string-from-chars'(Chars, Back),
+    invoke('string-from-chars'(Chars, Back)),
     Back == "abc".
 
 test(repeat_and_pad) :-
-    'string-repeat'("ab", 3, R), R == "ababab",
-    'string-repeat'("ab", 0, Z), Z == "",
-    'string-pad-left'("7", 3, "0", L), L == "007",
-    'string-pad-right'("7", 3, ".", P), P == "7..".
+    invoke('string-repeat'("ab", 3, R)), R == "ababab",
+    invoke('string-repeat'("ab", 0, Z)), Z == "",
+    invoke('string-pad-left'("7", 3, "0", L)), L == "007",
+    invoke('string-pad-right'("7", 3, ".", P)), P == "7..".
 
 test(padding_shorter_than_the_string_leaves_it_alone) :-
-    'string-pad-left'("hello", 2, "0", S), S == "hello".
+    invoke('string-pad-left'("hello", 2, "0", S)), S == "hello".
 
 % ----------------------------------------------------------- HE's spellings
 
@@ -162,7 +165,7 @@ test(every_operation_that_answers_text_answers_a_String,
      [forall(string_returning_operation(Name, Args))]) :-
     append(Args, [Out], Full),
     Goal =.. [Name|Full],
-    call(Goal),
+    invoke(Goal),
     % A number-answering operation is exempt; what must never happen is an
     % ATOM, which prints like a string and composes like a symbol.
     assertion(\+ atom(Out)).

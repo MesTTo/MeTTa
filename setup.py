@@ -1,10 +1,12 @@
-"""Purpose: copy the MeTTa runtime into wheels built from pyproject.toml, and
-  offer the wire codec as a compiled extension when a builder asks for one.
+"""Purpose: package the runtime and optional wire-codec compilation.
+
 Assumes:
   - PYMETTA_USE_MYPYC is unset for the wheel that ships, so the default build
     stays pure Python and platform-independent [tested
     test_the_codec_builds_under_mypyc_as_an_option]
 Guarantees:
+  - private native build directories do not enter the portable wheel
+    [tested: test_native_sources_build_after_wheel_install; commit=28c6146d805b5adba3047ffc72b2508c11816636]
   - the binding's owned directory supplies its runtime resource closure,
     including newly introduced nested includes, without booting an engine
     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
@@ -104,13 +106,16 @@ def compiled_modules():
     if os.environ.get("PYMETTA_USE_MYPYC") != "1":
         return []
     try:
-        from mypyc.build import mypycify
+        from mypyc.build import (
+            mypycify,  # noqa: PLC0415 -- optional compiler loads only when requested
+        )
     except ImportError:
-        raise SystemExit(
+        message = (
             "PYMETTA_USE_MYPYC=1 asks for a compiled codec and mypy is not "
             "installed. Install it (pip install mypy) and build again, or "
             "unset PYMETTA_USE_MYPYC to build the pure-Python wheel."
-        ) from None
+        )
+        raise SystemExit(message) from None
     os.environ["MYPYPATH"] = str(HERE / "extensions" / "python")
     return mypycify([*MYPYC_FLAGS, *MYPYC_MODULES])
 
@@ -203,7 +208,7 @@ class build_py_with_runtime(build_py):
                     dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns(
                         "__pycache__", "*.py[co]", "*.qlf", ".qlf-stamp",
-                        "*.so", "*.o",
+                        "*.so", "*.o", ".native",
                     ),
                 )
             else:

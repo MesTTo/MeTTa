@@ -1,6 +1,6 @@
 % Purpose: the module boundary itself -- that the engine core, its subsystems
-%   and every shipped library are modules, that `user` holds nothing the engine
-%   defines, and that each module owns its own autoload table.
+%   and every shipped library declare their own modules, that `user` holds only
+%   designated host hooks, and that each module owns its own autoload table.
 % Assumes:
 %   - the working directory is tests/prolog, which is where engine/test.sh runs
 %     every suite from, because the fixtures are named relative to it
@@ -23,15 +23,22 @@
 %   - that is not vacuous either: two plain files consulted into one module
 %     leave one table, the second file's
 %     [tested: a_plain_pair_still_replaces_one_autoload_table; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
-%   - `user` holds no predicate any file under engine/ or lib/ DEFINES
-%     [tested: user_holds_nothing_the_engine_defines; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+%   - each shipped Prolog half declares a distinct module, regardless of its
+%     spelling; plain host files fail that declaration check [tested:
+%     every_shipped_prolog_half_has_its_own_module,
+%     two_libraries_may_define_one_helper_name,
+%     a_plain_pair_still_replaces_one_helpers_clauses; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
+%   - `user` holds no definition from engine/ or lib/ except SWI's designated
+%     multifile hooks [tested: user_holds_nothing_the_engine_defines; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 %   - the engine core exports every MeTTa builtin head it implements, bar the
 %     two SWI already has in `user`
 %     [tested: every_core_builtin_head_is_exported; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
-%   - no shipped module holds a predicate of its own under a name the engine
-%     owns, except the module-local names recorded in shadow_by_design/2
+%   - no shipped module inheriting the engine hides one of its names, except
+%     the module-local names recorded in shadow_by_design/2; independent
+%     provider namespaces may reuse names
 %     [tested: no_shipped_module_shadows_a_name_the_engine_owns,
-%     the_shadow_census_sees_a_planted_library_definition; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c]
+%     the_shadow_census_sees_a_planted_library_definition,
+%     the_shadow_census_respects_an_independent_provider_namespace; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 %   - the operator guards read the ENGINE's namespace, so a name a library lent
 %     the engine at one or two arguments is still told from a MeTTa call
 %     [tested: an_operator_lent_name_is_seen_in_the_engines_own_namespace; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
@@ -58,7 +65,12 @@ shipped_library(File, Module) :-
     expand_file_name('../../lib/*/*.pl', Files),
     member(Relative, Files),
     absolute_file_name(Relative, File),
-    source_file_property(File, module(Module)).
+    declared_source_module(File, Module).
+
+declared_source_module(File, Module) :-
+    absolute_file_name(File, Absolute),
+    source_file_property(Absolute, module(Module)),
+    module_property(Module, file(Absolute)).
 
 %A fixture path, from tests/prolog, spelled once.
 module_fixture(Name, Path) :-
@@ -92,8 +104,7 @@ test(every_shipped_prolog_half_has_its_own_module) :-
     expand_file_name('../../lib/*/*.pl', Files),
     assertion(Files \== []),
     forall(member(File, Files),
-           assertion((source_file_property(File, module(Module)),
-                      atom_concat(lib_, _, Module)))),
+           assertion(declared_source_module(File, _))),
     findall(Module, shipped_library(_, Module), Modules),
     sort(Modules, Unique),
     length(Files, Count),
@@ -186,6 +197,8 @@ test(two_libraries_may_define_one_helper_name) :-
     %answers with a permission error.
     user:use_module(Alpha, []),
     user:use_module(Beta, []),
+    assertion(declared_source_module(Alpha, plunit_module_alpha)),
+    assertion(declared_source_module(Beta, plunit_module_beta)),
     plunit_module_alpha:plunit_module_answer(A),
     plunit_module_beta:plunit_module_answer(B),
     assertion(A == alpha),
@@ -234,6 +247,8 @@ test(a_plain_pair_still_replaces_one_helpers_clauses) :-
     plain_control_module(helpers, Control),
     Control:ensure_loaded(PlainAlpha),
     Control:ensure_loaded(PlainBeta),
+    assertion(\+ declared_source_module(PlainAlpha, _)),
+    assertion(\+ declared_source_module(PlainBeta, _)),
     findall(X, Control:plunit_module_plain_helper(X), Helpers),
     assertion(Helpers == [beta]),
     %Both answers now come from the survivor, which is the defect stated as an
@@ -309,7 +324,7 @@ test(user_holds_nothing_the_engine_defines) :-
 %
 %   Exempt SWI's hooks in user. The census checks their multifile declarations
 %   and rejects every other engine or library definition in that module.
-%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 swi_hook_in_user(exception/3,
                  'SWI calls user:exception(undefined_predicate, ...) before it \c
                   reports an unknown procedure, which is how a foreign space \c
@@ -318,6 +333,9 @@ swi_hook_in_user(thread_message_hook/3,
                  'SWI consults user:thread_message_hook/3 to intercept a \c
                   message in THIS thread, which is how a load reports a syntax \c
                   error the loader would otherwise only print').
+swi_hook_in_user(message_hook/3,
+                 'SWI calls this multifile hook in user before printing a \c
+                  message; library logging may supply its handler there').
 swi_hook_in_user(prolog_trace_interception/4,
                  'SWI calls user:prolog_trace_interception/4 from the debugger \c
                   port, which is the source observer\'s whole mechanism').
@@ -404,11 +422,25 @@ test(the_shadow_census_sees_a_planted_library_definition) :-
         ( abolish(lib_tabling:'$metta_module_shadow_plant'/0),
           abolish(metta_engine:'$metta_module_shadow_plant'/0) )).
 
+test(the_shadow_census_respects_an_independent_provider_namespace) :-
+    once(( shipped_library(_, Module),
+           \+ default_module(Module, metta_engine) )),
+    setup_call_cleanup(
+        true,
+        ( assertz(metta_engine:'$metta_module_independent_plant'),
+          assertz(Module:'$metta_module_independent_plant'),
+          assertion(current_predicate(Module:'$metta_module_independent_plant'/0)),
+          assertion(current_predicate(metta_engine:'$metta_module_independent_plant'/0)),
+          assertion(\+ shipped_module_shadow(Module, '$metta_module_independent_plant'/0)) ),
+        ( abolish(Module:'$metta_module_independent_plant'/0),
+          abolish(metta_engine:'$metta_module_independent_plant'/0) )).
+
 shipped_module_shadow(Module, Name/Arity) :-
     current_module(Module),
     Module \== user,
     module_property(Module, file(File)),
     tree_owned_file(File),
+    default_module(Module, metta_engine),
     current_predicate(Module:Name/Arity),
     functor(Head, Name, Arity),
     \+ predicate_property(Module:Head, imported_from(_)),

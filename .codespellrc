@@ -61,4 +61,6 @@ ignore-words-list = intensional,dout,sourcee,notin,ba,nd,som,te,fo,anc,checkking
 # difference matters because ignoring the WORD would stop codespell reporting it
 # in prose this tree does own. An exclusion also expires by itself: change the
 # vendored line and it stops matching.
+# The exact lines also preserve intentionally misspelled similarity inputs and
+# the truncated "caf" name observed by the ZIP charset regression fixtures.
 exclude-file = .codespell-exclude

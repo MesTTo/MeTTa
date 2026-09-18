@@ -707,14 +707,16 @@ skips = [
 ]
 
 [tool.deptry]
-# check.sh supplies both source roots, so local modules follow their directories.
+# check.sh supplies package, tool and repository-checker source roots, so local
+# modules follow their directories. Repository checkers are a discovery root;
+# their imports are outside this package manifest's dependency ownership.
 # `ext` is excluded because deptry reads ONE manifest and every member has its
 # own: it would judge `metta-nanoarrow`'s import of nanoarrow against pymetta's
 # dependencies, which do not and must not contain it. What it would have said
 # there, `check_layering.py` says exactly: a member may name the libraries its
 # OWN pyproject declares and no other, derived from that manifest and the
 # syntax tree, which is a per-member deptry with no second manifest to read.
-extend_exclude = ["examples", "build", "bench.py", "benchmarks", "ext", "tools/protocol_sources/cpython"]
+extend_exclude = ["examples", "build", "bench.py", "benchmarks", "ext", "tools/protocol_sources/cpython", "../../tests/checks"]
 optional_dependencies_dev_groups = ["test", "checks"]
 
 # Every one of these is imported, and none of them by a statement a static

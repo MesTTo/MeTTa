@@ -4,6 +4,9 @@
 %   and write to an identical string through both paths, errors and refusals
 %   included, in both the dict shape the Python wire codec uses and the classic
 %   shape lib_json uses.
+% Guarantees: explicit formatting agrees with SWI at every tested width;
+% compact conversion retains the same differential and C-admission evidence
+% [tested: json_codec, json_codec_differential; commit=5e212d77a567d6d6c118529e4a226e5047ec2cfd].
 %
 %   Two things this suite does that a plain "does it work" suite would not.
 %   It compares the SEAM against the Prolog implementation inside one process,
@@ -85,7 +88,7 @@ agree_write(Value, Shape) :-
     prepared(Options, COptions),
     outcome(( json_codec:json_codec_finite(ForReference),
               json_codec:json_codec_write_prolog(ForReference, Reference,
-                                                 Shape, COptions) ),
+                                                 Shape, COptions, 0) ),
             Reference-ForReference, Expected),
     outcome(json_codec_write(ForSeam, Answer, Options), Answer-ForSeam, Got),
     (   Expected =@= Got
@@ -391,11 +394,11 @@ generated_document(Shape, Text) :-
     random_value(3, Classic),
     (   Shape == dicts
     ->  json_codec:json_codec_write_prolog(Classic, ClassicText, classic,
-                                           ClassicCOptions),
+                                           ClassicCOptions, 0),
         json_codec:json_codec_read_prolog(ClassicText, Value, dicts, COptions)
     ;   Value = Classic
     ),
-    json_codec:json_codec_write_prolog(Value, Text, Shape, COptions).
+    json_codec:json_codec_write_prolog(Value, Text, Shape, COptions, 0).
 
 % ------------------------------------------------------------------ the tests
 
@@ -484,6 +487,41 @@ test(the_writer_answers_one_line_whatever_the_document_is) :-
     json_codec_read(Text, Value, Options),
     json_codec_write(Value, Written, Options),
     \+ sub_string(Written, _, _, _, "\n").
+
+test(formatted_output_matches_the_native_writer) :-
+    forall((member(Shape, [classic, dicts]), member(Width, [0, 1, 20, 72])),
+           ( shape_options(Shape, Options),
+             json_codec_read("{\"a\":[1,2,{\"b\":true}],\"c\":null}", Value, Options),
+             prepared(Options, Prepared),
+             json_codec:json_codec_library_options(Prepared, Native),
+             ( Shape == classic
+             -> Writer = json:json_write
+             ;  Writer = json:json_write_dict ),
+             with_output_to(string(Expected),
+                 call(Writer, current_output, Value, [width(Width)|Native])),
+             json_codec_write(Value, Actual, Options, Width),
+             assertion(Actual == Expected),
+             json_codec_read(Actual, Again, Options),
+             assertion(Again =@= Value) )).
+
+test(format_width_zero_retains_compact_output) :-
+    classic_options(Options),
+    Value = json([a=[1, 2, 3]]),
+    json_codec_write(Value, Compact, Options),
+    json_codec_write(Value, Formatted, Options, 0),
+    assertion(Formatted == Compact).
+
+test(formatting_rejects_invalid_widths,
+     [forall(member(Width, [-1, 0.5, nope])), throws(error(type_error(nonneg, Width), _))]) :-
+    classic_options(Options),
+    json_codec_write(json([]), _, Options, Width).
+
+test(formatting_rejects_unbound_width, [throws(error(instantiation_error, _))]) :-
+    classic_options(Options), json_codec_write(json([]), _, Options, _).
+
+test(formatting_preserves_number_refusals,
+     [forall(non_finite(Value)), throws(error(domain_error(finite_number, Value), _))]) :-
+    classic_options(Options), json_codec_write([Value], _, Options, 72).
 
 :- end_tests(json_codec).
 

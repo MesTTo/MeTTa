@@ -27,6 +27,10 @@ concerned, and the fixtures are deliberately unbacked.
 Guarantees:
   - MeTTa data fixtures accept a collected test and reject a missing citation
     [tested: tests/checks/check_evidence_selftest.py; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1]
+  - nested Prolog suite helpers accept backed claims and reject stale citations
+    [tested: tests/checks/check_evidence_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3]
+  - nested distribution modules, Prolog/C/C++ library support and native face fixtures report stale citations
+    [tested: tests/checks/check_evidence_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
   - Prolog tools accept a backed claim and report an absent test on its own line
     [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
   - a shared build symlink preserves the selected TypeScript sources and
@@ -625,6 +629,13 @@ def tracked_probe_complaints() -> list[str]:
     """
     complaints = []
     for name in ("extensions/python/benchmarks/probes/probe.py",
+                 "extensions/python/ext/metta-fixture/library/__init__.py",
+                 "tests/data/prologface/fixture.pl",
+                 "tests/data/prologface/fixture.metta",
+                 "tests/prolog/suites/libraries/support/fixture.pl",
+                 "lib/lib_fixture/support/native_build.pl",
+                 "lib/lib_fixture/support/native.c",
+                 "lib/lib_fixture/support/native.cpp",
                  "examples/ch-plant/_fixtures/nested/library.metta",
                  "tests/data/spec.metta", "tests/data/nested/spec.metta",
                  "setup.py", "extensions/mork/tests/plant.sh"):
@@ -639,7 +650,7 @@ def tracked_probe_complaints() -> list[str]:
                 f"  - the collected test backs this [{TAG} {WHEN}: test_collected].",
                 f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].",
             ]
-            marker = "#" if probe.suffix == ".sh" else ";"
+            marker = {".sh": "#", ".c": "//", ".pl": "%"}.get(probe.suffix, ";")
             source = ('"""' + "\n".join(lines) + '\n"""\n'
                       if probe.suffix == ".py"
                       else "".join(marker + " " + line + "\n" for line in lines))
@@ -884,7 +895,7 @@ def main() -> int:
         f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
-        f"probe, a nested example fixture, a root build hook, a component shell test "
+        f"probe, native support sources, a nested example fixture, a root build hook, a component shell test "
         f"and a Prolog tool citing tests that are not there, "
         f"and a stale copy under an ignored build directory"
     )

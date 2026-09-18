@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 336 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 364 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -42,8 +42,8 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the 25 `engine/metta/*.pl` units (limits, terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, completion, algebra_operations, algebra_formula, algebra_fixpoint, space_hooks, runtime, control, interop, references, reference_sources, reference_loading, reference_refresh, properties, registration, prelude), `engine/translator.pl` compilation facade over the seven `engine/translator/*.pl` units (analysis, lowering, folding, constructors, special_forms, typing, runtime), `engine/spaces.pl` store facade over the twelve `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 135, `service` 74, `ownership` 41, `event` 23, `declaration` 20. Ownership, event and declaration clauses are contributed by an extension; the two service kinds are defined by the engine and called by an extension (`clauses_from/2`). `metta_space_registered/1` reflects existing native and foreign namespaces independently of their value species. `metta_with_trailed/3` restores context at each answer; `metta_with_trailed_enumeration/3` retains it until the generator finishes; `metta_with_trailed_push/3` pushes one item onto a stack-shaped root for that span. `metta_atom_index_new/1`, `metta_atom_index_bind/4` and `metta_atom_index_get/3` own temporary atom-key bindings with original values and trailed insertion. A `seam:context_reader/3` directive derives the callable reader and its inline read from one `context_reader/4` declaration. The contract for extending the engine | `ext_points.plt` |
-| `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 22 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 135, `service` 76, `ownership` 41, `event` 23, `declaration` 20. Ownership, event and declaration clauses are contributed by an extension; the two service kinds are defined by the engine and called by an extension (`clauses_from/2`). `metta_space_registered/1` reflects existing native and foreign namespaces independently of their value species. `metta_with_trailed/3` restores context at each answer; `metta_with_trailed_enumeration/3` retains it until the generator finishes; `metta_with_trailed_push/3` pushes one item onto a stack-shaped root for that span. `metta_atom_index_new/1`, `metta_atom_index_bind/4` and `metta_atom_index_get/3` own temporary atom-key bindings with original values and trailed insertion. A `seam:context_reader/3` directive derives the callable reader and its inline read from one `context_reader/4` declaration. The contract for extending the engine | `ext_points.plt` |
+| `lib/lib_*/` | 60 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 40 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
 | `extensions/node/src/*.ts` | MeTTa as a TypeScript library, the engine embedded in a Node process over swipl-wasm and the seam's second consumer: interned atoms, spaces as collections, lazy thenable answers, a lowered-source `define`, a traced generator `define`, host `op`s the engine calls back into, and `using` scopes. `extensions/node/bridge.pl` is its Prolog half and calls published surface only | the `node-binding` gate lane, and `extensions/python/tests/ch21_another_language_at_the_seam/test_node_binding.py` answers the same corpus in both hosts |
@@ -54,7 +54,7 @@ re-runs them.
 | `check.sh` | the gate. `GATE_ONLY=1 sh check.sh` is what CI blocks on | |
 | `extensions/python/metta/*.py` | the library. `extensions/python/metta/_spaces/handle.py` is the `MeTTa` context and the `Space` handle; a leading `_` means internal | |
 
-Seam counts re-measured 2026-09-08; other counts re-measured 2026-09-07. The `llms` lane derives every explicit count in
+Seam and library counts re-measured 2026-09-14; other counts re-measured 2026-09-07. The `llms` lane derives every explicit count in
 this table, checks the library roster and every backticked path, rejects names
 the live engine does not know, and asks the reverse question too: every
 engine-known call head the example corpus exercises must be named here.
@@ -2533,18 +2533,19 @@ so choose by the question you are asking:
 - what VALUE does this quantity take, over a distribution: `lib_measure`
   holds transparent weighted superpositions, where `ws-normalize` makes a
   distribution and `ws-sample!` draws from it, its bang naming the choice it
-  makes. `lib_distribution` maps one distribution, combines independent ones,
+  makes. `lib_statistics` maps one distribution, combines independent ones,
   conditions an explicit joint law, and asks named probability questions. The
   value belongs to the quantity.
 - how did this DERIVATION combine the tags it passed through: `under=`, above.
   The value belongs to the proof.
 
-For the value question, import `lib_distribution` and write a finite law as
+For the value question, import `lib_statistics` and write a finite law as
 `((weight value) ...)`. Choose the head by the question:
 
 - `(ws-map fun dist)` pushes one distribution through a pure unary function.
-- `(ws-map2-independent fun left right)` pushes the product of two independent
-  distributions through a binary function. If the values are correlated, put
+- `(ws-map-independent fun dist ...)` pushes the product of zero or more
+  independent distributions through a function with matching arity. Alternative
+  function rewrites give alternative complete laws. If the values are correlated, put
   `(Pair left right)` values in one joint distribution and use `ws-map`.
 - `(ws-mass-at-least dist threshold)` answers the inclusive probability
   `P(X >= threshold)`.
@@ -5063,53 +5064,292 @@ unknowns and refuses; the `#` operators POST rather than solve and compose
 across several operations, which is what they are for.
 `examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/02-relational_arithmetic.metta` runs all of it.
 
-38 libraries load with `!(import! &self (library lib_x))`, each one line of
-what it is for: `lib_builtin_types` the declared type surface of the shipped
-builtins; `lib_combinatorics` range, take, choose-k, and exact independent
-weighted-subset posterior marginals; `lib_conformance` proves
+<!-- begin generated library roster -->
+60 libraries load with `!(import! &self (library lib_x))`:
+`lib_builtin_types`, `lib_cli`, `lib_combinatorics`, `lib_compression`, `lib_conformance`, `lib_constraints`, `lib_crypto`, `lib_csv`, `lib_database`, `lib_datastructures`, `lib_datetime`, `lib_derived`, `lib_dict`, `lib_doc`, `lib_encoding`, `lib_file`, `lib_functional`, `lib_gitimport`, `lib_graph`, `lib_he`, `lib_http`, `lib_import`, `lib_json`, `lib_logging`, `lib_markup`, `lib_math`, `lib_measure`, `lib_memo`, `lib_mm2`, `lib_nars`, `lib_observe`, `lib_pairs`, `lib_parsing`, `lib_patrick`, `lib_pln`, `lib_pln2`, `lib_process`, `lib_random`, `lib_redis`, `lib_reflect`, `lib_regex`, `lib_roman`, `lib_sets`, `lib_socket`, `lib_soft`, `lib_spaces`, `lib_statistics`, `lib_strategy`, `lib_string`, `lib_system`, `lib_tabling`, `lib_testing`, `lib_thread`, `lib_torch`, `lib_unicode`, `lib_uri`, `lib_uuid`, `lib_vector`, `lib_yaml`, `lib_zar`. Scored answers and every documented head are listed in
+`website/reference/metta-libraries.md`.
+<!-- end generated library roster -->
+
+The standard-library basis includes `lib_builtin_types` for existing callable
+types and `lib_string` for text. The 36 concerns in the library census have
+35 principal library owners: finite distributions and descriptive statistics
+share `lib_statistics`. `lib_testing` imports generators for core `forall`
+and `test`; it adds no assertion protocol. `lib_reflect` and `lib_strategy`
+compose code-as-data traversal and replacement over ordinary expressions.
+Derived operations are stored MeTTa equations that callers can match and
+reconstruct; native halves own their host services, maintained algorithms
+and resource boundaries. `EXTENDING.md` describes how to author both halves.
+
+Library contracts: `lib_builtin_types` the declared type surface of the shipped
+builtins; `lib_cli` typed option declarations, literal String argument vectors,
+explicit repeat policies and (Pairs Operands) results. Short and long names use
+separate namespaces; defaults retain literal values and absent options contribute
+no pair. Six built-in converters and (parse Type Function) support ordinary held
+functions, with one-answer collection and live argument-type validation. Every
+occurrence converts before repeat selection; syntax validates before custom effects.
+The terminator preserves later operands, empty tokens remain empty and malformed
+options raise with their cause and repair. Help uses the same declarations;
+raw argv retains runner arguments and spelling. All parse state travels in arguments;
+`lib_combinatorics` derives ranges, prefixes, choices, permutations, subsets,
+Cartesian products and exact counts from MeTTa equations, segments and folds.
+Choices preserve literal occurrences and answer order; chooseK streams and
+chooseKl collects. Exact additive probability belongs to Statistics;
+`lib_compression` complete gzip/zlib byte
+members and streaming file replacements, with levels 0..9. Archive metadata keeps
+order, duplicate names and native properties; ordinal reads distinguish entries.
+Extraction publishes regular files and directories only after the whole archive
+passes, refusing escaping or nonportable names, links, special files and file
+collisions. Existing nonempty destinations survive refusal. Every gzip layer is
+validated even inside other native filters; those inputs use owned intermediate
+files so decoders close before archive readers open. File's staged publisher owns
+publication and cleanup. Native name conversion uses a thread-local UTF8 locale
+and restores it after archive close. ZIP names default to CP437, retaining UTF8
+flags and Unicode extra fields; unconvertible pathnames raise; `lib_conformance` proves
 a foreign space provider before its users find out; `lib_constraints` CLP(Q)
 over rationals and CLP(B) over booleans; `lib_csv` streams CSV rows through the foreign space seam; `lib_crypto` hashes and secure
-randomness, refusing by name where OpenSSL is absent; `lib_datastructures` an
-amortised O(1) functional queue and a finger tree; `lib_datetime` now,
-format-date, day-of-week; `lib_derived` the derived forms the engine keeps FUSED
+randomness, refusing by name where OpenSSL is absent; `lib_database` independent
+ordered multisets of native syntax in store directories containing a
+journal and a permanent lock file. Opaque engines own their schemas and streams;
+requests serialize and competing owners refuse. database-atoms returns passive
+expression snapshots with duplicates and fresh variables shared within each
+occurrence. MeTTa segment patterns derive selection and joins; stored equations
+can be inspected and explicitly reconstructed as functions. Removal deletes one
+alpha-identical value, keeping variable sharing and numeric kinds distinct.
+Old ground journals remain valid; variable encodings must be canonical.
+Sync uses journal-sync buffering modes and never claims
+fsync or transactions. Writes survive caller backtracking; write/sync failures
+end the attachment. Opening rejects malformed UTF8 and journal records before
+replay. Close and with-database finish cleanup and retain combined errors; native
+atom collection releases abandoned engines asynchronously. Keep each open store's
+directory and contents managed exclusively through its API; `lib_datastructures` an
+amortised O(1) functional queue, a finger tree, and map/priority-queue equations
+over ordered pair expressions. `(SortedMap Rows)` has distinct identity keys;
+`(PriorityQueue Rows)` preserves every occurrence and stable ties. Operations
+validate the representation, preserve literal terms and variables, and return
+new values. Missing lookups, minima and queue removals have no answer; an absent
+map removal returns the same value. `pq-merge` accepts zero or any number of
+queues, with left-to-right order among ties. Pair sorting may take quadratic
+work; recipes can be matched, reconstructed and specialized; `lib_datetime` clocks,
+parsing, explicit-zone formatting, date records, calendar fields and addition;
+`lib_derived` the derived forms the engine keeps FUSED
 into its compiler, written out as equations; `lib_dict` a dictionary that IS a
-space; `lib_distribution` pure finite value-distribution map, independent
-product, threshold, strict win probability, exact joint conditioning, average
-and Bernoulli addition; `lib_doc` keeps the old doc import path working after
-its vocabulary moved; `lib_file` text files, directory creation, byte copies, queryable metadata, lexical paths and process streams;
-`lib_gitimport` git-import!, Prolog-only, a module fetched from a repository;
+space, with defaulted lookup, update, merge and pop; `lib_doc` keeps the old doc import path working after
+its vocabulary moved; `lib_encoding` shares strict byte/text boundaries and
+UTF8/base64 host codecs. Hex uses one ASCII alphabet, arithmetic and segments in
+MeTTa. Base64 takes its alphabet as an argument; its host URL decoder also reads
+classic digits. Cancellation, resource errors and unrelated decoder exceptions
+propagate unchanged. Malformed input raises a boundary error or assertion naming
+what was wrong; `lib_file` text and byte files whole or through handles, publication by rename, directory creation, tree copy and removal, renaming, a link-aware walk and glob, lexical and resolved paths, entry kinds, symbolic links, scoped handles and temporary directories, queryable metadata and process streams;
+`lib_functional` derives collection operations in MeTTa: zip and unzip, drop,
+chunk and window, one-level and every-level flatten, partition, group and sort
+by a key function, scan, unfold, pipe and apply-to, and the three held control
+forms while, repeat and unless. Segments select heads, tails and prefixes;
+unfold supplies zip, chunk and window. Callback operators share apply-to, which
+reduces a call built from finished values. Held/eager functions, lambdas and
+partial applications preserve literal data and variable identity. Callback
+alternatives remain alternative results, partition asks for a True answer,
+and grouping binds a key before comparing it so Error remains a literal key.
+Growing accumulators and slices can take quadratic work. Neither flatten takes the bare name, which is
+the host's own every-level one; `lib_gitimport` git-import!, Prolog-only, a
+module fetched from a repository;
+`lib_graph` derives directed graphs as canonical (Vertex Neighbours) expressions
+from Sets, Pairs and Functional. Vertices compare by identity, including shared
+variables and quoted runnable terms. Construction, projections, edits, transpose
+and variadic union use ordinary collection operations. A fold defines closure;
+reachability and cycle detection share that recipe. Topological ordering unfolds
+canonical zero-indegree layers and refuses a cycle with an actual cycle vertex.
+Matching can reconstruct or specialize the path equation. No native graph
+algorithm remains; a single-origin query computes all-pairs closure;
 `lib_he` the exact upstream compatibility equations, which shadow the
 importing space's prelude locally. Its assertions compare individual answers;
 native assertions compare answer bags. Its `add-reduct` equation returns the
 Boolean from `add-atom`; native `add-reduct` returns the reduced atom. The
 shared `if-equal`, `if-equal2`, and `match-types` use identity, `match-type-or`
 takes the upstream arguments, and `return-on-error` returns the bare error;
+`lib_http` method-based byte requests, parsed String-key header fields and status
+codes, with response streams shared through File handles. Non-2xx statuses remain
+data; redirects require an option. Independent local servers carry their MeTTa
+handler and execution module, route by ordinary equations and supply one response.
+Scopes release streams and servers on exhaustion, cut and exception. Server IDs
+protect reused ports; start/stop refuse transactions and a worker cannot stop its
+own server. HTTP owns framing and refuses malformed headers, options and bodies.
+Plain HTTP and optional HTTPS client transport have separate capabilities;
 `lib_import` importing that fails LOUDLY where a missing file once answered
 nothing; matchable `(import Path)` rows through `(imports &space)`,
-and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`
+and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON objects
+as spaces, native formatting, structural paths, UTF-8 document files and
+streaming JSON Lines, with atomic file publication and cycle refusal; `lib_logging`
+structured topic/level messages through host hooks, exact process-wide topic
+settings and explicit capture handlers carried by each message. Handlers receive
+an evaluated event Expression, preserving the held payload; their first Bool
+consumes or delegates the message, and failed verdicts raise. Earlier host hooks
+retain precedence, and log-format uses the same diagnostic translation;
+`lib_markup` XML and HTML as expressions, an element being
+(element Name Attributes Children) with tagged (attr Name Value) rows, a selector
+language over it converted to the host's xpath, strict parses that refuse every
+repair the host's own reader would make quietly, and an external entity refused
+rather than fetched; declares the `markup` capability; `lib_math` derives gcd/lcm
+folds, factor-pair choices and scalar floating conversion as MeTTa equations.
+Unary math-rational converts a finite Number exactly; its binary form constructs
+a ratio. Rationalization explicitly permits approximation. Integer roots,
+modular powers and floating-function names use the native numeric provider.
+math-sqrt takes the root before final rounding and retains signed zero.
+Vector supplies shared conversion and root rounding. Factorial and binomial
+compose from Combinatorics; exact construction refuses host approximation;
+`lib_measure`
 weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
 &mork, loaded on demand: `＋` and `－` add and remove one atom, `＋*`
 bulk-adds a whole expression in one crossing, and `~>` runs one MM2 transform; `lib_nars` NARS truth functions, inference rules and
-bounded derivation; `lib_observe` filtered traces, source coverage and attributed error frames as queryable atoms; `lib_patrick` compose, for, iterate; `lib_pln` PLN truth
+bounded derivation; `lib_observe` filtered traces, source coverage and attributed error frames as queryable atoms; `lib_parsing` prepares held grammars as written MeTTa lambdas.
+One metadata relation supplies fourteen primitives and twelve combinators and
+accepts new parsing functions. Whole and prefix text doors retain every answer;
+callable parsers consume finite token expressions and return (Contribution Rest),
+where () skips and (Value) retains any literal payload. Code, Error, Empty and
+shared variables survive composition and Python round trips. Cat and alt accept
+zero or any number of parts. Repetition preserves longest-first prefixes and
+refuses a step that consumes no input. Grammar checks never run callbacks or ref
+targets. String conversions supply the host boundary; ASCII classes and grammar
+composition are MeTTa equations; `lib_patrick` compose, for, iterate; `lib_pln` PLN truth
 formulas, consistency and ranking, over `/safe`, the division that answers
 nothing rather than raising when the denominator is zero; `lib_pln2` selected Beta and moment formulas
-with explicit evidence scale and support-checked independence; `lib_redis` shared spaces over Redis;
-`lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
-over strings; `lib_roman` a list and fold basis, head, init, fold-flat,
+with explicit evidence scale and support-checked independence; `lib_process` a program run with an
+argument VECTOR and never a command line, its exit code answered as a status beside
+everything it wrote, and a started process watched, signalled and waited for through
+its identifier. There is no shell: running one is the caller's explicit choice in the
+program's own name, `(process-run! "sh" ("-c" "..."))`; `lib_random` constructs
+inspectable sample programs for ten numeric families and occurrence choice.
+Construction validates without drawing; bind the program before eval or repeat.
+Core demand and with-seed control sampling and generator restoration. Programs
+can be stored, matched, rewritten or combined with alternative answers. Sampling
+distinct positions unfolds immutable populations through segments; shuffling
+samples every position. Repeated independent choices derive from choice and
+repeat, while map-atom preserves caller variable sharing. Held populations keep
+runnable terms literal. Gamma factors and log corrections delay underflow until
+the final scale or ratio. Numeric providers declare their effects beside their
+implementations; recording requires the same visible specialization equations
+and conservatively refuses possible assertion output;
+`lib_redis` shared spaces over Redis;
+`lib_reflect` the engine's surface and literal code as data. atom-variables
+collects written variables by first-appearance identity, including binder syntax.
+atom-replace composes Strategy's topmost traversal with exact Pairs lookup:
+root matches win, replacements are final for the pass, duplicate rows and
+independent occurrences preserve their full answer bags. Runnable, Empty and Error
+expressions stay literal. This is structural replacement, not lexical capture
+avoidance. atom-subst remains the single-written-variable template operation;
+`lib_regex` PCRE2
+over strings; `lib_pairs` a collection of (Key Value) pairs read as a relation: the two
+projections, the converse, the two stable orderings, the grouping into a multimap
+and back, and a lookup that answers once per value a key has. These equations
+reuse Functional's projections, grouping and sorting. Duplicates and caller
+variable identity survive; lookup selects a row by segments and compares its key
+by identity without binding a different key;
+`lib_sets` sets as ordered expressions: construction, membership by term rather
+than unification, insertion and removal, union, intersection, differences, subset
+and disjointness. Union accepts zero or more canonical sets; intersection accepts
+one or more. Both use variadic arrows and folds, subsuming the former all-forms.
+Pass runtime argument collections through apply-to. Core unique-atom, sort-atom,
+intersection-atom and subtraction-atom supply the operations; invalid canonical
+inputs raise through core assertions;
+`lib_roman` a list and fold basis, head, init, fold-flat,
 foldr-flat; the three general set operations `/?\`, `\?` and `\?/`, which take
 the comparison as an argument and are what the nine fixed spellings are sugar
 over; `fst`, `snd` and the pair-shaped `cns`; and `traceid` and `tracem`, which
-print and answer their subject unchanged; `lib_soft` soft structural unification over written symbols, including
+print and answer their subject unchanged; `lib_socket` IPv4/IPv6 TCP connections,
+listeners and complete UDP packets through File handles. Endpoint values include
+the actual family, numeric address and port. File byte operations carry TCP;
+UDP retains packet boundaries and empty payloads. Readiness preserves input
+order and duplicates, and shutdown selects a connection's direction. Scopes
+keep acquisition cancellable, close on every exit and retain original outcomes
+when cleanup also fails. Openers refuse transactions; declares the `socket`
+capability. Native adapters preserve complete IPv6 addresses and release failed
+stream publication; `lib_soft` soft structural unification over written symbols, including
 function names, with grounded values compared crisply; match quality as a measure;
-`lib_spaces` moving atoms between spaces, with find and match-count;
-`lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
-`lib_string` text, imported when you need it; `lib_tabling` expert-only tabling
-control; `lib_thread` parallel data operations, M:N futures and timers;
+`lib_spaces` whole-space work: find, match-count, copying, moving, draining, snapshotting, subtracting and clearing, each answering once per atom it touched;
+`lib_statistics` sample summaries and finite probability laws expressed as
+MeTTa equations. Sample totals, moments, three means, quantiles, ranks and
+regression retain exact intermediates; floating observations round the final
+result once. Variance composes covariance, deviation takes its root before
+rounding, and ranking both inputs composes Spearman correlation. Modes preserve
+term identity and answer every tie. Match can reconstruct or specialize a
+recipe as a function. Finite laws use Measure's (Weight Value) rows for mapping,
+independent products, conditioning, thresholds, inverse CDFs and moments.
+ws-map-independent is variadic and preserves alternative function rewrites as
+separate laws. Sample quantiles interpolate; law quantiles retain support values.
+First central moments are exactly zero after finite numeric validation.
+Insufficient samples, nonfinite data and invalid count domains refuse.
+weighted-subset-mass-independent and weighted-subset-posterior-independent
+hold literal (candidate ID LOSS (ratio N D)) rows. Ground acyclic IDs compare
+by identity; losses and targets share a nonnegative integer scale, and integer
+priors satisfy0<=N<=D withD>0. Sparse ordered integer coefficient rows merge
+equal sums and truncate at the target. A rolling fold computes exact mass;
+prefix/suffix unfolds and two-pointer joins recover all marginals in candidate
+order. Integer ratios remain exact without constructing host rationals. Zero
+mass is defined; zero-mass conditioning raises an assertion refusal that names
+the mass operation. The former Distribution import and Combinatorics probability
+operations are consolidated into this library;
+`lib_strategy` traversal through ordinary MeTTa equations, callable values and
+held plans. Bound terms remain literal for named functions, lambdas and partial
+applications. seq and choice accept zero or any number of strategies; choice
+returns the first nonempty complete answer bag. Failure is no answer, produced
+by (empty); literal Empty remains data. alltd stops at each successful
+root replacement; topdown, bottomup and innermost retain their distinct orders.
+strategy-repeat names direct rewriting until failure; held (repeat Rule) plans
+coexist with Functional's numeric repeat. Type selection reads current-space
+declarations and filters with match-types;
+`lib_string` codepoint text with String/Symbol/Number coercion and embedded NUL
+preservation. Nine MeTTa recipes derive literal membership, prefixes/suffixes,
+character joining, repetition, padding and normalized edit similarity. One
+function parameter assigns padding to the left; empty construction still
+validates complete inputs, and retained assertions keep replay conservative.
+Shared native boundaries own conversion, exact search, licensed layout/template
+grammars, RapidFuzz edit distance and ISub; no second text representation;
+`lib_system` the environment as a relation, a read with no answer for an unset
+variable, process-wide writes, the working directory and ten platform keys, with
+no shell anywhere; `lib_tabling` expert-only tabling
+control; `lib_testing` imports finite generators for properties expressed with
+core assertions. Compose range or cartesian-power with forall and test;
+assertEqualToResult checks complete answer bags and duplicate occurrences.
+foldall counts with a value/count callback, including zero for an empty domain.
+once selects the first answer of a filtered generator and retains its binding.
+Quote runnable values as data, select them with index-atom and request fresh
+variables explicitly with copy_term. Ordinary traversal preserves calling-module
+resolution and closes generators on success, failure and exceptions;
+`lib_thread` parallel data operations, M:N futures and timers;
 `lib_torch` PyTorch from plain MeTTa through py-call, GENERATED from torch's
 own signatures by `extensions/python/tools/facegen.py` and gated by the
-`face-sync` lane; `lib_vector` dot, norm,
-cosine and random-normal-vector; `lib_zar` Prolog interop, consult and
+`face-sync` lane; `lib_unicode` the Unicode database and the standard text transformations, each
+head taking its variant as an argument: normalization in the five UAX#15 and
+UAX#31 forms, case folding for caseless comparison, the general mapper with
+utf8proc's flags, thirteen per-character properties, fourteen locale-free
+character classes, grapheme clusters and code-point validity, with the database
+version as a head; declares the `unicode` capability; `lib_uri` generic URI
+components as encoded String pairs, preserving missing versus empty delimiters,
+userinfo case and reserved octets. RFC3986 resolution handles relative paths,
+authority-only bases and opaque URNs. Native context-sensitive percent encoding
+accepts Unicode; decoding requires valid UTF8. Query relations preserve repeated
+keys and blank values, with explicit uri/form plus convention. URI spelling is
+ASCII, and authorities remain encoded data rather than resolved addresses;
+`lib_uuid` explicit random
+and time UUIDs, UTF-8 namespace/name identifiers for versions 3 and 5, validation,
+version/variant fields, version-1 timestamps, nil and lossless 16-byte conversion;
+custom UUID namespaces and embedded NUL names are preserved. Namespaces, names,
+nil, byte conversions and field formulas are MeTTa equations that can be
+reconstructed as functions. One field layout drives validation and formatting;
+generation, strict validation and version-1 timestamps remain native. Shape
+assertions make recording replay conservative. Version 1 may expose the host's
+MAC address; `lib_vector` exact finite numeric kernels with
+one final rounding and IEEE signs/classes; MeTTa equations derive fill from
+range, random construction from foldall/cons-atom and the core seeded draws,
+and cosine-of-normalized from dot. Complete validation precedes entropy;
+count assertions and supplying numeric operations identify their own refusals;
+retained construction assertions make recording replay conservative, while
+the dot specialization keeps its structural numeric effect;
+`lib_yaml` YAML documents as values in lib_json's own shape, a mapping becoming a
+space and a sequence an expression, with the file doors derived from lib_file's
+and four refusals the host only fails at: a multi-document stream, an unsupported
+tag, a duplicate key and malformed text; declares the `yaml` capability;
+`lib_zar` Prolog interop, consult and
 use_module wrappers. Scored answers and fuzzy or regex matching
 are `lib_measure` and `lib_regex` riding the general seam, not Python modules:
 there is no `metta.measure` and no `metta.matching`.

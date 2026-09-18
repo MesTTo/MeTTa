@@ -12,7 +12,7 @@ Guarantees:
     [tested: tests/checks/check_policy_inventory_selftest.py;
     commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
   - multiline member/2 and memberchk/2 lists, arbitrary Literal annotations,
-    and Python list/set membership are planted independently; only catalog
+    and Python list/set membership are planted independently; catalog
     preset terms and generated vocabulary output are excluded [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
   - a Prolog list whose every element is a variable is skipped, and one
@@ -21,6 +21,9 @@ Guarantees:
   - computed Literal argument bundles are skipped; explicit alternatives and
     membership lists, including builtin references, remain findings
     [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=5fef7004c21135210fd2c05255a2661aa7e46d5e]
+  - vendor ownership excludes third-party sources while the same closed lists
+    in local adapters remain findings [tested:
+    test_vendor_ownership_does_not_exempt_local_adapters; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
   - semiring-claim validation rejects a missing required value, an undeclared
     semiring claim and a missing consumer seam [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
@@ -130,6 +133,24 @@ def test_catalog_authority_and_generated_output_are_not_findings() -> None:
         findings = scan_closed_lists(root)
     assert findings == [
         "engine/spaces.pl:2: closed policy list [one, two] has no adjacent exemption"
+    ]
+
+
+def test_vendor_ownership_does_not_exempt_local_adapters() -> None:
+    """Both languages retain their local checks beside a vendored provider."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        for parent, suffix, text in (
+            ("lib/example", "pl", "allowed(X) :- memberchk(X, [red, blue]).\n"),
+            ("extensions/python/metta/example", "py", "def allowed(x): return x in ['red', 'blue']\n"),
+        ):
+            _write(root, f"{parent}/vendor/provider.{suffix}", text)
+            _write(root, f"{parent}/support/adapter.{suffix}", text)
+        findings = scan_closed_lists(root)
+    assert findings == [
+        "lib/example/support/adapter.pl:1: closed policy list [red, blue] has no adjacent exemption",
+        "extensions/python/metta/example/support/adapter.py:1: closed policy list "
+        "['red', 'blue'] has no adjacent exemption",
     ]
 
 
@@ -333,6 +354,7 @@ def main() -> int:
         test_an_exemption_without_a_reason_is_reported,
         test_an_unknown_exemption_reason_is_reported,
         test_catalog_authority_and_generated_output_are_not_findings,
+        test_vendor_ownership_does_not_exempt_local_adapters,
         test_a_list_of_prolog_variables_carries_no_policy,
         test_multiline_prolog_member_predicates_are_reported,
         test_python_literal_and_list_set_membership_are_reported,

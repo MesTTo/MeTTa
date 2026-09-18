@@ -23,9 +23,16 @@ remaining file for malformed records. CSV spaces
 provide enumeration through the same Prolog seam used by Python's SpaceProvider;
 `match` performs the usual engine unification over the streamed atoms.
 
-The file uses UTF-8, comma separators, and SWI `library(csv)` quoting. A record
+The file uses UTF-8, comma separators and doubled-quote escaping. Quoted line
+endings retain their exact characters. A record
 with a different width or an unterminated quoted field raises
 `csv_malformed_row` with its logical record number. Missing files raise
 `csv_file_missing`; inaccessible files raise `csv_permission_denied`. Each
 error names its remedy. CSV spaces are read-only; copy row atoms into a native
 space to edit them. The constructor's effect class is `readOnlyLookup`.
+
+[The CSV library](../../../lib/lib_csv/README.md) also parses and encodes text,
+reads field lists, writes and appends files, and accepts explicit dialects.
+Snapshots carry logical record numbers; their ordinary space enumeration is
+an unordered bag. Blank records have zero fields, while quoted empty fields
+have one. Use `(width any)` when variable widths are intentional.

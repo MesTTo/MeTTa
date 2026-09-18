@@ -179,6 +179,341 @@ Lifted when: SWI-Prolog as shipped consults the loader for a reset predicate
   patch and the entry go together then.
 Record: docs/journal/2026-09-17-host-patches.md;
   docs/journal/2026-09-15-copied-specializations-materialize-before-calls.md.
+## swi-optparse-missing-value
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_options/4 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: a synthetic final empty argument makes an absent value indistinguishable
+  from an explicitly supplied empty token.
+Reproduction: tests/checks/host_workarounds/swi-optparse-missing-value.pl
+Workaround: the private parser keeps absence distinct and refuses missing values.
+Lifted when: a missing value raises after the explicit-empty control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-separator
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_args_/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the double dash becomes an operand while later options still parse.
+Reproduction: tests/checks/host_workarounds/swi-optparse-separator.pl
+Workaround: consume the terminator and retain every following token as an operand.
+Lifted when: the native parser consumes the terminator and leaves later flags literal.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-negation
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_args_/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: one negated Boolean produces two false occurrences under keepall.
+Reproduction: tests/checks/host_workarounds/swi-optparse-negation.pl
+Workaround: recognize and consume a negated Boolean once.
+Lifted when: one negated token yields one false occurrence after the explicit control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-name-grammar
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:name_long//1 and name_char/1 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the restrictive name grammar ignores declared digit or punctuation names
+  and accepts unknown dashed tokens as operands.
+Reproduction: tests/checks/host_workarounds/swi-optparse-name-grammar.pl
+Workaround: match literal declared dashed names and refuse unrecognized options.
+Lifted when: count2 and 9? declarations parse and the unknown --bad? token raises.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-flag-namespace
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:invalidate_opts_spec/2 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: uniqueness validation compares short and long names without their dash
+  prefixes, rejecting separate options named -x and --x.
+Reproduction: tests/checks/host_workarounds/swi-optparse-flag-namespace.pl
+Workaround: validate full dashed names in the adapter and private provider.
+Lifted when: distinct -x and --x declarations both parse after the disjoint control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-schema-ambiguity
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:invalidate_opts_spec/2 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the O1 \\= O2 guard excludes identical rows from duplicate-name detection.
+Reproduction: tests/checks/host_workarounds/swi-optparse-schema-ambiguity.pl
+Workaround: index each declaration, field and full flag name in call-local associations.
+Lifted when: identical repeated declarations raise after the single-row control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-value-report
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_val/4 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: conversion failure prints the option name to stdout but omits it from
+  the exception, so a caller cannot reliably display or retain its context.
+Reproduction: tests/checks/host_workarounds/swi-optparse-value-report.pl
+Workaround: include the token, declared type and original cause in the exception.
+Lifted when: conversion failure prints nothing and its exception identifies count.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-absolute-path-nul
+
+Host: SWI-Prolog 10.1.13, absolute_file_name/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: canonicalization truncates an input String at NUL, producing a valid
+  pathname for a different file or directory instead of preserving or refusing it.
+Reproduction: tests/checks/host_workarounds/swi-absolute-path-nul.pl
+Workaround: reject NUL before canonicalizing a database directory.
+Lifted when: canonicalization refuses NUL or retains the complete input path.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database pathname validation.
+
+## swi-utf8-journal-repair
+
+Host: SWI-Prolog 10.1.13, src/os/pl-stream.c:Sgetcode at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the UTF-8 reader accepts overlong sequences; other invalid sequences
+  warn and substitute a character instead of refusing the input term.
+Reproduction: tests/checks/host_workarounds/swi-utf8-journal-repair.pl
+Workaround: validate original byte lines using csv_codec:utf8_text/2 before
+  opening the journal with the host text reader. The existing codec checks
+  canonical encoding and Unicode scalar values.
+Lifted when: the overlong NUL raises after the canonical NUL control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database journal boundaries.
+
+## swi-persistency-write-memory
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:db_assert_sync/1 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: db_assert_sync asserts the in-memory row before opening or writing its
+  journal. An append error leaves that row visible in the attachment.
+Reproduction: tests/checks/host_workarounds/swi-persistency-write-memory.pl
+Workaround: update and sync failures end the owning database engine and its
+  attachment, so later queries refuse instead of exposing partially changed memory.
+Lifted when: the failed append leaves no row after the normal reopen control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database ownership.
+
+## swi-persistency-replay
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:load_db/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: unsupported journal records print illegal_term and replay continues
+  with later records, returning a partially interpreted store as a valid attachment.
+Reproduction: tests/checks/host_workarounds/swi-persistency-replay.pl
+Workaround: validate the entire journal before attachment; reject unknown or
+  malformed records with the journal path and an explicit repair instruction.
+Lifted when: native attachment raises for the unknown record after its valid control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database ownership.
+
+## swi-persistency-detach
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:db_sync/2 detach at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: detach retracts db_stream before close; a close exception skips removal
+  of db_file and db_option registrations. A second detach drains those records.
+Reproduction: tests/checks/host_workarounds/swi-persistency-detach.pl
+Workaround: retry detach only after its close fails, then propagate the close
+  error alongside any earlier operation or subsequent cleanup error.
+Lifted when: failed close leaves no attachment registration after a normal detach control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database ownership.
+
+## swi-persistency-stream-owner
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:persistent/2 and db_open_file/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: native journal opening precedes db_stream registration. An interruption
+  between them leaves a stream that db_detach cannot discover or close.
+Reproduction: tests/checks/host_workarounds/swi-persistency-stream-owner.pl
+Workaround: after native detach, the exclusive store owner closes remaining
+  streams naming its journal and retains their errors beside the operation outcome.
+Lifted when: interruption after native open leaves no journal stream after detach.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database cancellation ownership.
+
+## swi-relative-compound-source
+Host: SWI-Prolog 10.1.13; boot/init.pl:$register_resolved_source_path/2 at
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/init.pl#L2571-L2580.
+Defect: every compound file specification enters the global resolved-source
+  cache keyed by specification and dialect, including relative /(support,native).
+  A later importing directory therefore reuses the first directory's file.
+Reproduction: tests/checks/host_workarounds/swi-relative-compound-source.pl,
+  whose quoted atom control loads both providers while the compound path loads
+  only the first, using two independent directories for each form.
+Workaround: use quoted pathname atoms for relative native-provider imports.
+Lifted when: both forms load both directory-local providers and the reproduction
+  answers absent.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md,
+  native source isolation and CMake evidence.
+
+## libarchive-zip-unicode-crc
+
+Host: libarchive 3.8.5, archive_read_support_format_zip.c:process_extra at
+  dd897a78c662a2c7a003e7ec158cea7909557bee.
+Defect: a Unicode path extra field's CRC is compared with the already-converted
+  pathname. CP437-to-UTF8 conversion changes those bytes and invalidates a valid
+  field, so the reader silently returns the legacy name instead.
+Reproduction: tests/checks/host_workarounds/libarchive-zip-unicode-crc.sh
+Workaround: a private provider build saves the original filename CRC before
+  conversion and uses it for the extra-field check. Payload checks remain enabled.
+Lifted when: explicit CP437 conversion retains the valid Unicode extra-field name
+  after the default reader and ordinary CP437/UTF8 controls pass.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## libarchive-zip-default-charset
+
+Host: libarchive 3.8.5, archive_read_support_format_zip.c:zip_read_local_file_header
+  at dd897a78c662a2c7a003e7ec158cea7909557bee.
+Defect: unflagged CP437 names use the ambient locale by default. Under UTF8,
+  the valid ZIP name caf\x82 has no wide representation despite ARCHIVE_OK.
+Reproduction: tests/checks/host_workarounds/libarchive-zip-default-charset.sh
+Workaround: set the ZIP hdrcharset option to CP437. The native UTF8 flag and
+  Unicode extra-field handling still take precedence.
+Lifted when: the default reader returns café after explicit CP437 and UTF8 controls pass.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-archive-null-pathname
+
+Host: SWI-Prolog 10.1.13, packages-archive archive_next_header at
+  13a3f4af8f8219e10faf4895ce9fb189bc6aaefd.
+Defect: archive_entry_pathname_w may return NULL after ARCHIVE_OK. Passing it
+  to PL_unify_wchars with length -1 calls wcslen(NULL) and crashes the process.
+Reproduction: tests/checks/host_workarounds/swi-archive-null-pathname.sh
+Workaround: a private copy of the binding raises representation_error(archive_pathname)
+  before attempting the wide-string conversion.
+Lifted when: the native reader decodes or explicitly refuses the legacy name
+  after its Unicode control, instead of terminating with SIGSEGV.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## libarchive-utf8-locale
+
+Host: SWI-Prolog 10.1.13, packages-archive archive_next_header at
+  13a3f4af8f8219e10faf4895ce9fb189bc6aaefd, using libarchive 3.8.5.
+Defect: reading a Unicode pathname converts through the current C character
+  locale and raises archive_error(84, ...) under C, even for explicitly UTF8 ZIP/TAR.
+Reproduction: tests/checks/host_workarounds/libarchive-utf8-locale.pl
+Workaround: enter a thread-local UTF8 character locale for the complete archive
+  operation and restore the caller's locale after its streams and archives close.
+Lifted when: the same Unicode name reads under C after its UTF8 control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## libarchive-gzip-trailer
+
+Host: SWI-Prolog 10.1.13 library(archive); libarchive consume_trailer at
+  c719b9b1f56621d92063a85361cc8d114f5575a9.
+Defect: the gzip filter consumes CRC and length fields without checking them;
+  its optional header CRC is also unchecked.
+Reproduction: tests/checks/host_workarounds/libarchive-gzip-trailer.pl
+Workaround: decode each gzip layer through zopen and read it completely before
+  the archive operation can publish results. Other filters retain native decoding.
+Lifted when: the valid member reads correctly and the corrupt CRC raises.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-archive-input-exception
+
+Host: SWI-Prolog 10.1.13, packages-archive libarchive_close_cb at
+  13a3f4af8f8219e10faf4895ce9fb189bc6aaefd.
+Defect: closing an archive whose parent decoder raised ignores the failure of
+  PL_release_stream, returning with an exception pending and losing its original
+  read error. The runtime prints a foreign-predicate protocol violation.
+Reproduction: tests/checks/host_workarounds/swi-archive-input-exception.pl
+Workaround: close and validate a decoded intermediate file before opening the
+  next archive reader; remove each consumed intermediate during the traversal.
+Lifted when: corrupt input raises and archive_close leaves no exception pending.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-tcp-ipv6-peer
+
+Host: SWI-Prolog10.1.13, packages-clib socket.c:pl_accept at
+  a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: native accept uses sockaddr_in and IPv4 address formatting for an IPv6
+  connection, returning ip(0,0,0,0) for the IPv6 loopback peer.
+Reproduction: tests/checks/host_workarounds/swi-tcp-ipv6-peer.pl
+Workaround: query the connected descriptor with getpeername, sockaddr_storage
+  and getnameinfo to retain its family and actual source port.
+Lifted when: native accept returns the complete IPv6 loopback address.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-udp-ipv6-address
+
+Host: SWI-Prolog10.1.13, packages-clib socket.c:unify_address at
+  a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: udp_receive passes its IPv6 sockaddr to an address formatter that handles
+  only AF_INET and aborts the process in its default branch.
+Reproduction: tests/checks/host_workarounds/swi-udp-ipv6-address.pl
+Workaround: receive complete datagrams with the OS API and format either address
+  family through getnameinfo, retaining the sender's actual port.
+Lifted when: the native IPv6 packet and sender endpoint pass in the isolated child.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-empty-query
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:add_query_and_fragment,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: native composition adds the query delimiter only for a nonempty query,
+  collapsing a present-empty component into an absent one.
+Reproduction: tests/checks/host_workarounds/swi-uri-empty-query.pl
+Workaround: compose all defined components using RFC3986 section5.3.
+Lifted when: the native builder retains the question mark for an empty query.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-empty-base-path
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:resolve_guarded,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: the authority-with-empty-path branch creates a merged buffer but does
+  not assign its range to the target path, so resolving g against http://a loses g.
+Reproduction: tests/checks/host_workarounds/swi-uri-empty-base-path.pl
+Workaround: RFC3986 section5.2.3 prepends slash and retains the merged path.
+Lifted when: resolving g against http://a returns http://a/g.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-urn-resolution
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:resolve_guarded/ranges_in_charbuf,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: native absolute URN parsing stores nid/nss, while resolution emits only
+  the generic path slot; an absolute URN becomes urn:.
+Reproduction: tests/checks/host_workarounds/swi-uri-urn-resolution.pl
+Workaround: carry the entire opaque path through generic RFC3986 resolution.
+Lifted when: resolving an absolute URN retains its namespace content.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-normalization-data
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:normalize_in_charbuf,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: unconditional lowercasing includes case-sensitive userinfo and URN
+  content; liberal percent decoding rewrites arbitrary octets through Unicode.
+Reproduction: tests/checks/host_workarounds/swi-uri-normalization-data.pl
+Workaround: normalize unreserved bytes and scheme/host case only, retaining
+  userinfo case and every other encoded octet.
+Lifted when: all identifying-case and octet fixtures retain their data.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-http-stop-ack
+
+Host: SWI-Prolog10.1.13, packages-http thread_httpd.pl:http_stop_server/2,
+  upstream8e6b758778aed1986f81a4a7a8efeb475faa35aa.
+Defect: the timeout-and-connect shutdown branch joins the accept thread but
+  leaves its untagged http_stopped acknowledgement in the caller mailbox. A
+  later stop can consume it and join a listener it has not woken.
+Reproduction: tests/checks/host_workarounds/swi-http-stop-ack.pl
+Workaround: run each native stop in a fresh thread, joining it in cleanup so
+  its mailbox and leftover acknowledgement die with that operation.
+Lifted when: the forced timeout branch leaves no http_stopped message after
+  native stop returns, so the reproduction prints absent.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md,
+  2026-09-12 HTTP design and verification.
+
+## swi-http-partial-startup
+
+Host: SWI-Prolog10.1.13, packages-http thread_httpd.pl:http_server/2,
+  create_workers/1 and create_server/3, upstream8e6b758778aed1986f81a4a7a8efeb475faa35aa.
+Defect: workers and their message queue are created before the accept thread;
+  an exception creating that thread leaves those resources alive.
+Reproduction: tests/checks/host_workarounds/swi-http-partial-startup.pl
+Workaround: own the bound listener before starting, and release its fresh worker
+  queue and socket if native startup fails. Successful servers use native stop.
+Lifted when: the injected accept-thread alias collision leaves no worker or
+  message queue, so the reproduction prints absent.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md,
+  2026-09-12 HTTP design and verification.
+
 ## swi-cleanup-window
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `setup_call_cleanup/3` is
   `sig_atomic(Setup), '$call_cleanup'` (boot/init.pl:680-682). This tree
@@ -745,3 +1080,113 @@ Lifted when: profile/2's report treats a zero tick count as an empty profile,
   or the division moves behind the `top(0)` option.
 Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the 2026-09-12
   section on the publication merge.
+
+## swi-string-nul-membership
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-string.c:split_string uses text_chr for separator and padding membership.
+Defect: NUL-terminated membership lookup counts the terminator as a member even
+  of an empty set. Splitting the codes [97,0,98] with comma returns ["a","b"],
+  losing NUL. Line and wrapping utilities that use this splitter inherit the defect.
+Reproduction: tests/checks/host_workarounds/swi-string-nul-membership.pl,
+  compares a normal split control with the embedded-NUL input.
+Workaround: the String provider scans complete codepoint sets and explicit input
+  bounds. Line and layout adapters use that corrected boundary. UUID validation
+  requires exact reserialization of the separators after the host split.
+Lifted when: the host splitter preserves NUL unless explicitly listed in the
+  separator or padding set. The private KMP search and exact edit-distance
+  provider remain necessary for their independent operations and complexity.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-isub-nul-lengths
+Host: SWI-Prolog 10.1.13, packages-nlp dd69ae95342d7a0429a0f8bcc7deab2bd514570e;
+  pl-isub.c:get_chars uses wcscpy/wcsdup and isub.c:isub_score_inplace uses wcslen.
+Defect: ISub compares only the prefix before NUL. Codes [97,0,98] against "a"
+  score 1 at threshold zero, instead of the complete-input score 0.55.
+Reproduction: tests/checks/host_workarounds/swi-isub-nul-lengths.pl,
+  checks the identity control and the complete-input score.
+Workaround: the String provider owns codepoint vectors and passes explicit
+  lengths through its licensed ISub adaptation.
+Lifted when: the host ISub boundary and core preserve complete strings and the
+  reproduction returns the complete-input score. Re-evaluate the adapter's
+  scalar, length and cancellation contracts before replacing it with the host.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-isub-variable-options
+Host: SWI-Prolog 10.1.13, packages-nlp dd69ae95342d7a0429a0f8bcc7deab2bd514570e;
+  isub.pl:user:goal_expansion/2 calls isub_options/3 on variable options.
+Defect: normalize_int/2 binds a variable Bool to true while compiling its caller.
+  A predicate intended to accept either Bool is compiled for true only. A wholly
+  variable options list instead raises from option/3 during compilation.
+Reproduction: tests/checks/host_workarounds/swi-isub-variable-options.pl,
+  compares compiled options with the public predicate called at runtime.
+Workaround: the String differential oracle uses call/5 so all option combinations
+  reach the public host predicate at runtime.
+Lifted when: compilation preserves option variables and both Bool branches agree
+  with the runtime control. Restore the direct oracle call after that proof.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-rational-subnormal-rounding
+Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-gmp.c:mpq_to_double rounds a significand before ldexp.
+Defect: converting ((1<<54)+1) rdiv (1<<1129) returns zero although its exact
+  value is above half the smallest subnormal and must round to 2^-1074.
+Reproduction: tests/checks/host_workarounds/swi-rational-subnormal-rounding.pl,
+  compares normal and exact subnormal controls with the above-midpoint value.
+Workaround: Vector rounds integer quotient/remainder at the final binary64
+  quantum and converts only an already representable dyadic with float/1.
+  Math converts scalar numbers through Vector's multiplication by a floating unit.
+Lifted when: the host's rational conversion rounds subnormals once and the
+  reproduction returns absent. Preserve Vector's explicit IEEE overflow and
+  signed-underflow policy when replacing the conversion.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-infinite-division-zero-sign
+Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).
+Defect: sign_f loses a negative-zero numerator's sign, reversing the expected
+  sign of -0.0 divided by either infinity. Finite division controls are correct.
+Reproduction: tests/checks/host_workarounds/swi-infinite-division-zero-sign.pl,
+  checks both finite controls and all four zero/infinity sign combinations.
+Workaround: Vector's class/sign proxies divide by multiplying the exact signed
+  reciprocal. Proxies contain only units, zeros, infinities and NaNs.
+Lifted when: the host preserves the numerator's zero sign and the reproduction
+  returns absent; restore direct division inside the proxy arithmetic boundary.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uuid-nonhex-hyphens
+Host: SWI-Prolog 10.1.13; library/ext/clib/uuid.pl:is_uuid/1 calls
+  hex_or_minus/1 at every position, including hexadecimal digit positions.
+Defect: is_uuid/1 accepts 36 hyphens as a UUID, although 32 positions must be hex.
+Reproduction: tests/checks/host_workarounds/swi-uuid-nonhex-hyphens.pl,
+  with a valid UUID and a nonhex control before the all-hyphen probe.
+Workaround: lib_uuid validates all five group lengths and their hexadecimal digits.
+Lifted when: the host accepts the valid control and rejects both malformed inputs.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-ugraphs-append2
+Host: SWI-Prolog 10.1.13; library/ugraphs.pl:top_sort/2 calls append/2 at
+  line 460, while its library(lists) declaration at line 79 imports append/3.
+Defect: with autoload disabled, top_sort/2 raises
+  existence_error(procedure,ugraphs:append/2) even for a two-vertex DAG.
+Reproduction: tests/checks/host_workarounds/swi-ugraphs-append2.pl,
+  requiring the expected order after adding the missing import as a control.
+Workaround: the graph differential suite explicitly imports append/2 into
+  the ugraphs module for its independent host oracle. The public graph library
+  derives its operations from MeTTa expressions and no longer reaches top_sort/2.
+Lifted when: top_sort/2 computes the expected order with autoload disabled
+  before the reproduction supplies the import.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uuid-name-encoding
+Host: SWI-Prolog 10.1.13; packages-clib uuid.c:pl_uuid uses PL_get_chars with
+  CVT_ATOM and passes a NUL-terminated name to OSSP uuid_make;
+  https://github.com/SWI-Prolog/packages-clib/blob/2d74666697ba12af386644638b3e563390affbf6/uuid.c.
+Defect: UUID names are read as Latin-1 and truncated at NUL. Non-Latin-1 names
+  raise representation_error(encoding); accepted names can hash different bytes.
+Reproduction: tests/checks/host_workarounds/swi-uuid-name-encoding.pl,
+  comparing ASCII, accented and embedded-NUL names with UTF-8 UUID vectors.
+Workaround: lib_uuid's MeTTa name recipe composes lib_encoding and lib_crypto over namespace bytes
+  and the complete UTF-8 name, then sets the RFC version and variant bits.
+Lifted when: the host produces both UTF-8/NUL vectors. Arbitrary namespace support
+  still requires the byte construction unless the host also admits a UUID namespace.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
