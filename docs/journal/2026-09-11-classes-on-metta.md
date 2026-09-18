@@ -3165,3 +3165,42 @@ write in a Setup, the branch's lifted shape at five sites; the rule guards
 the cleanup window, so it now reads docs/host-workarounds.md and stands
 down while the swi-cleanup-window entry carries Patch:, its selftest
 keeping the scan alive for a host without the patch.
+Found: on the first fixed preview the class-entities twin dumped core, a
+segmentation fault in nb_setval/2's duplicate_term inside a transaction
+inside an engine (gdb: mark_for_duplicate under pl_nb_setval2_va under
+transaction___LD under pl_engine_next2_va), deterministic there and absent
+on 89bd5dc41; with garbage collection off the twin runs, so a term some
+global still referenced had been collected. Reverting each trunk-changed
+unit to the branch's copy one at a time named engine/spaces/receipts.pl:
+with the branch's receipts unit the twin runs, with every other revert it
+still crashes. The trunk's receipts delta (+139/-34) is its
+swi-cleanup-window scaffolding for transaction retirement by its own
+markers, mutating the occurrence-transaction root's term in place with
+nb_setarg/3 after nb_current/2 and re-arming completion through
+thread_signal/2 and a bound hook; the branch's copy keeps the base's
+Frame-Scope root. Decided: the branch's receipts unit, whole, as for the
+observation unit; the trunk's receipt_limits suite is adapted to what the
+merged tree does under a bound or dropped where it tests the dropped
+machinery.
+Found: the batch door filereader:with_definition_batch/1 asserted
+active_source_load/1 as a fact while the trunk derives it from the trailed
+publication context, a static reader, so every Python-seat write raised
+"No permission to modify static procedure" (fifty twins failed to run, the
+pytest lane read 1345 failures); the door now enters the context through
+with_owning_source_load/2, whose pin the branch's recorders already unwrap,
+and no other declared context reader is written by branch code. The
+foreign-rules twin's transaction-write refusal was the same defect: its
+provider's declaration never landed. On the preview with that fix the
+pytest lane reads 2 failed of 7017, the twin budget the re-pin settles and
+a ruff duplicate the auto-merge doubled.
+Decided, with the branch's receipts unit: its two listeners register through
+the trunk's door (metta_listen/2 in place of two named prolog_listen/3
+calls, which the trunk's static rule refuses outside the door); the trunk's
+four-line edit of the frames suite goes back with the unit; of the trunk's
+receipt-limits suite the one test that exercises a surviving mechanism,
+the exception hook armed by the process's first bound, moves into the
+limits unit's own suite counting the hook's clauses without naming a row,
+and the four that read the trunk's occurrence-transaction cell go, with the
+control.pl guarantee that cited one of them. On the preview so built:
+the engine loads clean, the class-entities twin runs, limits 5/5,
+receipt_frames 4/4, prolog-static ok.
