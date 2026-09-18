@@ -25,6 +25,65 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   type completeness rises from 70.99% to 73.82%.
 
 - HTTP serving accepts a context for GET and POST authorization by naming the home space already resolved by its gateway.
+- Door-order analysis treats a declaration the type checker verified as
+  authoritative: a value the declaration cannot admit does not escape a
+  function (`runtime() -> Runtime` no longer answers `None`), a caller's
+  supplied or unknown value reaches a concrete parameter as the declared
+  class, and an `Any` narrowed by `isinstance` is that class. `getattr`
+  answers its default, `type(x)` is `x`'s class, iteration through a source
+  `__iter__` or an inherited `UserList` yields the elements, a field tested
+  against `None` narrows wherever a subclass holds it, and a branch no
+  value enters is unreachable rather than an unresolved call. The
+  `_WatchIterator` and `integrate` helpers declare the `Subscription` and
+  `Space` they take.
+
+- Door-order analysis reads the structure the source declares: a generic
+  annotation keeps its element, key, position or class type and admits only
+  that type's own operations; a door's public contract is its overloads'
+  when it has them, and an `Any` alternative stays a value of unknown
+  structure; a declared parameter or return type settles a value the source
+  cannot type; `*args` and `**kwargs` bind as the tuple and mapping Python
+  makes; a `__slots__` descriptor taken from a class namespace and a
+  `UserList` base reach their fields; `callable()` tests and early exits
+  narrow as a type checker does. Which standard-library calls invoke a
+  supplied callback is read from mypy's typeshed into the generated table
+  `extensions/python/metta/doors/_invocations.py`, so `sorted(key=)` and
+  `atexit.register` run their callback and `callable(fn)` does not; only the
+  stub modules typeshed ships for the running interpreter enter it. A value
+  the standard library made is host work; what a supplied callable answers
+  keeps its contract instead of becoming a defect.
+
+- A boot no longer analyses the Python seat's source to publish door orders.
+  The verdict of every shipped door lives in the generated table
+  `extensions/python/metta/doors/_orders.py`, which
+  `extensions/python/tools/doororder.py --write` derives from the same
+  analysis and whose drift the `door-order` lane refuses; only a door
+  registered from a package the table does not know is analysed in the
+  running process. `Space()` plus one `run` takes 0.61s instead of 34.58s.
+
+- Door-order analysis follows literal object fields and descriptor access,
+  preserves functions stored on instances, and settles caller values before
+  completing missing helper declarations. Broad annotations retain returned
+  callables; unresolved dynamic member names remain findings. A setter that
+  only forwards its parameters to `object.__setattr__` keeps each field
+  paired with its own value instead of every value assigned through it.
+  Declaration lookups are memoized against the store slots they read, so
+  the analysis of the shipped tree takes 17.8s instead of 41s with the same
+  report.
+
+- Wire decoding now builds ordinary and undefined answers from one definite
+  atom decoder. Nested undefined wrappers fail before payload descent, while
+  deep expressions keep their iterative decoding.
+
+- The door-order gate reports declared caller-implemented contracts and
+  their dependent doors as unordered without failing them. Mixed crossings,
+  recursion, registry callbacks and undeclared operations still fail; every
+  contract retains its signature and source call site in the report.
+
+- Door-order analysis follows callable values stored in source-declared
+  containers, including alias writes and container copies. Type qualifiers
+  preserve the declared value, and unresolved container operations remain
+  findings. Literal keys and tuple fields retain their individual targets.
 
 ### Added
 
