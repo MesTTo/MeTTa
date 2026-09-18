@@ -59,7 +59,7 @@
 %     author's loop, bounded by the caller as any other [tested:
 %     algebra_fixpoint:a_guard_drops_the_instances_it_refuses,
 %     algebra_fixpoint:a_guard_that_answers_no_truth_value_is_refused_by_name;
-%     commit=WORKTREE].
+%     commit=49478d67a10793a114d27d01a51f09a685d5136a].
 %   - a carrier written (product Left Right) is the product semiring, its
 %     tags [pair, L, R] joined and extended componentwise, nested as deep
 %     as written: the guards and the (function F) labels read the left
@@ -69,7 +69,7 @@
 %     explains itself. A product of semirings is a semiring, and the join
 %     saturates when both components do [tested:
 %     algebra_fixpoint:a_product_carrier_pairs_the_record_with_its_witnesses;
-%     commit=WORKTREE].
+%     commit=49478d67a10793a114d27d01a51f09a685d5136a].
 % Fails when: a proposition's head is not a symbol, which the reader refuses
 %   by name; a carrier with no fixpoint over cyclic data runs until the
 %   caller's timeout or inference budget stops it, as any other unbounded

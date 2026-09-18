@@ -33,7 +33,7 @@
 %     variable (Coudert and Madre, DAC 1992, 10.1109/DAC.1992.227866),
 %     which for the fixpoint's positive formulas is every minimal
 %     derivation [tested: algebra_fixpoint:a_formula_answers_its_minimal_derivations_as_witnesses;
-%     commit=WORKTREE].
+%     commit=49478d67a10793a114d27d01a51f09a685d5136a].
 % Owns resources: the four dynamic tables below are process-global memory
 %   released only by metta_formula_clear/0; a program that mints variables
 %   forever grows them, as a program that asserts forever grows the database.

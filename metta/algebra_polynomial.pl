@@ -16,12 +16,12 @@
 %     this polynomial under the one homomorphism sending each variable to
 %     that carrier's tag for the source [tested:
 %     algebra_fixpoint:the_polynomial_carrier_answers_every_witness_with_its_multiplicity;
-%     commit=WORKTREE].
+%     commit=49478d67a10793a114d27d01a51f09a685d5136a].
 %   - a variable is minted per fact and per ground rule instance from the
 %     fixpoint's keys, [src, Space, N] and [rule, Space, N, Head], so a
 %     monomial names exactly the sources one derivation uses and how often
 %     [tested: algebra_fixpoint:the_polynomial_carrier_answers_every_witness_with_its_multiplicity;
-%     commit=WORKTREE].
+%     commit=49478d67a10793a114d27d01a51f09a685d5136a].
 % Decides: the polynomial is canonical, so the fixpoint's saturation test
 %   is structural equality, and a program with infinitely many derivations
 %   has no fixpoint here, as it has none under any non-idempotent carrier.
