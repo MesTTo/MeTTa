@@ -155,7 +155,7 @@ check_engine_bench() {
     # resolves $HERE/ and not a local name. engine/bench.sh picks the
     # interpreter and runs engine/bench.py, which starts one engine/bench.pl
     # process per sample and hands the counters to the shared harness in
-    # extensions/python/ext/metta-benchmarking/metta_benchmarking.py; without
+    # ext/metta-benchmarking/metta_benchmarking.py; without
     # the literals the lane covers none of them and every evidence claim
     # written in one reads as unbacked.
     #

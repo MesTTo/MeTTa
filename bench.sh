@@ -10,7 +10,7 @@
 #   diluted by whatever the harness spent around it.
 # Assumes:
 #   - swipl, and a Python that can import metta_benchmarking, the distribution
-#     under extensions/python/ext/. The comparison protocol, the two-sided
+#     under ext/. The comparison protocol, the two-sided
 #     band, the configuration stamp and the atomic re-pin are that shared
 #     harness's and are deliberately not reimplemented here
 #     [source: DEVELOPING.md:149-151].
@@ -28,7 +28,7 @@
 #   - a regression beyond a case's allowance exits nonzero naming the case,
 #     and so does an improvement left unpinned, because a stale-high pin masks
 #     regressions up to its own margin
-#     [source: extensions/python/ext/metta-benchmarking/metta_benchmarking.py, _compare_counter].
+#     [source: ext/metta-benchmarking/metta_benchmarking.py, _compare_counter].
 #   - a missing toolchain exits 0 with a note naming the step, the same split
 #     engine/build.sh draws; a PRESENT toolchain that measures a regression
 #     exits nonzero.

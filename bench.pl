@@ -529,7 +529,7 @@ bench_run(Case) :-
 %bounded.sh refuses with it when the process that started a command had
 %already exited. metta_benchmarking names the same number PERF_CONTROL_REFUSED
 %and turns it into a named skip [source: coreutils timeout(1) EXIT STATUS;
-%git-bisect(1), "run <cmd>"; extensions/python/ext/metta-benchmarking/metta_benchmarking.py,
+%git-bisect(1), "run <cmd>"; ext/metta-benchmarking/metta_benchmarking.py,
 %PERF_CONTROL_REFUSED].
 bench_unmeasured(context(_, Message-Cause)) :-
     format(user_error, "bench.pl: ~w (~w)~n", [Message, Cause]),
