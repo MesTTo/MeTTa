@@ -309,7 +309,7 @@ test(a_discarding_join_takes_out_exactly_the_credit) :-
           thread_create(fixed_worker(Ready), Discarded, []),
           thread_get_message(Ready, done),
           metta_discarded_inferences(Tally0),
-          metta_engine:metta_join_discarding(Discarded, Status),
+          metta_join_discarding(Discarded, Status),
           metta_discarded_inferences(Tally),
           assertion(Status == true),
           assertion(Tally - Tally0 =:= Credit),

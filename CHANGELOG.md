@@ -4245,16 +4245,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   band keeps its pin, and the two boot rows keep theirs until measured from
   a canonical checkout. The twins lane's per-definition authoring allowance
   is re-derived on the merged tree (305 once plus 1642 per definition), and
-  the corpus is re-pinned with the merge as its mechanism. The four counter
-  doors are not exported from the engine module (exporting their names, and
-  no other four, moved every seat row measured in a fresh process; their
-  callers name the module), KERNEL.md lists `match-under`, the parity
+  the corpus is re-pinned with the merge as its mechanism. The three join
+  doors the counters added are exported as declared services at a measured
+  price (their names in the engine module's export list, and no other
+  three, move every seat row measured in a fresh process; the seat ledgers
+  carry it with the A/B as the mechanism), KERNEL.md lists `match-under`, the parity
   baseline re-freezes the ch22 examples the algebra work moved, and
   EXTENDING.md's cost table row the moved extension pin derives is
   regenerated. A benchmark row's every comparison now reaches the log:
   `BenchmarkBaseline.collecting()` records each failed comparison in its
   block and raises one error naming all of them, so a failed count no
   longer hides a stale slope pin or a later tier.
+  The engine and seat instruction rows whose counts move with the engine
+  image's layout declare that spread as their band (five percent, the C
+  term-in one) instead of re-pinning on every unrelated change, and the
+  twins whose cost has a second exact mode under the gate's concurrent
+  lanes carry envelopes over both modes with the condition recorded.
 
 ### Fixed
 

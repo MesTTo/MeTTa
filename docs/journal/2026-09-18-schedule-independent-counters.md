@@ -194,11 +194,21 @@ The tally door metta_discarded_inferences/1 exported alone reads every
 row at its pin too (wt-battery-3 ai-ab-remedy-7.log: translate
 327,014,703), and the seam requires a declared host service to be exported
 (engine_modules:every_declared_service_is_exported_to_the_host).
-Decided: the three join doors stay in engine/metta/control.pl and leave
-the export list, lib_thread calls them metta_engine-qualified; the tally
-door stays exported and its callers unqualified; the seat rows measured
-in a fresh process keep the pins measured on 4c0533704 and the seat
-re-pins written for them are withdrawn.
+Tried: the three join doors off the export list, lib_thread calling them
+metta_engine-qualified (e81e5369e) -> the gate on 19fdb0b86 refused it
+twice: the lib-surface lane holds a library to published engine services
+(the three predicates called from lib_thread without a seam:kind row) and
+every_declared_service_is_exported_to_the_host holds a published service
+to an export; and the class twins, pinned with the exports present, read
++21k to +24k without them (wt-battery-2 ai-full-gate-19fdb0b86.log).
+Decided: the three doors are exported and declared `service`, lib_thread
+calls them unqualified like every published door, and the price the rounds
+measured is paid and recorded on the seat rows (engine translate, the C
+term-in, MORK's native rows re-pinned to the final tree's readings with
+the rounds as the mechanism), because the seam's two laws outrank a
+constant-factor cost the user has accepted while this engine is the 1.0.0
+vehicle. Revisit if the price ever matters: the join brackets living in
+lib_thread over one exported discard door, whose export price is unmeasured.
 Found (the Python-seat rows): direct-join and prepared-join's slope pins
 and the extension add-atom tier's pin were stale, not moved: on 4c0533704
 with a purged QLF set the same test's point-count assertion failed first
@@ -215,3 +225,22 @@ instructions and a MORK conjunction 4% per operation while four other
 names do not; the shape fits the functors' placement in a procedure table
 the evaluator probes on every meta-call, which is the host's and is not
 pursued further under the engine's retirement.
+Found: ten point twins read one exact integer under the lane's own protocol
+(ten rounds, spread 0) and a second exact integer under the gate's
+concurrent lanes, three runs alike: the six class twins +21,276 to +24,128
+(class_values 4,655,324 alone, 4,677,080 under the gate, twice), reference_maps
++328, reflect_lib +90, the two tabling twins -90 and -45, and the mutex
+envelope's top +2. The class examples spawn nothing; the extra mode is the
+same work done on a different thread under load, a loader flight or a
+settle step the foreground runs itself when the worker is late, which the
+join accounting does not reach (the gate on 10da82e4a already read it and
+its twins finding went unread).
+Decided: the ten become envelopes spanning both modes with the condition
+recorded (ai-tmp/ai_envelope_points.py, ENVELOPED paragraphs), the mutex
+envelope pooled to 23258..23267; an envelope states what was observed, and
+a point that held only with the box otherwise idle was the lie.
+Open: which foreground-or-worker path in the class installer the loaded
+mode is, and whether the flight's work should be joined into the block's
+count or its foreground fallback removed; a bisect of one class twin under
+a synthetic load (a second battery's lanes) with the profiler over both
+modes would name it.
