@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 334 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 335 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -2413,6 +2413,13 @@ or `(rule space n head)` and its written tag, which is how a carrier becomes
 free over the program's facts; `formula` ships `formula-var`, `counting`
 ships `counting-one`). Each is a callable, a Symbol, or an operation name,
 exactly as `plus=` and `times=` are.
+
+In MeTTa the same fixpoint is `(match-under &space carrier pattern)`: one
+answer `(proposition tag)` per derived proposition matching the pattern, the
+pattern's variables bound, and a carrier written `(formula prob)` answers the
+exact model count, so `!(match-under &self (formula prob) (path a c))` is
+`((path a c) 0.344)` over the two-cycle graph of
+`examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta`.
 
 A rule may label its instances by a function of its premise tags instead of
 the carrier's extend fold: `add_tagged_rule(weaker, S.h(V.x), S.p(V.x),
@@ -4871,7 +4878,7 @@ Seventy-two more engine heads the corpus exercises, by family. Numeric:
 `is-member`, `is-var`, `is-expr`, `is-function`, `first-from-pair`,
 `second-from-pair`, `reverse`, `last`, `id`, `for-each-in-atom`, `foldl`.
 Logic: `xor`, `dif`. Spaces:
-`get-atoms`, `space-atom-count`, `is-space`, `new-state`, `has-declared-type`,
+`get-atoms`, `match-under`, `space-atom-count`, `is-space`, `new-state`, `has-declared-type`,
 `space-admission-verdict`. Types: `match-types`, `match-type-or`, `type-cast`.
 Text, IO and files: `repr`, `println!`, `readln!`, `read-form!`, `format-args`,
 `sort-strings`, `parse-command`, `sleep`, `exists_file`.

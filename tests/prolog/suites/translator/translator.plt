@@ -840,6 +840,7 @@ expected_special_heads([
     'remove-atom', 'subtract-atom', 'test-no-answer', 'with-seed', '|->',
     call, case, chain,
     collapse, cut, elapsed, eval, evalc, explain, hyperpose, if, let, match,
+    'match-under',
     inferences, noeval, nop,
     once, prog1, progn, quote, reduce, sealed, 'space-atom-count',
     'space-contains', super, superpose, switch, take, test,

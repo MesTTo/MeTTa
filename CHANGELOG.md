@@ -31,6 +31,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   tagged `(function F)`, or added with a callable tag, labels each instance
   with F over its premise tags in place of the extend fold, on both routes,
   which is a generalized annotated program (Kifer and Subrahmanian, 1992).
+  `(match-under &space carrier pattern)` is the MeTTa spelling of the same
+  fixpoint, one `(proposition tag)` answer per derived proposition, with
+  `(formula prob)` as the exact two-stage carrier; example
+  `examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta`.
 - The algebra package asks the catalog by pattern where it read every row
   into Python: the annotations row a context declares for a carrier, an
   algebra's own row, its semiring claims and the algebra-law aliases were

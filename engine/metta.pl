@@ -442,6 +442,7 @@
             metta_apply_algebra_negation/4,
             metta_algebra_claim/3,
             metta_algebra_fixpoint/4,
+            'match-under'/4,
             metta_formula_clear/0,
             metta_formula_model_count/3,
             metta_formula_variables/2,

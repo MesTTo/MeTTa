@@ -113,6 +113,17 @@ test(a_rule_may_label_its_instances_by_a_function_of_its_premise_tags,
     Answers = [[[h, a], Label]],
     assertion(near(0.3, Label)).
 
+%The language's door binds the pattern's variables and reads a two-stage
+%carrier: (formula prob) is the exact probability.
+test(match_under_is_the_language_door,
+     [ setup(cycle_space(Space)), cleanup(metta_release_space(Space)) ]) :-
+    findall(Y-T, 'match-under'(Space, bool, [path, a, Y], [_, T]), Pairs),
+    msort(Pairs, Sorted),
+    assertion(Sorted = [a-_, b-_, c-_]),
+    'match-under'(Space, [formula, prob], [path, a, c], [[path, a, c], Exact]),
+    Expected is 1 - (1 - 0.2) * (1 - 0.6 * 0.3),
+    assertion(near(Expected, Exact)).
+
 test(the_fixpoint_module_is_gone_after_the_call,
      [ setup(dag_space(Space)), cleanup(metta_release_space(Space)) ]) :-
     flag('$metta_algebra_fixpoint', Before, Before),

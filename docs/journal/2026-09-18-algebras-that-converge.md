@@ -215,6 +215,17 @@ one call form a label function serves, since the op door refuses a bare
 variadic; `metta.formula` joins the hand-kept carrier imports of
 `__init__.pyi` from which rootgen derives the root table.
 
+Decided: the language's door is `(match-under &space carrier pattern)`, a
+special form beside `get-atoms` (the space translated, the carrier and the
+pattern as written, since a carrier is a name or `(formula target)` and the
+pattern's variables are what an answer binds), registered as a
+nondeterministic read of every atom of the space so a table over it is
+invalidated by any write. `(formula prob)` is the two-stage carrier, the
+MeTTa spelling of `under=formula` then `.under(prob)`. The tagged-rule form
+had no MeTTa evaluator, so the algebra track had no `.metta` example; ch22-01
+`07-tagged_fixpoint.metta` with its twin is that example, and the node and C
+seats can reach the fixpoint through this form before they read the doors.
+
 Measured (the new twin, `twin_coverage.py --measure --rounds 3`): 757958
 inferences against the example's 30891, 24.5x, where the lane's band is
 about one. Split with `metta.stats()`: the fixpoint door itself 3837, and
