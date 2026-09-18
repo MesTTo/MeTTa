@@ -831,7 +831,7 @@ test(the_counter_door_carries_the_polls_term) :-
 %after the inference read at both edges the corpus lane read every twin +5
 %(wt-battery-3, ai-twins-lane-c7e27cf2a.log: 293 of 294) [measured
 %2026-09-19: this suite, the empty block on both trees and that lane;
-%commit=WORKTREE].
+%commit=32335687084e4d8ad43cf8800f2dedce707fa137].
 test(the_discarded_tally_is_read_outside_the_window) :-
     metta_py_stats(close, _),
     metta_py_stats(open, [Opened|_]),
