@@ -365,6 +365,8 @@
             metta_dynamic_call/3,
             metta_dynamic_head_masks/1,
             metta_dynamic_value_call/4,
+            metta_dynamic_keyword_call/4,
+            metta_dynamic_keyword_value_call/5,
             metta_minimal_equation_step/3,
             collapse_runtime/2,
             metta_function_eval/2,

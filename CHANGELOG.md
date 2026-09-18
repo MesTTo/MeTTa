@@ -340,6 +340,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   contract.
 - `Annotated[Atom, ...]` parameters keep Atom's evaluation mask in the engine
   and run their refinement check on the written argument.
+- The engine's grounded call, `((py-atom f) args...)`, a `bind!` token or a
+  `(= name (py-atom f))` symbol applied to arguments, crosses through the
+  seam's codec: an expression reaches the Python callable as a tuple under
+  its Symbol head, a symbol as a Symbol, a grounded value as itself, and the
+  result returns held (`None` is `None`, not the unit; returned syntax stays
+  data), so a Python callable sees the same values from MeTTa and from a
+  compiled body. `(Kwargs (name value) ...)` is keywords only where it is
+  written last at the call site; the translator reads it from the source,
+  compiles the pair values and keeps the names, so `(Kwargs (reverse true))`
+  is the keyword `reverse` whatever function `reverse` means, and a
+  `Kwargs`-shaped value arriving through a variable or a compiled body's
+  argument is data. Before, janus converted the crossing (lists, strings,
+  `()` for None) and any value shaped `(Kwargs ...)` became keywords.
+  `seam:grounded_apply` takes the keyword pairs as its third argument, the
+  C seat provides it with no keywords, and the Python side is
+  `metta._binding.host.grounded_apply`, an engine-audience door, so the
+  engine runner applies a Python callable without the host runtime loaded.
+  A tuple a callable returns is the expression it spells (`((py-atom tuple))`
+  is `()`, and a callable returning its argument is the identity on
+  expressions); a list, a dict or a set stays held by identity.
 - A function change drops the tables that can have read it and no other. A
   declared table is a node in the support graph that its function supports,
   so the invalidation wave a definition change starts, bounded to the modules

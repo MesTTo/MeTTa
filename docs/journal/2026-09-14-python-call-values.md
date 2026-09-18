@@ -271,3 +271,108 @@ ch17 05-channels read the engine's `existence_error(metta_channel ...)` out
 of a second `channel-close`; since a9b0ddb6d a Python handle whose space was
 dropped is dead and the seat refuses at the door, so the twin asserts that
 refusal for the second close and the receive.
+
+### The same day, one codec at the grounded call
+
+The open question above, two codecs at one boundary, is closed by decision:
+the seam's codec owns the host crossing. Measured before the change with one
+Python function reached from one compiled twin (`ai-tmp/ai_probe_two_codecs.py`,
+`ai-tmp/ai_probe_seam_codec.py`): scalars agreed on both routes; the engine's
+grounded call handed `(+ 1 2)` as the janus list `['+', 1, 2]`, `hello` as the
+string `'hello'`, `(Kwargs (entry 3))` as the keywords `{'entry': 3}` whether
+written or bound, and a returned `None` as `()`; the seam handed the tuple
+`('+', 1, 2)` under its Symbol, the Symbol `hello`, the Kwargs expression as
+data, and `None` held. Upstream 43705f5 has no `Kwargs` convention at all; it is
+this repository's, spelled in three ch11 examples, all after a grounded head or
+a `bind!` token or a `(= name (py-atom ...))` symbol.
+
+Decided: `seam:grounded_apply/4` (Obj, Positional, KeywordPairs, Out). The
+callable and its positional values cross as atoms on the wire and
+`metta._binding.host.grounded_apply` reads them through `pythonic`, calls the object, and
+answers `returned(result)` on the wire; nothing in the binding converts
+through janus for this crossing any more, so a Python callable sees the same
+values from MeTTa and from a compiled body. The keyword pairs are decided by
+the TRANSLATOR from the source, the same written-versus-value line the door
+law drew: a `(Kwargs (name value) ...)` written LAST at a call site is
+keywords (lowering.pl `keyword_tail/3`, the computed-head branch and a new
+branch for an untyped known head such as the eta-expanded
+`(= py-round (py-atom round))`), only the pair values are compiled and the
+names stay names, so `(Kwargs (reverse true))` is the keyword `reverse`
+whatever function `reverse` means; the runtime doors
+`metta_dynamic_keyword_call/4` and `metta_dynamic_keyword_value_call/5`
+evaluate the head alone (`metta_evaluate_symbol/2` for a symbol) and apply a
+grounded callable with the pairs, or fall back to the ordinary dynamic call
+with the written `(Kwargs ...)` as that head's data. A `(Kwargs ...)` that
+reaches a call through a variable or a runtime-built term takes the ordinary
+doors, which pass `[]` for the pairs, and is data. `metta_py_split_kwargs/3`
+and `metta_py_kwarg/2`, the shape-based split, are gone.
+
+Rejected: keeping janus's conversion and moving the seam to it, because a
+symbol crossing as a string and `None` crossing as the unit lose information
+the seam keeps, and the call-frame tests pin the tuple codec. Rejected:
+reading keywords from a bound value with a "written" marker term, because a
+marker is not MeTTa syntax and would leak into any MeTTa function that
+received the argument; deciding at translation needs no marker.
+
+Measured after (`ai-tmp/ai_probe_one_codec.py`, `ai-tmp/ai_probe_host_apply.py`):
+both routes answer `(('+', 1, 2),)`, `((Kwargs, (entry, 3)),)` and `(hello,)`
+for the three payloads; `(py-round 3.14159 (Kwargs (ndigits 2)))` answers 3.14;
+`(py-dict (Kwargs (a 1) (b (+ 1 2))))` after `bind!` answers `{'a': 1, 'b': 3}`
+and `(Kwargs (reverse True))` with `(= (reverse $x) 99)` defined answers
+`{'reverse': True}`; a Kwargs bound in a `let` reaches the callable as data;
+`(keep 1 (Kwargs (entry 3)))` for a MeTTa `keep` answers `(1 (Kwargs (entry
+3)))`. The `_direct` row returns to the call-frame matrices, since data now
+stays data on every route. Unchanged and out of this decision: the `py-*`
+surface builtins (`py-dot`, `py-iter`, `py-list`, `py-dict`) still convert
+their own results through `metta_py_result/2`; `(= mk (py-atom dict))` with a
+class value never registered as a function on either tree, so `(mk ...)`
+stays unreduced as before.
+
+Tried: the codec crossing declared in the ENGINE audience (provides_engine_user.pl)
+while the wire and the handle store stayed with the host shim. The engine
+runner, which loads the Python seat without the shim, then raised
+`existence_error(metta_py_encode_arguments/3)` at every grounded call
+(examples/ch11 05-py_numpy, the parity lane), and prolog-static named the two
+predicates undefined. Decided: `wire.pl` and `handles.pl` load through
+`surface.pl`, the engine audience, since the grounded call is the engine's
+own and the shim reads the same predicates after it; the 2026-09-09
+binding-collapse entry's "shared host-private namespace" classification of
+the wire is superseded by this owner decision. bindinggen's audience walk
+agrees (`binding: service signatures, crossing capabilities, seam kinds and
+projections agree`). Ten host suites under tests/prolog/suites consult the
+shim alone (shared_decode_index.plt lost `metta_py_decode_shared/3`), so the
+shim includes the two files itself under `:- if(\+ current_predicate(...))`,
+once whichever audience loads first.
+
+Tried: the Python side of the crossing as `metta_ops:host_apply`, a callback
+in the host facade. The engine runner has no `metta_ops`, which only the host
+runtime's `_consult_shim` aliases, so every engine-only grounded call raised
+`ModuleNotFoundError` (examples ch11 01, 04, 05; the parity and
+spec-differential lanes; `test_a_python_tuple_answers_the_same_through_both_doors`).
+Decided: `metta._binding.host.grounded_apply`, named by its import path like
+every other engine-audience door `metta_py_call/3` reaches, and listed in
+`PYTHON_SERVICES`; `host.apply(fn, args, kwargs)` stays as the callee the
+frames route applies through it, since frames assembled at run time cannot
+write their keywords for the translator. The C seat's `seam:grounded_apply`
+became `/4` with `[]` pairs, since a C function takes no keywords; before
+that `test_the_c_binding_suite_passes` lost two checks ("a C function carried
+as a value is applied where it lands").
+
+Measured: `test_a_tuple_defaults_to_data_and_grounded_retains_a_handle` refused
+`((py-atom tuple))` answering `Grounded(())` where the engine door's law is
+`()`; `returned` held every container by identity, so a callable returning
+its argument was not the identity on expressions (`pythonic` hands `(1 2)` as
+the tuple `(1, 2)`, `returned` gave it back held). Decided: `returned` spells
+a raw tuple as its expression, the inverse of `pythonic` on expressions, and
+keeps a list, a dict, a set and every tuple subclass (the opaque
+`_GroundedTuple` reading included) held by identity, since their identity is
+what a storage cell or a declared grain reads back. The frames route's
+`host.apply` keeps its transport envelope for iterators; the grounded call
+answers the exact object `returned` holds, the seam's law.
+
+Measured: the identity twin (`ch05 01-identity.py`) rose from its 3639 pin to
+3670 inferences, past its declared allowance of 20; its cost carries the
+engine's clause layout (test_a_declared_allowance_widens_one_twins_band_only),
+which this change moves by the new translator and runtime clauses. The
+known-head keyword branch tests `keyword_tail/3` first, so an ordinary call
+site pays one failing inference for it; the twin re-pins on the tip.

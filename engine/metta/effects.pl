@@ -340,6 +340,16 @@ metta_effect_classify(Module, metta_dynamic_call(Head, Args, _), Queue,
 metta_effect_classify(Module, metta_dynamic_value_call(Head, _, Values, _),
                       Queue, Next) :- !,
     metta_effect_reduced(Module, [Head|Values], Queue, Next).
+%The keyword doors: a `(Kwargs ...)` written last at the site is carried
+%beside the positional values, and the head decides the call as above.
+metta_effect_classify(Module, metta_dynamic_keyword_call(Head, Positional, Pairs, _),
+                      Queue, Next) :- !,
+    metta_effect_reduced(Module, [Head|Positional], Queue, Next0),
+    metta_effect_reduced(Module, ['Kwargs'|Pairs], Next0, Next).
+metta_effect_classify(Module, metta_dynamic_keyword_value_call(Head, _, Values, Pairs, _),
+                      Queue, Next) :- !,
+    metta_effect_reduced(Module, [Head|Values], Queue, Next0),
+    metta_effect_reduced(Module, ['Kwargs'|Pairs], Next0, Next).
 %The branch guard reads one indexed register row and binds nothing.
 metta_effect_classify(_, metta_dynamic_head_masks(_), Queue, Queue) :- !.
 
@@ -1531,6 +1541,18 @@ metta_effect_plan_classify(Module,
                            State0, State) :-
     !,
     metta_effect_plan_reduced(Module, [Head|Values], State0, State).
+metta_effect_plan_classify(Module,
+                           metta_dynamic_keyword_call(Head, Positional, Pairs, _),
+                           State0, State) :-
+    !,
+    metta_effect_plan_reduced(Module, [Head|Positional], State0, State1),
+    metta_effect_plan_reduced(Module, ['Kwargs'|Pairs], State1, State).
+metta_effect_plan_classify(Module,
+                           metta_dynamic_keyword_value_call(Head, _, Values, Pairs, _),
+                           State0, State) :-
+    !,
+    metta_effect_plan_reduced(Module, [Head|Values], State0, State1),
+    metta_effect_plan_reduced(Module, ['Kwargs'|Pairs], State1, State).
 metta_effect_plan_classify(_, metta_dynamic_head_masks(_), State, State) :- !.
 %The host prefixes this planner-only carrier to the translated target. It is
 %consumed here and never reaches execution; the same read-only source walk is
@@ -1545,7 +1567,7 @@ metta_effect_plan_classify(Module, metta_masked_result(Template, _),
     metta_effect_plan_masked_result(Module, Template, State0, State).
 %An opaque grounded callable has no symbol whose effect row can be queried.
 %It is the higher-order counterpart of a variable-headed reduce.
-metta_effect_plan_classify(_, grounded_apply(_, _, _),
+metta_effect_plan_classify(_, grounded_apply(_, _, _, _),
                            Queue-Effects, Queue-Next) :-
     !,
     metta_effect_plan_dynamic(Effects, Next).

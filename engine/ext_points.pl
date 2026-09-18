@@ -209,7 +209,7 @@
 
             % The grounded-value protocol.
             grounded_applicable/1,
-            grounded_apply/3,
+            grounded_apply/4,
             grounded_algebra_equal/3,
             grounded_algebra_type/3,
             grounded_class_type/2,
@@ -944,8 +944,15 @@ kind(host_remove_hooks_idle/2, ownership).
 %a Python bridge claims Python callables, and a bridge for something else
 %claims its own. It is consulted only for a head that is neither a function
 %name nor a partial application, so an ordinary call never reaches it.
-:- multifile grounded_apply/3.
-kind(grounded_apply/3, ownership).
+%
+%grounded_apply(Obj, Positional, KeywordPairs, Out): Positional are the
+%finished argument values, KeywordPairs the `(name value)` pairs of a
+%`(Kwargs ...)` written LAST at the call site, `[]` when none was written.
+%The translator decides that from the source, so a `(Kwargs ...)` that
+%arrives in a value is the data it is and never becomes control
+%[tested: test_grounded_applications_read_keywords_only_where_written].
+:- multifile grounded_apply/4.
+kind(grounded_apply/4, ownership).
 
 %Whether a value is an operation at all, asked WITHOUT applying it. `bind!`
 %needs to know before there are any arguments: a name bound to a callable is

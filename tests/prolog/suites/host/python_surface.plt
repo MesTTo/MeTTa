@@ -8,7 +8,7 @@
 %   - a dotted name of any depth resolves, which splitting on the first dot
 %     could not do [tested: a_dotted_path_of_any_depth_resolves]
 %   - a resolved callable is applicable in head position, through the engine's
-%     seam:grounded_apply/3 seam
+%     seam:grounded_apply/4 seam
 %     [tested: a_resolved_callable_is_applicable]
 %   - nothing is drained: an unbounded iterator yields one element at a time
 %     [tested: iteration_is_lazy]
@@ -59,7 +59,7 @@ test(a_string_spec_is_an_expression) :-
     'py-atom'("1 + 2", Three),
     assertion(Three == 3).
 
-% The engine applies a grounded atom through seam:grounded_apply/3, which is
+% The engine applies a grounded atom through seam:grounded_apply/4, which is
 % not Python-specific: MeTTa's own definition of a Grounded atom is that it may
 % hold an operation.
 test(a_resolved_callable_is_applicable) :-
@@ -130,13 +130,17 @@ test(iteration_yields_every_element) :-
     findall(E, 'py-iter'(List, E), Elements),
     assertion(Elements == [10, 20, 30]).
 
-% Keyword arguments, in the language's own spelling. The pairs arrive
-% unevaluated, so a keyword whose name is also a MeTTa function still names the
-% keyword: without the mask `(Kwargs (reverse true))` was read as a call to the
-% `reverse` builtin and the whole form vanished.
+% Keyword arguments, in the language's own spelling. The TRANSLATOR reads a
+% `(Kwargs (name value) ...)` written last at a call site: the names stay
+% names, so a keyword whose name is also a MeTTa function still names the
+% keyword (`(Kwargs (reverse true))` is the keyword `reverse`, not a call to
+% the `reverse` builtin), and the pair values are compiled. The pairs reach
+% seam:grounded_apply/4 as its third argument.
 test(keyword_arguments_reach_python) :-
     'py-atom'("dict", Dict),
-    reduce([Dict, ['Kwargs', [aaa, 1], [bbb, 2]]], Built, _),
+    translator:translate_expr([Dict, ['Kwargs', [aaa, 1], [bbb, 2]]], Goals, Built),
+    translator:goals_list_to_conj(Goals, Body),
+    once(Body),
     'py-atom'(len, Len),
     reduce([Len, Built], Count, _),
     assertion(Count == 2).
@@ -144,17 +148,32 @@ test(keyword_arguments_reach_python) :-
 test(a_keyword_name_that_is_a_builtin_is_still_a_name) :-
     'py-atom'("sorted", Sorted),
     'py-list'([3, 1, 2], List),
-    reduce([Sorted, List, ['Kwargs', [reverse, true]]], Descending, _),
+    translator:translate_expr([Sorted, List, ['Kwargs', [reverse, true]]], Goals, Descending),
+    translator:goals_list_to_conj(Goals, Body),
+    once(Body),
     findall(E, 'py-iter'(Descending, E), Elements),
     assertion(Elements == [3, 2, 1]).
 
 % The VALUE half of a pair is evaluated, which is the other half of getting the
-% mask right: a name is a name and a value is a value.
+% spelling right: a name is a name and a value is a value.
 test(a_keyword_value_is_evaluated) :-
     'py-atom'("dict", Dict),
-    reduce([Dict, ['Kwargs', [n, [+, 1, 2]]]], Built, _),
-    py_call(Built:get("n"), Three),
+    translator:translate_expr([Dict, ['Kwargs', [n, [+, 1, 2]]]], Goals, Built),
+    translator:goals_list_to_conj(Goals, Body),
+    once(Body),
+    % The dict returns held; the engine's own doors read it.
+    'py-dot'(Built, get, Get),
+    reduce([Get, "n"], Three, _),
     assertion(Three == 3).
+
+% A `(Kwargs ...)` that reaches an application as a VALUE, here through the
+% runtime-built term reduce/3 applies, is data: the seam receives no pairs and
+% the callable sees one positional tuple, so dict() refuses it as it would
+% refuse any other tuple of triples.
+test(a_kwargs_shaped_value_is_data,
+     [throws(error(python_error('TypeError', _), _))]) :-
+    'py-atom'("dict", Dict),
+    reduce([Dict, ['Kwargs', [aaa, 1], [bbb, 2]]], _, _).
 
 % A declared type is kept rather than accepted and dropped, and it rides the
 % seam:grounded_extra_type/2 extension point that already existed for exactly this.
@@ -251,12 +270,15 @@ test(none_is_not_empty) :-
     assertion(Equal == false).
 
 %A method called purely for effect returns None in Python, and the whole reason
-%unit is right is that this binds rather than vanishing.
+%a value is right is that this binds rather than vanishing. The grounded call
+%answers the None it returned, held, where the `py-atom` reading door above
+%snapshots the unit; a held None is a value and never Empty.
 test(an_effect_only_method_still_binds) :-
     'py-atom'("[1, 2]", List),
     'py-dot'(List, append, Append),
     reduce([Append, 3], Result, _),
-    assertion(Result == []),
+    assertion(Result \== 'Empty'),
+    assertion(Result \== []),
     'py-atom'(len, Len),
     reduce([Len, List], Count, _),
     assertion(Count == 3).

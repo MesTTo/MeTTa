@@ -10,15 +10,15 @@
 :- multifile seam:grounded_applicable/1.
 seam:grounded_applicable("plunit-opaque-callable").
 
-:- multifile seam:grounded_apply/3.
-seam:grounded_apply("plunit-opaque-callable", _, _) :-
+:- multifile seam:grounded_apply/4.
+seam:grounded_apply("plunit-opaque-callable", _, _, _) :-
     throw(error(plunit_effect_plan_applied_its_target, _)).
 
 :- begin_tests(grounded_source_effects).
 
 test(an_applicable_grounded_source_has_the_compiled_goals_opaque_effect,
      [forall(member(Goal,
-         [grounded_apply("plunit-opaque-callable", [3], _),
+         [grounded_apply("plunit-opaque-callable", [3], [], _),
           metta_dynamic_call("plunit-opaque-callable", [3], _),
           metta_dynamic_value_call("plunit-opaque-callable", [3], [3], _),
           reduce(["plunit-opaque-callable", 3], _, _)]))]) :-
