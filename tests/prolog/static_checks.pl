@@ -1,6 +1,6 @@
 % Guarantees: no_mutating_scope_setup/0 applies only while docs/host-workarounds.md's
 %   swi-cleanup-window entry carries no Patch: field, a patched host having no
-%   window to guard [tested: sh check.sh prolog-static; commit=WORKTREE], and
+%   window to guard [tested: sh check.sh prolog-static; commit=f97c4b0a3997b3628179170d502bcd35f517c80f], and
 %   then refuses writes in either cleanup Setup
 %   and setup_mutation_selftest/0 checks the declared fixture exception
 %   [tested: setup_mutation_selftest; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
