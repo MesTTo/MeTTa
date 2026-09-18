@@ -376,3 +376,45 @@ engine's clause layout (test_a_declared_allowance_widens_one_twins_band_only),
 which this change moves by the new translator and runtime clauses. The
 known-head keyword branch tests `keyword_tail/3` first, so an ordinary call
 site pays one failing inference for it; the twin re-pins on the tip.
+
+## 2026-09-18, the keyword tail's cost placed
+Measured: the twins lane on 9f32fe6a6 (before the codec) against 2f1e85496
+(the codec, pinned): every example and twin moved by a few dozen to a few
+thousand inferences, examples included (`07-and_or` example 1996 -> 2008,
+twin 2431 -> 2443; `15-roman` example 280020 -> 281647, twin 335808 ->
+337310; `09-class_values` twin 4656825 -> 4660612). The profiler under the
+lane's own load (`ai-tmp/ai_profile_load.py`, per-predicate call counts,
+diffed) places roman's +1627 exactly: 278 calls of `keyword_tail/3`, each
+with its `is_list/1` and an `append/3` walk of the site's arity, once per
+call-shaped expression at translation, so the cost is about six inferences
+per site and 0.6% of these small programs; H (55368cb4e), I and J move no
+example. The class_values twin's +4102 is 506 such sites (about 2500) plus
+480 more `metta_storage_term/4` reads under `metta_native_pair/4` whose
+cause is not placed (the reflection catalog holds 1550 rows at both
+revisions and the twin's stored content is identical, 27 atoms, one
+digest).
+Tried: a constant-inference read of the last element (`'$skip_list'/3` then
+`nth1/3`, or `nth0/3`) -> 7 inferences at every arity against `append/3`'s
+6, 6, 7, 8 at arities 1 to 4 and `last/2`'s 5, 6, 7, 8, so the walk is at
+its floor for the arities call sites have; a `memberchk/2` scan is one
+inference but binds a variable argument to `['Kwargs'|_]`, so it cannot be
+the test. Rejected: reading the tail at run time in the grounded door,
+which would make a runtime-built `(Kwargs ...)` control, the case the
+2026-09-18 entry above settled as data.
+Decided: the site's tail is read ONCE. The known-head branch and the
+runtime-dispatch branch both asked `keyword_tail/3`, so a site whose head
+is not a known function paid the walk twice; the answer is now kept in
+`Keywords` and both doors test it in one unification. Measured on the same
+probe: roman 278 -> 253 calls, 281647 -> 281518 inferences; class_values
+twin 506 -> 399 calls, 4661496 -> 4659892; spaces_find unchanged at 8982
+(its ten sites were single reads).
+Found: the full gate on 8c35e7455 read `vulture` red on
+`host.grounded_apply` (reached by name from seam:grounded_apply/4, now in
+vulture_whitelist.py with its Prolog call site) and `refurb` red on the
+algebra package's `{"order": order, **operations}` (now `|`). Its pytest
+lane's one red, `test_saga.py::test_every_effectful_dispatch_shape_leaves_one_committed_receipt`
+(`_EmptySagaStepError` arriving as a `PrologError`, then the rollback asking
+a compensation for the inverse receipt), passes alone at 9f32fe6a6 and
+2f1e85496 and in the chapter's file order at 9f32fe6a6 and 8c35e7455 (124
+passed each), so it is order-dependent across chapters under xdist; it had
+not been seen before G in this branch's gates.

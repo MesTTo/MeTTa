@@ -390,6 +390,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   C seat provides it with no keywords, and the Python side is
   `metta._binding.host.grounded_apply`, an engine-audience door, so the
   engine runner applies a Python callable without the host runtime loaded.
+  A call site's written tail is read for its keyword frame once, at
+  translation, whatever branch the head takes: about six inferences per
+  site, and no longer twice for a head the runtime resolves.
   A tuple a callable returns is the expression it spells (`((py-atom tuple))`
   is `()`, and a callable returning its argument is the identity on
   expressions); a list, a dict or a set stays held by identity.
