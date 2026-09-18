@@ -1260,6 +1260,7 @@ builtin_implementation('add-reducts'/2, prolog(spaces)).
 builtin_implementation('get-atoms'/1, prolog(spaces)).
 builtin_implementation('owned-record-read'/1, prolog(spaces)).
 builtin_implementation(match/3, prolog(spaces)).
+builtin_implementation('match-under'/3, prolog(engine)).
 builtin_implementation('is-var'/1, prolog(engine)).
 builtin_implementation('is-ground'/1, prolog(engine)).
 builtin_implementation('is-expr'/1, prolog(engine)).

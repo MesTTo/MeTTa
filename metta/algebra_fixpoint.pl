@@ -34,6 +34,13 @@
 %     the derived route mints, so the formula carrier is the free Boolean
 %     algebra over the program's facts on either route [tested:
 %     test_the_formula_carrier_counts_each_proof_once; commit=55368cb4eeb641d2325194eff9d0925048814b76].
+%   - (match-under Space Carrier Pattern) is the language's door onto the same
+%     fixpoint: one answer (Proposition Tag) per derived proposition matching
+%     Pattern, and a carrier written (formula Target) answers the exact model
+%     count of the formula under Target, which is how a MeTTa program reads an
+%     exact probability [tested: algebra_fixpoint:match_under_is_the_language_door,
+%     examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta;
+%     commit=WORKTREE].
 %   - a rule tagged (function F) labels each instance with F applied to its
 %     premise tags in order, evaluated under the carrier, in place of the
 %     extend fold: Kifer and Subrahmanian's generalized annotated programs
@@ -214,6 +221,22 @@ metta_algebra_query(Module, Goal, Answers) :-
 metta_algebra_unload_program(Module) :-
     abolish_module_tables(Module),
     '$destroy_module'(Module).
+
+%%%% The language's door %%%%
+
+%'match-under'(+Space, +Carrier, +Pattern, -Answer): (match-under &space
+%carrier (path a $y)) answers [Proposition, Tag] for every derived
+%proposition matching the pattern, the pattern's variables bound; the carrier
+%(formula Target) evaluates under formula and answers each tag's model count
+%under Target.
+'match-under'(Space, [formula, Target], Pattern, [Proposition, Count]) :-
+    !,
+    metta_algebra_fixpoint(Space, formula, Pattern, Answers),
+    member([Proposition, Formula], Answers),
+    metta_formula_model_count(Formula, Target, Count).
+'match-under'(Space, Carrier, Pattern, Answer) :-
+    metta_algebra_fixpoint(Space, Carrier, Pattern, Answers),
+    member(Answer, Answers).
 
 %%%% Join, saturation, claims %%%%
 

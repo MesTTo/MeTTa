@@ -1211,6 +1211,15 @@ translate_special_dl('space-contains', [SpaceExpr, Atom], AfterHead, Goals,
 translate_special_dl('get-atoms', [SpaceExpr], AfterHead, Goals, Out) :-
     translate_space_expr_dl(SpaceExpr, AfterHead, BeforeRead, Space),
     BeforeRead = ['get-atoms'(Space, Out)|Goals].
+%(match-under &space carrier pattern): the tagged program's fixpoint under a
+%carrier, one answer (proposition tag) per derived proposition matching the
+%pattern. The carrier and the pattern stay as written: a carrier is a name
+%or (formula target), and the pattern's variables are what the answer binds,
+%as match's are [source: engine/metta/algebra_fixpoint.pl, 'match-under'/4].
+translate_special_dl('match-under', [SpaceExpr, Carrier, Pattern], AfterHead,
+                     Goals, Out) :-
+    translate_space_expr_dl(SpaceExpr, AfterHead, BeforeRead, Space),
+    BeforeRead = ['match-under'(Space, Carrier, Pattern, Out)|Goals].
 %(super (f a b)): the definition of f the NEXT module up this space's chain
 %holds, so a shadow can check a call and then let the original run.
 %

@@ -279,6 +279,10 @@ metta_effect_classify(_, match_bounded(_, Space, Pattern, _, _), Queue-Reads0,
                       Queue-[read(match, Space, Pattern)|Reads0]) :- !.
 metta_effect_classify(_, 'get-atoms'(Space, Pattern), Queue-Reads0,
                       Queue-[read('get-atoms', Space, Pattern)|Reads0]) :- !.
+%A fixpoint reads the whole tagged program, so its read is every atom of the
+%space, the read a table over it is invalidated by.
+metta_effect_classify(_, 'match-under'(Space, _, _, _), Queue-Reads0,
+                      Queue-[read('get-atoms', Space, _)|Reads0]) :- !.
 metta_effect_classify(_, 'owned-record-read'(Declaration, _), Queue-Reads0,
                       Queue-Reads) :- !,
     (   nonvar(Declaration),
@@ -697,6 +701,7 @@ metta_semantic_effect('get-state', readOnlyLookup).
 %tested: effects_lattice:no_operation_below_the_nondeterministic_rank_answers_more_than_once;
 %commit=94e4aae42d1223d63500ffb5a9a413852f559192].
 metta_semantic_effect('get-atoms', nondeterministicReadOnly).
+metta_semantic_effect('match-under', nondeterministicReadOnly).
 metta_semantic_effect('get-deps', readOnlyLookup).
 metta_semantic_effect('module-tree!', readOnlyLookup).
 metta_semantic_effect('loaded-mods!', readOnlyLookup).
@@ -967,6 +972,7 @@ metta_builtin_effect_override(register_metta_library_path, oracleIO).
 
 metta_builtin_effect_override('context-space', readOnlyLookup).
 metta_builtin_effect_override('get-atoms', nondeterministicReadOnly).
+metta_builtin_effect_override('match-under', nondeterministicReadOnly).
 metta_builtin_effect_override('owned-record-read', readOnlyLookup).
 metta_builtin_effect_override('get-metatype', readOnlyLookup).
 metta_builtin_effect_override(only, nondeterministicReadOnly).
@@ -2085,6 +2091,8 @@ metta_effect_plan_source_special_arguments(_, 'space-contains', [Space, _],
                                            [metta_evaluated_source_root(Space)]).
 metta_effect_plan_source_special_arguments(_, 'owned-record-read', [_], []).
 metta_effect_plan_source_special_arguments(_, 'get-atoms', [Space],
+                                           [metta_evaluated_source_root(Space)]).
+metta_effect_plan_source_special_arguments(_, 'match-under', [Space, _, _],
                                            [metta_evaluated_source_root(Space)]).
 metta_effect_plan_source_special_arguments(_, super, [Call],
                                            [metta_evaluated_source_root(Call)]).
