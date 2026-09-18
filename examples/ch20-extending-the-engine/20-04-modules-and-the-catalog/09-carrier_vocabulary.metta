@@ -7,13 +7,13 @@
 ;; a (claim ...) row; this one is about the set those claims are drawn from,
 ;; and about what goes wrong when the two halves drift.
 
-;; Eleven algebras ship and the semiring vocabulary is exactly their names.
+;; Twelve algebras ship and the semiring vocabulary is exactly their names.
 ;; This row is the authority rather than a copy of one:
 ;; extensions/python/metta/vocabularies.py is GENERATED from it, so
 ;; `Semiring.budget` exists in a Python annotation because this row says
 ;; budget does.
 !(test (match &metta (vocabulary semiring (:seg $names)) $names)
-       (bool visibility bag counting set ranked tropical prob prov budget amplitude))
+       (bool visibility bag counting set ranked tropical prob prov budget formula amplitude))
 
 ;; Each of those names also has an (algebra ...) row saying what it
 ;; computes. budget is a cost carrier: it combines with min, extends with

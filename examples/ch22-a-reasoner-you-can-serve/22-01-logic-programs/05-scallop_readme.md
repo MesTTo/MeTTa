@@ -19,9 +19,13 @@ README's printed values, not MeTTa-specific replacements.
 The following Scallop behavior remains filed rather than implied by these five
 finite cases:
 
-- General cyclic least-fixed-point recursion and its set-deduplicating search
-  control remain P4.22. The acyclic path case terminates under ordinary MeTTa
-  equations.
+- General cyclic least-fixed-point recursion is the engine's tabled fixpoint
+  (`derivations=False`, or any program whose rules form a cycle), converging
+  where the carrier's arithmetic does; Scallop's `saturated` is the
+  `saturated=` claim, its `negate` the `negate=` claim, and its `proofs`
+  provenance with `wmc` is the `formula` carrier read through `.under(prob)`.
+  Set-deduplicating search control is the `set` carrier's idempotent join.
+  The acyclic path case still terminates under ordinary MeTTa equations.
 - MeTTa has no identical `@file` surface syntax. `add_table` provides the data
   seam through Python.
 - MeTTa has no static stratification checker. Grounded-before-negated ordering

@@ -2746,6 +2746,22 @@ metta_catalog_preset([policy, determinism, determinism, nondet]).
 metta_catalog_preset([claim, semiring, ranked, ordered, descending]).
 metta_catalog_preset([claim, semiring, tropical, ordered, ascending]).
 metta_catalog_preset([claim, semiring, prob, ordered, descending]).
+%Three more claims a semiring may carry, each an operation name the engine
+%applies under that carrier: `negation` is the unary operation a weighted
+%model count weighs a variable's false branch with, `saturation` the binary
+%test that says a joined fixpoint answer is not worth another round, and
+%`variable` the binary operation that mints a carrier value for one source
+%key and its written tag, which is how a carrier becomes free over the
+%program's facts [source: engine/metta/algebra_fixpoint.pl,
+%engine/metta/algebra_formula.pl].
+metta_catalog_preset([claim, semiring, bool, negation, complement]).
+metta_catalog_preset([claim, semiring, prob, negation, complement]).
+metta_catalog_preset([claim, semiring, formula, negation, 'formula-not']).
+metta_catalog_preset([claim, semiring, formula, variable, 'formula-var']).
+%counting reads every fact and every rule instance as one whatever tag it
+%was written with, so its fixpoint is the number of derivations, the answer
+%the engine's counting aggregate gives.
+metta_catalog_preset([claim, semiring, counting, variable, 'counting-one']).
 %budget is ordered the way tropical is, min over the reals with an ascending
 %reading, and declares order=ascending in its own preset. Its claim row was
 %the one an ordered carrier was missing.
@@ -2764,13 +2780,14 @@ metta_catalog_preset([claim, 'algebra-law', Alias, 'expands-to'|Expansion]) :-
     metta_algebra_law_alias(Alias, Expansion).
 metta_catalog_preset([algebra, bool, max, '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
-                       'extend-associative', 'left-distributive',
+                       'combine-idempotent', 'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
                       [carrier], [requires], global]).
 metta_catalog_preset([algebra, visibility, max, min, 'INTERNAL', 'PUBLIC',
                       [laws, 'combine-associative', 'combine-commutative',
+                       'combine-idempotent',
                        'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
@@ -2799,7 +2816,7 @@ metta_catalog_preset([algebra, set, max, '*', 0, 1,
                       [carrier], [requires], global]).
 metta_catalog_preset([algebra, ranked, max, '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
-                       'extend-associative', 'left-distributive',
+                       'combine-idempotent', 'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
@@ -2828,6 +2845,21 @@ metta_catalog_preset([algebra, budget, min, '+', infinity, 0,
                       [laws, 'combine-associative', 'combine-commutative',
                        'combine-idempotent', 'extend-associative',
                        'combine-zero-identity', 'extend-one-identity'],
+                      [carrier], [requires], global]).
+%formula: the free positive Boolean algebra over the program's facts, its
+%values reduced ordered binary decision diagrams ([formula Id], [formula 0]
+%false and [formula 1] true), so shared facts are counted once, a cyclic
+%program converges (or is idempotent and absorptive), and a carrier with a
+%negation reads the exact probability back through the model count
+%[source: engine/metta/algebra_formula.pl].
+metta_catalog_preset([algebra, formula, 'formula-or', 'formula-and',
+                      [formula, 0], [formula, 1],
+                      [laws, 'combine-associative', 'combine-commutative',
+                       'combine-idempotent', 'extend-associative',
+                       'extend-commutative', 'left-distributive',
+                       'right-distributive', 'combine-zero-identity',
+                       'extend-one-identity', 'extend-zero-annihilates',
+                       contraction],
                       [carrier], [requires], global]).
 metta_catalog_preset([algebra, amplitude, 'amplitude-add',
                       'amplitude-multiply', [complex, 0, 0], [complex, 1, 0],

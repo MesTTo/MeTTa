@@ -281,7 +281,7 @@ test(shipped_algebra_rows_are_the_semiring_vocabulary) :-
     findall(Name, 'get-atoms'('&metta', [algebra, Name|_]), Algebras),
     Semirings == Algebras,
     Semirings == [bool, visibility, bag, counting, set, ranked, tropical, prob, prov,
-                  budget, amplitude].
+                  budget, formula, amplitude].
 
 test(algebra_law_aliases_expand_through_catalog_claims,
      [cleanup(metta_remove_atom('&metta',

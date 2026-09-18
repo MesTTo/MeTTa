@@ -376,7 +376,13 @@ def why(self) -> AlgebraDerivation:
 def under(self, carrier: Any) -> TaggedAnswer:
 ```
 
-> Interpret this retained derivation under another algebra, no requery.
+> Interpret this answer under another algebra, no requery.
+>
+> A formula tag under a carrier with a negation is its weighted model
+> count, exact where a sum over proofs would count a shared fact twice;
+> a retained derivation folds through the carrier's operations; an
+> engine-fixpoint answer under any other carrier kept nothing to fold
+> and refuses by name.
 
 ## `current_algebra`
 
@@ -405,10 +411,19 @@ def declare(
     type: Any = None,
     requires: Iterable[str] = (),
     order: vocabularies.SemiringOrder | None = None,
+    negate: str | None = None,
+    saturated: str | None = None,
+    variable: str | None = None,
 ) -> Atom:
 ```
 
 > Check and add one algebra catalog atom, without replacing an old one.
+>
+> `order`, `negate`, `saturated` and `variable` land as the semiring claims
+> the engine reads beside the row: the direction that counts as best, the
+> unary complement a model count weighs a false branch with, the binary
+> test that stops a fixpoint join, and the binary operation that mints the
+> carrier's value for a source key and its tag.
 >
 > metta may be a context or a space.
 
@@ -424,10 +439,33 @@ def evaluate(
     context: EvaluationContext | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
+    derivations: bool | None = None,
 ) -> AlgebraEvaluation:
 ```
 
-> Evaluate finite tagged derivations under one call-wide resource budget.
+> Evaluate a tagged program under one call-wide resource budget.
+>
+> `derivations` chooses the route. None takes the route that terminates
+> and is exact: a program whose rules form a cycle, under a carrier whose
+> combine is idempotent or that declares a saturation, takes the engine's
+> tabled fixpoint, which converges there and keeps no proof tree (a cyclic
+> program has none that is finite); every other program takes the derived
+> route, whose answers retain their derivations for `why()` and `under()`
+> and which refuses a cyclic program after `max_rounds`. True forces the
+> derived route. False forces the fixpoint, the route that scales; under a
+> carrier whose combine is not idempotent it has no fixpoint over cyclic
+> data and runs until `timeout` or `inferences` stops it, and its answers
+> reinterpret exactly only through the formula carrier.
+>
+> metta may be a context or a space.
+
+## `formula_variables`
+
+```python
+def formula_variables(metta: Space, formula: Atom) -> list[tuple[Atom, Atom]]:
+```
+
+> The source keys a formula tag mentions, each with its recorded weight.
 >
 > metta may be a context or a space.
 

@@ -2129,7 +2129,7 @@ Evidence: `extensions/python/tests/ch20_extending_the_engine/test_references.py:
 ## space:match
 
 ```python
-match(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, into: _builtins.type | None=None, **values: Any) -> Any
+match(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, into: _builtins.type | None=None, derivations: bool | None=None, **values: Any) -> Any
 ```
 
 Kind: `query`. Answer: `value`. Effect: `oracleIO`. Determinism: `nondet`.
@@ -2149,9 +2149,14 @@ Assumes receiver state `live`.
 | `inferences` | `(host-union (Number NoneType))` | `None` | `values` | `keyword_only` |
 | `under` | `%Undefined%` | `_UNSET` | `values` | `keyword_only` |
 | `into` | `(host-union ((host-type metta._spaces.query _builtins.type) NoneType))` | `None` | `values` | `keyword_only` |
+| `derivations` | `(host-union (Bool NoneType))` | `None` | `values` | `keyword_only` |
 | `values` | `%Undefined%` | `required` | `values` | `var_keyword` |
 
 Guarantees result type `%Undefined%` with the answer shape, effect, and determinism above.
+
+Declared local refusals:
+
+- `type`: `extensions/python/tests/repository/test_door_refusals.py::test_door_type_refusals[space:match]`.
 
 Implementation failures propagate, including failures from callees and providers.
 
@@ -2187,6 +2192,18 @@ Implementation failures propagate, including failures from callees and providers
 > ``under(other)``; the latter two reuse the retained derivation rather
 > than querying the space again. ``with metta.under(carrier)`` supplies
 > the carrier when this call has no explicit ``under=``.
+>
+> ``derivations=`` chooses how a tagged program is evaluated under the
+> carrier. Left alone, a program whose rules form a cycle, under a carrier
+> whose combine is idempotent or that declares a saturation, takes the
+> engine's tabled fixpoint, which converges there and keeps no proof tree;
+> any other program takes the derived route whose answers carry their
+> derivations and which refuses a cycle after its round bound.
+> ``derivations=False`` forces the fixpoint, the route that scales;
+> ``derivations=True`` forces the derived route.
+> A fixpoint answer reinterprets exactly through ``under=formula``, whose
+> tag is the derivation compiled to a decision diagram, and
+> ``.under(prob)`` on it is the weighted model count.
 >
 > `into=Rows` explicitly chooses the eager Rows face. Other `into=`
 > values shape each row into a dataclass, NamedTuple, or
@@ -5120,7 +5137,7 @@ Evidence: `extensions/python/tests/ch04_spaces_and_matching/test_answer_protocol
 ## space:algebra
 
 ```python
-algebra(name: str, *, combine: str, extend: str, zero: Any, one: Any, laws: _abc.Iterable[str]=(), carrier: _abc.Iterable[Any]=(), type: Any=None, requires: _abc.Iterable[str]=(), order: SemiringOrder | None=None) -> Atom
+algebra(name: str, *, combine: str, extend: str, zero: Any, one: Any, laws: _abc.Iterable[str]=(), carrier: _abc.Iterable[Any]=(), type: Any=None, requires: _abc.Iterable[str]=(), order: SemiringOrder | None=None, negate: Any=None, saturated: Any=None, variable: Any=None) -> Atom
 ```
 
 Kind: `provider`. Answer: `Atom`. Effect: `oracleIO`. Determinism: `det`.
@@ -5147,6 +5164,9 @@ Assumes receiver state `live`.
 | `type` | `%Undefined%` | `None` | `values` | `keyword_only` |
 | `requires` | `(host-apply (host-type metta._declare.declarations _abc.Iterable) (String))` | `()` | `values` | `keyword_only` |
 | `order` | `(host-union ((host-type metta._declare.declarations SemiringOrder) NoneType))` | `None` | `values` | `keyword_only` |
+| `negate` | `%Undefined%` | `None` | `values` | `keyword_only` |
+| `saturated` | `%Undefined%` | `None` | `values` | `keyword_only` |
+| `variable` | `%Undefined%` | `None` | `values` | `keyword_only` |
 
 Guarantees result type `Atom` with the answer shape, effect, and determinism above.
 
@@ -5159,6 +5179,12 @@ Implementation failures propagate, including failures from callees and providers
 > fusion. ``carrier`` enumerates the finite domain required for exhaustive
 > law checking; it may accompany ``type`` to constrain that domain.
 > Use ``prov`` and ``.under()`` to reinterpret uncertified tensor traces.
+> ``negate``, ``saturated`` and ``variable`` are the three further
+> operations a carrier may claim, each a callable, a Symbol or an
+> operation name like ``combine``: the unary complement a model count
+> weighs a variable's false branch with, the test that stops a fixpoint
+> join, and the operation that mints the carrier's value for a source key
+> and its tag.
 
 Evidence: `extensions/python/tests/ch04_spaces_and_matching/test_algebra_lifecycle.py::test_drop_retires_algebra_before_redeclaration`, `extensions/python/tests/ch04_spaces_and_matching/test_algebra_lifecycle.py::test_rollback_releases_an_algebra_mirror`, `extensions/python/tests/ch04_spaces_and_matching/test_algebra_lifecycle.py::test_rollback_restores_a_replaced_algebra_mirror`.
 
@@ -5289,6 +5315,11 @@ Guarantees result type `Atom` with the answer shape, effect, and determinism abo
 Implementation failures propagate, including failures from callees and providers.
 
 > Store one rule generated by the algebra-agnostic tag threader.
+>
+> A callable ``tag`` labels each instance with its result over the premise
+> tags in order, in place of the carrier's extend fold: it registers under
+> its own name and the rule stores ``(function <name>)``, the spelling a
+> MeTTa equation of the same shape takes directly.
 
 Evidence: `extensions/python/tests/ch06_many_answers/test_under_algebra.py::test_tagged_derivations_flow_through_match_and_reinterpret_without_requery`, `extensions/python/tests/ch14_seeing_your_program/test_features.py::test_tagged_algebra_debits_inferences_across_operations`, `extensions/python/tests/ch14_seeing_your_program/test_features.py::test_tagged_algebra_forwards_bounds_to_every_evaluating_door`.
 

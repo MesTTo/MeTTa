@@ -9,6 +9,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Algebras that converge, scale and are exact. A tagged program with a cycle
+  in its rules is evaluated by the engine's own tabling
+  (`engine/metta/algebra_fixpoint.pl`): every relation becomes a tabled
+  predicate whose tag is a lattice-moded argument joined by the carrier's
+  `combine` and its saturation test, the PITA transformation, so `bool`,
+  `set`, `tropical`, `budget`, `ranked`, `visibility` and `formula` converge
+  on cyclic data, where the round-bounded evaluator refused, and every
+  carrier is exact on acyclic data at the engine's cost rather than Python
+  rounds; `derivations=` on `match` and `metta.algebra.evaluate` forces
+  either route, and left alone the fixpoint is taken exactly where it is
+  known to terminate. A new `formula` carrier
+  (`metta.formula`) tags answers with reduced ordered binary decision
+  diagrams over the program's facts (`engine/metta/algebra_formula.pl`), so
+  shared facts are counted once and `.under(prob)` is the exact weighted
+  model count where `prob` sums proofs. Three semiring claims join the
+  catalog beside `ordered`: `negation`, `saturation` and `variable`, written
+  by `algebra(..., negate=, saturated=, variable=)` and shipped for `bool`,
+  `prob`, `formula` and `counting`. A fixpoint answer keeps no derivation:
+  `why()` and `under()` refuse by name, except through `formula`. A rule
+  tagged `(function F)`, or added with a callable tag, labels each instance
+  with F over its premise tags in place of the extend fold, on both routes,
+  which is a generalized annotated program (Kifer and Subrahmanian, 1992).
 - Classes: the special methods and decorators of a declared class. A special
   method Python routes syntax to compiles under its word (`__add__` is
   `Vector-add`, `__len__` is `Stack-len`), and the compiler lowers that
