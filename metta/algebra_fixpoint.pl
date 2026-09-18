@@ -40,7 +40,7 @@
 %     count of the formula under Target, which is how a MeTTa program reads an
 %     exact probability [tested: algebra_fixpoint:match_under_is_the_language_door,
 %     examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/07-tagged_fixpoint.metta;
-%     commit=WORKTREE].
+%     commit=12609a929638e7a2b08d3ff8f517abc1a399e7a9].
 %   - a rule tagged (function F) labels each instance with F applied to its
 %     premise tags in order, evaluated under the carrier, in place of the
 %     extend fold: Kifer and Subrahmanian's generalized annotated programs
