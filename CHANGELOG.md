@@ -194,7 +194,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   existing grounded-call conversion and native callable contracts are reused.
 - Runnable translation caches track generated predicates and returned callable
   values. Retiring generated code invalidates its cached users and pending
-  compilations while preserving unrelated completed translations.
+  compilations while preserving unrelated completed translations. The
+  dependency is recorded where the compiler makes or emits the generated
+  name (a lambda's predicate, a segment specialization, a translator rule's
+  expansion) instead of by walking the published code, which cost the size
+  of that code at every miss: a one-line evaluation went from 2523
+  inferences to 1530.
 - Python underscore bindings preserve their identity in compiled functions,
   class constructors and methods, rule generators and type annotations.
   Nested binders use fresh native variables and discard shadowed value proofs;

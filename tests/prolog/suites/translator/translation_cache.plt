@@ -7,6 +7,12 @@
 % Guarantees: retiring generated calls or returned functions evicts their
 %   cached translations and cancels incomplete dependency reservations
 %   [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
+% Guarantees: a generated name carried by a template's code is in its index
+%   whether a lambda, a segment specialization or a translator rule's
+%   expansion put it there, and retiring it evicts the template
+%   [tested: a_generated_name_in_a_rule_expansion_is_a_dependency,
+%   the_emitted_dependencies_cover_every_generated_name_in_the_code;
+%   commit=WORKTREE].
 
 % Guarantees: ordinary eval preserves attributed-variable identity, sharing,
 %   delayed hook counts and binding-time exceptions, including after a plain
@@ -328,5 +334,64 @@ test(test_a_repeated_eval_does_not_recompile_and_the_effects_cluster_conforms,
     swrite(Answer, Text),
     assertion(Text == "(Error (+ 1 (tc-effect TC-MARK)) (BadArgType 2 Number String))"),
     assertion(\+ get_native_atom('&self', ['tc-ran'])).
+
+
+%A translator rule computes its expansion, so a generated name it embeds was
+%read from no written source; the dependency is recorded when the expansion
+%is taken, and retiring that name evicts the template.
+test(a_generated_name_in_a_rule_expansion_is_a_dependency,
+     [ setup(( clear_translation_cache_test_state,
+               assertz(user:translator_rule('tc-expand', [], user)) )),
+       cleanup(( clear_translation_cache_test_state,
+                 retractall(user:translator_rule('tc-expand', _, _)),
+                 retractall(user:'tc-expand'(_, _)) )) ]) :-
+    gensym('&translation-expansion-', Space), space_module(Space, Module),
+    setup_call_cleanup(true,
+        with_metta_module(Module, plunit_translation_cache:
+            ( run_translated(['|->', [X], [+, X, 1]], Lambda),
+              assertz(user:'tc-expand'(V, [Lambda, V])),
+              run_translated(['tc-expand', 2], Three),
+              assertion(Three == 3),
+              translator:translated_form_cache(Module, _, Id, ['tc-expand', _], _, _),
+              assertion(translator:translated_form_mention(Lambda, Id)),
+              specializer:forget_symbol(Module, Lambda),
+              assertion(\+ translator:translated_form_cache(Module, _, _, ['tc-expand', _], _, _)) )),
+        metta_release_space(Space)).
+
+%Every generated name a published template's code carries is in its index,
+%checked the way the earlier index found them, a walk over the published goals
+%and result; a generated name is one the module's translated_from clauses
+%define. The three shapes that emit one: a segment lambda applied at several
+%arities, a returned lambda value, and a translator rule's expansion.
+test(the_emitted_dependencies_cover_every_generated_name_in_the_code,
+     [ setup(( clear_translation_cache_test_state,
+               assertz(user:translator_rule('tc-expand-all', [], user)) )),
+       cleanup(( clear_translation_cache_test_state,
+                 retractall(user:translator_rule('tc-expand-all', _, _)),
+                 retractall(user:'tc-expand-all'(_, _)) )) ]) :-
+    gensym('&translation-coverage-', Space), space_module(Space, Module),
+    setup_call_cleanup(true,
+        with_metta_module(Module, plunit_translation_cache:
+            ( forall(member(Arity, [0, 1, 5]),
+                     ( findall(N, between(1, Arity, N), Values),
+                       Source = [['|->', [[':seg', Args]], [evalc, [noeval, Args], Space]]|Values],
+                       findall(Value, run_translated(Source, Value), Answers),
+                       assertion(Answers == [Values]) )),
+              run_translated(['|->', [X], [+, X, 1]], Lambda),
+              assertz(user:'tc-expand-all'(V, [Lambda, V])),
+              run_translated(['tc-expand-all', 2], Three),
+              assertion(Three == 3),
+              findall(Name-Id,
+                      ( translator:translated_form_cache(Module, _, Id, _, Goals, Out),
+                        sub_term(Part, [Goals, Out]), nonvar(Part),
+                        functor(Part, Name, _), atom(Name),
+                        translator:translated_from(Ref, [=, [Name|_], _]),
+                        clause_property(Ref, module(Module)) ),
+                      Carried0),
+              sort(Carried0, Carried),
+              assertion(Carried \== []),
+              forall(member(Name-Id, Carried),
+                     assertion(translator:translated_form_mention(Name, Id))) )),
+        metta_release_space(Space)).
 
 :- end_tests(translation_cache).

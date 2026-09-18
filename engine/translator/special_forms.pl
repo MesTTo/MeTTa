@@ -993,6 +993,10 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     %rename moved to compile time, so it is not that change's doing.
     seal_lambda_locals(Body0, Body, SealedLocals),
     next_lambda_name(Function),
+    %A cached template that compiles this lambda calls and may answer the
+    %generated predicate; the name is read from no written source, so the
+    %dependency is recorded here, where the name is made.
+    note_translation_dependency(Function),
     term_variables(Body, AllVars),
     term_variables(Args, ArgVars),
     %A variable the BODY ITSELF BINDS is not free either, and for the same
