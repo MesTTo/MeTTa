@@ -437,7 +437,13 @@ present_segment_call(Fun, Args, Out, Resolved, Presented) :-
     Direct =.. [Fun|DirectArgs],
     (   Resolved == Direct
     ->  (   specializer:segment_specialization(Fun, Args, Out, Goal)
-        ->  Presented = Goal
+        ->  %The specialization's own name is what the compiled site calls
+            %and what its retirement announces; the written form names only
+            %the family it belongs to.
+            strip_module(Goal, _, Plain),
+            functor(Plain, Specialization, _),
+            note_translation_dependency(Specialization),
+            Presented = Goal
         ;   current_metta_module(Module),
             Presented = metta_segment_dispatch(Module, Fun, Args, Out)
         )
@@ -1225,6 +1231,9 @@ apply_translator_rule_dl(HV, Declarations, RuleModule,
     ->  Rewritten = Expansion
     ;   Rewritten = [noeval, [HV|Values]]
     ),
+    %The expansion is computed by the rule, so a name it carries was read
+    %from no written source: a cached template depends on every atom of it.
+    note_translation_dependencies(Rewritten),
     translate_expr_dl(Rewritten, AfterArgs, Goals, Out),
     refuse_seam_expanded_to_data(HV, Out).
 

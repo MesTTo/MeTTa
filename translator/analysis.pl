@@ -36,10 +36,13 @@
 %   and invalidation. metta_source_singleflight/2 serializes misses per key;
 %   compilation runs outside the publication mutex and releases reservations
 %   on every exit [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
-%   Cached templates retain dependencies from written source, generated goals
-%   and returned functions. Retirement evicts those templates and cancels
-%   pending compilation without discarding unrelated completed templates
-%   [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
+%   Cached templates retain dependencies from the written source and from
+%   the generated names the compiler emits while translating them (a
+%   lambda's predicate, a segment specialization, a translator rule's
+%   expansion), recorded at the emitting site rather than by walking the
+%   generated code. Retirement evicts those templates and cancels pending
+%   compilation without discarding unrelated completed templates
+%   [tested: translation_cache; commit=WORKTREE].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
@@ -1541,6 +1544,7 @@ compiled_function_name(F, F).
 %for the same reason. Per-THREAD, which is what thread_local gave it, because
 %SWI's global variables are per-thread.
 :- thread_initialization(nb_setval('$metta_translating_runnable', false)).
+:- thread_initialization(nb_setval('$metta_translation_ids', [])).
 
 translating_runnable :- b_getval('$metta_translating_runnable', true).
 %The names an importer form in the runnable being compiled registers, so the
@@ -1561,11 +1565,22 @@ translating_runnable :- b_getval('$metta_translating_runnable', true).
 %translation saving while the repeated eval workloads already repeat exact
 %variants.
 %
-%The runnable dependency index contains names in the written form and in its
-%generated goals and result. A generated predicate's functor is a dependency
-%even when it never appeared in the written source. Like
-%record_translated_supports/2, this index deliberately over-approximates:
-%evicting an unaffected translation is safe, retaining stale code is not.
+%The runnable dependency index holds the names of the written form, taken
+%at reservation, and the generated names the compiler emits while the
+%reservation is open, taken at the emitting site through
+%note_translation_dependency/1: a lambda's predicate, a segment
+%specialization's functor and every atom of a translator rule's expansion.
+%Those are the names a template's code can carry that its source does not
+%write. The index still over-approximates on the written side, like
+%record_translated_supports/2: evicting an unaffected translation is safe,
+%retaining stale code is not. Walking the published goals and result for
+%the same names cost the size of the generated code at every miss, about
+%850 inferences for `(if (or (and True False) True) 1 2)` against 1602 for
+%the whole evaluation [measured 2026-09-18: 69d1511c0 answers 1602, its
+%successor 5416e741d 2523, the walk removed 1674; command=python
+%ai-tmp/ai_probe_andor.py in a battery worktree], which is why the record
+%is made by the producer, the way a compiler writes its depfile as it
+%resolves an include rather than scanning its object code afterwards.
 :- dynamic translated_form_cache/6.
 :- dynamic translated_form_pending/3.
 :- dynamic translated_form_mention/2.
@@ -1704,32 +1719,101 @@ reserve_translated_form(Module, Key, Source, Id) :-
     assertz(translated_form_pending(Module, Key, Id)),
     record_translated_form_mentions(Id, Source).
 
+%The reservation is fresh, so its written names are asserted without the
+%lookup a later note needs.
 record_translated_form_mentions(Id, Term) :-
-    findall(Symbol,
-            (sub_term(Part, Term), nonvar(Part),
-             functor(Part, Symbol, _), atom(Symbol)), Symbols0),
-    sort(Symbols0, Symbols),
-    forall(member(Symbol, Symbols),
-           ( translated_form_mention(Symbol, Id)
-           -> true
-           ; assertz(translated_form_mention(Symbol, Id)) )).
+    translated_form_symbols(Term, Symbols),
+    forall(member(Symbol, Symbols), assertz(translated_form_mention(Symbol, Id))).
+
+%translated_form_symbols(+Term, -Symbols): the atoms of Term, each once,
+%the atomic leaves and the names of its compounds. One deterministic walk;
+%a list is walked by its elements, since its constructor is no name.
+%Time: about three inferences per list element and five per other
+%compound, against about eight per element for a sub_term/2 enumeration,
+%which visits every cons cell as a node and backtracks into each.
+translated_form_symbols(Term, Symbols) :-
+    translated_form_symbols_(Term, [], Symbols0),
+    sort(Symbols0, Symbols).
+
+translated_form_symbols_(Term, Acc0, Acc) :-
+    (   var(Term)
+    ->  Acc = Acc0
+    ;   atom(Term)
+    ->  Acc = [Term|Acc0]
+    ;   Term = [Head|Tail]
+    ->  translated_form_symbols_(Head, Acc0, Acc1),
+        translated_form_symbols_(Tail, Acc1, Acc)
+    ;   compound(Term)
+    ->  compound_name_arity(Term, Name, Arity),
+        translated_form_arguments_(1, Arity, Term, [Name|Acc0], Acc)
+    ;   Acc = Acc0
+    ).
+
+translated_form_arguments_(I, Arity, Term, Acc0, Acc) :-
+    (   I > Arity
+    ->  Acc = Acc0
+    ;   arg(I, Term, Argument),
+        translated_form_symbols_(Argument, Acc0, Acc1),
+        I1 is I + 1,
+        translated_form_arguments_(I1, Arity, Term, Acc1, Acc)
+    ).
+
+record_translated_form_mention(Symbol, Id) :-
+    (   translated_form_mention(Symbol, Id)
+    ->  true
+    ;   assertz(translated_form_mention(Symbol, Id))
+    ).
+
+%note_translation_dependency(+Name): every reservation being compiled on
+%this thread depends on the generated name Name. Outside a cached
+%compilation it is a no-op, which is what an equation's clause translation
+%and a runtime dispatch want. A nested cached translation pushes its own
+%reservation above the outer one and the note reaches both, since the
+%outer template embeds what the inner one produced.
+note_translation_dependency(Name) :-
+    (   atom(Name),
+        b_getval('$metta_translation_ids', Ids),
+        Ids \== []
+    ->  with_mutex('$metta_translation_cache',
+                   forall(member(Id, Ids),
+                          record_translated_form_mention(Name, Id)))
+    ;   true
+    ).
+
+%note_translation_dependencies(+Term): the atoms and functors of a term the
+%compiler did not read from the written source, a translator rule's
+%expansion; walked only while a reservation is open, and the expansion is
+%the size of what the rule wrote, not of the code compiled from it.
+note_translation_dependencies(Term) :-
+    (   b_getval('$metta_translation_ids', Ids),
+        Ids \== []
+    ->  translated_form_symbols(Term, Symbols),
+        with_mutex('$metta_translation_cache',
+                   forall(( member(Id, Ids), member(Symbol, Symbols) ),
+                          record_translated_form_mention(Symbol, Id)))
+    ;   true
+    ).
 
 % A change can evict the reservation while compilation is outside the lock.
 % Return this invocation's guarded goals, but never cache that stale snapshot.
 publish_translated_form(Module, Key, Id, Source, Goals, Out) :-
     ( retract(translated_form_pending(Module, Key, Id))
-    -> record_translated_form_mentions(Id, [Goals, Out]),
-       assertz(translated_form_cache(Module, Key, Id, Source, Goals, Out), Ref),
+    -> assertz(translated_form_cache(Module, Key, Id, Source, Goals, Out), Ref),
        record_source_assertion(Ref),
        forall(clause(translated_form_mention(_, Id), true, MentionRef),
               record_source_assertion(MentionRef))
     ; true ).
 
+% A reservation that never published, whether its compiler failed or a
+% retirement cancelled it, leaves no mention behind: a note made after the
+% cancellation would otherwise name a template that does not exist.
 release_translated_form(Id) :-
     with_mutex('$metta_translation_cache',
-        ( ( retract(translated_form_pending(_, _, Id))
-          -> retractall(translated_form_mention(_, Id))
-          ; true ),
+        ( retractall(translated_form_pending(_, _, Id)),
+          (   translated_form_cache(_, _, Id, _, _, _)
+          ->  true
+          ;   retractall(translated_form_mention(_, Id))
+          ),
           uninstall_idle_translation_cache_hooks )).
 
 %The lifecycle sweep for one execution module, called when its space is
@@ -1770,7 +1854,7 @@ translate_runnable_expr_cached(Module, Key, Source, Template, Goals, Out) :-
     ;   setup_call_cleanup(
             with_mutex('$metta_translation_cache',
                        reserve_translated_form(Module, Key, Template, Id)),
-            ( translate_runnable_expr(Template, TemplateGoals, TemplateOut),
+            ( translate_under_reservation(Id, Template, TemplateGoals, TemplateOut),
               with_mutex('$metta_translation_cache',
                   publish_translated_form(Module, Key, Id, Template,
                                           TemplateGoals, TemplateOut)) ),
@@ -1779,6 +1863,15 @@ translate_runnable_expr_cached(Module, Key, Source, Template, Goals, Out) :-
         Goals = TemplateGoals,
         Out = TemplateOut
     ).
+
+%The compiler runs with its reservation on the thread's stack, so a
+%generated name it emits meanwhile is recorded against this template by
+%note_translation_dependency/1 at the site that emits it.
+translate_under_reservation(Id, Template, Goals, Out) :-
+    b_getval('$metta_translation_ids', Outer),
+    setup_call_cleanup(b_setval('$metta_translation_ids', [Id|Outer]),
+                       translate_runnable_expr(Template, Goals, Out),
+                       b_setval('$metta_translation_ids', Outer)).
 
 invalidate_translated_forms(Symbol) :-
     (   translated_form_mention(Symbol, _)
