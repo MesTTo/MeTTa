@@ -3,6 +3,10 @@
 % Guarded by: metta_loader protects source-flight ownership, never user forms.
 % Owns resources: each source owner destroys its queue on every exit; waiters
 %   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: metta_host_probe_function/2 retires its probe at every swept
+%   inference budget while preserving the static-predicate refusal
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their
 %   loaded host source, independently of the MeTTa source that imported them
@@ -395,7 +399,9 @@ metta_host_probe_function(Name, PredArity) :-
 metta_host_probe_function(Name, PredArity) :-
     metta_self_module(Base),
     functor(Probe, Name, PredArity),
-    catch(setup_call_cleanup(assertz((Base:Probe :- fail), Ref), true, erase(Ref)),
+    % Workaround: swi-cleanup-window - mask signals over the probe and retire it through catch-port deferral.
+    catch(sig_atomic(( assertz((Base:Probe :- fail), Ref),
+                       catch(erase(Ref), Ball, (ignore(erase(Ref)), throw(Ball))) )),
           error(permission_error(modify, static_procedure, _), _),
           metta_host_refuse_taken_name(Name, PredArity, Probe)).
 

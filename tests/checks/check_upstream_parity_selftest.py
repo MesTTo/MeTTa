@@ -101,6 +101,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import check_upstream_parity as lane  # noqa: E402
+from qlf_header import NotQlfError, read_header  # noqa: E402
 
 #: The two costs a plant assigns, keyed by what the driver was handed. A null
 #: control is any program under NULL_ROOT and costs FIXED; everything else is
@@ -1003,24 +1004,14 @@ def qlf_content_digest(data: bytes) -> str:
     qlfPutInt64, qlfOpen and writeSourceMarks. No export or instruction bytes
     are omitted, and differing PID digit counts change no digest.
     """
-    magic = b"SWI-Prolog .qlf file\n\0"
-    if not data.startswith(magic):
-        message = "fixture is not a QLF artifact"
-        raise ValueError(message)
-    position = len(magic)
-    for _ in range(3):
-        start, value, shift = position, 0, 0
-        while True:
-            byte = data[position]
-            position += 1
-            value |= (byte & 0x7f) << shift
-            if byte & 0x80:
-                break
-            shift += 7
-        value = (value >> 1) ^ -(value & 1)
-    end = position + value
+    try:
+        header = read_header(data)
+    except NotQlfError as error:
+        message = f"fixture is not a QLF artifact ({error})"
+        raise ValueError(message) from error
+    start, end = header.path_start, header.path_end
     filename, replacements = re.subn(rb"(\.[^/]+\.qlf)\.[0-9]+$", rb"\1.PID",
-                                    data[position:end])
+                                    header.saved_path)
     if replacements != 1:
         message = "QLF header has no atomic compiler pathname"
         raise ValueError(message)

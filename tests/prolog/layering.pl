@@ -7,15 +7,25 @@
 %       DATABASE rather than the sources
 %     - the working directory is tests/prolog
 % Guarantees:
+%     - support scopes use the engine's trailed context door
+%       [tested: engine_layering; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 %     - boot and runtime imports share the source_loading leaf
 %       [tested: engine_layering; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %     - identity is a leaf reached by boot validation, storage and image receipt
 %       [tested: engine_layering; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+%     - host_listeners is a leaf reached from clause bodies by spaces and
+%       materialization, and reaches nothing; the seam table, the core's
+%       arithmetic guard and the reference watch call it from load directives,
+%       which this walk of the database does not see
+%       [tested: engine_layering; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 %     - every call from one engine subsystem into another, and every call from
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line
 %       [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named;
-%       commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+%       commit=e246959279271d22f166a1c8fb1840896295a020]
+%     - a multifile caller belongs to its actual clause's source subsystem,
+%       independently of which contributing file defines the first clause
+%       [tested: multifile_callers_keep_each_clauses_source_owner; commit=e246959279271d22f166a1c8fb1840896295a020]
 %     - a contract line no call needs any more is reported, so the allow-list
 %       cannot silently widen the surface as the engine changes
 %     - a cross-subsystem call into a subsystem that declares a module reaches
@@ -369,6 +379,7 @@ reaches(lib_tabling, spaces, 'declared space, storage and module services resolv
 reaches(lib_tabling, support_graph, 'a declared table is a node the tabled function supports, so the engine\'s invalidation wave abolishes the tables a change can have left stale').
 reaches(materialize, ext_points, 'admission preserves existing dispatch ownership').
 reaches(materialize, metta, 'module context, type declarations, algebra and reduction bounds gate relation construction and lookup').
+reaches(materialize, host_listeners, 'the erase listener that retires a collected source owner is registered through the one door').
 reaches(materialize, spaces, 'native storage, compiled source signatures and dispatch policies define the relation being materialized').
 reaches(materialize, support_graph, 'prepared relations depend on their compiled function definitions').
 reaches(materialize, translator_rules, 'rewritten match calls and evaluated result constructors remain outside relational admission').
@@ -391,11 +402,13 @@ reaches(parser, metta, 'refuses an unbound input in the core\'s error vocabulary
 reaches(qlf_boot, identity, 'validates actor and generation before engine initialization').
 reaches(qlf_boot, source_loading, 'boot reports errors SWI prints while replaying the engine artifact').
 reaches(spaces, identity, 'normalizes and orders occurrence tokens through the process identity owner').
+reaches(spaces, host_listeners, 'the receipt engine\'s frame and marker listeners are registered through the one door').
 reaches(spaces, ext_points, 'announces function changes and asks whether an atom hook is installed').
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').
 reaches(spaces, metta, 'a space write reaches the core\'s registries, contract atoms and error vocabulary').
 reaches(spaces, parser, 'space refusal messages render their forms through the parser\'s writer').
 reaches(spaces, materialize, 'clearing or releasing a space retires its counted relations transactionally').
+reaches(spaces, parser, 'error messages render rejected atoms through the parser printer').
 reaches(spaces, specializer, 'a changed function invalidates the specializations built over it').
 reaches(spaces, support_graph, 'content clear keeps live consumers and lifetime release retires the whole support module').
 reaches(spaces, translator, 'storing an equation compiles it').

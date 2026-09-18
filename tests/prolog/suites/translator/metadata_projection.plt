@@ -1,7 +1,7 @@
 % Purpose: compare projected function metadata with its complete source rows.
 % Guarantees: head aliases, duplicate occurrences, source ownership and runtime
 %   answer bags agree through insertion, removal and rollback
-%   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
+%   [tested: run_tests(translator_metadata_projection); commit=e246959279271d22f166a1c8fb1840896295a020].
 % Assumes: private metadata access is needed to compare the indexed read with
 %   its source relation and to inspect the exact occurrence references.
 
@@ -119,10 +119,8 @@ test(source_journal_retires_the_primary_and_both_projections,
      [setup(clean_metadata),
       cleanup((clean_source_journal, clean_metadata))]) :-
     Load = '$plunit_projection_source_owner',
-    setup_call_cleanup(
-        asserta(filereader:active_source_load(Load), OwnerRef),
-        record([X], [owned, X]),
-        erase(OwnerRef)),
+    filereader:with_owning_source_load(
+        Load, plunit_translator_metadata_projection:record([X], [owned, X])),
     consistent_projection,
     findall(Ref, filereader:source_load_assertion(Load, artifact, Ref), Refs),
     assertion(Refs \== []),

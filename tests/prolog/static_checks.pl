@@ -1,3 +1,10 @@
+% Guarantees: no_mutating_scope_setup/0 applies only while docs/host-workarounds.md's
+%   swi-cleanup-window entry carries no Patch: field, a patched host having no
+%   window to guard [tested: sh check.sh prolog-static; commit=WORKTREE], and
+%   then refuses writes in either cleanup Setup
+%   and setup_mutation_selftest/0 checks the declared fixture exception
+%   [tested: setup_mutation_selftest; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: run SWI's source checks after compiling representative MeTTa code,
 %     and enforce the two rules about engine/ext_points.pl's seams that no SWI
 %     check knows about: every seam declares its kind, and a seam whose kind
@@ -17,6 +24,9 @@
 % Guarantees:
 %   - The driver runs the four reviewed library(check) predicates and check/0
 %     after a function with control flow has been compiled.
+%   - every prolog_listen/2,3 and prolog_unlisten/2 under engine/, lib/ and
+%     the seats' binding halves is the one inside engine/host_listeners.pl
+%     [tested: every_host_listener_registers_through_the_door; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 %   - var_branches warnings are fatal for repository engine sources without
 %     attributing warnings from SWI's own libraries to the repository.
 %   - Every unqualified multifile seam declared anywhere under engine, lib,
@@ -109,6 +119,8 @@
 
 :- use_module(library(check)).
 :- use_module(library(solution_sequences)).
+:- use_module(library(prolog_source)).
+:- use_module(library(filesex)).
 :- ensure_loaded(surface_walk).
 :- initialization(main, main).
 
@@ -124,6 +136,7 @@ main :-
     every_seam_declares_one_kind,
     every_seam_kind_matches_its_direction,
     no_cut_in_an_event_hook,
+    every_host_listener_registers_through_the_door,
     arithmetic_expansion_stays_at_run_time,
     metta_host_set_silent(true),
     representative_source(Source),
@@ -141,7 +154,269 @@ main :-
     every_engine_emitted_goal_is_protected,
     every_emitted_goal_is_reachable,
     every_registered_space_name_is_an_ampersand_atom,
-    no_unit_computes_its_own_directory.
+    no_unit_computes_its_own_directory,
+    no_mutating_scope_setup.
+
+% Workaround: swi-cleanup-window - reject writes before cleanup registration.
+% The exception door is the first goal of a checker fixture, names that exact
+% predicate and gives its reason. It cannot exempt a runtime source file.
+% [tested: setup_mutation_selftest; commit=40b71fc99571872ca5fc85cdaf7902b467166539]
+setup_mutation_fixture(_, _).
+
+% The sites this rule still has to reach, each one a write in a Setup that an
+% inference limit can land between. They are INVENTORIED rather than exempted:
+% the rule fails on any site not listed here, and on a listed site the scan no
+% longer finds, so the list can only shrink and cannot go stale. The key is the
+% file and the predicate, never a line, so an edit elsewhere in the file does
+% not move an entry. Each row names the package whose branch owns the file and
+% what the conversion needs; the recipes are in
+% ai-tmp/ai-a-guard-is-a-trailed-write.md, "What the owners of the fifteen
+% refused sites have to do".
+% Workaround: swi-cleanup-window - the inventory of sites the trailed primitive has not reached.
+scope_setup_backlog('engine/spaces/foreign.pl', translate_when_still_deferred/1, assertz/2,
+                    classes, "the process-wide metta_function_compiling/1 guard, with its three readers and the deferred_translation_settled decision after the lock").
+scope_setup_backlog('engine/spaces/lifecycle.pl', metta_remove_atom_reference/1, nb_setval/2,
+                    classes, "the native removal selector, consumed with b_setval(Key, []) rather than nb_delete/1").
+scope_setup_backlog('engine/spaces/lifecycle.pl', with_native_removal_reference/2, nb_setval/2,
+                    classes, "the same selector through the reference-aware scope").
+scope_setup_backlog('engine/spaces/lifecycle.pl', with_metta_space_releasing/2, nb_setval/2,
+                    classes, "the releasing space and its module, nested around the existing retirement body, keeping the release mutex and registry order").
+scope_setup_backlog('engine/spaces/lifecycle.pl', metta_reference_remove_equation_source/4, nb_setval/2,
+                    classes, "the foreign removal token, whose consumer in engine/spaces/tokens.pl already trails it").
+scope_setup_backlog('engine/translator/lowering.pl', translate_runnable_expr_impl/3, b_setval/2,
+                    classes, "the runnable-translation flag, read with nb_current/2 and a false default rather than a boot-initialised global").
+scope_setup_backlog('engine/translator/lowering.pl', without_runnable_name_context/1, nb_delete/1,
+                    classes, "the name context suspended by trailing [], with readers matching the shape before committing").
+scope_setup_backlog('engine/translator/lowering.pl', with_runnable_variable_epochs/1, nb_setval/2,
+                    classes, "the variable epochs as a trailed mutable epoch(0) payload incremented with nb_setarg/3").
+scope_setup_backlog('lib/lib_import/lib_import.pl', 'static-import!'/3, retractall/1,
+                    libraries, "the static import image, whose payload is loaded source data: register cleanup before clearing or loading it").
+scope_setup_backlog('lib/lib_memo/lib_memo.pl', with_memo_call_context/4, asserta/1,
+                    libraries, "the memo call frame as a trailed stack of context(Fun, Module, Arity), preserving nearest-parent order").
+scope_setup_backlog('lib/lib_tabling/lib_tabling.pl', metta_tabling_guarded/1, asserta/2,
+                    libraries, "the reconciliation flag through nb_current/2 and the primitive, preserving the reentrant once/1").
+scope_setup_backlog('lib/lib_thread/lib_thread.pl', scope_drop_space/1, b_setval/2,
+                    libraries, "the scope cleanup flag around the release body; its reader already uses nb_current/2").
+scope_setup_backlog('lib/lib_thread/lib_thread.pl', scope_close/4, b_setval/2,
+                    libraries, "the same flag around the closing body").
+scope_setup_backlog('lib/lib_thread/lib_thread.pl', blocking_space_wait_/6, assertz/2,
+                    libraries, "queue, timer and hook retirement registered before they are acquired, each owner in its own mutable cell").
+scope_setup_backlog('lib/lib_thread/lib_thread.pl', scheduler_space_wait_/7, assertz/2,
+                    libraries, "the same three resources under the scheduler's wait").
+
+no_mutating_scope_setup :-
+    setup_mutation_selftest,
+    (   cleanup_window_patched(Ledger)
+    ->  format('static: scope setup: ~w carries Patch: for swi-cleanup-window, \c
+                so a write in a Setup is the intended shape and the trailed-scope \c
+                inventory does not apply~n', [Ledger])
+    ;   no_mutating_scope_setup_scan
+    ).
+
+% The rule guards the window between Setup's effects and the cleanup's
+% registration; a host built with the ledger's patch has no such window, and
+% the branch that patched it moved setup effects INTO Setup on purpose. The
+% ledger is the one record of which state the host is in, so the rule reads
+% it rather than a flag: an entry carrying `Patch:` switches the scan off,
+% and its selftest keeps the scan alive for a host without the patch.
+cleanup_window_patched(Ledger) :-
+    source_file(metta_engine:metta_with_trailed(_,_,_), Control),
+    file_directory_name(Control, Units), file_directory_name(Units, Engine),
+    file_directory_name(Engine, Root),
+    atomic_list_concat([Root, '/docs/host-workarounds.md'], Ledger),
+    exists_file(Ledger),
+    read_file_to_string(Ledger, Text, []),
+    split_string(Text, "\n", "", Lines),
+    append(_, ["## swi-cleanup-window"|Rest], Lines),
+    ledger_entry_fields(Rest, Fields),
+    member(Field, Fields), string_concat("Patch:", _, Field), !.
+
+ledger_entry_fields([], []).
+ledger_entry_fields([Line|_], []) :- string_concat("## ", _, Line), !.
+ledger_entry_fields([Line|Lines], [Line|Fields]) :- ledger_entry_fields(Lines, Fields).
+
+no_mutating_scope_setup_scan :-
+    source_file(no_mutating_scope_setup, Checker),
+    source_file(metta_engine:metta_with_trailed(_,_,_), Control),
+    file_directory_name(Control, Units), file_directory_name(Units, Engine),
+    file_directory_name(Engine, Root),
+    findall(File, scope_source_file(Root, File), Runtime),
+    sort([Checker|Runtime], Files),
+    findall(File-Line-Finding,
+            ( member(File, Files),
+              ( File == Checker -> Role = checker ; Role = runtime ),
+              setup_mutation_file(File, Role, Findings),
+              member(Line-Finding, Findings) ), All),
+    atom_concat(Root, '/', Prefix),
+    findall(Entry,
+            ( member(File-Line-Finding, All),
+              scope_setup_entry(Prefix, File, Line, Finding, Entry) ), Entries),
+    partition(scope_setup_inventoried, Entries, Known, New),
+    forall(member(entry(Relative, Line, Predicate, Effect), New),
+           format(user_error,
+                  '~w:~d: ~q writes ~q in a Setup; use metta_with_trailed/3 for scoped state, \c
+                   or inventory it in scope_setup_backlog/5 with its owner and its conversion~n',
+                  [Relative, Line, Predicate, Effect])),
+    findall(Relative-Predicate-Effect,
+            ( scope_setup_backlog(Relative, Predicate, Effect, _, _),
+              \+ member(entry(Relative, _, Predicate, Effect), Known) ), Retired),
+    forall(member(Relative-Predicate-Effect, Retired),
+           format(user_error,
+                  '~w: ~q no longer writes ~q in a Setup; drop its scope_setup_backlog/5 row~n',
+                  [Relative, Predicate, Effect])),
+    length(Files, Count), length(Known, Backlog),
+    aggregate_all(count, scope_setup_backlog(_, _, _, classes, _), Classes),
+    aggregate_all(count, scope_setup_backlog(_, _, _, libraries, _), Libraries),
+    format('static: scope setup scanned ~d files; ~d inventoried site(s) remain, \c
+            ~d owned by classes and ~d by libraries; planted selftest passed~n',
+           [Count, Backlog, Classes, Libraries]),
+    New == [], Retired == [].
+
+% One finding as the inventory keys it: the repository-relative file, the
+% predicate whose clause holds the Setup, and the write itself.
+scope_setup_entry(Prefix, File, Line, unsafe_setup(_, Effect), entry(Relative, Line, Predicate, Effect)) :-
+    !,
+    ( atom_concat(Prefix, Relative, File) -> true ; Relative = File ),
+    scope_setup_predicate(File, Line, Predicate).
+scope_setup_entry(Prefix, File, Line, Finding, entry(Relative, Line, Finding, Finding)) :-
+    ( atom_concat(Prefix, Relative, File) -> true ; Relative = File ).
+
+scope_setup_inventoried(entry(Relative, _, Predicate, Effect)) :-
+    scope_setup_backlog(Relative, Predicate, Effect, _, _).
+
+% The head of the clause that begins at Line, read from the file itself: the
+% scanner walks terms rather than predicates, and a line number alone would
+% make every inventory row stale on the next edit above it.
+scope_setup_predicate(File, Line, Name/Arity) :-
+    setup_call_cleanup(
+        prolog_open_source(File, Stream),
+        scope_setup_head(Stream, Line, Name/Arity),
+        prolog_close_source(Stream)).
+
+scope_setup_head(Stream, Line, Indicator) :-
+    prolog_read_source_term(Stream, Term, _,
+                            [term_position(Position),syntax_errors(error)]),
+    (   Term == end_of_file
+    ->  Indicator = unknown/0
+    ;   stream_position_data(line_count, Position, At),
+        (   At == Line
+        ->  ( Term = (Head :- _) -> true ; Head = Term ),
+            ( atom(Head) -> Indicator = Head/0
+            ; compound_name_arity(Head, Name, Arity), Indicator = Name/Arity )
+        ;   scope_setup_head(Stream, Line, Indicator)
+        )
+    ).
+
+scope_source_file(Root, File) :-
+    member(Relative, ['engine', 'lib', 'extensions/python/metta/_binding',
+                      'extensions/mork/mork_ffi']),
+    directory_file_path(Root, Relative, Directory),
+    directory_member(Directory, File, [recursive(true), extensions([pl])]).
+scope_source_file(Root, File) :-
+    member(Relative, ['extensions/node/bridge.pl', 'extensions/cmetta/bridge.pl']),
+    directory_file_path(Root, Relative, File).
+
+setup_mutation_file(File, Role, Findings) :-
+    setup_call_cleanup(prolog_open_source(File, Stream),
+                       setup_mutation_stream(Stream, Role, Findings, []),
+                       prolog_close_source(Stream)).
+
+setup_mutation_stream(Stream, Role, Findings, Tail) :-
+    prolog_read_source_term(Stream, Term, _,
+                            [term_position(Position),syntax_errors(error)]),
+    ( Term == end_of_file -> Findings = Tail
+    ; stream_position_data(line_count, Position, Line),
+      setup_mutation_term(Term, Role, Here),
+      setup_mutation_locations(Here, Line, Findings, Rest),
+      setup_mutation_stream(Stream, Role, Rest, Tail) ).
+
+setup_mutation_locations([], _, Tail, Tail).
+setup_mutation_locations([Finding|More], Line, [Line-Finding|Rest], Tail) :-
+    setup_mutation_locations(More, Line, Rest, Tail).
+
+setup_mutation_term(Term, Role, Findings) :-
+    findall(unsafe_setup(Wrapper, Effect),
+            ( sub_term(Scope, Term), compound(Scope),
+              compound_name_arity(Scope, Wrapper, Arity), cleanup_wrapper(Wrapper/Arity),
+              arg(1, Scope, Setup), sub_term(Write, Setup), compound(Write),
+              compound_name_arity(Write, Name, N), Effect = Name/N, setup_write(Effect) ), Raw),
+    sort(Raw, Writes),
+    ( Term = (Head :- Body), nonvar(Body), Body = (Marker, _),
+      nonvar(Marker), Marker = setup_mutation_fixture(Indicator, Reason)
+    -> ( Role == checker, callable(Head),
+         ( atom(Head) -> Name=Head, Arity=0 ; compound_name_arity(Head,Name,Arity) ),
+         Indicator == Name/Arity, string(Reason), Reason \== "", Writes \== []
+       -> Findings = []
+       ; Findings = [invalid_setup_fixture(Indicator)|Writes] )
+    ; Findings = Writes ).
+
+cleanup_wrapper(setup_call_cleanup/3).
+cleanup_wrapper(setup_call_catcher_cleanup/4).
+
+setup_write(assert/1).
+setup_write(assert/2).
+setup_write(asserta/1).
+setup_write(asserta/2).
+setup_write(assertz/1).
+setup_write(assertz/2).
+setup_write(retract/1).
+setup_write(retractall/1).
+setup_write(nb_setval/2).
+setup_write(b_setval/2).
+setup_write(nb_linkval/2).
+setup_write(nb_delete/1).
+
+setup_mutation_selftest :-
+    forall((cleanup_wrapper(Wrapper/Arity), setup_write(Name/N)),
+           ( functor(Effect, Name, N), functor(Scope, Wrapper, Arity),
+             arg(1, Scope, (true, nested:call(Effect))),
+             setup_mutation_term((planted :- Scope), runtime,
+                                 [unsafe_setup(Wrapper, Name/N)]) )),
+    Plant = "planted :- setup_call_cleanup(assertz(probe), true, true).\n",
+    Marked = "planted :- setup_mutation_fixture(planted/0, \"scanner witness\"), setup_call_cleanup(assertz(probe), true, true).\n",
+    Invalid = "planted :- setup_mutation_fixture(other/0, \"wrong owner\"), setup_call_cleanup(assertz(probe), true, true).\n",
+    Unused = "planted :- setup_mutation_fixture(planted/0, \"unused\"), true.\n",
+    setup_mutation_plant(Plant, runtime, [_-unsafe_setup(setup_call_cleanup, assertz/1)]),
+    setup_mutation_plant(Marked, checker, []),
+    setup_mutation_plant(Marked, runtime, [_-invalid_setup_fixture(planted/0)|_]),
+    setup_mutation_plant(Invalid, checker, [_-invalid_setup_fixture(other/0)|_]),
+    setup_mutation_plant(Unused, checker, [_-invalid_setup_fixture(planted/0)]),
+    setup_mutation_plant("clean :- setup_call_cleanup(true, assertz(probe), true).\n",
+                         runtime, []),
+    setup_mutation_plant("clean :- setup_call_cleanup(true, foreign:call(zero()), true).\n",
+                         runtime, []),
+    catch(setup_mutation_plant("broken :- setup_call_cleanup(", runtime, _),
+          error(syntax_error(_),_), Malformed=true),
+    Malformed == true,
+    scope_setup_inventory_selftest,
+    format('static: scope setup selftest caught all writes in both wrappers and checked the fixture door~n', []).
+
+% The inventory's two doors, each planted: a site the inventory does not name
+% is new, and a row the scan no longer finds is retired. Both are what make the
+% list a backlog rather than an allowlist.
+scope_setup_inventory_selftest :-
+    scope_setup_backlog(File, Predicate, Effect, _, _), !,
+    scope_setup_inventoried(entry(File, 1, Predicate, Effect)),
+    \+ scope_setup_inventoried(entry(File, 1, Predicate, planted_effect/0)),
+    \+ scope_setup_inventoried(entry('planted/file.pl', 1, Predicate, Effect)),
+    \+ scope_setup_inventoried(entry(File, 1, planted_predicate/0, Effect)),
+    partition(scope_setup_inventoried,
+              [entry(File, 1, Predicate, Effect), entry('planted/file.pl', 2, planted/0, assertz/1)],
+              [_], [entry('planted/file.pl', 2, planted/0, assertz/1)]),
+    Known = [entry(File, 1, Predicate, Effect)],
+    findall(F-P-E, ( scope_setup_backlog(F, P, E, _, _),
+                     \+ member(entry(F, _, P, E), Known) ), Retired),
+    length(Retired, Missing),
+    aggregate_all(count, scope_setup_backlog(_, _, _, _, _), Rows),
+    Missing =:= Rows - 1.
+
+setup_mutation_plant(Source, Role, Findings) :-
+    tmp_file(scope_setup_fixture, File),
+    setup_call_cleanup(
+        setup_call_cleanup(open(File, write, Stream, [encoding(utf8)]),
+                           format(Stream, '~s', [Source]), close(Stream)),
+        setup_mutation_file(File, Role, Findings),
+        delete_file(File)).
 
 %%%% A unit below engine/ cannot compute its own directory %%%%
 %
@@ -388,6 +663,69 @@ source_stream_term(Stream, Term) :-
     prolog_read_source_term(Stream, Read, _, []),
     ( Read == end_of_file -> !, fail ; Term = Read ).
 
+%%%% Every host listener registers through the door %%%%
+%
+% SWI holds a channel's event-list lock across every callback it delivers and
+% takes that lock to register, so a registration made while holding a mutex a
+% callback takes is a lock-order cycle, and this tree hung on that cycle four
+% times (docs/journal/2026-09-13-one-door-for-host-listeners.md). The door,
+% engine/host_listeners.pl, is the one place a raw prolog_listen/2 may appear:
+% it registers once, takes no name and holds no mutex. This scan reads the
+% files the hook scan reads and refuses any other raw call, in a clause body
+% or a directive, module-qualified or not.
+every_host_listener_registers_through_the_door :-
+    findall(File-Indicator,
+            ( hook_source_file(File),
+              File \== '../../engine/host_listeners.pl',
+              source_term(File, Term),
+              raw_listener_call(Term, Indicator) ),
+            Offenders0),
+    sort(Offenders0, Offenders),
+    (   Offenders == []
+    ->  source_scan_sees_a_raw_registration
+    ;   forall(member(File-Indicator, Offenders),
+               format(user_error,
+                      'raw ~w in ~w~nregister through metta_listen/2 in \c
+                       engine/host_listeners.pl; a listener is registered \c
+                       once, unnamed, and never removed~n',
+                      [Indicator, File])),
+        fail
+    ).
+
+% Every compound subterm rather than every goal, as the compile-time helper
+% scan does: a registration wrapped in catch/3 or forall/2 is still one.
+raw_listener_call(Term, Name/Arity) :-
+    nonvar(Term),
+    (   Term = (_ :- Body) -> Goal = Body
+    ;   Term = (:- Directive) -> Goal = Directive
+    ;   fail
+    ),
+    body_subterm(Goal, Call),
+    compound_name_arity(Call, Name, Arity),
+    memberchk(Name/Arity, [prolog_listen/2, prolog_listen/3, prolog_unlisten/2]).
+
+% The door's own raw call is the real positive this scan must see, and three
+% planted terms cover the other arity, removal and a qualified directive.
+source_scan_sees_a_raw_registration :-
+    Planted = [ (planted :- prolog_listen(erase, planted_handler)),
+                (:- prolog_listen(erase, planted_handler, [])),
+                (:- system:prolog_unlisten(erase, planted_handler)) ],
+    aggregate_all(count,
+                  ( member(Term, Planted), raw_listener_call(Term, _) ),
+                  Seen),
+    (   Seen =:= 3,
+        source_term('../../engine/host_listeners.pl', Door),
+        raw_listener_call(Door, prolog_listen/2)
+    ->  aggregate_all(count, hook_source_file(_), Files),
+        format("static: no raw listener registration outside the door in \c
+                ~d source files, and the scan saw the door's own call and \c
+                three planted ones~n", [Files])
+    ;   format(user_error,
+               'the raw listener scan saw ~d of 3 planted calls, so its \c
+                clean result says nothing~n', [Seen]),
+        fail
+    ).
+
 %%%% No cut in a live hook clause %%%%
 %
 % The source scan reads every clause a file writes, including one a directive
@@ -478,6 +816,7 @@ library_source(Library) :-
 % space-name scan below reported the fixture as a registered space with no '&'
 % prefix, which is how this was found [measured 2026-08-28].
 live_scan_sees_a_planted_cut :-
+    setup_mutation_fixture(live_scan_sees_a_planted_cut/0, "plants live event clauses"),
     aggregate_all(count, live_hook_clause(_, _), Live),
     Planted = seam:function_removed(_),
     space_module('&self', TodayModule),
@@ -659,6 +998,7 @@ no_compile_time_helper_in_a_compiled_body :-
 % generated_clause/2 is the predicate the survey measured going from 275
 % bodies to 1 while still reporting clean, and this is what closes that.
 detector_sees_a_planted_helper(Bodies) :-
+    setup_mutation_fixture(detector_sees_a_planted_helper/1, "plants compiled helper calls"),
     Planted = 'static-check-planted-helper',
     space_module('&self', TodayModule),
     Fixture = '$static-check-fixture:&helper-probe',
@@ -805,6 +1145,7 @@ control_shaped(T) :-
 % shape, one per name, so an earlier probe cannot free a later one, and asked
 % by doing the assert the engine would do rather than by reading a property.
 capturable(Name/Arity) :-
+    setup_mutation_fixture(capturable/1, "asks whether SWI permits an assertion"),
     gensym('$static-check-capture:&probe', Space),
     space_module(Space, Module),
     functor(Probe, Name, Arity),
@@ -878,7 +1219,13 @@ emitted_goal_module(Module) :-
 measure_called_goals :-
     retractall(emitted_goal_called(_, _)),
     extension_clauses(['../../engine'], References),
-    walk_clause_edges(References, record_emitted_goal_call).
+    walk_clause_edges(References, record_emitted_goal_call),
+    % A declared context reader is called at every site as its compiled read
+    % (engine/ext_points.pl, context_reader/4), so the walk sees nb_current/2
+    % where the reader's name stood and the declaration row is the one place
+    % that still names it. Its name is a call, not a constructed goal.
+    forall(seam:context_reader(Head, _, _, _),
+           record_emitted_goal_call(Head, declaration, none)).
 
 record_emitted_goal_call(Callee, _Caller, _Location) :-
     ( Callee = _:Goal -> true ; Goal = Callee ),
@@ -953,6 +1300,7 @@ unreachable_constructed_goals(Constructed, Blind) :-
 planted_unreachable_goal(metta_capacity_remove_sexp/3).
 
 with_planted_emitter(Goal) :-
+    setup_mutation_fixture(with_planted_emitter/1, "plants an unreachable emitted goal"),
     planted_unreachable_goal(Name/Arity),
     functor(Planted, Name, Arity),
     setup_call_cleanup(
@@ -1112,6 +1460,7 @@ expansion_leaves_run_time_arithmetic(Report) :-
           Report = threw(Error)).
 
 arithmetic_expansion_stays_at_run_time :-
+    setup_mutation_fixture(arithmetic_expansion_stays_at_run_time/0, "plants a throwing expander"),
     expansion_leaves_run_time_arithmetic(Report),
     (   Report == clean
     ->  (   setup_call_cleanup(

@@ -1,3 +1,13 @@
+% Guarantees: metta_with_trailed/3 preserves linked values and restores the prior root
+%   on ordinary return, failure, exception, redo and cut; the state fence it
+%   scopes is a declared context reader compiled to its read
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+% Guarantees: metta_with_trailed_enumeration/3 holds its value over the goal's
+%   whole enumeration and restores the prior root once the goal is finished,
+%   cut, failed or raised, with its entry write registered after the cleanup
+%   [tested: trailed_scopes:an_enumeration_scope_covers_every_answer_and_returns_once_finished;
+%   commit=aedde810f4af0e4fc55de275c06a6758e6edae21].
+%
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: eval-one counts at most two answers before result unification,
 %   restores the unique Source/Result binding graph, including raw attributes,
@@ -563,9 +573,13 @@ metta_host_inference_budget(Goal, Inferences, Bounded) :-
     ->  type_error(integer, Inferences)
     ;   Inferences =< 0
     ->  Bounded = Goal
-    ;   Bounded = ( statistics(inferences, Base),
-                    call_with_inference_limit(Goal, Inferences, Outcome),
-                    metta_engine:metta_inference_budget_spent(Outcome, Base, Inferences) )
+    % Workaround: swi-cleanup-window - classify a deferred cleanup ball after the native limiter returns.
+    ;   Bounded = catch(
+                    ( statistics(inferences, Base),
+                      call_with_inference_limit(Goal, Inferences, Outcome),
+                      metta_engine:metta_inference_budget_spent(Outcome, Base, Inferences) ),
+                    inference_limit_exceeded,
+                    metta_engine:metta_inference_bound_exceeded(Inferences))
     ).
 
 %Takes no goal, so no module travels with it and it may be called from
@@ -1663,25 +1677,14 @@ rewrite_parsed_form(Space, origin(Kind, Origins), FormStr, Term, Rewritten) :-
 :- dynamic metta_state_counter/1, metta_state_value/2.
 
 %State lives in a process-shared non-backtrackable store, so snapshot/1 cannot
-%undo it. A nesting counter is thread-local engine state: speculative entry
-%increments it, every exit restores the previous value, and direct or compiled
-%state heads consult the same fence before touching the store.
+%undo it. Direct and compiled state heads consult the same thread-local fence.
 :- meta_predicate metta_with_state_write_fence(0).
 
 metta_with_state_write_fence(Goal) :-
-    (   nb_current('$metta_state_write_fence', Previous)
-    ->  true
-    ;   Previous = 0
-    ),
-    Current is Previous + 1,
-    setup_call_cleanup(
-        nb_setval('$metta_state_write_fence', Current),
-        call(Goal),
-        nb_setval('$metta_state_write_fence', Previous)).
+    % Workaround: swi-cleanup-window - nesting restores the prior trailed fence.
+    metta_with_trailed('$metta_state_write_fence', true, Goal).
 
-metta_state_write_fenced :-
-    nb_current('$metta_state_write_fence', Depth),
-    Depth > 0.
+:- seam:context_reader(metta_state_write_fenced, '$metta_state_write_fence', value(true)).
 
 %The journal admission door asks this exact engine fact. Prefixes are not
 %enough because named cells are valid too, and a dead generated name is plain

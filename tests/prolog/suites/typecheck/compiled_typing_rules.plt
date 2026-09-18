@@ -2,10 +2,20 @@
    interpreter, including directed matching, variable sharing and cuts.
    Guarantees: the comparison includes accepted and refused outcome queries
    and constrained rule names [tested: sh engine/test.sh
-   suites/typecheck/compiled_typing_rules.plt; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
+   suites/typecheck/compiled_typing_rules.plt; commit=e246959279271d22f166a1c8fb1840896295a020].
+   Expected-family classification agrees with the original interpreter for
+   shipped and user tiers, including aliases, free values and rule order
+   [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;
+   commit=e246959279271d22f166a1c8fb1840896295a020].
+   Runtime get_type_rule/2 callbacks retain their order and source error
+   frames, including a throwing tuple retry [tested: compiled_typing_rules;
+   commit=e246959279271d22f166a1c8fb1840896295a020].
+   Owns resources: cases release their spaces and oracle wrapper.
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(library(prolog_wrap)).
+:- use_module('../../source_observation_helper.pl').
 
 :- begin_tests(compiled_typing_rules).
 
@@ -78,5 +88,106 @@ test(an_exact_pattern_can_share_a_free_variable_between_inputs) :-
             type_rules:decisive_typing_rule(shipped, '*', 'arrow-arity',
                                             Actual, Expected, _, _), Answers),
     assertion(Answers =@= [Same-Same]).
+
+registry_expected(Module, Family, Expected) :-
+    (   type_rules:typing_rule_entry(user, Module, _, Family, _, RawPattern, _),
+        normalize_callable_type_in(Module, RawPattern, Pattern)
+    ;   type_rules:typing_rule_entry(shipped, '*', _, Family, _, Pattern, _)
+    ),
+    type_rules:typing_pattern_openness(Pattern, Openness),
+    type_rules:typing_rule_pattern_matches(Expected, Pattern, Openness),
+    !.
+
+expected_agrees(Module, Family, Expected) :-
+    findall(Module-Family-Expected, registry_expected(Module, Family, Expected),
+            Reference),
+    findall(Module-Family-Expected,
+            type_rules:typing_rule_expected_resolved(Module, Family, Expected),
+            Compiled),
+    assertion(Compiled =@= Reference).
+
+test(expected_families_preserve_answers_and_bindings) :-
+    metta_self_module(Module),
+    forall((type_rules:typing_rule_family(Family), query_type(Expected)),
+           expected_agrees(Module, Family, Expected)),
+    forall(query_type(Expected), expected_agrees(Module, _, Expected)),
+    expected_agrees(Module, missing_family, _),
+    expected_agrees(Module, FamilyAndExpected, FamilyAndExpected).
+
+test(expected_user_patterns_keep_normalization_and_first_match,
+     [setup(('new-space'(Space), space_module(Space, Module))),
+      cleanup(metta_release_space(Space))]) :-
+    metta_add_atom(Space, [':', 'ExpectedAlias', ['Alias', 'TagA']], _),
+    with_metta_module(Module,
+        ( 'add-typing-rule!'('expected-alias', metatype, _, 'ExpectedAlias',
+                             [refuse, named_reason], _),
+          'add-typing-rule!'('expected-shared', metatype, _, [pair, X, X],
+                             defer, _),
+          'add-typing-rule!'('expected-open', widening, _, _, accept, _) )),
+    forall((type_rules:typing_rule_family(Family), query_type(Expected)),
+           expected_agrees(Module, Family, Expected)),
+    forall(query_type(Expected), expected_agrees(Module, _, Expected)),
+    expected_agrees(Module, metatype, [pair, Shared, Shared]),
+    expected_agrees(Module, metatype, [pair, _, _]),
+    assertion(type_rules:typing_rule_expected_resolved(Module, metatype, 'TagA')),
+    assertion(\+ type_rules:typing_rule_expected_resolved(Module, metatype, 'TagB')),
+    assertion(type_rules:typing_rule_expected_resolved(Module, widening, _)),
+    metta_remove_atom(Space, [':', 'ExpectedAlias', ['Alias', 'TagA']], _),
+    metta_add_atom(Space, [':', 'ExpectedAlias', ['Alias', 'TagB']], _),
+    expected_agrees(Module, metatype, 'TagA'),
+    expected_agrees(Module, metatype, 'TagB'),
+    assertion(\+ type_rules:typing_rule_expected_resolved(Module, metatype, 'TagA')),
+    assertion(type_rules:typing_rule_expected_resolved(Module, metatype, 'TagB')).
+
+callback_source(accepted,
+"(= (get-type observed) (progn (println! callback-first) Number))
+(: take (-> Number Atom))
+(= (take $x) (accepted $x))
+!(take observed)
+!(get-type (unknown observed))
+!(println! finished)").
+callback_source(refused,
+"(= (get-type observed) (progn (println! callback-first) String))
+(: take (-> Number Atom))
+(= (take $x) (accepted $x))
+!(take observed)
+!(take \"literal\")
+!(println! finished)").
+callback_source(throwing,
+"(= (get-type observed) (progn (println! callback-first) Number))
+(= (get-type observed) (progn (println! callback-second) (assertEqual 0 1)))
+!(get-type (unknown observed))
+!(println! unreachable)").
+
+test(runtime_callbacks_and_source_error_frames_agree,
+     [forall(callback_source(Kind, Source))]) :-
+    setup_call_cleanup(
+        wrap_predicate(type_rules:typing_rule_expected_resolved(Module, Family, Type),
+                       typing_expected_oracle, _,
+                       registry_expected(Module, Family, Type)),
+        source_run_observation("typing.metta", Source, Expected, ExpectedOutput),
+        unwrap_predicate(type_rules:typing_rule_expected_resolved/3,
+                         typing_expected_oracle)),
+    source_run_observation("typing.metta", Source, Actual, ActualOutput),
+    assertion(Actual =@= Expected),
+    assertion(ActualOutput == ExpectedOutput),
+    assertion(sub_string(ActualOutput, _, _, _, "callback-first")),
+    callback_outcome(Kind, Actual, ActualOutput).
+
+callback_outcome(accepted, Rows, Output) :-
+    assertion(memberchk(['observation-answer', 0, [accepted, observed]], Rows)),
+    assertion(sub_string(Output, _, _, _, "finished")).
+callback_outcome(refused, Rows, Output) :-
+    assertion(\+ member(['observation-answer', 0, _], Rows)),
+    assertion(memberchk(['observation-answer', 1,
+                         ['Error', [take, "literal"],
+                          ['BadArgType', 1, 'Number', 'String']]], Rows)),
+    assertion(sub_string(Output, _, _, _, "finished")).
+callback_outcome(throwing, Rows, Output) :-
+    assertion(memberchk(['observation-status', exception], Rows)),
+    assertion(member(['source-frame', _, _, get_type_rule, "typing.metta",
+                      2, _, 2, _, exact], Rows)),
+    assertion(sub_string(Output, _, _, _, "callback-second")),
+    assertion(\+ sub_string(Output, _, _, _, "unreachable")).
 
 :- end_tests(compiled_typing_rules).

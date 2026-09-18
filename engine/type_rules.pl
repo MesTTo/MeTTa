@@ -1,3 +1,8 @@
+% Guarantees: with_typing_policy_stable/1 scopes typing_policy_snapshot/1 through
+%   metta_with_trailed/3 while retaining the typing-policy mutex, and the
+%   snapshot is a declared context reader compiled to its read
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%
 % Purpose: hold the declared typing-rule registry and resolve its explicit
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.
 % Guarantees: with_typing_policy_stable/1 restores its snapshot on inference
@@ -6,7 +11,10 @@
 % Guarantees: the shipped decision clauses are compiled from typing_rule_entry/7
 %   and preserve its directed matching, variable sharing and first decision
 %   [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;
-%   commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
+%   commit=e246959279271d22f166a1c8fb1840896295a020].
+%   Expected-family queries reuse compiled shipped patterns while user rules
+%   retain query-time normalization and precedence [tested: sh engine/test.sh
+%   suites/typecheck/compiled_typing_rules.plt; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Assumes:
 %   - current_metta_module/1 identifies the execution module whose user rules
 %     are in scope.
@@ -102,7 +110,9 @@
 :- set_module(base(metta_engine)).
 
 :- dynamic typing_rule_entry/7.
-:- discontiguous typing_rule_entry/7, shipped_typing_rule/5.
+:- discontiguous typing_rule_entry/7, shipped_typing_rule/5,
+                 shipped_typing_rule_expected/2,
+                 shipped_typing_rule_expected_unbound/2.
 :- meta_predicate typing_rule_transaction(0).
 :- meta_predicate with_typing_policy_stable(0).
 :- seam:context_reader(typing_policy_snapshot(Snapshot),
@@ -117,7 +127,10 @@
 term_expansion(typing_rule_entry(shipped, '*', Name, Family, Left, Right, Decision),
                [typing_rule_entry(shipped, '*', Name, Family, Left, Right, Decision),
                 (shipped_typing_rule(Family, Actual, Expected, Outcome, Name) :-
-                     (LeftGoal, RightGoal, Decision \== defer, !, Outcome = Decision))]) :-
+                     (LeftGoal, RightGoal, Decision \== defer, !, Outcome = Decision)),
+                shipped_typing_rule_expected(Family, Right),
+                (shipped_typing_rule_expected_unbound(Family, Expected) :-
+                     RightGoal)]) :-
     prolog_load_context(module, type_rules),
     compiled_typing_pattern(Actual, Left, LeftGoal),
     compiled_typing_pattern(Expected, Right, RightGoal).
@@ -520,13 +533,20 @@ typing_rule_refusal_resolved(Module, Family, Actual, Expected, Name, Reason) :-
 % without inventing a parallel list. This is used to classify metatype
 % parameters before their actual argument is known. A user rule with a broad
 % expected pattern deliberately widens that family for its own module.
+% A bound expected value can use the clause index directly. An initially free
+% value keeps the directed checks: matching Family can bind a shared variable
+% before the expected pattern is tested, so filtering open patterns in advance
+% would change the relation [tested: compiled_typing_rules; commit=e246959279271d22f166a1c8fb1840896295a020].
 typing_rule_expected_resolved(Module, Family, Expected) :-
     (   typing_rule_entry(user, Module, _, Family, _, RawPattern, _),
-        normalize_callable_type_in(Module, RawPattern, Pattern)
-    ;   typing_rule_entry(shipped, '*', _, Family, _, Pattern, _)
+        normalize_callable_type_in(Module, RawPattern, Pattern),
+        typing_pattern_openness(Pattern, Openness),
+        typing_rule_pattern_matches(Expected, Pattern, Openness)
+    ;   (   nonvar(Expected)
+        ->  shipped_typing_rule_expected(Family, Expected)
+        ;   shipped_typing_rule_expected_unbound(Family, Expected)
+        )
     ),
-    typing_pattern_openness(Pattern, Openness),
-    typing_rule_pattern_matches(Expected, Pattern, Openness),
     !.
 
 % The reporter reads this predicate, so it analyzes the exact entries the

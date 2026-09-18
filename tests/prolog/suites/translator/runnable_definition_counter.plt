@@ -38,14 +38,22 @@ test(first_source_prefix_read_matches_the_warm_read,
 % Fresh processes keep the consumer's first inherited call unresolved. Warm
 % the unrelated context reads before measuring the real guard, then use the
 % reader's ordinary arrival transition to leave its pending row retired.
+% The program read is warmed from a clause asserted here, so it is a compiled
+% call into the translator's inherited procedure, the call the guard under
+% test makes: written as a goal of this file it would compile to its
+% nb_current/2 read instead (engine/ext_points.pl, context_reader/4), and a
+% meta-call resolves the definition without linking the translator's own
+% procedure, so neither warms what the guard's first call pays.
+:- dynamic warm_program_read/0.
 counter_child(State, Collection) :-
     set_prolog_gc_thread(false),
     '$cgc_params'(_, _, _, 0, 1.0e20, 1.0e20),
     b_setval('$metta_translating_runnable', true),
-    asserta(filereader:active_source_program(counter_source)),
+    b_setval('$metta_source_programs', [counter_source]),
     assertz(filereader:source_pending_definition(counter_source,
                                                 counter_function)),
-    translator:active_source_program(counter_source),
+    assertz((warm_program_read :- translator:active_source_program(counter_source))),
+    warm_program_read,
     translator:current_metta_module(_),
     ( State == arrived
     -> filereader:source_definition_arrived(counter_function)

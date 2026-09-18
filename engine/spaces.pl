@@ -460,6 +460,7 @@
 %every unit's imports, or list_undefined reports it as spaces:pairs_keys_values/3.
 :- use_module(library(pairs), [pairs_keys_values/3, group_pairs_by_key/2]).
 :- use_module(library(solution_sequences), [limit/2]).
+:- use_module(host_listeners, [metta_listen/2]).
 
 % Storage modules are separate from execution modules. They inherit nothing,
 % so a user predicate cannot appear as a space atom, and unknown arities fail

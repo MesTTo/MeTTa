@@ -356,7 +356,6 @@ test(inner_failure_transfers_one_watch_and_outer_completion_retires_it,
         Outcome == commit)),
     ( Outcome == commit -> call(Scope) ; \+ call(Scope) ),
     metta_engine:metta_reference_pending_frames(Retired), assertion(Retired == []),
-    assertion(\+ nb_current('$metta_reference_listening', true)),
     assertion(\+ metta_engine:metta_reference_finishing(_)).
 
 test(an_inference_cut_cannot_abandon_reference_completion,

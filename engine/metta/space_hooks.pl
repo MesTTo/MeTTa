@@ -6,6 +6,10 @@
 % environment from a small allowlist carrying no locale.
 :- encoding(utf8).
 
+% Guarantees: hook grants, user transactions and speculation use
+%   metta_with_trailed/3 for their scoped state
+%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare/5; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Guarantees: transaction_constraint/1 prepares checks after the body and before
 %   the commit mutex; their execution uses the refreshed outer commit view
@@ -352,10 +356,9 @@ metta_hook_post_apply([accept, Term1], Space, _, Term) :- !,
     (   Term1 == Term
     ->  true
     ;   metta_remove_atom(Space, Term, _),
-        setup_call_cleanup(
-            b_setval('$metta_hook_granted', granted(Space, Term1)),
-            metta_add_atom(Space, Term1, _),
-            b_setval('$metta_hook_granted', [])),
+        % Workaround: swi-cleanup-window - restore the enclosing hook grant on every exit.
+        metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
+                           metta_add_atom(Space, Term1, _)),
         metta_capacity_count_added(Space, Term1)
     ).
 %The refusal's undo is the catch handler's, once for every error path.
@@ -381,10 +384,9 @@ metta_hook_apply_counted([accept], Space, _, Term, _, Wrapped) :- !,
 metta_hook_apply_counted([accept, Term1], Space, _, Term, R, Wrapped) :- !,
     (   Term1 == Term
     ->  call(Wrapped)
-    ;   setup_call_cleanup(
-            b_setval('$metta_hook_granted', granted(Space, Term1)),
-            metta_add_atom(Space, Term1, R),
-            b_setval('$metta_hook_granted', []))
+    ;   % Workaround: swi-cleanup-window - a transformed counted write trails its grant.
+        metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
+                           metta_add_atom(Space, Term1, R))
     ),
     metta_capacity_count_added_known(Space, Term1).
 metta_hook_apply_counted(Verdict, Space, Handler, Term, R, Wrapped) :-
@@ -394,10 +396,9 @@ metta_hook_apply([accept], _, _, _, _, Wrapped) :- !, call(Wrapped).
 metta_hook_apply([accept, Term1], Space, _, Term, R, Wrapped) :- !,
     (   Term1 == Term
     ->  call(Wrapped)
-    ;   setup_call_cleanup(
-            b_setval('$metta_hook_granted', granted(Space, Term1)),
-            metta_add_atom(Space, Term1, R),
-            b_setval('$metta_hook_granted', []))
+    ;   % Workaround: swi-cleanup-window - a transformed write trails its grant.
+        metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
+                           metta_add_atom(Space, Term1, R))
     ).
 metta_hook_apply([refuse, Words], Space, _, Term, _, _) :- !,
     throw(error(metta_add_refused(Space, Term, Words), none)).

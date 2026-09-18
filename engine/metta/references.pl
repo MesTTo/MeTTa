@@ -1,3 +1,7 @@
+% Guarantees: refresh, force and frame-finish guards use metta_with_trailed/3
+%   and treat an absent root as inactive
+%   [source: engine/metta/references.pl:metta_reference_refresh/0; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: derive live definition references and occurrence visibility from rows.
 % Guarantees: data writes update only their occurrence grades; unchanged
 %   callable bindings keep their compiled clauses

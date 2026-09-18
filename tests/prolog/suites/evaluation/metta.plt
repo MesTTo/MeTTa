@@ -3006,40 +3006,39 @@ plunit_module_tree(Top, Package, Child) :-
 test(a_colon_path_names_a_file_beside_the_importer) :-
     plunit_module_tree(Top, _, Child),
     setup_call_cleanup(
-        asserta(filereader:working_dir(Top)),
+        true,
+        filereader:with_working_directory(Top,
         ( resolve_metta_import_path('pkg:child', Colon),
           resolve_metta_import_path('top:pkg:child', FromTop),
           same_file(Colon, Child),
-          same_file(FromTop, Child) ),
-        ( retract(filereader:working_dir(Top)),
-          delete_directory_and_contents(Top) )).
+          same_file(FromTop, Child) )),
+        delete_directory_and_contents(Top)).
 
 %Two modules deep, where the three bases stop agreeing: `self:` and a bare
 %path follow the INNER directory while `top:` follows the outer one.
 test(self_and_top_name_different_directories) :-
     plunit_module_tree(Top, Package, Child),
     setup_call_cleanup(
-        ( asserta(filereader:working_dir(Top)),
-          asserta(filereader:working_dir(Package)) ),
+        true,
+        filereader:with_working_directory(Top,
+        filereader:with_working_directory(Package,
         ( resolve_metta_import_path('self:child', Self),
           resolve_metta_import_path('top:pkg:child', FromTop),
           same_file(Self, Child),
           same_file(FromTop, Child),
-          \+ catch(resolve_metta_import_path('pkg:child', _), _, fail) ),
-        ( retract(filereader:working_dir(Package)),
-          retract(filereader:working_dir(Top)),
-          delete_directory_and_contents(Top) )).
+          \+ catch(resolve_metta_import_path('pkg:child', _), _, fail) ))),
+        delete_directory_and_contents(Top)).
 
 %A name carrying a separator already is a PATH and is left alone, so nothing
 %that resolved before starts resolving somewhere else.
 test(a_written_path_is_not_rewritten) :-
     plunit_module_tree(Top, _, Child),
     setup_call_cleanup(
-        asserta(filereader:working_dir(Top)),
+        true,
+        filereader:with_working_directory(Top,
         ( resolve_metta_import_path('pkg/child', Written),
-          same_file(Written, Child) ),
-        ( retract(filereader:working_dir(Top)),
-          delete_directory_and_contents(Top) )).
+          same_file(Written, Child) )),
+        delete_directory_and_contents(Top)).
 
 :- end_tests(module_colon_paths).
 
@@ -3067,7 +3066,8 @@ test(include_pastes_a_module_and_answers_its_last_directive,
      [setup(( silent(true) -> true ; assertz(silent(true)) ))]) :-
     plunit_include_tree(Top, _, _),
     setup_call_cleanup(
-        asserta(filereader:working_dir(Top)),
+        true,
+        filereader:with_working_directory(Top,
         ( findall(A, include(quiet, A), Quiet),
           findall(A, include(loud, A), Loud),
           Quiet == [],
@@ -3075,9 +3075,8 @@ test(include_pastes_a_module_and_answers_its_last_directive,
           process_metta_string("!(plunit-included)", Quietly),
           process_metta_string("!(plunit-included-loud)", Loudly),
           Quietly == [pasted],
-          Loudly == [pasted] ),
-        ( retract(filereader:working_dir(Top)),
-          delete_directory_and_contents(Top) )).
+          Loudly == [pasted] )),
+        delete_directory_and_contents(Top)).
 
 %`self` and `top` are BASES rather than modules, and a name that resolves to
 %nothing is refused in upstream's own words [measured 2026-08-19 against the

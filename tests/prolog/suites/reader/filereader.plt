@@ -1004,7 +1004,13 @@ test(the_capture_pass_refuses_swi_and_engine_bookkeeping,
 %
 % A RATIO rather than a count, because the honest number moves a few
 % inferences with clause layout: what must hold is that a name no module
-% resolves is priced like one a parent defines.
+% resolves is priced like one a parent defines. The first bound is ten rather
+% than four because the plunit lane runs under tests/prolog/lock_order.pl,
+% which costs about twenty inferences per mutex acquisition and the missing
+% path takes mutexes the present one does not [measured 2026-09-13: missing
+% 81 against present 20 under the recorder; command=sh engine/test.sh
+% suites/reader/filereader.plt; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]. The thousandfold search
+% this bound exists to catch is two orders away either way.
 test(a_name_no_module_resolves_is_priced_like_one_a_parent_defines,
      [ cleanup(catch(user:metta_release_space('&plunit_repair_cost'),
                      _, true)) ]) :-
@@ -1019,7 +1025,7 @@ test(a_name_no_module_resolves_is_priced_like_one_a_parent_defines,
     repair_cost(spaces:metta_restore_inherited_predicate(
                     Module, 'plunit-no-such-repair-name', 2),
                 Missing),
-    assertion(Missing =< 4 * Present),
+    assertion(Missing =< 10 * Present),
     repair_cost(spaces:metta_repair_shadow_import(Module, 'car-atom', 2),
                 PresentRepair),
     repair_cost(spaces:metta_repair_shadow_import(

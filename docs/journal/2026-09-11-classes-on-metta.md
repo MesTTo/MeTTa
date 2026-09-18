@@ -198,6 +198,15 @@ The user's point holds and is already the design: a `yield` is one nondeterminis
 4. The decorator rows the 2026-09-06 thread ordered (cache, cached_property, total_ordering, singledispatch, abstractmethod/Protocol, override/final).
 5. The five examples with twins, the corpus records, the reference pages, README, `llms.txt`, CHANGELOG, this thread's closing section with the measured numbers.
 
+## 2026-09-11, later still: provenance is a label, and the engine already labels
+The user recalled that MeTTaIL carries provenances, "more than just states", and that it resembles labelled deductive systems. Read in the LeaTTa checkout, a sibling of this repository's workspace (its `MeTTaIL/Transform/*.lean`, `MeTTaIL.Hypercube`): every grammar rule and generated slot carries a `label`, morphisms act on slots and "generating slots commutes with mapping, on the spatial inputs: the provenance payoff", so a produced piece of syntax knows which rule and which input produced it. That is Gabbay's labelled deductive system read as an engineering fact: a formula (here an occurrence) travels with a label the rules propagate, and the semantics of the label is a separate algebra from the semantics of the formula (D. M. Gabbay, "General theory of structured consequence relations", Theoria 61(3), 1995, https://doi.org/10.1111/j.1755-2567.1995.tb00509.x, where the database is structured rather than a set and the consequence relation reads the structure, which is what a space of labelled occurrences with `from` homes is; D. M. Gabbay, Labelled Deductive Systems, Oxford 1996; T. J. Green, G. Karvounarakis and V. Tannen, "Provenance semirings", PODS 2007, https://doi.org/10.1145/1265530.1265535, for the algebra side).
+Decided: nothing new. The engine already labels at two levels and the class design uses both without adding a third. Every native occurrence carries an actor-and-generation token (`engine/identity.pl`, `engine/spaces/tokens.pl`: "received generations advance the same flag used by fresh writes; rollback may leave gaps but cannot reuse an allocated generation"), which is where-provenance: an entity's fact knows the actor and the write that produced it, so `(balance (Account t) 125)` written by `deposit` in one transaction is distinguishable from the same value written by another, and receipts expose the label. And the measure algebra (`policy algebra: knob=annotations`, the semiring rows ranked, tropical, prob, budget, and the weighted-answer libraries lib_soft, lib_pln, lib_nars) is how-provenance: an answer's label is a semiring value the rules combine, exactly the Green-Karvounarakis-Tannen algebra. An entity handle minted from a token therefore carries its birth label by construction, and a method's writes carry the calling actor's; a class that wants a richer label (who, why, under which rule) declares an annotation algebra on its space, which is the existing door.
+Open: whether a `from` row should carry the referenced home as a label on the occurrences it exposes (today the home is recorded once per row, which the reference-loading rows already answer for `get-property`); MeTTaIL's slot labels suggest per-occurrence homes are worth having when a program reasons about where a definition came from.
+
+## 2026-09-11, later: the design is an order-sorted algebraic specification
+The user named the lens: multi-sorted and universal algebra. Read literally against the design, a declared class is a sort, `(:< Circle Shape)` is a subsort declaration, a constructor arrow `(: Point (-> Number Number Point))` is an operation with a sort declaration, the accessors and methods are further operations, and the method bodies are equations. That is an order-sorted algebraic specification in the sense of Goguen and Meseguer ("Order-sorted algebra I: equational deduction for multiple inheritance, overloading, exceptions and partial operations", Theoretical Computer Science 105(2), 1992, https://doi.org/10.1016/0304-3975(92)90302-V), and the executable prior art is OBJ3 and Maude (Clavel et al., "All About Maude", LNCS 4350, 2007, https://doi.org/10.1007/978-3-540-71999-1): `sort`, `subsort`, `op ... : ... -> ...`, `eq` and `rl [label] : ...` are the five declaration forms this thread derives from a Python class, multiple inheritance is the subsort order, overloading is the equation set per sort, and a rule's label is the provenance of the section above.
+Decided, and it settles the arrow tax's direction: in Maude a sorted operator declaration makes rewriting faster, because sort checking happens once when a term is built and dispatch is indexed by sort, never re-checked at each rewrite. The engine's strict typing policy re-checks a ground constructor application on every evaluation, which is the inverse. The fix the CLASSES package lands therefore checks a constructor application when it is built (or memoises the check per head and argument shape) and lets dispatch use the sort, so a typed constructor is faster than an untyped one, as the user ruled; the typing rules keep their meaning and lose their per-evaluation cost. The unsorted case (`(Pt 3 4)` with no arrow) is the untyped algebra, which Maude also allows and which is exactly the entity handle's shape until its class declares.
+Open: whether `(:< ...)` should be admitted between constructor SORTS only or also between value sorts (`Number :< Atom` is already how the engine widens), and whether a partial operation (a method defined for some subsorts) should refuse at compile time on a sort it is not defined for, which order-sorted algebra makes decidable and the closed-sets lane could derive.
 ## 2026-09-11: constructor checks and sorted projections
 
 Tried: the original loop forms with one warm call, then 100, 1,000 and 10,000 iterations, through `MeTTa.stats()` -> accessor deltas of 156 inferences for declared `Point`, 1 for undeclared `Pt`, and 1 for quoted `Point`; `norm` costs 171. The same deltas hold at every size. `profile/2` over 10,000 typed iterations records 10,000 calls to `metta_bad_argument_error/3` and `metta_operation_parameters/6`, and 20,000 calls to `metta_argument_type_origin/3` and `check_argument_type/3`. The old 168/15 table includes cold translation work.
@@ -3080,3 +3089,79 @@ constructor's widened result sort (bb4bbf578) and the dead handle of a dropped
 space (a9b0ddb6d). The decisions, measurements and repairs are the 2026-09-18
 entries of `docs/journal/2026-09-14-python-call-values.md`; after them all
 eleven run (wt-battery, `ai-tmp/ai-failing-twins-driver.log`).
+
+## 2026-09-18: the trunk merged into the branch
+Goal: one tree carrying the branch's 326 commits and the trunk's 61 since
+c75181adc, verified as a battery sees it, before the trunk fast-forwards.
+Tried: `git merge --no-commit --no-ff petta` -> 298 conflicts: 273 twins
+(both sides appended a re-pin paragraph and a budget at one spot, from the
+same ancestor value) and 25 files where the two sides rewrote the same
+guard machinery. The trunk restored temporary contexts through the trail
+as its swi-cleanup-window workaround (trailed doors, compiled context
+readers, source-owned publication, receipts retirement, a process-wide
+frame_finished listener through metta_listen/2); the branch patched the
+host on 09-17 and lifted every marked site, keeping the trailed doors as
+its own rule and moving reference refresh under a transaction-exit hook in
+engine/metta/reference_refresh.pl. The branch's diff on every conflicted
+engine file is two to ten times the trunk's.
+Decided: twins by ai-tmp/ai_resolve_twin_conflicts.py, the trunk's
+paragraphs first (older), the branch's declaration provisional until the
+lane re-measures the merged tree. Engine files from the branch's side
+wherever both rewrote one door; the trunk's features re-applied where they
+are features: host_listeners.pl and limits.pl, the compiled runnable
+envelope (filereader:run_source_runnable/2 executes the branch's inline
+runnable steps; the envelope translate_runnable_expr/4 emits is identical
+on both sides), retire_translated_clauses/2, the expected-family typing
+rules, the profiler primitive door with its no-samples guarantee and test,
+the trailed static parameter environment (with_static_parameter_entries/2
+is one line over metta_with_trailed/3, found by list_undefined after the
+first resolution), the specializer's needed flag on the trunk's trailed
+cell at every site. The evaluation-context reader is the trunk's declared
+context reader over the branch's push door; the bridge depth the trunk's
+depth(_) cell. The ledger keeps the branch's patched entries and the
+trunk's five new ones; the trunk's 38 remaining swi-cleanup-window sites
+keep their markers under the patched entry, which the lane allows, and
+lifting them is a unit of its own.
+Rejected: the trunk's observation rewrite (install_trace_observer with an
+owner and a GC flag, with_observation/4, the bounded frame walk
+source_frames_until/4), because it is built on
+swi-query-frame-discarded-on-engine-destroy and
+swi-gc-in-frame-finished-listener-clears-a-live-slot, both patched in the
+host the tree runs on; revisit the bounded walk on its own if an
+observation's frame walk shows up in a profile. Rejected: the trunk's
+generation-based translator-rule rollback and its rollback_source_load_rows
+undo plan, because the branch's clause-reference rollback (09-14) replaced
+them; and the trunk's metta_speculate_prepare/result split, because the
+branch's coordinator does that work. The trunk's trailed_scopes suite
+tests with_observation/4 and the owned loader watcher, which the merged
+tree does not have; those cases are adapted or dropped once the suite runs.
+Measured: the merged engine loads with no undefined predicate
+(wt-battery-5, ai-merge-load.log).
+Tried: the whole plunit set on the first preview -> 147 suites, two red.
+The trunk's trailed_scopes sweep failed five rows: the session row calls a
+door the merged tree has no counterpart for (dropped); three observation
+rows failed because the trunk's fixture set the branch's nb_linkval roots
+through the trailed door, the mixing the branch's doors forbid, and the
+sweep demanded to read `[]` back where the branch's scopes leave the root
+absent (fixture rewritten on nb_linkval and a cleanup, the two strict reads
+replaced by the suite's own context_inactive/1); the compiler row needs
+the trunk's clause-source lookup (dropped); the reference-finishing row
+named the trunk's listener callback (now the branch's finish-frame door
+over frame(Frame, Roots) entries). The plunit runner also refused four
+lock-order inventory rows for the trunk's frame_finished listener the
+merged tree no longer registers (deleted, with their comment).
+Found: the branch's constructors suite failed twice on the first preview
+through my one deviation from the rule: taking the trunk's trailed line
+for the static parameter environment, whose door leaves `[]` where the
+branch's scope deletes the key, so the branch's absence assertions read
+the residue; the branch's scope is back and the trunk's header line and
+comment for the other mechanism went with it. Its cost guard then read
+1507 and 1509 against a ceiling of 1500 inside the whole engine run and
+1339 cold in a fresh process (1353 on 89bd5dc41), so the ceiling is 1600
+with those readings in the test: the user ruled a small cost difference
+acceptable, the engine being replaced.
+Found: the trunk's prolog-static rule no_mutating_scope_setup refuses a
+write in a Setup, the branch's lifted shape at five sites; the rule guards
+the cleanup window, so it now reads docs/host-workarounds.md and stands
+down while the swi-cleanup-window entry carries Patch:, its selftest
+keeping the scan alive for a host without the patch.

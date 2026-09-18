@@ -212,6 +212,8 @@ Record: docs/journal/2026-09-17-host-patches.md, the budget sweep and the
   traced run that placed the exception inside `asserta/2`;
   docs/journal/2026-09-07-every-intermittent-root-caused.md, the
   20,000-budget sweep; docs/journal/2026-09-10-every-host-workaround-is-commented.md.
+  docs/journal/2026-09-11-source-owned-publication.md records the scoped
+  publication differential and its inference-budget sweep.
 
 ## swi-transaction-enumerator-repeats-parent
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `src/pl-transaction.c:current_transaction/1`.
@@ -345,6 +347,49 @@ Lifted when: SWI-Prolog as shipped restores the source module after a failed
   consult and refuses a null procedure in the QLF loader, so the reproduction
   prints absent; the patch and the entry go together then.
 Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-11-the-engine-and-packaging-lanes-after-the-wave.md.
+
+## swi-named-listener-replacement-lock
+Host: SWI-Prolog 10.1.13, src/pl-event.c:add_event_hook at
+  fc7ef84b949378b729052c3ade79c90ce5416abb, lines 145-159.
+Defect: src/pl-event.c:add_event_hook returns at line 155 after replacing
+  a named event handler, before UNLOCK_LIST at line 159 releases its
+  recursive list mutex. Its owning thread can continue, but another thread
+  blocks while registering, invoking or removing a handler on that channel.
+Reproduction: tests/checks/host_workarounds/swi-named-listener-replacement-lock.sh,
+  a completed single-registration control followed by a replacement whose
+  worker announces its arrival before trying to unregister the handler.
+Workaround: every listener is registered once, unnamed, through
+  engine/host_listeners.pl, so the replacement branch is never entered.
+Lifted when: add_event_hook releases the event-list mutex before returning
+  from the named-handler replacement branch. The once-only door stays after
+  that host repair, because a listener is process-wide by design.
+Record: docs/journal/2026-09-09-import-and-module-semantics.md, candidate
+  admission and concurrent rollback-listener evidence;
+  docs/journal/2026-09-13-one-door-for-host-listeners.md.
+
+## swi-event-list-lock-spans-listener-callbacks
+Host: SWI-Prolog 10.1.13, src/pl-event.c at
+  fc7ef84b949378b729052c3ade79c90ce5416abb: call_event_list holds the
+  channel's recursive list lock across every callback it delivers (lines
+  415-470) and link_event takes the same lock to register (lines 99-110).
+Defect: a callback runs with its channel's event-list lock held, so a callback
+  that waits for a mutex some other thread holds while that thread registers
+  on the same channel never returns, and neither does the registration: two
+  threads in futex_do_wait and a process that reports nothing. Four hangs in
+  this tree were that cycle, each through a different engine mutex.
+Reproduction: tests/checks/host_workarounds/swi-event-list-lock-spans-listener-callbacks.sh,
+  a control whose worker registers after releasing the mutex, then the same
+  registration made while holding the mutex the callback waits for.
+Workaround: every registration goes through engine/host_listeners.pl, which
+  holds no mutex while it registers, so no mutex is ever ordered before a
+  channel's event-list lock; tests/prolog/lock_order.pl records that lock as
+  one more mutex and the plunit lane fails on any cycle through it.
+Lifted when: call_event_list copies the callback list and releases the lock
+  before calling into Prolog, at which point the reproduction's worker joins.
+  The door stays: registering once, unnamed, is the shape the entry above
+  still needs.
+Record: docs/journal/2026-09-13-one-door-for-host-listeners.md.
+
 ## swi-query-frame-discarded-on-engine-destroy
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `PL_close_query` in
   src/pl-wam.c closes the foreign frame before discarding the outer query
@@ -552,3 +597,116 @@ Lifted when: SWI-Prolog as shipped merges a nested retract without losing the
 Record: docs/journal/2026-09-17-host-patches.md, the merge fix and the
   ownership journal it retires; docs/journal/2026-09-11-classes-on-metta.md,
   repository ownership after nested rollback.
+
+## swi-autoload-cut-installs-the-undefined-supervisor
+Host: SWI-Prolog 10.1.13; trapUndefined and autoLoader in src/pl-proc.c:2962-3047,
+  the undefined supervisor in src/pl-supervisor.c:235-240 and 433-443,
+  raiseInferenceLimitException in src/pl-prims.c:5676-5718,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-proc.c#L2962-L3047.
+Defect: the trap for an undefined predicate runs `'$undefined_procedure'/4` as
+  a query and reads its answer, fail, error or retry. A query that raised has
+  no answer, so the trap installs the undefined supervisor on the definition
+  and lets the ball go on. Every later compiled call that is not the last call
+  of its clause runs that supervisor and never traps again, so the predicate
+  answers "Unknown procedure" for the rest of the process although its library
+  is loaded; a last call, a meta-call, an explicit import or a defining assert
+  resolve it, which is why the symptom hides in library code. An inference
+  limit, an alarm or an interrupt landing inside a first-use resolution is
+  enough, and the resolution's absolute_file_name/3 walk is hundreds of
+  inferences wide. When the ball is the inference limit and the trip landed
+  after the definition arrived, the trap continues into the resolved
+  predicate with the ball pending and the first foreign call drops it, so the
+  bound is lost instead.
+Reproduction: tests/checks/host_workarounds/swi-autoload-cut-installs-the-undefined-supervisor.pl,
+  a budget sweep over fresh modules whose clause calls sum_list/2 before
+  another goal, each bounded on its first call; every budget from 1 to 64
+  leaves the predicate undefined on 10.1.13.
+Workaround: engine/metta/limits.pl wraps `'$undefined_procedure'/4`: the
+  resolution runs under a catch, a cut resolution is run again once the limit
+  has disarmed, the second attempt's answer is returned, and the ball is
+  re-raised through thread_signal/2 from the next call port. A cut on the
+  query's own entry ports, which precede the catch, is repaired from
+  prolog:prolog_exception_hook/5 by asking for the resolution again from the
+  thread's next safe point; only the inference limit's ball is repaired there,
+  because reading the frame the ball surfaces at marks it and a time limit or
+  interrupt can surface at an engine's outer query frame
+  (swi-query-frame-discarded-on-engine-destroy).
+Patch: tests/checks/host_workarounds/swi-cached-undefined-supervisor.patch,
+  the supervisor this trap installs is the cached S_UNDEF supervisor that
+  patch makes consult the loader once more before raising, so a resolution a
+  bound cut is retried by the next compiled call; the reproduction answers
+  absent on the build that carries it (the host-workarounds lane,
+  2026-09-18, on the tree that merged the trunk). The wrapper in
+  engine/metta/limits.pl stays until the trunk's sites are lifted together.
+Lifted when: trapUndefined leaves the definition untouched when the
+  resolution query raised, so the next call traps and resolves again, and the
+  pending ball is raised instead of the resolved predicate being entered.
+Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
+  2026-09-11 section; docs/journal/2026-09-11-the-end-of-wave-battery.md.
+
+## swi-findall-bag-push-window
+Host: SWI-Prolog 10.1.13; cleanup_bag/2 in boot/bags.pl:104-106, findnsols2/5
+  in boot/bags.pl:147-152, the bag stack in src/pl-bag.c:157-190 and 366-385,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/bags.pl#L94-L112.
+Defect: findall/4 pushes its bag with `'$new_findall_bag'` and registers
+  `'$destroy_findall_bag'` one call port later, and findnsols2/5 does the same
+  through setup_call_cleanup/3. An inference limit that trips on that port
+  unwinds with the bag on the thread's bag stack and no cleanup owed
+  (swi-cleanup-window is the same host rule seen from the engine's own state).
+  Every later answer of the enclosing findall is then added to the stale bag,
+  and the enclosing findall collects its own bag, which is short. The
+  cleanup's own entry port is a second window of the same shape.
+Reproduction: tests/checks/host_workarounds/swi-findall-bag-push-window.pl,
+  a findall over two hundred budgets each bounding a goal that runs a nested
+  findall; 13 of 200 are collected on 10.1.13, and a thrown ball through the
+  same nesting collects 200.
+Workaround: engine/metta/limits.pl wraps `'$bags':cleanup_bag/2` and
+  `'$bags':findnsols2/5` from the first `call_with_inference_limit/3` of the
+  process on, and the wrappers stay. findall's loop is deterministic and
+  never fails, so its bag is pushed and then the loop and the pop are caught
+  together, with the pop in the recovery: one inference more than the host's
+  own shape. findnsols keeps a registered cleanup, registered before the
+  push, with the push followed by catch/3 and the record of the push as the
+  first goal inside it, and a cleanup that is itself a catch/3 term whose
+  drop records before it pops. Each step rests on the host's rule that a
+  trip on catch/3's call port is raised at the next call port instead.
+Patch: tests/checks/host_workarounds/swi-cleanup-window.patch, whose
+  deferred inference check is exactly the "honours the atomic region" below:
+  the bag is pushed in a Setup, so the window between the push and the
+  cleanup's registration is the cleanup window; the reproduction answers
+  absent on the build that carries it (the host-workarounds lane,
+  2026-09-18, on the tree that merged the trunk). The wrappers in
+  engine/metta/limits.pl stay until the trunk's sites are lifted together.
+Lifted when: the inference-limit check honours the atomic region, or
+  cleanup_bag/2 and findnsols2/5 register their cleanup before the push and
+  the push records itself.
+Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the section on the
+  final gate's reds; docs/journal/2026-09-07-every-intermittent-root-caused.md.
+
+## swi-profile-report-divides-by-zero-samples
+Host: SWI-Prolog 10.1.13; profile/2 in library/prolog_profile.pl:107-118, its
+  report in the same file at 146-168 and time_data/7 at 204-210, the primitive
+  in src/pl-prof.c:942-970,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_profile.pl#L104-L210.
+Defect: profile/2 is `call_cleanup('$profile'(Goal, How, Ports, Rate),
+  show_profile(Options))`, and the report divides each predicate's ticks by
+  the total tick count, and the net time by it again. A goal that finishes
+  inside one sampling period (5 ms by default) leaves the total at zero, so
+  the report raises `evaluation_error(zero_divisor)` as the CLEANUP of a goal
+  that already answered, and the ball unwinds the goal's bindings on its way
+  out: the answer is gone before any catcher can read it. `top(0)`, which asks
+  for no rows at all, does not avoid the division. The report also consults
+  `prolog:show_profile_hook/1` first, which SWI autoloads from xpce whenever
+  DISPLAY is set.
+Reproduction: tests/checks/host_workarounds/swi-profile-report-divides-by-zero-samples.pl,
+  `profile(X is 1 + 1, [top(0)])` with the report's output swallowed; on
+  10.1.13 it raises with samples=0 and X unbound at the catcher.
+Workaround: extensions/python/metta/_binding/profiling.pl calls the primitive
+  profile/2 itself calls, `'$profile'(Goal, cputime, Ports, Rate)` with the
+  flags profile/2 reads for its defaults, and never the report; the rows come
+  from profile_data/1, whose own division is guarded and answers an empty
+  profile when nothing was sampled.
+Lifted when: profile/2's report treats a zero tick count as an empty profile,
+  or the division moves behind the `top(0)` option.
+Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the 2026-09-12
+  section on the publication merge.

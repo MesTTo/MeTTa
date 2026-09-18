@@ -173,8 +173,14 @@ trap 'rm -rf "$scratch"' EXIT HUP INT TERM
 boot_sample() {
     status=0
     output=$(bounded sh "$ROOT/engine/bench.sh" --counter-only boot 2>&1) || status=$?
+    # The driver prints one of three shapes: the comparison line (samples=[...]),
+    # an improvement left unpinned (every sample of [...]) or a regression
+    # (minimum of [...]). The property here is that the readings agree with each
+    # other, so all three shapes yield the reading; a stale pin is engine-bench's
+    # finding, not this lane's, and reading only the first two turned a stale pin
+    # into "no sample" in the 2026-09-11 end-of-wave gate.
     reading=$(printf '%s\n' "$output" |
-        sed -n 's/.*samples=\[\([0-9][0-9]*\).*/\1/p;s/.*every sample of \[\([0-9][0-9]*\).*/\1/p' |
+        sed -n 's/.*samples=\[\([0-9][0-9]*\).*/\1/p;s/.*every sample of \[\([0-9][0-9]*\).*/\1/p;s/.*minimum of \[\([0-9][0-9]*\).*/\1/p' |
         head -1)
     if [ -z "$reading" ]; then
         printf 'boot driver produced no sample (exit %s):\n%s\n' "$status" "$output" >&2

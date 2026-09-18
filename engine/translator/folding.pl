@@ -1,3 +1,7 @@
+% Guarantees: fold_native_scalar_call/5 treats the inactive observation root
+%   left by metta_with_trailed/3 as outside an observation
+%   [source: engine/translator/folding.pl:fold_native_scalar_call/5; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: fold immutable native scalar calls while compiling retained clauses.
 % Assumes: translator.pl owns this unit and retained clause publication keeps
 %   the source dependency edges from filereader:record_translated_supports/2.
@@ -40,7 +44,7 @@ fold_native_scalar_call(Module, Fun, Args, Out, Goal) :-
     % --counter-only run-source; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
     % [tested: source_observation:nested_controls_preserve_each_source_branch;
     % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
-    \+ nb_current('$metta_observation', _),
+    \+ (nb_current('$metta_observation', Buffer), Buffer \== []),
     % findall copies each answer and unwinds every speculative binding. The
     % exact singleton check retains failure and duplicate multiplicity, even
     % if the native implementation ceases to satisfy the expected mode.

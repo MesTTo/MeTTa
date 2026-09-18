@@ -290,3 +290,40 @@ An example's assertions check only the branch it executes. The C controls show
 why a successful exit alone cannot prove equivalent work. The engine, corpus
 and binding differential suites remain separate correctness obligations; an
 instruction comparison does not replace them.
+
+## Source publication measurements, 2026-09-11
+
+The source publication changes compile expected-family typing witnesses,
+reuse source-owner decisions, share the fixed runnable envelope and retire
+ordered groups of exact artifact references. The same estimator compares
+the provisioned cut `b1d175f13` with `621597ecf`. These observations update
+the relevant costs above; the earlier dated table remains its original audit.
+
+| Program | Cut inferences | Final inferences | Cut instructions | Final instructions |
+|---|---:|---:|---:|---:|
+| functionremovalspec | 11,932 | 11,814 | 12,613,617 | 12,503,784 |
+| casenew | 4,791 | 4,754 | refused | refused |
+| holfunctions | 17,360 | 17,057 | refused | refused |
+| plntest | 28,408 | 27,335 | 32,727,710 | 32,120,461 |
+| twostage | 4,794 | 4,763 | refused | 5,366,090 |
+| holfunctions_intrinsicop | 11,244 | 11,159 | refused | refused |
+| nilbc | 318,186,853 | 310,976,936 | 150,872,095,798 | 144,677,369,904 |
+
+An instruction refusal means the matched null exceeded the existing
+resolution. All attempts and their host loads are retained; none is replaced
+with a passing estimate. The four publication waivers remain: accepted final
+costs still exceed their unchanged bands, and refused comparisons do not
+establish a pass. Live pinned upstream nilbc costs 11,588,342,959 instructions
+and 17,937,607 inferences. Its runtime tuple derivations and callbacks remain
+required. The updated rulings, upstream pins, loads and controls are recorded
+in the repository journal
+`docs/journal/2026-09-08-what-the-waivers-were-paying-for.md`, under
+"2026-09-11: source-owned publication".
+
+The supplied 2026-09-12 measurement window accepts all seven final instruction
+prices. Functionremovalspec reads 12,521,592, casenew 5,623,210, holfunctions
+20,080,712 and plntest 32,117,704. Their inference counts remain unchanged from
+the table above. Every waiver remains above its unchanged ceiling. The cut,
+upstream, related-program values, sample ranges, loads and retained refusals
+are recorded in the same journal's "2026-09-12: publication window controls"
+section. The observations do not replace the merged-tree release re-pin.

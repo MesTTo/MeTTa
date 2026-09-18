@@ -93,6 +93,7 @@ from metta_benchmarking import (  # noqa: E402
     BenchmarkBaseline,
     measure_instructions,
     measured_main,
+    prepare_governed_artifacts,
     refusal_is_fatal,
 )
 
@@ -443,6 +444,23 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"{name}: NOT RE-PINNED IN THIS CONFIGURATION")
             continue
         try:
+            if case.whole_process:
+                # The boot row reads one artifact state whatever lane ran before
+                # it: the governed set is purged and warmed through the ordinary
+                # boot in children of their own (a library artifact another lane
+                # left beside the three the boot compiles moved this row 17
+                # inferences, past its four-inference allowance
+                # [measured 2026-09-11: 319,073 against 319,090; commit=23033852660c31aeadeb2719a1eead355c36e0bf]).
+                try:
+                    inventory = prepare_governed_artifacts(ROOT)
+                except subprocess.CalledProcessError as unprepared:
+                    detail = (unprepared.stderr or unprepared.stdout or "").strip()
+                    msg = f"the governed artifact set could not be prepared: {detail}"
+                    raise CaseFailureError(msg) from unprepared
+                print(
+                    f"{name} fixture: {len(inventory)} governed QLF artifacts after "
+                    "the purge and the ordinary warm boot"
+                )
             print(
                 observe(
                     baseline,

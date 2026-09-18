@@ -321,6 +321,37 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Evidence checks and provenance pinning include executable MeTTa fixtures
   under `tests/data/`, including nested fixtures.
 
+- One door for host event listeners: `metta_listen/2` in
+  `engine/host_listeners.pl` registers a listener once per process, unnamed
+  and permanent, through an atomic `flag/3` claim and a completion wait, and
+  holds no mutex while SWI takes the channel's event-list lock. SWI holds that
+  lock across every callback it delivers, and four hangs in this tree were
+  that lock ordered against an engine mutex. The arithmetic-expansion guard,
+  the seam table, the atom-hook watchers, materialization's erase listener,
+  the receipt engine's two listeners, the reference watch and the Python
+  seat's bound watch register through it; the reference watch is now one
+  process listener registered at load, reading each thread's own pending
+  frames, rather than one registration and removal per transaction. The
+  `prolog-static` lane refuses a
+  raw `prolog_listen/2,3` or `prolog_unlisten/2` anywhere else.
+- The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
+  records the order each thread acquires SWI mutexes, with each channel's
+  event-list lock as one more, and fails the lane on any cycle not in its
+  inventory, naming the goal each edge was first taken for; a suite that ran
+  without the recorder fails the lane too, and so does an inventoried cycle a
+  whole run shows nowhere. The inventory holds the six lock-order inversions
+  the engine carries today: four are a watched transaction frame finishing
+  inside the typing policy, the specializer or the exec-module lock while the
+  reference refresh that `frame_finished` runs needs that mutex, and two put
+  deferred translation on both sides of the typing policy; their burn-down is
+  tracked in the workspace ledger.
+- The `qlf-provenance` gate lane reads the directory every compiled artifact
+  under `engine/` and `lib/` records as the one it was saved in and refuses one
+  written anywhere else, naming both directories and the purge that repairs
+  it; SWI loads a moved artifact by rewriting its recorded source paths and
+  calling `system:'$translated_source'/2` per path, which every process then
+  pays for. Its selftest plants one SWI compiled in one directory and found in
+  another. The header reader is shared with the parity selftest's digest.
 - A concurrency example exercises scope answer multiplicity, child joining,
   resource release and transfer, the `scope_body` longhand, and deferred
   evaluation through a captured space.
@@ -696,6 +727,89 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   pending proxy registry, its validator and its error renderer in `_binding/lifecycle.pl`
   are gone; the outer commit validates one value and one live owner per key instead.
 
+- Engine call-graph checks attribute multifile calls to each clause's source
+  file. Handler implementations no longer create false cross-module reaches
+  or enlarge the declared dependency cycle.
+
+- Source cleanup and specialization invalidation retire ordered groups of exact
+  artifact references. Transactional native retirement reuses its receipt
+  owner while retaining every per-reference erase and callback.
+
+- Source runnable forms share a compiled answer, name and fuel envelope. Each
+  form still translates and runs against its arrived source prefix, with the
+  same ordered effects and source-observation boundary.
+
+- Source publication selects clause and support ownership once per load,
+  deferred owner or recompile scope. Individual journal references remain
+  immediately visible and retain exact withdrawal and rollback behavior.
+
+- Expected-type family classification reuses compiled shipped patterns. User
+  rules still normalize aliases when queried and retain their precedence.
+
+- A trailed context has two doors: `metta_with_trailed/3` restores the prior
+  value on every answer, and `metta_with_trailed_enumeration/3` holds the
+  value over a goal's whole enumeration and restores once it is finished, cut,
+  failed or raised. The execution module and the evaluation context take the
+  second, which is the scope their cut's setup/cleanup pair had: a collector
+  that pulls a million answers through them pays one write, not a million.
+- A context reader is declared once, `:- seam:context_reader(Head, Key, Shape)`,
+  and every call to it compiles to its `nb_current/2` read, so the trailed
+  guards cost what the asserted guards they replaced cost: an absent, inactive
+  or one-element context reads in one inference, and the loader's per-atom
+  read and the compiler's per-equation reads return to the cut's counts. The
+  receipt listener's exception hook is clausal only from the process's first
+  bound on, so a process that never bounds pays nothing per ball it throws and
+  one that does pays three inferences per bounded call for the test that arms
+  it, read from a fact rather than searched for among the hook's clauses.
+- The report of predicates nothing can reach reads a load-time directive in
+  the module that directive runs in, scans the units a subsystem keeps one
+  directory down, takes a module-qualified name held as data as the goal it is
+  at whatever arity it is defined with, and roots a declared context reader in
+  its declaration row. The four doors take 175 findings off the report, led by
+  the engine's builtin census and its prelude installation: both are reached
+  only from their own module file's directive, which the probe clause ran as
+  user's until now. Five planted predicates and
+  `tests/prolog/probes/reachability_doors.sh` keep each door attached to the
+  plant that proves it, and the self-test reads a plant's whole indicator, so
+  a row naming a module can no longer be skipped in silence.
+- Receipt retirement completes after an inference limit interrupts a native
+  transaction's completion listener. Rolled-back marker notifications release
+  their standing-engine claims while preserving a live outer transaction.
+  The shared inference-bound door preserves its control envelope when the
+  native notification raises the limit after the host limiter returns.
+- Reader source-load and directory scopes are published to their compiler
+  and manifest consumers; the binding service manifest records the shared
+  trailed context door.
+- Temporary engine contexts use `metta_with_trailed/3` to restore their
+  enclosing value after inference limits, exceptions, failure, cut and redo.
+  Source and materialization rollback retain their ownership records until
+  cleanup completes.
+- Scoped executable clauses register retirement before acquisition and retain
+  ownership across interruption. Source observation trails its contexts,
+  collects raised errors through the debugger, and stops its frame walk at
+  the observation boundary.
+- Python message forwarding and Node/C error capture use the engine's trailed
+  scope for their reentrancy and capture flags.
+- The `prolog-static` lane refuses state writes in either cleanup wrapper's
+  setup, validates the checker's declared fixture exceptions, and refuses
+  malformed source during its scan.
+- The engine benchmark's boot row prepares its own artifact state: the governed
+  `.qlf` set is purged and warmed through the ordinary boot in children of the
+  driver before the row's samples, the same preparation the C fixture takes, so
+  the pin reads one state whatever lane ran before it. The boot-determinism lane
+  reads the driver's regression shape as a reading too, so a stale pin is
+  engine-bench's finding and never "no sample".
+- The twins re-pinned on the merged tree: 265 point budgets under the serial
+  min-of-three protocol with the wave's mechanism in each chain, eight empirical
+  envelopes re-observed over ten full-lane rounds under the 282-example protocol,
+  the authoring constants re-derived (the first definition's premium fell from
+  1,482 to 303 with the binding's boot import; 1,362 per definition), six retired
+  overruns dropped and thirteen residuals priced where a twin still pays the
+  first use of its own lowering paths.
+- The end-of-wave re-pins: engine boot, evaluate, parse-prolog and translate;
+  the Python benchmark rows the wave moved; the automatic-tabling pins;
+  memory-scale `support-drop-spaces`; the Node rows; the C boot row. Each row
+  carries the ladder across the wave's landing tips that attributes its move.
 - The evidence, provenance-pin and spec-status gates read the set git tracks
   for the root they scan, keyed by that root, so a selftest's planted tree is
   a repository and a stale build copy under an ignored directory is never a
@@ -984,6 +1098,48 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   space. The sorted-constructor corpus example and three engine benchmark
   rows compare the typed path, untyped path and literal control.
 
+- The gate runs headless: `bounded.sh` unsets `DISPLAY` and `WAYLAND_DISPLAY`, so a
+  desktop run behaves as CI does. With a display set, SWI-Prolog loads xpce for a text
+  `profile/2` and a failing GLX context kills the process, which had turned prolog-static,
+  host-workarounds and the Python examples lane red on one box while the tree was unchanged.
+
+- `TaggedAnswer.under()` no longer raises `algebra_operation_error` for
+  `tropical` and `budget`: the reinterpretation fold now starts from the first
+  alternative, as direct evaluation does, instead of handing the carrier's
+  declared zero to its combine operation. Both presets declare the symbol
+  `infinity` as that zero, deliberate carrier vocabulary that `min` never
+  receives directly, so `.under(tropical)` raised `(min infinity 0)` where
+  `under=tropical` answered.
+- A profile whose sampler took no sample answers the goal's answers instead of
+  raising: SWI's own `profile/2` prints a report as the cleanup of the goal and
+  that report divides by the total tick count, so a goal finishing inside one
+  sampling period raised an arithmetic error that also discarded the answer.
+  The engine's profile door runs the profiler primitive `profile/2` itself runs
+  and reads the rows directly.
+
+- The mork seat's missing-artefacts test no longer writes compiled library
+  artifacts into the checkout: its scratch tree linked the checkout's `lib/`
+  directory, so the halves its boots compiled landed beside the real sources
+  recorded under the scratch path, and SWI loads such an artifact as moved,
+  calling `system:'$translated_source'/2` per recorded source at every load.
+  The tree now links `lib/` per file as it links `engine/`, and the test checks
+  the checkout gained no artifact while it ran.
+- The twins lane prints a band ceiling to the tenth it compares with, so a
+  finding no longer reads as a cost equal to its own ceiling.
+- A bound that cuts a first-use library resolution no longer leaves that
+  predicate answering "Unknown procedure" for the rest of the process, and a
+  bound that cuts a nested findall no longer shortens the enclosing findall's
+  answers. Both are SWI-Prolog 10.1.13 defects, reproduced by the
+  host-workarounds lane and worked around in `engine/metta/limits.pl`;
+  `docs/host-workarounds.md` names the mechanism and the host change that
+  lifts each workaround.
+
+- The Python profile door keeps the goal's answers when SWI's sampler took no
+  sample: the profiler's report divides by the total tick count as the cleanup
+  of the goal, and the raised division unwound the answer it was meant to
+  carry, so every profile door raised an engine error on a box quiet enough to
+  finish the profiled goal inside one sampling period. The answer is recorded
+  beside the run and an empty profile keeps its call rows.
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
   fixture producer uses the shared process bound. The syntax introduction
