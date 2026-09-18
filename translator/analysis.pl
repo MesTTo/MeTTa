@@ -42,7 +42,7 @@
 %   expansion), recorded at the emitting site rather than by walking the
 %   generated code. Retirement evicts those templates and cancels pending
 %   compilation without discarding unrelated completed templates
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=a9e2c06d337ff1f15a56d02a48a9ce14a307da68].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
