@@ -308,3 +308,12 @@ coefficients 1 over 2 and 4 variables, source weights 0.2, 0.5, 0.6; the
 two-cycle's formula has two witnesses, sources 0.2 and 0.3, 0.6, the round
 trip through b absorbed); the derived and fixpoint routes agree on the
 guarded threshold program (a at 0.6, b absent).
+Measured, on the tree as landed (49478d67a, evidence pinned by 558f40c9c;
+the miss probe c85001901, pinned by babeeafa4): algebra_fixpoint 14/14,
+catalog 58, translation_cache 17 (plunit); the ch06 guard tests, the ch18
+fixpoint tests and the ch06 algebra tests 54 passed; vulture, ruff, llms,
+evidence, init-stub, door-sync and closed-sets green; the example
+08-guarded_rules.metta answers 1.6 for the pair's weights and its twin is
+pinned at 23621 with an overrun of 538 (re-priced to 3385 the same day in
+the twins-lane entry: the 538 was priced with an authoring allowance the
+twin no longer earns).

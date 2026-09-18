@@ -76,3 +76,117 @@ authoring allowance and declares what the twin costs above it. Found: the
 reference-loading twin read 369745 under its ten-round floor of 370077 on
 the next run; the reading joins the envelope under the same protocol
 (369745..373706 over 11), the pooling the 2026-09-08 entry decided.
+
+## 2026-09-18, after the guards landed
+Goal: the lane green on the tip that carries the guards, the polynomial and
+product carriers and the witnesses (49478d67a), every move named.
+Tried: the lane on 558f40c9c (wt-battery-6, ai-twins-K5.log) -> 35 findings
+over 294 twins: 19 point budgets moved, 8 envelopes naming the 293-example
+protocol (the corpus is 294 wide since 08-guarded_rules joined it, and a
+full-lane protocol names the width), 2 stored-content divergences, 2 band
+overruns, 4 spellings in the new twin (S["above-half"] where S.above_half
+reaches the same name).
+Measured: against the lane on 6944d06ce's twins (wt-battery-4
+ai-twins-lane-residuals-2.log, 0 findings over 293) seven examples moved by
+exactly their twin's delta: restricted_spaces +522, pln_roman, pln_formulas
+and pln_derivation_control +63 each, tabling_equation_change +20,
+tabling_space_write +10, reflect_lib +6 (the engine: the catalog's two new
+rows); twelve twins moved with their examples unmoved or moved the other
+way: class_grains -4212 (example +2878), class_values +2068, class_entities
++2841, class_dispatch +1507, class_prototypes +349, class_decorators -1466
+(example -410), reference_rows +208, reference_maps +317, tagged_fixpoint
++610 (example +681), doc_lib -22, documentation_as_data -50, types_nondet +5.
+Tried: per-predicate profiles of class_grains and class_entities on
+71c0296b9 and 558f40c9c (ai-tmp/ai_profile_twin.py, one process each) ->
+grains 7374035 to 7367208, entities 5154165 to 5147107, the movers
+metta_storage_term/4 (-733, -524) with clause/3, functor/3 and =@=/2 beside
+it; the entities total moves the other way from the lane's +2841, so the
+single-process profile is not the lane's quantity for these twins and the
+pins are the lane's readings.
+Found: the measure twin's declared divergence 8703f431e0c5 was already stale
+on 6944d06ce: the lane on 71c0296b9 with the declaration blanked observes
+98e5f4b7422d, the K5 tip the same. The settlement written in wt-battery-4
+for that commit sat in an envelope twin, and the assembly excluded the eight
+envelope twins as identical, so the committed tree read one finding the
+battery did not. Settled again on the tip with the same mechanism (the
+compiled call law, e59104ace).
+Decided: `--repin --rounds 3` on the 19 with 49478d67a's mechanism as the
+reason; the two divergences settled by `--divergence-reason` (the guarded
+twin's second rule, a callable guard, registers rule-strong's type and
+annotation rows; the measure twin's compiled bodies under the call law); the
+two overruns priced by their exact excess (types_nondet 1404 to 1409,
+guarded_rules 538 to 3385). Found: the guarded twin's declaration of 538
+was priced while the twin authored one compiled definition, and the
+paragraph pinned to 49478d67a still names the 2846 of authoring the lane
+granted then; the twin since mirrors the example's guard as the MeTTa
+equation and registers its Python guard as a grounded operation, which the
+lane does not price as authoring, so on the tip the ceiling is the band
+plus the declaration and the whole distance is the twin's own program (the
+twin's cost, 23621, did not move). The eight envelopes re-observed under
+'full-lane/294/workers=32' (`--observe --rounds 10` on 558f40c9c,
+wt-battery-5); the four spellings corrected.
+Measured: the lane on the assembled tree before the envelopes (wt-battery-6,
+ai-twins-K6-interim.log) -> 8 findings over 294, the eight protocol ones
+and nothing else.
+Measured: `--observe --rounds 10` on 558f40c9c under 'full-lane/294/workers=32'
+(wt-battery-5, ai-observe-558f40c9c.log; 294 rows, none failed):
+mutex_and_transaction 23345..23353, thread_lib 323990..354073, thread_linda
+151772..151801, channels_pools_and_the_machine 121854..122493,
+the_prolog_rung_under_lib_thread 152824..154546, git_import 30508..30508,
+reference_loading 369880..373517, measure 134844..134910; each envelope
+takes this protocol's own ten observations (ai-tmp/ai_envelopes.py --write),
+not pooled with the 293-wide ones. Two point budgets varied across the
+rounds, hyperpose_primes 23821..23826 about its pin 23824 and thin_forms
+40532..40533 about 40532, both inside the deterministic allowance and both
+declared as scheduling-sensitive in their own paragraphs; the 09-18
+observation on f06186a96 read the same spreads (23824..23826, 40530..40533).
+Tried: the lane on the assembled tree with the envelopes written
+(wt-battery-6, ai-twins-K6-final.log) -> 1 finding over 294: thread_lib
+read 355245 above its ten-round ceiling of 354073, whose ten samples
+scatter from 323990 to 354073 with no mode (the K4 observation's ten under
+the 293 protocol ran 323633..340336). The other seven envelope twins read
+inside their ranges in all three full-lane runs on this tree (the K5 tip,
+the assembled tree before and after its envelopes).
+Decided: every full-lane run under one protocol is an observation, so the
+envelopes pool (the 2026-09-08 rule: union of the extrema, sum of the
+counts) the two ten-round observations on this tree with the three lane
+runs, 23 observations each, thread_lib's ceiling the lane's 355245; the
+second observation runs on the assembled tree (wt-battery-5,
+ai-observe-c6448858b.log) rather than the 11-observation pooling alone,
+because a ceiling set by the last reading is exceeded by the next one about
+one run in twelve, and the 2026-09-08 goal is a gate rather than a coin
+toss.
+Measured: the second `--observe --rounds 10` on the assembled tree
+(wt-battery-5, ai-observe-c6448858b.log; 294 rows, none failed) read
+thread_lib 324156..356658, above the first observation's ceiling and the
+lane's 355245 again; pooled over the two observations and the three lane
+runs (ai-tmp/ai_envelopes_pool.py --write, 23 observations each):
+mutex_and_transaction 23345..23357, thread_lib 323990..356658, thread_linda
+151772..151801, channels_pools_and_the_machine 121850..122493,
+the_prolog_rung_under_lib_thread 152493..154546, git_import 30508..30508,
+reference_loading 369880..373517, measure 134811..134910.
+Tried: the lane on the tree with the 23-observation envelopes (wt-battery-6,
+ai-twins-K6-final-2.log) -> 2 findings: thread_lib 322447 BELOW its floor
+323990, reference_loading 373736 above its ceiling 373517. Pooled again
+(24 observations; thread_lib 322447..356658, reference_loading
+369880..373736).
+Found: an envelope of observed extrema is a coin with a known bias. For a
+counter whose readings are draws from one continuous distribution, the
+next reading falls outside the range of the previous n with probability
+2/(n+1) whatever the distribution (the order-statistics identity), so at
+24 observations a twin such as thread_lib strays one run in twelve or so,
+and with six envelope twins whose spreads are not a few discrete values
+(thread_lib 34211, reference_loading 3856, the_prolog_rung 2053,
+channels 643, measure 99, mutex 12) the lane reads red about one run in
+three; reaching one run in twenty for all six needs about 240 observations
+per twin (Wilks: [min, max] of n covers 95% of readings with 95%
+confidence at n = 93, and the six compound). Pooling cannot make the gate
+deterministic; it lowers the bias as 2/(n+1). The 2026-09-08 constraint
+(an envelope states what was observed, and the deterministic tolerance
+never widens it) is kept here; the decision whether a scheduling-sensitive
+counter should carry a tolerance interval, a modelled margin, or a counter
+that does not depend on the schedule is recorded as open for the user.
+Open: which of those three the lane adopts; until then a stray reading is
+pooled by ai-tmp/ai_envelopes_pool.py and the lane re-run.
+Measured: the lane on the 24-observation tree (wt-battery-6,
+ai-twins-K6-final-3.log) -> 0 findings over 294 twinned examples.
