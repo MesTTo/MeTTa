@@ -1118,9 +1118,9 @@ with_definition_batch(Goal) :-
     %recompile_function_in_module/2 at 400 calls against 122, and
     %class_decorators' twin by 38% [measured 2026-09-18: the twins lane on
     %89bd5dc41 and on the merge f97c4b0a3, and the profiler over the
-    %class_values twin on both; commit=WORKTREE]
+    %class_values twin on both; commit=2da1155e3ec9abc468243e51a70859fe9f22676b]
     %[tested: filereader_source_reload:a_definition_batch_rebuilds_a_dependent_once_at_its_end;
-    %commit=WORKTREE].
+    %commit=2da1155e3ec9abc468243e51a70859fe9f22676b].
     %The context is a trailed scope, so the batch's rows below are the only
     %state a cleanup has to clear.
     source_publication_load_context(LoadId, LoadId, Context),
