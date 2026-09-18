@@ -30,3 +30,49 @@ child (`_WARMED`), so no measured child compiles or checks a stale artifact.
 Measured: touch then the cache-age test, three runs, all 58017 == 58017;
 `test_a_measurement_warms_stale_artifacts_once_per_process` pins one warm-up
 before the first launch and none after; qlf-freshness and its self-test green.
+
+## 2026-09-18, the classes branch re-pinned on its tip
+Goal: the lane green on f06186a96 for a reason, every budget moved by a named
+mechanism, no band widened.
+Tried: the lane on 8c35e7455 (the full gate, wt-battery-2) -> 363 findings
+over 292 twins: 242 point budgets above, 37 below, 64 past the band ceiling,
+11 stored-content divergences, 8 envelopes naming the stale 277-example
+protocol. On 9f32fe6a6, before this unit's codec commit, 361 with the same
+shape, so the drift is the branch's since the 09-10 pins.
+Measured: a per-commit sweep over five twins (ai-tmp/ai-attribution-sweep.log)
+and the ledger's 27-point first-parent ladder over three
+(ai-tmp/ai-twin-ladder-1.log) place the moves. G (fd0af38f7) reads a call
+site's written keyword tail at translation, about six inferences per site,
+0.6% of a small program, twins and examples alike (roman example +1627 = 278
+sites). The branch's own move, 07-and_or's twin 1602 -> 2523 with its example
+unmoved and 09-streamops 5964 -> 9402, sits entirely at 5416e741d, whose
+dependency index walked every cached translation's generated code at every
+miss (docs/journal/2026-09-14-runnable-artifact-dependencies.md, its
+2026-09-18 section). H, I and J move no example; J adds one catalog row the
+class twins scan.
+Decided: fix both at the cause before pinning anything on them: 7cc8fb863
+reads the tail once per site, a9e2c06d3 writes the index at the emitting
+site. On the tip 07-and_or reads 1530 (0.76 of its example), 09-streamops
+6064 (1.13), 01-comments 1362.
+Decided: `--repin --rounds 3` on f06186a96 with the landings as the reason,
+the 09-11 precedent, and `--divergence-reason` naming the call law for the
+stored-content rows; `--observe --rounds 10` on the same tree for the
+envelopes under the 293-example protocol; the residual band overruns priced
+per the 09-10 procedure, the exact excess with the floor probe's control in
+each paragraph, and obsolete declarations dropped (ai-tmp/ai_overrun_paragraphs.py
+writes both from the lane's own findings).
+Measured: the lane on f06186a96 after the translator repairs read 316
+findings (181 above, 100 below, 9 band, 11 stored, 8 envelopes, 7 obsolete
+overruns) against 363 on 8c35e7455; `--repin --rounds 3` re-pinned 282
+point budgets and settled 11 divergences; the eight envelopes re-observed
+under 'full-lane/293/workers=32' (ten rounds, wt-battery-6); the lane on
+that tree read 16: 7 band overruns, 7 obsolete declarations, one divergence
+on an envelope twin the point re-pin skips. The 7 were priced by their
+exact excess with the floor probe's control in each paragraph and the 7
+dropped (ai-tmp/ai_overrun_paragraphs.py). Found: the lane prints its
+ceiling rounded, and an excess computed from the printed number left two
+twins one inference over; the generator now takes the exact band plus the
+authoring allowance and declares what the twin costs above it. Found: the
+reference-loading twin read 369745 under its ten-round floor of 370077 on
+the next run; the reading joins the envelope under the same protocol
+(369745..373706 over 11), the pooling the 2026-09-08 entry decided.
