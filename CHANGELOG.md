@@ -4227,6 +4227,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   wrapper adds 5.6 nanoseconds an item, 3.29% of one guarded pull.
   `extensions/python/benchmarks/py_iter_guard.py` is the measurement.
 
+### Fixed
+
+- A definition batch, the door under every Python transaction body and every
+  multi-atom `add`, files the dependent recompiles its definitions provoke
+  under its own load and rebuilds each dependent once at its end, as a file
+  load does. Since the trunk merge the batch had entered the source
+  publication context as an owner pin, which the invalidation action skips,
+  so N definitions in one batch rebuilt each shared dependent N times:
+  the class_values twin cost 5,415,793 inferences on the merge against
+  4,640,297 before it and 4,655,364 now, and class_decorators' twin 38%
+  more. `filereader_source_reload:a_definition_batch_rebuilds_a_dependent_once_at_its_end`
+  counts the rebuilds.
+
 ## [0.8.0] - 2026-09-06
 
 ### Added

@@ -593,6 +593,43 @@ test(recompiled_metadata_keeps_the_equations_source_owner,
                  assertion(filereader:source_load_assertion(Load, artifact, Ref))) ),
         delete_file(File)).
 
+%A definition batch files the recompiles its definitions provoke under the
+%batch's own load, as a file load files them under its, and drains them once
+%at its end. Pushed as an owner pin the batch was skipped by the invalidation
+%action, which filed every repair as immediate, so N definitions in one batch
+%rebuilt a shared dependent N times: class_values' twin rose from 4,640,297
+%to 5,415,793 inferences on the merge [measured 2026-09-18: the twins lane on
+%89bd5dc41 and on f97c4b0a3; the profiler counted recompile_function_in_module/2
+%at 400 calls against 122].
+test(a_definition_batch_rebuilds_a_dependent_once_at_its_end,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    space_module(Space, Module),
+    user:metta_add_atom(Space, [=, ['plunit-batch-left'], 1], true),
+    user:metta_add_atom(Space, [=, ['plunit-batch-right'], 2], true),
+    user:metta_add_atom(Space, [=, ['plunit-batch-sum'],
+                                [+, ['plunit-batch-left'], ['plunit-batch-right']]], true),
+    findall(R, evalc(['plunit-batch-sum'], Space, R), Before),
+    assertion(Before == [3]),
+    flag(plunit_batch_repairs, _, 0),
+    setup_call_cleanup(
+        wrap_predicate(filereader:recompile_function_in_module_stable(Owner, Name),
+                       plunit_batch_repairs, Original,
+                       ( ( Owner == Module, Name == 'plunit-batch-sum'
+                         -> flag(plunit_batch_repairs, N, N+1) ; true ),
+                         call(Original) )),
+        ( filereader:with_definition_batch(
+              ( user:metta_add_atom(Space, [=, ['plunit-batch-left'], 10], true),
+                user:metta_add_atom(Space, [=, ['plunit-batch-right'], 20], true),
+                flag(plunit_batch_repairs, Inside, Inside),
+                assertion(Inside == 0) )),
+          flag(plunit_batch_repairs, Count, Count),
+          assertion(Count == 1) ),
+        unwrap_predicate(filereader:recompile_function_in_module_stable(_, _),
+                         plunit_batch_repairs)),
+    findall(R, evalc(['plunit-batch-sum'], Space, R), After0),
+    msort(After0, After),
+    assertion(After == [3, 12, 21, 30]).
+
 :- end_tests(filereader_source_reload).
 
 :- begin_tests(filereader_global_function_scope).

@@ -3204,3 +3204,39 @@ and the four that read the trunk's occurrence-transaction cell go, with the
 control.pl guarantee that cited one of them. On the preview so built:
 the engine loads clean, the class-entities twin runs, limits 5/5,
 receipt_frames 4/4, prolog-static ok.
+
+## 2026-09-18: the merge's batch pin, found by the twins lane
+Found: the twins lane on the merged tip (wt-battery-3, ai-twins-merged.log)
+read 279 of 294 examples cheaper than on 89bd5dc41 (median -0.78%) and 268
+of 289 twins cheaper (median -1.21%), with five Python twins costlier by 17%
+to 54%: class_decorators 13,950,837 -> 19,232,576, class_dispatch
+10,759,060 -> 12,683,783, class_prototypes 8,606,342 -> 10,115,468,
+class_values 4,640,297 -> 5,415,793, types_nondet 16,237 -> 25,023. SWI's
+profiler over the class_values twin on both trees, diffed by caller->callee
+edge (ai-tmp/ai_profile_dump.pl profile_edges/1, ai_profile_edges_diff.py):
+translate_tracked_clause/3 at 480 calls against 161,
+recompile_function_in_module/2 at 400 against 122,
+repair_support_invalidations/1 draining a pending set 51 times against 5,
+translate_runnable_expr/3 unchanged at 123. The merge's
+with_definition_batch/1 entered the publication context through
+with_owning_source_load/2, an owner PIN; support_invalidation_action/1
+skips pins when it keys a pending repair, so every repair raised inside a
+batch was filed immediate and drained at the next repair call. N
+definitions in one batch rebuilt each shared dependent N times, where the
+branch's asserted running load had them filed under the batch and drained
+once by run_source_repairs/1 at its end. The class twins are the Python
+seat's transactions and multi-atom adds, the two doors of the batch.
+Decided: the batch pushes its load as the running load and stored owner,
+source_publication_load_context(LoadId, LoadId, Context), as
+with_source_load/3 pushes a file's. Tested by
+filereader_source_reload:a_definition_batch_rebuilds_a_dependent_once_at_its_end:
+two rebuilds inside the batch before the fix, one at its end after.
+Measured (profiler, m.stats inferences; 89bd5dc41 / merge / fixed):
+class_values 4,641,000 / 5,415,831 / 4,655,364; class_decorators
+13,954,646 / 19,232,576 (lane) / 13,878,634; types_nondet 16,237 / 25,023
+(lane) / 15,956. The +0.3% residual on class_values is the trunk's derived
+context readers, b_getval/2 at 23,498 calls against 479.
+Rejected: re-pinning the class twins at the merged cost with a reason naming
+"the seat's paths the trunk changed", because the profile did not support
+that mechanism; the observe and ledger runs taken on the unfixed tip are
+discarded, every measurement is re-taken on the fixed tree.

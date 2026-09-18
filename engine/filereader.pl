@@ -1108,13 +1108,25 @@ retire_source_program(Id) :-
 with_definition_batch(Goal) :-
     gensym(source_load_, LoadId),
     gensym(source_program_, ProgramId),
-    % The batch owns its definitions the way a source load owns its clauses:
-    % through the publication context, where active_source_load/1 reads the
-    % owner pin and the recorders unwrap it. The context is a trailed scope,
-    % so the batch's rows below are the only state a cleanup has to clear.
+    %The batch's load is the RUNNING load of the publication context, pushed
+    %as with_source_load/3 pushes a file's: the invalidation action files each
+    %dependent recompile under the running load and run_source_repairs/1
+    %drains that queue once at the batch's end. Pushed as an owner PIN, the
+    %action skipped it and filed every repair as immediate, so a batch of N
+    %definitions rebuilt their dependents after each one: class_values' twin
+    %rose from 4,640,297 to 5,415,793 inferences with
+    %recompile_function_in_module/2 at 400 calls against 122, and
+    %class_decorators' twin by 38% [measured 2026-09-18: the twins lane on
+    %89bd5dc41 and on the merge f97c4b0a3, and the profiler over the
+    %class_values twin on both; commit=WORKTREE]
+    %[tested: filereader_source_reload:a_definition_batch_rebuilds_a_dependent_once_at_its_end;
+    %commit=WORKTREE].
+    %The context is a trailed scope, so the batch's rows below are the only
+    %state a cleanup has to clear.
+    source_publication_load_context(LoadId, LoadId, Context),
     setup_call_cleanup(
         true,
-        with_owning_source_load(LoadId,
+        with_source_publication_context(Context,
             ( with_source_definition_order(ProgramId, [], Goal),
               run_source_repairs(LoadId) )),
         ( retractall(source_load_repair(LoadId, _)),
