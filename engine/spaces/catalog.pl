@@ -2464,10 +2464,12 @@ metta_catalog_preset([vocabulary, 'space-capability', file, process, network]).
 %are both multifile: a seat or a library declares a hook of its own and the
 %word that gates it. extensions/node/bridge.pl does exactly that today with
 %bounded, pushdown and transactional, which it registers through the
-%(vocabulary-member ...) door at load.
+%(vocabulary-member ...) door at load. savepoint declares a provider that can
+%roll a nested transaction back to the point it was entered.
 metta_catalog_preset([vocabulary, 'provider-capability',
                       match, enumerate, add, 'add-many', remove, clear,
-                      subscribe, plan, rules, tokens, 'add-token', 'remove-token']).
+                      subscribe, plan, rules, tokens, 'add-token', 'remove-token',
+                      savepoint]).
 %How a callable receives its arguments: `atoms` hands the syntax through
 %untouched, `values` decodes it to the host's own data first, and the absence
 %of an (arguments ...) row means values. It is a catalog vocabulary rather

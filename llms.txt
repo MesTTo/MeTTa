@@ -1686,7 +1686,7 @@ Return the first row, or the caller's explicit default.
 one(*, default: Any=_MISSING) -> Row | Any
 ```
 
-THE row, when the query is asserted to have exactly one answer;
+Return the sole row, using an explicit default only for absence.
 
 `rows:raise-for-errors`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
 
@@ -1730,7 +1730,7 @@ Rebuild constructor atoms through the two-way translator.
 into(cls: type) -> list
 ```
 
-Each row as one ``cls``, matched by field name.
+Each row as one ``cls``, matched to named constructor inputs.
 
 `rows:to-dicts`: `query`, returns `list`, effect `pureStructural`, determinism `det`; tiers `sync`.
 
@@ -2097,7 +2097,7 @@ Enter the receiver lifetime.
 `remote-cursor:__exit__`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `remote`.
 
 ```python
-__exit__(exc_type, exc, tb) -> None
+__exit__(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> None
 ```
 
 Stop the server's cursor without letting the stop displace the
@@ -4219,8 +4219,8 @@ and `refusal(capability, **request)` to give a declined request its own reason.
 For example, an add policy reads `request["atom"]`; it runs before the write,
 including before any bulk write.
 Capabilities are declared, not guessed: `tokens`, `match`, `enumerate`, `add`, `add-many`,
-`remove`, `clear`, `subscribe`, `plan`, `rules`, `add-token`, `remove-token`, and an unsupported operation
-refuses loudly rather than degrading. They are the engine's own
+`remove`, `clear`, `subscribe`, `plan`, `rules`, `add-token`, `remove-token`, `savepoint`, and an
+unsupported operation refuses loudly rather than degrading. They are the engine's own
 `(vocabulary provider-capability ...)` row, which `metta.foreign.CAPABILITIES`
 reads rather than restates, and the row is OPEN: a seat or library that
 declares a seam hook of its own registers the word gating it with

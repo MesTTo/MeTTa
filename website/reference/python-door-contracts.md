@@ -2569,9 +2569,9 @@ Declared local refusals:
 
 Implementation failures propagate, including failures from callees and providers.
 
-> THE row, when the query is asserted to have exactly one answer;
-> none or several raise naming the count, so a lookup that silently
-> picked an arbitrary row cannot hide.
+> Return the sole row, using an explicit default only for absence.
+>
+> Several rows always raise with their count.
 
 Evidence: `extensions/python/tests/repository/test_door_rows.py::test_result_door_projections_preserve_fields_and_host_conversions`.
 
@@ -2749,15 +2749,13 @@ Guarantees result type `(host-type metta._spaces.results list)` with the answer 
 
 Implementation failures propagate, including failures from callees and providers.
 
-> Each row as one ``cls``, matched by field name.
+> Each row as one ``cls``, matched to named constructor inputs.
 >
-> ``match(..., into=cls)`` is sugar for this and says so: the
-> conversion was only ever reachable through that keyword, so a
-> prepared query's solve(), or any other Rows, could not ask for it
-> even though rows_into() never cared where the rows came from
-> . build(cls) is the neighbouring method and a
-> different question: it rebuilds ONE column of complete constructor
-> expressions, where this maps every column onto a field.
+> Dataclasses, NamedTuples and registered classes use their constructor
+> defaults for omitted inputs. TypedDicts preserve omitted optional
+> keys. Extra query columns are ignored. ``match(..., into=cls)`` uses
+> this conversion too. A single column of complete constructor
+> expressions rebuilds through ``build(cls)``.
 
 Evidence: `extensions/python/tests/repository/test_door_rows.py::test_result_door_projections_preserve_fields_and_host_conversions`.
 
@@ -7505,7 +7503,7 @@ Evidence: `extensions/python/tests/repository/test_door_rows.py::test_remote_gen
 ## remote-cursor:__exit__
 
 ```python
-__exit__(exc_type, exc, tb) -> None
+__exit__(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> None
 ```
 
 Kind: `lifecycle`. Answer: `None`. Effect: `oracleIO`. Determinism: `det`.
@@ -7518,9 +7516,9 @@ Assumes receiver state `any`.
 
 | argument | MeTTa type | default | delivery | parameter kind |
 |---|---|---|---|---|
-| `exc_type` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
-| `exc` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
-| `tb` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
+| `exc_type` | `(host-union ((host-apply (host-type metta.remote._client type) ((host-type metta.remote._client BaseException))) NoneType))` | `required` | `values` | `positional_or_keyword` |
+| `exc` | `(host-union ((host-type metta.remote._client BaseException) NoneType))` | `required` | `values` | `positional_or_keyword` |
+| `tb` | `(host-union ((host-type metta.remote._client TracebackType) NoneType))` | `required` | `values` | `positional_or_keyword` |
 
 Guarantees result type `NoneType` with the answer shape, effect, and determinism above.
 

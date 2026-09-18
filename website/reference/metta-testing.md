@@ -697,6 +697,20 @@ def test_a_write_round_trip_leaves_the_provider_as_it_was(self, provider, exerci
 > An atom the provider already holds is the one thing every backend is
 > certainly able to accept, so the round trip uses that.
 
+### `SpaceComplianceSuite.test_a_nested_transaction_restores_its_provider_savepoint`
+
+```python
+def test_a_nested_transaction_restores_its_provider_savepoint(
+    self,
+    provider,
+    exercised,
+    space,
+    stored,
+):
+```
+
+> A caught nested failure restores its entry bag before outer commit.
+
 ### `SpaceComplianceSuite.test_a_batch_add_stores_every_atom`
 
 ```python

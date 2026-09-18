@@ -48,17 +48,17 @@ def add(space: SpaceLike, head: Any, data: Any) -> int:
 >
 > space may be a context or a space.
 >
-> The source may offer rows its own way (``iter_rows()`` for polars,
-> ``itertuples()`` for pandas, a mapping of columns, any iterable of rows)
-> or speak the Arrow PyCapsule Interface, which is how a DuckDB relation, a
-> pyarrow Table, a Parquet reader or an Ibis expression hands over rows
-> without a row-at-a-time Python door. A source with both keeps its own:
-> the two produce identical atoms, and the row door is the faster of them
-> .
+> A registered frame provider may declare its row extraction. Otherwise
+> the source is a mapping of columns, an Arrow PyCapsule stream, or an
+> iterable of rows. Mapping records keep one key order, including an empty
+> first record. Arrow batches stream through unchanged; other rows use the
+> existing chunk capacity.
 >
-> An Arrow source is written one record batch at a time, so a reader larger
-> than memory loads, and the writes are one transaction each; wrap the call
-> in ``m.transaction(...)`` to make the whole load one.
+> One transaction covers reading, conversion, writes and input release.
+> A foreign store must declare transactional writes and implement their
+> protocol. Inside an existing transaction it must also declare savepoint
+> support; until the engine and provider implement that protocol, ingest
+> at top level or into a native store. Refusal precedes input acquisition.
 
 ## `Executes`
 
@@ -251,7 +251,7 @@ No docstring is defined.
 ### `TableBridge.__arrow_c_schema__`
 
 ```python
-def __arrow_c_schema__(self):
+def __arrow_c_schema__(self) -> object:
 ```
 
 > The declared columns as an "arrow_schema" PyCapsule.
@@ -259,7 +259,7 @@ def __arrow_c_schema__(self):
 ### `TableBridge.__arrow_c_stream__`
 
 ```python
-def __arrow_c_stream__(self, requested_schema=None):
+def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
 ```
 
 > This bridge's rows as an "arrow_array_stream" PyCapsule.

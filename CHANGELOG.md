@@ -7,6 +7,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The Node seat's provider-capability roster is the engine's own vocabulary row
+  plus the three words its bridge registers, rather than a second list written
+  out beside it; the written list had gone stale the moment the row gained
+  `savepoint`.
+
+- A frame library's rows reach `tables.add` through the reader it declares on
+  the seam's frame point, and the refusal for an unreadable source names that
+  declaration, so a library is never read by the spelling of its own method.
+
+- The Python seat's registry points, algebra presets, answer indexing, remote
+  wire envelopes and table projections carry declared types, so a downstream
+  checker reads `seam.frame` as a Point, `answers[0]` as the value kind and a
+  gateway reply as `dict[str, object]` instead of `Any`; the package's measured
+  type completeness rises from 70.99% to 73.82%.
+
+- HTTP serving accepts a context for GET and POST authorization by naming the home space already resolved by its gateway.
+
 ### Added
 
 - Algebras that converge, scale and are exact. A tagged program with a cycle
@@ -1183,6 +1202,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   immutable `OwnedRecord` descriptor (`_declare/owned_records.py`), and the thread-local
   pending proxy registry, its validator and its error renderer in `_binding/lifecycle.pl`
   are gone; the outer commit validates one value and one live owner per key instead.
+- Evaluation answers retain each value and caller-binding row in one immutable
+  record. Replay, slicing and asynchronous projections share that record,
+  including the cached prefix retained after closing a view.
 
 - Engine call-graph checks attribute multifile calls to each clause's source
   file. Handler implementations no longer create false cross-module reaches
@@ -1567,6 +1589,46 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `profile/2` and a failing GLX context kills the process, which had turned prolog-static,
   host-workarounds and the Python examples lane red on one box while the tree was unchanged.
 
+- Rows.one recommends the executable `first(default=None)` expression when
+  the result has no row or several rows.
+
+- Answers remains equal to equivalent sequences and is now unhashable, so
+  equality with strings, bytes and ranges cannot contradict dictionary lookup.
+
+- Remote removal delegates Symbols, Grounded values and expressions to the
+  store, preserving local absence and duplicate-occurrence behavior over HTTP.
+
+- Table ingestion owns one transaction across input reads, conversion, writes
+  and iterator cleanup. Frame providers declare their native row extraction.
+  Unsupported foreign stores refuse before input acquisition; nested foreign
+  ingestion requires the reserved `savepoint` provider capability.
+- Provider compliance checks the `savepoint` declaration against a caught
+  nested failure and a successful outer commit. Outer-only transactions fail
+  that law; undeclared savepoints receive the suite's explicit skip.
+
+- Answer views, asynchronous evaluation views, remote cursors, gateways and
+  servers preserve body and cleanup failures together on context exit,
+  including cancellation. A single failure keeps its original identity.
+
+- Failed Python seam publication restores registry preimages and completed
+  observers. Rollback attempts every action and retains failed actions for retry.
+  Transaction journals retain each receipt, including retries after caught failures.
+
+- Python row conversion uses constructor parameters and defaults for dataclasses,
+  named tuples and registered classes, and preserves absent optional TypedDict keys.
+- Python seam registrations expose immutable metadata and an owned read-only
+  field mapping, so caller mutation cannot bypass registry publication.
+- Python extension discovery refuses competing providers with the same entry-point
+  name before loading any provider, and reports both distribution origins.
+
+- Lazy Answers accepts `__index__` objects for positions and slice bounds,
+  matching Python sequences while retaining bounded lazy reads.
+- Registration rollback attempts both the external-store and seam-table
+  inverses and retains simultaneous failures in an exception group.
+- Withdrawing a seam registration now has an insertion inverse, preserving
+  every surviving row and the original order when registration is rolled back.
+- Registration listeners retain exact point and registrant identities, including
+  quotes and names containing ` registration `.
 - `TaggedAnswer.under()` no longer raises `algebra_operation_error` for
   `tropical` and `budget`: the reinterpretation fold now starts from the first
   alternative, as direct evaluation does, instead of handing the carrier's

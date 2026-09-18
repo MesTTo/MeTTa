@@ -37,14 +37,14 @@ def __init_subclass__(cls, **kwargs: Any) -> None:
 ```python
 def __init__(
     self,
-    source: Iterable[T | _AnswerItem],
+    source: Iterable[T | _AnswerItem[T]],
     *,
     columns: Iterable[str] = (),
     space: str | None = None,
     target: object = None,
     count: Callable[..., int | None] | None = None,
     query: _QueryContext | None = None,
-    bound_source: Callable[[int, Iterable[T | _AnswerItem]], Iterable[T | _AnswerItem] | None] | None = None,
+    bound_source: Callable[[int, Iterable[_AnswerItem[T]]], Iterable[_AnswerItem[T]] | None] | None = None,
 ) -> None:
 ```
 
@@ -101,7 +101,7 @@ def index(self, value: T, start: int = 0, stop: int | None = None) -> int:
 ### `Answers.__getitem__`
 
 ```python
-def __getitem__(self, key: int | slice | Variable | str) -> T | Answers[T] | Answers[Any]:
+def __getitem__(self, key: SupportsIndex | slice | Variable | str) -> T | Answers[T] | Answers[Any]:
 ```
 
 No docstring is defined.
@@ -328,14 +328,6 @@ def __eq__(self, other: object) -> bool:
 
 No docstring is defined.
 
-### `Answers.__hash__`
-
-```python
-def __hash__(self) -> int:
-```
-
-No docstring is defined.
-
 ### `Answers.__repr__`
 
 ```python
@@ -400,7 +392,12 @@ No docstring is defined.
 ### `Answers.__exit__`
 
 ```python
-def __exit__(self, *_exception: object) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc: BaseException | None,
+    tb: types.TracebackType | None,
+) -> None:
 ```
 
 No docstring is defined.
@@ -713,9 +710,9 @@ def first(self, *, default: Any = _MISSING) -> Row | Any:
 def one(self, *, default: Any = _MISSING) -> Row | Any:
 ```
 
-> THE row, when the query is asserted to have exactly one answer;
-> none or several raise naming the count, so a lookup that silently
-> picked an arbitrary row cannot hide.
+> Return the sole row, using an explicit default only for absence.
+>
+> Several rows always raise with their count.
 
 ### `Rows.raise_for_errors`
 
@@ -790,15 +787,13 @@ def build(self, column: str | type, cls: type | None = None) -> list:
 def into(self, cls: type) -> list:
 ```
 
-> Each row as one ``cls``, matched by field name.
+> Each row as one ``cls``, matched to named constructor inputs.
 >
-> ``match(..., into=cls)`` is sugar for this and says so: the
-> conversion was only ever reachable through that keyword, so a
-> prepared query's solve(), or any other Rows, could not ask for it
-> even though rows_into() never cared where the rows came from
-> . build(cls) is the neighbouring method and a
-> different question: it rebuilds ONE column of complete constructor
-> expressions, where this maps every column onto a field.
+> Dataclasses, NamedTuples and registered classes use their constructor
+> defaults for omitted inputs. TypedDicts preserve omitted optional
+> keys. Extra query columns are ignored. ``match(..., into=cls)`` uses
+> this conversion too. A single column of complete constructor
+> expressions rebuilds through ``build(cls)``.
 
 ### `Rows.to_dicts`
 
