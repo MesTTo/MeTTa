@@ -224,3 +224,48 @@ ai-tmp/ai_envelopes.py, each carrying a RE-OBSERVED paragraph, so the
 point twins and the envelope twins state one tree; the assembly
 (ai-tmp/ai_assemble_twins_merged.sh) applies the battery's diff, writes
 the envelopes, then commits and pins.
+Found: the lane on the re-pinned merged tree (wt-battery-3,
+ai-twins-lanes-43800c685.log) -> 17 findings, 15 of them twins past their
+example's band by 150 to 250 inferences per compiled definition (ifsimple
++248, if2 +389, tabling_fib +230, translatorrule_fib +771 over 4,
+callquoteevalreduce2 +1381 over 6) and 2 stale OVERRUN declarations
+(alpha_unique_atom, segments). The authoring probe on the merged tree reads
+7, 1954, 3581, 5224, 6879 for 0..4 definitions, the fit 305 once plus 1642
+each against 303 plus 1362 on the branch: the define door is 642 past the
+source door end to end (87 before), the trunk's cost per recorded write
+times the define door's eight writes per definition.
+Rejected: publishing a definition's writes under one definition batch
+(metta_py_batch/2, the transaction's batch without the rollback), because
+the probe read 396 once plus 1606 each with it, +60 per single-definition
+install: the batch's own cost exceeds what five writes save. Revisit if the
+batch's fixed cost (two gensyms, the context push, the drain, five cleanup
+retractalls) drops below the per-write publication cost times the writes.
+Decided: DEFINITION_WARMUP 303 -> 305 and DEFINITION_COST 1362 -> 1642,
+the documented re-derivation, and the residual overruns priced by
+ai-tmp/ai_overrun_paragraphs.py from the lane's next reading.
+Found: the lane on the remedied tree with the edged counter doors
+(wt-battery-3, ai-twins-lane-edged.log) -> 27 findings: 269 of 294 twins
+read exactly their pins (the doors' edge holds), 17 point twins moved by
+the remedy's library changes in programs that race, time out or join
+(class_dispatch -4,099, class_decorators +2,250, class_prototypes +2,076,
+class_entities +273, class_values +226, class_grains +136, reference_rows
++185, restricted_spaces +116, tagged_fixpoint +60, reference_maps +35,
+reflect_lib +30, pln_roman, pln_formulas and pln_derivation_control +24,
+guarded_rules +18, tabling_equation_change -10, tabling_space_write -5),
+three envelope twins outside their ranges (the_prolog_rung_under_lib_thread
+-10,632, thread_linda +178, mutex_and_transaction +5), four parity residuals
+after the allowance's re-derivation (types_nondet +931, specializecyclic
++561, guarded_rules +129, if2 +107) and three OVERRUN declarations now
+obsolete (alpha_unique_atom, segments, translatorrule_fib).
+Decided: the 17 point twins re-pinned with the remedy as their mechanism
+(`--repin --rounds 3`, ai-repin-remedy.log); the eight envelope twins
+observed ten rounds on the remedied tree (ai-observe-remedy.log) and each
+that reads one integer converted to a point by ai-tmp/ai_point_envelopes.py;
+the parity residuals priced by ai-tmp/ai_overrun_paragraphs.py with the
+trunk's per-write cost as the mechanism and the obsolete declarations
+dropped.
+Measured: the ten-round observation on the remedied tree (wt-battery-3,
+ai-observe-remedy.log) pointed git_import (30449) and re-observed the other
+seven envelopes under the remedy as their mechanism; the ranges and what
+remains schedule-bound are in
+docs/journal/2026-09-18-schedule-independent-counters.md (2026-09-19).

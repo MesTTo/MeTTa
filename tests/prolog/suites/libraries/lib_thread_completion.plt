@@ -49,15 +49,15 @@ completion_worker(Mode, Space, Done, Ready, Release, Events) :-
           assertz(lib_thread:metta_future(Space, Worker, Done)) ),
         ( thread_get_message(Ready, published, [timeout(10)]),
           setup_call_cleanup(
-              wrap_predicate(lib_thread:metta_thread_join_settled(Thread, _),
+              wrap_predicate(lib_thread:metta_thread_join(Thread, _),
                   '$completion_join', Wrapped,
                   plunit_lib_thread_completion:record_join(
                       Thread, Worker, Events, Wrapped)),
               completion_awaiter(Mode, Space, Release, Events),
-              unwrap_predicate(lib_thread:metta_thread_join_settled/2,
+              unwrap_predicate(lib_thread:metta_thread_join/2,
                                '$completion_join')) ),
         ( thread_send_message(Release, go),
-          catch(lib_thread:metta_thread_join_settled(Worker, _), _, true),
+          catch(lib_thread:metta_thread_join(Worker, _), _, true),
           retractall(lib_thread:metta_future(Space, _, _)),
           retractall(lib_thread:metta_future_result(Space, _)) )).
 
@@ -185,16 +185,16 @@ pair_worker(ModeOne, ModeTwo, Interrupt, Space, Done, Ready, Release,
         ( assertion(blob(Worker, thread)),
           thread_get_message(Ready, exiting),
           setup_call_cleanup(
-              wrap_predicate(lib_thread:metta_thread_join_settled(Thread, _),
+              wrap_predicate(lib_thread:metta_thread_join(Thread, _),
                   '$completion_pair_join', Wrapped,
                   plunit_lib_thread_completion:observe_contended_join(
                       Thread, Worker, Events, Recovery, Wrapped)),
               pair_waiters(ModeOne, ModeTwo, Interrupt, Space, Events,
                            Release, Recovery),
-              unwrap_predicate(lib_thread:metta_thread_join_settled/2,
+              unwrap_predicate(lib_thread:metta_thread_join/2,
                                '$completion_pair_join')) ),
         ( release_pair(Release, Recovery),
-          catch(lib_thread:metta_thread_join_settled(Worker, _), _, true),
+          catch(lib_thread:metta_thread_join(Worker, _), _, true),
           retractall(lib_thread:metta_future(Space, _, _)),
           retractall(lib_thread:metta_future_result(Space, _)) )).
 
@@ -233,16 +233,21 @@ test(an_interrupted_joiner_leaves_the_join_for_the_other_awaiter,
     Interrupt =.. [Phase, Ball],
     concurrent_awaiters(ordinary, scheduled, Interrupt).
 
-test(an_interruption_during_the_status_read_is_not_settlement,
+%The join blocks in the host and a signal can interrupt it (a time limit,
+%a cancel); the interruption is the awaiter's outcome, never settlement.
+%Until 2026-09-18 the ball was planted in the poll's status read that
+%preceded the join; the poll is gone with the patched host, so it is planted
+%in the join itself.
+test(an_interruption_during_the_join_is_not_settlement,
      [forall(member(Ball, [time_limit_exceeded, completion_join_interrupted]))]) :-
     setup_call_cleanup(
-        wrap_predicate(system:thread_property(Thread, _),
-            '$completion_status_error', Wrapped,
-            ( Thread == '$completion_status_probe' -> throw(Ball)
+        wrap_predicate(system:thread_join(Thread, _),
+            '$completion_join_error', Wrapped,
+            ( Thread == '$completion_join_probe' -> throw(Ball)
             ; call(Wrapped) )),
-        ( catch(lib_thread:future_join_('$completion_status_probe'),
+        ( catch(lib_thread:future_join_('$completion_join_probe'),
                 Caught, true),
           assertion(Caught == Ball) ),
-        unwrap_predicate(system:thread_property/2, '$completion_status_error')).
+        unwrap_predicate(system:thread_join/2, '$completion_join_error')).
 
 :- end_tests(lib_thread_completion).

@@ -420,6 +420,41 @@ Lifted when: SWI-Prolog as shipped delivers `frame_finished` for a discarded
   prints absent; the patch and the entry go together then.
 Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-09-the-binding-collapse.md,
   transfer bound watches before native query destruction.
+## swi-thread-join-detach-window
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, and upstream master at
+  73a6750 (fetched 2026-09-18); `detach_engine` in src/pl-thread.c zeroes
+  the detached engine's `PL_thread_info_t.tid` and `PL_set_engine` detaches
+  the CALLING thread's own engine for the duration of `engine_create/3` and
+  `engine_destroy/1`, while `thread_join/2` reads `info->tid` once, with no
+  `has_tid` test, and hands it to `pthread_timedjoin_np`. This tree runs on
+  10.1.14 built with the patch below.
+Defect: joining a thread that is inside `engine_create/3` or
+  `engine_destroy/1`, which any worker evaluating MeTTa can be since a merged
+  match opens one engine per space, calls `pthread_timedjoin_np(0, ...)` and
+  glibc dereferences a null `struct pthread`: SIGSEGV in
+  `__pthread_clockjoin_ex`, exit 139. Until 2026-09-18 lib_thread polled the
+  joinee's status with a sleep backoff before every join
+  (docs/journal/2026-09-06-materialization-segv.md), about ten inferences a
+  wakeup, which was part of every threaded twin's spread.
+Reproduction: tests/checks/host_workarounds/swi-thread-join-detach-window.sh,
+  the destroy mode of tests/prolog/probes/engine_join_window.pl frozen: a
+  worker parked inside `engine_destroy/1` by a message queue and joined from
+  the main thread with plain `thread_join/2`. Exit 139 answers `present`;
+  exit 0, the join returning `true` after a detached sleeper releases the
+  worker, answers `absent`; every other result is a broken reproduction.
+Patch: tests/checks/host_workarounds/swi-thread-join-detach-window.patch,
+  against swipl-devel V10.1.14 src/pl-thread.c: `detach_engine` clears the
+  thread id only of an interactor (`is_engine`), which has no OS thread while
+  detached; a real thread keeps running on the same pthread while its own
+  engine is detached, so its identity survives and `thread_join/2` always
+  joins the right thread. `has_tid` is cleared as before, so the alert and
+  signal paths that test it are unchanged.
+Lifted when: SWI-Prolog as shipped joins a thread inside its engine-switch
+  window, so the reproduction prints absent; the patch and the entry go
+  together then, and lib_thread's join door stays a plain `thread_join/2`.
+Record: docs/journal/2026-09-18-schedule-independent-counters.md;
+  docs/journal/2026-09-06-materialization-segv.md, closed at the joiner;
+  docs/journal/2026-09-06-swi-defects-to-report-upstream.md, item 1.
 ## swi-file-search-cache-autoload
 Host: janus-swi 1.5.3, the same janus.pl in swipl-devel V10.1.14's
   packages/swipy, on SWI-Prolog 10.1.13 and 10.1.14 as shipped; the venv's

@@ -4227,6 +4227,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   wrapper adds 5.6 nanoseconds an item, 3.29% of one guarded pull.
   `extensions/python/benchmarks/py_iter_guard.py` is the measurement.
 
+- Cost follows the answer. `m.stats()` and every measurement the seat reports
+  charge a block for its own thread's work and for the workers whose answers
+  it used: a race's losers, the branches `par-any` and `par-forall` stopped,
+  a cancelled future or timer, are joined through the engine's discarding
+  door and their partial spend, which only the schedule sized, is taken out
+  beside the interrupt poll's charge. `par-race`, `par-any` and `par-forall`
+  are three faces of one first-wins door, one worker per branch. The host is
+  patched so `thread_join/2` is safe inside a worker's engine switch
+  (`swi-thread-join-detach-window` in docs/host-workarounds.md), and
+  lib_thread's join no longer polls. The seat's counter doors read for one
+  edge of the window they bracket, so the discarded tally is read outside
+  it and a block's own cost stays what its pins were taken with.
+- The benchmark ledgers are re-pinned on the merged tree: every moved row's
+  comment places its move on the branch's first-parent line, step by
+  measured step, then the merge alone with its mechanism; a row inside its
+  band keeps its pin, and the two boot rows keep theirs until measured from
+  a canonical checkout. The twins lane's per-definition authoring allowance
+  is re-derived on the merged tree (305 once plus 1642 per definition), and
+  the corpus is re-pinned with the merge as its mechanism.
+
 ### Fixed
 
 - A definition batch, the door under every Python transaction body and every

@@ -53,6 +53,10 @@ metta_match_atoms(Left, Right) :-
 %exercise the real question against a live engine.
 metta_space_operand('&self').
 metta_space_operand('&metta').
+% The counters door reads the engine's discarded-work tally
+% (engine/metta/control.pl, metta_discarded_inferences/1); with the engine
+% absent there is nothing discarded.
+metta_discarded_inferences(0).
 
 %extensions/python/metta/_binding/surface.pl's, which this engine-free suite does not load.
 %metta_py_encode/2's tuple clause calls it before its compound clause, so
@@ -801,17 +805,48 @@ test(an_uninitialised_thread_reads_zeros) :-
     nb_setval('$metta_heartbeat_ticks', ticks(0, 0, 0, 0)).
 
 %The counter door hands the four fields across beside the counters, so the
-%seat corrects a reading with the poll's own state at that reading.
+%seat corrects a reading with the poll's own state at that reading, and the
+%discarded-work tally after them.
 test(the_counter_door_carries_the_polls_term) :-
     nb_setval('$metta_heartbeat_ticks', ticks(7, 42, 11, 36)),
-    metta_py_stats(Counters),
-    length(Counters, Width),
-    nth1(7, Counters, Ticks),
-    nth1(8, Counters, Spent),
-    nth1(9, Counters, At),
-    nth1(10, Counters, Before),
-    assertion(Width == 10),
-    assertion([Ticks, Spent, At, Before] == [7, 42, 11, 36]),
+    forall(member(Edge, [open, close]),
+           ( metta_py_stats(Edge, Counters),
+             length(Counters, Width),
+             nth1(7, Counters, Ticks),
+             nth1(8, Counters, Spent),
+             nth1(9, Counters, At),
+             nth1(10, Counters, Before),
+             nth1(11, Counters, Discarded),
+             assertion(Width == 11),
+             assertion([Ticks, Spent, At, Before, Discarded] == [7, 42, 11, 36, 0]) )),
     nb_setval('$metta_heartbeat_ticks', ticks(0, 0, 0, 0)).
+
+%The tally is read outside the window two readings bracket: before the
+%opening inference read and after the closing one. Differentially: a window
+%opened with the closing door instead contains that door's tally read, so it
+%is strictly the larger, by the read's own cost (one inference on this
+%suite's fact, nb_current/2 and its test on the engine). The absolute
+%windows are 7 and 6 here (one more on a cold first call), the seat's empty
+%stats() block 7 as on the committed tree 43800c685; with the tally read
+%after the inference read at both edges the corpus lane read every twin +5
+%(wt-battery-3, ai-twins-lane-c7e27cf2a.log: 293 of 294) [measured
+%2026-09-19: this suite, the empty block on both trees and that lane;
+%commit=WORKTREE].
+test(the_discarded_tally_is_read_outside_the_window) :-
+    metta_py_stats(close, _),
+    metta_py_stats(open, [Opened|_]),
+    metta_py_stats(close, [Closed|_]),
+    Window is Closed - Opened,
+    metta_py_stats(close, [Opened2|_]),
+    metta_py_stats(close, [Closed2|_]),
+    WindowFromClose is Closed2 - Opened2,
+    metta_py_work(open, WorkOpened),
+    metta_py_work(close, WorkClosed),
+    WorkWindow is WorkClosed - WorkOpened,
+    metta_py_work(close, WorkOpened2),
+    metta_py_work(close, WorkClosed2),
+    WorkWindowFromClose is WorkClosed2 - WorkOpened2,
+    assertion(Window < WindowFromClose),
+    assertion(WorkWindow < WorkWindowFromClose).
 
 :- end_tests(heartbeat_accounting).

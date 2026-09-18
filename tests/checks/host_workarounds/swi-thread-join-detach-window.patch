@@ -1,0 +1,30 @@
+diff --git a/src/pl-thread.c b/src/pl-thread.c
+index 71b1357..50f06d0 100644
+--- a/src/pl-thread.c
++++ b/src/pl-thread.c
+@@ -7040,13 +7040,22 @@ detach_engine(PL_engine_t e)
+ 
+   info->has_tid = false;
+ #ifdef O_PLMT
++  /* Only an interactor engine has no OS thread while it is detached.  A
++     thread's own engine is detached for the duration of engine_create/3
++     and engine_destroy/1, and the thread keeps running on the same
++     pthread throughout, so its identity must survive: thread_join/2
++     reads info->tid unguarded and a zero here reaches pthread_join as a
++     null struct pthread. */
++  if ( info->is_engine )
++  {
+ #ifdef __linux__
+-  info->pid = -1;
++    info->pid = -1;
+ #endif
+ #ifdef __WINDOWS__
+-  info->w32id = 0;
++    info->w32id = 0;
+ #endif
+-  memset(&info->tid, 0, sizeof(info->tid));
++    memset(&info->tid, 0, sizeof(info->tid));
++  }
+ #endif
+   info->c_stack = NULL;
+ }

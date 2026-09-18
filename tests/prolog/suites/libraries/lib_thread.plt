@@ -237,6 +237,85 @@ test(race_fails_when_every_branch_fails) :-
 test(race_rejects_an_empty_branch_list) :-
     \+ par_race([], _).
 
+%Cost follows the answer: a race charges the caller and the winner, and a
+%stopped branch's spend, which only the schedule sizes, comes out. Three
+%measured races of the same branches read one integer; the first is the
+%warm-up that pays first-use costs. Measured as the seat measures, the
+%thread's counter less its discarded tally.
+race_work(Work) :-
+    metta_discarded_inferences(Discarded0),
+    statistics(inferences, Before),
+    par_race([['t-slow', 1], ['t-inc', 41]], Out),
+    statistics(inferences, After),
+    metta_discarded_inferences(Discarded),
+    assertion(Out == 42),
+    Work is (After - Before) - (Discarded - Discarded0).
+
+%The winner's work is in and the loser's is out: a race a 20,000-step spin
+%wins against the two-million-step t-slow costs at least those steps, and
+%the race t-inc wins against t-slow costs nothing like t-slow's spin.
+winner_work(Work) :-
+    metta_discarded_inferences(Discarded0),
+    statistics(inferences, Before),
+    par_race([['t-spin', 20000], ['t-slow', 1]], Out),
+    statistics(inferences, After),
+    metta_discarded_inferences(Discarded),
+    assertion(Out == done),
+    Work is (After - Before) - (Discarded - Discarded0).
+
+test(a_race_costs_the_caller_and_the_winner_only) :-
+    race_work(_),
+    race_work(First),
+    race_work(Second),
+    race_work(Third),
+    assertion(First == Second),
+    assertion(Second == Third),
+    assertion(First < 100000),
+    winner_work(_),
+    winner_work(Work),
+    winner_work(Again),
+    assertion(Work == Again),
+    assertion(Work > 20000).
+
+%The discarding join takes out exactly what the host credited. The bracket's
+%own cost is two inferences, one foreign call and the second read, which the
+%first assertion measures on a call that joins nothing; a worker of a fixed
+%cost joined plainly then moves the counter by its credit plus those two, and
+%an identical worker joined through the discarding door adds that credit,
+%and nothing else, to the tally. The first worker is a warm-up: the first
+%thread to run the goal pays two inferences of first use that the next do
+%not [measured 2026-09-18: 2014 against 2012 on the patched host].
+fixed_worker(Ready) :-
+    thread_send_message(Ready, done),
+    forall(between(1, 1000, _), true).
+
+joined_fixed_worker(Ready, Credit) :-
+    thread_create(fixed_worker(Ready), Worker, []),
+    thread_get_message(Ready, done),
+    statistics(inferences, Before),
+    thread_join(Worker, true),
+    statistics(inferences, After),
+    Credit is After - Before - 2.
+
+test(a_discarding_join_takes_out_exactly_the_credit) :-
+    statistics(inferences, Before),
+    thread_self(_),
+    statistics(inferences, After),
+    assertion(After - Before =:= 2),
+    setup_call_cleanup(
+        message_queue_create(Ready),
+        ( joined_fixed_worker(Ready, _),
+          joined_fixed_worker(Ready, Credit),
+          thread_create(fixed_worker(Ready), Discarded, []),
+          thread_get_message(Ready, done),
+          metta_discarded_inferences(Tally0),
+          metta_join_discarding(Discarded, Status),
+          metta_discarded_inferences(Tally),
+          assertion(Status == true),
+          assertion(Tally - Tally0 =:= Credit),
+          assertion(Credit > 1000) ),
+        message_queue_destroy(Ready)).
+
 % ----------------------------------------------------------------- futures
 
 test(spawn_and_await_answer_the_value) :-
@@ -1042,7 +1121,7 @@ test(a_joined_worker_survives_engine_churn_on_its_thread) :-
                                Worker, []),
                  thread_get_message(Ready, churning),
                  sleep(0.002),
-                 lib_thread:metta_thread_join_settled(Worker, Status),
+                 lib_thread:metta_thread_join(Worker, Status),
                  assertion(Status == true) )),
         message_queue_destroy(Ready)).
 
@@ -1084,7 +1163,7 @@ test(a_joined_worker_survives_a_merged_match_on_its_thread) :-
                                Worker, []),
                  thread_get_message(Ready, matching),
                  sleep(0.002),
-                 lib_thread:metta_thread_join_settled(Worker, Status),
+                 lib_thread:metta_thread_join(Worker, Status),
                  assertion(Status == true) )),
         message_queue_destroy(Ready)).
 

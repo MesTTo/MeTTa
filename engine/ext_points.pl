@@ -1351,6 +1351,11 @@ system:goal_expansion(Head, Read) :-
 %both made the same mistake, which is why the wrapper is built here and handed
 %back rather than described. engine/metta/control.pl carries the measurements.
 kind(metta_host_inference_budget/3, host_service).
+%The joined-worker credits the measuring thread discarded, so the host's
+%counters door reports the work that produced its answers and not a stopped
+%branch's spend (engine/metta/control.pl, metta_join_measured/3); the host
+%reads it beside the interrupt poll's term and takes the delta out.
+kind(metta_discarded_inferences/1, host_service).
 %The same bargain on the other axis. A wall-clock bound cannot be placed around
 %engine_next/2 either, and for a sharper reason: call_with_time_limit/2 cannot
 %interrupt a goal running inside an engine, so a host that wraps its pull loop

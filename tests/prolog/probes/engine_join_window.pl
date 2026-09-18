@@ -13,8 +13,12 @@
 %   command=sh tests/prolog/probes/engine_join_window.sh 10;
 %   fixture=swipl 10.1.13, this file;
 %   commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
-% Fails when: run against an SWI-Prolog that guards thread_join/2 with
-%   has_tid, where every mode joins cleanly and the probe shows nothing.
+% Fails when: run against an SWI-Prolog whose detach_engine keeps a real
+%   thread's tid, which is the host this tree runs on since the
+%   swi-thread-join-detach-window patch of docs/host-workarounds.md, where
+%   every mode joins cleanly and the probe shows nothing; the ledger's
+%   reproduction is this probe's destroy mode frozen in
+%   tests/checks/host_workarounds/swi-thread-join-detach-window.sh.
 % Owns resources: three message queues, one worker thread, one detached
 %   releaser and one engine per run. The process is expected to die in
 %   `destroy` mode, so cleanup is the process exit; every other mode joins its

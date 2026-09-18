@@ -84,7 +84,7 @@ test(an_awaiting_consumer_does_not_lock_cancellation_out,
     thread_get_message(Ready, ready),
     thread_create(findall(A, thread_await(Space, A), []), Waiter, []),
     thread_cancel(Space, Stopped),
-    lib_thread:metta_thread_join_settled(Waiter, Status),
+    lib_thread:metta_thread_join(Waiter, Status),
     assertion(Stopped == true),
     assertion(Status == true).
 
