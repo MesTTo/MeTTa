@@ -901,6 +901,15 @@ translate_args_by_type_dl([A|As], [T|Ts], [Origin|Origins],
 %way: its `Atom` branch emits no goals at all, and every other type appends
 %its own `get-type` check.
 non_evaluated_parameter_type(Type) :- Type == 'Atom', !.
+%A refinement of a masked type keeps the mask: `(Annotated Atom (MinLen 2))`
+%is a predicate over the argument AS WRITTEN (an atom with two children), so
+%the position takes its argument unevaluated and, unlike bare Atom, keeps its
+%check, which the masked branch runs on the written term. The Python seat
+%publishes this shape for every `Annotated[Atom, ...]` parameter
+%[tested 2026-09-18: test_python_call_arguments_follow_the_arrow].
+non_evaluated_parameter_type(Type) :-
+    nonvar(Type), Type = ['Annotated', Base|_], nonvar(Base),
+    non_evaluated_parameter_type(Base), !.
 non_evaluated_parameter_type(Type) :- type_position_modifier(Type, _, _), !.
 non_evaluated_parameter_type(Type) :-
     nonvar(Type),

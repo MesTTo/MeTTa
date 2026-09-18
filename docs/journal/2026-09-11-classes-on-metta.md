@@ -3067,3 +3067,16 @@ Measured (twin lane, min of three serial fresh processes, battery-3 on the worki
 Superseded: the 2026-09-11 row "`__await__` ... an `async def` method is the same equation reached through the aio door, as the function compiler already treats `async def`". The function compiler refuses an `async def` body (`define.compile_function`, construct `async def`, remedy `@space.op(effect=...)` or `aio.AsyncMeTTa.call`), so an `async def` method keeps its host equation as any refused method does, visible in the catalog as `oracleIO`. What the aio door does give is the other direction: every compiled method's heads are engine functions, so `AsyncMeTTa`'s engine-function faces (`aio/_views.py`, `__getattr__`) await them like any other; nothing class-specific is generated. Decided: the row reads "an `async def` method is a host equation; a compiled method is awaitable through the mirror's engine-function face".
 Read at 8e6968ecb and unchanged here: a nested `def` in a compiled body is lambda-lifted (`statements._lift_definition`, Johnsson), its free outer names becoming leading parameters bound per call, which is Python's late binding without a cell; `nonlocal` refuses with the remedy of a State cell or a space (construct `nonlocal`). That refusal names its ground, so the closure obligation the team handoffs opened (shared cells over owned records) stays open as a design the refusal already covers; revisit if a corpus example needs a rebinding closure.
 Tried: the lane list on the working tree -> the twin scan refused the entities twin's string names (`Account("alice", 40)`; names are symbols), the corpus counts in `examples/README.md` and `llms.txt` were five behind, the call-value source tests execute `returned` in a namespace without the module's lazy door (a local import now), two `noqa` suppressions pushed the ruff burn-down past its recorded maximum (the test binds the class under a lowercase local and asks the space for the abstract row), `_ORDERINGS` needed its closed-set line, ty wanted the partial target's name read defensively, and the README's new class block exposed `attribute_docstrings` parsing whatever `inspect.getsource` answers for a class exec'd from text (a `SyntaxError` now means no docstrings, and the class node is selected by name). The twins' stored-content divergence (the derived arrows, contracts and documentation rows beside the hand-written equations) is settled with the lane's own `--repin --divergence-reason`; the 265 twins already drifting on the tip stay for the branch-wide re-pin on the merged tree.
+
+## 2026-09-18: the twin lane's eleven failures
+
+Eleven twins did not run on the branch tip d761b9c43 and all eleven run on
+trunk fafab2703 (wt-battery-6, `ai-tmp/ai-twin-*.log`). Eight failed at the
+Python call door that quoted every argument (9ea1ccd583), one at the compiled
+lambda's quoting (10ef2f6958), one at the seam route every bound-callee call
+took (e01a1a46a), which also left the benchmark twin unfinished after eighty
+minutes, and two at branch laws the twins had not followed: a data
+constructor's widened result sort (bb4bbf578) and the dead handle of a dropped
+space (a9b0ddb6d). The decisions, measurements and repairs are the 2026-09-18
+entries of `docs/journal/2026-09-14-python-call-values.md`; after them all
+eleven run (wt-battery, `ai-tmp/ai-failing-twins-driver.log`).

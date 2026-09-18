@@ -308,6 +308,38 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A Python call spells the MeTTa application. An `Atom` argument is syntax
+  written at the call site and enters the application as written, so the
+  callee's arrow decides its evaluation exactly as `m.eval` would:
+  `f(S.add(1, 1))` answers 44 under `(-> Number %Undefined%)` and
+  `(+ (+ 1 1) 42)` under `(-> Atom Atom)`, a symbol with a live scalar rule
+  is rewritten, and an `Expression` position evaluates the argument and reads
+  the payload-preserving spelling `S.noeval(syntax)` as the syntax itself. A
+  Python object (a declared class instance, a container, a generator) crosses
+  as a value bound unevaluated, so an instance reaches a method as the term it
+  is. A lambda image, which has no arrow the engine could read, holds the
+  positions its `Callable[[Atom, ...], R]` annotation or `@python-callable`
+  signature rows declare `Atom`, and `Annotated[Atom, ...]` parameters keep
+  Atom's mask in the engine while still running their check on the written
+  term. This replaces the 2026-09-14 door that quoted every argument, which
+  answered the unevaluated argument to eleven twins. Defined functions,
+  native callable values, class construction, method calls and field writes
+  from Python share the one rule (`call_values.source`); a Python container
+  is a literal the codec spells, so `f((43,))` is `(f (43))`.
+- A compiled positional call of a bound callee is MeTTa's own application:
+  `def f(g, x): return fn.repra(g(x))` compiles to `(repra ($g $x))`, as the
+  example writes it, whatever `$g` holds (a symbol, a lambda, a grounded host
+  callable the engine applies itself). Keyword and expanded calls keep the
+  call-frame route, which MeTTa has no syntax for. This also returns the
+  benchmark twin's million-deep recursion to a direct call: it did not finish
+  in eighty minutes through the frames and finishes inside the lane's budget
+  now.
+- A compiled lambda is the bare `|->` where it is applied or bound, the form
+  `maplist` and every higher-order head apply, and its quoted syntax where a
+  function returns it, so a caller can rebuild the value through its published
+  contract.
+- `Annotated[Atom, ...]` parameters keep Atom's evaluation mask in the engine
+  and run their refinement check on the written argument.
 - A function change drops the tables that can have read it and no other. A
   declared table is a node in the support graph that its function supports,
   so the invalidation wave a definition change starts, bounded to the modules
