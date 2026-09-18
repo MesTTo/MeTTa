@@ -205,3 +205,22 @@ and the remedy for a schedule-bound counter is the user's ruling recorded
 above. Recommended: a loser that does a fixed amount of work instead of
 spinning until the winner lands, which makes the counter deterministic and
 retires the envelope and the pooling with it.
+
+## 2026-09-19
+
+Tried: the corpus re-pin on the merged tree 4c0533704 (the trunk merge
+f97c4b0a3 with the definition batch's load pushed as the running load,
+2da1155e3), `twin_coverage.py --repin --rounds 3` in wt-battery-3,
+ai-repin-4c0533704.log -> 276 of 294 twins re-pinned, 263 cheaper and 13
+dearer, median -1.25%, spread -3.85% (09-multicall.py 5041 to 4847) to
++3.38% (10-mettaset.py 474 to 490); 10 inside their bands; 0 stored-content
+divergences; the 8 envelope twins refused a point re-pin as designed.
+Measured: class_values 4,640,297 to 4,655,098 (+0.32%) with the batch pin;
+5,415,793 without it (the merge's per-definition repair drain,
+recompile_function_in_module/2 400 calls against 122).
+Decided: the envelopes are re-observed from the same tree's 294-wide
+`--observe` run (wt-battery-5, ai-observe-4c0533704.log) by
+ai-tmp/ai_envelopes.py, each carrying a RE-OBSERVED paragraph, so the
+point twins and the envelope twins state one tree; the assembly
+(ai-tmp/ai_assemble_twins_merged.sh) applies the battery's diff, writes
+the envelopes, then commits and pins.
