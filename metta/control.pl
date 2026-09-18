@@ -643,6 +643,17 @@ metta_inference_budget_spent(_, Base, Inferences) :-
 %losers leaves its creator's tally alone, and its creator's counter never
 %saw that credit, since a joined child brings its own count and not its
 %children's.
+%The three join doors below are NOT exported from metta_engine; lib_thread
+%calls them module-qualified. The tally door metta_discarded_inferences/1 IS
+%exported, as the seam requires of a declared host service. Adding the four
+%names to the export list, with the doors defined or not, moved every seat
+%row measured in a fresh process (engine translate +1.2% instructions, MORK
+%conjunction +4% per operation, the C term-in +0.4%); the doors defined
+%without the exports moved nothing, four other names of any arity moved
+%nothing, and the tally door exported alone moved nothing, so the cost is
+%the join doors' names in the list and not any row's path [measured
+%2026-09-19: A/B rounds 3 to 7 on the tip, wt-battery-2 ai-ab-remedy-3.log
+%to -6.log and wt-battery-3 ai-ab-remedy-7.log; commit=WORKTREE].
 metta_join_measured(Thread, Status, Credit) :-
     statistics(inferences, Before),
     thread_join(Thread, Status),

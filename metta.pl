@@ -476,8 +476,13 @@
             metta_host_time_budget/3,
             metta_host_with_stack_limit/2,
             metta_in_user_transaction/0,
-            metta_join_discarding/2,
-            metta_join_measured/3,
+            metta_discarded_inferences/1,
+            %The join doors metta_join_measured/3, metta_join_discarding/2 and
+            %metta_discard_inferences/1 are deliberately NOT in this list; their
+            %callers (lib_thread) name the module. Exporting their names moved
+            %every seat row measured in a fresh process, while exporting the
+            %host-service door above alone moves nothing
+            %(engine/metta/control.pl, above the doors).
             metta_negation_world_guard/1,
             metta_transaction/1,
             metta_transaction/2,
@@ -527,8 +532,6 @@
             import_when/4,
             metta_enlist_foreign/1,
             metta_ensure_source_observation/0,
-            metta_discard_inferences/1,
-            metta_discarded_inferences/1,
             metta_extension_controls/2,
             metta_host_source_compile_effect_plan/4,
             metta_host_source_effect_plan/4,
