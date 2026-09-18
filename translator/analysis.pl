@@ -1579,7 +1579,7 @@ translating_runnable :- b_getval('$metta_translating_runnable', true).
 %the whole evaluation [measured 2026-09-18: 69d1511c0 answers 1602, its
 %successor 5416e741d 2523, the walk removed 1674; command=python
 %extensions/python/benchmarks/probes/cached_evaluation_miss.py;
-%commit=WORKTREE], which is why the record
+%commit=c85001901fb1bec8013087ca31f63c3fcb318180], which is why the record
 %is made by the producer, the way a compiler writes its depfile as it
 %resolves an include rather than scanning its object code afterwards.
 :- dynamic translated_form_cache/6.
