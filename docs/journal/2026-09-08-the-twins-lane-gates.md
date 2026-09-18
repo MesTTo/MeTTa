@@ -190,3 +190,18 @@ Open: which of those three the lane adopts; until then a stray reading is
 pooled by ai-tmp/ai_envelopes_pool.py and the lane re-run.
 Measured: the lane on the 24-observation tree (wt-battery-6,
 ai-twins-K6-final-3.log) -> 0 findings over 294 twinned examples.
+Tried: the lane on the tip e28c4f2f5 while a second battery ran the tip's
+other lanes beside it (wt-battery-6, ai-twins-tip-e28c4f2f5.log) -> 2
+findings, both thread_lib: 416925, sixty thousand above the 25th reading's
+ceiling and 12 past its band. The reading joins the envelope
+(322447..416925 over 25) and the overrun follows the envelope's top
+(242090 to 242102), the 2026-09-08 decision. The loser's spin is bounded
+only by its cap, and how far it runs depends on the load beside the lane,
+which the protocol string does not name; the 2026-09-08 envelope on a
+heavier day topped out at 770008.
+Decided: no further draw on this tree; the touched lanes and the pytest
+twin tests are green on the tip (wt-battery-5, ai-lanes-tip-e28c4f2f5.log),
+and the remedy for a schedule-bound counter is the user's ruling recorded
+above. Recommended: a loser that does a fixed amount of work instead of
+spinning until the winner lands, which makes the counter deterministic and
+retires the envelope and the pooling with it.
