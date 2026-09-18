@@ -3,7 +3,7 @@
 % Guarantees: a cyclic program converges under an idempotent combine, an
 %   acyclic one is exact under every shipped carrier, the formula carrier's
 %   model count is the exact probability, and a relation the program never
-%   names answers nothing [tested: run_tests(algebra_fixpoint); commit=WORKTREE].
+%   names answers nothing [tested: run_tests(algebra_fixpoint); commit=55368cb4eeb641d2325194eff9d0925048814b76].
 % Owns resources: each test releases its space; the formula tables are
 %   cleared after the suite.
 
