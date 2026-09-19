@@ -67,3 +67,6 @@ pypi.txt
 # run is kept rather than deleted, so `mutmut show` can name a survivor after
 # the lane has printed its score.
 .mutmut/
+
+# Lock directory the record tool uses at runtime; the record itself is agenticmind.json.
+.agenticmind/

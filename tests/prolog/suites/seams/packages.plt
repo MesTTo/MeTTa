@@ -26,6 +26,18 @@
 %   - `package` is internal in every space, so one library's package rows are
 %     never read as its importer's own
 %     [tested: packages:the_package_head_is_internal_in_every_space]
+%   - a row reaches its claimant as DATA, so a one-name list is a list and not
+%     a nullary call to the name in it
+%     [tested: packages:a_backing_row_reaches_its_claimant_as_data]
+%   - the claimant resolves its own locator, so `(library x.pl)` in a row
+%     reaches the importer as the path it names
+%     [tested: packages:a_backing_row_resolves_its_library_locator]
+%   - a row performs for the file that carries it and for no other load into
+%     the same space
+%     [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it]
+%   - a row's head list is data, so no head it names becomes a dependency of
+%     the `package` equation
+%     [tested: packages:importing_a_backed_library_leaves_the_package_head_alone]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -42,7 +54,8 @@
 :- prolog_load_context(directory, Here),
    atomic_list_concat([Here, '/../../../../ai-tmp'], Scratch),
    assertz(packages_scratch(Scratch)),
-   forall(member(Kind, [backed, unbacked, unclaimed, requires, absent]),
+   forall(member(Kind, [backed, unbacked, unclaimed, requires, absent, declared,
+                        undepended]),
           ( atomic_list_concat([Here, '/../../../data/packages/', Kind, '.pl'], Relative),
             absolute_file_name(Relative, Artifact, [access(read)]),
             assertz(packages_artifact(Kind, Artifact)) )).
@@ -56,13 +69,19 @@
 %One file PER TEST, because `import!` skips a path it has already loaded
 %unchanged: three tests sharing one path would import the first one's rows
 %three times and the later fixtures never at all.
+%Zero or one artifact. Every case that loads one names it in its body through
+%`~w`, and the locator case below names a library that does not exist, so it
+%has no artifact to name and passes no argument.
 package_fixture(Name, Body, Path) :-
-    packages_artifact(Name, Artifact),
+    (   packages_artifact(Name, Artifact)
+    ->  Arguments = [Artifact]
+    ;   Arguments = []
+    ),
     packages_scratch(Scratch),
     make_directory_path(Scratch),
     atomic_list_concat([Scratch, '/ai-packages-', Name, '.metta'], Path),
     setup_call_cleanup(open(Path, write, Stream),
-                       format(Stream, Body, [Artifact]),
+                       format(Stream, Body, Arguments),
                        close(Stream)).
 
 %The artifact's own predicate, which nothing else in the tree defines, so its
@@ -86,6 +105,98 @@ test(a_backing_row_installs_the_head_its_artifact_exports) :-
     'import!'('&self', Path, _),
     artifact_loaded(backed),
     packages_backed_double(21, 42).
+
+%A row is DATA: the claimant reads the subterms the file WROTE, never what
+%they reduce to. The fixture makes the two answers differ by naming its head
+%through a nullary equation, so an evaluated row hands the importer the bare
+%atom `packages_declared_double` where a list of names belongs and a row kept
+%as data hands it `(packages_declared_name)`, which the artifact does not
+%export. Both refuse, and WHICH refusal arrives is the observable:
+%`existence_error(procedure, packages_declared_name)` names what was written,
+%`type_error(list, packages_declared_double)` names what it reduced to
+%[measured 2026-09-19, both ways, by removing the Atom mask on `perform`].
+%
+%What the mask costs in the field, rather than in a fixture: minimal_metta_lib
+%names `(unify-mod)` beside `(: unify-mod (-> Atom Atom Atom Atom %Undefined%))`
+%and _support/collections names `(collections-expression)` beside its own
+%declaration, and ten of the thirteen tests in
+%extensions/python/tests/ch19_spaces_backed_by_anything/test_imports.py failed
+%with `Type error: `atom\' expected, found `[\'collections-expression\']\'`
+%until `perform` carried the mask [measured 2026-09-19].
+%
+%The older `!(import_prolog_functions_from_file ...)` spelling never needed it:
+%translate_prolog_import_dl/5 compiles the name list where the literal sits and
+%never evaluates it. A claim body has a variable there instead, which that
+%special form passes through untouched, so the mask is what it was.
+test(a_backing_row_reaches_its_claimant_as_data) :-
+    package_fixture(declared,
+                    '(= (packages_declared_name) packages_declared_double)\n\c
+                     (= (package backing) (prolog "~w" (packages_declared_name)))\n',
+                    Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    Formal = existence_error(procedure, packages_declared_name).
+
+%The claimant's half of the same law. The mask hands `(library x.pl)` over as
+%the two-element list it is, and only the claimant knows that is a locator, so
+%the claim evaluates it and the engine never does. Without that the importer
+%consults `library` and `x.pl` as two separate files and the refusal names
+%neither the library nor a path [measured 2026-09-19: source_sink `library\'
+%does not exist]. A library nothing holds is what makes the resolved path
+%observable, since the refusal quotes the path it tried.
+test(a_backing_row_resolves_its_library_locator) :-
+    package_fixture(locator,
+                    '(= (package backing) (prolog (library packages_no_such_library.pl) \c
+                     (packages_locator_double)))\n',
+                    Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    Formal = existence_error(source_sink, Tried),
+    sub_atom(Tried, _, _, _,
+             'packages_no_such_library/packages_no_such_library.pl').
+
+%Law 14 performs a file's rows AT ONCE, when the file carrying them loads, and
+%the rows of one file are no part of the next load into the same space. This
+%reads the plainest consequence: a refusing row is refused once, by the import
+%that declared it, and a file declaring nothing afterwards still loads.
+%
+%The performer matched the SPACE until 2026-09-19, so every load re-performed
+%every row the space held. N libraries in one space cost N*(N+1)/2 performs
+%rather than N, and the refusal below arrived on the next three unrelated
+%imports instead of on its own [measured 2026-09-19].
+test(a_backing_row_performs_only_for_the_file_that_carries_it) :-
+    package_fixture(refusing,
+                    '(= (package backing) (prolog (library packages_no_second_library.pl) \c
+                     (packages_refusing_double)))\n',
+                    Refusing),
+    catch('import!'('&self', Refusing, _),
+          error(existence_error(source_sink, _), _),
+          true),
+    package_fixture(afterwards, '(= (package version) "0.0.2")\n', Afterwards),
+    'import!'('&self', Afterwards, _).
+
+%A row NAMES the heads its artifact exports, and naming is not calling. The
+%body's head is `prolog`, which the translator compiles to a literal, so the
+%compiled clause holds the whole row as data and no arrival can turn a name
+%inside it into a call.
+%
+%Recording one anyway made every `package` equation a dependent of every head
+%it backs, so performing a row recompiled the `package` head, which carries a
+%clause per library in the space. The recompile is a no-op, the clause bodies
+%being identical under =@= either side of it, and it made importing N
+%Prolog-backed libraries cost O(N*N): per-import cost fitted 702i + 6,438
+%inferences and now fits 11i + 5,874, the 11 being the same noise floor a row
+%nobody claims reads [measured 2026-09-19].
+test(importing_a_backed_library_leaves_the_package_head_alone) :-
+    package_fixture(undepended,
+                    '(= (package backing) (prolog "~w" (packages_undepended_double)))\n',
+                    Path),
+    'import!'('&self', Path, _),
+    packages_undepended_double(21, 42),
+    \+ ( support_graph:supports(function_view(Module, packages_undepended_double),
+                               translated_form(Module, Id)),
+         support_graph:support_translated_form_id(Ref, Module, Id),
+         clause(Clause, _, Ref),
+         strip_module(Clause, _, Bare),
+         functor(Bare, package, _) ).
 
 test(a_file_with_no_backing_row_installs_nothing) :-
     package_fixture(unbacked, '(= (package version) "0.0.1") ; no backing row for ~w~n', Path),

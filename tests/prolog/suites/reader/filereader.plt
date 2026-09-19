@@ -1425,6 +1425,71 @@ test(repairing_late_callers_costs_nothing_that_grows_with_the_program) :-
 
 :- end_tests(filereader_late_definition_cost).
 
+% What a body can CALL is fewer names than it MENTIONS, and the difference is
+% what a definition depends on. A term whose head the translator compiles to a
+% literal is data all the way down, so reading the names inside it as calls
+% records a dependency the compiled clause does not have and makes every
+% arrival of one of those names recompile the definition for nothing. The head
+% itself is still answered and is the guard for its own subtree: if it becomes
+% a function the clause is invalidated through that edge and the walk runs
+% again, descending then.
+:- begin_tests(filereader_called_symbols).
+
+test(a_literal_head_hides_the_names_inside_it) :-
+    findall(S,
+            filereader:called_symbol([zzz_unknown_head, [zzz_inner_name]], S),
+            Symbols),
+    assertion(Symbols == [zzz_unknown_head]).
+
+% quote is a translator FORM, so the general test would descend into it. The
+% language fixes its payload as syntax, which is why the three named heads are
+% answered ahead of that test.
+test(a_quoted_payload_hides_the_names_inside_it) :-
+    findall(S, filereader:called_symbol([quote, [zzz_inner_name]], S), Symbols),
+    assertion(Symbols == [quote]).
+
+test(a_translator_form_still_shows_the_names_inside_it) :-
+    findall(S,
+            filereader:called_symbol(['if-equal', [zzz_inner_name], a, b, c], S),
+            Symbols0),
+    sort(Symbols0, Symbols),
+    assertion(memberchk(zzz_inner_name, Symbols)),
+    assertion(memberchk('if-equal', Symbols)).
+
+test(a_builtin_head_still_shows_the_names_inside_it) :-
+    findall(S,
+            filereader:called_symbol(['size-atom', [zzz_inner_name]], S),
+            Symbols0),
+    sort(Symbols0, Symbols),
+    assertion(memberchk(zzz_inner_name, Symbols)),
+    assertion(memberchk('size-atom', Symbols)).
+
+% A head that becomes a function stops hiding what is under it, which is the
+% whole of the soundness argument: the arrival that matters is the head's own,
+% and it is recorded either way.
+test(a_head_that_becomes_a_function_shows_them_again) :-
+    findall(S, filereader:called_symbol([zzz_late_head, [zzz_under_it]], S), Before),
+    setup_call_cleanup(
+        assertz(metta_engine:fun(zzz_late_head)),
+        findall(S, filereader:called_symbol([zzz_late_head, [zzz_under_it]], S), After),
+        retractall(metta_engine:fun(zzz_late_head))),
+    assertion(Before == [zzz_late_head]),
+    sort(After, Sorted),
+    assertion(Sorted == [zzz_late_head, zzz_under_it]).
+
+% A partial list matches [Head|Arguments] with its tail unbound, and member/2
+% over an unbound tail generates rather than enumerating. The walk tests for a
+% proper list first, which is what mentioned_symbol/2 does and for this reason.
+test(a_partial_list_is_not_walked) :-
+    Partial = [zzz_unknown_head|_],
+    findall(S, filereader:called_symbol(Partial, S), Symbols),
+    assertion(Symbols == []).
+
+test(an_unbound_head_is_not_a_literal_head) :-
+    assertion(\+ filereader:literal_head(_)).
+
+:- end_tests(filereader_called_symbols).
+
 % Registering a name asks SWI which predicates already carry it, and
 % current_predicate/1 with the arity unbound enumerates the predicate table.
 % Asked once per name that is a walk per name, so the batch asks once for all

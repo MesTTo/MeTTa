@@ -36,6 +36,43 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the source rather than its text so the mentions in other libraries' comments
   are not reported.
 
+  A row reaches its claimant as DATA, and the claimant says what its own
+  subterms mean. `perform` carries an `Atom` mask, so the engine hands the row
+  over as it was written rather than reducing inside it, which it could only do
+  by deciding what a token's payload means. The loader's claim then evaluates
+  the file locator itself and leaves the head list alone, which is why
+  `(prolog (library lib_x.pl) (head))` reaches the importer as a path and a
+  one-name list. Without the mask a one-name list was read as a nullary call to
+  the name in it, so `(unify-mod)` beside its own
+  `(: unify-mod (-> Atom Atom Atom Atom %Undefined%))` became the error that
+  arity answers: the older spelling had been safe only because the compiler kept
+  a name list literal where the literal sat, which a claim body cannot do.
+
+- A definition depends on the names its body can CALL rather than on every
+  name it mentions. A term whose head the engine compiles to a literal is data
+  all the way down, so the names inside it are not call sites, and recording
+  them made every arrival of one recompile a definition that does not call it.
+  Backing rows are where it showed: a row names the heads its artifact exports,
+  so registering one recompiled the `package` head, which carries a clause per
+  library in the space, and importing N Prolog-backed libraries into one space
+  cost O(N squared). The per-import cost fitted 702i + 6,438 inferences and now
+  fits 11i + 5,874, flat in the number already loaded. The head of a literal
+  term is still recorded and is the guard for its own subtree, so a head that
+  later becomes a function invalidates the definition through its own edge and
+  the walk descends then: import order still cannot change what a definition
+  means.
+
+- A file's package rows perform for that file's load and for no other. The
+  loader matched the whole space for `(= (package backing) ...)`, so every later
+  load into a space re-performed every row already there: N libraries sharing a
+  space cost N(N+1)/2 performs where N is right, and a row that refused raised
+  again on every subsequent load, including loads of files that declare nothing.
+  Importing twelve one-row files into one space cost 2,728 inferences per
+  already-loaded file and now costs 702, the 2,026 difference being one
+  re-performed row each. The rows are read from the journal the load itself
+  wrote, which is the same record `unimport!` uses to take a source's atoms
+  back out.
+
 - Registering a door the shipped verdict table does not name analyses that door
   against a SOLVED core instead of solving the whole program again. Its body is
   the only new entry, and a registered door's entry set is one no other
