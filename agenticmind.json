@@ -60,6 +60,12 @@
       "blocks": [
         "g1"
       ]
+    },
+    "i9": {
+      "what": "_attribute returns Reference('unknown', f'undeclared member {parameter}.{member}') for a member a supplied parameter does not declare, which is one abstract value per parameter TIMES member",
+      "blocks": [
+        "g1"
+      ]
     }
   },
   "approaches": {
@@ -254,6 +260,25 @@
         "i7"
       ],
       "cost": 1
+    },
+    "a10": {
+      "title": "carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read",
+      "status": "active",
+      "addresses": [
+        "i9"
+      ],
+      "cost": 1,
+      "rests_on": [
+        "c11"
+      ]
+    },
+    "a11": {
+      "title": "key the solve cache on the sources, entries and lifetimes it reads, instead of on the whole row set",
+      "status": "done",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 2
     }
   },
   "claims": {
@@ -632,6 +657,31 @@
         "c13"
       ],
       "basis": "source"
+    },
+    "r38": {
+      "says": "measured: three degraded doors each carried 12,527 open entries, nearly all of them _map_atoms:504 once per supplied parameter; the branch immediately below it states the rule it breaks, 'one derived value per parameter, so the domain stays finite'",
+      "supports": [
+        "i9"
+      ],
+      "basis": "measured"
+    },
+    "r39": {
+      "says": "committed; test_door_order.py passes whole, 123 tests. It does not make test_door_rows.py pass, because one solve is still 460s",
+      "supports": [
+        {
+          "node": "a11",
+          "status": "done"
+        }
+      ]
+    },
+    "r40": {
+      "says": "applied and under measurement: the door-order suite passes whole with it, 123 tests, and no test asserts the text it coarsens; its effect on the 12,527-entry open sets is being measured",
+      "supports": [
+        {
+          "node": "a10",
+          "status": "active"
+        }
+      ]
     }
   },
   "log": [
@@ -2418,6 +2468,184 @@
           "r37",
           "supports",
           "c13"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:34:46+10:00",
+      "after": "8eecc3b43a813c23c9aa29931867978010f14620",
+      "did": "add-issue i9 '_attribute returns Reference('\"'\"'unknown'\"'\"', f'\"'\"'undeclared member {parameter}.{member}'\"'\"') for a member a supplied parameter does not declare, which is one abstract value per parameter TIMES member' --blocks g1 --because 'measured: three degraded doors each carried 12,527 open entries, nearly all of them _map_atoms:504 once per supplied parameter; the branch immediately below it states the rule it breaks, '\"'\"'one derived value per parameter, so the domain stays finite'\"'\"'' --basis measured",
+      "assert": [
+        [
+          "i9",
+          "sort",
+          "issue"
+        ],
+        [
+          "i9",
+          "blocks",
+          "g1"
+        ],
+        [
+          "i9",
+          "what",
+          "_attribute returns Reference('unknown', f'undeclared member {parameter}.{member}') for a member a supplied parameter does not declare, which is one abstract value per parameter TIMES member"
+        ],
+        [
+          "r38",
+          "sort",
+          "claim"
+        ],
+        [
+          "r38",
+          "basis",
+          "measured"
+        ],
+        [
+          "r38",
+          "says",
+          "measured: three degraded doors each carried 12,527 open entries, nearly all of them _map_atoms:504 once per supplied parameter; the branch immediately below it states the rule it breaks, 'one derived value per parameter, so the domain stays finite'"
+        ],
+        [
+          "r38",
+          "supports",
+          "i9"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:34:46+10:00",
+      "after": "8eecc3b43a813c23c9aa29931867978010f14620",
+      "did": "add-approach a10 'carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read' --addresses i9 --cost 1",
+      "assert": [
+        [
+          "a10",
+          "sort",
+          "approach"
+        ],
+        [
+          "a10",
+          "addresses",
+          "i9"
+        ],
+        [
+          "a10",
+          "cost",
+          1
+        ],
+        [
+          "a10",
+          "status",
+          "untried"
+        ],
+        [
+          "a10",
+          "title",
+          "carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:34:46+10:00",
+      "after": "8eecc3b43a813c23c9aa29931867978010f14620",
+      "did": "link a10 c11 --as rests-on",
+      "assert": [
+        [
+          "a10",
+          "rests_on",
+          "c11"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:34:46+10:00",
+      "after": "8eecc3b43a813c23c9aa29931867978010f14620",
+      "did": "add-approach a11 'key the solve cache on the sources, entries and lifetimes it reads, instead of on the whole row set' --addresses i1 --cost 2",
+      "assert": [
+        [
+          "a11",
+          "sort",
+          "approach"
+        ],
+        [
+          "a11",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a11",
+          "cost",
+          2
+        ],
+        [
+          "a11",
+          "status",
+          "untried"
+        ],
+        [
+          "a11",
+          "title",
+          "key the solve cache on the sources, entries and lifetimes it reads, instead of on the whole row set"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:34:46+10:00",
+      "after": "8eecc3b43a813c23c9aa29931867978010f14620",
+      "did": "status a11 done --because 'committed; test_door_order.py passes whole, 123 tests. It does not make test_door_rows.py pass, because one solve is still 460s'",
+      "assert": [
+        [
+          "a11",
+          "status",
+          "done"
+        ],
+        [
+          "r39",
+          "sort",
+          "claim"
+        ],
+        [
+          "r39",
+          "says",
+          "committed; test_door_order.py passes whole, 123 tests. It does not make test_door_rows.py pass, because one solve is still 460s"
+        ],
+        [
+          "r39",
+          "supports",
+          {
+            "node": "a11",
+            "status": "done"
+          }
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:34:54+10:00",
+      "after": "8eecc3b43a813c23c9aa29931867978010f14620",
+      "did": "status a10 active --because 'applied and under measurement: the door-order suite passes whole with it, 123 tests, and no test asserts the text it coarsens; its effect on the 12,527-entry open sets is being measured'",
+      "assert": [
+        [
+          "a10",
+          "status",
+          "active"
+        ],
+        [
+          "r40",
+          "sort",
+          "claim"
+        ],
+        [
+          "r40",
+          "says",
+          "applied and under measurement: the door-order suite passes whole with it, 123 tests, and no test asserts the text it coarsens; its effect on the 12,527-entry open sets is being measured"
+        ],
+        [
+          "r40",
+          "supports",
+          {
+            "node": "a10",
+            "status": "active"
+          }
         ]
       ]
     }
