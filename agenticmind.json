@@ -3429,6 +3429,54 @@
       "supersedes": [
         "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs"
       ]
+    },
+    "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found": {
+      "title": "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+      "supports": [
+        {
+          "node": "a25",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "r182",
+        "r186"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open": {
+      "title": "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+    },
+    "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta": {
+      "title": "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta",
+      "supports": [
+        "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done": {
+      "title": "it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done",
+      "supports": [
+        {
+          "node": "a31.1",
+          "relation": "rests_on",
+          "target": "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+        }
+      ]
+    },
+    "a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling": {
+      "title": "a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling",
+      "supports": [
+        {
+          "node": "a31.5",
+          "relation": "rests_on",
+          "target": "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+        }
+      ]
     }
   },
   "approaches": {
@@ -3816,7 +3864,7 @@
     },
     "a25": {
       "title": "replace the hand-counted root walks with a contract that DERIVES both roots: a component is the nearest ancestor holding a pyproject.toml or a .git, and the workspace is the nearest holding both engine/ and lib/",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -3909,7 +3957,8 @@
         "c68",
         "c70",
         "c72",
-        "c74"
+        "c74",
+        "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
       ]
     },
     "a31.2": {
@@ -3970,7 +4019,8 @@
         "c91",
         "c92",
         "c94",
-        "c95"
+        "c95",
+        "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
       ]
     },
     "a31.6": {
@@ -19504,6 +19554,133 @@
         ]
       ],
       "id": "07763e267bc02e5e"
+    },
+    {
+      "at": "2026-09-19T17:15:11.243291+00:00",
+      "after": "72910b6a35b88337eb941c550e8de8946008d6ff",
+      "did": "[{\"op\": \"status\", \"id\": \"a25\", \"because\": \"both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta\", \"tags\": [\"measured\"], \"title\": \"the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open\", \"fields\": {}}, {\"op\": \"link\", \"id\": \"a31.1\", \"because\": \"it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done\", \"tags\": [], \"target\": \"the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open\", \"relation\": \"rests-on\"}, {\"op\": \"link\", \"id\": \"a31.5\", \"because\": \"a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling\", \"tags\": [], \"target\": \"the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open\", \"relation\": \"rests-on\"}]",
+      "parents": [
+        "07763e267bc02e5e"
+      ],
+      "assert": [
+        [
+          "a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling",
+          "sort",
+          "prop"
+        ],
+        [
+          "a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling",
+          "supports",
+          {
+            "node": "a31.5",
+            "relation": "rests_on",
+            "target": "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+          }
+        ],
+        [
+          "a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling",
+          "title",
+          "a31.5's first half, performing requires before any packaging library merges, is built and gated; its second half is the ceiling"
+        ],
+        [
+          "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta",
+          "sort",
+          "prop"
+        ],
+        [
+          "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta",
+          "supports",
+          "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+        ],
+        [
+          "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta",
+          "tags",
+          "measured"
+        ],
+        [
+          "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta",
+          "title",
+          "a31.6 failed on measurement: applying the ceiling to the row refused every shipped backing, since (prolog F (heads)) plans as oracleIO because prolog is a known operation, and applying it to the question refused every requires, since a question's plan includes the equations answering it. The other three are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the file's own rows through &catalogs, and perform dispatches by unification against a claim in &metta"
+        ],
+        [
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+          "sort",
+          "prop"
+        ],
+        [
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+          "supersedes",
+          "r182"
+        ],
+        [
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+          "supersedes",
+          "r186"
+        ],
+        [
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+          "supports",
+          {
+            "node": "a25",
+            "status": "done"
+          }
+        ],
+        [
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+          "tags",
+          "tested"
+        ],
+        [
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found",
+          "title",
+          "both roots are derived rather than counted and the contract now reaches every site: metta._roots derives a component from a pyproject.toml OR a .git and the workspace from engine/ plus lib/, the 29 sites that reached the wrong root were repaired, and the last eleven that asked for .git alone were corrected today. tests/checks/check_root_walks.py reads 0 findings over the seat, refuses a counted walk, a derivation landing on a wrong root AND a single-marker derivation, and its selftest asserts each of those is found"
+        ],
+        [
+          "it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done",
+          "sort",
+          "prop"
+        ],
+        [
+          "it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done",
+          "supports",
+          {
+            "node": "a31.1",
+            "relation": "rests_on",
+            "target": "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+          }
+        ],
+        [
+          "it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done",
+          "title",
+          "it names which quarter of a31.1 is missing, so the next window does not re-derive which three are done"
+        ],
+        [
+          "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open",
+          "title",
+          "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+        ],
+        [
+          "a25",
+          "status",
+          "done"
+        ],
+        [
+          "a31.1",
+          "rests_on",
+          "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+        ],
+        [
+          "a31.5",
+          "rests_on",
+          "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
+        ]
+      ],
+      "id": "622a7dd3ffafa29c"
     }
   ]
 }
