@@ -632,6 +632,15 @@ run GATE spread-calls-selftest "$PY" "$HERE/tests/checks/check_spread_calls_self
 run GATE root-walks "$PY" "$HERE/tests/checks/check_root_walks.py"
 run GATE root-walks-selftest "$PY" "$HERE/tests/checks/check_root_walks_selftest.py"
 
+# The lanes below run the seat's generators as SCRIPTS, which puts tools/ on
+# sys.path and not the seat, so a tool importing `metta` at module level cannot
+# start. Deriving the roots instead of counting them did exactly that to ten of
+# the twenty-two tools this file runs, and the equivalence check that gated the
+# migration could not see it: it compared the PATH each site resolves to, with
+# the seat already importable, so it proved the value and never the import.
+run GATE tool-startup "$PY" "$HERE/tests/checks/check_tool_startup.py"
+run GATE tool-startup-selftest "$PY" "$HERE/tests/checks/check_tool_startup_selftest.py"
+
 # A gate reading a tree somebody is still editing returns a verdict about no
 # particular state. tools/battery.sh snapshots the working tree, uncommitted
 # work included, and REFUSES to run unless the snapshot is still exact. This
