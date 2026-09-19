@@ -78,6 +78,8 @@ replacement(no_equation_collision, lib_package:package_source_equation(_,_,_,_),
 replacement(no_merge, lib_package:package_merge_answer(_,_,_), _, true).
 replacement(no_receipts, spaces:metta_add_atom(_Space,Row,Result), Wrapped,
             (nonvar(Row), Row=[performed,_,_] -> Result=true ; call(Wrapped))).
+replacement(no_available, spaces:metta_add_atom(_Space,Row,Result), Wrapped,
+            (nonvar(Row), Row=[available,_] -> Result=true ; call(Wrapped))).
 replacement(no_release, lib_package:package_release_loads(_,_), _, true).
 replacement(no_boot_validation, lib_package:package_validate_boots(_,_), _, true).
 replacement(no_failure_cleanup, lib_package:package_loading(_,_,Goal), _, call(Goal)).
@@ -118,6 +120,10 @@ replacement(no_export_boundary, lib_package:package_native_manifest(File,Declare
 replacement(no_native_admission, lib_package:package_native_admission(_,_,_,_,_), _, true).
 replacement(no_native_reuse, lib_package:package_open_head(_,_,Row,Name,Arity), _,
             (Row=[Token|_],metta_engine:metta_host_open_function(Name,Token,Arity))).
+replacement(import_every_native_head, lib_package:package_load_native(File,Owner), _,
+            (metta_engine:current_metta_space(Home),metta_engine:space_module(Home,Module),
+             load_files(Module:File,[if(changed)]),
+             (source_file_property(File,module(Owner)) -> true ; Owner=Module))).
 replacement(process_registration, metta_engine:metta_reference_register_prolog(Home,_,Name,Arity), Wrapped,
             (Home=='&self' -> metta_engine:register_process_function(Name,[Arity]) ; call(Wrapped))).
 replacement(no_declared_contracts, lib_package:package_native_exports(_,Names), _, Names=[]).
@@ -200,7 +206,10 @@ group(refuse_equal_alias, [catalog_aliases_with_equal_digests_load_once]).
 group(no_identity_check, [catalog_aliases_with_different_digests_refuse]).
 group(no_pin_check, [two_requirers_cannot_pin_different_revisions_of_one_name]).
 group(no_pending_requirements, [pending_requirements_expose_cycles_outside_their_transaction]).
-group(no_export_boundary, [native_export_declarations_do_not_leak_hidden_arities]).
+group(no_export_boundary, [native_export_declarations_do_not_leak_hidden_arities,
+                          native_export_declarations_refuse_unexported_names]).
+group(no_available, [partially_overlapping_backings_only_merge_their_unselected_heads]).
+group(import_every_native_head, [unselected_native_exports_leave_equation_heads_free]).
 group(no_contract_requirement, [backings_must_supply_contracts_for_the_heads_they_name]).
 group(no_native_admission, [native_names_owned_by_a_requirement_refuse_before_directives]).
 group(no_native_reuse, [an_already_loaded_artifact_can_register_its_own_heads]).

@@ -18,6 +18,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   releases acquired handles in reverse. The implementation and per-law evidence
   are recorded in `docs/record/lib-package-laws-6-13.md`.
 
+- Package native artifacts load in a process namespace and publish only the
+  selected exports into the library home. Unselected exports leave MeTTa
+  equation names free, private names outside a declared export list refuse,
+  and partially selected backings retain their unused heads as alternatives.
+
 - `bounded.sh` carries a THIRD bound, `--memory KILOBYTES|none`, and applies
   one by default: an eighth of what the box has, read from `/proc/meminfo`.
   The two it already had are a deadline and a link to the starting process,

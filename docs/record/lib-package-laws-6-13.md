@@ -26,7 +26,7 @@ requires a disabling mutation for every library test and refuses nonexistent
 witnesses. Whole-gate attribution requires identical unrelated source bytes,
 Git identities and build configuration in the candidate and control.
 
-The latest focused run passed all 22 `packages` tests and 66 `lib_package`
+The latest focused run passed all 22 `packages` tests and 68 `lib_package`
 tests. The shipped `07-scopes_and_captured_calls.metta` example also passed.
 The subsequent no-autoload lane failed; its attribution and the final whole
 comparison remain open. Its exact output is
@@ -89,6 +89,28 @@ Native clauses have process lifetime; native MeTTa registrations are local
 source artifacts. Three older package cases used direct unqualified Prolog
 calls, which required global host registration. They now call their public
 MeTTa heads and inspect the explicit importing module. This follows law 7.
+
+The whole comparison found an additional namespace leak:
+
+```text
+math-float with 1 arguments is one of Prolog's protected core predicates,
+which no space can redefine, &self included.
+```
+
+`load_files(Module:File, ...)` imported every module export, including names
+the backing had not selected. The native loader now uses a process-owned
+artifact namespace and `imports([])`, then imports only selected predicate
+indicators into the home. Plain Prolog sources receive a namespace derived
+from their canonical path; already-loaded sources reuse SWI's source context.
+`unselected_native_exports_leave_equation_heads_free` failed before this fix
+and now passes for both module and plain sources. The math example also exits
+0 with `METTA_VERIFY_SPECIALIZATIONS=1`.
+
+Two further law 6 counterexamples now pass. A declared export boundary refuses
+private names instead of falling back to inferred clause heads. Partial-overlap
+selection records the unused heads as available while performing the fresh
+heads. The selection partition retains O(h log h) cost. Both refusals/property
+observations have disabling mutations.
 
 Law 6 also supersedes the old
 `a_backing_no_claimant_answers_installs_nothing` test: accepting an uncovered
@@ -155,9 +177,11 @@ during compensation. No new dependency was introduced.
 
 ## Verification still being completed
 
-The mutation runner passed all 71 witnesses: 66 library cases and five changed
-package cases. Each fresh-process control exited 0 and each disabling mutation
-exited 1. The complete result is `ai-tmp/ai-package-mutations-71.log`.
+The mutation runner passed all 74 witnesses: 68 library cases and five changed
+package cases, with two independent mutations for partial-overlap selection
+and availability. Each fresh-process control exited 0 and each disabling
+mutation exited 1. The complete result is
+`ai-tmp/ai-package-mutations-74-and-math.log`.
 Whole-gate results from batteries without their own Git identity are invalid.
 An earlier control also retained a stale detached HEAD and an empty
 `lib_package` directory after an orphan QLF prevented removal; it cannot

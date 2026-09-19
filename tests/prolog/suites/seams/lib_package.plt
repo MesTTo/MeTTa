@@ -449,6 +449,27 @@ test(native_export_declarations_do_not_leak_hidden_arities) :-
     lp_import(Path,Home), lp_answers(Home,[lp_native_arity],[42]),
     lp_throws(lp_answers(Home,[lp_native_arity,9],_),domain_error(function_input_arities(lp_native_arity,[0]),1)).
 
+test(native_export_declarations_refuse_unexported_names) :-
+    lp_package(private_export,
+        "(= (package backing) (prolog \"native.pl\" (lp_private_native)))", Path, Home),
+    lp_adjacent(Path, 'native.pl',
+        ":- module(lp_private_native,[lp_public_native/1]).\n\c
+         lp_public_native(42).\nlp_private_native(99).", _),
+    lp_throws(lp_import(Path, Home), existence_error(procedure, lp_private_native)).
+
+test(unselected_native_exports_leave_equation_heads_free) :-
+    forall(member(Kind, [module, plain]),
+        ( lp_package(selective,
+              "(= (package backing) (prolog \"native.pl\" (lp_selected_native)))", Path, Home),
+          ( Kind == module
+          -> Header = ":- module(lp_selective_native,[lp_selected_native/1,lp_unused_native/1]).\n"
+          ; Header = "" ),
+          string_concat(Header, "lp_selected_native(42).\nlp_unused_native(99).", Native),
+          lp_adjacent(Path, 'native.pl', Native, _), lp_import(Path, Home),
+          metta_add_atom(Home, ['=', [lp_unused_native], 43], _),
+          lp_answers(Home, [lp_selected_native], [42]),
+          lp_answers(Home, [lp_unused_native], [43]) )).
+
 test(backings_must_supply_contracts_for_the_heads_they_name) :-
     lp_package(no_contract,"(= (package backing) (lp-resource no_contract (lp_not_exported)))",Path,Home),
     lp_throws(lp_import(Path,Home),existence_error(package_export_contract,_)),lp_events([]).
@@ -520,7 +541,8 @@ test(partially_overlapping_backings_only_merge_their_unselected_heads) :-
     format(string(Source),'(= (package backing) (lp-space ~w (lp-overlap)))\n\c
                            (= (package backing) (lp-space ~w (lp-overlap lp-fresh)))',[First,Second]),
     lp_package(overlap,Source,Path,Home),lp_import(Path,Home),
-    lp_answers(Home,['lp-overlap'],[42]),lp_answers(Home,['lp-fresh'],[44]).
+    lp_answers(Home,['lp-overlap'],[42]),lp_answers(Home,['lp-fresh'],[44]),
+    metta_host_stored(Home,[available,['lp-space',Second,['lp-overlap']]]).
 
 test(ordinary_contract_equations_describe_an_attached_claimant) :-
     'new-space'(Artifact),metta_add_atom(Artifact,[=,['lp-contract-equation'],42],_),
