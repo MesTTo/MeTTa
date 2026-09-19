@@ -4443,6 +4443,47 @@
       "supports": [
         "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering"
       ]
+    },
+    "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing": {
+      "title": "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+    },
+    "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])": {
+      "title": "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])",
+      "supports": [
+        "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves": {
+      "title": "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves",
+      "supports": [
+        {
+          "node": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "status": "untried"
+        },
+        {
+          "node": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "relation": "addresses",
+          "target": "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+        }
+      ]
+    },
+    "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check": {
+      "title": "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check",
+      "supports": [
+        {
+          "node": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -5218,6 +5259,14 @@
       "status": "untried",
       "addresses": [
         "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+      ]
+    },
+    "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog": {
+      "title": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
       ]
     }
   },
@@ -23581,6 +23630,127 @@
         ]
       ],
       "id": "7563f835d3472c56"
+    },
+    {
+      "at": "2026-09-19T21:19:55.357842+00:00",
+      "after": "1ac751aba7f42b82964da0718b2a425cdedbd5e1",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])\", \"tags\": [\"measured\"], \"title\": \"the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves\", \"tags\": [], \"title\": \"leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog\", \"fields\": {\"effort\": 1, \"addresses\": [\"the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing\"]}}, {\"op\": \"status\", \"id\": \"leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog\", \"because\": \"the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "7563f835d3472c56"
+      ],
+      "assert": [
+        [
+          "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves",
+          "sort",
+          "prop"
+        ],
+        [
+          "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves",
+          "supports",
+          {
+            "node": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+            "status": "untried"
+          }
+        ],
+        [
+          "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves",
+          "supports",
+          {
+            "node": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+            "relation": "addresses",
+            "target": "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+          }
+        ],
+        [
+          "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves",
+          "title",
+          "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves"
+        ],
+        [
+          "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])",
+          "supports",
+          "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+        ],
+        [
+          "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])",
+          "title",
+          "measured 2026-09-20: `python tools/fngen.py --write` adds two symbols and nothing else, and lib/lib_package/lib_package.pl:16 declares module(lib_package, ['setup!'/2, 'get-property'/3, 'package-prolog'/3])"
+        ],
+        [
+          "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing",
+          "title",
+          "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+        ],
+        [
+          "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check",
+          "sort",
+          "prop"
+        ],
+        [
+          "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check",
+          "supersedes",
+          "a generated artifact is only as good as the catalog it was taken from, and committing one derived from a library that is still being written pins names that may not survive it; the lane is red for a reason that the library landing resolves"
+        ],
+        [
+          "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check",
+          "supports",
+          {
+            "node": "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+            "status": "done"
+          }
+        ],
+        [
+          "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check",
+          "tags",
+          "measured"
+        ],
+        [
+          "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check",
+          "title",
+          "the regeneration was reverted and the seat is clean again; the lane stays red until the library lands, which is the honest state rather than a face nobody can check"
+        ],
+        [
+          "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "sort",
+          "approach"
+        ],
+        [
+          "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "addresses",
+          "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+        ],
+        [
+          "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "effort",
+          1
+        ],
+        [
+          "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "status",
+          "done"
+        ],
+        [
+          "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog",
+          "title",
+          "leave the generated fn face alone until the package library lands, rather than regenerating it against a half-built catalog"
+        ]
+      ],
+      "id": "c9b0aac9ac9c19f3"
     }
   ]
 }
