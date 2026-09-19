@@ -187,6 +187,35 @@ the shipped table does not name and so pays a live analysis. It now runs the who
 157.9 seconds. Before, a single test in it was still running when `pytest`'s faulthandler fired
 at 180 seconds.
 
+## The cost equation, now that there is one worth writing
+
+Sweeping the module set and reading the store at each size gives a clean answer, and it is
+not the equation this started from.
+
+| modules | solve | stored references | per reference | mean set | largest slot |
+|---|---|---|---|---|---|
+| 100 | 11.4s | 276,677 | 41.2us | 4.3 | 888 |
+| 130 | 117.4s | 2,459,912 | 47.7us | 27.7 | 1,677 |
+| 158 | 138.4s | 3,003,989 | 46.1us | 29.1 | 1,784 |
+
+    T = c * P,  P = references the store ends up holding
+
+and `c` is flat at 41 to 48 microseconds across a tenfold range of `P`. Before this change it
+was 139.6 microseconds at 130 modules, so what moved is the constant, by about 3x, exactly as
+the wall clock says. The analysis is linear in the store it builds and was linear before.
+
+That makes the remaining question sharp rather than open. Between 100 and 130 modules the store
+grows 8.9x for 30 per cent more source, and the mean set size goes from 4.3 references to 27.7.
+Since the time is linear in that number, every further second has to come from the analysis
+holding fewer references, not from anything about the fixpoint, the iteration order, or the
+representation of a set. That is the issue already in the record as i2, one slot holding 3,104
+abstract references, and it is a precision question.
+
+It also retires a12, collapsing the value-flow graph's strongly connected components, as the
+named next fix. Collapsing a cycle makes several slots share one set. The store here is not
+large because slots hold redundant copies of each other, which hash consing already
+measured and removed; it is large because the sets themselves are large.
+
 ## A gate that has never been green
 
 Separately, and independent of any of this. The door-order lane is a GATE, and `doororder.py`

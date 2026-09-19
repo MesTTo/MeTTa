@@ -613,6 +613,15 @@ run GATE submodules "$PY" "$HERE/tests/checks/check_submodules_populated.py"
 run GATE submodules-selftest "$PY" "$HERE/tests/checks/check_submodules_populated_selftest.py"
 run GATE conflict-markers-selftest "$PY" "$HERE/tests/checks/check_conflict_markers_selftest.py"
 
+# The door analysis's transfer functions take a value SET and are distributive over
+# it, so calling one per reference is correct and slow: nothing fails, and the fixed
+# cost of entering the function is paid again for every reference. It has happened
+# three times. Removing eight such sites took the analysis from 392.4s to 128.6s with
+# every published verdict unchanged. The pass derives the methods from their own
+# annotations rather than a list, so a new one is covered the day it is written.
+run GATE spread-calls "$PY" "$HERE/tests/checks/check_spread_calls.py"
+run GATE spread-calls-selftest "$PY" "$HERE/tests/checks/check_spread_calls_selftest.py"
+
 # b54dea73 renamed the chapter-19 C artifacts on 2026-08-27 and left THREE
 # consumers holding the old directory. Each was found separately by somebody
 # noticing a test skip -- test_benchmarks.py and benchmarks/configuration.py

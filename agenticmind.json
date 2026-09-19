@@ -23,7 +23,10 @@
       "blocks": [
         "g1"
       ],
-      "what": "metta._atoms.model.encode's return slot holds 3,104 abstract references, and every frozenset union, difference and membership over it is linear in that size"
+      "what": "metta._atoms.model.encode's return slot holds 3,104 abstract references, and every frozenset union, difference and membership over it is linear in that size",
+      "rests_on": [
+        "c30"
+      ]
     },
     "i3": {
       "at": "2026-09-19",
@@ -376,7 +379,9 @@
         "r92",
         "r98",
         "r100",
-        "r94"
+        "r94",
+        "r103",
+        "r107"
       ],
       "detail": [
         "docs/record/a17-call-each-distributive-transfer-function-once-with-the-whole.md"
@@ -1256,6 +1261,57 @@
       "says": "r85: the profile shows _protocol entered 31,779,766 times against 2,494,402 expression evaluations, so the repeated work is a per-reference call and not an AST re-walk at full set width. The equation's terms are real but it names the wrong one as dominant",
       "attacks": [
         "r52"
+      ]
+    },
+    "r103": {
+      "says": "the second batch, _class_attribute's descriptor and property paths and _set_attribute's two, measures 117.4s at 130 modules against the first batch's 121.5s and the baseline's 343.0s, with put 24,723,340 against 26,786,898. It stores 3,209 MORE references, 0.13 per cent, over 1,271 more scope evaluations, and I did not isolate where those come from. Every published figure is identical and the row-level comparison finds zero differing fields, so nothing reaches a verdict on this tree"
+    },
+    "r104": {
+      "says": "ai_cost_probe.py at LIMIT=130 in wt-battery-4 against wt-battery-2 and wt-battery-3, and the full-input run in wt-battery-3 against the baseline",
+      "supports": [
+        "r103"
+      ],
+      "basis": "measured"
+    },
+    "c28": {
+      "says": "a reused battery worktree sitting on an older commit keeps directories the newer layout moved, and an rsync without --delete leaves them, so two arms of an A/B can differ in a whole directory nobody named. It has cost three invalid comparisons here: an empty ext/ producing a 210-row baseline, a diverged ext/ under one arm, and a stale extensions/python/ext/ left from before the integrations moved to the repository root"
+    },
+    "r105": {
+      "says": "measured each time: the arms were fingerprinted by hashing every provider source and the digests disagreed",
+      "supports": [
+        "c28"
+      ],
+      "basis": "measured"
+    },
+    "c29": {
+      "says": "the fix is to fingerprint the input before trusting any A/B: hash every source file the run will read, on both sides, and refuse to compare until the digests match. Naming the paths is not enough, because the failure is a path that should not exist",
+      "rests_on": [
+        "c28"
+      ]
+    },
+    "r106": {
+      "says": "c28",
+      "supports": [
+        "c29"
+      ]
+    },
+    "r107": {
+      "says": "the cost is LINEAR in stored references and the constant is what this change moved. After: 100 modules 11.4s over 276,677 references, 41.2us each; 130 modules 117.4s over 2,459,912, 47.7us; 158 modules 138.4s over 3,003,989, 46.1us. Before: 130 modules 343.0s over 2,456,718, 139.6us. So T = c times P with c falling from about 132us to about 46us per stored reference, flat across a tenfold range of P"
+    },
+    "r108": {
+      "says": "ai_cost_probe.py at LIMIT 100, 130 and 158 on the committed analyser, against the same probe on the analyser before it",
+      "supports": [
+        "r107"
+      ],
+      "basis": "measured"
+    },
+    "c30": {
+      "says": "what remains is not the cost model but the store it fills: stored references jump from 276,677 at 100 modules to 2,459,912 at 130, an 8.9x rise for 30 per cent more source, and mean set size from 4.3 to 27.7. Since T is linear in that number, every further second has to come from making the analysis hold fewer references rather than from touching the fixpoint"
+    },
+    "r109": {
+      "says": "r107",
+      "supports": [
+        "c30"
       ]
     }
   },
@@ -5827,6 +5883,265 @@
         ]
       ],
       "id": "9ae9c7887021e00c"
+    },
+    {
+      "at": "2026-09-19T14:40:32+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "add-claim r103 'the second batch, _class_attribute'\"'\"'s descriptor and property paths and _set_attribute'\"'\"'s two, measures 117.4s at 130 modules against the first batch'\"'\"'s 121.5s and the baseline'\"'\"'s 343.0s, with put 24,723,340 against 26,786,898. It stores 3,209 MORE references, 0.13 per cent, over 1,271 more scope evaluations, and I did not isolate where those come from. Every published figure is identical and the row-level comparison finds zero differing fields, so nothing reaches a verdict on this tree' --because 'ai_cost_probe.py at LIMIT=130 in wt-battery-4 against wt-battery-2 and wt-battery-3, and the full-input run in wt-battery-3 against the baseline' --basis measured",
+      "parents": [
+        "9ae9c7887021e00c"
+      ],
+      "assert": [
+        [
+          "r103",
+          "sort",
+          "claim"
+        ],
+        [
+          "r103",
+          "says",
+          "the second batch, _class_attribute's descriptor and property paths and _set_attribute's two, measures 117.4s at 130 modules against the first batch's 121.5s and the baseline's 343.0s, with put 24,723,340 against 26,786,898. It stores 3,209 MORE references, 0.13 per cent, over 1,271 more scope evaluations, and I did not isolate where those come from. Every published figure is identical and the row-level comparison finds zero differing fields, so nothing reaches a verdict on this tree"
+        ],
+        [
+          "r104",
+          "sort",
+          "claim"
+        ],
+        [
+          "r104",
+          "basis",
+          "measured"
+        ],
+        [
+          "r104",
+          "says",
+          "ai_cost_probe.py at LIMIT=130 in wt-battery-4 against wt-battery-2 and wt-battery-3, and the full-input run in wt-battery-3 against the baseline"
+        ],
+        [
+          "r104",
+          "supports",
+          "r103"
+        ]
+      ],
+      "id": "8258654785cfa3da"
+    },
+    {
+      "at": "2026-09-19T14:40:32+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "link a17 r103 --as rests-on",
+      "parents": [
+        "8258654785cfa3da"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r103"
+        ]
+      ],
+      "id": "20faa41acced9982"
+    },
+    {
+      "at": "2026-09-19T14:42:09+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "add-claim c28 'a reused battery worktree sitting on an older commit keeps directories the newer layout moved, and an rsync without --delete leaves them, so two arms of an A/B can differ in a whole directory nobody named. It has cost three invalid comparisons here: an empty ext/ producing a 210-row baseline, a diverged ext/ under one arm, and a stale extensions/python/ext/ left from before the integrations moved to the repository root' --because 'measured each time: the arms were fingerprinted by hashing every provider source and the digests disagreed' --basis measured",
+      "parents": [
+        "20faa41acced9982"
+      ],
+      "assert": [
+        [
+          "c28",
+          "sort",
+          "claim"
+        ],
+        [
+          "c28",
+          "says",
+          "a reused battery worktree sitting on an older commit keeps directories the newer layout moved, and an rsync without --delete leaves them, so two arms of an A/B can differ in a whole directory nobody named. It has cost three invalid comparisons here: an empty ext/ producing a 210-row baseline, a diverged ext/ under one arm, and a stale extensions/python/ext/ left from before the integrations moved to the repository root"
+        ],
+        [
+          "r105",
+          "sort",
+          "claim"
+        ],
+        [
+          "r105",
+          "basis",
+          "measured"
+        ],
+        [
+          "r105",
+          "says",
+          "measured each time: the arms were fingerprinted by hashing every provider source and the digests disagreed"
+        ],
+        [
+          "r105",
+          "supports",
+          "c28"
+        ]
+      ],
+      "id": "45de0acc7c118ab4"
+    },
+    {
+      "at": "2026-09-19T14:42:09+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "add-claim c29 'the fix is to fingerprint the input before trusting any A/B: hash every source file the run will read, on both sides, and refuse to compare until the digests match. Naming the paths is not enough, because the failure is a path that should not exist' --because c28",
+      "parents": [
+        "45de0acc7c118ab4"
+      ],
+      "assert": [
+        [
+          "c29",
+          "sort",
+          "claim"
+        ],
+        [
+          "c29",
+          "says",
+          "the fix is to fingerprint the input before trusting any A/B: hash every source file the run will read, on both sides, and refuse to compare until the digests match. Naming the paths is not enough, because the failure is a path that should not exist"
+        ],
+        [
+          "r106",
+          "sort",
+          "claim"
+        ],
+        [
+          "r106",
+          "says",
+          "c28"
+        ],
+        [
+          "r106",
+          "supports",
+          "c29"
+        ]
+      ],
+      "id": "06a1ed82f9e71a85"
+    },
+    {
+      "at": "2026-09-19T14:42:09+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "link c29 c28 --as rests-on",
+      "parents": [
+        "06a1ed82f9e71a85"
+      ],
+      "assert": [
+        [
+          "c29",
+          "rests_on",
+          "c28"
+        ]
+      ],
+      "id": "572c1ea170f09a75"
+    },
+    {
+      "at": "2026-09-19T14:45:39+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "add-claim r107 'the cost is LINEAR in stored references and the constant is what this change moved. After: 100 modules 11.4s over 276,677 references, 41.2us each; 130 modules 117.4s over 2,459,912, 47.7us; 158 modules 138.4s over 3,003,989, 46.1us. Before: 130 modules 343.0s over 2,456,718, 139.6us. So T = c times P with c falling from about 132us to about 46us per stored reference, flat across a tenfold range of P' --because 'ai_cost_probe.py at LIMIT 100, 130 and 158 on the committed analyser, against the same probe on the analyser before it' --basis measured",
+      "parents": [
+        "572c1ea170f09a75"
+      ],
+      "assert": [
+        [
+          "r107",
+          "sort",
+          "claim"
+        ],
+        [
+          "r107",
+          "says",
+          "the cost is LINEAR in stored references and the constant is what this change moved. After: 100 modules 11.4s over 276,677 references, 41.2us each; 130 modules 117.4s over 2,459,912, 47.7us; 158 modules 138.4s over 3,003,989, 46.1us. Before: 130 modules 343.0s over 2,456,718, 139.6us. So T = c times P with c falling from about 132us to about 46us per stored reference, flat across a tenfold range of P"
+        ],
+        [
+          "r108",
+          "sort",
+          "claim"
+        ],
+        [
+          "r108",
+          "basis",
+          "measured"
+        ],
+        [
+          "r108",
+          "says",
+          "ai_cost_probe.py at LIMIT 100, 130 and 158 on the committed analyser, against the same probe on the analyser before it"
+        ],
+        [
+          "r108",
+          "supports",
+          "r107"
+        ]
+      ],
+      "id": "6ec1f5ca680668ab"
+    },
+    {
+      "at": "2026-09-19T14:45:39+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "add-claim c30 'what remains is not the cost model but the store it fills: stored references jump from 276,677 at 100 modules to 2,459,912 at 130, an 8.9x rise for 30 per cent more source, and mean set size from 4.3 to 27.7. Since T is linear in that number, every further second has to come from making the analysis hold fewer references rather than from touching the fixpoint' --because r107",
+      "parents": [
+        "6ec1f5ca680668ab"
+      ],
+      "assert": [
+        [
+          "c30",
+          "sort",
+          "claim"
+        ],
+        [
+          "c30",
+          "says",
+          "what remains is not the cost model but the store it fills: stored references jump from 276,677 at 100 modules to 2,459,912 at 130, an 8.9x rise for 30 per cent more source, and mean set size from 4.3 to 27.7. Since T is linear in that number, every further second has to come from making the analysis hold fewer references rather than from touching the fixpoint"
+        ],
+        [
+          "r109",
+          "sort",
+          "claim"
+        ],
+        [
+          "r109",
+          "says",
+          "r107"
+        ],
+        [
+          "r109",
+          "supports",
+          "c30"
+        ]
+      ],
+      "id": "2d31183742aa190c"
+    },
+    {
+      "at": "2026-09-19T14:45:39+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "link i2 c30 --as rests-on",
+      "parents": [
+        "2d31183742aa190c"
+      ],
+      "assert": [
+        [
+          "i2",
+          "rests_on",
+          "c30"
+        ]
+      ],
+      "id": "53ff3365fa852d3d"
+    },
+    {
+      "at": "2026-09-19T14:45:40+10:00",
+      "after": "2af05a2b0ed4470e2585a64bbae9bd48477b5450",
+      "did": "link a17 r107 --as rests-on",
+      "parents": [
+        "53ff3365fa852d3d"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r107"
+        ]
+      ],
+      "id": "24cfedb2dc9506be"
     }
   ]
 }
