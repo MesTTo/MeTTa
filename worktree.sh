@@ -74,20 +74,13 @@ fi
 # FIRST, because everything below reads files that live in a component:
 # engine/build.sh, engine/main.pl and the chapter 19 examples are all inside
 # one, and `git worktree add` leaves each component as an empty directory.
-#
-# `protocol.file.allow` is passed for this ONE command rather than written into
-# the repository's config. Git refuses the `file` transport for submodules by
-# default since CVE-2022-39253, because a repository you clone can name a local
-# path in its .gitmodules; here the paths are this repository's own committed
-# ones, and scoping the flag to the invocation means a clone of this repository
-# does not inherit a relaxed transport policy.
-#
-# --recursive because a component can mount another: the twins carry the .metta
-# corpus they are twins OF.
-bounded git -C "$HERE" -c protocol.file.allow=always submodule update --init --recursive ||
+# components.sh is the one mechanism for that, here and in an existing checkout
+# adopting the mount, and it needs no relaxation of git's transport policy
+# because it clones and fetches directly rather than through the submodule
+# machinery CVE-2022-39253 restricted.
+bounded sh "$HERE/components.sh" ||
     { echo "worktree.sh: the components could not be checked out; this worktree has no engine to run" >&2
       exit 1; }
-echo "worktree.sh: populated $(git -C "$HERE" ls-files --stage | awk '$1=="160000"' | wc -l) component(s)"
 
 copied=0
 for artefact in extensions/mork/mork_ffi/target/release/libmork_ffi.so extensions/mork/mork_ffi/morklib.so; do

@@ -56,8 +56,8 @@ git -C "$project_dir" worktree add --quiet -b "$branch" "$tree"
 # stays the precise one this test needs: an engine that is there, running one
 # backend fewer. Without this the probe answers nothing and the test reports
 # that it can no longer show its own difference.
-bounded git -C "$tree" -c protocol.file.allow=always submodule update --init --recursive \
-    >/dev/null 2>&1 ||
+cp "$project_dir/components.sh" "$tree/components.sh"
+bounded sh "$tree/components.sh" >/dev/null 2>&1 ||
     { echo "FAIL: the probe worktree's components could not be checked out" >&2; exit 1; }
 
 # The probe asks the ENGINE whether the backend registered, rather than
