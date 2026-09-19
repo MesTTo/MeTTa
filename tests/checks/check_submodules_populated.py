@@ -12,12 +12,12 @@ so nobody else can populate it at all, and `git submodule update` passes over it
 Assumes: a git checkout. A tree git will not enumerate is reported, never assumed empty.
 Guarantees:
   - a gitlink whose working tree is absent or empty is reported with the command that fixes it
-    [tested: tests/checks/check_submodules_populated_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_submodules_populated_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb]
   - a gitlink absent from `.gitmodules`, and a `.gitmodules` entry with no gitlink, are each
-    reported [tested: tests/checks/check_submodules_populated_selftest.py; commit=WORKTREE]
+    reported [tested: tests/checks/check_submodules_populated_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb]
   - a checkout with no submodules passes and says so, so this lane is silent until the split
     lands rather than needing to be added with it [tested:
-    tests/checks/check_submodules_populated_selftest.py; commit=WORKTREE]
+    tests/checks/check_submodules_populated_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb]
 Fails when: run outside a git checkout, which it reports rather than passing.
 Open Obligations:
   To Do: None

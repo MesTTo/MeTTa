@@ -38,7 +38,7 @@ Guarantees:
   - a `_workspace.py` whose `EXT` reaches a different set of directories than
     the glob names is reported, so a moved `ext/` fails here rather than as
     `ModuleNotFoundError` in the member suites [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb]
   - a member whose version, pymetta pin, entry point, README or tests are
     missing is reported [tested: tests/checks/check_layering_selftest.py;
     commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
@@ -282,7 +282,7 @@ def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list
     # outside it and the entry is what keeps the resolution in this checkout rather
     # than an index. It is not matched by the members glob, so the roster alone
     # cannot know it, and it is not a member, so nothing may demand it be declared
-    # [tested: tests/checks/check_layering_selftest.py; commit=WORKTREE].
+    # [tested: tests/checks/check_layering_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb].
     allowed = named | {manifest.get("project", {}).get("name", "")}
     return [
         *(
