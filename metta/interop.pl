@@ -1072,9 +1072,12 @@ metta_registration_names([Importer, _File, Names], Named) :-
 %[source: docs/journal/2026-09-09-packages-are-equations.md, laws 4 and 5].
 metta_registration_names(['=', [package, backing], Row], Named) :-
     nonvar(Row),
-    Row = [Token|Rest],
+    %Law 6's shape exactly, `(<token> <artifact> <heads>)`, rather than taking
+    %the last element of whatever length the row has: a row of another shape is
+    %one this reader does not understand, and claiming its last element as the
+    %head list would be a guess where the four spellings above make none.
+    Row = [Token, _Artifact, Names],
     atom(Token),
-    append(_, [Names], Rest),
     !,
     literal_registration_names(Names, Named).
 metta_registration_names(_, []).
