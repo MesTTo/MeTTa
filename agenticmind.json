@@ -4817,6 +4817,47 @@
       "tags": [
         "source"
       ]
+    },
+    "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it": {
+      "title": "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+    },
+    "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON": {
+      "title": "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON",
+      "supports": [
+        "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence": {
+      "title": "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence",
+      "supports": [
+        {
+          "node": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "status": "untried"
+        },
+        {
+          "node": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "relation": "addresses",
+          "target": "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+        }
+      ]
+    },
+    "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict": {
+      "title": "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict",
+      "supports": [
+        {
+          "node": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5632,6 +5673,14 @@
       "status": "done",
       "addresses": [
         "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+      ]
+    },
+    "register that module as a foundation with no predecessors, and declare it in the three packages that import it": {
+      "title": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
       ]
     }
   },
@@ -25078,6 +25127,127 @@
         ]
       ],
       "id": "fef578682290a352"
+    },
+    {
+      "at": "2026-09-19T22:19:31.726053+00:00",
+      "after": "f95806ea53cdb73555c695924c9653728fe02cbb",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON\", \"tags\": [\"measured\"], \"title\": \"the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence\", \"tags\": [], \"title\": \"register that module as a foundation with no predecessors, and declare it in the three packages that import it\", \"fields\": {\"effort\": 1, \"addresses\": [\"the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it\"]}}, {\"op\": \"status\", \"id\": \"register that module as a foundation with no predecessors, and declare it in the three packages that import it\", \"because\": \"both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "fef578682290a352"
+      ],
+      "assert": [
+        [
+          "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict",
+          "sort",
+          "prop"
+        ],
+        [
+          "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict",
+          "supersedes",
+          "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence"
+        ],
+        [
+          "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict",
+          "supports",
+          {
+            "node": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+            "status": "done"
+          }
+        ],
+        [
+          "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict",
+          "tags",
+          "tested"
+        ],
+        [
+          "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict",
+          "title",
+          "both layering lanes report ok where one reported a violation; the three importers the lane named after registration, _binding, _declare and testing, are exactly the three packages a search for the import finds; and the door verdict table is not stale afterwards, so growing the analysed source set changed no verdict"
+        ],
+        [
+          "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence",
+          "sort",
+          "prop"
+        ],
+        [
+          "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence",
+          "supports",
+          {
+            "node": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+            "status": "untried"
+          }
+        ],
+        [
+          "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence",
+          "supports",
+          {
+            "node": "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+            "relation": "addresses",
+            "target": "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+          }
+        ],
+        [
+          "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence",
+          "title",
+          "it imports only os, functools and pathlib, so it has no predecessors in this package the way _layers, _lazy and _version have none, and registering it makes the lane name its three importers rather than only its absence"
+        ],
+        [
+          "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON",
+          "supports",
+          "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+        ],
+        [
+          "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON",
+          "title",
+          "measured 2026-09-20: the lane reported package '_roots' is absent from BUILDS_ON, git log names commit c658a964 of 2026-09-19 as what added metta/_roots.py, and core_paths() derives the analysed source set by iterating BUILDS_ON"
+        ],
+        [
+          "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it",
+          "title",
+          "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+        ],
+        [
+          "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "sort",
+          "approach"
+        ],
+        [
+          "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "addresses",
+          "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+        ],
+        [
+          "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "effort",
+          1
+        ],
+        [
+          "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "status",
+          "done"
+        ],
+        [
+          "register that module as a foundation with no predecessors, and declare it in the three packages that import it",
+          "title",
+          "register that module as a foundation with no predecessors, and declare it in the three packages that import it"
+        ]
+      ],
+      "id": "e201eaeb95f87504"
     }
   ]
 }
