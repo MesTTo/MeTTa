@@ -8,6 +8,14 @@
     "g2": {
       "want": "a checkout's components can be provisioned from any starting state without losing untracked build output or somebody's work",
       "weight": 40
+    },
+    "g3": {
+      "want": "any gate verdict names the exact tree it was measured on, so an A/B comparison differs only in what is under test",
+      "weight": 75
+    },
+    "g4": {
+      "want": "every agreed item in ai-todo.md is either shipped or has a live reason it is not",
+      "weight": 65
     }
   },
   "issues": {
@@ -81,7 +89,9 @@
       "rests_on": [
         "r72",
         "r80",
-        "r73"
+        "r73",
+        "r175",
+        "c42"
       ]
     },
     "i11": {
@@ -101,6 +111,31 @@
       "blocks": [
         "g1"
       ]
+    },
+    "i13": {
+      "what": "what counts as a guard becomes a thing to get right, and a wrong mark hides a real crossing",
+      "consequence": true
+    },
+    "i14": {
+      "what": "this repository mounts eight submodules (engine, lib, examples, ext, extensions/{python,cmetta,node,mork}), and git worktree add materialises none of their worktrees while git stash create captures none of their working trees, so every battery tree was populated by hand at a different moment and drifted independently",
+      "blocks": [
+        "g3"
+      ]
+    },
+    "i15": {
+      "what": "ai-todo.md rows outlive the work that closed them, so an item agreed for building has already shipped and the row is the only thing that says otherwise",
+      "blocks": [
+        "g4"
+      ]
+    },
+    "i16": {
+      "what": "_facts is cached on the entry set, and a test that registers a fixture door adds one entry, so its key differs from the core's and all 210 rows re-solve; the suite therefore pays one whole-program solve per registering test rather than one in total",
+      "blocks": [
+        "g1"
+      ]
+    },
+    "i17": {
+      "what": "the corpus scan descends into a nested component checkout, so where language-feature-examples has its own examples mount provisioned the same corpus is counted twice and the twin set gains four entries"
     }
   },
   "approaches": {
@@ -470,6 +505,77 @@
       "rests_on": [
         "r165",
         "r170"
+      ]
+    },
+    "a24": {
+      "title": "let a crossing declare itself a GUARD, so the order analysis can tell a liveness check apart from the body's work, the way the repository already marks mechanism-internal sites with policy-inventory-exempt",
+      "status": "untried",
+      "addresses": [
+        "i10"
+      ],
+      "creates": [
+        "i13"
+      ],
+      "cost": 8
+    },
+    "a25": {
+      "title": "replace the hand-counted root walks with a contract that DERIVES both roots: a component is the nearest ancestor holding a pyproject.toml or a .git, and the workspace is the nearest holding both engine/ and lib/",
+      "status": "active",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 9,
+      "rests_on": [
+        "c45",
+        "c46"
+      ]
+    },
+    "a26": {
+      "title": "snapshot the working tree into the battery with rsync at the filesystem level, and make the same flags drive a dry-run comparison that refuses to run a gate unless the snapshot is still exact",
+      "status": "done",
+      "addresses": [
+        "i14"
+      ],
+      "cost": 5,
+      "rests_on": [
+        "c48",
+        "c49",
+        "c50"
+      ]
+    },
+    "a27": {
+      "title": "before building an agreed row, run its own acceptance criteria against the tree and strike the row with the evidence when they already pass",
+      "status": "active",
+      "addresses": [
+        "i15"
+      ],
+      "cost": 2,
+      "rests_on": [
+        "c51",
+        "c52"
+      ]
+    },
+    "a28": {
+      "title": "seed a fresh solve from an already-solved core store and schedule only the new entries, so a fixture door costs the work it reaches rather than the whole program",
+      "status": "untried",
+      "addresses": [
+        "i16"
+      ],
+      "cost": 6,
+      "rests_on": [
+        "c53",
+        "c54"
+      ]
+    },
+    "a29": {
+      "title": "check a derivation by its RESULT rather than its spelling: carry module-level path bindings forward and refuse one that names a path which does not exist, exempting only what the source itself names under ai-tmp",
+      "status": "done",
+      "addresses": [
+        "i4"
+      ],
+      "cost": 3,
+      "rests_on": [
+        "c56"
       ]
     }
   },
@@ -1822,6 +1928,317 @@
           "status": "failed"
         }
       ]
+    },
+    "r175": {
+      "says": "the door-order gate's mixed flag refuses COMPOSITION, not a defect. Order.mixed is native and (calls or contracts), and native is the union over the whole dependency closure. Of 227 rows, 130 are mixed and the 97 that are not are not for exactly two reasons: 64 call no other door at all, and 33 reach nothing native. So every door that both composes and transitively touches the engine is refused, and every space door reaches SpaceHandle._space"
+    },
+    "r172": {
+      "says": "grouped the full Order records from the committed analyser; space:__iadd__ is the clean case, four native crossings all inherited from metta._spaces.handle and metta._spaces.lifetime, none in its own body, and its four calls are space:add, admits, capacity, covers",
+      "supports": [
+        "r175"
+      ],
+      "basis": "measured"
+    },
+    "r173": {
+      "says": "the proposal built on it was refuted by test_door_order_resolves_inherited_properties_and_distinguishes_foreign_names, which plants a door whose body constructs a Space and asserts it is mixed because the CONSTRUCTOR crosses. That crossing is reached through a helper exactly as SpaceHandle._space is, so there is no structural difference between the two and no 'own body' reading separates them. And derive already excludes crossings reached through another DOOR: helpers is calls minus door bodies",
+      "attacks": [
+        "r175"
+      ],
+      "basis": "tested"
+    },
+    "c42": {
+      "says": "the door-order mixed flag is correct as designed and the 130 rows are genuinely mixed: their own helper chains reach the engine AND they call doors. What makes it ubiquitous is one guard. SpaceHandle._space refuses a dropped handle and, when the space is scope-attached, crosses to confirm lib_thread:scope_space_live, and every engine call reads the space name through it deliberately, so a dropped handle cannot reach the engine at all. So nearly every space door crosses once for liveness and then delegates"
+    },
+    "r174": {
+      "says": "read handle.py:431-472 and store.py:636-652, where _install_relative_write_declaration reaches space._space before calling space.admits",
+      "supports": [
+        "c42"
+      ],
+      "basis": "source"
+    },
+    "r176": {
+      "says": "it changes what 130 published verdicts mean, which is a decision about what a door order IS rather than a repair. The alternative is making the lane a REPORT until the backlog clears, which is this repository's own idiom for a gate with a backlog",
+      "supports": [
+        {
+          "node": "a24",
+          "status": "untried"
+        }
+      ]
+    },
+    "r180": {
+      "says": "L104's remove-one already exists as subtract-atom: it takes ONE occurrence and answers whether one was there, it answers False without waiting for another writer, it works inside a transaction and a failed transaction restores the copy it consumed, and the Python surface spells it space.remove(atom) and space -= atom"
+    },
+    "r177": {
+      "says": "examples/ch04-spaces-and-matching/.../10-subtract_atom.metta and examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta, both under the gate, plus the space:remove door's own contract",
+      "supports": [
+        "r180"
+      ],
+      "basis": "tested"
+    },
+    "c43": {
+      "says": "the L104 ledger line contradicted a recorded ruling rather than an undone piece of work: the CHR journal entry of 2026-09-08 says in as many words that subtract-atom is the operation and that adding remove-one would duplicate it. A todo line can outlive the decision that settles it, so a stale item is not only work not done but work decided against"
+    },
+    "r178": {
+      "says": "docs/journal/2026-09-08-production-rules-through-chr.md:56 and its probe table at lines 36-42",
+      "supports": [
+        "c43"
+      ],
+      "basis": "source"
+    },
+    "r185": {
+      "says": "cancellation interrupts a body with no yield point, so L055's stated blocker is stale. lib_thread cancels a worker with thread_signal/2 at line 515, and SWI checks signals between inferences: a thread running spin(3,000,000,000), signalled 0.3 seconds in, ends as exception(cancelled_by_probe) in 0.050 seconds. All 78 lib_thread tests pass, eight of them cancellation"
+    },
+    "r179": {
+      "says": "ai_signal_probe.pl in wt-battery-3, and the lib_thread plunit suite run whole",
+      "supports": [
+        "r185"
+      ],
+      "basis": "measured"
+    },
+    "c44": {
+      "says": "two of the three items agreed for building are stale, and both were stale against something already recorded rather than against undone work: remove-one against the CHR journal's ruling of 2026-09-08, and L055's blocker against a mechanism that has since been replaced by thread_signal. A ledger line outlives the thing that settles it, so reading the corpus and the journal first is not diligence, it is the cheapest way to not build something twice"
+    },
+    "r181": {
+      "says": "r180 and r185",
+      "supports": [
+        "c44"
+      ],
+      "basis": "measured"
+    },
+    "r182": {
+      "says": "243 counts across 203 files at six depths, of which 167 resolved to just two directories under ten different names; the split made it worse because moving a file between components changes its depth",
+      "supports": [
+        {
+          "node": "a25",
+          "status": "untried"
+        }
+      ]
+    },
+    "c45": {
+      "says": "a file that finds the seat in order to put it on sys.path CANNOT use a resolver that lives in the package it is finding. 40 of the 134 files are that shape, and they get the derivation inline instead, which is still not a count. The test for it is not 'does it import metta' but 'is the walk used at or above the end of the import block', because a probe that never imports metta still sets sys.path from its walk"
+    },
+    "r183": {
+      "says": "the first reading missed 22 files and ruff reported them as undefined names",
+      "supports": [
+        "c45"
+      ],
+      "basis": "measured"
+    },
+    "c46": {
+      "says": "text surgery on Python made exactly the two mistakes a parser cannot: an import inserted INSIDE a triple-quoted string holding an embedded program, and a pathlib. prefix left dangling when only the Path(...) part matched. Python's own ast fixed both, and three further rounds each found one more real defect: anchoring on an import's start line splits a parenthesised import, the derivation must use the file's OWN spelling of Path, and .git alone is not a marker because the tree the gates run in is populated by rsync and has none"
+    },
+    "r184": {
+      "says": "five rounds, each caught by ruff or by a failing parse rather than by reading",
+      "supports": [
+        "c46"
+      ],
+      "basis": "measured"
+    },
+    "r186": {
+      "says": "applied to 134 files: 71 workspace(), 34 seat(), 40 derived inline. mypy clean over 172 files, ruff 360 against a 361 baseline with zero introduced undefined names, unused imports or parse errors, and the contract's own 13 tests pass including in a history-less tree",
+      "supports": [
+        {
+          "node": "a25",
+          "status": "active"
+        }
+      ]
+    },
+    "r187": {
+      "says": "four A/B comparisons in this repository were invalid because their battery trees differed in more than the file under test",
+      "supports": [
+        "g3"
+      ],
+      "basis": "measured"
+    },
+    "r188": {
+      "says": "read .gitmodules and worktree.sh, whose own header records that git worktree add leaves one empty directory per component",
+      "supports": [
+        "i14"
+      ],
+      "basis": "source"
+    },
+    "c47": {
+      "says": "the 169-failure repository-suite run of 2026-09-19 was an artifact of a mismatched battery, not of the root migration"
+    },
+    "r189": {
+      "says": "wt-battery-6 held revision 14f5c43b5's engine while carrying wt-merge's Python tree; the dominant failure was Unknown procedure metta_release_space/2 against a defined metta_release_space/1, an arity no path-constant change can produce, and 199 Python files plus atom_index.pl, host_transactions.pl and source_origins.pl differed between the trees",
+      "supports": [
+        "c47"
+      ],
+      "basis": "measured"
+    },
+    "c48": {
+      "says": "rsync's own dry run is a sound equality check between two trees: run with the same flags after a real sync it prints nothing exactly when they match, and otherwise names each drifted path"
+    },
+    "r190": {
+      "says": "planted an untouched copy, a modified file, an extra file and a missing file; the first was accepted and the other three were refused by name",
+      "supports": [
+        "c48"
+      ],
+      "basis": "tested"
+    },
+    "c49": {
+      "says": "directory mtimes must be excluded from that comparison, because provisioning writes the excluded ai-tmp/ into the tree it has just copied and the moved parent mtime reads as drift"
+    },
+    "r191": {
+      "says": "verify refused a correct snapshot with .d..t...... ./ until -O was applied to both invocations",
+      "supports": [
+        "c49"
+      ],
+      "basis": "measured"
+    },
+    "c50": {
+      "says": "components.sh and worktree.sh cannot serve a pre-commit gate run, because both provision from COMMITTED state: components.sh checks components out where the superproject pins them and worktree.sh reproduces the main checkout's configuration, and neither carries modified or untracked files"
+    },
+    "r192": {
+      "says": "read both scripts' headers and bodies at 12919aabd",
+      "supports": [
+        "c50"
+      ],
+      "basis": "source"
+    },
+    "r193": {
+      "says": "tools/battery.sh provisions, verifies and runs, tools/battery_selftest.sh exhausts the four drift shapes plus the excluded-scratch false positive, and the pair is registered as the battery-selftest GATE lane",
+      "supports": [
+        {
+          "node": "a26",
+          "status": "done"
+        }
+      ]
+    },
+    "r194": {
+      "says": "three of the agreed rows were stale: L104 remove-one already ships as subtract-atom decided 2026-09-08, and L055 structured concurrency shipped in full at f80cc416d on the same day while its row still read blocked",
+      "supports": [
+        "i15"
+      ],
+      "basis": "measured"
+    },
+    "c51": {
+      "says": "L055 structured concurrency shipped in full and its row was stale: metta.scope() with cancel, cancelled, close and keep at parallel.py:1261, channels as spaces and cancel-answers-the-truth in the f80cc416d merge subject, and capture public as a MeTTa word via lib_thread.pl:234 capture/2 defined at line 900"
+    },
+    "r195": {
+      "says": "ran examples/ch17-concurrency-and-the-loop/07-scopes_and_captured_calls.metta: nine result groups all true, including the scope releasing an unreturned space, an inner space transferring to its outer scope, and a captured call evaluating in its home after that home changed",
+      "supports": [
+        "c51"
+      ],
+      "basis": "tested"
+    },
+    "c52": {
+      "says": "searching only the Python surface cannot decide whether a MeTTa capability exists, because this repository treats MeTTa as the meaning and a host language as a notation"
+    },
+    "r196": {
+      "says": "capture answered absent in dir(metta) and present as capture/2 in lib/lib_thread/lib_thread.pl",
+      "supports": [
+        "c52"
+      ],
+      "basis": "source"
+    },
+    "r197": {
+      "says": "L104 and L055 struck with evidence; L069 and L070 not yet checked this way",
+      "supports": [
+        {
+          "node": "a27",
+          "status": "active"
+        }
+      ]
+    },
+    "r198": {
+      "says": "210 core rows give 210 core entry points; two fixture doors produce two further distinct keys, so two tests need three cache slots against lru_cache(maxsize=2), and test_door_rows registers a fixture door in most of its tests",
+      "supports": [
+        "i16"
+      ],
+      "basis": "measured"
+    },
+    "c53": {
+      "says": "raising the lru_cache size cannot fix this, because the keys never repeat across tests: every test contributes a different fixture entry"
+    },
+    "r199": {
+      "says": "compared the entry frozensets for two fixture doors against the core set; all three differ",
+      "supports": [
+        "c53"
+      ],
+      "basis": "measured"
+    },
+    "c54": {
+      "says": "the saving from seeding a solved base is bounded by the fixpoint's share of a solve, because solve() ends with a reporting pass that re-evaluates every scope in self.facts whatever the entry set is"
+    },
+    "r200": {
+      "says": "read CallGraph.solve at extensions/python/metta/doors/_analysis.py:1941, which runs two fixpoint passes and then sets _reporting and re-evaluates every scope",
+      "supports": [
+        "c54"
+      ],
+      "basis": "source"
+    },
+    "r201": {
+      "says": "the fixpoint-versus-reporting split is being measured first, since c54 makes that share the ceiling on what the approach can save",
+      "supports": [
+        {
+          "node": "a28",
+          "status": "untried"
+        }
+      ]
+    },
+    "c55": {
+      "says": "the inline bootstrap derivation used .git as its marker, which is a SEAT marker: this superproject mounts eight submodules and each has a .git, so the walk stopped at the nearest component instead of the tree holding engine/ and lib/, and 29 sites resolved to extensions/python where they had resolved to the workspace"
+    },
+    "r202": {
+      "says": "evaluated the old parents[N] subexpression and the new resolver subexpression from each file's own location and diffed them: 151 rewritten sites, 122 agreeing and 29 disagreeing, every disagreement the same shape",
+      "supports": [
+        "c55"
+      ],
+      "basis": "measured"
+    },
+    "c56": {
+      "says": "a marker check cannot catch that class, because the marker was correct and only the root it reached was wrong; what must differ is the path the binding goes on to name, so the check carries module-level bindings forward and requires each resulting path to exist"
+    },
+    "r203": {
+      "says": "measured over the seat: 40 derivations all naming a real path, and 72 path bindings in files that walk, 71 real with the one exception a probe's own output under ai-tmp",
+      "supports": [
+        "c56"
+      ],
+      "basis": "measured"
+    },
+    "c57": {
+      "says": "the saving available to a28 is 97.5 per cent of a solve, not a fraction of it"
+    },
+    "r204": {
+      "says": "instrumented CallGraph.solve over the merged tree: fixpoint 95.28s of 97.73s total and the reporting pass 2.45s, with 1899 scopes, 105,242 slots and 3,034,712 stored references",
+      "supports": [
+        "c57"
+      ],
+      "basis": "measured"
+    },
+    "r205": {
+      "says": "the migration it reported as applied put 29 sites on the wrong root, which the equivalence check found and repaired; the count of files touched was right and the resolver chosen for 29 of them was not",
+      "attacks": [
+        "r182"
+      ]
+    },
+    "r206": {
+      "says": "check_root_walks now reports it, the selftest plants a derivation using a correct marker on the wrong root and requires it to be named, and both a correct derivation and a scratch output must not be",
+      "supports": [
+        {
+          "node": "a29",
+          "status": "done"
+        }
+      ]
+    },
+    "r207": {
+      "says": "test_the_twin_set_is_derived_from_the_one_corpus fails in wt-merge with four extra items under extensions/python/examples/language-feature-examples/examples/, a declared submodule in that component's own .gitmodules pointing at components/MeTTa-Examples.git; the main checkout's copy of that component predates the mount and has no .gitmodules, so the same test passes there",
+      "supports": [
+        "i17"
+      ],
+      "basis": "measured"
+    },
+    "c58": {
+      "says": "that failure is not the root migration: the test's REPO derivation resolves to the same workspace before and after, as the equivalence check showed for all 151 rewritten sites"
+    },
+    "r208": {
+      "says": "ran tests/repository/test_twin_coverage.py: 1 failed and 114 passed, against 10 errors in the mismatched-battery run, and the one failure names corpus paths rather than a changed root",
+      "supports": [
+        "c58"
+      ],
+      "basis": "tested"
     }
   },
   "log": [
@@ -8819,6 +9236,1790 @@
         ]
       ],
       "id": "39ef72cb55161e13"
+    },
+    {
+      "at": "2026-09-19T16:09:39+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim r175 'the door-order gate'\"'\"'s mixed flag refuses COMPOSITION, not a defect. Order.mixed is native and (calls or contracts), and native is the union over the whole dependency closure. Of 227 rows, 130 are mixed and the 97 that are not are not for exactly two reasons: 64 call no other door at all, and 33 reach nothing native. So every door that both composes and transitively touches the engine is refused, and every space door reaches SpaceHandle._space' --because 'grouped the full Order records from the committed analyser; space:__iadd__ is the clean case, four native crossings all inherited from metta._spaces.handle and metta._spaces.lifetime, none in its own body, and its four calls are space:add, admits, capacity, covers' --basis measured",
+      "parents": [
+        "39ef72cb55161e13"
+      ],
+      "assert": [
+        [
+          "r172",
+          "sort",
+          "claim"
+        ],
+        [
+          "r172",
+          "basis",
+          "measured"
+        ],
+        [
+          "r172",
+          "says",
+          "grouped the full Order records from the committed analyser; space:__iadd__ is the clean case, four native crossings all inherited from metta._spaces.handle and metta._spaces.lifetime, none in its own body, and its four calls are space:add, admits, capacity, covers"
+        ],
+        [
+          "r172",
+          "supports",
+          "r175"
+        ],
+        [
+          "r175",
+          "sort",
+          "claim"
+        ],
+        [
+          "r175",
+          "says",
+          "the door-order gate's mixed flag refuses COMPOSITION, not a defect. Order.mixed is native and (calls or contracts), and native is the union over the whole dependency closure. Of 227 rows, 130 are mixed and the 97 that are not are not for exactly two reasons: 64 call no other door at all, and 33 reach nothing native. So every door that both composes and transitively touches the engine is refused, and every space door reaches SpaceHandle._space"
+        ]
+      ],
+      "id": "8496b29c55c8cb44"
+    },
+    {
+      "at": "2026-09-19T16:09:39+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link i10 r175 --as rests-on",
+      "parents": [
+        "8496b29c55c8cb44"
+      ],
+      "assert": [
+        [
+          "i10",
+          "rests_on",
+          "r175"
+        ]
+      ],
+      "id": "11409f4e3bd0111f"
+    },
+    {
+      "at": "2026-09-19T16:18:34+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "attack r175 --because 'the proposal built on it was refuted by test_door_order_resolves_inherited_properties_and_distinguishes_foreign_names, which plants a door whose body constructs a Space and asserts it is mixed because the CONSTRUCTOR crosses. That crossing is reached through a helper exactly as SpaceHandle._space is, so there is no structural difference between the two and no '\"'\"'own body'\"'\"' reading separates them. And derive already excludes crossings reached through another DOOR: helpers is calls minus door bodies' --basis tested",
+      "parents": [
+        "11409f4e3bd0111f"
+      ],
+      "assert": [
+        [
+          "r173",
+          "sort",
+          "claim"
+        ],
+        [
+          "r173",
+          "attacks",
+          "r175"
+        ],
+        [
+          "r173",
+          "basis",
+          "tested"
+        ],
+        [
+          "r173",
+          "says",
+          "the proposal built on it was refuted by test_door_order_resolves_inherited_properties_and_distinguishes_foreign_names, which plants a door whose body constructs a Space and asserts it is mixed because the CONSTRUCTOR crosses. That crossing is reached through a helper exactly as SpaceHandle._space is, so there is no structural difference between the two and no 'own body' reading separates them. And derive already excludes crossings reached through another DOOR: helpers is calls minus door bodies"
+        ]
+      ],
+      "id": "1b0588badd165daf"
+    },
+    {
+      "at": "2026-09-19T16:18:34+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c42 'the door-order mixed flag is correct as designed and the 130 rows are genuinely mixed: their own helper chains reach the engine AND they call doors. What makes it ubiquitous is one guard. SpaceHandle._space refuses a dropped handle and, when the space is scope-attached, crosses to confirm lib_thread:scope_space_live, and every engine call reads the space name through it deliberately, so a dropped handle cannot reach the engine at all. So nearly every space door crosses once for liveness and then delegates' --because 'read handle.py:431-472 and store.py:636-652, where _install_relative_write_declaration reaches space._space before calling space.admits' --basis source",
+      "parents": [
+        "1b0588badd165daf"
+      ],
+      "assert": [
+        [
+          "c42",
+          "sort",
+          "claim"
+        ],
+        [
+          "c42",
+          "says",
+          "the door-order mixed flag is correct as designed and the 130 rows are genuinely mixed: their own helper chains reach the engine AND they call doors. What makes it ubiquitous is one guard. SpaceHandle._space refuses a dropped handle and, when the space is scope-attached, crosses to confirm lib_thread:scope_space_live, and every engine call reads the space name through it deliberately, so a dropped handle cannot reach the engine at all. So nearly every space door crosses once for liveness and then delegates"
+        ],
+        [
+          "r174",
+          "sort",
+          "claim"
+        ],
+        [
+          "r174",
+          "basis",
+          "source"
+        ],
+        [
+          "r174",
+          "says",
+          "read handle.py:431-472 and store.py:636-652, where _install_relative_write_declaration reaches space._space before calling space.admits"
+        ],
+        [
+          "r174",
+          "supports",
+          "c42"
+        ]
+      ],
+      "id": "04c59b7f473f49ad"
+    },
+    {
+      "at": "2026-09-19T16:18:34+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link i10 c42 --as rests-on",
+      "parents": [
+        "04c59b7f473f49ad"
+      ],
+      "assert": [
+        [
+          "i10",
+          "rests_on",
+          "c42"
+        ]
+      ],
+      "id": "10ef526a191e0e9f"
+    },
+    {
+      "at": "2026-09-19T16:18:34+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-approach a24 'let a crossing declare itself a GUARD, so the order analysis can tell a liveness check apart from the body'\"'\"'s work, the way the repository already marks mechanism-internal sites with policy-inventory-exempt' --addresses i10 --cost 8 --creates 'what counts as a guard becomes a thing to get right, and a wrong mark hides a real crossing'",
+      "parents": [
+        "10ef526a191e0e9f"
+      ],
+      "assert": [
+        [
+          "i13",
+          "sort",
+          "issue"
+        ],
+        [
+          "i13",
+          "consequence",
+          true
+        ],
+        [
+          "i13",
+          "what",
+          "what counts as a guard becomes a thing to get right, and a wrong mark hides a real crossing"
+        ],
+        [
+          "a24",
+          "sort",
+          "approach"
+        ],
+        [
+          "a24",
+          "addresses",
+          "i10"
+        ],
+        [
+          "a24",
+          "cost",
+          8
+        ],
+        [
+          "a24",
+          "creates",
+          "i13"
+        ],
+        [
+          "a24",
+          "status",
+          "untried"
+        ],
+        [
+          "a24",
+          "title",
+          "let a crossing declare itself a GUARD, so the order analysis can tell a liveness check apart from the body's work, the way the repository already marks mechanism-internal sites with policy-inventory-exempt"
+        ]
+      ],
+      "id": "6ad1ba7b941508f0"
+    },
+    {
+      "at": "2026-09-19T16:18:34+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "status a24 untried --because 'it changes what 130 published verdicts mean, which is a decision about what a door order IS rather than a repair. The alternative is making the lane a REPORT until the backlog clears, which is this repository'\"'\"'s own idiom for a gate with a backlog'",
+      "parents": [
+        "6ad1ba7b941508f0"
+      ],
+      "assert": [
+        [
+          "r176",
+          "sort",
+          "claim"
+        ],
+        [
+          "r176",
+          "says",
+          "it changes what 130 published verdicts mean, which is a decision about what a door order IS rather than a repair. The alternative is making the lane a REPORT until the backlog clears, which is this repository's own idiom for a gate with a backlog"
+        ],
+        [
+          "r176",
+          "supports",
+          {
+            "node": "a24",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "7fd150a230468488"
+    },
+    {
+      "at": "2026-09-19T16:29:20+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim r180 'L104'\"'\"'s remove-one already exists as subtract-atom: it takes ONE occurrence and answers whether one was there, it answers False without waiting for another writer, it works inside a transaction and a failed transaction restores the copy it consumed, and the Python surface spells it space.remove(atom) and space -= atom' --because 'examples/ch04-spaces-and-matching/.../10-subtract_atom.metta and examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta, both under the gate, plus the space:remove door'\"'\"'s own contract' --basis tested",
+      "parents": [
+        "7fd150a230468488"
+      ],
+      "assert": [
+        [
+          "r177",
+          "sort",
+          "claim"
+        ],
+        [
+          "r177",
+          "basis",
+          "tested"
+        ],
+        [
+          "r177",
+          "says",
+          "examples/ch04-spaces-and-matching/.../10-subtract_atom.metta and examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta, both under the gate, plus the space:remove door's own contract"
+        ],
+        [
+          "r177",
+          "supports",
+          "r180"
+        ],
+        [
+          "r180",
+          "sort",
+          "claim"
+        ],
+        [
+          "r180",
+          "says",
+          "L104's remove-one already exists as subtract-atom: it takes ONE occurrence and answers whether one was there, it answers False without waiting for another writer, it works inside a transaction and a failed transaction restores the copy it consumed, and the Python surface spells it space.remove(atom) and space -= atom"
+        ]
+      ],
+      "id": "babaea7cd5767a5e"
+    },
+    {
+      "at": "2026-09-19T16:29:41+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c43 'the L104 ledger line contradicted a recorded ruling rather than an undone piece of work: the CHR journal entry of 2026-09-08 says in as many words that subtract-atom is the operation and that adding remove-one would duplicate it. A todo line can outlive the decision that settles it, so a stale item is not only work not done but work decided against' --because 'docs/journal/2026-09-08-production-rules-through-chr.md:56 and its probe table at lines 36-42' --basis source",
+      "parents": [
+        "babaea7cd5767a5e"
+      ],
+      "assert": [
+        [
+          "c43",
+          "sort",
+          "claim"
+        ],
+        [
+          "c43",
+          "says",
+          "the L104 ledger line contradicted a recorded ruling rather than an undone piece of work: the CHR journal entry of 2026-09-08 says in as many words that subtract-atom is the operation and that adding remove-one would duplicate it. A todo line can outlive the decision that settles it, so a stale item is not only work not done but work decided against"
+        ],
+        [
+          "r178",
+          "sort",
+          "claim"
+        ],
+        [
+          "r178",
+          "basis",
+          "source"
+        ],
+        [
+          "r178",
+          "says",
+          "docs/journal/2026-09-08-production-rules-through-chr.md:56 and its probe table at lines 36-42"
+        ],
+        [
+          "r178",
+          "supports",
+          "c43"
+        ]
+      ],
+      "id": "9fbd2108ff98c82e"
+    },
+    {
+      "at": "2026-09-19T16:32:06+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim r185 'cancellation interrupts a body with no yield point, so L055'\"'\"'s stated blocker is stale. lib_thread cancels a worker with thread_signal/2 at line 515, and SWI checks signals between inferences: a thread running spin(3,000,000,000), signalled 0.3 seconds in, ends as exception(cancelled_by_probe) in 0.050 seconds. All 78 lib_thread tests pass, eight of them cancellation' --because 'ai_signal_probe.pl in wt-battery-3, and the lib_thread plunit suite run whole' --basis measured",
+      "parents": [
+        "9fbd2108ff98c82e"
+      ],
+      "assert": [
+        [
+          "r179",
+          "sort",
+          "claim"
+        ],
+        [
+          "r179",
+          "basis",
+          "measured"
+        ],
+        [
+          "r179",
+          "says",
+          "ai_signal_probe.pl in wt-battery-3, and the lib_thread plunit suite run whole"
+        ],
+        [
+          "r179",
+          "supports",
+          "r185"
+        ],
+        [
+          "r185",
+          "sort",
+          "claim"
+        ],
+        [
+          "r185",
+          "says",
+          "cancellation interrupts a body with no yield point, so L055's stated blocker is stale. lib_thread cancels a worker with thread_signal/2 at line 515, and SWI checks signals between inferences: a thread running spin(3,000,000,000), signalled 0.3 seconds in, ends as exception(cancelled_by_probe) in 0.050 seconds. All 78 lib_thread tests pass, eight of them cancellation"
+        ]
+      ],
+      "id": "cbae1a9851031cd1"
+    },
+    {
+      "at": "2026-09-19T16:32:06+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c44 'two of the three items agreed for building are stale, and both were stale against something already recorded rather than against undone work: remove-one against the CHR journal'\"'\"'s ruling of 2026-09-08, and L055'\"'\"'s blocker against a mechanism that has since been replaced by thread_signal. A ledger line outlives the thing that settles it, so reading the corpus and the journal first is not diligence, it is the cheapest way to not build something twice' --because 'r180 and r185' --basis measured",
+      "parents": [
+        "cbae1a9851031cd1"
+      ],
+      "assert": [
+        [
+          "c44",
+          "sort",
+          "claim"
+        ],
+        [
+          "c44",
+          "says",
+          "two of the three items agreed for building are stale, and both were stale against something already recorded rather than against undone work: remove-one against the CHR journal's ruling of 2026-09-08, and L055's blocker against a mechanism that has since been replaced by thread_signal. A ledger line outlives the thing that settles it, so reading the corpus and the journal first is not diligence, it is the cheapest way to not build something twice"
+        ],
+        [
+          "r181",
+          "sort",
+          "claim"
+        ],
+        [
+          "r181",
+          "basis",
+          "measured"
+        ],
+        [
+          "r181",
+          "says",
+          "r180 and r185"
+        ],
+        [
+          "r181",
+          "supports",
+          "c44"
+        ]
+      ],
+      "id": "99b1327a3a95bd83"
+    },
+    {
+      "at": "2026-09-19T16:44:59+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-approach a25 'replace the hand-counted root walks with a contract that DERIVES both roots: a component is the nearest ancestor holding a pyproject.toml or a .git, and the workspace is the nearest holding both engine/ and lib/' --addresses i1 --cost 9 --because '243 counts across 203 files at six depths, of which 167 resolved to just two directories under ten different names; the split made it worse because moving a file between components changes its depth'",
+      "parents": [
+        "99b1327a3a95bd83"
+      ],
+      "assert": [
+        [
+          "a25",
+          "sort",
+          "approach"
+        ],
+        [
+          "a25",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a25",
+          "cost",
+          9
+        ],
+        [
+          "a25",
+          "status",
+          "untried"
+        ],
+        [
+          "a25",
+          "title",
+          "replace the hand-counted root walks with a contract that DERIVES both roots: a component is the nearest ancestor holding a pyproject.toml or a .git, and the workspace is the nearest holding both engine/ and lib/"
+        ],
+        [
+          "r182",
+          "sort",
+          "claim"
+        ],
+        [
+          "r182",
+          "says",
+          "243 counts across 203 files at six depths, of which 167 resolved to just two directories under ten different names; the split made it worse because moving a file between components changes its depth"
+        ],
+        [
+          "r182",
+          "supports",
+          {
+            "node": "a25",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "126b2d3023006a20"
+    },
+    {
+      "at": "2026-09-19T16:44:59+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c45 'a file that finds the seat in order to put it on sys.path CANNOT use a resolver that lives in the package it is finding. 40 of the 134 files are that shape, and they get the derivation inline instead, which is still not a count. The test for it is not '\"'\"'does it import metta'\"'\"' but '\"'\"'is the walk used at or above the end of the import block'\"'\"', because a probe that never imports metta still sets sys.path from its walk' --because 'the first reading missed 22 files and ruff reported them as undefined names' --basis measured",
+      "parents": [
+        "126b2d3023006a20"
+      ],
+      "assert": [
+        [
+          "c45",
+          "sort",
+          "claim"
+        ],
+        [
+          "c45",
+          "says",
+          "a file that finds the seat in order to put it on sys.path CANNOT use a resolver that lives in the package it is finding. 40 of the 134 files are that shape, and they get the derivation inline instead, which is still not a count. The test for it is not 'does it import metta' but 'is the walk used at or above the end of the import block', because a probe that never imports metta still sets sys.path from its walk"
+        ],
+        [
+          "r183",
+          "sort",
+          "claim"
+        ],
+        [
+          "r183",
+          "basis",
+          "measured"
+        ],
+        [
+          "r183",
+          "says",
+          "the first reading missed 22 files and ruff reported them as undefined names"
+        ],
+        [
+          "r183",
+          "supports",
+          "c45"
+        ]
+      ],
+      "id": "8a73fe1f6ce725fe"
+    },
+    {
+      "at": "2026-09-19T16:44:59+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c46 'text surgery on Python made exactly the two mistakes a parser cannot: an import inserted INSIDE a triple-quoted string holding an embedded program, and a pathlib. prefix left dangling when only the Path(...) part matched. Python'\"'\"'s own ast fixed both, and three further rounds each found one more real defect: anchoring on an import'\"'\"'s start line splits a parenthesised import, the derivation must use the file'\"'\"'s OWN spelling of Path, and .git alone is not a marker because the tree the gates run in is populated by rsync and has none' --because 'five rounds, each caught by ruff or by a failing parse rather than by reading' --basis measured",
+      "parents": [
+        "8a73fe1f6ce725fe"
+      ],
+      "assert": [
+        [
+          "c46",
+          "sort",
+          "claim"
+        ],
+        [
+          "c46",
+          "says",
+          "text surgery on Python made exactly the two mistakes a parser cannot: an import inserted INSIDE a triple-quoted string holding an embedded program, and a pathlib. prefix left dangling when only the Path(...) part matched. Python's own ast fixed both, and three further rounds each found one more real defect: anchoring on an import's start line splits a parenthesised import, the derivation must use the file's OWN spelling of Path, and .git alone is not a marker because the tree the gates run in is populated by rsync and has none"
+        ],
+        [
+          "r184",
+          "sort",
+          "claim"
+        ],
+        [
+          "r184",
+          "basis",
+          "measured"
+        ],
+        [
+          "r184",
+          "says",
+          "five rounds, each caught by ruff or by a failing parse rather than by reading"
+        ],
+        [
+          "r184",
+          "supports",
+          "c46"
+        ]
+      ],
+      "id": "f2c2503e4d7d9533"
+    },
+    {
+      "at": "2026-09-19T16:44:59+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a25 c45 --as rests-on",
+      "parents": [
+        "f2c2503e4d7d9533"
+      ],
+      "assert": [
+        [
+          "a25",
+          "rests_on",
+          "c45"
+        ]
+      ],
+      "id": "90f912614fb6cc1b"
+    },
+    {
+      "at": "2026-09-19T16:44:59+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a25 c46 --as rests-on",
+      "parents": [
+        "90f912614fb6cc1b"
+      ],
+      "assert": [
+        [
+          "a25",
+          "rests_on",
+          "c46"
+        ]
+      ],
+      "id": "cc579acc46bcf29a"
+    },
+    {
+      "at": "2026-09-19T16:44:59+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "status a25 active --because 'applied to 134 files: 71 workspace(), 34 seat(), 40 derived inline. mypy clean over 172 files, ruff 360 against a 361 baseline with zero introduced undefined names, unused imports or parse errors, and the contract'\"'\"'s own 13 tests pass including in a history-less tree'",
+      "parents": [
+        "cc579acc46bcf29a"
+      ],
+      "assert": [
+        [
+          "a25",
+          "status",
+          "active"
+        ],
+        [
+          "r186",
+          "sort",
+          "claim"
+        ],
+        [
+          "r186",
+          "says",
+          "applied to 134 files: 71 workspace(), 34 seat(), 40 derived inline. mypy clean over 172 files, ruff 360 against a 361 baseline with zero introduced undefined names, unused imports or parse errors, and the contract's own 13 tests pass including in a history-less tree"
+        ],
+        [
+          "r186",
+          "supports",
+          {
+            "node": "a25",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "3b659d90c612f46e"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-goal g3 'any gate verdict names the exact tree it was measured on, so an A/B comparison differs only in what is under test' --weight 75 --because 'four A/B comparisons in this repository were invalid because their battery trees differed in more than the file under test' --basis measured",
+      "parents": [
+        "3b659d90c612f46e"
+      ],
+      "assert": [
+        [
+          "g3",
+          "sort",
+          "goal"
+        ],
+        [
+          "g3",
+          "want",
+          "any gate verdict names the exact tree it was measured on, so an A/B comparison differs only in what is under test"
+        ],
+        [
+          "g3",
+          "weight",
+          75
+        ],
+        [
+          "r187",
+          "sort",
+          "claim"
+        ],
+        [
+          "r187",
+          "basis",
+          "measured"
+        ],
+        [
+          "r187",
+          "says",
+          "four A/B comparisons in this repository were invalid because their battery trees differed in more than the file under test"
+        ],
+        [
+          "r187",
+          "supports",
+          "g3"
+        ]
+      ],
+      "id": "49e91225cedd8c34"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-issue i14 'this repository mounts eight submodules (engine, lib, examples, ext, extensions/{python,cmetta,node,mork}), and git worktree add materialises none of their worktrees while git stash create captures none of their working trees, so every battery tree was populated by hand at a different moment and drifted independently' --blocks g3 --basis source --because 'read .gitmodules and worktree.sh, whose own header records that git worktree add leaves one empty directory per component'",
+      "parents": [
+        "49e91225cedd8c34"
+      ],
+      "assert": [
+        [
+          "i14",
+          "sort",
+          "issue"
+        ],
+        [
+          "i14",
+          "blocks",
+          "g3"
+        ],
+        [
+          "i14",
+          "what",
+          "this repository mounts eight submodules (engine, lib, examples, ext, extensions/{python,cmetta,node,mork}), and git worktree add materialises none of their worktrees while git stash create captures none of their working trees, so every battery tree was populated by hand at a different moment and drifted independently"
+        ],
+        [
+          "r188",
+          "sort",
+          "claim"
+        ],
+        [
+          "r188",
+          "basis",
+          "source"
+        ],
+        [
+          "r188",
+          "says",
+          "read .gitmodules and worktree.sh, whose own header records that git worktree add leaves one empty directory per component"
+        ],
+        [
+          "r188",
+          "supports",
+          "i14"
+        ]
+      ],
+      "id": "cc8e35d7742b7ed5"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-approach a26 'snapshot the working tree into the battery with rsync at the filesystem level, and make the same flags drive a dry-run comparison that refuses to run a gate unless the snapshot is still exact' --addresses i14 --cost 5",
+      "parents": [
+        "cc8e35d7742b7ed5"
+      ],
+      "assert": [
+        [
+          "a26",
+          "sort",
+          "approach"
+        ],
+        [
+          "a26",
+          "addresses",
+          "i14"
+        ],
+        [
+          "a26",
+          "cost",
+          5
+        ],
+        [
+          "a26",
+          "status",
+          "untried"
+        ],
+        [
+          "a26",
+          "title",
+          "snapshot the working tree into the battery with rsync at the filesystem level, and make the same flags drive a dry-run comparison that refuses to run a gate unless the snapshot is still exact"
+        ]
+      ],
+      "id": "d7f98f47539ac751"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c47 'the 169-failure repository-suite run of 2026-09-19 was an artifact of a mismatched battery, not of the root migration' --because 'wt-battery-6 held revision 14f5c43b5'\"'\"'s engine while carrying wt-merge'\"'\"'s Python tree; the dominant failure was Unknown procedure metta_release_space/2 against a defined metta_release_space/1, an arity no path-constant change can produce, and 199 Python files plus atom_index.pl, host_transactions.pl and source_origins.pl differed between the trees' --basis measured",
+      "parents": [
+        "d7f98f47539ac751"
+      ],
+      "assert": [
+        [
+          "c47",
+          "sort",
+          "claim"
+        ],
+        [
+          "c47",
+          "says",
+          "the 169-failure repository-suite run of 2026-09-19 was an artifact of a mismatched battery, not of the root migration"
+        ],
+        [
+          "r189",
+          "sort",
+          "claim"
+        ],
+        [
+          "r189",
+          "basis",
+          "measured"
+        ],
+        [
+          "r189",
+          "says",
+          "wt-battery-6 held revision 14f5c43b5's engine while carrying wt-merge's Python tree; the dominant failure was Unknown procedure metta_release_space/2 against a defined metta_release_space/1, an arity no path-constant change can produce, and 199 Python files plus atom_index.pl, host_transactions.pl and source_origins.pl differed between the trees"
+        ],
+        [
+          "r189",
+          "supports",
+          "c47"
+        ]
+      ],
+      "id": "1e4ecfcd8626c13b"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c48 'rsync'\"'\"'s own dry run is a sound equality check between two trees: run with the same flags after a real sync it prints nothing exactly when they match, and otherwise names each drifted path' --because 'planted an untouched copy, a modified file, an extra file and a missing file; the first was accepted and the other three were refused by name' --basis tested",
+      "parents": [
+        "1e4ecfcd8626c13b"
+      ],
+      "assert": [
+        [
+          "c48",
+          "sort",
+          "claim"
+        ],
+        [
+          "c48",
+          "says",
+          "rsync's own dry run is a sound equality check between two trees: run with the same flags after a real sync it prints nothing exactly when they match, and otherwise names each drifted path"
+        ],
+        [
+          "r190",
+          "sort",
+          "claim"
+        ],
+        [
+          "r190",
+          "basis",
+          "tested"
+        ],
+        [
+          "r190",
+          "says",
+          "planted an untouched copy, a modified file, an extra file and a missing file; the first was accepted and the other three were refused by name"
+        ],
+        [
+          "r190",
+          "supports",
+          "c48"
+        ]
+      ],
+      "id": "939b0522261699c7"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c49 'directory mtimes must be excluded from that comparison, because provisioning writes the excluded ai-tmp/ into the tree it has just copied and the moved parent mtime reads as drift' --because 'verify refused a correct snapshot with .d..t...... ./ until -O was applied to both invocations' --basis measured",
+      "parents": [
+        "939b0522261699c7"
+      ],
+      "assert": [
+        [
+          "c49",
+          "sort",
+          "claim"
+        ],
+        [
+          "c49",
+          "says",
+          "directory mtimes must be excluded from that comparison, because provisioning writes the excluded ai-tmp/ into the tree it has just copied and the moved parent mtime reads as drift"
+        ],
+        [
+          "r191",
+          "sort",
+          "claim"
+        ],
+        [
+          "r191",
+          "basis",
+          "measured"
+        ],
+        [
+          "r191",
+          "says",
+          "verify refused a correct snapshot with .d..t...... ./ until -O was applied to both invocations"
+        ],
+        [
+          "r191",
+          "supports",
+          "c49"
+        ]
+      ],
+      "id": "49ef81bec3f9b1f3"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c50 'components.sh and worktree.sh cannot serve a pre-commit gate run, because both provision from COMMITTED state: components.sh checks components out where the superproject pins them and worktree.sh reproduces the main checkout'\"'\"'s configuration, and neither carries modified or untracked files' --because 'read both scripts'\"'\"' headers and bodies at 12919aabd' --basis source",
+      "parents": [
+        "49ef81bec3f9b1f3"
+      ],
+      "assert": [
+        [
+          "c50",
+          "sort",
+          "claim"
+        ],
+        [
+          "c50",
+          "says",
+          "components.sh and worktree.sh cannot serve a pre-commit gate run, because both provision from COMMITTED state: components.sh checks components out where the superproject pins them and worktree.sh reproduces the main checkout's configuration, and neither carries modified or untracked files"
+        ],
+        [
+          "r192",
+          "sort",
+          "claim"
+        ],
+        [
+          "r192",
+          "basis",
+          "source"
+        ],
+        [
+          "r192",
+          "says",
+          "read both scripts' headers and bodies at 12919aabd"
+        ],
+        [
+          "r192",
+          "supports",
+          "c50"
+        ]
+      ],
+      "id": "5fbed75c315f67fe"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a26 c48 --as rests-on",
+      "parents": [
+        "5fbed75c315f67fe"
+      ],
+      "assert": [
+        [
+          "a26",
+          "rests_on",
+          "c48"
+        ]
+      ],
+      "id": "dccc361d49d5614d"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a26 c49 --as rests-on",
+      "parents": [
+        "dccc361d49d5614d"
+      ],
+      "assert": [
+        [
+          "a26",
+          "rests_on",
+          "c49"
+        ]
+      ],
+      "id": "59cfcac8e586f335"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a26 c50 --as rests-on",
+      "parents": [
+        "59cfcac8e586f335"
+      ],
+      "assert": [
+        [
+          "a26",
+          "rests_on",
+          "c50"
+        ]
+      ],
+      "id": "b5afef4cd0f1e6d1"
+    },
+    {
+      "at": "2026-09-19T16:58:54+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "status a26 done --because 'tools/battery.sh provisions, verifies and runs, tools/battery_selftest.sh exhausts the four drift shapes plus the excluded-scratch false positive, and the pair is registered as the battery-selftest GATE lane'",
+      "parents": [
+        "b5afef4cd0f1e6d1"
+      ],
+      "assert": [
+        [
+          "a26",
+          "status",
+          "done"
+        ],
+        [
+          "r193",
+          "sort",
+          "claim"
+        ],
+        [
+          "r193",
+          "says",
+          "tools/battery.sh provisions, verifies and runs, tools/battery_selftest.sh exhausts the four drift shapes plus the excluded-scratch false positive, and the pair is registered as the battery-selftest GATE lane"
+        ],
+        [
+          "r193",
+          "supports",
+          {
+            "node": "a26",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "ed0fec4233620b6f"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-goal g4 'every agreed item in ai-todo.md is either shipped or has a live reason it is not' --weight 65",
+      "parents": [
+        "ed0fec4233620b6f"
+      ],
+      "assert": [
+        [
+          "g4",
+          "sort",
+          "goal"
+        ],
+        [
+          "g4",
+          "want",
+          "every agreed item in ai-todo.md is either shipped or has a live reason it is not"
+        ],
+        [
+          "g4",
+          "weight",
+          65
+        ]
+      ],
+      "id": "516a9c9c7c1c5cce"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-issue i15 'ai-todo.md rows outlive the work that closed them, so an item agreed for building has already shipped and the row is the only thing that says otherwise' --blocks g4 --basis measured --because 'three of the agreed rows were stale: L104 remove-one already ships as subtract-atom decided 2026-09-08, and L055 structured concurrency shipped in full at f80cc416d on the same day while its row still read blocked'",
+      "parents": [
+        "516a9c9c7c1c5cce"
+      ],
+      "assert": [
+        [
+          "i15",
+          "sort",
+          "issue"
+        ],
+        [
+          "i15",
+          "blocks",
+          "g4"
+        ],
+        [
+          "i15",
+          "what",
+          "ai-todo.md rows outlive the work that closed them, so an item agreed for building has already shipped and the row is the only thing that says otherwise"
+        ],
+        [
+          "r194",
+          "sort",
+          "claim"
+        ],
+        [
+          "r194",
+          "basis",
+          "measured"
+        ],
+        [
+          "r194",
+          "says",
+          "three of the agreed rows were stale: L104 remove-one already ships as subtract-atom decided 2026-09-08, and L055 structured concurrency shipped in full at f80cc416d on the same day while its row still read blocked"
+        ],
+        [
+          "r194",
+          "supports",
+          "i15"
+        ]
+      ],
+      "id": "f2057b652e7c60b4"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-approach a27 'before building an agreed row, run its own acceptance criteria against the tree and strike the row with the evidence when they already pass' --addresses i15 --cost 2",
+      "parents": [
+        "f2057b652e7c60b4"
+      ],
+      "assert": [
+        [
+          "a27",
+          "sort",
+          "approach"
+        ],
+        [
+          "a27",
+          "addresses",
+          "i15"
+        ],
+        [
+          "a27",
+          "cost",
+          2
+        ],
+        [
+          "a27",
+          "status",
+          "untried"
+        ],
+        [
+          "a27",
+          "title",
+          "before building an agreed row, run its own acceptance criteria against the tree and strike the row with the evidence when they already pass"
+        ]
+      ],
+      "id": "5702b86b933db947"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c51 'L055 structured concurrency shipped in full and its row was stale: metta.scope() with cancel, cancelled, close and keep at parallel.py:1261, channels as spaces and cancel-answers-the-truth in the f80cc416d merge subject, and capture public as a MeTTa word via lib_thread.pl:234 capture/2 defined at line 900' --because 'ran examples/ch17-concurrency-and-the-loop/07-scopes_and_captured_calls.metta: nine result groups all true, including the scope releasing an unreturned space, an inner space transferring to its outer scope, and a captured call evaluating in its home after that home changed' --basis tested",
+      "parents": [
+        "5702b86b933db947"
+      ],
+      "assert": [
+        [
+          "c51",
+          "sort",
+          "claim"
+        ],
+        [
+          "c51",
+          "says",
+          "L055 structured concurrency shipped in full and its row was stale: metta.scope() with cancel, cancelled, close and keep at parallel.py:1261, channels as spaces and cancel-answers-the-truth in the f80cc416d merge subject, and capture public as a MeTTa word via lib_thread.pl:234 capture/2 defined at line 900"
+        ],
+        [
+          "r195",
+          "sort",
+          "claim"
+        ],
+        [
+          "r195",
+          "basis",
+          "tested"
+        ],
+        [
+          "r195",
+          "says",
+          "ran examples/ch17-concurrency-and-the-loop/07-scopes_and_captured_calls.metta: nine result groups all true, including the scope releasing an unreturned space, an inner space transferring to its outer scope, and a captured call evaluating in its home after that home changed"
+        ],
+        [
+          "r195",
+          "supports",
+          "c51"
+        ]
+      ],
+      "id": "bd158b4ca879f8b3"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c52 'searching only the Python surface cannot decide whether a MeTTa capability exists, because this repository treats MeTTa as the meaning and a host language as a notation' --because 'capture answered absent in dir(metta) and present as capture/2 in lib/lib_thread/lib_thread.pl' --basis source",
+      "parents": [
+        "bd158b4ca879f8b3"
+      ],
+      "assert": [
+        [
+          "c52",
+          "sort",
+          "claim"
+        ],
+        [
+          "c52",
+          "says",
+          "searching only the Python surface cannot decide whether a MeTTa capability exists, because this repository treats MeTTa as the meaning and a host language as a notation"
+        ],
+        [
+          "r196",
+          "sort",
+          "claim"
+        ],
+        [
+          "r196",
+          "basis",
+          "source"
+        ],
+        [
+          "r196",
+          "says",
+          "capture answered absent in dir(metta) and present as capture/2 in lib/lib_thread/lib_thread.pl"
+        ],
+        [
+          "r196",
+          "supports",
+          "c52"
+        ]
+      ],
+      "id": "dab3dbe73f933b88"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a27 c51 --as rests-on",
+      "parents": [
+        "dab3dbe73f933b88"
+      ],
+      "assert": [
+        [
+          "a27",
+          "rests_on",
+          "c51"
+        ]
+      ],
+      "id": "0ff9bfdbbb6956a1"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a27 c52 --as rests-on",
+      "parents": [
+        "0ff9bfdbbb6956a1"
+      ],
+      "assert": [
+        [
+          "a27",
+          "rests_on",
+          "c52"
+        ]
+      ],
+      "id": "c0390ae688e3b406"
+    },
+    {
+      "at": "2026-09-19T17:04:43+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "status a27 active --because 'L104 and L055 struck with evidence; L069 and L070 not yet checked this way'",
+      "parents": [
+        "c0390ae688e3b406"
+      ],
+      "assert": [
+        [
+          "a27",
+          "status",
+          "active"
+        ],
+        [
+          "r197",
+          "sort",
+          "claim"
+        ],
+        [
+          "r197",
+          "says",
+          "L104 and L055 struck with evidence; L069 and L070 not yet checked this way"
+        ],
+        [
+          "r197",
+          "supports",
+          {
+            "node": "a27",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "13e997ade47cec8e"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-issue i16 '_facts is cached on the entry set, and a test that registers a fixture door adds one entry, so its key differs from the core'\"'\"'s and all 210 rows re-solve; the suite therefore pays one whole-program solve per registering test rather than one in total' --blocks g1 --basis measured --because '210 core rows give 210 core entry points; two fixture doors produce two further distinct keys, so two tests need three cache slots against lru_cache(maxsize=2), and test_door_rows registers a fixture door in most of its tests'",
+      "parents": [
+        "13e997ade47cec8e"
+      ],
+      "assert": [
+        [
+          "i16",
+          "sort",
+          "issue"
+        ],
+        [
+          "i16",
+          "blocks",
+          "g1"
+        ],
+        [
+          "i16",
+          "what",
+          "_facts is cached on the entry set, and a test that registers a fixture door adds one entry, so its key differs from the core's and all 210 rows re-solve; the suite therefore pays one whole-program solve per registering test rather than one in total"
+        ],
+        [
+          "r198",
+          "sort",
+          "claim"
+        ],
+        [
+          "r198",
+          "basis",
+          "measured"
+        ],
+        [
+          "r198",
+          "says",
+          "210 core rows give 210 core entry points; two fixture doors produce two further distinct keys, so two tests need three cache slots against lru_cache(maxsize=2), and test_door_rows registers a fixture door in most of its tests"
+        ],
+        [
+          "r198",
+          "supports",
+          "i16"
+        ]
+      ],
+      "id": "4b2dec3f9eecc2f8"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-approach a28 'seed a fresh solve from an already-solved core store and schedule only the new entries, so a fixture door costs the work it reaches rather than the whole program' --addresses i16 --cost 7",
+      "parents": [
+        "4b2dec3f9eecc2f8"
+      ],
+      "assert": [
+        [
+          "a28",
+          "sort",
+          "approach"
+        ],
+        [
+          "a28",
+          "addresses",
+          "i16"
+        ],
+        [
+          "a28",
+          "cost",
+          7
+        ],
+        [
+          "a28",
+          "status",
+          "untried"
+        ],
+        [
+          "a28",
+          "title",
+          "seed a fresh solve from an already-solved core store and schedule only the new entries, so a fixture door costs the work it reaches rather than the whole program"
+        ]
+      ],
+      "id": "8b9c8e4b041b8d8a"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c53 'raising the lru_cache size cannot fix this, because the keys never repeat across tests: every test contributes a different fixture entry' --because 'compared the entry frozensets for two fixture doors against the core set; all three differ' --basis measured",
+      "parents": [
+        "8b9c8e4b041b8d8a"
+      ],
+      "assert": [
+        [
+          "c53",
+          "sort",
+          "claim"
+        ],
+        [
+          "c53",
+          "says",
+          "raising the lru_cache size cannot fix this, because the keys never repeat across tests: every test contributes a different fixture entry"
+        ],
+        [
+          "r199",
+          "sort",
+          "claim"
+        ],
+        [
+          "r199",
+          "basis",
+          "measured"
+        ],
+        [
+          "r199",
+          "says",
+          "compared the entry frozensets for two fixture doors against the core set; all three differ"
+        ],
+        [
+          "r199",
+          "supports",
+          "c53"
+        ]
+      ],
+      "id": "1071242f368f833b"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c54 'the saving from seeding a solved base is bounded by the fixpoint'\"'\"'s share of a solve, because solve() ends with a reporting pass that re-evaluates every scope in self.facts whatever the entry set is' --because 'read CallGraph.solve at extensions/python/metta/doors/_analysis.py:1941, which runs two fixpoint passes and then sets _reporting and re-evaluates every scope' --basis source",
+      "parents": [
+        "1071242f368f833b"
+      ],
+      "assert": [
+        [
+          "c54",
+          "sort",
+          "claim"
+        ],
+        [
+          "c54",
+          "says",
+          "the saving from seeding a solved base is bounded by the fixpoint's share of a solve, because solve() ends with a reporting pass that re-evaluates every scope in self.facts whatever the entry set is"
+        ],
+        [
+          "r200",
+          "sort",
+          "claim"
+        ],
+        [
+          "r200",
+          "basis",
+          "source"
+        ],
+        [
+          "r200",
+          "says",
+          "read CallGraph.solve at extensions/python/metta/doors/_analysis.py:1941, which runs two fixpoint passes and then sets _reporting and re-evaluates every scope"
+        ],
+        [
+          "r200",
+          "supports",
+          "c54"
+        ]
+      ],
+      "id": "d952f34416192a94"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a28 c53 --as rests-on",
+      "parents": [
+        "d952f34416192a94"
+      ],
+      "assert": [
+        [
+          "a28",
+          "rests_on",
+          "c53"
+        ]
+      ],
+      "id": "d9b675a8c402f54e"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a28 c54 --as rests-on",
+      "parents": [
+        "d9b675a8c402f54e"
+      ],
+      "assert": [
+        [
+          "a28",
+          "rests_on",
+          "c54"
+        ]
+      ],
+      "id": "9db8cd19201a3ea9"
+    },
+    {
+      "at": "2026-09-19T17:09:12+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "status a28 untried --because 'the fixpoint-versus-reporting split is being measured first, since c54 makes that share the ceiling on what the approach can save'",
+      "parents": [
+        "9db8cd19201a3ea9"
+      ],
+      "assert": [
+        [
+          "r201",
+          "sort",
+          "claim"
+        ],
+        [
+          "r201",
+          "says",
+          "the fixpoint-versus-reporting split is being measured first, since c54 makes that share the ceiling on what the approach can save"
+        ],
+        [
+          "r201",
+          "supports",
+          {
+            "node": "a28",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "aae478e0ea6812f2"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c55 'the inline bootstrap derivation used .git as its marker, which is a SEAT marker: this superproject mounts eight submodules and each has a .git, so the walk stopped at the nearest component instead of the tree holding engine/ and lib/, and 29 sites resolved to extensions/python where they had resolved to the workspace' --because 'evaluated the old parents[N] subexpression and the new resolver subexpression from each file'\"'\"'s own location and diffed them: 151 rewritten sites, 122 agreeing and 29 disagreeing, every disagreement the same shape' --basis measured",
+      "parents": [
+        "aae478e0ea6812f2"
+      ],
+      "assert": [
+        [
+          "c55",
+          "sort",
+          "claim"
+        ],
+        [
+          "c55",
+          "says",
+          "the inline bootstrap derivation used .git as its marker, which is a SEAT marker: this superproject mounts eight submodules and each has a .git, so the walk stopped at the nearest component instead of the tree holding engine/ and lib/, and 29 sites resolved to extensions/python where they had resolved to the workspace"
+        ],
+        [
+          "r202",
+          "sort",
+          "claim"
+        ],
+        [
+          "r202",
+          "basis",
+          "measured"
+        ],
+        [
+          "r202",
+          "says",
+          "evaluated the old parents[N] subexpression and the new resolver subexpression from each file's own location and diffed them: 151 rewritten sites, 122 agreeing and 29 disagreeing, every disagreement the same shape"
+        ],
+        [
+          "r202",
+          "supports",
+          "c55"
+        ]
+      ],
+      "id": "29e7c30021b07228"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c56 'a marker check cannot catch that class, because the marker was correct and only the root it reached was wrong; what must differ is the path the binding goes on to name, so the check carries module-level bindings forward and requires each resulting path to exist' --because 'measured over the seat: 40 derivations all naming a real path, and 72 path bindings in files that walk, 71 real with the one exception a probe'\"'\"'s own output under ai-tmp' --basis measured",
+      "parents": [
+        "29e7c30021b07228"
+      ],
+      "assert": [
+        [
+          "c56",
+          "sort",
+          "claim"
+        ],
+        [
+          "c56",
+          "says",
+          "a marker check cannot catch that class, because the marker was correct and only the root it reached was wrong; what must differ is the path the binding goes on to name, so the check carries module-level bindings forward and requires each resulting path to exist"
+        ],
+        [
+          "r203",
+          "sort",
+          "claim"
+        ],
+        [
+          "r203",
+          "basis",
+          "measured"
+        ],
+        [
+          "r203",
+          "says",
+          "measured over the seat: 40 derivations all naming a real path, and 72 path bindings in files that walk, 71 real with the one exception a probe's own output under ai-tmp"
+        ],
+        [
+          "r203",
+          "supports",
+          "c56"
+        ]
+      ],
+      "id": "f474f04558add245"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c57 'the saving available to a28 is 97.5 per cent of a solve, not a fraction of it' --because 'instrumented CallGraph.solve over the merged tree: fixpoint 95.28s of 97.73s total and the reporting pass 2.45s, with 1899 scopes, 105,242 slots and 3,034,712 stored references' --basis measured",
+      "parents": [
+        "f474f04558add245"
+      ],
+      "assert": [
+        [
+          "c57",
+          "sort",
+          "claim"
+        ],
+        [
+          "c57",
+          "says",
+          "the saving available to a28 is 97.5 per cent of a solve, not a fraction of it"
+        ],
+        [
+          "r204",
+          "sort",
+          "claim"
+        ],
+        [
+          "r204",
+          "basis",
+          "measured"
+        ],
+        [
+          "r204",
+          "says",
+          "instrumented CallGraph.solve over the merged tree: fixpoint 95.28s of 97.73s total and the reporting pass 2.45s, with 1899 scopes, 105,242 slots and 3,034,712 stored references"
+        ],
+        [
+          "r204",
+          "supports",
+          "c57"
+        ]
+      ],
+      "id": "ed1b7f623ca0be4f"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "attack r182 --because 'the migration it reported as applied put 29 sites on the wrong root, which the equivalence check found and repaired; the count of files touched was right and the resolver chosen for 29 of them was not'",
+      "parents": [
+        "ed1b7f623ca0be4f"
+      ],
+      "assert": [
+        [
+          "r205",
+          "sort",
+          "claim"
+        ],
+        [
+          "r205",
+          "attacks",
+          "r182"
+        ],
+        [
+          "r205",
+          "says",
+          "the migration it reported as applied put 29 sites on the wrong root, which the equivalence check found and repaired; the count of files touched was right and the resolver chosen for 29 of them was not"
+        ]
+      ],
+      "id": "ef4324e979802a23"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-approach a29 'check a derivation by its RESULT rather than its spelling: carry module-level path bindings forward and refuse one that names a path which does not exist, exempting only what the source itself names under ai-tmp' --addresses i4 --cost 3",
+      "parents": [
+        "ef4324e979802a23"
+      ],
+      "assert": [
+        [
+          "a29",
+          "sort",
+          "approach"
+        ],
+        [
+          "a29",
+          "addresses",
+          "i4"
+        ],
+        [
+          "a29",
+          "cost",
+          3
+        ],
+        [
+          "a29",
+          "status",
+          "untried"
+        ],
+        [
+          "a29",
+          "title",
+          "check a derivation by its RESULT rather than its spelling: carry module-level path bindings forward and refuse one that names a path which does not exist, exempting only what the source itself names under ai-tmp"
+        ]
+      ],
+      "id": "badd35b929b70446"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "link a29 c56 --as rests-on",
+      "parents": [
+        "badd35b929b70446"
+      ],
+      "assert": [
+        [
+          "a29",
+          "rests_on",
+          "c56"
+        ]
+      ],
+      "id": "170e9573fee11212"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "status a29 done --because 'check_root_walks now reports it, the selftest plants a derivation using a correct marker on the wrong root and requires it to be named, and both a correct derivation and a scratch output must not be'",
+      "parents": [
+        "170e9573fee11212"
+      ],
+      "assert": [
+        [
+          "a29",
+          "status",
+          "done"
+        ],
+        [
+          "r206",
+          "sort",
+          "claim"
+        ],
+        [
+          "r206",
+          "says",
+          "check_root_walks now reports it, the selftest plants a derivation using a correct marker on the wrong root and requires it to be named, and both a correct derivation and a scratch output must not be"
+        ],
+        [
+          "r206",
+          "supports",
+          {
+            "node": "a29",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "bcac422703eaa220"
+    },
+    {
+      "at": "2026-09-19T17:17:30+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "edit a28 --set cost --to 6",
+      "parents": [
+        "bcac422703eaa220"
+      ],
+      "assert": [
+        [
+          "a28",
+          "cost",
+          6
+        ]
+      ],
+      "id": "0601f5e899355002"
+    },
+    {
+      "at": "2026-09-19T17:22:11+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-issue i17 'the corpus scan descends into a nested component checkout, so where language-feature-examples has its own examples mount provisioned the same corpus is counted twice and the twin set gains four entries' --basis measured --because 'test_the_twin_set_is_derived_from_the_one_corpus fails in wt-merge with four extra items under extensions/python/examples/language-feature-examples/examples/, a declared submodule in that component'\"'\"'s own .gitmodules pointing at components/MeTTa-Examples.git; the main checkout'\"'\"'s copy of that component predates the mount and has no .gitmodules, so the same test passes there'",
+      "parents": [
+        "0601f5e899355002"
+      ],
+      "assert": [
+        [
+          "i17",
+          "sort",
+          "issue"
+        ],
+        [
+          "i17",
+          "what",
+          "the corpus scan descends into a nested component checkout, so where language-feature-examples has its own examples mount provisioned the same corpus is counted twice and the twin set gains four entries"
+        ],
+        [
+          "r207",
+          "sort",
+          "claim"
+        ],
+        [
+          "r207",
+          "basis",
+          "measured"
+        ],
+        [
+          "r207",
+          "says",
+          "test_the_twin_set_is_derived_from_the_one_corpus fails in wt-merge with four extra items under extensions/python/examples/language-feature-examples/examples/, a declared submodule in that component's own .gitmodules pointing at components/MeTTa-Examples.git; the main checkout's copy of that component predates the mount and has no .gitmodules, so the same test passes there"
+        ],
+        [
+          "r207",
+          "supports",
+          "i17"
+        ]
+      ],
+      "id": "a063b717b3716742"
+    },
+    {
+      "at": "2026-09-19T17:22:11+10:00",
+      "after": "12919aabd167e32ce4a53f1c4628d1295ced2c33",
+      "did": "add-claim c58 'that failure is not the root migration: the test'\"'\"'s REPO derivation resolves to the same workspace before and after, as the equivalence check showed for all 151 rewritten sites' --because 'ran tests/repository/test_twin_coverage.py: 1 failed and 114 passed, against 10 errors in the mismatched-battery run, and the one failure names corpus paths rather than a changed root' --basis tested",
+      "parents": [
+        "a063b717b3716742"
+      ],
+      "assert": [
+        [
+          "c58",
+          "sort",
+          "claim"
+        ],
+        [
+          "c58",
+          "says",
+          "that failure is not the root migration: the test's REPO derivation resolves to the same workspace before and after, as the equivalence check showed for all 151 rewritten sites"
+        ],
+        [
+          "r208",
+          "sort",
+          "claim"
+        ],
+        [
+          "r208",
+          "basis",
+          "tested"
+        ],
+        [
+          "r208",
+          "says",
+          "ran tests/repository/test_twin_coverage.py: 1 failed and 114 passed, against 10 errors in the mismatched-battery run, and the one failure names corpus paths rather than a changed root"
+        ],
+        [
+          "r208",
+          "supports",
+          "c58"
+        ]
+      ],
+      "id": "952a231531a200b6"
     }
   ]
 }

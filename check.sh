@@ -622,6 +622,16 @@ run GATE conflict-markers-selftest "$PY" "$HERE/tests/checks/check_conflict_mark
 run GATE spread-calls "$PY" "$HERE/tests/checks/check_spread_calls.py"
 run GATE spread-calls-selftest "$PY" "$HERE/tests/checks/check_spread_calls_selftest.py"
 
+# `Path(__file__).resolve().parents[N]` writes the distance from one file to the
+# repository root as a literal. Move the file and the count still resolves, to the
+# wrong directory, so the failure arrives as a missing artifact somewhere else
+# rather than where the mistake is. 134 files carried one. `metta._roots` ascends
+# for a marker instead -- `seat()` for the package root, `workspace()` for the tree
+# holding engine/ and lib/ -- and this refuses a count that lands ON or ABOVE the
+# seat. A count staying inside the package is package-relative and stays.
+run GATE root-walks "$PY" "$HERE/tests/checks/check_root_walks.py"
+run GATE root-walks-selftest "$PY" "$HERE/tests/checks/check_root_walks_selftest.py"
+
 # b54dea73 renamed the chapter-19 C artifacts on 2026-08-27 and left THREE
 # consumers holding the old directory. Each was found separately by somebody
 # noticing a test skip -- test_benchmarks.py and benchmarks/configuration.py

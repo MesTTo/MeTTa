@@ -9,6 +9,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A file finds the seat and the workspace by ASCENDING for a marker rather than
+  counting directory levels to them. `Path(__file__).resolve().parents[N]` is a
+  literal distance that still resolves after the file moves, to somewhere else,
+  so what fails is whatever reads the path rather than the line that is wrong;
+  the many-repo split had taken those counts to 243 across 203 files at six
+  depths, resolving to just two directories under ten names. `metta._roots`
+  derives both, `seat()` by a `pyproject.toml` or a `.git` and `workspace()` by
+  a tree holding `engine/` and `lib/`, with `METTA_WORKSPACE` or `METTA_PATH`
+  overriding the latter. A file whose walk exists to put the seat on `sys.path`
+  writes the same rule inline, since it cannot import what it is still looking
+  for. Every one of the 151 rewritten sites was checked by evaluating the old
+  and the new expression from that file's own location and comparing: all 151
+  resolve where they resolved before.
+
 - Door-order analysis calls each transfer function once with a whole value set
   instead of once per reference in it. `_protocol`, `_attribute`, `_call` and
   `_store` are distributive, so the union of the singleton answers is the answer
