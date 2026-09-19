@@ -3303,6 +3303,132 @@
           "target": "c129"
         }
       ]
+    },
+    "i29": {
+      "title": "eleven sites in the Python seat derived a root by walking up for a `.git` and nothing else, which is absent in a tree copied without its history; every gate here runs in exactly such a tree, so those sites answer a different directory under the gate than in the checkout",
+      "blocks": [
+        "g3"
+      ]
+    },
+    "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none": {
+      "title": "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none",
+      "supports": [
+        "i29",
+        {
+          "node": "i29",
+          "relation": "blocks",
+          "target": "g3"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design": {
+      "title": "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design",
+      "supports": [
+        {
+          "node": "a33",
+          "status": "untried"
+        },
+        {
+          "node": "a33",
+          "relation": "addresses",
+          "target": "i29"
+        }
+      ]
+    },
+    "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found": {
+      "title": "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found",
+      "supports": [
+        {
+          "node": "a33",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design"
+      ]
+    },
+    "c130": {
+      "title": "a marker check cannot decide WHICH root a walk should reach, which is why the existing pass compares the path each derivation goes on to name, but completeness of the marker SET is a different question and the only one a single-tree evaluation cannot answer: a `.git`-only walk names the right directory in a checkout and a different one in a copy"
+    },
+    "all eleven sites passed the existing result-based pass while failing inside the snapshot": {
+      "title": "all eleven sites passed the existing result-based pass while failing inside the snapshot",
+      "supports": [
+        "c130"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it is why the new finding is spelled rather than evaluated": {
+      "title": "it is why the new finding is spelled rather than evaluated",
+      "supports": [
+        {
+          "node": "a33",
+          "relation": "rests_on",
+          "target": "c130"
+        }
+      ]
+    },
+    "c131": {
+      "title": "the 39 commit=WORKTREE placeholders across 11 files are not a backlog: check.sh's evidence lane calls WORKTREE the lawful in-progress spelling, since a commit cannot contain its own object ID, and only RELEASE=1 refuses them as the cut-time check that a release ships no evidence pointing at an uncommitted worktree. tests/checks/pin_provenance.py resolves them, taking one --commit for the whole tree, which is why it belongs to the release pass rather than to each change"
+    },
+    "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0": {
+      "title": "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0",
+      "supports": [
+        "c131"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "i30": {
+      "title": "two artifacts of this session's doors work were left behind: metta/doors/_analysis.py's _duplicated/1 bound a defaultdict without an annotation, which mypy refuses with `Need type annotation for clone`, and website/reference/metta-doors.md was never regenerated after the `guard` marker was added, so doorgen reported it stale",
+      "blocks": [
+        "g3"
+      ]
+    },
+    "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree": {
+      "title": "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree",
+      "supports": [
+        "i30",
+        {
+          "node": "i30",
+          "relation": "blocks",
+          "target": "g3"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs": {
+      "title": "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs",
+      "supports": [
+        {
+          "node": "a34",
+          "status": "untried"
+        },
+        {
+          "node": "a34",
+          "relation": "addresses",
+          "target": "i30"
+        }
+      ]
+    },
+    "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed": {
+      "title": "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed",
+      "supports": [
+        {
+          "node": "a34",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs"
+      ]
     }
   },
   "approaches": {
@@ -3932,6 +4058,23 @@
       ],
       "detail": [
         "docs/record/a31.9.1-guard-support-memo-call-head-2-s-descent-on-whether-the-tran.md"
+      ]
+    },
+    "a33": {
+      "title": "ask for a pyproject.toml as well as a .git at every one of the eleven sites, which is the rule metta._roots already states, and teach tests/checks/check_root_walks.py to refuse a single-marker derivation",
+      "status": "done",
+      "addresses": [
+        "i29"
+      ],
+      "rests_on": [
+        "c130"
+      ]
+    },
+    "a34": {
+      "title": "annotate the clone as defaultdict[object, object] and run doorgen.py --write",
+      "status": "done",
+      "addresses": [
+        "i30"
       ]
     }
   },
@@ -19016,6 +19159,351 @@
         ]
       ],
       "id": "d88cbbe2c754e43f"
+    },
+    {
+      "at": "2026-09-19T14:11:05.504628+00:00",
+      "after": "bf0e5403b4a604314d9d20d43a45a8d9e23aaf5e",
+      "did": "[{\"op\": \"add-issue\", \"id\": \"i29\", \"because\": \"the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none\", \"tags\": [\"measured\"], \"title\": \"eleven sites in the Python seat derived a root by walking up for a `.git` and nothing else, which is absent in a tree copied without its history; every gate here runs in exactly such a tree, so those sites answer a different directory under the gate than in the checkout\", \"fields\": {\"blocks\": [\"g3\"]}}, {\"op\": \"add-approach\", \"id\": \"a33\", \"because\": \"the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design\", \"tags\": [], \"title\": \"ask for a pyproject.toml as well as a .git at every one of the eleven sites, which is the rule metta._roots already states, and teach tests/checks/check_root_walks.py to refuse a single-marker derivation\", \"fields\": {\"addresses\": [\"i29\"]}}, {\"op\": \"status\", \"id\": \"a33\", \"because\": \"the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found\", \"tags\": [], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": \"c130\", \"because\": \"all eleven sites passed the existing result-based pass while failing inside the snapshot\", \"tags\": [\"measured\"], \"title\": \"a marker check cannot decide WHICH root a walk should reach, which is why the existing pass compares the path each derivation goes on to name, but completeness of the marker SET is a different question and the only one a single-tree evaluation cannot answer: a `.git`-only walk names the right directory in a checkout and a different one in a copy\", \"fields\": {}}, {\"op\": \"link\", \"id\": \"a33\", \"because\": \"it is why the new finding is spelled rather than evaluated\", \"tags\": [], \"target\": \"c130\", \"relation\": \"rests-on\"}]",
+      "parents": [
+        "d88cbbe2c754e43f"
+      ],
+      "assert": [
+        [
+          "all eleven sites passed the existing result-based pass while failing inside the snapshot",
+          "sort",
+          "prop"
+        ],
+        [
+          "all eleven sites passed the existing result-based pass while failing inside the snapshot",
+          "supports",
+          "c130"
+        ],
+        [
+          "all eleven sites passed the existing result-based pass while failing inside the snapshot",
+          "tags",
+          "measured"
+        ],
+        [
+          "all eleven sites passed the existing result-based pass while failing inside the snapshot",
+          "title",
+          "all eleven sites passed the existing result-based pass while failing inside the snapshot"
+        ],
+        [
+          "c130",
+          "sort",
+          "prop"
+        ],
+        [
+          "c130",
+          "title",
+          "a marker check cannot decide WHICH root a walk should reach, which is why the existing pass compares the path each derivation goes on to name, but completeness of the marker SET is a different question and the only one a single-tree evaluation cannot answer: a `.git`-only walk names the right directory in a checkout and a different one in a copy"
+        ],
+        [
+          "i29",
+          "sort",
+          "prop"
+        ],
+        [
+          "i29",
+          "blocks",
+          "g3"
+        ],
+        [
+          "i29",
+          "title",
+          "eleven sites in the Python seat derived a root by walking up for a `.git` and nothing else, which is absent in a tree copied without its history; every gate here runs in exactly such a tree, so those sites answer a different directory under the gate than in the checkout"
+        ],
+        [
+          "it is why the new finding is spelled rather than evaluated",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is why the new finding is spelled rather than evaluated",
+          "supports",
+          {
+            "node": "a33",
+            "relation": "rests_on",
+            "target": "c130"
+          }
+        ],
+        [
+          "it is why the new finding is spelled rather than evaluated",
+          "title",
+          "it is why the new finding is spelled rather than evaluated"
+        ],
+        [
+          "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none",
+          "supports",
+          "i29"
+        ],
+        [
+          "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none",
+          "supports",
+          {
+            "node": "i29",
+            "relation": "blocks",
+            "target": "g3"
+          }
+        ],
+        [
+          "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none",
+          "tags",
+          "measured"
+        ],
+        [
+          "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none",
+          "title",
+          "the door-order gate reported thirteen failures inside the battery snapshot and none in the checkout; doororder.py resolved SEAT past the snapshot to the superproject above it and then looked for metta/doors/_invocations.py under a root that holds none"
+        ],
+        [
+          "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design",
+          "sort",
+          "prop"
+        ],
+        [
+          "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design",
+          "supports",
+          {
+            "node": "a33",
+            "status": "untried"
+          }
+        ],
+        [
+          "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design",
+          "supports",
+          {
+            "node": "a33",
+            "relation": "addresses",
+            "target": "i29"
+          }
+        ],
+        [
+          "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design",
+          "title",
+          "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design"
+        ],
+        [
+          "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found",
+          "supersedes",
+          "the resolver already states the two-marker rule and the reason for it, so the sites are stragglers rather than a new design"
+        ],
+        [
+          "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found",
+          "supports",
+          {
+            "node": "a33",
+            "status": "done"
+          }
+        ],
+        [
+          "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found",
+          "title",
+          "the same thirteen door-order cases pass inside the snapshot after the change, 169 pass across every suite the eleven files touch, the root-walks lane reads 0 findings, and its selftest now asserts a `.git`-only walk IS found"
+        ],
+        [
+          "a33",
+          "sort",
+          "approach"
+        ],
+        [
+          "a33",
+          "addresses",
+          "i29"
+        ],
+        [
+          "a33",
+          "rests_on",
+          "c130"
+        ],
+        [
+          "a33",
+          "status",
+          "done"
+        ],
+        [
+          "a33",
+          "title",
+          "ask for a pyproject.toml as well as a .git at every one of the eleven sites, which is the rule metta._roots already states, and teach tests/checks/check_root_walks.py to refuse a single-marker derivation"
+        ]
+      ],
+      "id": "be8008797dfef3fc"
+    },
+    {
+      "at": "2026-09-19T15:52:11.291805+00:00",
+      "after": "bf0e5403b4a604314d9d20d43a45a8d9e23aaf5e",
+      "did": "[{\"op\": \"add-claim\", \"id\": \"c131\", \"because\": \"read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0\", \"tags\": [\"source\"], \"title\": \"the 39 commit=WORKTREE placeholders across 11 files are not a backlog: check.sh's evidence lane calls WORKTREE the lawful in-progress spelling, since a commit cannot contain its own object ID, and only RELEASE=1 refuses them as the cut-time check that a release ships no evidence pointing at an uncommitted worktree. tests/checks/pin_provenance.py resolves them, taking one --commit for the whole tree, which is why it belongs to the release pass rather than to each change\", \"fields\": {}}]",
+      "parents": [
+        "be8008797dfef3fc"
+      ],
+      "assert": [
+        [
+          "c131",
+          "sort",
+          "prop"
+        ],
+        [
+          "c131",
+          "title",
+          "the 39 commit=WORKTREE placeholders across 11 files are not a backlog: check.sh's evidence lane calls WORKTREE the lawful in-progress spelling, since a commit cannot contain its own object ID, and only RELEASE=1 refuses them as the cut-time check that a release ships no evidence pointing at an uncommitted worktree. tests/checks/pin_provenance.py resolves them, taking one --commit for the whole tree, which is why it belongs to the release pass rather than to each change"
+        ],
+        [
+          "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0",
+          "supports",
+          "c131"
+        ],
+        [
+          "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0",
+          "tags",
+          "source"
+        ],
+        [
+          "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0",
+          "title",
+          "read check.sh:539-545 and pin_provenance.py --check, which reports 39 pins awaiting over 11 files and exits 0"
+        ]
+      ],
+      "id": "22d32d11b758338b"
+    },
+    {
+      "at": "2026-09-19T16:21:32.617167+00:00",
+      "after": "bf0e5403b4a604314d9d20d43a45a8d9e23aaf5e",
+      "did": "[{\"op\": \"add-issue\", \"id\": \"i30\", \"because\": \"tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree\", \"tags\": [\"measured\"], \"title\": \"two artifacts of this session's doors work were left behind: metta/doors/_analysis.py's _duplicated/1 bound a defaultdict without an annotation, which mypy refuses with `Need type annotation for clone`, and website/reference/metta-doors.md was never regenerated after the `guard` marker was added, so doorgen reported it stale\", \"fields\": {\"blocks\": [\"g3\"]}}, {\"op\": \"add-approach\", \"id\": \"a34\", \"because\": \"the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs\", \"tags\": [], \"title\": \"annotate the clone as defaultdict[object, object] and run doorgen.py --write\", \"fields\": {\"addresses\": [\"i30\"]}}, {\"op\": \"status\", \"id\": \"a34\", \"because\": \"mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed\", \"tags\": [], \"status\": \"done\"}]",
+      "parents": [
+        "22d32d11b758338b"
+      ],
+      "assert": [
+        [
+          "i30",
+          "sort",
+          "prop"
+        ],
+        [
+          "i30",
+          "blocks",
+          "g3"
+        ],
+        [
+          "i30",
+          "title",
+          "two artifacts of this session's doors work were left behind: metta/doors/_analysis.py's _duplicated/1 bound a defaultdict without an annotation, which mypy refuses with `Need type annotation for clone`, and website/reference/metta-doors.md was never regenerated after the `guard` marker was added, so doorgen reported it stale"
+        ],
+        [
+          "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed",
+          "supersedes",
+          "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs"
+        ],
+        [
+          "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed",
+          "supports",
+          {
+            "node": "a34",
+            "status": "done"
+          }
+        ],
+        [
+          "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed",
+          "title",
+          "mypy answers Success on _analysis.py, doorgen answers `227 contracts and every projection agree`, and test_artifact_projections.py answers 20 passed"
+        ],
+        [
+          "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree",
+          "supports",
+          "i30"
+        ],
+        [
+          "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree",
+          "supports",
+          {
+            "node": "i30",
+            "relation": "blocks",
+            "target": "g3"
+          }
+        ],
+        [
+          "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree",
+          "tags",
+          "measured"
+        ],
+        [
+          "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree",
+          "title",
+          "tests/repository/test_artifact_projections.py answered 6 failed 14 passed in the checkout, three of them the mypy error reaching the root-consumer and setting-configuration cases and three the drift cases, where doorgen.main([]) returned 1 on an unmodified tree"
+        ],
+        [
+          "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs",
+          "supports",
+          {
+            "node": "a34",
+            "status": "untried"
+          }
+        ],
+        [
+          "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs",
+          "supports",
+          {
+            "node": "a34",
+            "relation": "addresses",
+            "target": "i30"
+          }
+        ],
+        [
+          "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs",
+          "title",
+          "the tool names the stale file and the command that rewrites it, and the annotation is what the walk's object-to-object typing needs"
+        ],
+        [
+          "a34",
+          "sort",
+          "approach"
+        ],
+        [
+          "a34",
+          "addresses",
+          "i30"
+        ],
+        [
+          "a34",
+          "status",
+          "done"
+        ],
+        [
+          "a34",
+          "title",
+          "annotate the clone as defaultdict[object, object] and run doorgen.py --write"
+        ]
+      ],
+      "id": "07763e267bc02e5e"
     }
   ]
 }

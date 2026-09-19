@@ -38,6 +38,9 @@
 %   - a row's head list is data, so no head it names becomes a dependency of
 %     the `package` equation
 %     [tested: packages:importing_a_backed_library_leaves_the_package_head_alone]
+%   - a row PUBLISHES the heads it names, so a reader asking what a library
+%     declares sees them where the older spelling put them
+%     [tested: packages:a_backing_row_publishes_the_heads_it_names]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -197,6 +200,36 @@ test(importing_a_backed_library_leaves_the_package_head_alone) :-
          clause(Clause, _, Ref),
          strip_module(Clause, _, Bare),
          functor(Bare, package, _) ).
+
+%A row is a REGISTRATION FORM, the fifth metta_registration_names/2 covers.
+%The four before it are the importer spellings, and a reader that knows only
+%those reports a migrated library as empty of its Prolog-backed heads: the
+%reference page read lib_reflect at 21 heads under the old spelling and 12
+%after the migration, the nine missing being its own backing row's list
+%[measured 2026-09-20].
+%
+%Read without performing anything, which is what the relation is for: a reader
+%asking what a library declares must not load it.
+test(a_backing_row_publishes_the_heads_it_names) :-
+    Row = ['=', [package, backing],
+           [prolog, "somewhere.pl", [packages_named_one, packages_named_two]]],
+    metta_engine:metta_registration_names(Row, Named),
+    Named == [packages_named_one, packages_named_two].
+
+%A token nobody claims still SAYS which heads it would publish, because which
+%tokens exist is the claimants' business rather than this engine's.
+test(an_unclaimed_token_still_names_its_heads) :-
+    Row = ['=', [package, backing],
+           [nobody_claims_this, "somewhere.pl", [packages_named_three]]],
+    metta_engine:metta_registration_names(Row, Named),
+    Named == [packages_named_three].
+
+%A name list that is not literal claims NOTHING rather than guessing, which is
+%the rule the four importer spellings already follow.
+test(a_computed_head_list_publishes_nothing) :-
+    Row = ['=', [package, backing], [prolog, "somewhere.pl", [car, _Rest]]],
+    metta_engine:metta_registration_names(Row, Named),
+    Named == [].
 
 test(a_file_with_no_backing_row_installs_nothing) :-
     package_fixture(unbacked, '(= (package version) "0.0.1") ; no backing row for ~w~n', Path),
