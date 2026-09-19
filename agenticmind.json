@@ -4602,6 +4602,42 @@
       "tags": [
         "tested"
       ]
+    },
+    "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal": {
+      "title": "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal"
+    },
+    "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it": {
+      "title": "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it",
+      "supports": [
+        "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true": {
+      "title": "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused": {
+      "title": "the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused",
+      "supports": [
+        "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true"
+      ]
+    },
+    "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running": {
+      "title": "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running"
+    },
+    "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running": {
+      "title": "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running",
+      "supports": [
+        "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -24228,6 +24264,107 @@
         ]
       ],
       "id": "a8a05ba67bfac160"
+    },
+    {
+      "at": "2026-09-19T21:59:50.938302+00:00",
+      "after": "66f87b56fdbec6c935225a96bb41ceae095c9fac",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it\", \"tags\": [\"measured\"], \"title\": \"a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused\", \"tags\": [\"reasoning\"], \"title\": \"a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running\", \"tags\": [\"measured\"], \"title\": \"the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running\", \"fields\": {}}]",
+      "parents": [
+        "a8a05ba67bfac160"
+      ],
+      "assert": [
+        [
+          "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal",
+          "sort",
+          "prop"
+        ],
+        [
+          "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal",
+          "title",
+          "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal"
+        ],
+        [
+          "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true",
+          "sort",
+          "prop"
+        ],
+        [
+          "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true",
+          "title",
+          "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true"
+        ],
+        [
+          "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it",
+          "supports",
+          "a backing row can now succeed and install nothing: importing lib_thread answers true while the head its artifact exports never reaches the engine, so every caller sees an unknown procedure instead of a refusal"
+        ],
+        [
+          "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it",
+          "title",
+          "measured 2026-09-20 with a probe against the in-flight tree: eval(['import!','&self',[library,lib_thread]], R) gives R = true and current_predicate(metta_engine:metta_async_future_new/2) then fails, while lib/lib_thread/lib_thread.metta:95 declares the backing and lib_thread.pl defines that predicate; test_async_scheduler.py and test_class_methods.py carry 22 failures on it"
+        ],
+        [
+          "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running",
+          "supports",
+          "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running"
+        ],
+        [
+          "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running",
+          "title",
+          "measured 2026-09-20: two job_steer calls at 8506 seconds elapsed both returned delivery_unknown with that error, and job_status still read running"
+        ],
+        [
+          "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running",
+          "sort",
+          "prop"
+        ],
+        [
+          "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running",
+          "title",
+          "the delegated job could not be reached with either of two steers about the silent backing: the codex transport answered 'app-server transport is closed' and reported delivery_unknown, while the job itself stayed running"
+        ],
+        [
+          "the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused",
+          "sort",
+          "prop"
+        ],
+        [
+          "the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused",
+          "supports",
+          "a backing that reports true and installs nothing is a worse failure than the coverage refusal that preceded it, because the refusal at least named a head: there should be no path through selected, available and covered that performs nothing and answers true"
+        ],
+        [
+          "the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused",
+          "title",
+          "the refusal named ['collections-expression'] and sent the reader to the right question, while the silent success sends every caller to an unknown-procedure error far from the load that should have refused"
+        ]
+      ],
+      "id": "ee0c9f21c9c5305d"
     }
   ]
 }
