@@ -17,7 +17,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import check_submodules_populated as pass_under_test  # noqa: E402  -- the path is arranged just above
+import check_submodules_populated as pass_under_test
 
 ROOT = Path(__file__).resolve().parents[2]
 
