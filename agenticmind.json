@@ -4679,6 +4679,30 @@
       "tags": [
         "tested"
       ]
+    },
+    "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars": {
+      "title": "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars"
+    },
+    "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change": {
+      "title": "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change",
+      "supports": [
+        "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for": {
+      "title": "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for"
+    },
+    "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out": {
+      "title": "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out",
+      "supports": [
+        "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -24535,6 +24559,77 @@
         ]
       ],
       "id": "9d02d4ecebd03c53"
+    },
+    {
+      "at": "2026-09-19T22:04:51.450528+00:00",
+      "after": "bf00d91462adf386d9678f172c13ea69df72d327",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change\", \"tags\": [\"measured\"], \"title\": \"the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out\", \"tags\": [\"measured\"], \"title\": \"the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for\", \"fields\": {}}]",
+      "parents": [
+        "9d02d4ecebd03c53"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change",
+          "supports",
+          "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars"
+        ],
+        [
+          "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change",
+          "title",
+          "measured 2026-09-20: the lane's JSON reads counts unordered 182, first_order 16, one unordered_by_contract (rows:pipe) and no unordered_by_dependency, and it was already FAIL in the whole-gate run at c66b6dc64, before this session's door core change"
+        ],
+        [
+          "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out",
+          "supports",
+          "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for"
+        ],
+        [
+          "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out",
+          "tags",
+          "measured"
+        ],
+        [
+          "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out",
+          "title",
+          "the 43-lane whole-gate run listing door-order FAIL ran at revision c66b6dc64 and the seat change landed afterwards as 20ff88f69, so the ordering rules it out"
+        ],
+        [
+          "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for",
+          "title",
+          "the door core cache-key change did not cause the door-order lane to fail: the lane was already red one commit earlier, at c66b6dc64, which is before the seat commit that changed which entries the core is solved for"
+        ],
+        [
+          "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars",
+          "title",
+          "the door-order gate is a large standing surface rather than a defect: it reports 182 unordered doors, 126 of them mixed and most of those recursive, with the named sites in the extension packages metta-live, metta-pandas and metta-polars"
+        ]
+      ],
+      "id": "1d83c52593b22346"
     }
   ]
 }
