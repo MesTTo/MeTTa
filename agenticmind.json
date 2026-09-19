@@ -5306,6 +5306,34 @@
           "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
         }
       ]
+    },
+    "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it": {
+      "title": "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+      "supports": [
+        {
+          "node": "make the engine door of the example comparison exit nonzero when it reports an application error, as the engine's own runner already does for a failed selftest",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the comparator reads process status beside the answer lines, so a door that captures a failure as output and still exits 0 can never agree with one that raises, and the repository already treats a failed test as a nonzero exit in engine/main.pl; the unwind clause rethrows before the halt, so a normal process exit keeps its own status",
+        "the engine door now exits 1 with its one ANSWER-ERROR line on the class-dispatch example where it exited 0, and the harness's own 30 tests still pass, including test_process_exit_is_not_an_answer_error which exists to keep a normal halt from being read as an answer error"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second": {
+      "title": "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second"
+    },
+    "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed": {
+      "title": "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed",
+      "supports": [
+        "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -27077,6 +27105,80 @@
         ]
       ],
       "id": "0286bca2ef896ce0"
+    },
+    {
+      "at": "2026-09-19T23:51:00.388332+00:00",
+      "after": "4eef9e2771111a2c6bc6333d147080bd0628886a",
+      "did": "[{\"op\": \"status\", \"id\": \"make the engine door of the example comparison exit nonzero when it reports an application error, as the engine's own runner already does for a failed selftest\", \"because\": \"the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed\", \"tags\": [\"measured\"], \"title\": \"the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second\", \"fields\": {}}]",
+      "parents": [
+        "0286bca2ef896ce0"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed",
+          "supports",
+          "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second"
+        ],
+        [
+          "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed",
+          "title",
+          "measured 2026-09-20: after the engine door began exiting nonzero, parity reads 359/359 agree while sh run.sh on the class-dispatch example exits 2 reporting one MeTTa test failed"
+        ],
+        [
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+          "supersedes",
+          "the comparator reads process status beside the answer lines, so a door that captures a failure as output and still exits 0 can never agree with one that raises, and the repository already treats a failed test as a nonzero exit in engine/main.pl; the unwind clause rethrows before the halt, so a normal process exit keeps its own status"
+        ],
+        [
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+          "supersedes",
+          "the engine door now exits 1 with its one ANSWER-ERROR line on the class-dispatch example where it exited 0, and the harness's own 30 tests still pass, including test_process_exit_is_not_an_answer_error which exists to keep a normal halt from being read as an answer error"
+        ],
+        [
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+          "supports",
+          {
+            "node": "make the engine door of the example comparison exit nonzero when it reports an application error, as the engine's own runner already does for a failed selftest",
+            "status": "done"
+          }
+        ],
+        [
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+          "tags",
+          "measured"
+        ],
+        [
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it",
+          "title",
+          "the parity lane reports ok with 359 of 359 examples agreeing, where it had reported one disagreement; and the failure both doors share is NOT hidden by that agreement, because sh run.sh on the same example exits 2 and reports the MeTTa test failure, so the examples lane still refuses it"
+        ],
+        [
+          "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second",
+          "title",
+          "the two lanes ask different questions and the repair kept them apart: parity asks whether the two configurations AGREE, and the example runner asks whether an example PASSES, so a failure both doors report is agreement for the first and a refusal for the second"
+        ]
+      ],
+      "id": "87c3f84fbc3ec700"
     }
   ]
 }
