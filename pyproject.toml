@@ -332,8 +332,9 @@ pythonpath = ["."]
 #: member's tests live with the member, which is what makes "delete ext/ and
 #: the core is green" a thing the layout says rather than a thing a reader has
 #: to check. `ext` is the directory, so a package added under it is collected
-#: with no edit here.
-testpaths = ["tests", "ext"]
+#: with no edit here, and the path reaches out of the seat because the
+#: distributions are a sibling of `extensions/` now.
+testpaths = ["tests", "../../ext"]
 
 # pytest-memray's two markers, registered HERE as well as by the plugin, so
 # the plant can carry one where the plugin is absent and be reported as skipped

@@ -35,6 +35,10 @@ Guarantees:
   - a member missing from `[tool.uv.sources]`, and a source naming no member,
     are each reported, so the resolver's view and the directory agree [tested:
     tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
+  - a `_workspace.py` whose `EXT` reaches a different set of directories than
+    the glob names is reported, so a moved `ext/` fails here rather than as
+    `ModuleNotFoundError` in the member suites [tested:
+    tests/checks/check_layering_selftest.py; commit=WORKTREE]
   - a member whose version, pymetta pin, entry point, README or tests are
     missing is reported [tested: tests/checks/check_layering_selftest.py;
     commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
@@ -272,6 +276,14 @@ def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list
     manifest = _manifest(root / "pyproject.toml")
     declared = manifest.get("tool", {}).get("uv", {}).get("sources", {})
     named = {member.distribution for member in roster}
+    # The workspace ROOT's own distribution is PERMITTED here beside the members,
+    # never required. Every member depends on it exactly, and while the members sat
+    # inside its own directory uv resolved that implicitly; as siblings they are
+    # outside it and the entry is what keeps the resolution in this checkout rather
+    # than an index. It is not matched by the members glob, so the roster alone
+    # cannot know it, and it is not a member, so nothing may demand it be declared
+    # [tested: tests/checks/check_layering_selftest.py; commit=WORKTREE].
+    allowed = named | {manifest.get("project", {}).get("name", "")}
     return [
         *(
             Finding(
@@ -288,7 +300,61 @@ def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list
                 f"[tool.uv.sources] names {distribution}, which is no longer a "
                 f"workspace member; remove the entry",
             )
-            for distribution in sorted(set(declared) - named)
+            for distribution in sorted(set(declared) - allowed)
+        ),
+    ]
+
+
+def _the_checkout_finder_sees_the_roster(roster: list[Member], root: Path) -> list[Finding]:
+    """The checkout's path helper reaches exactly the members the glob names.
+
+    `_workspace.py` is what makes `import metta_pandas` work from a checkout,
+    and it locates `ext/` by walking up from its own file rather than by reading
+    a manifest, because it runs before anything that could parse one. A wrong
+    number of levels there does not raise: the glob matches nothing, `members()`
+    answers an empty list, every member silently stops being importable, and the
+    member suites fail with `ModuleNotFoundError` a long way from the cause
+    [measured 2026-09-19: moving `ext/` out of the seat left this reaching
+    `extensions/python/ext`, and the six distributions whose tests import their
+    own module raised 22 collection errors while every lane stayed green].
+    Comparing the helper against the roster puts that mismatch here instead.
+    """
+    source = root / "extensions" / "python" / "_workspace.py"
+    if not source.exists():
+        return [
+            Finding(
+                "extensions/python/_workspace.py",
+                "the seat ships no path helper, so a checkout can import no member",
+            )
+        ]
+    namespace = runpy.run_path(str(source))
+    reached = {path.resolve() for path in namespace["members"]()}
+    named = {member.directory.resolve() for member in roster}
+    return [
+        *(
+            [
+                Finding(
+                    "extensions/python/_workspace.py",
+                    f"EXT is {namespace['EXT']}, which does not reach "
+                    f"{', '.join(sorted(path.name for path in named - reached))}; "
+                    f"the workspace glob names them, so this checkout ships members "
+                    f"it cannot import",
+                )
+            ]
+            if named - reached
+            else []
+        ),
+        *(
+            [
+                Finding(
+                    "extensions/python/_workspace.py",
+                    f"EXT is {namespace['EXT']}, which reaches "
+                    f"{', '.join(sorted(path.name for path in reached - named))}; "
+                    f"the workspace glob names no such member",
+                )
+            ]
+            if reached - named
+            else []
         ),
     ]
 
@@ -600,6 +666,7 @@ def findings(root: Path = ROOT) -> list[Finding]:
         *_members_reach_only_the_public_core(roster),
         *_members_declare_what_they_name(roster),
         *_the_roster_and_the_resolver_agree(roster, root),
+        *_the_checkout_finder_sees_the_roster(roster, root),
         *_each_member_is_whole(roster, root),
         *_every_extra_installs_members(roster, root),
         *_discovery_stays_cheap(roster, root),

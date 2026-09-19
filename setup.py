@@ -152,7 +152,7 @@ RUNTIME_RESOURCES = {
     "extensions/mork/extension.pl": "extensions/mork/extension.pl",
     "tests/codec": "tests/codec",
     "llms.txt": "llms.txt",
-    "extension.pl": "extension.pl",
+    "extensions/python/extension.pl": "extensions/python/extension.pl",
     "extensions/python/metta/_binding": "extensions/python/metta/_binding",
     "extensions/python/helper.pl": "extensions/python/helper.pl",
 }

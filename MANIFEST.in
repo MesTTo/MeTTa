@@ -28,7 +28,7 @@ include SECURITY.md
 include extensions/mork/extension.pl
 include llms.txt
 recursive-include tests/codec *
-include extension.pl
+include extensions/python/extension.pl
 recursive-include extensions/python/metta/_binding *
 recursive-exclude extensions/python/metta/_binding __pycache__ *.py[co] *.qlf .qlf-stamp *.so *.o
 recursive-exclude tests/codec __pycache__ *.py[co]

@@ -123,7 +123,7 @@ for required in (
     "engine",
     "lib",
     "extensions/mork/extension.pl",
-    "extension.pl",
+    "extensions/python/extension.pl",
     "llms.txt",
 ):
     assert (runtime / required).exists(), f"{required} is missing from the wheel"

@@ -109,7 +109,7 @@ class Space:
 def _plant(scratch: Path) -> Path:
     """Write a clean fixture workspace and answer its root."""
     core = scratch / "extensions" / "python" / "metta"
-    member = scratch / "extensions" / "python" / "ext" / "metta-solars"
+    member = scratch / "ext" / "metta-solars"
     (member / "tests").mkdir(parents=True)
     core.mkdir(parents=True)
     (core / "_spaces").mkdir()
@@ -131,6 +131,9 @@ def _plant(scratch: Path) -> Path:
     }
     layers = layers[:start] + "BUILDS_ON = " + repr(graph) + layers[end:]
     (core / "_layers.py").write_text(layers, encoding="utf-8")
+    (scratch / "extensions/python/_workspace.py").write_text(
+        (ROOT / "extensions/python/_workspace.py").read_text(encoding="utf-8"), encoding="utf-8"
+    )
     (member / "pyproject.toml").write_text(MEMBER_MANIFEST, encoding="utf-8")
     (member / "metta_solars.py").write_text(MEMBER, encoding="utf-8")
     (member / "README.md").write_text("# metta-solars\n", encoding="utf-8")
@@ -284,6 +287,17 @@ def main() -> int:
         )
         assert any("no longer a workspace member" in line for line in found), found
 
+        # The workspace ROOT's own distribution is a legitimate source: every member
+        # depends on it exactly, and naming it is what makes uv resolve it from this
+        # checkout instead of an index. It is not matched by the members glob, so the
+        # rule has to know it rather than infer it.
+        found = _reported(
+            scratch,
+            "pyproject.toml",
+            CORE_MANIFEST + 'pymetta = { workspace = true }\n',
+        )
+        assert not any("no longer a workspace member" in line for line in found), found
+
         # 5. A member missing its parts: no entry point, so nothing discovers it.
         found = _reported(
             scratch,
@@ -320,6 +334,18 @@ def main() -> int:
             SEAM.replace('extra="solar"', 'extra="eclipse"'),
         )
         assert any("does not declare" in line and "eclipse" in line for line in found), found
+
+        # 7. The path helper counts directory levels to reach `ext/`, so a
+        # layout change can leave it pointing at nothing. It answers an empty
+        # roster rather than raising, which is why the lane compares it.
+        found = _reported(
+            scratch,
+            "extensions/python/_workspace.py",
+            (ROOT / "extensions/python/_workspace.py")
+            .read_text(encoding="utf-8")
+            .replace("parents[2]", "parent"),
+        )
+        assert any("does not reach metta-solars" in line for line in found), found
 
         # And the tree is clean again, so nothing above leaked.
         assert _findings_over(scratch) == [], _findings_over(scratch)
