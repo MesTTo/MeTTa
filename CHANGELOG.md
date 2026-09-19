@@ -9,6 +9,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library describes what backs its heads instead of telling the engine to go
+  and load it. Where a library wrote
+  `!(import_prolog_functions_from_file (library lib_x.pl) (head ...))` it now
+  writes `(= (package backing) (prolog (library lib_x.pl) (head ...)))`, and the
+  loader performs the row once the file's rows are in the space. The row is
+  data: any implementation that can read atoms can read it, decide which rows it
+  can perform, and refuse the rest by name, where the call was an instruction
+  only this engine understood. The engine still names no host, because its
+  loader registers a claim, `(= (perform (prolog $file $names)) ...)`, the way a
+  seat or a library registers one, and `(perform Row)` reaches it by
+  unification. `package` is reserved: it is internal in every space, so one
+  library's version and backing rows are never read as its importer's own. 32 of
+  the 33 shipped libraries carrying the old call have moved; `lib_import` keeps
+  it, since it defines the operation the claim's body calls.
+
 - Registering a door the shipped verdict table does not name analyses that door
   against a SOLVED core instead of solving the whole program again. Its body is
   the only new entry, and a registered door's entry set is one no other

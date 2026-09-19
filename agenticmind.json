@@ -16,6 +16,10 @@
     "g4": {
       "want": "every agreed item in ai-todo.md is either shipped or has a live reason it is not",
       "weight": 65
+    },
+    "g5": {
+      "want": "a library or an application describes itself in its own .metta file, in MeTTa semantics only, so any implementation that can read atoms can read the package, perform the rows it can, and refuse the rest by name",
+      "weight": 90
     }
   },
   "issues": {
@@ -136,6 +140,33 @@
     },
     "i17": {
       "what": "the corpus scan descends into a nested component checkout, so where language-feature-examples has its own examples mount provisioned the same corpus is counted twice and the twin set gains four entries"
+    },
+    "i18": {
+      "what": "113 functions own the crossings that keep 130 door rows mixed, and they are not one class: lifetime bookkeeping, acquiring the runtime, attaching the engine thread and the wire codec are substrate every door pays to reach the engine at all, while metta.algebra._evaluate_with_budget and metta.events._FoldRegistry._publish_locked are the door's own work",
+      "blocks": [
+        "g1"
+      ]
+    },
+    "i19": {
+      "what": "nothing of the package design is built: no lib_package, no (= (package ...)) row in lib/ or examples/, no reserved package head in the engine, and manifest.py is still the 503-line closed vocabulary the design replaces",
+      "blocks": [
+        "g5"
+      ]
+    },
+    "i20": {
+      "what": "the predicate that enumerates a space's rows back out has not been located, so the loader cannot yet read the package rows of the file it has just loaded",
+      "blocks": [
+        "g5"
+      ]
+    },
+    "i21": {
+      "what": "the patched SWI build the venv uses is missing three packs the stock build has, so every library resting on them fails: library(archive), library(unicode) and library(yaml) answer absent under /home/user/Dev/swipl-patched and present under /usr/bin/swipl"
+    },
+    "i22": {
+      "what": "the root migration made ten of the 22 tools check.sh runs directly unimportable: they are executed as scripts, so python tools/x.py puts tools/ on sys.path and not the seat, and the migration replaced their parents[N] walk with an import of metta._roots, the package that is not importable yet",
+      "blocks": [
+        "g2"
+      ]
     }
   },
   "approaches": {
@@ -509,7 +540,7 @@
     },
     "a24": {
       "title": "let a crossing declare itself a GUARD, so the order analysis can tell a liveness check apart from the body's work, the way the repository already marks mechanism-internal sites with policy-inventory-exempt",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i10"
       ],
@@ -555,12 +586,13 @@
       "cost": 2,
       "rests_on": [
         "c51",
-        "c52"
+        "c52",
+        "c63"
       ]
     },
     "a28": {
       "title": "seed a fresh solve from an already-solved core store and schedule only the new entries, so a fixture door costs the work it reaches rather than the whole program",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i16"
       ],
@@ -580,6 +612,87 @@
       "cost": 3,
       "rests_on": [
         "c56"
+      ]
+    },
+    "a30": {
+      "title": "classify the 113 owners into substrate and work, mark the substrate with metta.doors.guard, and check first whether a door's reaching them is real or an artifact of the analysis's context insensitivity",
+      "status": "untried",
+      "addresses": [
+        "i18"
+      ],
+      "cost": 8,
+      "rests_on": [
+        "c61"
+      ]
+    },
+    "a31": {
+      "title": "build the package design in the order its laws depend on each other, engine core first, then the prelude library, then the migration that proves it",
+      "status": "active",
+      "addresses": [
+        "i19"
+      ],
+      "cost": 25,
+      "kind": "and"
+    },
+    "a31.1": {
+      "title": "give the engine its four fixed things: the reserved head package, (package requires) performed before any packaging library is merged, perform dispatched by unification in the seam space, and the reads ceiling with its inference budget",
+      "status": "done",
+      "addresses": [
+        "i19"
+      ],
+      "cost": 8,
+      "rests_on": [
+        "c65",
+        "c66",
+        "c68",
+        "c70",
+        "c72",
+        "c74"
+      ]
+    },
+    "a31.2": {
+      "title": "write lib_package as a prelude library carrying everything laws 1 to 15 do not fix in the engine: version, setup, boot, backing, coverage, receipts, the lifecycle and the lock",
+      "status": "untried",
+      "addresses": [
+        "i19"
+      ],
+      "cost": 9
+    },
+    "a31.3": {
+      "title": "replace the 40 libraries' !(import_prolog_functions_from_file (library lib_x.pl) (names)) with (= (package backing) (prolog \"lib_x.pl\" (names))), derived from the calls rather than retyped",
+      "status": "done",
+      "addresses": [
+        "i19"
+      ],
+      "cost": 5,
+      "rests_on": [
+        "c64",
+        "c67",
+        "c76",
+        "c78",
+        "c81",
+        "c82",
+        "c84",
+        "c86"
+      ]
+    },
+    "a31.4": {
+      "title": "gate it: a lane refusing a library that declares its Prolog body the old way, and a head with neither an equation nor a claimed backing refusing by name at import",
+      "status": "active",
+      "addresses": [
+        "i19"
+      ],
+      "cost": 4
+    },
+    "a32": {
+      "title": "give every file that runs as a script the inline derivation rather than an import, and gate it by running each tool check.sh invokes and requiring it to start",
+      "status": "active",
+      "addresses": [
+        "i22"
+      ],
+      "cost": 3,
+      "rests_on": [
+        "c83"
       ]
     }
   },
@@ -2279,6 +2392,408 @@
       "says": "read _index at extensions/python/metta/doors/_analysis.py:466 and _Scope at line 263",
       "supports": [
         "c60"
+      ],
+      "basis": "source"
+    },
+    "r213": {
+      "says": "committed as 362b07c2; the differential reports 1909 functions both ways with zero differing facts, at 109.25s against 4.31s",
+      "supports": [
+        {
+          "node": "a28",
+          "status": "done"
+        }
+      ]
+    },
+    "r214": {
+      "says": "committed as 4ecc24ba: metta.doors.guard, the mark on SpaceHandle._space, and two tests of which one is the negative control",
+      "supports": [
+        {
+          "node": "a24",
+          "status": "done"
+        }
+      ]
+    },
+    "c61": {
+      "says": "marking SpaceHandle._space does not move the mixed count, because the 130 mixed rows carry crossings from 113 OTHER functions; the three reaching all 130 are metta._spaces.lifetime.attach twice and lifetime.current, and engine_thread, runtime, json.dumps and factories._read_one reach 128 each"
+    },
+    "r215": {
+      "says": "resolved the site indices in tools/doororder.py --json against its site table: zero sites owned by _space remain anywhere, no verdict changed, and mixed stayed at 130",
+      "supports": [
+        "c61"
+      ],
+      "basis": "measured"
+    },
+    "r216": {
+      "says": "grouped every crossing site in a mixed row by its owning function",
+      "supports": [
+        "i18"
+      ],
+      "basis": "measured"
+    },
+    "r217": {
+      "says": "the reachability question comes first: a door reaching metta.algebra._evaluate_with_budget may be an over-approximation rather than a call, and marking on top of an artifact would hide it",
+      "supports": [
+        {
+          "node": "a30",
+          "status": "untried"
+        }
+      ]
+    },
+    "r218": {
+      "says": "the design is decided in fifteen laws at docs/journal/2026-09-09-packages-are-equations.md, recorded on trunk as d73212926 and 85d8384bc, and the user asked for it to be built",
+      "supports": [
+        "g5"
+      ],
+      "basis": "source"
+    },
+    "r219": {
+      "says": "searched all 26 worktrees and every ref; the only two commits touching it, d73212926 and 85d8384bc, change docs/journal/2026-09-09-packages-are-equations.md and nothing else, 185 and 59 lines",
+      "supports": [
+        "i19"
+      ],
+      "basis": "measured"
+    },
+    "c62": {
+      "says": "the blocker recorded against the package work is stale: FROM is merged, so the loader it owned is available"
+    },
+    "r220": {
+      "says": "git merge-base --is-ancestor feature/references-grades-and-properties HEAD succeeds with zero unmerged commits, and its surface is present as engine/metta/properties.pl at 192 lines and metta_graded_pair/5 in engine/metta.pl",
+      "supports": [
+        "c62"
+      ],
+      "basis": "measured"
+    },
+    "c63": {
+      "says": "three of the blockers recorded in ai-todo.md this session were stale, so a row's own acceptance criteria should be run against the tree before any of it is built"
+    },
+    "r221": {
+      "says": "L104 remove-one already shipped as subtract-atom, L055 structured concurrency shipped in full at f80cc416d, and the package row's FROM blocker is merged",
+      "supports": [
+        "c63"
+      ],
+      "basis": "measured"
+    },
+    "c64": {
+      "says": "the migration is mechanical and checkable: 40 libraries each carry exactly one import_prolog_functions_from_file call naming a file and a head list, so the backing row is a function of the call and the head set registered before and after can be compared"
+    },
+    "r222": {
+      "says": "grep -rln over lib/ found 40 files, and lib_thread.metta:95 carries the call with 30 head names",
+      "supports": [
+        "c64"
+      ],
+      "basis": "measured"
+    },
+    "r223": {
+      "says": "FROM is merged so the loader is available, the user asked for the design to be built, and nothing of it exists",
+      "supports": [
+        {
+          "node": "a31",
+          "status": "active"
+        }
+      ]
+    },
+    "c65": {
+      "says": "protected_core_head/1 is not the mechanism law 1's reserved head needs: it refuses a REWRITE RULE replacing a core head through add-translator-rule!, and says nothing about an equation head, so adding package to it would reserve nothing the design asks for"
+    },
+    "r224": {
+      "says": "read engine/translator_rules.pl:174-190, where the table holds eval, evalc, chain, let, unify, superpose, collapse, call, translatePredicate, reduce, if, case, catch and cut, and refuse_protected_core_rule/1 throws only from add-translator-rule!",
+      "supports": [
+        "c65"
+      ],
+      "basis": "source"
+    },
+    "c66": {
+      "says": "the sealed-head declaration law 4 names does not exist: sealed in this engine is the MeTTa special form that freshens an atom's variables, and nothing else in the engine carries the concept"
+    },
+    "r225": {
+      "says": "grep over engine/ for sealed finds metta_grounded_token('sealed'), its writesState effect row, its lowering note and its special-form entry, and no declaration mechanism",
+      "supports": [
+        "c66"
+      ],
+      "basis": "source"
+    },
+    "c67": {
+      "says": "the loader's cut point for performing a backing row is after load_imported_metta_file/3 inside importer_helper_impl/2, which is where a library's own rows are in the space"
+    },
+    "r226": {
+      "says": "read engine/metta/interop.pl:1897, where importer_helper_impl either hands the file to seam:host_import or resolves the path and loads it under import_when(changed, ...)",
+      "supports": [
+        "c67"
+      ],
+      "basis": "source"
+    },
+    "r227": {
+      "says": "two candidate mechanisms tested and refuted, and the loader's cut point found; what remains open is how a package row is enumerated in a space and graded internal, and how a claim collision refuses, which law 4 calls a sealed-head declaration that does not exist yet",
+      "supports": [
+        {
+          "node": "a31.1",
+          "status": "active"
+        }
+      ]
+    },
+    "c68": {
+      "says": "a row is an atom in a space, a list such as [parametric, Space] written with metta_add_atom/3-4, and &metta is the reflection space law 2 puts the runtime facts in; so a package row is the atom ['=', [package, backing], [prolog, File, Names]]"
+    },
+    "r228": {
+      "says": "read engine/spaces/lifecycle.pl:1097 and :1135, where the engine writes its own reflection rows with metta_add_atom('&metta', [parametric, Space], _)",
+      "supports": [
+        "c68"
+      ],
+      "basis": "source"
+    },
+    "r229": {
+      "says": "grep over engine/spaces for a row-reading predicate found none by the names tried, and the engine's semantic index was still building",
+      "supports": [
+        "i20"
+      ],
+      "basis": "source"
+    },
+    "c69": {
+      "says": "two further concepts the package laws rest on are also unbuilt: git-dependency rows, which law 10 folds requirements from, and the sealed-head declaration law 4 refuses a claim collision with"
+    },
+    "r230": {
+      "says": "grep over engine/ finds neither; sealed is the variable-freshening special form and nothing names git-dependency",
+      "supports": [
+        "c69"
+      ],
+      "basis": "source"
+    },
+    "c70": {
+      "says": "the engine must NOT understand the token in a backing row: the design rejects language tokens the engine answers itself, because the engine would then name hosts, and its own Prolog loader claims prolog and c as a registrant of the same seam"
+    },
+    "r231": {
+      "says": "read docs/journal/2026-09-09-packages-are-equations.md in full; the rejection is in the 2026-09-09 opening section and law 4 states the engine holds no claim",
+      "supports": [
+        "c70"
+      ],
+      "basis": "source"
+    },
+    "c71": {
+      "says": "seven amendments revise the laws and the user confirmed the first two: a requirement resolves by matching catalog spaces with no resolver code, rows perform in source order unless the package declares otherwise, a performer answers any atom including a space of the heads' rows that the loader merges, ownership is a policy row over linear take with one claimant per token by default, several backings make the package a theory parameterised over a host interface, boot is MeTTaIL's Space => { Prog }, and export by sort is a type-shaped internal pattern adding nothing"
+    },
+    "r232": {
+      "says": "read the 2026-09-09 substrate and theory-algebra section of the journal",
+      "supports": [
+        "c71"
+      ],
+      "basis": "source"
+    },
+    "c72": {
+      "says": "metta_reference_internal(_, package) is live in the engine and is law 1's reservation in the mechanism the engine already has"
+    },
+    "r233": {
+      "says": "predicate_property reports 3 clauses for metta_reference_internal/2 in module metta_engine after the edit, where there were 2",
+      "supports": [
+        "c72"
+      ],
+      "basis": "measured"
+    },
+    "c73": {
+      "says": "grading a row internal does not keep it out of a file import: after import! of a file carrying package rows, &self holds all three of its atoms and match finds them, so law 1's never merge into an importer is about the reference merge rather than import!"
+    },
+    "r234": {
+      "says": "ran the probe before and after adding the clause; &self held (= (package version) ...) and (= (package backing) ...) both times",
+      "supports": [
+        "c73"
+      ],
+      "basis": "measured"
+    },
+    "c74": {
+      "says": "laws 4 and 5 need no new machinery: a claim is an ordinary equation added to &metta with add-atom, and (perform Row) dispatches by unification when evaluated there with evalc, while the same call in a space holding no claim leaves the term unreduced, which is law 3's row nobody claims"
+    },
+    "r235": {
+      "says": "added (= (perform (probe-token $a $b)) (probe-performed $a $b)) to &metta and ran !(evalc (perform (probe-token 1 2)) &metta), which answered (probe-performed 1 2); the same call in &self answered the unreduced term and an unclaimed token in &metta answered nothing",
+      "supports": [
+        "c74"
+      ],
+      "basis": "measured"
+    },
+    "c75": {
+      "says": "the word claim is already taken in &metta for a different concept, the vocabulary rows declared by (kind claim symbol symbol (rest symbol)) such as (claim semiring ranked ordered descending), so law 4's claims must be the perform equations themselves rather than a row spelled claim"
+    },
+    "r236": {
+      "says": "read the 23 claim rows in &metta: ten semiring rows, six cache-policy rows and seven algebra-law rows",
+      "supports": [
+        "c75"
+      ],
+      "basis": "measured"
+    },
+    "r237": {
+      "says": "the engine's four things reduce to two edits and no new mechanism: package is reserved by metta_reference_internal(_, package), and perform dispatches by unification through evalc in &metta, both verified against the running engine",
+      "supports": [
+        {
+          "node": "a31.1",
+          "status": "done"
+        }
+      ]
+    },
+    "c76": {
+      "says": "the whole of law 14 is one MeTTa form the loader runs after a file loads: (match <space> (= (package backing) $b) (evalc (perform $b) &metta)); it found the backing row, dispatched through the loader's claim by unification, ran the importer and installed the head"
+    },
+    "r238": {
+      "says": "probe_double answered unreduced before and 10 after, with the claim registered in &metta by filereader:process_loader_string and the backing row naming a real .pl file",
+      "supports": [
+        "c76"
+      ],
+      "basis": "measured"
+    },
+    "c77": {
+      "says": "the Prolog-level 'get-atoms'/2 enumerates nothing for '&self' while MeTTa's !(get-atoms &self) answers three atoms, because the MeTTa name resolves through the evaluation context a bare Prolog call does not have; so the loader reads package rows by evaluating a match rather than by a Prolog row query"
+    },
+    "r239": {
+      "says": "aggregate_all(count, spaces:'get-atoms'('&self', _), N) answered N=0 immediately after an import! that MeTTa could see",
+      "supports": [
+        "c77"
+      ],
+      "basis": "measured"
+    },
+    "c78": {
+      "says": "a claim's body is ordinary MeTTa and needs its own dependencies present: the loader's prolog claim calls import_prolog_functions_from_file, which lib_import defines as an equation rather than the engine defining it as a predicate, so registering the claim means importing lib_import into &metta"
+    },
+    "r240": {
+      "says": "the first dispatch raised Unknown procedure: import_prolog_functions_from_file/3 and succeeded after !(import! &metta (library lib_import))",
+      "supports": [
+        "c78"
+      ],
+      "basis": "measured"
+    },
+    "r241": {
+      "says": "the mechanism is proven end to end against the running engine; what remains is putting it in the loader and migrating the 40 libraries",
+      "supports": [
+        {
+          "node": "a31.3",
+          "status": "active"
+        }
+      ]
+    },
+    "c79": {
+      "says": "the engine suite's 156 failures are pre-existing and not caused by the loader hook: lib_unicode answers 8 failed both with the hook and with it removed, and lib_csv_surface answers 45 failed and 35 passed both ways"
+    },
+    "r242": {
+      "says": "ran each suite twice on the same tree with only the metta_perform_package_backings call added and removed",
+      "supports": [
+        "c79"
+      ],
+      "basis": "measured"
+    },
+    "c80": {
+      "says": "the dominant pre-existing cause is missing SWI packs rather than anything in this repository: lib_compression fails with Unknown procedure archive_open/4 and exists_source(library(archive)) answers absent on this install"
+    },
+    "r243": {
+      "says": "ran swipl -g \"(exists_source(library(archive)) -> writeln(present) ; writeln(absent))\"",
+      "supports": [
+        "c80"
+      ],
+      "basis": "measured"
+    },
+    "c81": {
+      "says": "the migration is one generator change rather than 40 file edits, because the importer call is generated: prologface.py emits it and a drift lane refuses a hand-edited face, so changing the emission and regenerating rewrote 23 faces at once with 0 findings"
+    },
+    "r244": {
+      "says": "read the GENERATED-by header on lib_regex.metta and prologface.py:116, changed the emission and ran tools/prologface.py --write, which reported 24 described sources and 0 findings",
+      "supports": [
+        "c81"
+      ],
+      "basis": "measured"
+    },
+    "r245": {
+      "says": "tests/prolog/suites/seams/packages.plt passes 4 of 4: a backing row installs its artifact's head, the same library without the row installs nothing, a token no claimant answers installs nothing, and package is internal in every space",
+      "supports": [
+        {
+          "node": "a31.4",
+          "status": "active"
+        }
+      ]
+    },
+    "r246": {
+      "says": "ran exists_source(library(X)) for each under both builds; it accounts for lib_compression, lib_unicode and lib_yaml, which are 3 of the 23 regenerated faces and the engine suite's largest failure clusters at 10, 8 and 11",
+      "supports": [
+        "i21"
+      ],
+      "basis": "measured"
+    },
+    "c82": {
+      "says": "20 of the 23 regenerated faces import cleanly in a FRESH engine, and the three that do not are exactly the three whose system pack is missing from the patched build"
+    },
+    "r247": {
+      "says": "imported each face in its own subprocess so one library's failure could not poison another's, after a shared-engine run had reported 22 of 23 failing from a single missing pack",
+      "supports": [
+        "c82"
+      ],
+      "basis": "measured"
+    },
+    "r248": {
+      "says": "ran each of the 22 tools and counted ModuleNotFoundError: No module named 'metta'; artifacts.py, codecdoc.py, example_origins.py, filesizes.py, prologface.py, protocolgen.py, pygmentsgen.py, reference.py, refusalgen.py, refusalsdoc.py and vocabgen.py failed, and the prolog-face GATE lane failed with them",
+      "supports": [
+        "i22"
+      ],
+      "basis": "measured"
+    },
+    "c83": {
+      "says": "the equivalence check could not have caught it: it compared the PATH each site resolves to with the seat already on sys.path, so it verified the value and never the importability of the module the value now comes from"
+    },
+    "r249": {
+      "says": "the check imported metta._roots itself before evaluating either side, which is why 151 of 151 sites agreed while ten tools could not start",
+      "supports": [
+        "c83"
+      ],
+      "basis": "source"
+    },
+    "r250": {
+      "says": "the ten tools are repaired with the inline workspace derivation and all 22 now import; the gate that would have caught it is not written yet",
+      "supports": [
+        {
+          "node": "a32",
+          "status": "active"
+        }
+      ]
+    },
+    "c84": {
+      "says": "the hook belongs in replacing_previous_load/4 rather than in any loading door: four call sites reach it, and hooking load_imported_metta_file/3 alone left the grouped door unperformed, so a face loaded with the Python load door answered its own head unreduced while the same file imported answered normally"
+    },
+    "r251": {
+      "says": "counted four call sites of replacing_previous_load/4 in engine/filereader/source_lifecycle.pl at lines 105, 838, 1141 and 1160, and the prologface selftest failed on load and passed on import until the hook moved",
+      "supports": [
+        "c84"
+      ],
+      "basis": "measured"
+    },
+    "c85": {
+      "says": "a file loaded through the Python door lands in &pyspace_1 rather than &self, which is why the first reading of the loaded space found nothing"
+    },
+    "r252": {
+      "says": "the debug topic printed space='&pyspace_1' on the load path and space='&metta' on the claim registration",
+      "supports": [
+        "c85"
+      ],
+      "basis": "measured"
+    },
+    "r253": {
+      "says": "both doors perform a file's backing rows, the prologface selftest passes 13 of 13, the packages suite passes 4 of 4, and 23 library faces carry the row from one generator change",
+      "supports": [
+        {
+          "node": "a31.3",
+          "status": "done"
+        }
+      ]
+    },
+    "c86": {
+      "says": "performing a backing after the load commits does not re-enter the approach docs/journal/2026-09-05-function-free-materialization.md rejected: that entry rejects rebuilding a DERIVED RELATION after commit, because preparation can fail or exhaust a budget and so belongs inside the rollback boundary, and it bars a derivation moving past commit and a mutation listener being added"
+    },
+    "r254": {
+      "says": "read the 2026-09-05 transactional publication design section; a backing consults a Prolog artifact, which is an irreversible host effect rather than derived state, and it is called directly in the load path rather than through an atom listener",
+      "supports": [
+        "c86"
+      ],
+      "basis": "source"
+    },
+    "c87": {
+      "says": "the boundary runs the other way for an effect: consulting an artifact inside a transaction that may roll back would leave the clauses standing for a load that failed, so after the commit is where an irreversible effect belongs and inside is where derived state belongs"
+    },
+    "r255": {
+      "says": "read replacing_previous_load/4, whose materialization_transaction rolls back both source and image changes on a throw",
+      "supports": [
+        "c87"
       ],
       "basis": "source"
     }
@@ -11244,6 +11759,2259 @@
         ]
       ],
       "id": "d4092d64bf9382d1"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a28 done --because 'committed as 362b07c2; the differential reports 1909 functions both ways with zero differing facts, at 109.25s against 4.31s'",
+      "parents": [
+        "d4092d64bf9382d1"
+      ],
+      "assert": [
+        [
+          "a28",
+          "status",
+          "done"
+        ],
+        [
+          "r213",
+          "sort",
+          "claim"
+        ],
+        [
+          "r213",
+          "says",
+          "committed as 362b07c2; the differential reports 1909 functions both ways with zero differing facts, at 109.25s against 4.31s"
+        ],
+        [
+          "r213",
+          "supports",
+          {
+            "node": "a28",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "7f556fc5ed068777"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a24 done --because 'committed as 4ecc24ba: metta.doors.guard, the mark on SpaceHandle._space, and two tests of which one is the negative control'",
+      "parents": [
+        "7f556fc5ed068777"
+      ],
+      "assert": [
+        [
+          "a24",
+          "status",
+          "done"
+        ],
+        [
+          "r214",
+          "sort",
+          "claim"
+        ],
+        [
+          "r214",
+          "says",
+          "committed as 4ecc24ba: metta.doors.guard, the mark on SpaceHandle._space, and two tests of which one is the negative control"
+        ],
+        [
+          "r214",
+          "supports",
+          {
+            "node": "a24",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "efef90bd6a682783"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c61 'marking SpaceHandle._space does not move the mixed count, because the 130 mixed rows carry crossings from 113 OTHER functions; the three reaching all 130 are metta._spaces.lifetime.attach twice and lifetime.current, and engine_thread, runtime, json.dumps and factories._read_one reach 128 each' --because 'resolved the site indices in tools/doororder.py --json against its site table: zero sites owned by _space remain anywhere, no verdict changed, and mixed stayed at 130' --basis measured",
+      "parents": [
+        "efef90bd6a682783"
+      ],
+      "assert": [
+        [
+          "c61",
+          "sort",
+          "claim"
+        ],
+        [
+          "c61",
+          "says",
+          "marking SpaceHandle._space does not move the mixed count, because the 130 mixed rows carry crossings from 113 OTHER functions; the three reaching all 130 are metta._spaces.lifetime.attach twice and lifetime.current, and engine_thread, runtime, json.dumps and factories._read_one reach 128 each"
+        ],
+        [
+          "r215",
+          "sort",
+          "claim"
+        ],
+        [
+          "r215",
+          "basis",
+          "measured"
+        ],
+        [
+          "r215",
+          "says",
+          "resolved the site indices in tools/doororder.py --json against its site table: zero sites owned by _space remain anywhere, no verdict changed, and mixed stayed at 130"
+        ],
+        [
+          "r215",
+          "supports",
+          "c61"
+        ]
+      ],
+      "id": "abc112ce89995f9f"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-issue i18 '113 functions own the crossings that keep 130 door rows mixed, and they are not one class: lifetime bookkeeping, acquiring the runtime, attaching the engine thread and the wire codec are substrate every door pays to reach the engine at all, while metta.algebra._evaluate_with_budget and metta.events._FoldRegistry._publish_locked are the door'\"'\"'s own work' --blocks g1 --basis measured --because 'grouped every crossing site in a mixed row by its owning function'",
+      "parents": [
+        "abc112ce89995f9f"
+      ],
+      "assert": [
+        [
+          "i18",
+          "sort",
+          "issue"
+        ],
+        [
+          "i18",
+          "blocks",
+          "g1"
+        ],
+        [
+          "i18",
+          "what",
+          "113 functions own the crossings that keep 130 door rows mixed, and they are not one class: lifetime bookkeeping, acquiring the runtime, attaching the engine thread and the wire codec are substrate every door pays to reach the engine at all, while metta.algebra._evaluate_with_budget and metta.events._FoldRegistry._publish_locked are the door's own work"
+        ],
+        [
+          "r216",
+          "sort",
+          "claim"
+        ],
+        [
+          "r216",
+          "basis",
+          "measured"
+        ],
+        [
+          "r216",
+          "says",
+          "grouped every crossing site in a mixed row by its owning function"
+        ],
+        [
+          "r216",
+          "supports",
+          "i18"
+        ]
+      ],
+      "id": "dcdbbc8f25e2c5ae"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a30 'classify the 113 owners into substrate and work, mark the substrate with metta.doors.guard, and check first whether a door'\"'\"'s reaching them is real or an artifact of the analysis'\"'\"'s context insensitivity' --addresses i18 --cost 8",
+      "parents": [
+        "dcdbbc8f25e2c5ae"
+      ],
+      "assert": [
+        [
+          "a30",
+          "sort",
+          "approach"
+        ],
+        [
+          "a30",
+          "addresses",
+          "i18"
+        ],
+        [
+          "a30",
+          "cost",
+          8
+        ],
+        [
+          "a30",
+          "status",
+          "untried"
+        ],
+        [
+          "a30",
+          "title",
+          "classify the 113 owners into substrate and work, mark the substrate with metta.doors.guard, and check first whether a door's reaching them is real or an artifact of the analysis's context insensitivity"
+        ]
+      ],
+      "id": "1f9a1742a256849c"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a30 c61 --as rests-on",
+      "parents": [
+        "1f9a1742a256849c"
+      ],
+      "assert": [
+        [
+          "a30",
+          "rests_on",
+          "c61"
+        ]
+      ],
+      "id": "9c7a173ba89c6e8b"
+    },
+    {
+      "at": "2026-09-19T17:43:31+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a30 untried --because 'the reachability question comes first: a door reaching metta.algebra._evaluate_with_budget may be an over-approximation rather than a call, and marking on top of an artifact would hide it'",
+      "parents": [
+        "9c7a173ba89c6e8b"
+      ],
+      "assert": [
+        [
+          "r217",
+          "sort",
+          "claim"
+        ],
+        [
+          "r217",
+          "says",
+          "the reachability question comes first: a door reaching metta.algebra._evaluate_with_budget may be an over-approximation rather than a call, and marking on top of an artifact would hide it"
+        ],
+        [
+          "r217",
+          "supports",
+          {
+            "node": "a30",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "40fe35a27d70a44a"
+    },
+    {
+      "at": "2026-09-19T17:44:35+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-goal g5 'a library or an application describes itself in its own .metta file, in MeTTa semantics only, so any implementation that can read atoms can read the package, perform the rows it can, and refuse the rest by name' --weight 90 --because 'the design is decided in fifteen laws at docs/journal/2026-09-09-packages-are-equations.md, recorded on trunk as d73212926 and 85d8384bc, and the user asked for it to be built' --basis source",
+      "parents": [
+        "40fe35a27d70a44a"
+      ],
+      "assert": [
+        [
+          "g5",
+          "sort",
+          "goal"
+        ],
+        [
+          "g5",
+          "want",
+          "a library or an application describes itself in its own .metta file, in MeTTa semantics only, so any implementation that can read atoms can read the package, perform the rows it can, and refuse the rest by name"
+        ],
+        [
+          "g5",
+          "weight",
+          90
+        ],
+        [
+          "r218",
+          "sort",
+          "claim"
+        ],
+        [
+          "r218",
+          "basis",
+          "source"
+        ],
+        [
+          "r218",
+          "says",
+          "the design is decided in fifteen laws at docs/journal/2026-09-09-packages-are-equations.md, recorded on trunk as d73212926 and 85d8384bc, and the user asked for it to be built"
+        ],
+        [
+          "r218",
+          "supports",
+          "g5"
+        ]
+      ],
+      "id": "f166a00d801f955e"
+    },
+    {
+      "at": "2026-09-19T17:44:35+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-issue i19 'nothing of the package design is built: no lib_package, no (= (package ...)) row in lib/ or examples/, no reserved package head in the engine, and manifest.py is still the 503-line closed vocabulary the design replaces' --blocks g5 --basis measured --because 'searched all 26 worktrees and every ref; the only two commits touching it, d73212926 and 85d8384bc, change docs/journal/2026-09-09-packages-are-equations.md and nothing else, 185 and 59 lines'",
+      "parents": [
+        "f166a00d801f955e"
+      ],
+      "assert": [
+        [
+          "i19",
+          "sort",
+          "issue"
+        ],
+        [
+          "i19",
+          "blocks",
+          "g5"
+        ],
+        [
+          "i19",
+          "what",
+          "nothing of the package design is built: no lib_package, no (= (package ...)) row in lib/ or examples/, no reserved package head in the engine, and manifest.py is still the 503-line closed vocabulary the design replaces"
+        ],
+        [
+          "r219",
+          "sort",
+          "claim"
+        ],
+        [
+          "r219",
+          "basis",
+          "measured"
+        ],
+        [
+          "r219",
+          "says",
+          "searched all 26 worktrees and every ref; the only two commits touching it, d73212926 and 85d8384bc, change docs/journal/2026-09-09-packages-are-equations.md and nothing else, 185 and 59 lines"
+        ],
+        [
+          "r219",
+          "supports",
+          "i19"
+        ]
+      ],
+      "id": "76e6de33661a6f3d"
+    },
+    {
+      "at": "2026-09-19T17:44:35+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c62 'the blocker recorded against the package work is stale: FROM is merged, so the loader it owned is available' --because 'git merge-base --is-ancestor feature/references-grades-and-properties HEAD succeeds with zero unmerged commits, and its surface is present as engine/metta/properties.pl at 192 lines and metta_graded_pair/5 in engine/metta.pl' --basis measured",
+      "parents": [
+        "76e6de33661a6f3d"
+      ],
+      "assert": [
+        [
+          "c62",
+          "sort",
+          "claim"
+        ],
+        [
+          "c62",
+          "says",
+          "the blocker recorded against the package work is stale: FROM is merged, so the loader it owned is available"
+        ],
+        [
+          "r220",
+          "sort",
+          "claim"
+        ],
+        [
+          "r220",
+          "basis",
+          "measured"
+        ],
+        [
+          "r220",
+          "says",
+          "git merge-base --is-ancestor feature/references-grades-and-properties HEAD succeeds with zero unmerged commits, and its surface is present as engine/metta/properties.pl at 192 lines and metta_graded_pair/5 in engine/metta.pl"
+        ],
+        [
+          "r220",
+          "supports",
+          "c62"
+        ]
+      ],
+      "id": "9abb0e966e083b73"
+    },
+    {
+      "at": "2026-09-19T17:44:35+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c63 'three of the blockers recorded in ai-todo.md this session were stale, so a row'\"'\"'s own acceptance criteria should be run against the tree before any of it is built' --because 'L104 remove-one already shipped as subtract-atom, L055 structured concurrency shipped in full at f80cc416d, and the package row'\"'\"'s FROM blocker is merged' --basis measured",
+      "parents": [
+        "9abb0e966e083b73"
+      ],
+      "assert": [
+        [
+          "c63",
+          "sort",
+          "claim"
+        ],
+        [
+          "c63",
+          "says",
+          "three of the blockers recorded in ai-todo.md this session were stale, so a row's own acceptance criteria should be run against the tree before any of it is built"
+        ],
+        [
+          "r221",
+          "sort",
+          "claim"
+        ],
+        [
+          "r221",
+          "basis",
+          "measured"
+        ],
+        [
+          "r221",
+          "says",
+          "L104 remove-one already shipped as subtract-atom, L055 structured concurrency shipped in full at f80cc416d, and the package row's FROM blocker is merged"
+        ],
+        [
+          "r221",
+          "supports",
+          "c63"
+        ]
+      ],
+      "id": "a392426d09c1e844"
+    },
+    {
+      "at": "2026-09-19T17:44:35+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a27 c63 --as rests-on",
+      "parents": [
+        "a392426d09c1e844"
+      ],
+      "assert": [
+        [
+          "a27",
+          "rests_on",
+          "c63"
+        ]
+      ],
+      "id": "01b3096c293006d7"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a31 'build the package design in the order its laws depend on each other, engine core first, then the prelude library, then the migration that proves it' --addresses i19 --cost 25",
+      "parents": [
+        "01b3096c293006d7"
+      ],
+      "assert": [
+        [
+          "a31",
+          "sort",
+          "approach"
+        ],
+        [
+          "a31",
+          "addresses",
+          "i19"
+        ],
+        [
+          "a31",
+          "cost",
+          25
+        ],
+        [
+          "a31",
+          "status",
+          "untried"
+        ],
+        [
+          "a31",
+          "title",
+          "build the package design in the order its laws depend on each other, engine core first, then the prelude library, then the migration that proves it"
+        ]
+      ],
+      "id": "e643a810ec9a576b"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "edit a31 --set children --to all",
+      "parents": [
+        "e643a810ec9a576b"
+      ],
+      "assert": [
+        [
+          "a31",
+          "kind",
+          "and"
+        ]
+      ],
+      "id": "a441193e62b1cf17"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a31.1 'give the engine its four fixed things: the reserved head package, (package requires) performed before any packaging library is merged, perform dispatched by unification in the seam space, and the reads ceiling with its inference budget' --addresses i19 --cost 8",
+      "parents": [
+        "a441193e62b1cf17"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "sort",
+          "approach"
+        ],
+        [
+          "a31.1",
+          "addresses",
+          "i19"
+        ],
+        [
+          "a31.1",
+          "cost",
+          8
+        ],
+        [
+          "a31.1",
+          "status",
+          "untried"
+        ],
+        [
+          "a31.1",
+          "title",
+          "give the engine its four fixed things: the reserved head package, (package requires) performed before any packaging library is merged, perform dispatched by unification in the seam space, and the reads ceiling with its inference budget"
+        ]
+      ],
+      "id": "333cb33d67dfa1e8"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a31.2 'write lib_package as a prelude library carrying everything laws 1 to 15 do not fix in the engine: version, setup, boot, backing, coverage, receipts, the lifecycle and the lock' --addresses i19 --cost 9",
+      "parents": [
+        "333cb33d67dfa1e8"
+      ],
+      "assert": [
+        [
+          "a31.2",
+          "sort",
+          "approach"
+        ],
+        [
+          "a31.2",
+          "addresses",
+          "i19"
+        ],
+        [
+          "a31.2",
+          "cost",
+          9
+        ],
+        [
+          "a31.2",
+          "status",
+          "untried"
+        ],
+        [
+          "a31.2",
+          "title",
+          "write lib_package as a prelude library carrying everything laws 1 to 15 do not fix in the engine: version, setup, boot, backing, coverage, receipts, the lifecycle and the lock"
+        ]
+      ],
+      "id": "0b9aa1be9a3103a0"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a31.3 'replace the 40 libraries'\"'\"' !(import_prolog_functions_from_file (library lib_x.pl) (names)) with (= (package backing) (prolog \"lib_x.pl\" (names))), derived from the calls rather than retyped' --addresses i19 --cost 5",
+      "parents": [
+        "0b9aa1be9a3103a0"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "sort",
+          "approach"
+        ],
+        [
+          "a31.3",
+          "addresses",
+          "i19"
+        ],
+        [
+          "a31.3",
+          "cost",
+          5
+        ],
+        [
+          "a31.3",
+          "status",
+          "untried"
+        ],
+        [
+          "a31.3",
+          "title",
+          "replace the 40 libraries' !(import_prolog_functions_from_file (library lib_x.pl) (names)) with (= (package backing) (prolog \"lib_x.pl\" (names))), derived from the calls rather than retyped"
+        ]
+      ],
+      "id": "964d1afd6801eec8"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a31.4 'gate it: a lane refusing a library that declares its Prolog body the old way, and a head with neither an equation nor a claimed backing refusing by name at import' --addresses i19 --cost 4",
+      "parents": [
+        "964d1afd6801eec8"
+      ],
+      "assert": [
+        [
+          "a31.4",
+          "sort",
+          "approach"
+        ],
+        [
+          "a31.4",
+          "addresses",
+          "i19"
+        ],
+        [
+          "a31.4",
+          "cost",
+          4
+        ],
+        [
+          "a31.4",
+          "status",
+          "untried"
+        ],
+        [
+          "a31.4",
+          "title",
+          "gate it: a lane refusing a library that declares its Prolog body the old way, and a head with neither an equation nor a claimed backing refusing by name at import"
+        ]
+      ],
+      "id": "4dd061aa630cadf5"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c64 'the migration is mechanical and checkable: 40 libraries each carry exactly one import_prolog_functions_from_file call naming a file and a head list, so the backing row is a function of the call and the head set registered before and after can be compared' --because 'grep -rln over lib/ found 40 files, and lib_thread.metta:95 carries the call with 30 head names' --basis measured",
+      "parents": [
+        "4dd061aa630cadf5"
+      ],
+      "assert": [
+        [
+          "c64",
+          "sort",
+          "claim"
+        ],
+        [
+          "c64",
+          "says",
+          "the migration is mechanical and checkable: 40 libraries each carry exactly one import_prolog_functions_from_file call naming a file and a head list, so the backing row is a function of the call and the head set registered before and after can be compared"
+        ],
+        [
+          "r222",
+          "sort",
+          "claim"
+        ],
+        [
+          "r222",
+          "basis",
+          "measured"
+        ],
+        [
+          "r222",
+          "says",
+          "grep -rln over lib/ found 40 files, and lib_thread.metta:95 carries the call with 30 head names"
+        ],
+        [
+          "r222",
+          "supports",
+          "c64"
+        ]
+      ],
+      "id": "63077e90cc8c04dc"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c64 --as rests-on",
+      "parents": [
+        "63077e90cc8c04dc"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c64"
+        ]
+      ],
+      "id": "07f941182f797057"
+    },
+    {
+      "at": "2026-09-19T17:45:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a31 active --because 'FROM is merged so the loader is available, the user asked for the design to be built, and nothing of it exists'",
+      "parents": [
+        "07f941182f797057"
+      ],
+      "assert": [
+        [
+          "a31",
+          "status",
+          "active"
+        ],
+        [
+          "r223",
+          "sort",
+          "claim"
+        ],
+        [
+          "r223",
+          "says",
+          "FROM is merged so the loader is available, the user asked for the design to be built, and nothing of it exists"
+        ],
+        [
+          "r223",
+          "supports",
+          {
+            "node": "a31",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "db609ff8866e4bb8"
+    },
+    {
+      "at": "2026-09-19T17:48:00+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c65 'protected_core_head/1 is not the mechanism law 1'\"'\"'s reserved head needs: it refuses a REWRITE RULE replacing a core head through add-translator-rule!, and says nothing about an equation head, so adding package to it would reserve nothing the design asks for' --because 'read engine/translator_rules.pl:174-190, where the table holds eval, evalc, chain, let, unify, superpose, collapse, call, translatePredicate, reduce, if, case, catch and cut, and refuse_protected_core_rule/1 throws only from add-translator-rule!' --basis source",
+      "parents": [
+        "db609ff8866e4bb8"
+      ],
+      "assert": [
+        [
+          "c65",
+          "sort",
+          "claim"
+        ],
+        [
+          "c65",
+          "says",
+          "protected_core_head/1 is not the mechanism law 1's reserved head needs: it refuses a REWRITE RULE replacing a core head through add-translator-rule!, and says nothing about an equation head, so adding package to it would reserve nothing the design asks for"
+        ],
+        [
+          "r224",
+          "sort",
+          "claim"
+        ],
+        [
+          "r224",
+          "basis",
+          "source"
+        ],
+        [
+          "r224",
+          "says",
+          "read engine/translator_rules.pl:174-190, where the table holds eval, evalc, chain, let, unify, superpose, collapse, call, translatePredicate, reduce, if, case, catch and cut, and refuse_protected_core_rule/1 throws only from add-translator-rule!"
+        ],
+        [
+          "r224",
+          "supports",
+          "c65"
+        ]
+      ],
+      "id": "2f044605481b3f76"
+    },
+    {
+      "at": "2026-09-19T17:48:00+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c66 'the sealed-head declaration law 4 names does not exist: sealed in this engine is the MeTTa special form that freshens an atom'\"'\"'s variables, and nothing else in the engine carries the concept' --because 'grep over engine/ for sealed finds metta_grounded_token('\"'\"'sealed'\"'\"'), its writesState effect row, its lowering note and its special-form entry, and no declaration mechanism' --basis source",
+      "parents": [
+        "2f044605481b3f76"
+      ],
+      "assert": [
+        [
+          "c66",
+          "sort",
+          "claim"
+        ],
+        [
+          "c66",
+          "says",
+          "the sealed-head declaration law 4 names does not exist: sealed in this engine is the MeTTa special form that freshens an atom's variables, and nothing else in the engine carries the concept"
+        ],
+        [
+          "r225",
+          "sort",
+          "claim"
+        ],
+        [
+          "r225",
+          "basis",
+          "source"
+        ],
+        [
+          "r225",
+          "says",
+          "grep over engine/ for sealed finds metta_grounded_token('sealed'), its writesState effect row, its lowering note and its special-form entry, and no declaration mechanism"
+        ],
+        [
+          "r225",
+          "supports",
+          "c66"
+        ]
+      ],
+      "id": "25bc1f01602f24f0"
+    },
+    {
+      "at": "2026-09-19T17:48:01+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c67 'the loader'\"'\"'s cut point for performing a backing row is after load_imported_metta_file/3 inside importer_helper_impl/2, which is where a library'\"'\"'s own rows are in the space' --because 'read engine/metta/interop.pl:1897, where importer_helper_impl either hands the file to seam:host_import or resolves the path and loads it under import_when(changed, ...)' --basis source",
+      "parents": [
+        "25bc1f01602f24f0"
+      ],
+      "assert": [
+        [
+          "c67",
+          "sort",
+          "claim"
+        ],
+        [
+          "c67",
+          "says",
+          "the loader's cut point for performing a backing row is after load_imported_metta_file/3 inside importer_helper_impl/2, which is where a library's own rows are in the space"
+        ],
+        [
+          "r226",
+          "sort",
+          "claim"
+        ],
+        [
+          "r226",
+          "basis",
+          "source"
+        ],
+        [
+          "r226",
+          "says",
+          "read engine/metta/interop.pl:1897, where importer_helper_impl either hands the file to seam:host_import or resolves the path and loads it under import_when(changed, ...)"
+        ],
+        [
+          "r226",
+          "supports",
+          "c67"
+        ]
+      ],
+      "id": "ecba23635f0f52d2"
+    },
+    {
+      "at": "2026-09-19T17:48:01+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.1 c65 --as rests-on",
+      "parents": [
+        "ecba23635f0f52d2"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "rests_on",
+          "c65"
+        ]
+      ],
+      "id": "5d1f3cd7b1514d3a"
+    },
+    {
+      "at": "2026-09-19T17:48:01+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.1 c66 --as rests-on",
+      "parents": [
+        "5d1f3cd7b1514d3a"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "rests_on",
+          "c66"
+        ]
+      ],
+      "id": "4e7373dab614f21e"
+    },
+    {
+      "at": "2026-09-19T17:48:01+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c67 --as rests-on",
+      "parents": [
+        "4e7373dab614f21e"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c67"
+        ]
+      ],
+      "id": "afc02e0e34845416"
+    },
+    {
+      "at": "2026-09-19T17:48:01+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a31.1 active --because 'two candidate mechanisms tested and refuted, and the loader'\"'\"'s cut point found; what remains open is how a package row is enumerated in a space and graded internal, and how a claim collision refuses, which law 4 calls a sealed-head declaration that does not exist yet'",
+      "parents": [
+        "afc02e0e34845416"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "status",
+          "active"
+        ],
+        [
+          "r227",
+          "sort",
+          "claim"
+        ],
+        [
+          "r227",
+          "says",
+          "two candidate mechanisms tested and refuted, and the loader's cut point found; what remains open is how a package row is enumerated in a space and graded internal, and how a claim collision refuses, which law 4 calls a sealed-head declaration that does not exist yet"
+        ],
+        [
+          "r227",
+          "supports",
+          {
+            "node": "a31.1",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "071ad3c3a8f24299"
+    },
+    {
+      "at": "2026-09-19T17:49:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c68 'a row is an atom in a space, a list such as [parametric, Space] written with metta_add_atom/3-4, and &metta is the reflection space law 2 puts the runtime facts in; so a package row is the atom ['\"'\"'='\"'\"', [package, backing], [prolog, File, Names]]' --because 'read engine/spaces/lifecycle.pl:1097 and :1135, where the engine writes its own reflection rows with metta_add_atom('\"'\"'&metta'\"'\"', [parametric, Space], _)' --basis source",
+      "parents": [
+        "071ad3c3a8f24299"
+      ],
+      "assert": [
+        [
+          "c68",
+          "sort",
+          "claim"
+        ],
+        [
+          "c68",
+          "says",
+          "a row is an atom in a space, a list such as [parametric, Space] written with metta_add_atom/3-4, and &metta is the reflection space law 2 puts the runtime facts in; so a package row is the atom ['=', [package, backing], [prolog, File, Names]]"
+        ],
+        [
+          "r228",
+          "sort",
+          "claim"
+        ],
+        [
+          "r228",
+          "basis",
+          "source"
+        ],
+        [
+          "r228",
+          "says",
+          "read engine/spaces/lifecycle.pl:1097 and :1135, where the engine writes its own reflection rows with metta_add_atom('&metta', [parametric, Space], _)"
+        ],
+        [
+          "r228",
+          "supports",
+          "c68"
+        ]
+      ],
+      "id": "d6efdc1b578213ad"
+    },
+    {
+      "at": "2026-09-19T17:49:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-issue i20 'the predicate that enumerates a space'\"'\"'s rows back out has not been located, so the loader cannot yet read the package rows of the file it has just loaded' --blocks g5 --basis source --because 'grep over engine/spaces for a row-reading predicate found none by the names tried, and the engine'\"'\"'s semantic index was still building'",
+      "parents": [
+        "d6efdc1b578213ad"
+      ],
+      "assert": [
+        [
+          "i20",
+          "sort",
+          "issue"
+        ],
+        [
+          "i20",
+          "blocks",
+          "g5"
+        ],
+        [
+          "i20",
+          "what",
+          "the predicate that enumerates a space's rows back out has not been located, so the loader cannot yet read the package rows of the file it has just loaded"
+        ],
+        [
+          "r229",
+          "sort",
+          "claim"
+        ],
+        [
+          "r229",
+          "basis",
+          "source"
+        ],
+        [
+          "r229",
+          "says",
+          "grep over engine/spaces for a row-reading predicate found none by the names tried, and the engine's semantic index was still building"
+        ],
+        [
+          "r229",
+          "supports",
+          "i20"
+        ]
+      ],
+      "id": "25bdf5df06484c0d"
+    },
+    {
+      "at": "2026-09-19T17:49:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c69 'two further concepts the package laws rest on are also unbuilt: git-dependency rows, which law 10 folds requirements from, and the sealed-head declaration law 4 refuses a claim collision with' --because 'grep over engine/ finds neither; sealed is the variable-freshening special form and nothing names git-dependency' --basis source",
+      "parents": [
+        "25bdf5df06484c0d"
+      ],
+      "assert": [
+        [
+          "c69",
+          "sort",
+          "claim"
+        ],
+        [
+          "c69",
+          "says",
+          "two further concepts the package laws rest on are also unbuilt: git-dependency rows, which law 10 folds requirements from, and the sealed-head declaration law 4 refuses a claim collision with"
+        ],
+        [
+          "r230",
+          "sort",
+          "claim"
+        ],
+        [
+          "r230",
+          "basis",
+          "source"
+        ],
+        [
+          "r230",
+          "says",
+          "grep over engine/ finds neither; sealed is the variable-freshening special form and nothing names git-dependency"
+        ],
+        [
+          "r230",
+          "supports",
+          "c69"
+        ]
+      ],
+      "id": "ec6ce8129fa8930b"
+    },
+    {
+      "at": "2026-09-19T17:49:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.1 c68 --as rests-on",
+      "parents": [
+        "ec6ce8129fa8930b"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "rests_on",
+          "c68"
+        ]
+      ],
+      "id": "34ce96f148267c69"
+    },
+    {
+      "at": "2026-09-19T17:53:14+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c70 'the engine must NOT understand the token in a backing row: the design rejects language tokens the engine answers itself, because the engine would then name hosts, and its own Prolog loader claims prolog and c as a registrant of the same seam' --because 'read docs/journal/2026-09-09-packages-are-equations.md in full; the rejection is in the 2026-09-09 opening section and law 4 states the engine holds no claim' --basis source",
+      "parents": [
+        "34ce96f148267c69"
+      ],
+      "assert": [
+        [
+          "c70",
+          "sort",
+          "claim"
+        ],
+        [
+          "c70",
+          "says",
+          "the engine must NOT understand the token in a backing row: the design rejects language tokens the engine answers itself, because the engine would then name hosts, and its own Prolog loader claims prolog and c as a registrant of the same seam"
+        ],
+        [
+          "r231",
+          "sort",
+          "claim"
+        ],
+        [
+          "r231",
+          "basis",
+          "source"
+        ],
+        [
+          "r231",
+          "says",
+          "read docs/journal/2026-09-09-packages-are-equations.md in full; the rejection is in the 2026-09-09 opening section and law 4 states the engine holds no claim"
+        ],
+        [
+          "r231",
+          "supports",
+          "c70"
+        ]
+      ],
+      "id": "27bc355d225976e5"
+    },
+    {
+      "at": "2026-09-19T17:53:14+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c71 'seven amendments revise the laws and the user confirmed the first two: a requirement resolves by matching catalog spaces with no resolver code, rows perform in source order unless the package declares otherwise, a performer answers any atom including a space of the heads'\"'\"' rows that the loader merges, ownership is a policy row over linear take with one claimant per token by default, several backings make the package a theory parameterised over a host interface, boot is MeTTaIL'\"'\"'s Space => { Prog }, and export by sort is a type-shaped internal pattern adding nothing' --because 'read the 2026-09-09 substrate and theory-algebra section of the journal' --basis source",
+      "parents": [
+        "27bc355d225976e5"
+      ],
+      "assert": [
+        [
+          "c71",
+          "sort",
+          "claim"
+        ],
+        [
+          "c71",
+          "says",
+          "seven amendments revise the laws and the user confirmed the first two: a requirement resolves by matching catalog spaces with no resolver code, rows perform in source order unless the package declares otherwise, a performer answers any atom including a space of the heads' rows that the loader merges, ownership is a policy row over linear take with one claimant per token by default, several backings make the package a theory parameterised over a host interface, boot is MeTTaIL's Space => { Prog }, and export by sort is a type-shaped internal pattern adding nothing"
+        ],
+        [
+          "r232",
+          "sort",
+          "claim"
+        ],
+        [
+          "r232",
+          "basis",
+          "source"
+        ],
+        [
+          "r232",
+          "says",
+          "read the 2026-09-09 substrate and theory-algebra section of the journal"
+        ],
+        [
+          "r232",
+          "supports",
+          "c71"
+        ]
+      ],
+      "id": "b968a713eeec5552"
+    },
+    {
+      "at": "2026-09-19T17:53:14+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c72 'metta_reference_internal(_, package) is live in the engine and is law 1'\"'\"'s reservation in the mechanism the engine already has' --because 'predicate_property reports 3 clauses for metta_reference_internal/2 in module metta_engine after the edit, where there were 2' --basis measured",
+      "parents": [
+        "b968a713eeec5552"
+      ],
+      "assert": [
+        [
+          "c72",
+          "sort",
+          "claim"
+        ],
+        [
+          "c72",
+          "says",
+          "metta_reference_internal(_, package) is live in the engine and is law 1's reservation in the mechanism the engine already has"
+        ],
+        [
+          "r233",
+          "sort",
+          "claim"
+        ],
+        [
+          "r233",
+          "basis",
+          "measured"
+        ],
+        [
+          "r233",
+          "says",
+          "predicate_property reports 3 clauses for metta_reference_internal/2 in module metta_engine after the edit, where there were 2"
+        ],
+        [
+          "r233",
+          "supports",
+          "c72"
+        ]
+      ],
+      "id": "cbe6b7f98de2cfbb"
+    },
+    {
+      "at": "2026-09-19T17:53:14+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.1 c70 --as rests-on",
+      "parents": [
+        "cbe6b7f98de2cfbb"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "rests_on",
+          "c70"
+        ]
+      ],
+      "id": "727a8ce386e81f24"
+    },
+    {
+      "at": "2026-09-19T17:53:14+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.1 c72 --as rests-on",
+      "parents": [
+        "727a8ce386e81f24"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "rests_on",
+          "c72"
+        ]
+      ],
+      "id": "fb05de76f7356f79"
+    },
+    {
+      "at": "2026-09-19T17:53:14+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c73 'grading a row internal does not keep it out of a file import: after import! of a file carrying package rows, &self holds all three of its atoms and match finds them, so law 1'\"'\"'s never merge into an importer is about the reference merge rather than import!' --because 'ran the probe before and after adding the clause; &self held (= (package version) ...) and (= (package backing) ...) both times' --basis measured",
+      "parents": [
+        "fb05de76f7356f79"
+      ],
+      "assert": [
+        [
+          "c73",
+          "sort",
+          "claim"
+        ],
+        [
+          "c73",
+          "says",
+          "grading a row internal does not keep it out of a file import: after import! of a file carrying package rows, &self holds all three of its atoms and match finds them, so law 1's never merge into an importer is about the reference merge rather than import!"
+        ],
+        [
+          "r234",
+          "sort",
+          "claim"
+        ],
+        [
+          "r234",
+          "basis",
+          "measured"
+        ],
+        [
+          "r234",
+          "says",
+          "ran the probe before and after adding the clause; &self held (= (package version) ...) and (= (package backing) ...) both times"
+        ],
+        [
+          "r234",
+          "supports",
+          "c73"
+        ]
+      ],
+      "id": "e244585b2d9a191a"
+    },
+    {
+      "at": "2026-09-19T17:54:43+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c74 'laws 4 and 5 need no new machinery: a claim is an ordinary equation added to &metta with add-atom, and (perform Row) dispatches by unification when evaluated there with evalc, while the same call in a space holding no claim leaves the term unreduced, which is law 3'\"'\"'s row nobody claims' --because 'added (= (perform (probe-token $a $b)) (probe-performed $a $b)) to &metta and ran !(evalc (perform (probe-token 1 2)) &metta), which answered (probe-performed 1 2); the same call in &self answered the unreduced term and an unclaimed token in &metta answered nothing' --basis measured",
+      "parents": [
+        "e244585b2d9a191a"
+      ],
+      "assert": [
+        [
+          "c74",
+          "sort",
+          "claim"
+        ],
+        [
+          "c74",
+          "says",
+          "laws 4 and 5 need no new machinery: a claim is an ordinary equation added to &metta with add-atom, and (perform Row) dispatches by unification when evaluated there with evalc, while the same call in a space holding no claim leaves the term unreduced, which is law 3's row nobody claims"
+        ],
+        [
+          "r235",
+          "sort",
+          "claim"
+        ],
+        [
+          "r235",
+          "basis",
+          "measured"
+        ],
+        [
+          "r235",
+          "says",
+          "added (= (perform (probe-token $a $b)) (probe-performed $a $b)) to &metta and ran !(evalc (perform (probe-token 1 2)) &metta), which answered (probe-performed 1 2); the same call in &self answered the unreduced term and an unclaimed token in &metta answered nothing"
+        ],
+        [
+          "r235",
+          "supports",
+          "c74"
+        ]
+      ],
+      "id": "58a5a0e3a7b42e09"
+    },
+    {
+      "at": "2026-09-19T17:54:43+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c75 'the word claim is already taken in &metta for a different concept, the vocabulary rows declared by (kind claim symbol symbol (rest symbol)) such as (claim semiring ranked ordered descending), so law 4'\"'\"'s claims must be the perform equations themselves rather than a row spelled claim' --because 'read the 23 claim rows in &metta: ten semiring rows, six cache-policy rows and seven algebra-law rows' --basis measured",
+      "parents": [
+        "58a5a0e3a7b42e09"
+      ],
+      "assert": [
+        [
+          "c75",
+          "sort",
+          "claim"
+        ],
+        [
+          "c75",
+          "says",
+          "the word claim is already taken in &metta for a different concept, the vocabulary rows declared by (kind claim symbol symbol (rest symbol)) such as (claim semiring ranked ordered descending), so law 4's claims must be the perform equations themselves rather than a row spelled claim"
+        ],
+        [
+          "r236",
+          "sort",
+          "claim"
+        ],
+        [
+          "r236",
+          "basis",
+          "measured"
+        ],
+        [
+          "r236",
+          "says",
+          "read the 23 claim rows in &metta: ten semiring rows, six cache-policy rows and seven algebra-law rows"
+        ],
+        [
+          "r236",
+          "supports",
+          "c75"
+        ]
+      ],
+      "id": "142aab944fc29099"
+    },
+    {
+      "at": "2026-09-19T17:54:43+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.1 c74 --as rests-on",
+      "parents": [
+        "142aab944fc29099"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "rests_on",
+          "c74"
+        ]
+      ],
+      "id": "ebcf3151978b31e6"
+    },
+    {
+      "at": "2026-09-19T17:54:43+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a31.1 done --because 'the engine'\"'\"'s four things reduce to two edits and no new mechanism: package is reserved by metta_reference_internal(_, package), and perform dispatches by unification through evalc in &metta, both verified against the running engine'",
+      "parents": [
+        "ebcf3151978b31e6"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "status",
+          "done"
+        ],
+        [
+          "r237",
+          "sort",
+          "claim"
+        ],
+        [
+          "r237",
+          "says",
+          "the engine's four things reduce to two edits and no new mechanism: package is reserved by metta_reference_internal(_, package), and perform dispatches by unification through evalc in &metta, both verified against the running engine"
+        ],
+        [
+          "r237",
+          "supports",
+          {
+            "node": "a31.1",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "f86e0ba70856e059"
+    },
+    {
+      "at": "2026-09-19T18:00:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c76 'the whole of law 14 is one MeTTa form the loader runs after a file loads: (match <space> (= (package backing) $b) (evalc (perform $b) &metta)); it found the backing row, dispatched through the loader'\"'\"'s claim by unification, ran the importer and installed the head' --because 'probe_double answered unreduced before and 10 after, with the claim registered in &metta by filereader:process_loader_string and the backing row naming a real .pl file' --basis measured",
+      "parents": [
+        "f86e0ba70856e059"
+      ],
+      "assert": [
+        [
+          "c76",
+          "sort",
+          "claim"
+        ],
+        [
+          "c76",
+          "says",
+          "the whole of law 14 is one MeTTa form the loader runs after a file loads: (match <space> (= (package backing) $b) (evalc (perform $b) &metta)); it found the backing row, dispatched through the loader's claim by unification, ran the importer and installed the head"
+        ],
+        [
+          "r238",
+          "sort",
+          "claim"
+        ],
+        [
+          "r238",
+          "basis",
+          "measured"
+        ],
+        [
+          "r238",
+          "says",
+          "probe_double answered unreduced before and 10 after, with the claim registered in &metta by filereader:process_loader_string and the backing row naming a real .pl file"
+        ],
+        [
+          "r238",
+          "supports",
+          "c76"
+        ]
+      ],
+      "id": "bf2922f22aa4ab4f"
+    },
+    {
+      "at": "2026-09-19T18:00:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c77 'the Prolog-level '\"'\"'get-atoms'\"'\"'/2 enumerates nothing for '\"'\"'&self'\"'\"' while MeTTa'\"'\"'s !(get-atoms &self) answers three atoms, because the MeTTa name resolves through the evaluation context a bare Prolog call does not have; so the loader reads package rows by evaluating a match rather than by a Prolog row query' --because 'aggregate_all(count, spaces:'\"'\"'get-atoms'\"'\"'('\"'\"'&self'\"'\"', _), N) answered N=0 immediately after an import! that MeTTa could see' --basis measured",
+      "parents": [
+        "bf2922f22aa4ab4f"
+      ],
+      "assert": [
+        [
+          "c77",
+          "sort",
+          "claim"
+        ],
+        [
+          "c77",
+          "says",
+          "the Prolog-level 'get-atoms'/2 enumerates nothing for '&self' while MeTTa's !(get-atoms &self) answers three atoms, because the MeTTa name resolves through the evaluation context a bare Prolog call does not have; so the loader reads package rows by evaluating a match rather than by a Prolog row query"
+        ],
+        [
+          "r239",
+          "sort",
+          "claim"
+        ],
+        [
+          "r239",
+          "basis",
+          "measured"
+        ],
+        [
+          "r239",
+          "says",
+          "aggregate_all(count, spaces:'get-atoms'('&self', _), N) answered N=0 immediately after an import! that MeTTa could see"
+        ],
+        [
+          "r239",
+          "supports",
+          "c77"
+        ]
+      ],
+      "id": "61ea9cb17578d969"
+    },
+    {
+      "at": "2026-09-19T18:00:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c78 'a claim'\"'\"'s body is ordinary MeTTa and needs its own dependencies present: the loader'\"'\"'s prolog claim calls import_prolog_functions_from_file, which lib_import defines as an equation rather than the engine defining it as a predicate, so registering the claim means importing lib_import into &metta' --because 'the first dispatch raised Unknown procedure: import_prolog_functions_from_file/3 and succeeded after !(import! &metta (library lib_import))' --basis measured",
+      "parents": [
+        "61ea9cb17578d969"
+      ],
+      "assert": [
+        [
+          "c78",
+          "sort",
+          "claim"
+        ],
+        [
+          "c78",
+          "says",
+          "a claim's body is ordinary MeTTa and needs its own dependencies present: the loader's prolog claim calls import_prolog_functions_from_file, which lib_import defines as an equation rather than the engine defining it as a predicate, so registering the claim means importing lib_import into &metta"
+        ],
+        [
+          "r240",
+          "sort",
+          "claim"
+        ],
+        [
+          "r240",
+          "basis",
+          "measured"
+        ],
+        [
+          "r240",
+          "says",
+          "the first dispatch raised Unknown procedure: import_prolog_functions_from_file/3 and succeeded after !(import! &metta (library lib_import))"
+        ],
+        [
+          "r240",
+          "supports",
+          "c78"
+        ]
+      ],
+      "id": "b1c673ff4551f40d"
+    },
+    {
+      "at": "2026-09-19T18:00:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c76 --as rests-on",
+      "parents": [
+        "b1c673ff4551f40d"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c76"
+        ]
+      ],
+      "id": "27d022e228b22d2a"
+    },
+    {
+      "at": "2026-09-19T18:00:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c78 --as rests-on",
+      "parents": [
+        "27d022e228b22d2a"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c78"
+        ]
+      ],
+      "id": "2467ae51b9db06c5"
+    },
+    {
+      "at": "2026-09-19T18:00:06+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a31.3 active --because 'the mechanism is proven end to end against the running engine; what remains is putting it in the loader and migrating the 40 libraries'",
+      "parents": [
+        "2467ae51b9db06c5"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "status",
+          "active"
+        ],
+        [
+          "r241",
+          "sort",
+          "claim"
+        ],
+        [
+          "r241",
+          "says",
+          "the mechanism is proven end to end against the running engine; what remains is putting it in the loader and migrating the 40 libraries"
+        ],
+        [
+          "r241",
+          "supports",
+          {
+            "node": "a31.3",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "855187eb0841e86c"
+    },
+    {
+      "at": "2026-09-19T18:10:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c79 'the engine suite'\"'\"'s 156 failures are pre-existing and not caused by the loader hook: lib_unicode answers 8 failed both with the hook and with it removed, and lib_csv_surface answers 45 failed and 35 passed both ways' --because 'ran each suite twice on the same tree with only the metta_perform_package_backings call added and removed' --basis measured",
+      "parents": [
+        "855187eb0841e86c"
+      ],
+      "assert": [
+        [
+          "c79",
+          "sort",
+          "claim"
+        ],
+        [
+          "c79",
+          "says",
+          "the engine suite's 156 failures are pre-existing and not caused by the loader hook: lib_unicode answers 8 failed both with the hook and with it removed, and lib_csv_surface answers 45 failed and 35 passed both ways"
+        ],
+        [
+          "r242",
+          "sort",
+          "claim"
+        ],
+        [
+          "r242",
+          "basis",
+          "measured"
+        ],
+        [
+          "r242",
+          "says",
+          "ran each suite twice on the same tree with only the metta_perform_package_backings call added and removed"
+        ],
+        [
+          "r242",
+          "supports",
+          "c79"
+        ]
+      ],
+      "id": "9078b0524f63f99d"
+    },
+    {
+      "at": "2026-09-19T18:10:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c80 'the dominant pre-existing cause is missing SWI packs rather than anything in this repository: lib_compression fails with Unknown procedure archive_open/4 and exists_source(library(archive)) answers absent on this install' --because 'ran swipl -g \"(exists_source(library(archive)) -> writeln(present) ; writeln(absent))\"' --basis measured",
+      "parents": [
+        "9078b0524f63f99d"
+      ],
+      "assert": [
+        [
+          "c80",
+          "sort",
+          "claim"
+        ],
+        [
+          "c80",
+          "says",
+          "the dominant pre-existing cause is missing SWI packs rather than anything in this repository: lib_compression fails with Unknown procedure archive_open/4 and exists_source(library(archive)) answers absent on this install"
+        ],
+        [
+          "r243",
+          "sort",
+          "claim"
+        ],
+        [
+          "r243",
+          "basis",
+          "measured"
+        ],
+        [
+          "r243",
+          "says",
+          "ran swipl -g \"(exists_source(library(archive)) -> writeln(present) ; writeln(absent))\""
+        ],
+        [
+          "r243",
+          "supports",
+          "c80"
+        ]
+      ],
+      "id": "a29c3c7dfb319f23"
+    },
+    {
+      "at": "2026-09-19T18:10:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c81 'the migration is one generator change rather than 40 file edits, because the importer call is generated: prologface.py emits it and a drift lane refuses a hand-edited face, so changing the emission and regenerating rewrote 23 faces at once with 0 findings' --because 'read the GENERATED-by header on lib_regex.metta and prologface.py:116, changed the emission and ran tools/prologface.py --write, which reported 24 described sources and 0 findings' --basis measured",
+      "parents": [
+        "a29c3c7dfb319f23"
+      ],
+      "assert": [
+        [
+          "c81",
+          "sort",
+          "claim"
+        ],
+        [
+          "c81",
+          "says",
+          "the migration is one generator change rather than 40 file edits, because the importer call is generated: prologface.py emits it and a drift lane refuses a hand-edited face, so changing the emission and regenerating rewrote 23 faces at once with 0 findings"
+        ],
+        [
+          "r244",
+          "sort",
+          "claim"
+        ],
+        [
+          "r244",
+          "basis",
+          "measured"
+        ],
+        [
+          "r244",
+          "says",
+          "read the GENERATED-by header on lib_regex.metta and prologface.py:116, changed the emission and ran tools/prologface.py --write, which reported 24 described sources and 0 findings"
+        ],
+        [
+          "r244",
+          "supports",
+          "c81"
+        ]
+      ],
+      "id": "8c1a0f7d13160a68"
+    },
+    {
+      "at": "2026-09-19T18:10:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c81 --as rests-on",
+      "parents": [
+        "8c1a0f7d13160a68"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c81"
+        ]
+      ],
+      "id": "91eca7df099072d6"
+    },
+    {
+      "at": "2026-09-19T18:10:20+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a31.4 active --because 'tests/prolog/suites/seams/packages.plt passes 4 of 4: a backing row installs its artifact'\"'\"'s head, the same library without the row installs nothing, a token no claimant answers installs nothing, and package is internal in every space'",
+      "parents": [
+        "91eca7df099072d6"
+      ],
+      "assert": [
+        [
+          "a31.4",
+          "status",
+          "active"
+        ],
+        [
+          "r245",
+          "sort",
+          "claim"
+        ],
+        [
+          "r245",
+          "says",
+          "tests/prolog/suites/seams/packages.plt passes 4 of 4: a backing row installs its artifact's head, the same library without the row installs nothing, a token no claimant answers installs nothing, and package is internal in every space"
+        ],
+        [
+          "r245",
+          "supports",
+          {
+            "node": "a31.4",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "4fc7c82b9d56718c"
+    },
+    {
+      "at": "2026-09-19T18:11:37+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-issue i21 'the patched SWI build the venv uses is missing three packs the stock build has, so every library resting on them fails: library(archive), library(unicode) and library(yaml) answer absent under /home/user/Dev/swipl-patched and present under /usr/bin/swipl' --basis measured --because 'ran exists_source(library(X)) for each under both builds; it accounts for lib_compression, lib_unicode and lib_yaml, which are 3 of the 23 regenerated faces and the engine suite'\"'\"'s largest failure clusters at 10, 8 and 11'",
+      "parents": [
+        "4fc7c82b9d56718c"
+      ],
+      "assert": [
+        [
+          "i21",
+          "sort",
+          "issue"
+        ],
+        [
+          "i21",
+          "what",
+          "the patched SWI build the venv uses is missing three packs the stock build has, so every library resting on them fails: library(archive), library(unicode) and library(yaml) answer absent under /home/user/Dev/swipl-patched and present under /usr/bin/swipl"
+        ],
+        [
+          "r246",
+          "sort",
+          "claim"
+        ],
+        [
+          "r246",
+          "basis",
+          "measured"
+        ],
+        [
+          "r246",
+          "says",
+          "ran exists_source(library(X)) for each under both builds; it accounts for lib_compression, lib_unicode and lib_yaml, which are 3 of the 23 regenerated faces and the engine suite's largest failure clusters at 10, 8 and 11"
+        ],
+        [
+          "r246",
+          "supports",
+          "i21"
+        ]
+      ],
+      "id": "94197b178b3292a7"
+    },
+    {
+      "at": "2026-09-19T18:11:37+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c82 '20 of the 23 regenerated faces import cleanly in a FRESH engine, and the three that do not are exactly the three whose system pack is missing from the patched build' --because 'imported each face in its own subprocess so one library'\"'\"'s failure could not poison another'\"'\"'s, after a shared-engine run had reported 22 of 23 failing from a single missing pack' --basis measured",
+      "parents": [
+        "94197b178b3292a7"
+      ],
+      "assert": [
+        [
+          "c82",
+          "sort",
+          "claim"
+        ],
+        [
+          "c82",
+          "says",
+          "20 of the 23 regenerated faces import cleanly in a FRESH engine, and the three that do not are exactly the three whose system pack is missing from the patched build"
+        ],
+        [
+          "r247",
+          "sort",
+          "claim"
+        ],
+        [
+          "r247",
+          "basis",
+          "measured"
+        ],
+        [
+          "r247",
+          "says",
+          "imported each face in its own subprocess so one library's failure could not poison another's, after a shared-engine run had reported 22 of 23 failing from a single missing pack"
+        ],
+        [
+          "r247",
+          "supports",
+          "c82"
+        ]
+      ],
+      "id": "a30e61bc10bcbb52"
+    },
+    {
+      "at": "2026-09-19T18:11:37+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c82 --as rests-on",
+      "parents": [
+        "a30e61bc10bcbb52"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c82"
+        ]
+      ],
+      "id": "68cf2c67d5fc7392"
+    },
+    {
+      "at": "2026-09-19T18:15:16+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-issue i22 'the root migration made ten of the 22 tools check.sh runs directly unimportable: they are executed as scripts, so python tools/x.py puts tools/ on sys.path and not the seat, and the migration replaced their parents[N] walk with an import of metta._roots, the package that is not importable yet' --blocks g2 --basis measured --because 'ran each of the 22 tools and counted ModuleNotFoundError: No module named '\"'\"'metta'\"'\"'; artifacts.py, codecdoc.py, example_origins.py, filesizes.py, prologface.py, protocolgen.py, pygmentsgen.py, reference.py, refusalgen.py, refusalsdoc.py and vocabgen.py failed, and the prolog-face GATE lane failed with them'",
+      "parents": [
+        "68cf2c67d5fc7392"
+      ],
+      "assert": [
+        [
+          "i22",
+          "sort",
+          "issue"
+        ],
+        [
+          "i22",
+          "blocks",
+          "g2"
+        ],
+        [
+          "i22",
+          "what",
+          "the root migration made ten of the 22 tools check.sh runs directly unimportable: they are executed as scripts, so python tools/x.py puts tools/ on sys.path and not the seat, and the migration replaced their parents[N] walk with an import of metta._roots, the package that is not importable yet"
+        ],
+        [
+          "r248",
+          "sort",
+          "claim"
+        ],
+        [
+          "r248",
+          "basis",
+          "measured"
+        ],
+        [
+          "r248",
+          "says",
+          "ran each of the 22 tools and counted ModuleNotFoundError: No module named 'metta'; artifacts.py, codecdoc.py, example_origins.py, filesizes.py, prologface.py, protocolgen.py, pygmentsgen.py, reference.py, refusalgen.py, refusalsdoc.py and vocabgen.py failed, and the prolog-face GATE lane failed with them"
+        ],
+        [
+          "r248",
+          "supports",
+          "i22"
+        ]
+      ],
+      "id": "e170a1b0245564ef"
+    },
+    {
+      "at": "2026-09-19T18:15:16+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c83 'the equivalence check could not have caught it: it compared the PATH each site resolves to with the seat already on sys.path, so it verified the value and never the importability of the module the value now comes from' --because 'the check imported metta._roots itself before evaluating either side, which is why 151 of 151 sites agreed while ten tools could not start' --basis source",
+      "parents": [
+        "e170a1b0245564ef"
+      ],
+      "assert": [
+        [
+          "c83",
+          "sort",
+          "claim"
+        ],
+        [
+          "c83",
+          "says",
+          "the equivalence check could not have caught it: it compared the PATH each site resolves to with the seat already on sys.path, so it verified the value and never the importability of the module the value now comes from"
+        ],
+        [
+          "r249",
+          "sort",
+          "claim"
+        ],
+        [
+          "r249",
+          "basis",
+          "source"
+        ],
+        [
+          "r249",
+          "says",
+          "the check imported metta._roots itself before evaluating either side, which is why 151 of 151 sites agreed while ten tools could not start"
+        ],
+        [
+          "r249",
+          "supports",
+          "c83"
+        ]
+      ],
+      "id": "4f6541b0937a3c43"
+    },
+    {
+      "at": "2026-09-19T18:15:16+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-approach a32 'give every file that runs as a script the inline derivation rather than an import, and gate it by running each tool check.sh invokes and requiring it to start' --addresses i22 --cost 3",
+      "parents": [
+        "4f6541b0937a3c43"
+      ],
+      "assert": [
+        [
+          "a32",
+          "sort",
+          "approach"
+        ],
+        [
+          "a32",
+          "addresses",
+          "i22"
+        ],
+        [
+          "a32",
+          "cost",
+          3
+        ],
+        [
+          "a32",
+          "status",
+          "untried"
+        ],
+        [
+          "a32",
+          "title",
+          "give every file that runs as a script the inline derivation rather than an import, and gate it by running each tool check.sh invokes and requiring it to start"
+        ]
+      ],
+      "id": "e61ba2eaee0274b7"
+    },
+    {
+      "at": "2026-09-19T18:15:16+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a32 c83 --as rests-on",
+      "parents": [
+        "e61ba2eaee0274b7"
+      ],
+      "assert": [
+        [
+          "a32",
+          "rests_on",
+          "c83"
+        ]
+      ],
+      "id": "9e3fe6ec939a0deb"
+    },
+    {
+      "at": "2026-09-19T18:15:16+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a32 active --because 'the ten tools are repaired with the inline workspace derivation and all 22 now import; the gate that would have caught it is not written yet'",
+      "parents": [
+        "9e3fe6ec939a0deb"
+      ],
+      "assert": [
+        [
+          "a32",
+          "status",
+          "active"
+        ],
+        [
+          "r250",
+          "sort",
+          "claim"
+        ],
+        [
+          "r250",
+          "says",
+          "the ten tools are repaired with the inline workspace derivation and all 22 now import; the gate that would have caught it is not written yet"
+        ],
+        [
+          "r250",
+          "supports",
+          {
+            "node": "a32",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "bcb650937863991e"
+    },
+    {
+      "at": "2026-09-19T18:20:02+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c84 'the hook belongs in replacing_previous_load/4 rather than in any loading door: four call sites reach it, and hooking load_imported_metta_file/3 alone left the grouped door unperformed, so a face loaded with the Python load door answered its own head unreduced while the same file imported answered normally' --because 'counted four call sites of replacing_previous_load/4 in engine/filereader/source_lifecycle.pl at lines 105, 838, 1141 and 1160, and the prologface selftest failed on load and passed on import until the hook moved' --basis measured",
+      "parents": [
+        "bcb650937863991e"
+      ],
+      "assert": [
+        [
+          "c84",
+          "sort",
+          "claim"
+        ],
+        [
+          "c84",
+          "says",
+          "the hook belongs in replacing_previous_load/4 rather than in any loading door: four call sites reach it, and hooking load_imported_metta_file/3 alone left the grouped door unperformed, so a face loaded with the Python load door answered its own head unreduced while the same file imported answered normally"
+        ],
+        [
+          "r251",
+          "sort",
+          "claim"
+        ],
+        [
+          "r251",
+          "basis",
+          "measured"
+        ],
+        [
+          "r251",
+          "says",
+          "counted four call sites of replacing_previous_load/4 in engine/filereader/source_lifecycle.pl at lines 105, 838, 1141 and 1160, and the prologface selftest failed on load and passed on import until the hook moved"
+        ],
+        [
+          "r251",
+          "supports",
+          "c84"
+        ]
+      ],
+      "id": "3901a5667c0a58a5"
+    },
+    {
+      "at": "2026-09-19T18:20:02+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c85 'a file loaded through the Python door lands in &pyspace_1 rather than &self, which is why the first reading of the loaded space found nothing' --because 'the debug topic printed space='\"'\"'&pyspace_1'\"'\"' on the load path and space='\"'\"'&metta'\"'\"' on the claim registration' --basis measured",
+      "parents": [
+        "3901a5667c0a58a5"
+      ],
+      "assert": [
+        [
+          "c85",
+          "sort",
+          "claim"
+        ],
+        [
+          "c85",
+          "says",
+          "a file loaded through the Python door lands in &pyspace_1 rather than &self, which is why the first reading of the loaded space found nothing"
+        ],
+        [
+          "r252",
+          "sort",
+          "claim"
+        ],
+        [
+          "r252",
+          "basis",
+          "measured"
+        ],
+        [
+          "r252",
+          "says",
+          "the debug topic printed space='&pyspace_1' on the load path and space='&metta' on the claim registration"
+        ],
+        [
+          "r252",
+          "supports",
+          "c85"
+        ]
+      ],
+      "id": "c84971e10c659883"
+    },
+    {
+      "at": "2026-09-19T18:20:02+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c84 --as rests-on",
+      "parents": [
+        "c84971e10c659883"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c84"
+        ]
+      ],
+      "id": "587ad17e91d97893"
+    },
+    {
+      "at": "2026-09-19T18:20:02+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "status a31.3 done --because 'both doors perform a file'\"'\"'s backing rows, the prologface selftest passes 13 of 13, the packages suite passes 4 of 4, and 23 library faces carry the row from one generator change'",
+      "parents": [
+        "587ad17e91d97893"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "status",
+          "done"
+        ],
+        [
+          "r253",
+          "sort",
+          "claim"
+        ],
+        [
+          "r253",
+          "says",
+          "both doors perform a file's backing rows, the prologface selftest passes 13 of 13, the packages suite passes 4 of 4, and 23 library faces carry the row from one generator change"
+        ],
+        [
+          "r253",
+          "supports",
+          {
+            "node": "a31.3",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "15e741d081b4d7a5"
+    },
+    {
+      "at": "2026-09-19T18:22:24+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c86 'performing a backing after the load commits does not re-enter the approach docs/journal/2026-09-05-function-free-materialization.md rejected: that entry rejects rebuilding a DERIVED RELATION after commit, because preparation can fail or exhaust a budget and so belongs inside the rollback boundary, and it bars a derivation moving past commit and a mutation listener being added' --because 'read the 2026-09-05 transactional publication design section; a backing consults a Prolog artifact, which is an irreversible host effect rather than derived state, and it is called directly in the load path rather than through an atom listener' --basis source",
+      "parents": [
+        "15e741d081b4d7a5"
+      ],
+      "assert": [
+        [
+          "c86",
+          "sort",
+          "claim"
+        ],
+        [
+          "c86",
+          "says",
+          "performing a backing after the load commits does not re-enter the approach docs/journal/2026-09-05-function-free-materialization.md rejected: that entry rejects rebuilding a DERIVED RELATION after commit, because preparation can fail or exhaust a budget and so belongs inside the rollback boundary, and it bars a derivation moving past commit and a mutation listener being added"
+        ],
+        [
+          "r254",
+          "sort",
+          "claim"
+        ],
+        [
+          "r254",
+          "basis",
+          "source"
+        ],
+        [
+          "r254",
+          "says",
+          "read the 2026-09-05 transactional publication design section; a backing consults a Prolog artifact, which is an irreversible host effect rather than derived state, and it is called directly in the load path rather than through an atom listener"
+        ],
+        [
+          "r254",
+          "supports",
+          "c86"
+        ]
+      ],
+      "id": "4254b8a501acd660"
+    },
+    {
+      "at": "2026-09-19T18:22:24+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "add-claim c87 'the boundary runs the other way for an effect: consulting an artifact inside a transaction that may roll back would leave the clauses standing for a load that failed, so after the commit is where an irreversible effect belongs and inside is where derived state belongs' --because 'read replacing_previous_load/4, whose materialization_transaction rolls back both source and image changes on a throw' --basis source",
+      "parents": [
+        "4254b8a501acd660"
+      ],
+      "assert": [
+        [
+          "c87",
+          "sort",
+          "claim"
+        ],
+        [
+          "c87",
+          "says",
+          "the boundary runs the other way for an effect: consulting an artifact inside a transaction that may roll back would leave the clauses standing for a load that failed, so after the commit is where an irreversible effect belongs and inside is where derived state belongs"
+        ],
+        [
+          "r255",
+          "sort",
+          "claim"
+        ],
+        [
+          "r255",
+          "basis",
+          "source"
+        ],
+        [
+          "r255",
+          "says",
+          "read replacing_previous_load/4, whose materialization_transaction rolls back both source and image changes on a throw"
+        ],
+        [
+          "r255",
+          "supports",
+          "c87"
+        ]
+      ],
+      "id": "cf1ccd03cd8edc89"
+    },
+    {
+      "at": "2026-09-19T18:22:24+10:00",
+      "after": "a1bbc4b563a51067dae67af297c656b01c8e5cac",
+      "did": "link a31.3 c86 --as rests-on",
+      "parents": [
+        "cf1ccd03cd8edc89"
+      ],
+      "assert": [
+        [
+          "a31.3",
+          "rests_on",
+          "c86"
+        ]
+      ],
+      "id": "8bcc9bf0998f7a54"
     }
   ]
 }
