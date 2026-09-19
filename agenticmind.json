@@ -4561,6 +4561,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them": {
+      "title": "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+    },
+    "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails": {
+      "title": "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails",
+      "supports": [
+        "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices": {
+      "title": "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices",
+      "supports": [
+        {
+          "node": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "status": "untried"
+        },
+        {
+          "node": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "relation": "addresses",
+          "target": "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+        }
+      ]
+    },
+    "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to": {
+      "title": "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to",
+      "supports": [
+        {
+          "node": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5352,6 +5393,14 @@
       "status": "done",
       "addresses": [
         "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+      ]
+    },
+    "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk": {
+      "title": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
       ]
     }
   },
@@ -24058,6 +24107,127 @@
         ]
       ],
       "id": "7905cba5d6424fbe"
+    },
+    {
+      "at": "2026-09-19T21:57:32.895704+00:00",
+      "after": "827ef9fcba0131e50ea5a89167fd85f5c58721ab",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails\", \"tags\": [\"measured\"], \"title\": \"the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices\", \"tags\": [], \"title\": \"put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk\", \"fields\": {\"effort\": 1, \"addresses\": [\"the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them\"]}}, {\"op\": \"status\", \"id\": \"put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk\", \"because\": \"the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "7905cba5d6424fbe"
+      ],
+      "assert": [
+        [
+          "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices",
+          "sort",
+          "prop"
+        ],
+        [
+          "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices",
+          "supports",
+          {
+            "node": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+            "status": "untried"
+          }
+        ],
+        [
+          "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices",
+          "supports",
+          {
+            "node": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+            "relation": "addresses",
+            "target": "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+          }
+        ],
+        [
+          "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices",
+          "title",
+          "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices"
+        ],
+        [
+          "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails",
+          "supports",
+          "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+        ],
+        [
+          "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails",
+          "title",
+          "measured 2026-09-20: every worker returned 1 with ModuleNotFoundError: No module named 'metta', the children run with the workspace root as cwd and an unmodified environment, pymetta is not installed in the venv and nothing exports PYTHONPATH, and _prepare's insert sits inside the __main__ branch below the import that fails"
+        ],
+        [
+          "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to",
+          "sort",
+          "prop"
+        ],
+        [
+          "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to",
+          "supersedes",
+          "a file that is both a test module and a child entry point has to be importable before it can repair anything, and where a test sits inside its own seat is fixed by the layout, so its own ancestor needs no discovery and does not touch the root-marker rule the root-walks lane polices"
+        ],
+        [
+          "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to",
+          "supports",
+          {
+            "node": "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+            "status": "done"
+          }
+        ],
+        [
+          "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to",
+          "tags",
+          "tested"
+        ],
+        [
+          "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to",
+          "title",
+          "the four cases pass where three failed and one errored, the binding-selftest lane goes from 4 failed, 80 passed and 1 error to 1 failed and 84 passed, and the ruff and mypy lanes are both ok; the one left reads the catalog the delegated job is still adding names to"
+        ],
+        [
+          "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them",
+          "sort",
+          "prop"
+        ],
+        [
+          "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them",
+          "title",
+          "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+        ],
+        [
+          "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "sort",
+          "approach"
+        ],
+        [
+          "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "addresses",
+          "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+        ],
+        [
+          "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "effort",
+          1
+        ],
+        [
+          "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "status",
+          "done"
+        ],
+        [
+          "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk",
+          "title",
+          "put the seat on the module search path at module level, before metta is imported, deriving it from the test file's own position rather than from a marker walk"
+        ]
+      ],
+      "id": "a8a05ba67bfac160"
     }
   ]
 }
