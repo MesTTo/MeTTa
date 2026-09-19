@@ -4931,7 +4931,8 @@ Two names the corpus also exercises are LIBRARY heads and not in that count:
 `exists_file`, and `import_prolog_functions_from_file`, which a library
 registers.
 
-`pragma!` accepts `max-time`, `max-inferences`, `verify-specializations`,
+`pragma!` accepts `max-time`, `max-inferences`, `package-budget`,
+`verify-specializations`,
 `verify-discharges`, `verify-cardinality`, `max-stack-depth`, `stack-limit`,
 `plan-cyclic-joins`, `materialize-source-relations`, `type-check`, and
 `interpreter`, `from-map`, and `load`. The last two belong to the current
@@ -4946,7 +4947,10 @@ inertly. `max-time` takes a positive number of seconds,
 `max-inferences` a positive integer, and `none` explicitly disables
 either bound; an invalid value leaves the previous setting unchanged.
 `stack-limit` takes positive SWI combined-stack bytes and scopes the setting to
-the current thread. `verify-specializations` compares the first use of each
+the current thread. `package-budget` takes a positive integer and bounds the
+loader normalising ONE package row, defaulting to 1,000,000 inferences; it is
+not `max-inferences`, which bounds a runnable the program wrote, because a row
+is normalised while its file is still being read and no runnable is in flight. `verify-specializations` compares the first use of each
 generated higher-order call with its generic form; turning the pragma off, or
 leaving a process started with `METTA_VERIFY_SPECIALIZATIONS=1`, reports the
 agreed and inference-bounded counts even under `sh run.sh`'s quiet launch.
@@ -4958,6 +4962,40 @@ leftover choicepoints. `plan-cyclic-joins` plans a full native cyclic
 conjunction as a Generic Join instead of the retained nested loop, and
 `materialize-source-relations` derives the finite function-free fragment once
 at each source boundary and answers admitted ground calls from it.
+
+### Package rows: what a library says about itself
+
+`package` is a reserved head. It is internal in every space, so one library's
+rows are never read as its importer's own, and it is not a head any library
+declares. A library describes what backs its heads instead of telling the
+engine to load them:
+
+```metta
+(= (package backing) (prolog (library lib_regex.pl) (regex-match regex-replace)))
+(= (package requires) lib_json)
+```
+
+The row is DATA. Any implementation that can read atoms can read it, decide
+which rows it can perform and refuse the rest by name, where
+`!(import_prolog_functions_from_file ...)` was an instruction only this engine
+understood. That spelling still works and is what the row performs.
+
+The loader performs a file's rows once that file's load commits, and only that
+file's. `(package requires)` names a library and `&catalogs` says where it
+lives, so a requirement resolves by matching rather than by a resolver, and one
+no catalog holds refuses by name. Adding a catalog is adding a row.
+
+Dispatch is unification. `(perform <row>)` evaluates in `&metta` against a
+claim, `(= (perform (<token> ...)) ...)`, that a seat, library or program adds
+there; the engine holds none of its own beyond the Prolog loader's. `perform`
+takes its row as an `Atom`, so the row arrives exactly as written and the
+engine never decides what a token's payload means.
+
+A row whose head a claim answers is performed as written. Any other payload is
+NORMALISED first, evaluated in the home space under a ceiling of space reads
+and runtime facts, and under `package-budget`. A row reaching the filesystem or
+a host call refuses by name, naming the operation, because that work belongs in
+a claimant, which runs when the row is performed rather than while it is read.
 
 `if-decons-expr` reads a held expression, unifies its head and tail with the
 provided patterns, and evaluates the selected branch. Empty expressions and

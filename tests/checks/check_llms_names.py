@@ -105,6 +105,7 @@ import argparse
 import inspect
 import os
 import re
+from functools import cache
 import subprocess
 import sys
 from collections.abc import Iterator, Mapping
@@ -173,9 +174,46 @@ def _is_path_claim(token: str) -> bool:
 _PRUNED = frozenset({"ai-tmp", "node_modules", "__pycache__"})
 
 
+@cache
+def _own_components() -> frozenset[str]:
+    """The paths this tree MOUNTS, read from the `.gitmodules` that mount them.
+
+    A component holds a `.git` exactly as a foreign checkout does, so the bare
+    marker test below called all eight of this superproject's submodules
+    foreign and hid everything inside them. Every glob naming one then reported
+    that it named nothing: `engine/metta/*.pl`, `lib/lib_*/`,
+    `extensions/python/metta/*.py` and nine more
+    [measured 2026-09-20: twelve of the lane's thirty-three findings].
+
+    Derived from the files that decide it rather than listed here, and walked
+    because a component mounts components of its own: the examples corpus is a
+    submodule of the Python seat rather than of this tree.
+    """
+    found: set[str] = set()
+    pending = [REPO]
+    while pending:
+        base = pending.pop()
+        modules = base / ".gitmodules"
+        if not modules.is_file():
+            continue
+        for relative in re.findall(r"^\s*path\s*=\s*(.+?)\s*$",
+                                   modules.read_text(encoding="utf-8"),
+                                   re.MULTILINE):
+            component = (base / relative).resolve()
+            if not component.is_dir():
+                continue
+            found.add(str(component.relative_to(REPO)))
+            pending.append(component)
+    return frozenset(found)
+
+
 def _another_checkout(directory: Path) -> bool:
     """Whether `directory` is a nested worktree or clone rather than this tree."""
-    return directory != REPO and (directory / ".git").exists()
+    if directory == REPO:
+        return False
+    if str(directory.relative_to(REPO)) in _own_components():
+        return False
+    return (directory / ".git").exists()
 
 
 def _in_this_tree(path: Path) -> bool:
@@ -205,8 +243,40 @@ def _tree_paths_named(name: str) -> Iterator[Path]:
                 yield here / entry
 
 
+@cache
+def _build_output(directory: str, token: str) -> bool:
+    """Whether this tree deliberately does not hold the path.
+
+    `extensions/node/llms.txt` names `browser/`, `_runtime/`, `runtime.json`
+    and `wasm/`, and `extensions/node/.gitignore` lists the first two: they are
+    what the build produces, so naming them is a claim about the kit a page
+    serves rather than a broken claim about the tree. A checker that cannot
+    tell the two apart reports the documentation for being accurate.
+
+    git is asked rather than the ignore files read, because the rules nest and
+    the answer is git's. A path outside a repository answers no.
+
+    NOT every ignored path: the PATHS contract above says scratch under
+    `ai-tmp/` and a dependency's files under `node_modules/` never answer a
+    claim, and both are ignored, so asking git alone would let any typo under
+    either resolve. `_PRUNED` is the same set the tree walk refuses to enter.
+    """
+    if any(part in _PRUNED for part in Path(token).parts):
+        return False
+    try:
+        finished = subprocess.run(
+            ["git", "check-ignore", "-q", "--no-index", token],
+            cwd=directory, capture_output=True, check=False, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return finished.returncode == 0
+
+
 def _resolves(sheet: Path, token: str) -> bool:
-    """Whether a path claim names something this checkout actually holds."""
+    """Whether a path claim names something this checkout actually holds, or
+    deliberately does not hold because a build produces it."""
+    if _build_output(str(sheet.parent), token):
+        return True
     bases = (sheet.parent, REPO)
     if "*" in token:
         return any(_in_this_tree(hit) for base in bases for hit in base.glob(token))

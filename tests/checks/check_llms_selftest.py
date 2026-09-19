@@ -76,6 +76,9 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
 
 SHEET = REPO / "llms.txt"
 PYTHON_SHEET = REPO / "extensions/python/llms.txt"
+#: The node seat's sheet, which names what its build produces rather than what
+#: the tree holds, and is the only sheet with that shape.
+NODE_SHEET = REPO / "extensions/node/llms.txt"
 
 SEMIRINGS = (
     "bool", "bag", "counting", "set", "ranked", "tropical", "prob", "prov",
@@ -199,6 +202,34 @@ def main() -> int:
     expect(
         path_findings(SHEET, "`add-atom/3` and `metta.run/match/eval`") == [],
         "a predicate indicator or door list was read as a path",
+    )
+    # A component this tree MOUNTS holds a `.git` exactly as a foreign checkout
+    # does, and calling it foreign hid everything inside every submodule: a glob
+    # into one then reported that it named nothing.
+    expect(
+        path_findings(SHEET, "every engine unit is `engine/metta/*.pl`") == [],
+        "a glob into a mounted component was reported",
+    )
+    expect(
+        path_findings(SHEET, "the libraries are `lib/lib_*/`") == [],
+        "a glob naming the library directories was reported",
+    )
+    # A path the tree deliberately does not hold is a claim about what a BUILD
+    # produces. Reporting it is reporting the documentation for being accurate.
+    expect(
+        path_findings(NODE_SHEET, "a page serves `_runtime/`") == [],
+        "a build output the tree ignores was reported",
+    )
+    expect(
+        len(path_findings(NODE_SHEET, "a page serves `_no_such_output/`")) == 1,
+        "a path that is neither held nor ignored was NOT reported",
+    )
+    # And not every ignored path: scratch is ignored too, so asking git alone
+    # would let any typo under ai-tmp/ resolve, which the PATHS contract says
+    # never answers a claim.
+    expect(
+        len(path_findings(SHEET, "written to `ai-tmp/no-such-receipt.md`")) == 1,
+        "a scratch path was allowed to answer a claim",
     )
     # The shorthand resolves a bare tail against THIS checkout only: a file
     # that exists solely under ai-tmp/ (scratch, where agent worktrees live) or
