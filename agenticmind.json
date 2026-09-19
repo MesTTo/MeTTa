@@ -4953,6 +4953,47 @@
       "supports": [
         "adding those six to the backing row's heads would be the wrong repair: a head list is what a library publishes to MeTTa, and these are Prolog-level helpers one seat calls directly, so declaring them would make them callable MeTTa names to fix a module-visibility problem"
       ]
+    },
+    "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers": {
+      "title": "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers",
+      "supports": [
+        {
+          "node": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "status": "untried"
+        },
+        {
+          "node": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "relation": "addresses",
+          "target": "the Python seat's Prolog half calls six lib_thread predicates that the library's module exports but its backing row never declares as heads, and the package machinery imports only declared heads, so those calls now reach nothing"
+        }
+      ]
+    },
+    "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair": {
+      "title": "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair",
+      "supports": [
+        {
+          "node": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once": {
+      "title": "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store": {
+      "title": "measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store",
+      "supports": [
+        "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once"
+      ]
     }
   },
   "approaches": {
@@ -5784,6 +5825,14 @@
       "status": "done",
       "addresses": [
         "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+      ]
+    },
+    "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads": {
+      "title": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the Python seat's Prolog half calls six lib_thread predicates that the library's module exports but its backing row never declares as heads, and the package machinery imports only declared heads, so those calls now reach nothing"
       ]
     }
   },
@@ -25629,6 +25678,127 @@
         ]
       ],
       "id": "5af66fa630331b1b"
+    },
+    {
+      "at": "2026-09-19T22:53:56.703159+00:00",
+      "after": "4a999d8cfe5ccbdb4779b33214ed034b2095bfac",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers\", \"tags\": [], \"title\": \"reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads\", \"fields\": {\"effort\": 1, \"addresses\": [\"the Python seat's Prolog half calls six lib_thread predicates that the library's module exports but its backing row never declares as heads, and the package machinery imports only declared heads, so those calls now reach nothing\"]}}, {\"op\": \"status\", \"id\": \"reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads\", \"because\": \"test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store\", \"tags\": [\"reasoning\"], \"title\": \"chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once\", \"fields\": {}}]",
+      "parents": [
+        "5af66fa630331b1b"
+      ],
+      "assert": [
+        [
+          "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once",
+          "sort",
+          "prop"
+        ],
+        [
+          "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once",
+          "title",
+          "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once"
+        ],
+        [
+          "measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store",
+          "supports",
+          "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once"
+        ],
+        [
+          "measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store",
+          "title",
+          "measured 2026-09-20: after qualifying six names the async lane failed with Unknown procedure metta_async_future/4, and the export-versus-call comparison then named exactly three remaining, future_add_atom and metta_async_future in operations and metta_future_snapshot in store"
+        ],
+        [
+          "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair",
+          "sort",
+          "prop"
+        ],
+        [
+          "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair",
+          "supersedes",
+          "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers"
+        ],
+        [
+          "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair",
+          "supports",
+          {
+            "node": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+            "status": "done"
+          }
+        ],
+        [
+          "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair",
+          "tags",
+          "tested"
+        ],
+        [
+          "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair",
+          "title",
+          "test_async_scheduler.py goes from 19 failed and 9 passed to 28 passed in 2.41s, and test_class_methods.py to 28 passed, which is 56 cases; the set was closed by comparing lib_thread's 59 module exports against unqualified calls in the seat's Prolog rather than by chasing names out of error messages, which had already sent one too-narrow repair"
+        ],
+        [
+          "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers",
+          "sort",
+          "prop"
+        ],
+        [
+          "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers",
+          "supports",
+          {
+            "node": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+            "status": "untried"
+          }
+        ],
+        [
+          "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers",
+          "supports",
+          {
+            "node": "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+            "relation": "addresses",
+            "target": "the Python seat's Prolog half calls six lib_thread predicates that the library's module exports but its backing row never declares as heads, and the package machinery imports only declared heads, so those calls now reach nothing"
+          }
+        ],
+        [
+          "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers",
+          "title",
+          "the predicates are defined in a stable named module and the engine already qualifies a library call that way at engine/metta/interop.pl:560, so the dependency becomes explicit at the call site without minting MeTTa names for Prolog helpers"
+        ],
+        [
+          "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "sort",
+          "approach"
+        ],
+        [
+          "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "addresses",
+          "the Python seat's Prolog half calls six lib_thread predicates that the library's module exports but its backing row never declares as heads, and the package machinery imports only declared heads, so those calls now reach nothing"
+        ],
+        [
+          "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "effort",
+          1
+        ],
+        [
+          "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "status",
+          "done"
+        ],
+        [
+          "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads",
+          "title",
+          "reach lib_thread's predicates through its module from the Python seat's Prolog, the way the engine already reaches lib_conformance, rather than declaring them as backing heads"
+        ]
+      ],
+      "id": "19d0d0e4755b17c5"
     }
   ]
 }
