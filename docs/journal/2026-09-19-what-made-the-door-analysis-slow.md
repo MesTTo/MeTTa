@@ -216,6 +216,52 @@ named next fix. Collapsing a cycle makes several slots share one set. The store 
 large because slots hold redundant copies of each other, which hash consing already
 measured and removed; it is large because the sets themselves are large.
 
+## What the batching did to the profile, and what it exposed
+
+Profiling the committed analyser rather than reasoning from the old profile:
+
+| function | calls before | calls after |
+|---|---|---|
+| `_protocol` | 31,779,766 | **221,602** |
+| `_attribute` | 24,487,014 | **583,883** |
+| `_call` | 24,486,218 | **586,095** |
+| `_put` | 76,444,351 | 29,096,618 |
+| whole run | 1.459 billion | 792 million |
+
+`_protocol` fell 143x. What that leaves standing is `_container_call` at 10,081,913 calls
+carrying 152.3s of a 262s profile, and `_container` beneath it at 9,035,314, with 45.5 million
+`Reference` constructions under the pair.
+
+It is the same defect one level down. `_call` hands `_container_call` one `container_method`
+reference at a time, and a value holding 773 abstract containers with `.extend` called on it is
+773 entries. Three of `_container_call`'s operations BUILD a container at the call node:
+`__iter__`, the `keys`/`values`/`items` views, and `copy`. The container they build is named
+after the node, so all 773 receivers build the same one and each writes its own contents into
+it. One call with the union is identical.
+
+So `_container_call` now takes the whole set of receivers naming one method, and the
+per-container slot work moved to `_container_operation`, which is where it belongs, because a
+container owns its slots and nothing about that is shared.
+
+That reordering also fixed the lane rather than the lane fixing itself. Generalising it to find
+a `Values` parameter anywhere in a signature made it report `_put` twice, correctly by its own
+rule and uselessly in fact, because `_put`'s `Values` is a payload written to the slot its first
+parameter names. The set a transfer function dispatches over is its FIRST parameter after
+`self`, and that is a convention worth keeping uniform: it is what lets the pass find them by
+position instead of having to know which is which.
+
+## A hypothesis that was wrong, recorded because it was expensive to check
+
+One module carries 70 of the 128 seconds: 118 modules hold 770,115 references and solve in
+26.2s, and adding `metta.algebra` alone takes it to 2,406,911 and 96.1s. Its shape suggested a
+cause. `metta/algebra/__init__.py:1797` is `stack.extend(reversed(current.children))` inside a
+worklist over an expression tree, and under a field-based abstraction, where every instance of a
+class shares one slot per field, such a walk cannot separate the children of this expression
+from the children of any expression.
+
+Neutralising that one line in a throwaway copy moves the store from 2,406,911 references to
+2,406,906. Five. The tree walk is not what carries it, and what does is still open.
+
 ## Plan for the 128 seconds that are left
 
 Written before building anything, because the last round's lesson was that a diagnosis
@@ -246,6 +292,66 @@ reasoned from counts rather than a profile sends the construction at the wrong t
 
 Steps 2 and 3 are alternatives, not a sequence, and step 1 chooses between them. If the work
 is per slot, 2. If it is per element of a set that should not be that large, 3.
+
+## The wall clock cannot measure this, and three conclusions rested on it
+
+A clean A/B, one tree with only `_analysis.py` swapped and nothing else on the box, ordered
+`before, after, after, before` so an ordering effect would show as a disagreement within the
+pair, returned **116.3s, 123.6s, 132.1s, 157.3s**. The first and last are the same code. The
+times rise monotonically whatever the arm: a 35 per cent drift across four sequential runs of
+a two-minute solve. Nothing about any code is established by those numbers.
+
+A second measurement had already been wrong in the other direction, and for a more instructive
+reason. The 130-module cost probe reported the container batching 7 per cent FASTER. That probe
+wraps `_put` in a Python closure to count it, and the change cuts `_put` calls 10.8x, so the
+instrumented run sheds 10.8x of the probe's own overhead while the real run sheds almost
+nothing, because `_put` was already cheap. Instrumenting the thing you are optimising biases
+the result toward changes that reduce its call count.
+
+This repository already says both of these, and reading it first would have saved the hour:
+gate on a deterministic counter, let the wall clock advise, and use `perf stat -e
+instructions:u` for the pure-Python paths. `perf_event_paranoid` is `-1` here, so it needs no
+privileges.
+
+| arm | retired instructions | against the committed analyser |
+|---|---|---|
+| committed | 1.996e12 | 1.000x |
+| **refinement accumulation** | **1.814e12** | **0.909x** |
+| shared memo on top of it | 3.309e12 | 1.658x |
+| container batching | 2.121e12 | 1.063x |
+
+So one of the three changes is a 9.1 per cent win and two are losses, and the reverts stand,
+now for a reason rather than for a drift.
+
+## Caching loses here, three times from three directions
+
+The failures are worth naming together because the reason is the same and it is structural.
+
+`_spread` keyed a transfer function's answer on its call SITE. It was slower, and at the
+`_container_call` sites it was also wrong, because a site's input is not monotone when
+`_protocol` is called once per element.
+
+The shared memo keyed the answer on the identity of its INPUT SET instead, which rests on
+nothing about a site: `f(S)` depends on `S` and the store, so two sites handed the same set ask
+the same question. Measured, the sharing is real: 430,193 `_attribute` calls ask 167,897
+distinct questions and visit 34,060,019 references where answering each once visits 9,841,047.
+It is 1.658x SLOWER.
+
+Underneath both, `_memo` was given a purity gate: keep an answer only when the computation
+turned out to write nothing and record nothing, which is what makes it independent of the site
+that asked. The gate is correct. It made no difference to the outcome.
+
+The reason all three lose is that the bookkeeping a cache needs here is proportional to the work
+it saves. A `_memo` hit re-registers every slot the computation read, and these computations
+read about as many slots as they visit references, so the hit path costs what the miss path
+costs. That is not a defect in any one design and no fourth arrangement of the same idea will
+escape it.
+
+It also cost one error worth recording. An AST search for direct mutations says `_attribute` is
+pure: one `self.open.add` under a `_reporting` guard, and one idempotent `_schedule` in
+`_class_attribute`. It is not. `_class_attribute` CALLS `_call`, for a descriptor's `__get__`
+and for a property, and `_call` writes and names a container after the node. Purity cannot be
+read off a body; it has to be observed.
 
 ## A gate that has never been green
 

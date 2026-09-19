@@ -423,6 +423,53 @@
       "rests_on": [
         "c33"
       ]
+    },
+    "a20": {
+      "title": "give _container_call the whole set of container_method references that name one method, so the three operations that BUILD a container at the call node do it once rather than once per receiver, and split the per-container slot work into _container_operation",
+      "status": "failed",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 6,
+      "rests_on": [
+        "r145",
+        "c34"
+      ]
+    },
+    "a21": {
+      "title": "memoise the dispatching transfer functions on the IDENTITY of their interned input set rather than on the call site, so two sites asking the same question share one answer",
+      "status": "untried",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 13,
+      "rests_on": [
+        "c37"
+      ]
+    },
+    "a22": {
+      "title": "cache a dispatching transfer function on the identity of its input set, but only when the computation TURNED OUT to be pure: snapshot the four fact-set sizes and a write counter around it, and store the answer only if none moved. Every node-dependent thing in these functions is either a write or a recorded fact, so a computation that did neither has an answer that depends on the set, the discriminator and the store alone",
+      "status": "failed",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 9,
+      "rests_on": [
+        "c38",
+        "r150"
+      ]
+    },
+    "a23": {
+      "title": "accumulate the declared refinement into one set instead of folding one frozenset per reference, in _declared_values",
+      "status": "done",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 2,
+      "rests_on": [
+        "r165",
+        "r170"
+      ]
     }
   },
   "claims": {
@@ -1503,6 +1550,268 @@
         "c33"
       ],
       "basis": "source"
+    },
+    "r136": {
+      "says": "measured and refuted: neutralising metta/algebra/__init__.py:1797, the stack.extend over current.children, in a throwaway copy changes the store from 2,406,911 references to 2,406,906. Five references. The tree walk is not what carries it",
+      "attacks": [
+        "c32"
+      ],
+      "basis": "measured"
+    },
+    "r140": {
+      "says": "the batching worked as designed and the profile is now a different shape. Calls before and after: _protocol 31,779,766 to 221,602, a 143x fall; _attribute 24,487,014 to 583,883; _call 24,486,218 to 586,095; _put 76,444,351 to 29,096,618; and the whole run 1.459 billion calls to 792 million. What is left is _container_call at 10,081,913 calls carrying 152.3s of 262s cumulative, and _container at 9,035,314 calls, with 45.5 million Reference constructions under them"
+    },
+    "r137": {
+      "says": "cProfile of the committed analyser in wt-battery-5 against the same profile of the analyser before it, same input",
+      "supports": [
+        "r140"
+      ],
+      "basis": "measured"
+    },
+    "r138": {
+      "says": "r140: after the first batching _container_call is 10,081,913 calls carrying 152.3s of a 262s profile and _container beneath it 9,035,314, and a value holding 773 abstract containers with one method called on it is 773 entries there",
+      "supports": [
+        {
+          "node": "a20",
+          "status": "untried"
+        }
+      ]
+    },
+    "r139": {
+      "says": "applied; mypy clean, ruff clean, 123 of 123 door-order tests pass, and the full-input timing and equivalence are running",
+      "supports": [
+        {
+          "node": "a20",
+          "status": "active"
+        }
+      ]
+    },
+    "c34": {
+      "says": "the set a transfer function dispatches over is its FIRST parameter after self, and that is a convention rather than an accident: it separates a dispatching method from _put, whose Values is a payload written to the slot its first parameter names. Keeping it uniform is what lets the spread-calls lane find them by position instead of having to know which is which"
+    },
+    "r141": {
+      "says": "generalising the lane to find the Values parameter anywhere made it report _put twice, correctly by its own rule and uselessly in fact; reordering _container_call to receivers-then-method made the simple rule right again",
+      "supports": [
+        "c34"
+      ],
+      "basis": "measured"
+    },
+    "r145": {
+      "says": "batching the container calls cuts _put from 24,723,340 to 2,281,263, a 10.8x fall, and the eviction index from 16,571,416 to 1,019,431, and the solve improves only 7 per cent, 117.4s to 108.7s at 130 modules. So the call VOLUME was not the cost. Every published figure is unchanged and the store returns to 2,456,704, undoing the 3,209 the second batch had added"
+    },
+    "r142": {
+      "says": "ai_cost_probe.py at 130 modules and ai_doororder_run.py on the full input, both against the committed analyser",
+      "supports": [
+        "r145"
+      ],
+      "basis": "measured"
+    },
+    "c35": {
+      "says": "there is no constant-factor win of consequence left. Removing 22 million _put calls bought 7 per cent, and the profile's largest single item is _get at 27s of 262s. The remaining cost is the sum of set sizes spread thin across the analysis, so the only levers are making the sets smaller, which is precision, or doing the work once per distinct set rather than once per slot, whose ceiling r128 measures at 13.1x"
+    },
+    "r143": {
+      "says": "r145 and r140",
+      "supports": [
+        "c35"
+      ],
+      "basis": "measured"
+    },
+    "r144": {
+      "says": "r145: applied and measured. _put falls 24,723,340 to 2,281,263 and the eviction index 16,571,416 to 1,019,431, the solve improves 7 per cent at 130 modules, every published figure is unchanged, and the store returns to 2,456,704, undoing the 3,209 the second batch had added. The 7 per cent is small and that is the finding it carries, recorded as c35: call volume is not what the remaining time is made of",
+      "supports": [
+        {
+          "node": "a20",
+          "status": "done"
+        }
+      ]
+    },
+    "c36": {
+      "says": "every full-input comparison in this session shared the machine with two or three other solves, and the arms differ by less than the load does: the committed analyser reads 128.6s once and the container batching 135.6s and 136.1s, while the same change reads 7 per cent FASTER on the 130-module probe. Only a sequential run in one tree, with nothing else on the box and the arm swapped between runs, attributes a difference to the code"
+    },
+    "r146": {
+      "says": "the three full-input timings were taken with three jobs in flight, and the 130-module probe disagrees in sign with them",
+      "supports": [
+        "c36"
+      ],
+      "basis": "measured"
+    },
+    "r150": {
+      "says": "a memo keyed on the INPUT SET rather than on the site would cut per-element work 4.4x, not the 13.1x the slot ratio suggests. Over one 130-module solve: _attribute 430,193 calls asking 167,897 distinct questions, 34,060,019 element visits against 9,841,047; _call 442,373 asking 268,001, 19,150,537 against 4,153,738; _protocol 183,231 asking 60,222, 29,285,400 against 4,474,835; _container_call 106,939 asking 66,082, 9,550,380 against 2,450,114. Totals 92,046,336 against 20,919,734"
+    },
+    "r147": {
+      "says": "ai_sharing_probe.py wrapping the four dispatching transfer functions, counting a question by the identity of the interned input set and the discriminator, over a full solve",
+      "supports": [
+        "r150"
+      ],
+      "basis": "measured"
+    },
+    "r148": {
+      "says": "r150 prices it at 4.4x on per-element work, and unlike a14 it rests on no assumption about a site: f(S) depends only on S and the store, so two sites passing the same S get the same answer",
+      "supports": [
+        {
+          "node": "a21",
+          "status": "untried"
+        }
+      ]
+    },
+    "c37": {
+      "says": "a21's difficulty is not the values but the EFFECTS. The result of _attribute or _call over a set is a function of the set and the store, but what it records in open, native, targets and contracts is a function of the NODE, through _where(node, reason), so two sites asking the same question record different sites. Sharing the answer means separating the value computation from the effect recording, which is the part of the analyser a14 already got wrong once"
+    },
+    "r149": {
+      "says": "read from _analysis.py: every self.open.add in these functions goes through self._where(node, ...)",
+      "supports": [
+        "c37"
+      ],
+      "basis": "source"
+    },
+    "c38": {
+      "says": "_attribute is not pure, and an AST search for direct mutations says it is. It performs exactly one, self.open.add at line 911 under a _reporting guard, and _class_attribute one idempotent _schedule. But _class_attribute CALLS _call, for a descriptor's __get__ and for a property, and _call writes and builds containers named after the node. A purity test has to observe what a computation did, not what its own body contains"
+    },
+    "r151": {
+      "says": "the AST enumeration found the two direct mutations and missed the two _call sites, which are visible in _class_attribute's descriptor and property branches",
+      "supports": [
+        "c38"
+      ],
+      "basis": "source"
+    },
+    "r152": {
+      "says": "r150 prices the sharing at 4.4x on per-element work; c38 says the purity cannot be read off the body, so it is observed instead",
+      "supports": [
+        {
+          "node": "a22",
+          "status": "untried"
+        }
+      ]
+    },
+    "r155": {
+      "says": "the three changes are about 10 per cent SLOWER, measured cleanly: one tree, only _analysis.py swapped, nothing else on the box, before 116.3s then after 123.6s then after 132.1s"
+    },
+    "r153": {
+      "says": "ai_clean_ab.sh in wt-battery-6",
+      "supports": [
+        "r155"
+      ],
+      "basis": "measured"
+    },
+    "c39": {
+      "says": "the 130-module probe said the same changes were 7 per cent FASTER, and it was wrong because it wraps _put and _intern in Python closures to count them. The change cuts _put calls 10.8x, so the instrumented run loses 10.8x of the wrapper overhead while the real run loses almost nothing, because _put was already cheap. Instrumenting the thing you are optimising biases the result toward changes that reduce its call count"
+    },
+    "r154": {
+      "says": "r145 against r155: the same change, opposite sign, and the only difference is whether _put was wrapped",
+      "supports": [
+        "c39"
+      ],
+      "basis": "measured"
+    },
+    "r156": {
+      "says": "c39: the 7 per cent came from removing the probe's own wrapper overhead, not from the analysis getting faster. The CALL COUNTS it reports stand, since a wrapper counts correctly; the timing does not",
+      "attacks": [
+        "r145"
+      ]
+    },
+    "r157": {
+      "says": "the fourth run invalidates the first three. before, after, after, before reads 116.3s, 123.6s, 132.1s, 157.3s: the SAME code reads 116.3 and then 157.3, and the times rise monotonically whatever the arm. The before-after-after-before ordering was chosen to catch exactly this and it did. Nothing about the code is established by any of those four numbers",
+      "attacks": [
+        "r155"
+      ],
+      "basis": "measured"
+    },
+    "c40": {
+      "says": "wall clock cannot A/B anything on this box: four sequential runs of a 120-second solve, with nothing else running, drifted 116.3s to 157.3s monotonically. This repository already says so for its own benchmarks and names the remedy, which is a deterministic counter. perf stat -e instructions:u needs no privileges here, perf_event_paranoid is -1, and retired instructions are the same for the same binary and input"
+    },
+    "r158": {
+      "says": "the clean A/B's own fourth run, and CLAUDE.md's measurement section",
+      "supports": [
+        "c40"
+      ],
+      "basis": "measured"
+    },
+    "r160": {
+      "says": "the revert of the container batching rested on r155 and is therefore unsupported, not refuted. Those changes are measured again by instruction count alongside the committed analyser, the refinement accumulation alone, and the shared memo"
+    },
+    "r159": {
+      "says": "c40",
+      "supports": [
+        "r160"
+      ]
+    },
+    "r165": {
+      "says": "retired instructions for one door-order derivation, same input, deterministic: the committed analyser 1.996e12; the refinement accumulation 1.814e12, 0.909x, a 9.1 per cent WIN; the shared memo on top of it 3.309e12, 1.658x; the container batching 2.121e12, 1.063x"
+    },
+    "r161": {
+      "says": "perf stat -e instructions:u over tools/doororder.py, four arms in one tree with only _analysis.py swapped",
+      "supports": [
+        "r165"
+      ],
+      "basis": "measured"
+    },
+    "r162": {
+      "says": "r165: 2.121e12 instructions against 1.996e12, 6.3 per cent MORE. Its 10.8x cut in _put calls is real and bought nothing, because it trades 22 million cheap store writes for 10 million Python function frames and a grouping dictionary per call",
+      "supports": [
+        {
+          "node": "a20",
+          "status": "failed"
+        }
+      ]
+    },
+    "r163": {
+      "says": "r165: 3.309e12 instructions against 1.814e12 for the base it sits on, 82 per cent MORE. The purity gate is sound and the sharing is real, and the hit path still loses: a _memo hit re-registers every slot the computation read, which for these functions is more work than recomputing",
+      "supports": [
+        {
+          "node": "a22",
+          "status": "failed"
+        }
+      ]
+    },
+    "c41": {
+      "says": "caching loses in this analyser, three times from three directions: a14 keyed on the site, a22 keyed on the input set, and the _memo purity gate underneath both. The reason is the same each time, and it is structural rather than a detail of any one design: the dependency bookkeeping a cache needs is proportional to the work it saves, because these computations read about as many slots as they visit references",
+      "rests_on": [
+        "r165"
+      ]
+    },
+    "r164": {
+      "says": "r74, r165, and c23; the third instance is the one that names the cause, since the purity gate is correct and the sharing is real and it is still 1.66x",
+      "supports": [
+        "c41"
+      ],
+      "basis": "measured"
+    },
+    "r166": {
+      "says": "r140: three of its four arms keep the reference itself, so the union form built a singleton for each and folded the lot, at 30,352,000 calls carrying most of 45.5 million Reference constructions",
+      "supports": [
+        {
+          "node": "a23",
+          "status": "untried"
+        }
+      ]
+    },
+    "r167": {
+      "says": "applied; mypy and ruff clean, 123 of 123 door-order tests pass, r165 measures it at 0.909x on retired instructions, and the equivalence run is in flight",
+      "supports": [
+        {
+          "node": "a23",
+          "status": "active"
+        }
+      ]
+    },
+    "r170": {
+      "says": "equivalence holds for the refinement accumulation: stale None, 130 mixed, 131 recursive, 160 undeclared-open, 161 open, 227 rows, 29,583 sites, and zero differing fields across every field of every row once container line numbers inside _analysis.py are normalised"
+    },
+    "r168": {
+      "says": "ai_doororder_run.py on the full input in wt-battery-6 against the baseline dump, then a normalised field-by-field comparison",
+      "supports": [
+        "r170"
+      ],
+      "basis": "measured"
+    },
+    "r169": {
+      "says": "r165 measures 0.909x on retired instructions and r170 proves the answers unchanged in both directions",
+      "supports": [
+        {
+          "node": "a23",
+          "status": "done"
+        }
+      ]
     }
   },
   "log": [
@@ -7204,6 +7513,1252 @@
         ]
       ],
       "id": "d913bda849a3cdbc"
+    },
+    {
+      "at": "2026-09-19T15:06:33+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "attack c32 --because 'measured and refuted: neutralising metta/algebra/__init__.py:1797, the stack.extend over current.children, in a throwaway copy changes the store from 2,406,911 references to 2,406,906. Five references. The tree walk is not what carries it' --basis measured",
+      "parents": [
+        "d913bda849a3cdbc"
+      ],
+      "assert": [
+        [
+          "r136",
+          "sort",
+          "claim"
+        ],
+        [
+          "r136",
+          "attacks",
+          "c32"
+        ],
+        [
+          "r136",
+          "basis",
+          "measured"
+        ],
+        [
+          "r136",
+          "says",
+          "measured and refuted: neutralising metta/algebra/__init__.py:1797, the stack.extend over current.children, in a throwaway copy changes the store from 2,406,911 references to 2,406,906. Five references. The tree walk is not what carries it"
+        ]
+      ],
+      "id": "1b2adb278cfb9594"
+    },
+    {
+      "at": "2026-09-19T15:06:33+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r140 'the batching worked as designed and the profile is now a different shape. Calls before and after: _protocol 31,779,766 to 221,602, a 143x fall; _attribute 24,487,014 to 583,883; _call 24,486,218 to 586,095; _put 76,444,351 to 29,096,618; and the whole run 1.459 billion calls to 792 million. What is left is _container_call at 10,081,913 calls carrying 152.3s of 262s cumulative, and _container at 9,035,314 calls, with 45.5 million Reference constructions under them' --because 'cProfile of the committed analyser in wt-battery-5 against the same profile of the analyser before it, same input' --basis measured",
+      "parents": [
+        "1b2adb278cfb9594"
+      ],
+      "assert": [
+        [
+          "r137",
+          "sort",
+          "claim"
+        ],
+        [
+          "r137",
+          "basis",
+          "measured"
+        ],
+        [
+          "r137",
+          "says",
+          "cProfile of the committed analyser in wt-battery-5 against the same profile of the analyser before it, same input"
+        ],
+        [
+          "r137",
+          "supports",
+          "r140"
+        ],
+        [
+          "r140",
+          "sort",
+          "claim"
+        ],
+        [
+          "r140",
+          "says",
+          "the batching worked as designed and the profile is now a different shape. Calls before and after: _protocol 31,779,766 to 221,602, a 143x fall; _attribute 24,487,014 to 583,883; _call 24,486,218 to 586,095; _put 76,444,351 to 29,096,618; and the whole run 1.459 billion calls to 792 million. What is left is _container_call at 10,081,913 calls carrying 152.3s of 262s cumulative, and _container at 9,035,314 calls, with 45.5 million Reference constructions under them"
+        ]
+      ],
+      "id": "e8cb4d872c72d486"
+    },
+    {
+      "at": "2026-09-19T15:09:39+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-approach a20 'give _container_call the whole set of container_method references that name one method, so the three operations that BUILD a container at the call node do it once rather than once per receiver, and split the per-container slot work into _container_operation' --addresses i1 --cost 6 --because 'r140: after the first batching _container_call is 10,081,913 calls carrying 152.3s of a 262s profile and _container beneath it 9,035,314, and a value holding 773 abstract containers with one method called on it is 773 entries there'",
+      "parents": [
+        "e8cb4d872c72d486"
+      ],
+      "assert": [
+        [
+          "a20",
+          "sort",
+          "approach"
+        ],
+        [
+          "a20",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a20",
+          "cost",
+          6
+        ],
+        [
+          "a20",
+          "status",
+          "untried"
+        ],
+        [
+          "a20",
+          "title",
+          "give _container_call the whole set of container_method references that name one method, so the three operations that BUILD a container at the call node do it once rather than once per receiver, and split the per-container slot work into _container_operation"
+        ],
+        [
+          "r138",
+          "sort",
+          "claim"
+        ],
+        [
+          "r138",
+          "says",
+          "r140: after the first batching _container_call is 10,081,913 calls carrying 152.3s of a 262s profile and _container beneath it 9,035,314, and a value holding 773 abstract containers with one method called on it is 773 entries there"
+        ],
+        [
+          "r138",
+          "supports",
+          {
+            "node": "a20",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "99c31fbf49412f33"
+    },
+    {
+      "at": "2026-09-19T15:09:39+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "status a20 active --because 'applied; mypy clean, ruff clean, 123 of 123 door-order tests pass, and the full-input timing and equivalence are running'",
+      "parents": [
+        "99c31fbf49412f33"
+      ],
+      "assert": [
+        [
+          "a20",
+          "status",
+          "active"
+        ],
+        [
+          "r139",
+          "sort",
+          "claim"
+        ],
+        [
+          "r139",
+          "says",
+          "applied; mypy clean, ruff clean, 123 of 123 door-order tests pass, and the full-input timing and equivalence are running"
+        ],
+        [
+          "r139",
+          "supports",
+          {
+            "node": "a20",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "d470b028f3deca98"
+    },
+    {
+      "at": "2026-09-19T15:09:39+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c34 'the set a transfer function dispatches over is its FIRST parameter after self, and that is a convention rather than an accident: it separates a dispatching method from _put, whose Values is a payload written to the slot its first parameter names. Keeping it uniform is what lets the spread-calls lane find them by position instead of having to know which is which' --because 'generalising the lane to find the Values parameter anywhere made it report _put twice, correctly by its own rule and uselessly in fact; reordering _container_call to receivers-then-method made the simple rule right again' --basis measured",
+      "parents": [
+        "d470b028f3deca98"
+      ],
+      "assert": [
+        [
+          "c34",
+          "sort",
+          "claim"
+        ],
+        [
+          "c34",
+          "says",
+          "the set a transfer function dispatches over is its FIRST parameter after self, and that is a convention rather than an accident: it separates a dispatching method from _put, whose Values is a payload written to the slot its first parameter names. Keeping it uniform is what lets the spread-calls lane find them by position instead of having to know which is which"
+        ],
+        [
+          "r141",
+          "sort",
+          "claim"
+        ],
+        [
+          "r141",
+          "basis",
+          "measured"
+        ],
+        [
+          "r141",
+          "says",
+          "generalising the lane to find the Values parameter anywhere made it report _put twice, correctly by its own rule and uselessly in fact; reordering _container_call to receivers-then-method made the simple rule right again"
+        ],
+        [
+          "r141",
+          "supports",
+          "c34"
+        ]
+      ],
+      "id": "0c7f0e0d97cb478f"
+    },
+    {
+      "at": "2026-09-19T15:12:41+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r145 'batching the container calls cuts _put from 24,723,340 to 2,281,263, a 10.8x fall, and the eviction index from 16,571,416 to 1,019,431, and the solve improves only 7 per cent, 117.4s to 108.7s at 130 modules. So the call VOLUME was not the cost. Every published figure is unchanged and the store returns to 2,456,704, undoing the 3,209 the second batch had added' --because 'ai_cost_probe.py at 130 modules and ai_doororder_run.py on the full input, both against the committed analyser' --basis measured",
+      "parents": [
+        "0c7f0e0d97cb478f"
+      ],
+      "assert": [
+        [
+          "r142",
+          "sort",
+          "claim"
+        ],
+        [
+          "r142",
+          "basis",
+          "measured"
+        ],
+        [
+          "r142",
+          "says",
+          "ai_cost_probe.py at 130 modules and ai_doororder_run.py on the full input, both against the committed analyser"
+        ],
+        [
+          "r142",
+          "supports",
+          "r145"
+        ],
+        [
+          "r145",
+          "sort",
+          "claim"
+        ],
+        [
+          "r145",
+          "says",
+          "batching the container calls cuts _put from 24,723,340 to 2,281,263, a 10.8x fall, and the eviction index from 16,571,416 to 1,019,431, and the solve improves only 7 per cent, 117.4s to 108.7s at 130 modules. So the call VOLUME was not the cost. Every published figure is unchanged and the store returns to 2,456,704, undoing the 3,209 the second batch had added"
+        ]
+      ],
+      "id": "e3ff87978c14ff9e"
+    },
+    {
+      "at": "2026-09-19T15:12:41+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c35 'there is no constant-factor win of consequence left. Removing 22 million _put calls bought 7 per cent, and the profile'\"'\"'s largest single item is _get at 27s of 262s. The remaining cost is the sum of set sizes spread thin across the analysis, so the only levers are making the sets smaller, which is precision, or doing the work once per distinct set rather than once per slot, whose ceiling r128 measures at 13.1x' --because 'r145 and r140' --basis measured",
+      "parents": [
+        "e3ff87978c14ff9e"
+      ],
+      "assert": [
+        [
+          "c35",
+          "sort",
+          "claim"
+        ],
+        [
+          "c35",
+          "says",
+          "there is no constant-factor win of consequence left. Removing 22 million _put calls bought 7 per cent, and the profile's largest single item is _get at 27s of 262s. The remaining cost is the sum of set sizes spread thin across the analysis, so the only levers are making the sets smaller, which is precision, or doing the work once per distinct set rather than once per slot, whose ceiling r128 measures at 13.1x"
+        ],
+        [
+          "r143",
+          "sort",
+          "claim"
+        ],
+        [
+          "r143",
+          "basis",
+          "measured"
+        ],
+        [
+          "r143",
+          "says",
+          "r145 and r140"
+        ],
+        [
+          "r143",
+          "supports",
+          "c35"
+        ]
+      ],
+      "id": "5548c1f7ece7a319"
+    },
+    {
+      "at": "2026-09-19T15:13:37+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "status a20 done --because 'r145: applied and measured. _put falls 24,723,340 to 2,281,263 and the eviction index 16,571,416 to 1,019,431, the solve improves 7 per cent at 130 modules, every published figure is unchanged, and the store returns to 2,456,704, undoing the 3,209 the second batch had added. The 7 per cent is small and that is the finding it carries, recorded as c35: call volume is not what the remaining time is made of'",
+      "parents": [
+        "5548c1f7ece7a319"
+      ],
+      "assert": [
+        [
+          "a20",
+          "status",
+          "done"
+        ],
+        [
+          "r144",
+          "sort",
+          "claim"
+        ],
+        [
+          "r144",
+          "says",
+          "r145: applied and measured. _put falls 24,723,340 to 2,281,263 and the eviction index 16,571,416 to 1,019,431, the solve improves 7 per cent at 130 modules, every published figure is unchanged, and the store returns to 2,456,704, undoing the 3,209 the second batch had added. The 7 per cent is small and that is the finding it carries, recorded as c35: call volume is not what the remaining time is made of"
+        ],
+        [
+          "r144",
+          "supports",
+          {
+            "node": "a20",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "24db0a242a176aeb"
+    },
+    {
+      "at": "2026-09-19T15:13:37+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a20 r145 --as rests-on",
+      "parents": [
+        "24db0a242a176aeb"
+      ],
+      "assert": [
+        [
+          "a20",
+          "rests_on",
+          "r145"
+        ]
+      ],
+      "id": "7bc43851403b168b"
+    },
+    {
+      "at": "2026-09-19T15:13:37+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a20 c34 --as rests-on",
+      "parents": [
+        "7bc43851403b168b"
+      ],
+      "assert": [
+        [
+          "a20",
+          "rests_on",
+          "c34"
+        ]
+      ],
+      "id": "ee70995eedb0d28a"
+    },
+    {
+      "at": "2026-09-19T15:14:06+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c36 'every full-input comparison in this session shared the machine with two or three other solves, and the arms differ by less than the load does: the committed analyser reads 128.6s once and the container batching 135.6s and 136.1s, while the same change reads 7 per cent FASTER on the 130-module probe. Only a sequential run in one tree, with nothing else on the box and the arm swapped between runs, attributes a difference to the code' --because 'the three full-input timings were taken with three jobs in flight, and the 130-module probe disagrees in sign with them' --basis measured",
+      "parents": [
+        "ee70995eedb0d28a"
+      ],
+      "assert": [
+        [
+          "c36",
+          "sort",
+          "claim"
+        ],
+        [
+          "c36",
+          "says",
+          "every full-input comparison in this session shared the machine with two or three other solves, and the arms differ by less than the load does: the committed analyser reads 128.6s once and the container batching 135.6s and 136.1s, while the same change reads 7 per cent FASTER on the 130-module probe. Only a sequential run in one tree, with nothing else on the box and the arm swapped between runs, attributes a difference to the code"
+        ],
+        [
+          "r146",
+          "sort",
+          "claim"
+        ],
+        [
+          "r146",
+          "basis",
+          "measured"
+        ],
+        [
+          "r146",
+          "says",
+          "the three full-input timings were taken with three jobs in flight, and the 130-module probe disagrees in sign with them"
+        ],
+        [
+          "r146",
+          "supports",
+          "c36"
+        ]
+      ],
+      "id": "91a666a3df085b81"
+    },
+    {
+      "at": "2026-09-19T15:15:59+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r150 'a memo keyed on the INPUT SET rather than on the site would cut per-element work 4.4x, not the 13.1x the slot ratio suggests. Over one 130-module solve: _attribute 430,193 calls asking 167,897 distinct questions, 34,060,019 element visits against 9,841,047; _call 442,373 asking 268,001, 19,150,537 against 4,153,738; _protocol 183,231 asking 60,222, 29,285,400 against 4,474,835; _container_call 106,939 asking 66,082, 9,550,380 against 2,450,114. Totals 92,046,336 against 20,919,734' --because 'ai_sharing_probe.py wrapping the four dispatching transfer functions, counting a question by the identity of the interned input set and the discriminator, over a full solve' --basis measured",
+      "parents": [
+        "91a666a3df085b81"
+      ],
+      "assert": [
+        [
+          "r147",
+          "sort",
+          "claim"
+        ],
+        [
+          "r147",
+          "basis",
+          "measured"
+        ],
+        [
+          "r147",
+          "says",
+          "ai_sharing_probe.py wrapping the four dispatching transfer functions, counting a question by the identity of the interned input set and the discriminator, over a full solve"
+        ],
+        [
+          "r147",
+          "supports",
+          "r150"
+        ],
+        [
+          "r150",
+          "sort",
+          "claim"
+        ],
+        [
+          "r150",
+          "says",
+          "a memo keyed on the INPUT SET rather than on the site would cut per-element work 4.4x, not the 13.1x the slot ratio suggests. Over one 130-module solve: _attribute 430,193 calls asking 167,897 distinct questions, 34,060,019 element visits against 9,841,047; _call 442,373 asking 268,001, 19,150,537 against 4,153,738; _protocol 183,231 asking 60,222, 29,285,400 against 4,474,835; _container_call 106,939 asking 66,082, 9,550,380 against 2,450,114. Totals 92,046,336 against 20,919,734"
+        ]
+      ],
+      "id": "77eb9361e7f18375"
+    },
+    {
+      "at": "2026-09-19T15:15:59+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-approach a21 'memoise the dispatching transfer functions on the IDENTITY of their interned input set rather than on the call site, so two sites asking the same question share one answer' --addresses i1 --cost 13 --because 'r150 prices it at 4.4x on per-element work, and unlike a14 it rests on no assumption about a site: f(S) depends only on S and the store, so two sites passing the same S get the same answer'",
+      "parents": [
+        "77eb9361e7f18375"
+      ],
+      "assert": [
+        [
+          "a21",
+          "sort",
+          "approach"
+        ],
+        [
+          "a21",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a21",
+          "cost",
+          13
+        ],
+        [
+          "a21",
+          "status",
+          "untried"
+        ],
+        [
+          "a21",
+          "title",
+          "memoise the dispatching transfer functions on the IDENTITY of their interned input set rather than on the call site, so two sites asking the same question share one answer"
+        ],
+        [
+          "r148",
+          "sort",
+          "claim"
+        ],
+        [
+          "r148",
+          "says",
+          "r150 prices it at 4.4x on per-element work, and unlike a14 it rests on no assumption about a site: f(S) depends only on S and the store, so two sites passing the same S get the same answer"
+        ],
+        [
+          "r148",
+          "supports",
+          {
+            "node": "a21",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "43098da7463cebac"
+    },
+    {
+      "at": "2026-09-19T15:15:59+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c37 'a21'\"'\"'s difficulty is not the values but the EFFECTS. The result of _attribute or _call over a set is a function of the set and the store, but what it records in open, native, targets and contracts is a function of the NODE, through _where(node, reason), so two sites asking the same question record different sites. Sharing the answer means separating the value computation from the effect recording, which is the part of the analyser a14 already got wrong once' --because 'read from _analysis.py: every self.open.add in these functions goes through self._where(node, ...)' --basis source",
+      "parents": [
+        "43098da7463cebac"
+      ],
+      "assert": [
+        [
+          "c37",
+          "sort",
+          "claim"
+        ],
+        [
+          "c37",
+          "says",
+          "a21's difficulty is not the values but the EFFECTS. The result of _attribute or _call over a set is a function of the set and the store, but what it records in open, native, targets and contracts is a function of the NODE, through _where(node, reason), so two sites asking the same question record different sites. Sharing the answer means separating the value computation from the effect recording, which is the part of the analyser a14 already got wrong once"
+        ],
+        [
+          "r149",
+          "sort",
+          "claim"
+        ],
+        [
+          "r149",
+          "basis",
+          "source"
+        ],
+        [
+          "r149",
+          "says",
+          "read from _analysis.py: every self.open.add in these functions goes through self._where(node, ...)"
+        ],
+        [
+          "r149",
+          "supports",
+          "c37"
+        ]
+      ],
+      "id": "f5fd13775f05736a"
+    },
+    {
+      "at": "2026-09-19T15:15:59+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a21 c37 --as rests-on",
+      "parents": [
+        "f5fd13775f05736a"
+      ],
+      "assert": [
+        [
+          "a21",
+          "rests_on",
+          "c37"
+        ]
+      ],
+      "id": "b27626c3724a5dad"
+    },
+    {
+      "at": "2026-09-19T15:22:53+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c38 '_attribute is not pure, and an AST search for direct mutations says it is. It performs exactly one, self.open.add at line 911 under a _reporting guard, and _class_attribute one idempotent _schedule. But _class_attribute CALLS _call, for a descriptor'\"'\"'s __get__ and for a property, and _call writes and builds containers named after the node. A purity test has to observe what a computation did, not what its own body contains' --because 'the AST enumeration found the two direct mutations and missed the two _call sites, which are visible in _class_attribute'\"'\"'s descriptor and property branches' --basis source",
+      "parents": [
+        "b27626c3724a5dad"
+      ],
+      "assert": [
+        [
+          "c38",
+          "sort",
+          "claim"
+        ],
+        [
+          "c38",
+          "says",
+          "_attribute is not pure, and an AST search for direct mutations says it is. It performs exactly one, self.open.add at line 911 under a _reporting guard, and _class_attribute one idempotent _schedule. But _class_attribute CALLS _call, for a descriptor's __get__ and for a property, and _call writes and builds containers named after the node. A purity test has to observe what a computation did, not what its own body contains"
+        ],
+        [
+          "r151",
+          "sort",
+          "claim"
+        ],
+        [
+          "r151",
+          "basis",
+          "source"
+        ],
+        [
+          "r151",
+          "says",
+          "the AST enumeration found the two direct mutations and missed the two _call sites, which are visible in _class_attribute's descriptor and property branches"
+        ],
+        [
+          "r151",
+          "supports",
+          "c38"
+        ]
+      ],
+      "id": "ef83b013e6f38002"
+    },
+    {
+      "at": "2026-09-19T15:22:53+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-approach a22 'cache a dispatching transfer function on the identity of its input set, but only when the computation TURNED OUT to be pure: snapshot the four fact-set sizes and a write counter around it, and store the answer only if none moved. Every node-dependent thing in these functions is either a write or a recorded fact, so a computation that did neither has an answer that depends on the set, the discriminator and the store alone' --addresses i1 --cost 9 --because 'r150 prices the sharing at 4.4x on per-element work; c38 says the purity cannot be read off the body, so it is observed instead'",
+      "parents": [
+        "ef83b013e6f38002"
+      ],
+      "assert": [
+        [
+          "a22",
+          "sort",
+          "approach"
+        ],
+        [
+          "a22",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a22",
+          "cost",
+          9
+        ],
+        [
+          "a22",
+          "status",
+          "untried"
+        ],
+        [
+          "a22",
+          "title",
+          "cache a dispatching transfer function on the identity of its input set, but only when the computation TURNED OUT to be pure: snapshot the four fact-set sizes and a write counter around it, and store the answer only if none moved. Every node-dependent thing in these functions is either a write or a recorded fact, so a computation that did neither has an answer that depends on the set, the discriminator and the store alone"
+        ],
+        [
+          "r152",
+          "sort",
+          "claim"
+        ],
+        [
+          "r152",
+          "says",
+          "r150 prices the sharing at 4.4x on per-element work; c38 says the purity cannot be read off the body, so it is observed instead"
+        ],
+        [
+          "r152",
+          "supports",
+          {
+            "node": "a22",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "1f15747fdd0ee18e"
+    },
+    {
+      "at": "2026-09-19T15:22:53+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a22 c38 --as rests-on",
+      "parents": [
+        "1f15747fdd0ee18e"
+      ],
+      "assert": [
+        [
+          "a22",
+          "rests_on",
+          "c38"
+        ]
+      ],
+      "id": "e3048147e81b7f49"
+    },
+    {
+      "at": "2026-09-19T15:22:53+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a22 r150 --as rests-on",
+      "parents": [
+        "e3048147e81b7f49"
+      ],
+      "assert": [
+        [
+          "a22",
+          "rests_on",
+          "r150"
+        ]
+      ],
+      "id": "79b5d77fde2ce9b8"
+    },
+    {
+      "at": "2026-09-19T15:23:32+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r155 'the three changes are about 10 per cent SLOWER, measured cleanly: one tree, only _analysis.py swapped, nothing else on the box, before 116.3s then after 123.6s then after 132.1s' --because 'ai_clean_ab.sh in wt-battery-6' --basis measured",
+      "parents": [
+        "79b5d77fde2ce9b8"
+      ],
+      "assert": [
+        [
+          "r153",
+          "sort",
+          "claim"
+        ],
+        [
+          "r153",
+          "basis",
+          "measured"
+        ],
+        [
+          "r153",
+          "says",
+          "ai_clean_ab.sh in wt-battery-6"
+        ],
+        [
+          "r153",
+          "supports",
+          "r155"
+        ],
+        [
+          "r155",
+          "sort",
+          "claim"
+        ],
+        [
+          "r155",
+          "says",
+          "the three changes are about 10 per cent SLOWER, measured cleanly: one tree, only _analysis.py swapped, nothing else on the box, before 116.3s then after 123.6s then after 132.1s"
+        ]
+      ],
+      "id": "9be40abc04a791a6"
+    },
+    {
+      "at": "2026-09-19T15:23:32+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c39 'the 130-module probe said the same changes were 7 per cent FASTER, and it was wrong because it wraps _put and _intern in Python closures to count them. The change cuts _put calls 10.8x, so the instrumented run loses 10.8x of the wrapper overhead while the real run loses almost nothing, because _put was already cheap. Instrumenting the thing you are optimising biases the result toward changes that reduce its call count' --because 'r145 against r155: the same change, opposite sign, and the only difference is whether _put was wrapped' --basis measured",
+      "parents": [
+        "9be40abc04a791a6"
+      ],
+      "assert": [
+        [
+          "c39",
+          "sort",
+          "claim"
+        ],
+        [
+          "c39",
+          "says",
+          "the 130-module probe said the same changes were 7 per cent FASTER, and it was wrong because it wraps _put and _intern in Python closures to count them. The change cuts _put calls 10.8x, so the instrumented run loses 10.8x of the wrapper overhead while the real run loses almost nothing, because _put was already cheap. Instrumenting the thing you are optimising biases the result toward changes that reduce its call count"
+        ],
+        [
+          "r154",
+          "sort",
+          "claim"
+        ],
+        [
+          "r154",
+          "basis",
+          "measured"
+        ],
+        [
+          "r154",
+          "says",
+          "r145 against r155: the same change, opposite sign, and the only difference is whether _put was wrapped"
+        ],
+        [
+          "r154",
+          "supports",
+          "c39"
+        ]
+      ],
+      "id": "5d18aadc409b98ee"
+    },
+    {
+      "at": "2026-09-19T15:23:32+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "attack r145 --because 'c39: the 7 per cent came from removing the probe'\"'\"'s own wrapper overhead, not from the analysis getting faster. The CALL COUNTS it reports stand, since a wrapper counts correctly; the timing does not'",
+      "parents": [
+        "5d18aadc409b98ee"
+      ],
+      "assert": [
+        [
+          "r156",
+          "sort",
+          "claim"
+        ],
+        [
+          "r156",
+          "attacks",
+          "r145"
+        ],
+        [
+          "r156",
+          "says",
+          "c39: the 7 per cent came from removing the probe's own wrapper overhead, not from the analysis getting faster. The CALL COUNTS it reports stand, since a wrapper counts correctly; the timing does not"
+        ]
+      ],
+      "id": "906db8e6a099fcd1"
+    },
+    {
+      "at": "2026-09-19T15:25:43+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "attack r155 --because 'the fourth run invalidates the first three. before, after, after, before reads 116.3s, 123.6s, 132.1s, 157.3s: the SAME code reads 116.3 and then 157.3, and the times rise monotonically whatever the arm. The before-after-after-before ordering was chosen to catch exactly this and it did. Nothing about the code is established by any of those four numbers' --basis measured",
+      "parents": [
+        "906db8e6a099fcd1"
+      ],
+      "assert": [
+        [
+          "r157",
+          "sort",
+          "claim"
+        ],
+        [
+          "r157",
+          "attacks",
+          "r155"
+        ],
+        [
+          "r157",
+          "basis",
+          "measured"
+        ],
+        [
+          "r157",
+          "says",
+          "the fourth run invalidates the first three. before, after, after, before reads 116.3s, 123.6s, 132.1s, 157.3s: the SAME code reads 116.3 and then 157.3, and the times rise monotonically whatever the arm. The before-after-after-before ordering was chosen to catch exactly this and it did. Nothing about the code is established by any of those four numbers"
+        ]
+      ],
+      "id": "e569c6127a789b2f"
+    },
+    {
+      "at": "2026-09-19T15:25:43+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c40 'wall clock cannot A/B anything on this box: four sequential runs of a 120-second solve, with nothing else running, drifted 116.3s to 157.3s monotonically. This repository already says so for its own benchmarks and names the remedy, which is a deterministic counter. perf stat -e instructions:u needs no privileges here, perf_event_paranoid is -1, and retired instructions are the same for the same binary and input' --because 'the clean A/B'\"'\"'s own fourth run, and CLAUDE.md'\"'\"'s measurement section' --basis measured",
+      "parents": [
+        "e569c6127a789b2f"
+      ],
+      "assert": [
+        [
+          "c40",
+          "sort",
+          "claim"
+        ],
+        [
+          "c40",
+          "says",
+          "wall clock cannot A/B anything on this box: four sequential runs of a 120-second solve, with nothing else running, drifted 116.3s to 157.3s monotonically. This repository already says so for its own benchmarks and names the remedy, which is a deterministic counter. perf stat -e instructions:u needs no privileges here, perf_event_paranoid is -1, and retired instructions are the same for the same binary and input"
+        ],
+        [
+          "r158",
+          "sort",
+          "claim"
+        ],
+        [
+          "r158",
+          "basis",
+          "measured"
+        ],
+        [
+          "r158",
+          "says",
+          "the clean A/B's own fourth run, and CLAUDE.md's measurement section"
+        ],
+        [
+          "r158",
+          "supports",
+          "c40"
+        ]
+      ],
+      "id": "25d65c9ff7589227"
+    },
+    {
+      "at": "2026-09-19T15:25:44+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r160 'the revert of the container batching rested on r155 and is therefore unsupported, not refuted. Those changes are measured again by instruction count alongside the committed analyser, the refinement accumulation alone, and the shared memo' --because c40",
+      "parents": [
+        "25d65c9ff7589227"
+      ],
+      "assert": [
+        [
+          "r159",
+          "sort",
+          "claim"
+        ],
+        [
+          "r159",
+          "says",
+          "c40"
+        ],
+        [
+          "r159",
+          "supports",
+          "r160"
+        ],
+        [
+          "r160",
+          "sort",
+          "claim"
+        ],
+        [
+          "r160",
+          "says",
+          "the revert of the container batching rested on r155 and is therefore unsupported, not refuted. Those changes are measured again by instruction count alongside the committed analyser, the refinement accumulation alone, and the shared memo"
+        ]
+      ],
+      "id": "79f3c98ffdaa6a88"
+    },
+    {
+      "at": "2026-09-19T15:37:10+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r165 'retired instructions for one door-order derivation, same input, deterministic: the committed analyser 1.996e12; the refinement accumulation 1.814e12, 0.909x, a 9.1 per cent WIN; the shared memo on top of it 3.309e12, 1.658x; the container batching 2.121e12, 1.063x' --because 'perf stat -e instructions:u over tools/doororder.py, four arms in one tree with only _analysis.py swapped' --basis measured",
+      "parents": [
+        "79f3c98ffdaa6a88"
+      ],
+      "assert": [
+        [
+          "r161",
+          "sort",
+          "claim"
+        ],
+        [
+          "r161",
+          "basis",
+          "measured"
+        ],
+        [
+          "r161",
+          "says",
+          "perf stat -e instructions:u over tools/doororder.py, four arms in one tree with only _analysis.py swapped"
+        ],
+        [
+          "r161",
+          "supports",
+          "r165"
+        ],
+        [
+          "r165",
+          "sort",
+          "claim"
+        ],
+        [
+          "r165",
+          "says",
+          "retired instructions for one door-order derivation, same input, deterministic: the committed analyser 1.996e12; the refinement accumulation 1.814e12, 0.909x, a 9.1 per cent WIN; the shared memo on top of it 3.309e12, 1.658x; the container batching 2.121e12, 1.063x"
+        ]
+      ],
+      "id": "6702c2674ce21f35"
+    },
+    {
+      "at": "2026-09-19T15:37:10+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "status a20 failed --because 'r165: 2.121e12 instructions against 1.996e12, 6.3 per cent MORE. Its 10.8x cut in _put calls is real and bought nothing, because it trades 22 million cheap store writes for 10 million Python function frames and a grouping dictionary per call'",
+      "parents": [
+        "6702c2674ce21f35"
+      ],
+      "assert": [
+        [
+          "a20",
+          "status",
+          "failed"
+        ],
+        [
+          "r162",
+          "sort",
+          "claim"
+        ],
+        [
+          "r162",
+          "says",
+          "r165: 2.121e12 instructions against 1.996e12, 6.3 per cent MORE. Its 10.8x cut in _put calls is real and bought nothing, because it trades 22 million cheap store writes for 10 million Python function frames and a grouping dictionary per call"
+        ],
+        [
+          "r162",
+          "supports",
+          {
+            "node": "a20",
+            "status": "failed"
+          }
+        ]
+      ],
+      "id": "3b11ba0d2c8a91a9"
+    },
+    {
+      "at": "2026-09-19T15:37:10+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "status a22 failed --because 'r165: 3.309e12 instructions against 1.814e12 for the base it sits on, 82 per cent MORE. The purity gate is sound and the sharing is real, and the hit path still loses: a _memo hit re-registers every slot the computation read, which for these functions is more work than recomputing'",
+      "parents": [
+        "3b11ba0d2c8a91a9"
+      ],
+      "assert": [
+        [
+          "a22",
+          "status",
+          "failed"
+        ],
+        [
+          "r163",
+          "sort",
+          "claim"
+        ],
+        [
+          "r163",
+          "says",
+          "r165: 3.309e12 instructions against 1.814e12 for the base it sits on, 82 per cent MORE. The purity gate is sound and the sharing is real, and the hit path still loses: a _memo hit re-registers every slot the computation read, which for these functions is more work than recomputing"
+        ],
+        [
+          "r163",
+          "supports",
+          {
+            "node": "a22",
+            "status": "failed"
+          }
+        ]
+      ],
+      "id": "2ed78dfd1f724eb9"
+    },
+    {
+      "at": "2026-09-19T15:37:10+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim c41 'caching loses in this analyser, three times from three directions: a14 keyed on the site, a22 keyed on the input set, and the _memo purity gate underneath both. The reason is the same each time, and it is structural rather than a detail of any one design: the dependency bookkeeping a cache needs is proportional to the work it saves, because these computations read about as many slots as they visit references' --because 'r74, r165, and c23; the third instance is the one that names the cause, since the purity gate is correct and the sharing is real and it is still 1.66x' --basis measured",
+      "parents": [
+        "2ed78dfd1f724eb9"
+      ],
+      "assert": [
+        [
+          "c41",
+          "sort",
+          "claim"
+        ],
+        [
+          "c41",
+          "says",
+          "caching loses in this analyser, three times from three directions: a14 keyed on the site, a22 keyed on the input set, and the _memo purity gate underneath both. The reason is the same each time, and it is structural rather than a detail of any one design: the dependency bookkeeping a cache needs is proportional to the work it saves, because these computations read about as many slots as they visit references"
+        ],
+        [
+          "r164",
+          "sort",
+          "claim"
+        ],
+        [
+          "r164",
+          "basis",
+          "measured"
+        ],
+        [
+          "r164",
+          "says",
+          "r74, r165, and c23; the third instance is the one that names the cause, since the purity gate is correct and the sharing is real and it is still 1.66x"
+        ],
+        [
+          "r164",
+          "supports",
+          "c41"
+        ]
+      ],
+      "id": "76d434b6a652e76a"
+    },
+    {
+      "at": "2026-09-19T15:37:10+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link c41 r165 --as rests-on",
+      "parents": [
+        "76d434b6a652e76a"
+      ],
+      "assert": [
+        [
+          "c41",
+          "rests_on",
+          "r165"
+        ]
+      ],
+      "id": "ff2760b4045e9666"
+    },
+    {
+      "at": "2026-09-19T15:37:18+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-approach a23 'accumulate the declared refinement into one set instead of folding one frozenset per reference, in _declared_values' --addresses i1 --cost 2 --because 'r140: three of its four arms keep the reference itself, so the union form built a singleton for each and folded the lot, at 30,352,000 calls carrying most of 45.5 million Reference constructions'",
+      "parents": [
+        "ff2760b4045e9666"
+      ],
+      "assert": [
+        [
+          "a23",
+          "sort",
+          "approach"
+        ],
+        [
+          "a23",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a23",
+          "cost",
+          2
+        ],
+        [
+          "a23",
+          "status",
+          "untried"
+        ],
+        [
+          "a23",
+          "title",
+          "accumulate the declared refinement into one set instead of folding one frozenset per reference, in _declared_values"
+        ],
+        [
+          "r166",
+          "sort",
+          "claim"
+        ],
+        [
+          "r166",
+          "says",
+          "r140: three of its four arms keep the reference itself, so the union form built a singleton for each and folded the lot, at 30,352,000 calls carrying most of 45.5 million Reference constructions"
+        ],
+        [
+          "r166",
+          "supports",
+          {
+            "node": "a23",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "98c2db80cfa89c6f"
+    },
+    {
+      "at": "2026-09-19T15:37:18+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "status a23 active --because 'applied; mypy and ruff clean, 123 of 123 door-order tests pass, r165 measures it at 0.909x on retired instructions, and the equivalence run is in flight'",
+      "parents": [
+        "98c2db80cfa89c6f"
+      ],
+      "assert": [
+        [
+          "a23",
+          "status",
+          "active"
+        ],
+        [
+          "r167",
+          "sort",
+          "claim"
+        ],
+        [
+          "r167",
+          "says",
+          "applied; mypy and ruff clean, 123 of 123 door-order tests pass, r165 measures it at 0.909x on retired instructions, and the equivalence run is in flight"
+        ],
+        [
+          "r167",
+          "supports",
+          {
+            "node": "a23",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "6b8d03c884460ac7"
+    },
+    {
+      "at": "2026-09-19T15:37:18+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a23 r165 --as rests-on",
+      "parents": [
+        "6b8d03c884460ac7"
+      ],
+      "assert": [
+        [
+          "a23",
+          "rests_on",
+          "r165"
+        ]
+      ],
+      "id": "bcfb3747d78ce3d1"
+    },
+    {
+      "at": "2026-09-19T15:39:12+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "add-claim r170 'equivalence holds for the refinement accumulation: stale None, 130 mixed, 131 recursive, 160 undeclared-open, 161 open, 227 rows, 29,583 sites, and zero differing fields across every field of every row once container line numbers inside _analysis.py are normalised' --because 'ai_doororder_run.py on the full input in wt-battery-6 against the baseline dump, then a normalised field-by-field comparison' --basis measured",
+      "parents": [
+        "bcfb3747d78ce3d1"
+      ],
+      "assert": [
+        [
+          "r168",
+          "sort",
+          "claim"
+        ],
+        [
+          "r168",
+          "basis",
+          "measured"
+        ],
+        [
+          "r168",
+          "says",
+          "ai_doororder_run.py on the full input in wt-battery-6 against the baseline dump, then a normalised field-by-field comparison"
+        ],
+        [
+          "r168",
+          "supports",
+          "r170"
+        ],
+        [
+          "r170",
+          "sort",
+          "claim"
+        ],
+        [
+          "r170",
+          "says",
+          "equivalence holds for the refinement accumulation: stale None, 130 mixed, 131 recursive, 160 undeclared-open, 161 open, 227 rows, 29,583 sites, and zero differing fields across every field of every row once container line numbers inside _analysis.py are normalised"
+        ]
+      ],
+      "id": "2d6c60eb798fae4f"
+    },
+    {
+      "at": "2026-09-19T15:39:12+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "status a23 done --because 'r165 measures 0.909x on retired instructions and r170 proves the answers unchanged in both directions'",
+      "parents": [
+        "2d6c60eb798fae4f"
+      ],
+      "assert": [
+        [
+          "a23",
+          "status",
+          "done"
+        ],
+        [
+          "r169",
+          "sort",
+          "claim"
+        ],
+        [
+          "r169",
+          "says",
+          "r165 measures 0.909x on retired instructions and r170 proves the answers unchanged in both directions"
+        ],
+        [
+          "r169",
+          "supports",
+          {
+            "node": "a23",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "c035b1957ec348af"
+    },
+    {
+      "at": "2026-09-19T15:39:12+10:00",
+      "after": "581c0a1f686b1b249c62d26a7c27748953d6bde7",
+      "did": "link a23 r170 --as rests-on",
+      "parents": [
+        "c035b1957ec348af"
+      ],
+      "assert": [
+        [
+          "a23",
+          "rests_on",
+          "r170"
+        ]
+      ],
+      "id": "65570af3b06f49db"
     }
   ]
 }
