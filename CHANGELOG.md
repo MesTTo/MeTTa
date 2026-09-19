@@ -40,6 +40,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Registering a door the generated verdict table does not name solved the
+  shipped call graph's least fixed point in the running process, and paid it
+  again for every distinct set of rows a caller passed, because the cached core
+  was keyed on the caller's records rather than on the shipped table's own
+  entries. The catalog snapshot passes the whole live table, so the key looked
+  constant until anything passed a subset. Measured: `orders()` over the 210
+  shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on
+  the same key, while callers passing 3 and 5 of those rows each missed and
+  solved again, leaving three copies of one answer. The entries now come from
+  the shipped rows, so one solve serves every caller in the process: the same
+  four calls leave one cache entry and three hits, and the verdicts are
+  identical. It is also the entry set `doororder.py` derives the table from, so
+  a row analysed at runtime is measured against the same core as the table it
+  sits beside.
+
 - The cheat-sheet lane could not see this tree's own components. Every one of
   the eight submodules holds a `.git`, and the lane called any directory
   holding one a foreign checkout, so everything inside them was filtered out

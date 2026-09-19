@@ -3976,6 +3976,150 @@
       "tags": [
         "measured"
       ]
+    },
+    "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported": {
+      "title": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+    },
+    "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)": {
+      "title": "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)",
+      "supports": [
+        "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound": {
+      "title": "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound"
+    },
+    "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation": {
+      "title": "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation",
+      "supports": [
+        "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another": {
+      "title": "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another"
+    },
+    "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package": {
+      "title": "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package",
+      "supports": [
+        "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own": {
+      "title": "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+    },
+    "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's": {
+      "title": "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's",
+      "supports": [
+        "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable": {
+      "title": "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable",
+      "supports": [
+        {
+          "node": "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "status": "untried"
+        },
+        {
+          "node": "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "relation": "addresses",
+          "target": "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+        }
+      ]
+    },
+    "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all": {
+      "title": "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all"
+    },
+    "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17": {
+      "title": "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17",
+      "supports": [
+        "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer": {
+      "title": "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer",
+      "supports": [
+        {
+          "node": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "status": "untried"
+        },
+        {
+          "node": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "relation": "addresses",
+          "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        }
+      ]
+    },
+    "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751": {
+      "title": "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751",
+      "supports": [
+        {
+          "node": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer": {
+      "title": "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+    },
+    "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries": {
+      "title": "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries",
+      "supports": [
+        "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper": {
+      "title": "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper",
+      "supports": [
+        {
+          "node": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "status": "untried"
+        },
+        {
+          "node": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "relation": "addresses",
+          "target": "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+        }
+      ]
+    },
+    "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file": {
+      "title": "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file",
+      "supports": [
+        {
+          "node": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -4675,6 +4819,30 @@
       "status": "done",
       "addresses": [
         "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+      ]
+    },
+    "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows": {
+      "title": "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+      "effort": 8,
+      "status": "untried",
+      "addresses": [
+        "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+      ]
+    },
+    "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist": {
+      "title": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+      ]
+    },
+    "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched": {
+      "title": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
       ]
     }
   },
@@ -21669,6 +21837,442 @@
         ]
       ],
       "id": "75c5860e1e631cf9"
+    },
+    {
+      "at": "2026-09-19T19:34:22.985151+00:00",
+      "after": "2d50a6746182d69d4e717444d14888ee08572289",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \\\"dependency.metta\\\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)\", \"tags\": [\"measured\"], \"title\": \"laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation\", \"tags\": [\"tested\"], \"title\": \"the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound\", \"fields\": {}}]",
+      "parents": [
+        "75c5860e1e631cf9"
+      ],
+      "assert": [
+        [
+          "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)",
+          "sort",
+          "prop"
+        ],
+        [
+          "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)",
+          "supports",
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        ],
+        [
+          "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)",
+          "tags",
+          "measured"
+        ],
+        [
+          "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)",
+          "title",
+          "independently reproduced 2026-09-20 by running tests/data/lib_package/ai-boundary.pl, which reports backing_receipt_retained failed, boot_performed failed, uncovered_unclaimed_import succeeded, backing_registered_in_home failed and native_after_unimport [42]; law 10's relative-path requirement raises existence_error(package_requirement, \"dependency.metta\") and (get-property perform claims) raises domain_error(function_input_arities('get-property',[1]),2)"
+        ],
+        [
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported",
+          "sort",
+          "prop"
+        ],
+        [
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported",
+          "title",
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        ],
+        [
+          "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound",
+          "sort",
+          "prop"
+        ],
+        [
+          "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound",
+          "title",
+          "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound"
+        ],
+        [
+          "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation",
+          "sort",
+          "prop"
+        ],
+        [
+          "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation",
+          "supports",
+          "the delegated genius job on the package lifecycle library ended blocked rather than wrong: it could not build laws 6 to 13 inside lib/lib_package alone because every one of them needs an engine entry point it was barred from editing, and the boundary analysis and executable witness it produced are sound"
+        ],
+        [
+          "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation",
+          "tags",
+          "tested"
+        ],
+        [
+          "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation",
+          "title",
+          "the job reported blocked after 1088 seconds naming metta_perform_package_rows/2 as offering no interception before backing execution, and its diagnostic reproduces here observation for observation"
+        ]
+      ],
+      "id": "c3690c21f59df758"
+    },
+    {
+      "at": "2026-09-19T19:36:15.867135+00:00",
+      "after": "2d50a6746182d69d4e717444d14888ee08572289",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package\", \"tags\": [\"source\"], \"title\": \"the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's\", \"tags\": [\"source\"], \"title\": \"the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable\", \"tags\": [], \"title\": \"move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows\", \"fields\": {\"effort\": 8, \"addresses\": [\"the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17\", \"tags\": [\"measured\"], \"title\": \"performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all\", \"fields\": {}}]",
+      "parents": [
+        "c3690c21f59df758"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17",
+          "supports",
+          "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all"
+        ],
+        [
+          "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17",
+          "title",
+          "measured 2026-09-20 by changing the evalc target from &metta to the load's space, after which the boundary diagnostic reported backing_performed failed where it had succeeded and packages.plt dropped from 18 passing lines to 17"
+        ],
+        [
+          "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all",
+          "title",
+          "performing a backing row in the file's own space instead of the seam space does not reach the claim: the row stops performing at all"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package",
+          "supports",
+          "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package",
+          "title",
+          "read docs/journal/2026-09-09-packages-are-equations.md, the 2026-09-09 section titled the package is an argument record and the engine knows four things, which states the four and then names everything else as lib_package"
+        ],
+        [
+          "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's",
+          "supports",
+          "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+        ],
+        [
+          "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's",
+          "title",
+          "read engine/metta/interop.pl:2057-2073, which normalises each backing row and evaluates (perform Row) in &metta discarding the answers, against the journal's ruling that backing and coverage and receipts are lib_package's"
+        ],
+        [
+          "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable",
+          "sort",
+          "prop"
+        ],
+        [
+          "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable",
+          "supports",
+          {
+            "node": "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+            "status": "untried"
+          }
+        ],
+        [
+          "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable",
+          "supports",
+          {
+            "node": "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+            "relation": "addresses",
+            "target": "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+          }
+        ],
+        [
+          "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable",
+          "title",
+          "the design says the engine knows four things and a package naming no requires is applied to the prelude's default, so the handoff is what laws 6 to 13 are built against and what the blocked genius job was missing; dispatch must stay in the seam space because performing the row in the file's own space instead makes the claim unreachable"
+        ],
+        [
+          "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own",
+          "title",
+          "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+        ],
+        [
+          "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another",
+          "sort",
+          "prop"
+        ],
+        [
+          "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another",
+          "title",
+          "the packages design fixes the engine's knowledge at exactly four things, the reserved head, requires performed first, perform dispatched by unification, and the reads ceiling with its budget, and assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package as a prelude library replaceable by a package that requires another"
+        ],
+        [
+          "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "sort",
+          "approach"
+        ],
+        [
+          "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "addresses",
+          "the engine performs backing rows itself in metta_perform_package_backings/2, which the design assigns to lib_package, so there is no point at which a packaging library can choose coverage, capture an answer or validate a boot row, and the engine carries half of a lifecycle it is not supposed to own"
+        ],
+        [
+          "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "effort",
+          8
+        ],
+        [
+          "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "status",
+          "untried"
+        ],
+        [
+          "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows",
+          "title",
+          "move backing performance out of the engine into a prelude lib_package, leaving the engine its four fixed things and a handoff that gives the packaging library the file, its space and its rows"
+        ]
+      ],
+      "id": "105290bd41d6df5e"
+    },
+    {
+      "at": "2026-09-19T19:38:57.794508+00:00",
+      "after": "2d50a6746182d69d4e717444d14888ee08572289",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer\", \"tags\": [], \"title\": \"close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist\", \"fields\": {\"effort\": 1, \"addresses\": [\"laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported\"]}}, {\"op\": \"status\", \"id\": \"close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist\", \"because\": \"answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "105290bd41d6df5e"
+      ],
+      "assert": [
+        [
+          "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer",
+          "sort",
+          "prop"
+        ],
+        [
+          "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer",
+          "supports",
+          {
+            "node": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+            "status": "untried"
+          }
+        ],
+        [
+          "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer",
+          "supports",
+          {
+            "node": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+            "relation": "addresses",
+            "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+          }
+        ],
+        [
+          "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer",
+          "title",
+          "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer"
+        ],
+        [
+          "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751",
+          "sort",
+          "prop"
+        ],
+        [
+          "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751",
+          "supersedes",
+          "a ledger row naming a thing that is not there sends the next reader looking for it, and the row's whole content is that the word is waiting for a consumer"
+        ],
+        [
+          "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751",
+          "supports",
+          {
+            "node": "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+            "status": "done"
+          }
+        ],
+        [
+          "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751",
+          "tags",
+          "measured"
+        ],
+        [
+          "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751",
+          "title",
+          "answer-policy ships depth, fair and best-first and nothing else at extensions/python/metta/vocabularies.py:272-277, and a case-insensitive search for iterative across that file, lib/ and engine/ answers only two C comments about iterative tree walks at engine/reader.c:447 and engine/writer.c:751"
+        ],
+        [
+          "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "sort",
+          "approach"
+        ],
+        [
+          "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "addresses",
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        ],
+        [
+          "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "effort",
+          1
+        ],
+        [
+          "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "status",
+          "done"
+        ],
+        [
+          "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist",
+          "title",
+          "close the todo ledger's L070 residue row as stale, since the iterative-deepening vocabulary word it says is inert does not exist"
+        ]
+      ],
+      "id": "3dedf02dcbf1520a"
+    },
+    {
+      "at": "2026-09-19T19:39:58.356422+00:00",
+      "after": "f616e1c0b2a6aa5cf900719cda554e00ef3b155f",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries\", \"tags\": [\"measured\"], \"title\": \"the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper\", \"tags\": [], \"title\": \"take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched\", \"fields\": {\"effort\": 2, \"addresses\": [\"the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer\"]}}, {\"op\": \"status\", \"id\": \"take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched\", \"because\": \"the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "3dedf02dcbf1520a"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries",
+          "supports",
+          "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+        ],
+        [
+          "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries",
+          "title",
+          "measured 2026-09-20: over the 210 shipped rows plus one provider row, orders() took 105.03s cold and 3.79s on the same key, while callers passing 3 and 5 of those rows each missed, leaving three cache entries"
+        ],
+        [
+          "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer",
+          "title",
+          "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+        ],
+        [
+          "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file",
+          "supersedes",
+          "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper"
+        ],
+        [
+          "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file",
+          "supports",
+          {
+            "node": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+            "status": "done"
+          }
+        ],
+        [
+          "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file",
+          "tags",
+          "measured"
+        ],
+        [
+          "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file",
+          "title",
+          "the same four calls now leave one cache entry and three hits at 117.83s then 3.59s, 3.04s and 3.38s, and dumping every verdict for the full set and two subsets before and after gives 211, 4 and 6 keys a side with no key on one side only and no verdict differing; ruff and mypy pass on the changed file"
+        ],
+        [
+          "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper",
+          "sort",
+          "prop"
+        ],
+        [
+          "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper",
+          "supports",
+          {
+            "node": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+            "status": "untried"
+          }
+        ],
+        [
+          "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper",
+          "supports",
+          {
+            "node": "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+            "relation": "addresses",
+            "target": "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+          }
+        ],
+        [
+          "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper",
+          "title",
+          "the shipped contracts are a constant of the tree, so the key stops varying, and it is the same entry set the generator derives the shipped verdict table from, which makes a row analysed at runtime measured against the same core as the table beside it; derivation still sees every record because that is what makes a shipped door's body read as a door rather than as a helper"
+        ],
+        [
+          "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "sort",
+          "approach"
+        ],
+        [
+          "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "addresses",
+          "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+        ],
+        [
+          "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "effort",
+          2
+        ],
+        [
+          "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "status",
+          "done"
+        ],
+        [
+          "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched",
+          "title",
+          "take the solved core's entry set from the shipped contracts read out of marked source rather than from the caller's records, leaving the records that derive the verdicts untouched"
+        ]
+      ],
+      "id": "73e431deab7ca40c"
     }
   ]
 }
