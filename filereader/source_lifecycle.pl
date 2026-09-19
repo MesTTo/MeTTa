@@ -1381,6 +1381,7 @@ replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
 %The walk itself was never the cost -- enumerating the same journal without
 %decoding read +1,151 over the whole corpus -- so what had to go was the
 %decode, not the enumeration.
+:- export(source_package_row/4).
 source_package_row(CanonPath, Space, Kind, Payload) :-
     metta_source_load(CanonPath, Space, LoadId, _),
     package_row_reference(Space, LoadId, Ref),

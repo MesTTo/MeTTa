@@ -1941,6 +1941,22 @@ importer_helper_impl(Space, File) :-
 % commit=WORKTREE].
 :- use_module('../../lib/lib_package/lib_package').
 
+% The prelude uses the engine's bounded evaluator, seam dispatch, source
+% locators and load policy. Publish these through the ordinary service seam;
+% the source reader also calls the package activation and replacement doors.
+% [tested: metta_published_surface, engine_layering; commit=WORKTREE].
+:- multifile seam:kind/2.
+seam:kind(metta_package_normalise/3, service).
+seam:kind(metta_package_perform/3, service).
+seam:kind(metta_loader_source/1, service).
+seam:kind(metta_reference_option/3, service).
+seam:kind(resolve_space_form/2, service).
+seam:kind(resolve_module_form/2, service).
+seam:kind(resolve_unimport_path/3, service).
+seam:kind(metta_package_loading/3, service).
+seam:kind(metta_package_reload/3, service).
+seam:kind(metta_perform_package_rows/2, service).
+
 % Time: one indexed source/package join plus O(p) rows, p = package rows in
 % this load. A file with no package rows never decodes its other atoms.
 metta_perform_package_rows(CanonPath, Space) :-
