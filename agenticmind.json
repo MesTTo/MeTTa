@@ -54,6 +54,12 @@
       "blocks": [
         "g2"
       ]
+    },
+    "i8": {
+      "what": "on the merged tree the analysis DEGRADES thirty-one doors: verdicts that were Verdict(1), Verdict(2) or a clean dependency all become the same Verdict(None, mixed, open, recursive, dependency)",
+      "blocks": [
+        "g1"
+      ]
     }
   },
   "approaches": {
@@ -609,6 +615,23 @@
           "status": "done"
         }
       ]
+    },
+    "r36": {
+      "says": "measured by regenerating the table, which completes for the first time: 31 of 227 rows change and every one collapses to the same maximally degraded verdict",
+      "supports": [
+        "i8"
+      ],
+      "basis": "measured"
+    },
+    "c13": {
+      "says": "the collapse of external unknowns cannot cause that: coarsening an unknown's NAME cannot make open non-empty where it was empty, since one or more unknowns reaching a call becomes exactly one and never none, and cycles are derived from door-to-door calls which unknown references never enter"
+    },
+    "r37": {
+      "says": "read in _analysis.py and _order.py: _call adds to open per unknown reaching it, and derive builds its graph from bodies.get(target)",
+      "supports": [
+        "c13"
+      ],
+      "basis": "source"
     }
   },
   "log": [
@@ -2316,6 +2339,85 @@
             "node": "a9",
             "status": "done"
           }
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:21:36+10:00",
+      "after": "24a4e36936425932a6dcbab85aede042765de666",
+      "did": "add-issue i8 'on the merged tree the analysis DEGRADES thirty-one doors: verdicts that were Verdict(1), Verdict(2) or a clean dependency all become the same Verdict(None, mixed, open, recursive, dependency)' --blocks g1 --because 'measured by regenerating the table, which completes for the first time: 31 of 227 rows change and every one collapses to the same maximally degraded verdict' --basis measured",
+      "assert": [
+        [
+          "i8",
+          "sort",
+          "issue"
+        ],
+        [
+          "i8",
+          "blocks",
+          "g1"
+        ],
+        [
+          "i8",
+          "what",
+          "on the merged tree the analysis DEGRADES thirty-one doors: verdicts that were Verdict(1), Verdict(2) or a clean dependency all become the same Verdict(None, mixed, open, recursive, dependency)"
+        ],
+        [
+          "r36",
+          "sort",
+          "claim"
+        ],
+        [
+          "r36",
+          "basis",
+          "measured"
+        ],
+        [
+          "r36",
+          "says",
+          "measured by regenerating the table, which completes for the first time: 31 of 227 rows change and every one collapses to the same maximally degraded verdict"
+        ],
+        [
+          "r36",
+          "supports",
+          "i8"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:21:36+10:00",
+      "after": "24a4e36936425932a6dcbab85aede042765de666",
+      "did": "add-claim c13 'the collapse of external unknowns cannot cause that: coarsening an unknown'\"'\"'s NAME cannot make open non-empty where it was empty, since one or more unknowns reaching a call becomes exactly one and never none, and cycles are derived from door-to-door calls which unknown references never enter' --because 'read in _analysis.py and _order.py: _call adds to open per unknown reaching it, and derive builds its graph from bodies.get(target)' --basis source",
+      "assert": [
+        [
+          "c13",
+          "sort",
+          "claim"
+        ],
+        [
+          "c13",
+          "says",
+          "the collapse of external unknowns cannot cause that: coarsening an unknown's NAME cannot make open non-empty where it was empty, since one or more unknowns reaching a call becomes exactly one and never none, and cycles are derived from door-to-door calls which unknown references never enter"
+        ],
+        [
+          "r37",
+          "sort",
+          "claim"
+        ],
+        [
+          "r37",
+          "basis",
+          "source"
+        ],
+        [
+          "r37",
+          "says",
+          "read in _analysis.py and _order.py: _call adds to open per unknown reaching it, and derive builds its graph from bodies.get(target)"
+        ],
+        [
+          "r37",
+          "supports",
+          "c13"
         ]
       ]
     }
