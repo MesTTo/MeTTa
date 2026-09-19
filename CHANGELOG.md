@@ -9,6 +9,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Registering a door the shipped verdict table does not name analyses that door
+  against a SOLVED core instead of solving the whole program again. Its body is
+  the only new entry, and a registered door's entry set is one no other
+  registration shares, so no cache of any size could hold them: a test
+  registering sixty synthetic doors paid sixty whole-program analyses and pushed
+  one case past the suite's 180-second per-test timeout. The core's store is the
+  least fixed point for its own entries and only ever grows, so the answer for
+  the larger input is reached by propagating what is new. Measured 109.25s
+  against 4.31s, with a differential over the whole fact mapping reporting 1909
+  functions both ways and none whose facts differ.
+
+- `metta.doors.guard` marks a body whose engine crossings are liveness checks,
+  so a door reaching one is numbered by what it calls rather than charged for
+  the substrate it reaches through. `SpaceHandle._space` carries the mark: every
+  engine call reads the space name through it and it crosses to refuse a dropped
+  handle. No published verdict changes, and the mixed count is unchanged at 130,
+  because those rows carry crossings from 113 other functions.
+
 - `tools/battery.sh` makes a battery tree a byte-identical snapshot of the
   working tree and REFUSES to run a gate in one that has drifted, so a verdict
   names a known state. This repository mounts eight submodules, and

@@ -509,14 +509,17 @@
     },
     "a24": {
       "title": "let a crossing declare itself a GUARD, so the order analysis can tell a liveness check apart from the body's work, the way the repository already marks mechanism-internal sites with policy-inventory-exempt",
-      "status": "untried",
+      "status": "active",
       "addresses": [
         "i10"
       ],
       "creates": [
         "i13"
       ],
-      "cost": 8
+      "cost": 8,
+      "rests_on": [
+        "c60"
+      ]
     },
     "a25": {
       "title": "replace the hand-counted root walks with a contract that DERIVES both roots: a component is the nearest ancestor holding a pyproject.toml or a .git, and the workspace is the nearest holding both engine/ and lib/",
@@ -557,14 +560,15 @@
     },
     "a28": {
       "title": "seed a fresh solve from an already-solved core store and schedule only the new entries, so a fixture door costs the work it reaches rather than the whole program",
-      "status": "untried",
+      "status": "active",
       "addresses": [
         "i16"
       ],
       "cost": 6,
       "rests_on": [
         "c53",
-        "c54"
+        "c54",
+        "c59"
       ]
     },
     "a29": {
@@ -2239,6 +2243,44 @@
         "c58"
       ],
       "basis": "tested"
+    },
+    "r209": {
+      "says": "CallGraph.extended, _copy and _duplicated are written and _order.live routes a door from outside the shipped table through a cached solved core; the first differential measured 98.90s against 2.57s, a 38.5x speedup, and refuted the first draft",
+      "supports": [
+        {
+          "node": "a28",
+          "status": "active"
+        }
+      ]
+    },
+    "c59": {
+      "says": "an extension copied from a solved graph evaluates nothing unless _reporting is cleared first, because solve leaves it set and both _schedule and _put return early while it is"
+    },
+    "r210": {
+      "says": "the differential reported three functions the full solve had and the extension did not, one of them the planted entry itself, so the extension had returned the base's own answers unchanged",
+      "supports": [
+        "c59"
+      ],
+      "basis": "measured"
+    },
+    "r211": {
+      "says": "the user chose the guard marker over making the lane REPORT; metta.doors.guard is written, Calls carries it from the decorator the index already records, derive drops a guard's crossings where summaries are built and where a row reads its own facts, and SpaceHandle._space is marked",
+      "supports": [
+        {
+          "node": "a24",
+          "status": "active"
+        }
+      ]
+    },
+    "c60": {
+      "says": "the marker cannot be a comment: ast.parse discards comments, so the repository's policy-inventory-exempt markers are read by text lanes and are invisible to this analysis; a decorator is already carried, since _Scope holds decorators that _index fills from decorator_list"
+    },
+    "r212": {
+      "says": "read _index at extensions/python/metta/doors/_analysis.py:466 and _Scope at line 263",
+      "supports": [
+        "c60"
+      ],
+      "basis": "source"
     }
   },
   "log": [
@@ -11020,6 +11062,188 @@
         ]
       ],
       "id": "952a231531a200b6"
+    },
+    {
+      "at": "2026-09-19T17:36:56+10:00",
+      "after": "731e18fc083719b9dc63a98b40658e6ec63a5273",
+      "did": "status a28 active --because 'CallGraph.extended, _copy and _duplicated are written and _order.live routes a door from outside the shipped table through a cached solved core; the first differential measured 98.90s against 2.57s, a 38.5x speedup, and refuted the first draft'",
+      "parents": [
+        "952a231531a200b6"
+      ],
+      "assert": [
+        [
+          "a28",
+          "status",
+          "active"
+        ],
+        [
+          "r209",
+          "sort",
+          "claim"
+        ],
+        [
+          "r209",
+          "says",
+          "CallGraph.extended, _copy and _duplicated are written and _order.live routes a door from outside the shipped table through a cached solved core; the first differential measured 98.90s against 2.57s, a 38.5x speedup, and refuted the first draft"
+        ],
+        [
+          "r209",
+          "supports",
+          {
+            "node": "a28",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "48b43f1a622d5189"
+    },
+    {
+      "at": "2026-09-19T17:36:56+10:00",
+      "after": "731e18fc083719b9dc63a98b40658e6ec63a5273",
+      "did": "add-claim c59 'an extension copied from a solved graph evaluates nothing unless _reporting is cleared first, because solve leaves it set and both _schedule and _put return early while it is' --because 'the differential reported three functions the full solve had and the extension did not, one of them the planted entry itself, so the extension had returned the base'\"'\"'s own answers unchanged' --basis measured",
+      "parents": [
+        "48b43f1a622d5189"
+      ],
+      "assert": [
+        [
+          "c59",
+          "sort",
+          "claim"
+        ],
+        [
+          "c59",
+          "says",
+          "an extension copied from a solved graph evaluates nothing unless _reporting is cleared first, because solve leaves it set and both _schedule and _put return early while it is"
+        ],
+        [
+          "r210",
+          "sort",
+          "claim"
+        ],
+        [
+          "r210",
+          "basis",
+          "measured"
+        ],
+        [
+          "r210",
+          "says",
+          "the differential reported three functions the full solve had and the extension did not, one of them the planted entry itself, so the extension had returned the base's own answers unchanged"
+        ],
+        [
+          "r210",
+          "supports",
+          "c59"
+        ]
+      ],
+      "id": "8485002e79d0e0ff"
+    },
+    {
+      "at": "2026-09-19T17:36:56+10:00",
+      "after": "731e18fc083719b9dc63a98b40658e6ec63a5273",
+      "did": "link a28 c59 --as rests-on",
+      "parents": [
+        "8485002e79d0e0ff"
+      ],
+      "assert": [
+        [
+          "a28",
+          "rests_on",
+          "c59"
+        ]
+      ],
+      "id": "bfb88f2f93a5f5a8"
+    },
+    {
+      "at": "2026-09-19T17:36:56+10:00",
+      "after": "731e18fc083719b9dc63a98b40658e6ec63a5273",
+      "did": "status a24 active --because 'the user chose the guard marker over making the lane REPORT; metta.doors.guard is written, Calls carries it from the decorator the index already records, derive drops a guard'\"'\"'s crossings where summaries are built and where a row reads its own facts, and SpaceHandle._space is marked'",
+      "parents": [
+        "bfb88f2f93a5f5a8"
+      ],
+      "assert": [
+        [
+          "a24",
+          "status",
+          "active"
+        ],
+        [
+          "r211",
+          "sort",
+          "claim"
+        ],
+        [
+          "r211",
+          "says",
+          "the user chose the guard marker over making the lane REPORT; metta.doors.guard is written, Calls carries it from the decorator the index already records, derive drops a guard's crossings where summaries are built and where a row reads its own facts, and SpaceHandle._space is marked"
+        ],
+        [
+          "r211",
+          "supports",
+          {
+            "node": "a24",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "8817bbab7ab865ea"
+    },
+    {
+      "at": "2026-09-19T17:36:56+10:00",
+      "after": "731e18fc083719b9dc63a98b40658e6ec63a5273",
+      "did": "add-claim c60 'the marker cannot be a comment: ast.parse discards comments, so the repository'\"'\"'s policy-inventory-exempt markers are read by text lanes and are invisible to this analysis; a decorator is already carried, since _Scope holds decorators that _index fills from decorator_list' --because 'read _index at extensions/python/metta/doors/_analysis.py:466 and _Scope at line 263' --basis source",
+      "parents": [
+        "8817bbab7ab865ea"
+      ],
+      "assert": [
+        [
+          "c60",
+          "sort",
+          "claim"
+        ],
+        [
+          "c60",
+          "says",
+          "the marker cannot be a comment: ast.parse discards comments, so the repository's policy-inventory-exempt markers are read by text lanes and are invisible to this analysis; a decorator is already carried, since _Scope holds decorators that _index fills from decorator_list"
+        ],
+        [
+          "r212",
+          "sort",
+          "claim"
+        ],
+        [
+          "r212",
+          "basis",
+          "source"
+        ],
+        [
+          "r212",
+          "says",
+          "read _index at extensions/python/metta/doors/_analysis.py:466 and _Scope at line 263"
+        ],
+        [
+          "r212",
+          "supports",
+          "c60"
+        ]
+      ],
+      "id": "9212147003c1b2c7"
+    },
+    {
+      "at": "2026-09-19T17:36:56+10:00",
+      "after": "731e18fc083719b9dc63a98b40658e6ec63a5273",
+      "did": "link a24 c60 --as rests-on",
+      "parents": [
+        "9212147003c1b2c7"
+      ],
+      "assert": [
+        [
+          "a24",
+          "rests_on",
+          "c60"
+        ]
+      ],
+      "id": "d4092d64bf9382d1"
     }
   ]
 }
