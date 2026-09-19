@@ -55,6 +55,11 @@ component() {
         { echo "components.sh: cannot fetch main from $url" >&2; return 1; }
     git -C "$here" update-ref refs/heads/main "$sha"
     git -C "$here" symbolic-ref HEAD refs/heads/main
+    # A component repository is created here rather than cloned from a host that configured
+    # it, so it carries no author identity and a commit inside it refuses. Take the
+    # superproject's, which is whose work it is.
+    git -C "$here" config user.name "$(git -C "$HERE" config user.name)"
+    git -C "$here" config user.email "$(git -C "$HERE" config user.email)"
     git -C "$here" reset --quiet --mixed main
     # `reset --mixed` sets the index and leaves the working tree, which is what
     # preserves the untracked build output. It does NOT bring back a tracked
