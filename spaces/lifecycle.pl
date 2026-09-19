@@ -590,13 +590,35 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %every resolving call [measured 2026-09-06: 200 add-and-remove cycles through
 %'remove-atom'/3, 1,069,438 inferences with the trap asked first and 858,838
 %with current_predicate/1 first; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%The RECORDED source is read before the record is dropped. A live
+%imported_from/1 answers only while the import is still materialized, and the
+%case this exists for is the one where it is not: metta_prepare_function_
+%predicate/3 ABOLISHED the import to make room for a local shadow, and it
+%recorded where the name came from precisely so the removal could put it back.
+%Retracting that first and then asking the module threw the answer away, so a
+%shadow over a backed library head was removable but never restorable: the
+%caller was left unreduced with the head as written
+%[measured 2026-09-20: after removing the shadow, (string-upper "hello")
+%answered ['string-upper',"hello"] and the module carried no import;
+%tested: engine_modules:removing_a_local_shadow_restores_a_library_export].
+%
+%The emptied local predicate is abolished before the re-import, because
+%import/1 refuses a name the module still defines, and what the removal left
+%behind is a dynamic predicate with no clauses rather than nothing at all.
 metta_restore_inherited_predicate(Module, Name, Arity) :-
-    retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
     functor(Head, Name, Arity),
     (   current_predicate(Module:Name/Arity),
-        predicate_property(Module:Head, imported_from(Source)),
-        Source \== system,
-        \+ predicate_property(Module:Head, built_in),
+        predicate_property(Module:Head, imported_from(Live)),
+        Live \== system,
+        \+ predicate_property(Module:Head, built_in)
+    ->  Source = Live
+    ;   '$metta_repaired_shadow_import'(Module, Name, Arity, Source),
+        \+ ( predicate_property(Module:Head, number_of_clauses(N)), N > 0 )
+    ->  catch(abolish(Module:Name/Arity), _, true)
+    ;   Source = none
+    ),
+    retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
+    (   Source \== none,
         catch(Module:import(Source:Name/Arity), _, fail)
     ->  assertz('$metta_repaired_shadow_import'(Module, Name, Arity, Source))
     ;   true
@@ -684,11 +706,28 @@ metta_prepare_local_predicate(Module, Clause) :-
 %already has a materialized import needs the weak-link repair. Public atom
 %addition calls this before opening its transaction; the compiler repeats it
 %so source-loader and generated-clause doors share the same rule.
+%The first branch asks whether this module already owns the predicate, and
+%`fun_in/2` alone does not answer that: a BACKING registers its heads in the
+%library's home through metta_reference_register_prolog/4, which sets fun_in
+%while the predicate itself stays an IMPORT. Taking that as ownership skipped
+%the repair, and the later assertz met SWI's static import and raised
+%permission_error(modify, static_procedure), which throw_builtin_redefinition/2
+%then reported as `string-upper ... is one of Prolog's protected core
+%predicates` -- a refusal about the wrong thing entirely, since a local shadow
+%of a library export is exactly what the surrounding code allows
+%[tested: engine_modules:removing_a_local_shadow_restores_a_library_export].
+%
+%So ownership is "registered here AND not resolving through an import", and a
+%registered name that still has one takes the repair with the inherited names.
 metta_prepare_function_predicate(Module, Name, Arity) :-
-    (   fun_in(Module, Name)
+    functor(Head, Name, Arity),
+    (   fun_in(Module, Name),
+        \+ metta_existing_import(Module, Head, _)
     ->  true
-    ;   metta_may_inherit_function(Module, Name),
-        functor(Head, Name, Arity),
+    ;   (   fun_in(Module, Name)
+        ->  true
+        ;   metta_may_inherit_function(Module, Name)
+        ),
         metta_existing_import(Module, Head, Source),
         \+ seam:engine_emitted(Name/Arity)
     ->  catch(abolish(Module:Name/Arity), _, true),
@@ -1889,6 +1928,15 @@ metta_host_space_capability_error(
 function_still_defined(F) :- function_still_defined(F, ordinary).
 function_still_defined(F, _) :- builtin_fun(F), !.
 function_still_defined(F, source(_)) :- deferred_metta_function(F, _, _, _, _, _), !.
+%A head a BACKING registered is defined by its artifact, not by a clause in
+%any space's module, and that registration outlives a local shadow over the
+%same name: removing the shadow restores the library's import, and without
+%this the removal read the name as gone and left every caller unreduced
+%[measured 2026-09-20: metta_reference_prolog_head/3 still answers for the
+%name after the shadow is removed, while fun_in/2 no longer does;
+%tested: engine_modules:removing_a_local_shadow_restores_a_library_export].
+function_still_defined(F, _) :-
+    metta_engine:metta_reference_prolog_head(_, F, _), !.
 function_still_defined(F, Owner) :- compiled_function_name(F, Predicate),
                              ( fun_in(Module, F) ; metta_engine_module(Module) ),
                              compiled_predicate_arity(F, Module, Predicate, Arity, Owner),
@@ -1902,6 +1950,12 @@ function_still_defined(F, Owner) :- compiled_function_name(F, Predicate),
 %counting those would keep a module's claim alive on another space's strength.
 module_owns_function(Module, F) :- module_owns_function(Module, F, ordinary).
 module_owns_function(Module, F, source(_)) :- deferred_metta_function(F, Module, _, _, _, _), !.
+%The same for THIS module: a backing registers its heads in the library's own
+%home, so the registration is this space's own rather than another's, which is
+%what the note above rules out.
+module_owns_function(Module, F, _) :-
+    metta_module_space(Module, Space),
+    metta_engine:metta_reference_prolog_head(Space, F, _), !.
 module_owns_function(Module, F, Owner) :- compiled_function_name(F, Predicate),
                                    compiled_predicate_arity(F, Module, Predicate,
                                                             Arity, Owner),
