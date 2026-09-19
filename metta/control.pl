@@ -87,6 +87,11 @@
 %MeTTa's, and are the ones this engine can actually enforce.
 metta_pragma_key('max-time', 'bound every runnable by wall-clock seconds').
 metta_pragma_key('max-inferences', 'bound every runnable by inference count').
+%Law 3's budget, which is not max-inferences: that bounds a RUNNABLE, a `!`
+%form the program wrote, and this bounds the loader normalising a package row
+%while the file is still being read, where no runnable is in flight
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 3].
+metta_pragma_key('package-budget', 'bound normalising one package row by inference count').
 metta_pragma_key('verify-specializations',
                  'check every specialization against the generic call once').
 metta_pragma_key('verify-discharges',

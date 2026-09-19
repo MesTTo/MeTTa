@@ -2067,8 +2067,149 @@ metta_perform_package_backings(CanonPath, Space) :-
     (   \+ filereader:source_package_row(CanonPath, Space, backing, _)
     ->  true
     ;   metta_register_loader_claims,
-        forall(filereader:source_package_row(CanonPath, Space, backing, Row),
-               forall(eval([evalc, [perform, Row], '&metta'], _), true))
+        forall(filereader:source_package_row(CanonPath, Space, backing, Written),
+               ( metta_package_normalise(Space, Written, Row),
+                 forall(eval([evalc, [perform, Row], '&metta'], _), true) ))
+    ).
+
+%%%% Law 3: normalising a row before it is performed %%%%
+%
+%A row whose head a CLAIM answers is already the answer, so it is READ and
+%performed as written: there is nothing to normalise and therefore nothing to
+%charge. Every shipped row is of that kind, which is why the loader worked
+%before this existed.
+%
+%Two earlier attempts refused every shipped row, and the reason is the same
+%both times: they charged something the law does not govern. Planning the
+%effect of the `package` HEAD walks every equation for it, so asking about the
+%`requires` question charges the backing row's body; planning the row's own
+%body reads `(prolog F (heads))` as a call to a known operation and charges it
+%`oracleIO`. The law says NORMALISATION, and a literal row has nothing to
+%normalise [source: docs/journal/2026-09-09-packages-are-equations.md, law 3;
+%the failure is recorded against a31.6].
+%
+%Anything else is a term, so the law applies to it and to nothing else: it is
+%evaluated in the home space under the `reads` ceiling and an inference budget,
+%and the row is what it reduces to.
+metta_package_normalise(_, Written, Written) :-
+    metta_package_claimed(Written),
+    !.
+metta_package_normalise(Space, Written, Row) :-
+    metta_package_refuse_above_ceiling(Space, Written),
+    metta_package_budget(Budget),
+    metta_package_reduce(Space, Written, Budget, Row).
+
+%A token some claim answers. The registry is law 4's own: a claim is the
+%equation `(= (perform (<token> ...)) ...)` a seat, library or program adds to
+%the seam space, so asking whether a token is claimed is one match against it
+%and the engine keeps no second list to fall out of step.
+%
+%The claims are ENUMERATED and the token tested here, rather than matched with
+%`[Token|_]` in the pattern: a partial list does not answer through the space's
+%index, where the full shape does [measured 2026-09-20: the partial pattern
+%answered nothing while `(= (perform $pattern) $_)` answered `[prolog,_,_]`].
+%There are as many claims as there are attached seats, so enumerating them is
+%the small side of the join.
+metta_package_claimed(Row) :-
+    nonvar(Row),
+    Row = [Token|_],
+    atom(Token),
+    eval([match, '&metta', ['=', [perform, Pattern], _], Pattern], Claimed),
+    nonvar(Claimed),
+    Claimed = [Token|_],
+    !.
+
+%Law 3's ceiling is NOT a single rank in this engine's lattice, and the
+%measurement says why: `(match &self a a)` and `(add-atom &self a)` both plan
+%`writesState`, while `(get-property lib version)` plans `oracleIO` through
+%metta_builtin_effect_override/2, and `oracleIO` is the class the law excludes.
+%Law 2 makes `get-property` the way a package reads the runtime facts law 3
+%explicitly allows, so a ceiling at any single rank either refuses the one read
+%the design provides or admits the filesystem [measured 2026-09-20].
+%
+%So it is written the way the law writes it: the classes below `oracleIO`, plus
+%the operations the design names as reads of the runtime. `py-call` needs no
+%naming on the other side, being `oracleIO` through the Python seat's own
+%seam:extension_builtin/2 row, which is where a seat classifies its operations.
+metta_package_ceiling(writesState).
+
+metta_package_reads_runtime('get-property').
+
+%Law 3's default budget, and the pragma that moves it. A package needing more
+%says so in its own source, rather than an operator raising it for every one.
+metta_package_budget(Budget) :-
+    (   metta_pragma('package-budget', Value),
+        integer(Value),
+        Value > 0
+    ->  Budget = Value
+    ;   Budget = 1000000
+    ).
+
+%The source planner rather than the goal planner. The goal one answers about a
+%compiled Prolog body and calls ANY list `oracleIO`, which is what refused
+%every shipped row in both earlier attempts; the source one answers about MeTTa
+%source and prices a literal row `pureStructural` with no operations at all
+%[measured 2026-09-20].
+%
+%The refusal NAMES the operations that exceeded the ceiling, because `it reads
+%too much` says nothing a writer can act on while `py-call` names the line to
+%move. Law 3 spells that remedy out and it is the same for every operation
+%above the ceiling: the work belongs in a claimant, which runs when the row is
+%performed rather than while it is being read.
+metta_package_refuse_above_ceiling(Space, Written) :-
+    metta_module_space(Module, Space),
+    metta_host_source_effect_plan(Module, Written, Operations, Effect),
+    metta_package_ceiling(Ceiling),
+    (   metta_effect_covered(Effect, Ceiling)
+    ->  true
+        %The plan's operations are [Name, Class] LISTS rather than Key-Value
+        %pairs, so the names are taken by matching rather than by pairs_keys/2.
+        %No `; true` arm after this: an empty culprit list where the whole plan
+        %is above the ceiling is a bug in this predicate, and a fallback that
+        %allowed the row would hide it, which is how the first version of this
+        %passed while checking nothing.
+    ;   findall(Operation,
+                ( member(Entry, Operations),
+                  metta_package_above_ceiling(Ceiling, Entry),
+                  Entry = [Operation|_] ),
+                Names0),
+        sort(Names0, Names),
+        throw(error(permission_error(normalise, package_row, Names),
+                    context('package normalisation',
+                            'a package row is normalised under the reads \c
+                             ceiling, space reads and runtime facts only; \c
+                             move this into a claimant, which runs when the \c
+                             row is performed')))
+    ).
+
+%One operation, with its class, against the ceiling. A runtime read is admitted
+%by name because the lattice cannot say it: see metta_package_ceiling/1.
+metta_package_above_ceiling(Ceiling, [Operation, Class]) :-
+    \+ metta_effect_covered(Class, Ceiling),
+    \+ metta_package_reads_runtime(Operation).
+
+%Past the budget the refusal names both ways out, since a row that will not
+%reduce in a million inferences is either doing work that belongs in a claimant
+%or is not converging at all.
+metta_package_reduce(Space, Written, Budget, Row) :-
+    catch(metta_call_with_inference_bound(
+              once(eval([evalc, Written, Space], Reduced)), Budget),
+          error(Formal, _),
+          metta_package_budget_refusal(Formal, Budget)),
+    Row = Reduced.
+
+%The engine's own signal names the limit but not WHICH budget, and a package
+%row can run out under either this one or the program's `max-inferences`, so
+%the refusal says which and how to move it [measured 2026-09-20: the bound
+%raises metta_control_signal(inference_limit, N)].
+metta_package_budget_refusal(Formal, Budget) :-
+    (   Formal = metta_control_signal(inference_limit, _)
+    ->  throw(error(resource_error(package_budget),
+                    context('package normalisation',
+                            'the row did not reduce within the inference \c
+                             budget; raise it with !(pragma! package-budget \c
+                             N) or move the work into a claimant')))
+    ;   throw(error(Formal, context('package normalisation', Budget)))
     ).
 
 :- dynamic(metta_loader_claims_registered/0).
