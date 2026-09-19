@@ -11,7 +11,7 @@
 %   same space
 %   [tested: packages:a_backing_row_reaches_its_claimant_as_data,
 %   packages:a_backing_row_performs_only_for_the_file_that_carries_it;
-%   commit=c4876eac2ec5943c8eff70623f2ebe6202c40286].
+%   commit=WORKTREE].
 %
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their
@@ -1934,143 +1934,47 @@ importer_helper_impl(Space, File) :-
          import_when(changed, Space, CanonPath,
                      load_imported_metta_file(CanonPath, _, Space)) ).
 
-%A library describes its own body rather than calling the importer. Where it
-%used to write
-%
-%    !(import_prolog_functions_from_file (library lib_x.pl) (head ...))
-%
-%it writes a row saying what backs its heads,
-%
-%    (= (package backing) (prolog "lib_x.pl" (head ...)))
-%
-%and the loader performs it here, once the file's rows are in the space. The
-%difference is that the row is DATA any implementation can read, decide whether
-%it can perform, and refuse by name when it cannot, where the call was an
-%instruction only this engine understands
-%[source: docs/journal/2026-09-09-packages-are-equations.md, law 14].
-%
-%Time: one match over the loaded space per import, and one perform per backing
-%row; a library carries one row, so this is a single pass over a space that has
-%just been read from one file.
-%`&catalogs` answers WHERE a requirement lives, and it is a space rather than a
-%lookup, so resolving one is a match and adding a catalog is adding a row:
-%
-%    (match &catalogs (package lib_json $where) $where)
-%
-%The loader holds no resolver of its own, which is the point
-%[source: docs/journal/2026-09-09-packages-are-equations.md, law 10 and the
-%amendment confirmed with it].
-%
-%The shipped catalog is the `lib/` directory, ANSWERED rather than enumerated
-%into rows: the directory is the authority on what it holds, and a row per
-%library would be a second copy of it that goes stale the day one is added.
-%A foreign space is how a space answers a query in this engine; the five hooks
-%below are the read half of that seam, and the catalog is read-only because
-%nothing installs a library by writing a row into it
-%[source: engine/ext_points.pl:foreign_match/3, and
-%tests/prolog/suites/spaces/reference_providers.plt for the shape].
-:- multifile seam:foreign_space/1, seam:foreign_capability/2,
-             seam:foreign_atoms/2, seam:foreign_match/3.
+% The engine sequences requirements before handing the package argument record
+% to its prelude interpreter. Catalogs and every lifecycle policy belong to it.
+% [source: docs/journal/2026-09-09-packages-are-equations.md,
+% "the package is an argument record and the engine knows four things";
+% commit=WORKTREE].
+:- use_module('../../lib/lib_package/lib_package').
 
-metta_catalogs_space('&catalogs').
-
-seam:foreign_space(Space) :- metta_catalogs_space(Space).
-seam:foreign_capability(Space, Capability) :-
-    metta_catalogs_space(Space),
-    % policy-inventory-exempt: mechanism-internal; reason=a read-only catalog implements the two reading hooks of the foreign-provider protocol and no writing one; evidence=engine/metta/interop.pl:metta_catalog_entry/1
-    member(Capability, [match, enumerate]).
-seam:foreign_atoms(Space, Atom) :-
-    metta_catalogs_space(Space), metta_catalog_entry(Atom).
-seam:foreign_match(Space, Pattern, _Options) :-
-    metta_catalogs_space(Space), metta_catalog_entry(Pattern).
-
-%One row per library the catalog holds. A bound name is resolved directly,
-%because `library/2` normalises a name into a path and cannot run backwards;
-%an unbound one walks the directory, which is the only way to answer "what is
-%there" and is what makes `(match &catalogs (package $name $where) ...)` an
-%enumeration rather than a refusal.
-metta_catalog_entry([package, Name, Where]) :-
-    standard_library_path(Base),
-    (   nonvar(Name)
-    ->  true
-    ;   directory_files(Base, Entries),
-        member(Name, Entries)
-    ),
-    %Both branches, because `library/2` BUILDS a path from a name and never
-    %asks whether it is there: without this the catalog answers for a name
-    %nobody holds, and a requirement naming one is refused three layers later
-    %by the file opener rather than by name here.
-    metta_catalog_holds(Base, Name),
-    library(Name, Where0),
-    %Canonical, because `library/2` builds its answer from the engine's own
-    %directory and leaves the `engine/..` step in it, which is the same place
-    %spelled two ways and would read as two catalogs to anything comparing.
-    absolute_file_name(Where0, Where).
-
-%A library is a directory holding a file NAMED AFTER IT, which is the rule
-%`library/2` resolves by. Testing for a directory alone answered `.git` and
-%every other directory that happens to sit in the catalog.
-metta_catalog_holds(Base, Name) :-
-    \+ memberchk(Name, ['.', '..']),
-    directory_file_path(Base, Name, Held),
-    exists_directory(Held),
-    member(Extension, [metta, pl]),
-    file_name_extension(Name, Extension, File),
-    directory_file_path(Held, File, Source),
-    exists_file(Source), !.
-
-%A file's package rows, in the order the laws put them: what it REQUIRES loads
-%before its own rows perform, because a backing's claimant may be one of them
-%[source: docs/journal/2026-09-09-packages-are-equations.md, law 10].
+% Time: one indexed source/package join plus O(p) rows, p = package rows in
+% this load. A file with no package rows never decodes its other atoms.
 metta_perform_package_rows(CanonPath, Space) :-
-    metta_perform_package_requires(CanonPath, Space),
-    metta_perform_package_backings(CanonPath, Space).
+    findall(Kind-Written,
+            filereader:source_package_row(CanonPath, Space, Kind, Written), Rows),
+    ( Rows == [] -> true
+    ; lib_package:package_context(CanonPath, Space,
+          metta_engine:(metta_perform_package_requires(CanonPath, Space, Rows),
+                        lib_package:package_load(CanonPath, Space, Rows))) ).
 
-%A requirement names a library and the CATALOGS say where it lives, so this is
-%two matches and no resolver: the requirement is read from the file's own rows,
-%and `&catalogs` answers the path. The loader never looks in a directory
-%itself, which is what "adding a catalog is adding a row" buys.
-metta_perform_package_requires(CanonPath, Space) :-
-    forall(filereader:source_package_row(CanonPath, Space, requires, Required),
-           metta_require_one(Space, Required)).
+metta_perform_package_requires(CanonPath, Space, Rows) :-
+    forall((member(requires-Written, Rows),
+            metta_package_normalise(Space, Written, Required)),
+           lib_package:package_require(CanonPath, Space, Required)).
 
-%An absent requirement REFUSES BY NAME rather than being skipped. Wrapping the
-%catalog match in `forall/2` alone would not: a match with no answer has zero
-%solutions and `forall/2` succeeds over them, so a requirement no catalog holds
-%would load nothing and say nothing, and the failure would surface later as a
-%head that does not answer [source:
-%docs/journal/2026-09-09-packages-are-equations.md, law 9, which refuses an
-%absent requirement by name].
-metta_require_one(Space, Required) :-
-    (   eval([match, '&catalogs', [package, Required, Where], Where], _),
-        nonvar(Where)
-    ->  importer_helper(Space, Where)
-        %`existence_error/2` rather than a term of this module's own, because
-        %the engine already renders it and a private term reads as "Unknown
-        %error term" to every caller.
-    ;   throw(error(existence_error(package_requirement, Required),
-                    context('package requires',
-                            'no catalog in force holds it; add a catalog row \c
-                             for it, or install the library it names')))
-    ).
+% Compilation chooses the seam's equation; execution carries the caller's
+% home. evalc alone would replace both contexts and lose native ownership.
+% [tested: lib_package:backing_lives_and_retires_in_its_home; commit=WORKTREE].
+metta_package_perform(Home, Expression, Result) :-
+    space_module('&metta', Seam), space_module(Home, Module),
+    with_metta_module(Seam,
+        translate_cached_expr(Expression, Goals, Produced)),
+    with_metta_module(Module, call_goals_in_(Seam, Goals)),
+    metta_boundary_result(Expression, Produced, Result),
+    Result \== 'Empty'.
 
-metta_perform_package_backings(CanonPath, Space) :-
-    %`debug(packages)` turns this on; it costs nothing while the topic is off,
-    %which a getenv check on every load would not. It names the SPACE as well
-    %as the file, because the space a file loads into is not the one a reader
-    %expects: a file loaded through the Python door lands in `&pyspace_1`, not
-    %`&self`, and reading the wrong space is why the first version of this
-    %found nothing.
-    debug(packages, "~q carries package rows into space ~q", [CanonPath, Space]),
-    %The rows are looked for before the claims are registered, so a file that
-    %declares none never loads lib_import at all.
-    (   \+ filereader:source_package_row(CanonPath, Space, backing, _)
-    ->  true
-    ;   metta_register_loader_claims,
-        forall(filereader:source_package_row(CanonPath, Space, backing, Written),
-               ( metta_package_normalise(Space, Written, Row),
-                 forall(eval([evalc, [perform, Row], '&metta'], _), true) ))
-    ).
+:- meta_predicate metta_package_loading(+, +, 0),
+                  metta_package_reload(1, +, +).
+metta_package_loading(Path, Space, Goal) :-
+    lib_package:package_loading(Path, Space, Goal).
+
+metta_package_reload(LoadInto, Path, Space) :-
+    metta_package_loading(Path, Space,
+        (call(LoadInto, Space), metta_perform_package_rows(Path, Space))).
 
 %%%% Law 3: normalising a row before it is performed %%%%
 %
@@ -2094,6 +1998,11 @@ metta_perform_package_backings(CanonPath, Space) :-
 metta_package_normalise(_, Written, Written) :-
     metta_package_claimed(Written),
     !.
+metta_package_normalise(Space, Written, Written) :-
+    ( atomic(Written)
+    ; nonvar(Written), Written = [Head|_], atom(Head),
+      space_module(Space, Module),
+      \+ metta_host_function_callable_from(Module, Head) ), !.
 metta_package_normalise(Space, Written, Row) :-
     metta_package_refuse_above_ceiling(Space, Written),
     metta_package_budget(Budget),
@@ -2127,13 +2036,17 @@ metta_package_claimed(Row) :-
 %explicitly allows, so a ceiling at any single rank either refuses the one read
 %the design provides or admits the filesystem [measured 2026-09-20].
 %
-%So it is written the way the law writes it: the classes below `oracleIO`, plus
-%the operations the design names as reads of the runtime. `py-call` needs no
-%naming on the other side, being `oracleIO` through the Python seat's own
-%seam:extension_builtin/2 row, which is where a seat classifies its operations.
-metta_package_ceiling(writesState).
+% Admit nondeterministic reads and the conservatively classified read forms.
+% Inspect every operation in a computed body, so a write nested in match is
+% still refused. Host calls retain the effect declared by their own seat.
+% [tested: lib_package:space_read_bodies_cannot_hide_state_writes; commit=WORKTREE].
+metta_package_ceiling(nondeterministicReadOnly).
 
 metta_package_reads_runtime('get-property').
+metta_package_reads_runtime(match).
+metta_package_reads_runtime('match%').
+metta_package_reads_runtime('get-type').
+metta_package_reads_runtime('get-type-space').
 
 %Law 3's default budget, and the pragma that moves it. A package needing more
 %says so in its own source, rather than an operator raising it for every one.
@@ -2176,22 +2089,21 @@ metta_package_refuse_above_ceiling(Space, Written) :-
     ->  true
         %The plan's operations are [Name, Class] LISTS rather than Key-Value
         %pairs, so the names are taken by matching rather than by pairs_keys/2.
-        %No `; true` arm after this: an empty culprit list where the whole plan
-        %is above the ceiling is a bug in this predicate, and a fallback that
-        %allowed the row would hide it, which is how the first version of this
-        %passed while checking nothing.
+        % A plan above the lattice rank is allowed only when every operation
+        % responsible is one of the read forms admitted below.
     ;   findall(Operation,
                 ( member(Entry, Operations),
                   metta_package_above_ceiling(Ceiling, Entry),
                   Entry = [Operation|_] ),
                 Names0),
         sort(Names0, Names),
-        throw(error(permission_error(normalise, package_row, Names),
+        ( Names == [] -> true
+        ; throw(error(permission_error(normalise, package_row, Names),
                     context('package normalisation',
                             'a package row is normalised under the reads \c
                              ceiling, space reads and runtime facts only; \c
                              move this into a claimant, which runs when the \c
-                             row is performed')))
+                             row is performed'))))
     ).
 
 %One operation, with its class, against the ceiling. A runtime read is admitted
@@ -2212,10 +2124,10 @@ metta_package_reduce(Space, Written, Budget, Row) :-
     %backing is skipped rather than refused [source:
     %docs/journal/2026-09-09-packages-are-equations.md, laws 3 and 6].
     (   catch(metta_call_with_inference_bound(
-                  once(eval([evalc, Written, Space], Reduced)), Budget),
+                  findall(Reduced, evalc(Written, Space, Reduced), Answers), Budget),
               error(Formal, _),
               metta_package_budget_refusal(Formal, Budget))
-    ->  Row = Reduced
+    ->  ( Answers == [] -> Row = Written ; member(Row, Answers) )
     ;   Row = Written
     ).
 
@@ -2233,74 +2145,8 @@ metta_package_budget_refusal(Formal, Budget) :-
     ;   throw(error(Formal, context('package normalisation', Budget)))
     ).
 
-:- dynamic(metta_loader_claims_registered/0).
-
-%The two rows the engine writes into `&metta` so that a package row can be
-%performed: what `perform` means, and the loader's own claim on the `prolog`
-%token. Source text rather than terms built here, because a claim's pattern
-%carries MeTTa variables and a term would be a second representation of the
-%same equation.
-%
-%A package row is DATA, and this Atom mask is what makes it so. Dispatch is
-%unification against a claimant's own equation, so evaluating inside the row
-%would mean the engine deciding what a token's payload means, which is the one
-%thing the design refuses [source:
-%docs/journal/2026-09-09-packages-are-equations.md, laws 4 and 5].
-%
-%Without it the row is an ordinary application and its subterms reduce before
-%any claim is tried: a one-name backing list is read as a nullary call, so
-%`(unify-mod)` in minimal_metta_lib became the `(Error ...)` its own arity
-%check answers and reached check_prolog_function_names/3 as a list where a
-%name belongs, `Type error: 'atom' expected, found ['unify-mod']`
-%[measured 2026-09-19; tested: a_backing_row_reaches_its_claimant_as_data].
-%
-%HERE rather than as a prelude_declaration/2 row, which is where an Atom mask
-%normally lives: the prelude tier is INHERITED, and
-%prelude_declaration_governs_in/2 withholds an inherited declaration from a
-%named module that defines the name itself. `&metta` defines `perform` -- the
-%claim below is its definition -- so a prelude row for it governs nowhere and
-%the mask is silently absent [measured 2026-09-19: the row loaded, 48
-%declarations registered, and the failure was unchanged].
-%
-%The `!(import_prolog_functions_from_file ...)` spelling never needed the mask
-%because translate_prolog_import_dl/5 compiles the name list where the literal
-%sits and never evaluates it. A claim body has a VARIABLE there, which that
-%special form passes through untouched, so the mask is what it was
-%[source: engine/translator/special_forms.pl, prolog_function_importer/1].
+% Claimants supply their equations; the engine fixes only the data mask.
 metta_loader_source("(: perform (-> Atom %Undefined%))").
 
-%The loader's own claim on the `prolog` token, registered the way a seat or a
-%library registers one. The engine does not answer the token itself: the design
-%rejects language tokens the engine understands, because the engine would then
-%name hosts, and dispatch is unification against a claim rather than a clause
-%testing a spelling [source: docs/journal/2026-09-09-packages-are-equations.md,
-%laws 4 and 5, and the rejection recorded above the laws].
-%
-%AFTER the declaration, by clause order: the mask governs the equation that
-%follows it, and a claim compiled first would be compiled without one.
-%
-%`eval` on the FILE and nothing on the names, which is the claim saying what
-%its own two subterms mean: one is a locator to resolve, the other is a list
-%of names to register. The mask stops the engine deciding that for it, so
-%saying it here is the whole of the claimant's side of law 5. Both halves are
-%load-bearing -- without the `eval` the row's `(library "x.pl")` reaches the
-%importer as a two-element list and it consults `library` and `x.pl` as two
-%separate files, `source_sink 'library' does not exist`
-%[measured 2026-09-19; tested: a_backing_row_resolves_its_library_locator].
-metta_loader_source("(= (perform (prolog $file $names)) \c
-                       (import_prolog_functions_from_file (eval $file) \c
-                                                          $names))").
-
-%Once per process rather than per import: each row is a row, and adding one
-%twice would leave two equations for one head where law 4 admits one claimant.
-%`lib_import` comes first because `import_prolog_functions_from_file` is ITS
-%equation rather than a predicate of this engine, so the claim's body has
-%nothing to reach without it.
 metta_register_loader_claims :-
-    (   metta_loader_claims_registered
-    ->  true
-    ;   assertz(metta_loader_claims_registered),
-        importer_helper('&metta', [library, lib_import]),
-        forall(metta_loader_source(Source),
-               filereader:process_loader_string(Source, _, '&metta'))
-    ).
+    lib_package:package_register_claims.

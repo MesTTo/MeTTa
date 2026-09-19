@@ -14,7 +14,7 @@
 % Guarantees: source_package_row/4 answers only the package rows the named load
 %   stored, so a later load into the same space re-performs none of them
 %   [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it;
-%   commit=c4876eac2ec5943c8eff70623f2ebe6202c40286].
+%   commit=WORKTREE].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: every source retirement restores surviving function registrations
@@ -1341,22 +1341,26 @@ metta_source_changed(CanonPath) :-
 %and replacement commit together; with_source_load/3 supplies the same atomic
 %boundary for a first load, whose dependent repairs can replace older clauses
 %[tested: test_a_reload_that_fails_leaves_the_previous_definitions_standing].
-%A file's package rows are performed once the load that carried them has
-%committed, and HERE because this is the one predicate every door into a space
+%A file's package rows perform after its source journal is published, inside
+%the replacement transaction. This is the predicate every door into a space
 %passes through: `import!`, the `load` door, the grouped door that answers
 %directive groups, and the re-population of a space being brought up to date.
 %Hooking a single door left the others silently unperformed, which is how a
 %face loaded with `load` answered its own head unreduced while the same file
-%imported answered normally. After the transaction rather than inside it,
-%because a load that rolls back has no rows and must perform nothing
-%[source: docs/journal/2026-09-09-packages-are-equations.md, law 14].
+%imported answered normally. A failed activation restores the preceding source;
+%lib_package compensates external acquisitions outside Prolog's transaction.
+%[tested: lib_package:failed_replacement_preserves_the_previous_source_and_handles;
+%commit=WORKTREE].
 %
 %The PATH travels with the space, because the rows performed are this file's
 %and law 14 performs them at once, when the file carrying them loads.
 :- meta_predicate replacing_previous_load(+, +, 1, 0).
 replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
-    replacing_previous_load_(CanonPath, Space, LoadInto, Goal),
-    metta_engine:metta_perform_package_rows(CanonPath, Space).
+    metta_engine:metta_package_loading(CanonPath, Space,
+        filereader:replacing_previous_load_(CanonPath, Space,
+            metta_engine:metta_package_reload(LoadInto, CanonPath),
+            ( call(Goal),
+              metta_engine:metta_perform_package_rows(CanonPath, Space) ))).
 
 %One file's own package rows in one space, read from the journal its load
 %wrote rather than by matching the space.
