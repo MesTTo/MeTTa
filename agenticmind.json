@@ -4381,6 +4381,44 @@
       "tags": [
         "tested"
       ]
+    },
+    "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it": {
+      "title": "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+    },
+    "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work": {
+      "title": "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work",
+      "supports": [
+        "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched": {
+      "title": "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched",
+      "supports": [
+        {
+          "node": "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "status": "untried"
+        },
+        {
+          "node": "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "relation": "addresses",
+          "target": "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+        }
+      ]
+    },
+    "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5": {
+      "title": "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5"
+    },
+    "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship": {
+      "title": "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship",
+      "supports": [
+        "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -5148,6 +5186,14 @@
       "status": "done",
       "addresses": [
         "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+      ]
+    },
+    "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix": {
+      "title": "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
       ]
     }
   },
@@ -23317,6 +23363,129 @@
         ]
       ],
       "id": "1f5b7ec1398275e8"
+    },
+    {
+      "at": "2026-09-19T21:15:13.418496+00:00",
+      "after": "930c22471c325cd607d6ceca29b743372f574fe5",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work\", \"tags\": [\"measured\"], \"title\": \"the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched\", \"tags\": [], \"title\": \"stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix\", \"fields\": {\"effort\": 3, \"addresses\": [\"the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship\", \"tags\": [\"measured\"], \"title\": \"the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5\", \"fields\": {}}]",
+      "parents": [
+        "1f5b7ec1398275e8"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship",
+          "supports",
+          "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5"
+        ],
+        [
+          "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship",
+          "title",
+          "measured 2026-09-20 after `apt-get download libarchive-dev` needing no root, `dpkg-deb -x` into /home/user/Dev/libarchive-dev, and repointing the dev package's dangling libarchive.so at the system runtime /usr/lib/x86_64-linux-gnu/libarchive.so.13.8.5, which the dev package does not ship"
+        ],
+        [
+          "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work",
+          "supports",
+          "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+        ],
+        [
+          "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work",
+          "title",
+          "measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither library/archive.pl nor an archive4pl.so, the four reproductions all report source_sink library(archive) does not exist, and the 2026-09-19 journal records the same lane red at 4910afc33 before any recent work"
+        ],
+        [
+          "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it",
+          "title",
+          "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+        ],
+        [
+          "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched",
+          "sort",
+          "prop"
+        ],
+        [
+          "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched",
+          "supports",
+          {
+            "node": "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+            "status": "untried"
+          }
+        ],
+        [
+          "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched",
+          "supports",
+          {
+            "node": "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+            "relation": "addresses",
+            "target": "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+          }
+        ],
+        [
+          "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched",
+          "title",
+          "the runtime library is already installed system-wide and only the headers are missing, and this workspace has already solved exactly this shape once for OSSP uuid by building into its own prefix and naming it to cmake, so nothing new is invented and nothing system-wide is touched"
+        ],
+        [
+          "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5",
+          "sort",
+          "prop"
+        ],
+        [
+          "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5",
+          "title",
+          "the staged libarchive prefix links: a C probe including archive.h and linking -larchive against it prints libarchive 3.8.5"
+        ],
+        [
+          "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "sort",
+          "approach"
+        ],
+        [
+          "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "addresses",
+          "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
+        ],
+        [
+          "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "effort",
+          3
+        ],
+        [
+          "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "status",
+          "untried"
+        ],
+        [
+          "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix",
+          "title",
+          "stage the distribution's libarchive development files into a local prefix the way OSSP uuid was staged, and rebuild the patched host with its archive package pointed at that prefix"
+        ]
+      ],
+      "id": "f37c6df1c6f6aecb"
     }
   ]
 }
