@@ -59,7 +59,8 @@
       "what": "on the merged tree the analysis DEGRADES thirty-one doors: verdicts that were Verdict(1), Verdict(2) or a clean dependency all become the same Verdict(None, mixed, open, recursive, dependency)",
       "blocks": [
         "g1"
-      ]
+      ],
+      "accepted": true
     },
     "i9": {
       "what": "_attribute returns Reference('unknown', f'undeclared member {parameter}.{member}') for a member a supplied parameter does not declare, which is one abstract value per parameter TIMES member",
@@ -733,6 +734,15 @@
         "c16"
       ],
       "basis": "measured"
+    },
+    "r45": {
+      "says": "the 31 degraded verdicts are the merged tree's truth, not a defect: answers:arrow called only rows:arrow at the branch tip and now also reaches space:map, space:match, space:atoms, space:__iter__, answers:one and rows:to-dicts, and space:map leads into _map_atoms in the parser's recursive region. The regenerated table is what to commit.",
+      "supports": [
+        {
+          "node": "i8",
+          "status": "accepted"
+        }
+      ]
     }
   },
   "log": [
@@ -2966,6 +2976,40 @@
         ]
       ],
       "id": "dd7bf7c9af43b2ee"
+    },
+    {
+      "at": "2026-09-19T12:59:57+10:00",
+      "after": "23c745d9342582ce9054d1bdb44347e7df16c2e9",
+      "did": "accept i8 --because 'the 31 degraded verdicts are the merged tree'\"'\"'s truth, not a defect: answers:arrow called only rows:arrow at the branch tip and now also reaches space:map, space:match, space:atoms, space:__iter__, answers:one and rows:to-dicts, and space:map leads into _map_atoms in the parser'\"'\"'s recursive region. The regenerated table is what to commit.'",
+      "parents": [
+        "dd7bf7c9af43b2ee"
+      ],
+      "assert": [
+        [
+          "i8",
+          "accepted",
+          true
+        ],
+        [
+          "r45",
+          "sort",
+          "claim"
+        ],
+        [
+          "r45",
+          "says",
+          "the 31 degraded verdicts are the merged tree's truth, not a defect: answers:arrow called only rows:arrow at the branch tip and now also reaches space:map, space:match, space:atoms, space:__iter__, answers:one and rows:to-dicts, and space:map leads into _map_atoms in the parser's recursive region. The regenerated table is what to commit."
+        ],
+        [
+          "r45",
+          "supports",
+          {
+            "node": "i8",
+            "status": "accepted"
+          }
+        ]
+      ],
+      "id": "1c522661d22be452"
     }
   ]
 }
