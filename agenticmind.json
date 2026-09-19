@@ -3582,6 +3582,30 @@
         "r258",
         "r269"
       ]
+    },
+    "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected": {
+      "title": "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected"
+    },
+    "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member": {
+      "title": "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member",
+      "supports": [
+        "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building": {
+      "title": "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building",
+      "supports": [
+        {
+          "node": "a27",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "r197"
+      ]
     }
   },
   "approaches": {
@@ -3994,7 +4018,7 @@
     },
     "a27": {
       "title": "before building an agreed row, run its own acceptance criteria against the tree and strike the row with the evidence when they already pass",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i15"
       ],
@@ -20110,6 +20134,75 @@
         ]
       ],
       "id": "ec61d69d1808ba28"
+    },
+    {
+      "at": "2026-09-19T17:29:26.605884+00:00",
+      "after": "8e9b1481eeef149644af920e59d2a4a288eec7a5",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member\", \"tags\": [\"measured\"], \"title\": \"neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"a27\", \"because\": \"both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building\", \"tags\": [], \"status\": \"done\"}]",
+      "parents": [
+        "ec61d69d1808ba28"
+      ],
+      "assert": [
+        [
+          "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building",
+          "sort",
+          "prop"
+        ],
+        [
+          "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building",
+          "supersedes",
+          "r197"
+        ],
+        [
+          "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building",
+          "supports",
+          {
+            "node": "a27",
+            "status": "done"
+          }
+        ],
+        [
+          "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building",
+          "title",
+          "both remaining rows were checked against the tree, which is what this approach asks. L104 and L055 were struck with evidence earlier; L069 does not already pass and stays open as the ledger marks it, a DEFERRED product decision about new language surface rather than a repair, which is the user's to make; L070 does not pass either and its premise is stale, so the row wants correcting rather than building"
+        ],
+        [
+          "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected",
+          "sort",
+          "prop"
+        ],
+        [
+          "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected",
+          "title",
+          "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected"
+        ],
+        [
+          "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member",
+          "sort",
+          "prop"
+        ],
+        [
+          "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member",
+          "supports",
+          "neither of the two remaining agreed rows already passes, and L070's premise is stale: it calls the iterative-deepening vocabulary word inert for want of a consumer, and no such word exists. `deepen` appears nowhere in the engine, lib, Python seat or docs, and neither do Ciao's id and bf spellings; the only best-first in the tree is a provider EMISSION policy in engine/spaces/bounded_matching.pl, which is the order answers come back in rather than how goals are selected"
+        ],
+        [
+          "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member",
+          "tags",
+          "measured"
+        ],
+        [
+          "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member",
+          "title",
+          "searched engine/, lib/, extensions/python/metta/ and docs/ for deepen, for id and bf as search words, and for a vocabulary row naming a search strategy; the catalog has no such vocabulary member"
+        ],
+        [
+          "a27",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "5293962ad15adbb0"
     }
   ]
 }
