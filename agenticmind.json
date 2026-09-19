@@ -118,7 +118,7 @@
     },
     "a5": {
       "title": "memoise the container item-slot union in _protocol's __iter__ expansion, through the class's existing _memo that evicts when a read slot grows",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -129,6 +129,10 @@
         {
           "status": "untried",
           "until": "2026-09-19"
+        },
+        {
+          "status": "active",
+          "until": "2026-09-19"
         }
       ],
       "rests_on": [
@@ -137,7 +141,7 @@
     },
     "a6": {
       "title": "memoise the same container item-slot union in _assign's destructuring branch, keyed by the element slot it reads",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -147,6 +151,10 @@
       "history": [
         {
           "status": "untried",
+          "until": "2026-09-19"
+        },
+        {
+          "status": "active",
           "until": "2026-09-19"
         }
       ],
@@ -446,6 +454,26 @@
         {
           "node": "a7",
           "status": "failed"
+        }
+      ]
+    },
+    "r25": {
+      "says": "landed in the consolidated form a7.1 named it: _protocol's __iter__ expansion calls _stored(reference.name, '<items>'), and the differential over all 227 orders passed",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a5",
+          "status": "done"
+        }
+      ]
+    },
+    "r26": {
+      "says": "landed in the same consolidated form: _assign's destructuring calls _stored(reference.name, slot), and the differential over all 227 orders passed",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a6",
+          "status": "done"
         }
       ]
     }
