@@ -371,6 +371,27 @@ def fails_when(self) -> FailsWhen:
 
 > The refusal contract checked by the witness lane.
 
+## `guard`
+
+```python
+def guard(function: F) -> F:
+```
+
+> Mark a body whose engine crossings are liveness checks rather than work.
+>
+> `SpaceHandle._space` is the case this exists for. Every engine call reads
+> the space name through it, and it crosses to ask whether the handle is
+> still live, so a dropped handle cannot reach the engine at all. The order
+> analysis saw that crossing in every door that touches a space and read it
+> as the door doing native work beside composing other doors, which is what
+> `mixed` means, and a mixed row cannot be numbered. The crossing is real;
+> what is wrong is charging it to the caller, whose own work it is not.
+>
+> A guard's crossings never count and never propagate. A door reaching only a
+> guard is numbered by what it calls, which is what it actually does. The
+> mark returns the function unchanged, as `door` does, so a `property`
+> wrapping it and its descriptor binding are untouched.
+
 ## `door`
 
 ```python
