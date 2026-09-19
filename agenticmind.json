@@ -4419,6 +4419,30 @@
       "tags": [
         "measured"
       ]
+    },
+    "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name": {
+      "title": "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name"
+    },
+    "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered": {
+      "title": "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered",
+      "supports": [
+        "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering": {
+      "title": "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened": {
+      "title": "the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened",
+      "supports": [
+        "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering"
+      ]
     }
   },
   "approaches": {
@@ -23486,6 +23510,77 @@
         ]
       ],
       "id": "f37c6df1c6f6aecb"
+    },
+    {
+      "at": "2026-09-19T21:17:39.061400+00:00",
+      "after": "d5dcf57ac2494782c72007044c40329807c1ab33",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered\", \"tags\": [\"measured\"], \"title\": \"the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened\", \"tags\": [\"reasoning\"], \"title\": \"a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering\", \"fields\": {}}]",
+      "parents": [
+        "f37c6df1c6f6aecb"
+      ],
+      "assert": [
+        [
+          "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering",
+          "sort",
+          "prop"
+        ],
+        [
+          "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering",
+          "title",
+          "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered",
+          "supports",
+          "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered",
+          "title",
+          "measured 2026-09-20 in a whole gate over the in-flight tree: the Python suite went from 18 failed and 4393 passed to 451 failed, 3834 passed and 129 errors, and it reproduces as item 1 of 1 with the shuffle off as EngineError package_backing ['collections-expression'] does not exist, unclaimed(..., available_claims([])), where the empty claim list is the evidence that the registry was not populated rather than that the head was uncovered"
+        ],
+        [
+          "the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened",
+          "sort",
+          "prop"
+        ],
+        [
+          "the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened",
+          "supports",
+          "a refusal that reports an empty claim registry the same way it reports a genuinely uncovered head sends the reader to the library when the fault is the ordering"
+        ],
+        [
+          "the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened",
+          "title",
+          "the law 6 refusal names the missing head and prints available_claims([]) beside it, and only the second half says which of the two failures happened"
+        ],
+        [
+          "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name",
+          "sort",
+          "prop"
+        ],
+        [
+          "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name",
+          "title",
+          "the new coverage check judges a backing row before any claim is registered, so every row reads as unclaimed, nothing reaches the covered set, and law 6 refuses the shipped libraries' own backing heads by name"
+        ]
+      ],
+      "id": "7563f835d3472c56"
     }
   ]
 }
