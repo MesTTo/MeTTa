@@ -13,8 +13,9 @@ package-row query. The library-surface check finds no unpublished engine calls,
 the engine layering check passes, and all 13 `metta_published_surface` and
 `engine_layering` tests pass. After consolidating the policy module, the
 library-surface scanner passes 78 meaning comparisons, finds no unpublished
-engine calls in 2,466 clauses and sees all four planted reaches. Its official
-lane still exits 1 because `source_sink library(yaml) does not exist`.
+engine calls in 2,466 clauses and sees all four planted reaches. Its command
+with `--on-error=status` now exits 0 after the missing SWI libraries were
+restored. The earlier `source_sink library(yaml) does not exist` is resolved.
 
 The contract is laws 6–13 and “the package is an argument record and the engine
 knows four things” in
@@ -219,9 +220,14 @@ during compensation. No new dependency was introduced.
 
 On commit `7bf1051f09ed1f585785bddc08521357ff5bd356`, the selected official
 lanes pass QLF freshness, layering, llms, fn-sync and all 20 fn-sync selftests.
-The library-surface scanner passes; the lane's one load error is the missing
-SWI YAML library. `ai-tmp/ai-package-consolidation-gates.log` retains the exact
-lane results. An earlier freshness invocation raised
+The library-surface scanner passed; that run's one load error was the missing
+SWI YAML library, since restored. `ai-tmp/ai-package-consolidation-gates.log`
+retains those lane results. A later command with `--on-error=status` passes
+the surface check (`ai-tmp/ai-package-library-surface-with-host-libs.log`).
+The following pytest invocation initially used a wrong path and raised
+`ERROR: file or directory not found: tests/ch17_concurrency/test_async_scheduler.py`;
+the corrected path is `tests/ch17_concurrency_and_the_loop/test_async_scheduler.py`.
+An earlier freshness invocation raised
 `FileNotFoundError: .../lib/lib_package/support/catalog.pl` because the battery
 had current source bytes but a stale Git index. Aligning its own detached HEAD
 and all eight component indexes to the provisioned revisions repaired that
@@ -236,15 +242,16 @@ warnings, and jscpd reports zero clones. The complete result is
 Whole-gate results from batteries without their own Git identity are invalid.
 An earlier control also retained a stale detached HEAD and an empty
 `lib_package` directory after an orphan QLF prevented removal; it cannot
-supply the required comparison. Batteries 11 and 12 now run plain `sh check.sh`
-from a frozen candidate/control pair. Both detached HEADs and all eight
+supply the required comparison. Batteries 11 and 12 run plain `sh check.sh`
+from an earlier frozen candidate/control pair; they are diagnostic runs, not
+the final comparison for the consolidated implementation. Both detached HEADs and all eight
 component identities were aligned to the source revisions without changing
 working bytes. The source manifest `ai-tmp/ai-package-gate-pair.json` records
 3,079 identical source files, 16 package-change paths and no unrelated
 differences. The common superproject revision is
 `9f2a240cc329397b1c17edf8c3521bc0c5440833`.
 
-The latest no-autoload run reports missing SWI `library(unicode)`,
+The earlier no-autoload run reported missing SWI `library(unicode)`,
 `library(archive)` and `library(yaml)`, plus the class-dispatch example error:
 
 ```text
@@ -265,11 +272,13 @@ merely because they concern another component. No whole-gate completion is
 claimed.
 
 The comparison also exposed consumers of the old global native imports.
-`lib_thread_scope.plt` calls native predicates without a Prolog module import;
-Python `_binding/operations.pl` calls `metta_async_future_new/2` and its helper
-family unqualified. These helpers are not the named MeTTa backing heads in
-`lib_thread.metta`. Their consumers must name `lib_thread` now that a package
-publishes selected heads in its home. The native-shadow regression remains
+`lib_thread_scope.plt` calls native predicates without a Prolog module import.
+Python's binding called native helpers that are not named MeTTa backing heads
+in `lib_thread.metta`. Commit `7fa427cf237540669e9d8a87fd2a5890d9c20bed`
+qualifies those calls with `lib_thread`. A fresh battery run of the async
+scheduler and class-method files plus the isolated file-library reproduction
+passes all 57 cases (`57 passed in 14.81s`,
+`ai-tmp/ai-package-python-binding-integration.log`). The native-shadow regression remains
 open: `engine_modules:removing_a_local_shadow_restores_a_library_export` raises
 `metta_builtin_redefinition('string-upper',1,'&plunit_module_library_shadow')`.
 The shadow-repair code treats a local native registration as a local equation
@@ -306,6 +315,16 @@ passing focused suite.
 The generated library-reference page also needs regeneration for the three
 new package entries. Ownership for that artifact was requested alongside the
 engine and consumer repairs.
+
+The remaining ownership request covers `engine/spaces/lifecycle.pl`, native
+registration restoration and invalidation in `engine/filereader/source_lifecycle.pl`,
+`tests/prolog/suites/libraries/lib_thread_scope.plt`, the builtin type-table
+expectation in `tests/prolog/suites/evaluation/metta.plt`, and generated
+`website/reference/metta-libraries.md`. The original assignment restricts the
+engine edits to the package section and three source-reader hooks. No extension
+of that assignment has arrived. The whole-gate no-added-failure condition
+cannot be discharged while the measured native-retirement and consumer
+failures remain.
 
 The generated Python fn face now includes `setup!` and `package-prolog`.
 The Node wire-catalog test initially failed with
