@@ -3739,6 +3739,18 @@
           ]
         }
       ]
+    },
+    "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work": {
+      "title": "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work"
+    },
+    "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled": {
+      "title": "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled",
+      "supports": [
+        "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -20720,6 +20732,47 @@
         ]
       ],
       "id": "5944fcbba87f083e"
+    },
+    {
+      "at": "2026-09-19T17:44:42.483102+00:00",
+      "after": "281f116a14843807c99d4ac35e26ace4ab94a33f",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled\", \"tags\": [\"source\"], \"title\": \"a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work\", \"fields\": {}}]",
+      "parents": [
+        "5944fcbba87f083e"
+      ],
+      "assert": [
+        [
+          "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled",
+          "sort",
+          "prop"
+        ],
+        [
+          "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled",
+          "supports",
+          "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work"
+        ],
+        [
+          "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled",
+          "tags",
+          "source"
+        ],
+        [
+          "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled",
+          "title",
+          "a7 is failed and a7.1 is done; agenticmind list --kind issue reports i1 settled"
+        ],
+        [
+          "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work",
+          "sort",
+          "prop"
+        ],
+        [
+          "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work",
+          "title",
+          "a7.1 reads orphaned for the same reason a31.9.1 did, a step that worked under a parent that failed around it, but nothing is hidden by it: a7.1 is done and the issue it addresses, i1, is settled. The mark is a reading artifact rather than open work"
+        ]
+      ],
+      "id": "7a46c8b72d460dd7"
     }
   ]
 }
