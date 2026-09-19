@@ -288,7 +288,8 @@
       ],
       "cost": 8,
       "rests_on": [
-        "c14"
+        "c14",
+        "c15"
       ]
     }
   },
@@ -712,6 +713,16 @@
           "status": "untried"
         }
       ]
+    },
+    "c15": {
+      "says": "the two cycles in this analysis are different things and only one is a cost artefact: a cycle in the VALUE-FLOW graph means several slots provably converge to the same set, so collapsing it is representation and nothing else; a cycle in the CALL graph is what Order.cycles publishes as recursive=True and is a real property. Neither is a termination check, so collapsing the first cannot make the analysis miss a loop a developer wrote"
+    },
+    "r43": {
+      "says": "user, 2026-09-19: with SCC we don't prevent the dev to create an infinite while loop; and Order.cycles is read by Verdict as recursive",
+      "supports": [
+        "c15"
+      ],
+      "basis": "source"
     }
   },
   "log": [
@@ -2775,6 +2786,55 @@
           "a12",
           "rests_on",
           "c14"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:40:56+10:00",
+      "after": "4c59ec9799c18f037ca4b1dd22555483f98bf69b",
+      "did": "add-claim c15 'the two cycles in this analysis are different things and only one is a cost artefact: a cycle in the VALUE-FLOW graph means several slots provably converge to the same set, so collapsing it is representation and nothing else; a cycle in the CALL graph is what Order.cycles publishes as recursive=True and is a real property. Neither is a termination check, so collapsing the first cannot make the analysis miss a loop a developer wrote' --because 'user, 2026-09-19: with SCC we don'\"'\"'t prevent the dev to create an infinite while loop; and Order.cycles is read by Verdict as recursive' --basis source",
+      "assert": [
+        [
+          "c15",
+          "sort",
+          "claim"
+        ],
+        [
+          "c15",
+          "says",
+          "the two cycles in this analysis are different things and only one is a cost artefact: a cycle in the VALUE-FLOW graph means several slots provably converge to the same set, so collapsing it is representation and nothing else; a cycle in the CALL graph is what Order.cycles publishes as recursive=True and is a real property. Neither is a termination check, so collapsing the first cannot make the analysis miss a loop a developer wrote"
+        ],
+        [
+          "r43",
+          "sort",
+          "claim"
+        ],
+        [
+          "r43",
+          "basis",
+          "source"
+        ],
+        [
+          "r43",
+          "says",
+          "user, 2026-09-19: with SCC we don't prevent the dev to create an infinite while loop; and Order.cycles is read by Verdict as recursive"
+        ],
+        [
+          "r43",
+          "supports",
+          "c15"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:40:56+10:00",
+      "after": "4c59ec9799c18f037ca4b1dd22555483f98bf69b",
+      "did": "link a12 c15 --as rests-on",
+      "assert": [
+        [
+          "a12",
+          "rests_on",
+          "c15"
         ]
       ]
     }
