@@ -56,7 +56,21 @@ component() {
     git -C "$here" update-ref refs/heads/main "$sha"
     git -C "$here" symbolic-ref HEAD refs/heads/main
     git -C "$here" reset --quiet --mixed main
-    git -C "$here" checkout --quiet -- .gitmodules 2>/dev/null || true
+    # `reset --mixed` sets the index and leaves the working tree, which is what
+    # preserves the untracked build output. It does NOT bring back a tracked
+    # file the tree is missing, and a directory that git has just turned from
+    # tracked content into a gitlink is missing ALL of them, so reporting and
+    # stopping there leaves a component that cannot be used. Modifications are
+    # a different thing and are never overwritten: they are somebody's work.
+    # Gitlinks are excluded: a NESTED component sitting at a different commit
+    # reads as a modified path here, and it is not somebody's work, it is the
+    # thing the recursion below is about to set. The raw format's second field
+    # is the destination mode, and 160000 is a gitlink.
+    if [ -n "$(git -C "$here" diff --raw --diff-filter=M | awk '$2 != "160000"')" ]; then
+        echo "components.sh: $path has modified tracked files; commit or discard them first" >&2
+        return 1
+    fi
+    git -C "$here" checkout --quiet -- .
     printf '  %-34s %s\n' "$path" "$(echo "$sha" | cut -c1-9)"
     populate "$here"
 }
