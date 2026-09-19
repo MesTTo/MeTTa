@@ -20,9 +20,9 @@
 %   - the same library WITHOUT the row installs nothing, so the row is what
 %     does it rather than the import
 %     [tested: packages:a_file_with_no_backing_row_installs_nothing]
-%   - a token no claimant answers leaves the head absent rather than failing
-%     silently somewhere later
-%     [tested: packages:a_backing_no_claimant_answers_installs_nothing]
+%   - an uncovered backing without a claimant refuses by its named head
+%     [tested: packages:an_uncovered_backing_without_a_claimant_refuses;
+%     commit=WORKTREE]
 %   - `package` is internal in every space, so one library's package rows are
 %     never read as its importer's own
 %     [tested: packages:the_package_head_is_internal_in_every_space]
@@ -95,8 +95,8 @@ package_fixture(Name, Body, Path) :-
 
 %The artifact's own predicate, which nothing else in the tree defines, so its
 %being defined is the observable that must differ if the backing was performed.
-%Read through `predicate_property/2` with the module unbound, because the
-%importer consults the file into a module this suite does not name.
+%Ask the importing home's module explicitly. Execution modules are hidden
+%from current_module/1 and cannot be discovered through an unbound qualifier.
 %
 %One artifact and one predicate PER CASE, so the result does not depend on the
 %order the cases run in: the tests share an engine, and a positive case that
@@ -106,14 +106,15 @@ artifact_loaded(Kind) :-
     atom_concat(packages_, Kind, Prefix),
     atom_concat(Prefix, '_double', Name),
     Head =.. [Name, _, _],
-    catch(predicate_property(_:Head, defined), _, fail).
+    metta_engine:space_module('&self', Module),
+    catch(predicate_property(Module:Head, defined), _, fail), !.
 
 test(a_backing_row_installs_the_head_its_artifact_exports) :-
     package_fixture(backed, '(= (package backing) (prolog "~w" (packages_backed_double)))~n', Path),
     \+ artifact_loaded(backed),
     'import!'('&self', Path, _),
     artifact_loaded(backed),
-    packages_backed_double(21, 42).
+    eval([packages_backed_double, 21], 42).
 
 %A row is DATA: the claimant reads the subterms the file WROTE, never what
 %they reduce to. The fixture makes the two answers differ by naming its head
@@ -199,7 +200,7 @@ test(importing_a_backed_library_leaves_the_package_head_alone) :-
                     '(= (package backing) (prolog "~w" (packages_undepended_double)))\n',
                     Path),
     'import!'('&self', Path, _),
-    packages_undepended_double(21, 42),
+    eval([packages_undepended_double, 21], 42),
     \+ ( support_graph:supports(function_view(Module, packages_undepended_double),
                                translated_form(Module, Id)),
          support_graph:support_translated_form_id(Ref, Module, Id),
@@ -267,7 +268,7 @@ test(a_computed_row_normalises_and_then_performs) :-
     \+ artifact_loaded(computed),
     'import!'('&self', Path, _),
     artifact_loaded(computed),
-    packages_computed_double(21, 42).
+    eval([packages_computed_double, 21], 42).
 
 %The ceiling, refusing BY NAME and naming the operation rather than the class:
 %`it reads too much` says nothing a writer can act on where `exists_file` names
@@ -304,25 +305,17 @@ test(a_row_that_will_not_reduce_refuses_past_its_budget) :-
     catch('import!'('&self', Path, _), error(Formal, _), true),
     Formal = resource_error(package_budget).
 
-%A payload with NO ANSWER is a row that did not reduce, which law 3 calls a
-%row nobody claims. The written term passes through and the perform that
-%follows leaves it unreduced, which is what happened before normalisation
-%existed; refusing it by name waits on law 6, which decides when an unclaimed
-%backing is SKIPPED because its heads are covered rather than refused.
-%
-%The load must not fail, and it must not fail SILENTLY either: normalisation
-%failing where a bare conjunction would have propagated that failure would
-%have failed the forall, the perform and the whole load with no message.
-test(a_row_that_answers_nothing_leaves_the_load_standing) :-
+% Laws 3 and 6 require a named refusal for an unreduced row. The old case
+% accepted the missing behavior while coverage had no library implementation.
+test(a_row_that_answers_nothing_refuses_by_name) :-
     package_fixture(unreduced,
                     '(= (packages-unreduced-row) (empty))\n\c
                      (= (package backing) (packages-unreduced-row))\n\c
                      (= (packages-unreduced-witness) 42)\n',
                     Path),
-    'import!'('&self', Path, _),
-    %The file loaded, which its own later equation is the witness for.
-    eval([match, '&self', ['=', ['packages-unreduced-witness'], V], V], Answer),
-    Answer == 42.
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    nonvar(Formal),
+    Formal = domain_error(package_backing, ['packages-unreduced-row']).
 
 test(a_file_with_no_backing_row_installs_nothing) :-
     package_fixture(unbacked, '(= (package version) "0.0.1") ; no backing row for ~w~n', Path),
@@ -330,10 +323,12 @@ test(a_file_with_no_backing_row_installs_nothing) :-
     'import!'('&self', Path, _),
     \+ artifact_loaded(unbacked).
 
-test(a_backing_no_claimant_answers_installs_nothing) :-
+test(an_uncovered_backing_without_a_claimant_refuses) :-
     package_fixture(unclaimed, '(= (package backing) (nobody-claims-this "~w" (packages_unclaimed_double)))~n', Path),
     \+ artifact_loaded(unclaimed),
-    'import!'('&self', Path, _),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    nonvar(Formal),
+    Formal = existence_error(package_backing, [packages_unclaimed_double]),
     \+ artifact_loaded(unclaimed).
 
 %Law 10. A requirement names a library and the CATALOGS say where it lives, so

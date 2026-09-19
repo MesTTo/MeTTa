@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_package` owns package coverage, native contracts, home registration,
+  setup receipts, dependency catalogs and handle lifetimes. Requirements run
+  before a replaceable `package-load` interpreter. Import uses prepared local
+  artifacts; `setup!` alone prepares dependencies and publishes `performed.metta`
+  and `lock.metta` under a directory lock. Backing alternatives retain source
+  order, boot validates before effects, and withdrawal or failed activation
+  releases acquired handles in reverse. The implementation and per-law evidence
+  are recorded in `docs/record/lib-package-laws-6-13.md`.
+
 - `bounded.sh` carries a THIRD bound, `--memory KILOBYTES|none`, and applies
   one by default: an eighth of what the box has, read from `/proc/meminfo`.
   The two it already had are a deadline and a link to the starting process,
