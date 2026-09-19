@@ -4638,6 +4638,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns": {
+      "title": "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+    },
+    "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263": {
+      "title": "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263",
+      "supports": [
+        "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded": {
+      "title": "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded",
+      "supports": [
+        {
+          "node": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "status": "untried"
+        },
+        {
+          "node": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "relation": "addresses",
+          "target": "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+        }
+      ]
+    },
+    "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session": {
+      "title": "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session",
+      "supports": [
+        {
+          "node": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5437,6 +5478,14 @@
       "status": "done",
       "addresses": [
         "the heartbeat accounting test is also the body of the children it spawns, and it repaired their module search path from the main branch, which runs after the module-level metta import has already killed them"
+      ]
+    },
+    "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it": {
+      "title": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
       ]
     }
   },
@@ -24365,6 +24414,127 @@
         ]
       ],
       "id": "ee0c9f21c9c5305d"
+    },
+    {
+      "at": "2026-09-19T22:02:01.851715+00:00",
+      "after": "362cea11ea275adb8f950fec9ba7757340dee4b3",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263\", \"tags\": [\"measured\"], \"title\": \"the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded\", \"tags\": [], \"title\": \"send that case's setup shell through the wrapper rather than spending an unbounded exemption on it\", \"fields\": {\"effort\": 1, \"addresses\": [\"the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns\"]}}, {\"op\": \"status\", \"id\": \"send that case's setup shell through the wrapper rather than spending an unbounded exemption on it\", \"because\": \"the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "ee0c9f21c9c5305d"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263",
+          "supports",
+          "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+        ],
+        [
+          "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263",
+          "title",
+          "measured 2026-09-20: the lane reported one finding over 208 spawns in 6 gate scripts, 42 runners and 72 harness scripts, naming tests/shell/test_bounded_reaping.sh:263"
+        ],
+        [
+          "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns",
+          "sort",
+          "prop"
+        ],
+        [
+          "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns",
+          "title",
+          "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+        ],
+        [
+          "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded",
+          "sort",
+          "prop"
+        ],
+        [
+          "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded",
+          "supports",
+          {
+            "node": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+            "status": "untried"
+          }
+        ],
+        [
+          "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded",
+          "supports",
+          {
+            "node": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+            "relation": "addresses",
+            "target": "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+          }
+        ],
+        [
+          "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded",
+          "title",
+          "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded"
+        ],
+        [
+          "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session",
+          "supersedes",
+          "the outer rung sets the box's own share and the shell then ratchets down to the tighter figure the case needs, so bounding the setup costs the case nothing and the file's existing exemptions stay reserved for the grandchild whose whole point is arriving unbounded"
+        ],
+        [
+          "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session",
+          "supports",
+          {
+            "node": "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+            "status": "done"
+          }
+        ],
+        [
+          "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session",
+          "tags",
+          "tested"
+        ],
+        [
+          "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session",
+          "title",
+          "the process-bounds lane is ok where it reported one finding, every case of the reaping suite still passes, and shellcheck on that file is down to the two findings it had before this session"
+        ],
+        [
+          "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "sort",
+          "approach"
+        ],
+        [
+          "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "addresses",
+          "the memory-bound case added this session spawned its setup shell directly, which the process-bounds lane refuses: this repository's rule is that every spawn goes through the wrapper, and that case was the lane's only finding over 208 spawns"
+        ],
+        [
+          "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "effort",
+          1
+        ],
+        [
+          "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "status",
+          "done"
+        ],
+        [
+          "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it",
+          "title",
+          "send that case's setup shell through the wrapper rather than spending an unbounded exemption on it"
+        ]
+      ],
+      "id": "9d02d4ecebd03c53"
     }
   ]
 }

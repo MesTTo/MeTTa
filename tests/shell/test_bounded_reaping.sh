@@ -244,9 +244,11 @@ if $WRAPPER --memory 262144 /bin/sh -c '
 else
     printf 'ok  5c a command past its memory bound does not finish\n'
 fi
-$WRAPPER --memory none /bin/echo bounded >/dev/null 2>&1 &&
-    printf 'ok  5d --memory none runs the command unbounded\n' ||
+if $WRAPPER --memory none /bin/echo bounded >/dev/null 2>&1; then
+    printf 'ok  5d --memory none runs the command unbounded\n'
+else
     fail "case 5d: --memory none refused to run a trivial command"
+fi
 default_limit=$($WRAPPER /bin/sh -c 'ulimit -d' 2>/dev/null)
 case $default_limit in
     unlimited | '' | *[!0-9]*)
@@ -260,7 +262,12 @@ esac
 # bound" over a bound that is in force is the same silent weakening the wrapper
 # exists to prevent, pointed the other way, so the notice has to distinguish
 # them and the command still has to run.
-notice=$(sh -c "ulimit -d 262144; exec $WRAPPER --memory 524288 /bin/echo ran" 2>&1)
+# Through the wrapper rather than exempted: the outer rung sets the box's own
+# share, the shell then ratchets DOWN to 262144, and the inner rung asking for
+# 524288 is the refusal under test. Bounding the setup costs the case nothing,
+# so there is no reason to spend an `unbounded:` on it.
+notice=$($WRAPPER /bin/sh -c \
+    "ulimit -d 262144; exec $WRAPPER --memory 524288 /bin/echo ran" 2>&1)
 case $notice in
     *"262144 kB is already in"*ran*)
         printf 'ok  5f an inherited tighter bound is reported, not overstated\n' ;;
