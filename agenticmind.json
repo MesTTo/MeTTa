@@ -4299,6 +4299,47 @@
           ]
         }
       ]
+    },
+    "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes": {
+      "title": "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+    },
+    "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok": {
+      "title": "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok",
+      "supports": [
+        "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps": {
+      "title": "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps",
+      "supports": [
+        {
+          "node": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "status": "untried"
+        },
+        {
+          "node": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "relation": "addresses",
+          "target": "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+        }
+      ]
+    },
+    "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__": {
+      "title": "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__",
+      "supports": [
+        {
+          "node": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -5050,6 +5091,14 @@
       "status": "done",
       "addresses": [
         "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+      ]
+    },
+    "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism": {
+      "title": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
       ]
     }
   },
@@ -22977,6 +23026,127 @@
         ]
       ],
       "id": "2835ae772d9e465a"
+    },
+    {
+      "at": "2026-09-19T21:09:13.130823+00:00",
+      "after": "ed9ddb76f18a0ff81625709ec9ca9336f1e0999a",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok\", \"tags\": [\"measured\"], \"title\": \"the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps\", \"tags\": [], \"title\": \"delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism\", \"fields\": {\"effort\": 1, \"addresses\": [\"the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes\"]}}, {\"op\": \"status\", \"id\": \"delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism\", \"because\": \"sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "2835ae772d9e465a"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok",
+          "supports",
+          "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+        ],
+        [
+          "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok",
+          "title",
+          "measured 2026-09-20: the attribute is assigned at metta/doors/__init__.py and read nowhere in Python or outside it, the order analysis asks 'guard' in scope.decorators instead, and restoring the line makes ty report error[unresolved-attribute] on F@guard while removing it turns both lanes ok"
+        ],
+        [
+          "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__",
+          "sort",
+          "prop"
+        ],
+        [
+          "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__",
+          "supersedes",
+          "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps"
+        ],
+        [
+          "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__",
+          "supports",
+          {
+            "node": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+            "status": "done"
+          }
+        ],
+        [
+          "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__",
+          "tags",
+          "measured"
+        ],
+        [
+          "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__",
+          "title",
+          "sh check.sh vulture and sh check.sh ty both exit 0 where both failed before, and putting the line back makes ty report exactly one diagnostic naming __metta_guard__"
+        ],
+        [
+          "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps",
+          "sort",
+          "prop"
+        ],
+        [
+          "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps",
+          "supports",
+          {
+            "node": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+            "status": "untried"
+          }
+        ],
+        [
+          "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps",
+          "supports",
+          {
+            "node": "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+            "relation": "addresses",
+            "target": "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+          }
+        ],
+        [
+          "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps",
+          "title",
+          "the analysis reads source rather than a live object, so the mark is the spelling above the body; without that said, the decorator now reads as a no-op somebody will delete, and deleting it changes what the analysis charges every caller of whatever it wraps"
+        ],
+        [
+          "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes",
+          "title",
+          "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+        ],
+        [
+          "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "sort",
+          "approach"
+        ],
+        [
+          "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "addresses",
+          "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+        ],
+        [
+          "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "effort",
+          1
+        ],
+        [
+          "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "status",
+          "done"
+        ],
+        [
+          "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism",
+          "title",
+          "delete the dead attribute and say in the docstring that the decorator's NAME is the whole mechanism"
+        ]
+      ],
+      "id": "562b8ddc6720c46c"
     }
   ]
 }
