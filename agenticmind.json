@@ -4882,6 +4882,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing": {
+      "title": "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+    },
+    "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0": {
+      "title": "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0",
+      "supports": [
+        "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild": {
+      "title": "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild",
+      "supports": [
+        {
+          "node": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "status": "untried"
+        },
+        {
+          "node": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "relation": "addresses",
+          "target": "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+        }
+      ]
+    },
+    "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones": {
+      "title": "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones",
+      "supports": [
+        {
+          "node": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -5705,6 +5746,14 @@
       "status": "done",
       "addresses": [
         "the module that derives the seat and the workspace was added across 135 files a day before this session and never registered in the Python seat's layer lattice, so the layering gate refused it and the shipped source set the door analysis reads omitted it"
+      ]
+    },
+    "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package": {
+      "title": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+      "effort": 3,
+      "status": "done",
+      "addresses": [
+        "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
       ]
     }
   },
@@ -25343,6 +25392,127 @@
         ]
       ],
       "id": "d2f6b35fbd6a3536"
+    },
+    {
+      "at": "2026-09-19T22:46:42.561274+00:00",
+      "after": "977d560bd42b7df9334bd5ca3fb4fff60eaa45cc",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0\", \"tags\": [\"measured\"], \"title\": \"the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild\", \"tags\": [], \"title\": \"answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package\", \"fields\": {\"effort\": 3, \"addresses\": [\"the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing\"]}}, {\"op\": \"status\", \"id\": \"answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package\", \"because\": \"the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "d2f6b35fbd6a3536"
+      ],
+      "assert": [
+        [
+          "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild",
+          "sort",
+          "prop"
+        ],
+        [
+          "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild",
+          "supports",
+          {
+            "node": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+            "status": "untried"
+          }
+        ],
+        [
+          "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild",
+          "supports",
+          {
+            "node": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+            "relation": "addresses",
+            "target": "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+          }
+        ],
+        [
+          "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild",
+          "title",
+          "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild"
+        ],
+        [
+          "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0",
+          "supports",
+          "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+        ],
+        [
+          "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0",
+          "title",
+          "measured 2026-09-20: a sweep of the 49 library(X) names the shipped Prolog halves require against the patched host answered archive, unicode and yaml missing, and the build directory carried no LibArchive entry, an empty UTF8PROC_CFLAGS and no LibYAML entry while every configure had exited 0"
+        ],
+        [
+          "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing",
+          "title",
+          "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+        ],
+        [
+          "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones",
+          "sort",
+          "prop"
+        ],
+        [
+          "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones",
+          "supersedes",
+          "chasing the parity lane's differing examples would have been three separate hunts that each end at one library, while the sweep names the whole class in one command and re-runs after any host rebuild"
+        ],
+        [
+          "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones",
+          "supports",
+          {
+            "node": "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+            "status": "done"
+          }
+        ],
+        [
+          "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones",
+          "tags",
+          "measured"
+        ],
+        [
+          "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones",
+          "title",
+          "the sweep now answers 49 required and none missing; library(archive), library(unicode) and library(yaml) each load under the patched swipl; both host-workarounds lanes are ok; and the parity lane went from three differing examples to two, losing the unicode, functional and parsing ones"
+        ],
+        [
+          "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "sort",
+          "approach"
+        ],
+        [
+          "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "addresses",
+          "the patched host was missing three optional SWI packages the shipped libraries require, and each was invisible at build time because SWI wraps every optional binding in a FOUND guard, so cmake exits 0 and ships nothing"
+        ],
+        [
+          "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "effort",
+          3
+        ],
+        [
+          "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "status",
+          "done"
+        ],
+        [
+          "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package",
+          "title",
+          "answer the host gap as a set difference rather than one example at a time: sweep every library the shipped halves name, stage the dev files for each miss without root, and rebuild the host once per package"
+        ]
+      ],
+      "id": "a19e811b00f33e5d"
     }
   ]
 }
