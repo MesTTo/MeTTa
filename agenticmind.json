@@ -4703,6 +4703,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes": {
+      "title": "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes"
+    },
+    "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate": {
+      "title": "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate",
+      "supports": [
+        "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift": {
+      "title": "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift"
+    },
+    "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered": {
+      "title": "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered",
+      "supports": [
+        "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds": {
+      "title": "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline": {
+      "title": "the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline",
+      "supports": [
+        "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds"
+      ]
     }
   },
   "approaches": {
@@ -24630,6 +24666,107 @@
         ]
       ],
       "id": "1d83c52593b22346"
+    },
+    {
+      "at": "2026-09-19T22:06:26.798287+00:00",
+      "after": "93afde9a503e3329634c9ac7646217290953caa9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate\", \"tags\": [\"source\"], \"title\": \"this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered\", \"tags\": [\"source\"], \"title\": \"the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline\", \"tags\": [\"reasoning\"], \"title\": \"measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds\", \"fields\": {}}]",
+      "parents": [
+        "1d83c52593b22346"
+      ],
+      "assert": [
+        [
+          "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds",
+          "sort",
+          "prop"
+        ],
+        [
+          "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds",
+          "title",
+          "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds"
+        ],
+        [
+          "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered",
+          "supports",
+          "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift"
+        ],
+        [
+          "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered",
+          "title",
+          "read docs/journal/2026-09-09-the-binding-collapse.md:164 and docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:126; the lane's own exit is int(stale or any of mixed, defect_open_dependencies, recursive) at extensions/python/tools/doororder.py:299, and this session's run reads stale null with 182 unordered"
+        ],
+        [
+          "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate",
+          "supports",
+          "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes"
+        ],
+        [
+          "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate",
+          "title",
+          "read docs/journal/2026-09-15-door-bodies-compose-the-primitive-doors.md:124, which names the eleven as the integrator's baseline reds on this box and says the same lanes are red on the integrator's cut baseline and on audits' final gate"
+        ],
+        [
+          "the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline",
+          "supports",
+          "measuring this tree against zero red lanes was the wrong bar and produced a wrong reading of release readiness: ten of the 43 lanes in this session's whole-gate run are among the eleven recorded baseline reds"
+        ],
+        [
+          "the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline",
+          "title",
+          "the 43-lane list contains engine-bench, c-bench, mork-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, every one of them named in the 2026-09-15 baseline"
+        ],
+        [
+          "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift",
+          "title",
+          "the door-order gate is a DELIBERATE failing gate over a backlog, not a defect: it was turned into one knowing it reported 92 mixed, 165 open and 75 recursive rows, with an explicit instruction not to fabricate integers or quietly baseline those findings, and it is recorded as red by verdict only with no drift"
+        ],
+        [
+          "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes",
+          "sort",
+          "prop"
+        ],
+        [
+          "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes",
+          "title",
+          "this box has eleven RECORDED baseline red lanes that no branch introduced: engine-bench, c-bench, mork-bench, node-bench, pytest, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order, so release readiness is no new red against that baseline rather than zero red lanes"
+        ]
+      ],
+      "id": "e56321e408e8707d"
     }
   ]
 }
