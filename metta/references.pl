@@ -198,6 +198,16 @@ metta_reference_selected(partial(Head, Args), Name) :- !,
 metta_reference_selected([only, Names], Name) :- member(Name, Names).
 metta_reference_selected([rename, Pairs], Name) :- member([Name, _], Pairs).
 
+%`package` is the one head the engine reserves, and it is internal in every
+%space without anybody declaring it so. A package file describes ITSELF:
+%`(= (package version) "0.1.0")` and `(= (package backing) ...)` say what this
+%library is and what backs its heads, and none of that is an export. Merging
+%them would put one library's version and backing rows in its importer, where
+%the next importer would read them as its own. Written as a clause rather than
+%as an `(internal package)` row every library would have to carry, because a
+%row each of them repeats is a second representation of one rule
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 1].
+metta_reference_internal(_, package).
 metta_reference_internal(Space, Name) :-
     spaces:metta_space_pair(Space, [internal|Names], _, _), memberchk(Name, Names), !.
 metta_reference_internal(Space, Name) :-

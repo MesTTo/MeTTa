@@ -1333,8 +1333,22 @@ metta_source_changed(CanonPath) :-
 %and replacement commit together; with_source_load/3 supplies the same atomic
 %boundary for a first load, whose dependent repairs can replace older clauses
 %[tested: test_a_reload_that_fails_leaves_the_previous_definitions_standing].
+%A file's package rows are performed once the load that carried them has
+%committed, and HERE because this is the one predicate every door into a space
+%passes through: `import!`, the `load` door, the grouped door that answers
+%directive groups, and the re-population of a space being brought up to date.
+%Hooking a single door left the others silently unperformed, which is how a
+%face loaded with `load` answered its own head unreduced while the same file
+%imported answered normally. After the transaction rather than inside it,
+%because a load that rolls back has no rows and must perform nothing
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 14].
 :- meta_predicate replacing_previous_load(+, +, 1, 0).
 replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
+    replacing_previous_load_(CanonPath, Space, LoadInto, Goal),
+    metta_engine:metta_perform_package_backings(Space).
+
+:- meta_predicate replacing_previous_load_(+, +, 1, 0).
+replacing_previous_load_(CanonPath, Space, LoadInto, Goal) :-
     (   metta_source_load(CanonPath, _, _, _)
     ->  replaced_source_spaces(CanonPath, Space, Replaced),
         (   Replaced == []

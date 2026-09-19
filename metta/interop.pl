@@ -1900,3 +1900,66 @@ importer_helper_impl(Space, File) :-
        ; resolve_metta_import_path(File, CanonPath),
          import_when(changed, Space, CanonPath,
                      load_imported_metta_file(CanonPath, _, Space)) ).
+
+%A library describes its own body rather than calling the importer. Where it
+%used to write
+%
+%    !(import_prolog_functions_from_file (library lib_x.pl) (head ...))
+%
+%it writes a row saying what backs its heads,
+%
+%    (= (package backing) (prolog "lib_x.pl" (head ...)))
+%
+%and the loader performs it here, once the file's rows are in the space. The
+%difference is that the row is DATA any implementation can read, decide whether
+%it can perform, and refuse by name when it cannot, where the call was an
+%instruction only this engine understands
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 14].
+%
+%Time: one match over the loaded space per import, and one perform per backing
+%row; a library carries one row, so this is a single pass over a space that has
+%just been read from one file.
+metta_perform_package_backings(Space) :-
+    Backing = ['=', [package, backing], Row],
+    Perform = [evalc, [perform, Row], '&metta'],
+    %`debug(packages)` turns this on; it costs nothing while the topic is off,
+    %which a getenv check on every load would not. It names the SPACE as well
+    %as the rows, because the space a file loads into is not the one a reader
+    %expects: a file loaded through the Python door lands in `&pyspace_1`, not
+    %`&self`, and reading the wrong space is why the first version of this
+    %found nothing.
+    debug(packages, "space ~q carries package rows ~q", [Space, Backing]),
+    (   \+ eval([match, Space, Backing, Row], _)
+    ->  true
+    ;   metta_register_loader_claims,
+        forall(eval([match, Space, Backing, Perform], _), true)
+    ).
+
+:- dynamic(metta_loader_claims_registered/0).
+
+%The loader's own claim on the `prolog` token, registered the way a seat or a
+%library registers one. The engine does not answer the token itself: the design
+%rejects language tokens the engine understands, because the engine would then
+%name hosts, and dispatch is unification against a claim rather than a clause
+%testing a spelling [source: docs/journal/2026-09-09-packages-are-equations.md,
+%laws 4 and 5, and the rejection recorded above the laws].
+%
+%Registered from source text through the engine's own reader, because the
+%claim's pattern carries MeTTa variables and a term built here would be a
+%second representation of the same equation. `lib_import` comes first because
+%`import_prolog_functions_from_file` is ITS equation rather than a predicate of
+%this engine, so the claim's body has nothing to reach without it.
+%
+%Once per process rather than per import: the claim is a row, and adding it
+%twice would leave two equations for one head where law 4 admits one claimant.
+metta_loader_claim("(= (perform (prolog $file $names)) \c
+                      (import_prolog_functions_from_file $file $names))").
+
+metta_register_loader_claims :-
+    (   metta_loader_claims_registered
+    ->  true
+    ;   assertz(metta_loader_claims_registered),
+        importer_helper('&metta', [library, lib_import]),
+        forall(metta_loader_claim(Source),
+               filereader:process_loader_string(Source, _, '&metta'))
+    ).
