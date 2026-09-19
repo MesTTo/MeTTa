@@ -4484,6 +4484,30 @@
       "tags": [
         "measured"
       ]
+    },
+    "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box": {
+      "title": "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box"
+    },
+    "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure": {
+      "title": "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure",
+      "supports": [
+        "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused": {
+      "title": "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused"
+    },
+    "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError": {
+      "title": "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError",
+      "supports": [
+        "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -23751,6 +23775,77 @@
         ]
       ],
       "id": "c9b0aac9ac9c19f3"
+    },
+    {
+      "at": "2026-09-19T21:50:20.219131+00:00",
+      "after": "819d6905a178c06db3fe6e372d4f5d7b464d1f55",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure\", \"tags\": [\"measured\"], \"title\": \"the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError\", \"tags\": [\"measured\"], \"title\": \"the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused\", \"fields\": {}}]",
+      "parents": [
+        "c9b0aac9ac9c19f3"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError",
+          "supports",
+          "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused"
+        ],
+        [
+          "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError",
+          "title",
+          "measured 2026-09-20 while choosing the bound: a 600 MB bytearray under `systemd-run --user --scope -p MemoryMax=256M` succeeded, and the same allocation under `ulimit -d 262144` raised MemoryError"
+        ],
+        [
+          "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure",
+          "supports",
+          "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box"
+        ],
+        [
+          "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure",
+          "title",
+          "measured 2026-09-20: a process named metta reached 41,283,432 kB RSS in 63 seconds with /proc/<pid>/limits reading 'Max data size unlimited', its parent a bash started from a Claude shell snapshot rather than from bounded.sh; the box went to 1 GB available of 60 and the harness killed an unrelated gate run for memory pressure"
+        ],
+        [
+          "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused",
+          "title",
+          "the cgroup route is not available as a second net on this box: a user scope with MemoryMax set did not bound an allocation that RLIMIT_DATA refused"
+        ],
+        [
+          "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box",
+          "sort",
+          "prop"
+        ],
+        [
+          "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box",
+          "title",
+          "the wrapper's memory bound reaches only what is launched through the wrapper, so a command an agent session starts directly runs with an unlimited data segment and can still take the box"
+        ]
+      ],
+      "id": "c36c284ce0074ae9"
     }
   ]
 }
