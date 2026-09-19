@@ -167,6 +167,12 @@
       "blocks": [
         "g2"
       ]
+    },
+    "i23": {
+      "what": "law 10's &catalogs cannot be built on the space hooks the engine has: a catalog is a space with a handler that ANSWERS (package $name $where), and hook_slot_surface/2 declares only pre-add and post-add, so there is no slot at which a handler can answer a query",
+      "blocks": [
+        "g5"
+      ]
     }
   },
   "approaches": {
@@ -697,13 +703,17 @@
     },
     "a31.5": {
       "title": "perform (package requires) before any packaging library is merged, and normalise the other package questions under the reads effect ceiling with an inference budget, refusing by name past it",
-      "status": "untried",
+      "status": "active",
       "addresses": [
         "i19"
       ],
       "cost": 7,
       "rests_on": [
-        "c88"
+        "c88",
+        "c91",
+        "c92",
+        "c94",
+        "c95"
       ]
     }
   },
@@ -2877,6 +2887,88 @@
       "says": "the package-backings lane answers 0 findings over lib/*/*.metta, and the skel builtin module plus lib_datastructures, lib_combinatorics and lib_crypto all import cleanly",
       "supports": [
         "c90"
+      ],
+      "basis": "measured"
+    },
+    "r264": {
+      "says": "read engine/metta/space_hooks.pl:114-115, the whole slot table, and the claim machinery around it at :130-150",
+      "supports": [
+        "i23"
+      ],
+      "basis": "source"
+    },
+    "c91": {
+      "says": "the whole package change leaves the engine suite unchanged: the same five library units fail with the same counts, 87 lib_csv_surface, 29 lib_json_surface, 11 lib_yaml, 10 lib_compression and 8 lib_unicode, before the change and after it, and the new packages suite passes inside the full run"
+    },
+    "r265": {
+      "says": "ran the full engine suite three times, before the engine edits, after them, and after the library migration, and compared the failure profile each time",
+      "supports": [
+        "c91"
+      ],
+      "basis": "measured"
+    },
+    "r266": {
+      "says": "the mechanism exists and I looked at the wrong one: space hooks are write-time, pre-add and post-add, while a space ANSWERS a query through the foreign-provider seam, seam:foreign_match/3 with a declared match capability, which is how lib_redis and the reference-provider suite do it",
+      "attacks": [
+        "r264"
+      ]
+    },
+    "c92": {
+      "says": "&catalogs is a foreign space, so law 10 needs no new machinery either: the engine routes a match on it to seam:foreign_match/3, and the lib/ directory answers rather than being enumerated into rows, because the directory is the authority on what it holds"
+    },
+    "r267": {
+      "says": "the catalog resolves lib_regex to its path and enumerates 61 libraries with no dotfiles, and a file declaring only (= (package requires) lib_regex) causes re-match to answer where it was unreduced before",
+      "supports": [
+        "c92"
+      ],
+      "basis": "measured"
+    },
+    "c93": {
+      "says": "the provider capability word is enumerate rather than atoms: lib_redis declares [add, remove, match, enumerate, clear], and a catalog declaring atoms names a capability the engine does not know"
+    },
+    "r268": {
+      "says": "read lib/lib_redis/lib_redis.pl:254-258 against engine/ext_points.pl:835",
+      "supports": [
+        "c93"
+      ],
+      "basis": "source"
+    },
+    "r269": {
+      "says": "law 10's half is built: &catalogs answers as a foreign space and (package requires) performs before the file's own rows, with three tests. The reads ceiling with its inference budget is still open",
+      "supports": [
+        {
+          "node": "a31.5",
+          "status": "active"
+        }
+      ]
+    },
+    "c94": {
+      "says": "wrapping the catalog match in forall/2 alone would skip an absent requirement in silence, because a match with no answer has zero solutions and forall succeeds over them; law 9 wants it refused by name, so the resolution is a conditional that throws"
+    },
+    "r270": {
+      "says": "the first version loaded nothing and said nothing for a requirement no catalog holds, and the failure surfaced three layers later as the file opener refusing a path",
+      "supports": [
+        "c94"
+      ],
+      "basis": "measured"
+    },
+    "c95": {
+      "says": "the catalog has to check that a library is THERE in both branches, because library/2 builds a path from a name and never asks: without it the catalog answered for a name nobody holds and the refusal came from the file opener rather than by name"
+    },
+    "r271": {
+      "says": "!(match &catalogs (package lib_nothing_here $w) $w) answered a path before the check and answers nothing after",
+      "supports": [
+        "c95"
+      ],
+      "basis": "measured"
+    },
+    "c96": {
+      "says": "a refusal must use an error term the engine renders: a term of this module's own reads as Unknown error term to every caller, while existence_error(package_requirement, Name) renders as package_requirement `name' does not exist with the remedy in its context"
+    },
+    "r272": {
+      "says": "compared the two refusals as the Python surface reported them",
+      "supports": [
+        "c96"
       ],
       "basis": "measured"
     }
@@ -14427,6 +14519,422 @@
         ]
       ],
       "id": "fd69a1f3cb31811d"
+    },
+    {
+      "at": "2026-09-19T18:32:20+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-issue i23 'law 10'\"'\"'s &catalogs cannot be built on the space hooks the engine has: a catalog is a space with a handler that ANSWERS (package $name $where), and hook_slot_surface/2 declares only pre-add and post-add, so there is no slot at which a handler can answer a query' --blocks g5 --basis source --because 'read engine/metta/space_hooks.pl:114-115, the whole slot table, and the claim machinery around it at :130-150'",
+      "parents": [
+        "fd69a1f3cb31811d"
+      ],
+      "assert": [
+        [
+          "i23",
+          "sort",
+          "issue"
+        ],
+        [
+          "i23",
+          "blocks",
+          "g5"
+        ],
+        [
+          "i23",
+          "what",
+          "law 10's &catalogs cannot be built on the space hooks the engine has: a catalog is a space with a handler that ANSWERS (package $name $where), and hook_slot_surface/2 declares only pre-add and post-add, so there is no slot at which a handler can answer a query"
+        ],
+        [
+          "r264",
+          "sort",
+          "claim"
+        ],
+        [
+          "r264",
+          "basis",
+          "source"
+        ],
+        [
+          "r264",
+          "says",
+          "read engine/metta/space_hooks.pl:114-115, the whole slot table, and the claim machinery around it at :130-150"
+        ],
+        [
+          "r264",
+          "supports",
+          "i23"
+        ]
+      ],
+      "id": "22ba748eeefdf037"
+    },
+    {
+      "at": "2026-09-19T18:32:20+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-claim c91 'the whole package change leaves the engine suite unchanged: the same five library units fail with the same counts, 87 lib_csv_surface, 29 lib_json_surface, 11 lib_yaml, 10 lib_compression and 8 lib_unicode, before the change and after it, and the new packages suite passes inside the full run' --because 'ran the full engine suite three times, before the engine edits, after them, and after the library migration, and compared the failure profile each time' --basis measured",
+      "parents": [
+        "22ba748eeefdf037"
+      ],
+      "assert": [
+        [
+          "c91",
+          "sort",
+          "claim"
+        ],
+        [
+          "c91",
+          "says",
+          "the whole package change leaves the engine suite unchanged: the same five library units fail with the same counts, 87 lib_csv_surface, 29 lib_json_surface, 11 lib_yaml, 10 lib_compression and 8 lib_unicode, before the change and after it, and the new packages suite passes inside the full run"
+        ],
+        [
+          "r265",
+          "sort",
+          "claim"
+        ],
+        [
+          "r265",
+          "basis",
+          "measured"
+        ],
+        [
+          "r265",
+          "says",
+          "ran the full engine suite three times, before the engine edits, after them, and after the library migration, and compared the failure profile each time"
+        ],
+        [
+          "r265",
+          "supports",
+          "c91"
+        ]
+      ],
+      "id": "d154396c3a6684cb"
+    },
+    {
+      "at": "2026-09-19T18:32:20+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "link a31.5 c91 --as rests-on",
+      "parents": [
+        "d154396c3a6684cb"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "rests_on",
+          "c91"
+        ]
+      ],
+      "id": "11aa4c504a81f1a4"
+    },
+    {
+      "at": "2026-09-19T18:38:10+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "attack r264 --because 'the mechanism exists and I looked at the wrong one: space hooks are write-time, pre-add and post-add, while a space ANSWERS a query through the foreign-provider seam, seam:foreign_match/3 with a declared match capability, which is how lib_redis and the reference-provider suite do it'",
+      "parents": [
+        "11aa4c504a81f1a4"
+      ],
+      "assert": [
+        [
+          "r266",
+          "sort",
+          "claim"
+        ],
+        [
+          "r266",
+          "attacks",
+          "r264"
+        ],
+        [
+          "r266",
+          "says",
+          "the mechanism exists and I looked at the wrong one: space hooks are write-time, pre-add and post-add, while a space ANSWERS a query through the foreign-provider seam, seam:foreign_match/3 with a declared match capability, which is how lib_redis and the reference-provider suite do it"
+        ]
+      ],
+      "id": "1f0fbd2889c99e38"
+    },
+    {
+      "at": "2026-09-19T18:38:10+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-claim c92 '&catalogs is a foreign space, so law 10 needs no new machinery either: the engine routes a match on it to seam:foreign_match/3, and the lib/ directory answers rather than being enumerated into rows, because the directory is the authority on what it holds' --because 'the catalog resolves lib_regex to its path and enumerates 61 libraries with no dotfiles, and a file declaring only (= (package requires) lib_regex) causes re-match to answer where it was unreduced before' --basis measured",
+      "parents": [
+        "1f0fbd2889c99e38"
+      ],
+      "assert": [
+        [
+          "c92",
+          "sort",
+          "claim"
+        ],
+        [
+          "c92",
+          "says",
+          "&catalogs is a foreign space, so law 10 needs no new machinery either: the engine routes a match on it to seam:foreign_match/3, and the lib/ directory answers rather than being enumerated into rows, because the directory is the authority on what it holds"
+        ],
+        [
+          "r267",
+          "sort",
+          "claim"
+        ],
+        [
+          "r267",
+          "basis",
+          "measured"
+        ],
+        [
+          "r267",
+          "says",
+          "the catalog resolves lib_regex to its path and enumerates 61 libraries with no dotfiles, and a file declaring only (= (package requires) lib_regex) causes re-match to answer where it was unreduced before"
+        ],
+        [
+          "r267",
+          "supports",
+          "c92"
+        ]
+      ],
+      "id": "b64cb3090b0e3d58"
+    },
+    {
+      "at": "2026-09-19T18:38:10+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-claim c93 'the provider capability word is enumerate rather than atoms: lib_redis declares [add, remove, match, enumerate, clear], and a catalog declaring atoms names a capability the engine does not know' --because 'read lib/lib_redis/lib_redis.pl:254-258 against engine/ext_points.pl:835' --basis source",
+      "parents": [
+        "b64cb3090b0e3d58"
+      ],
+      "assert": [
+        [
+          "c93",
+          "sort",
+          "claim"
+        ],
+        [
+          "c93",
+          "says",
+          "the provider capability word is enumerate rather than atoms: lib_redis declares [add, remove, match, enumerate, clear], and a catalog declaring atoms names a capability the engine does not know"
+        ],
+        [
+          "r268",
+          "sort",
+          "claim"
+        ],
+        [
+          "r268",
+          "basis",
+          "source"
+        ],
+        [
+          "r268",
+          "says",
+          "read lib/lib_redis/lib_redis.pl:254-258 against engine/ext_points.pl:835"
+        ],
+        [
+          "r268",
+          "supports",
+          "c93"
+        ]
+      ],
+      "id": "d86d606a983b3590"
+    },
+    {
+      "at": "2026-09-19T18:38:10+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "link a31.5 c92 --as rests-on",
+      "parents": [
+        "d86d606a983b3590"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "rests_on",
+          "c92"
+        ]
+      ],
+      "id": "d3b042fa0c43652e"
+    },
+    {
+      "at": "2026-09-19T18:38:10+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "status a31.5 active --because 'law 10'\"'\"'s half is built: &catalogs answers as a foreign space and (package requires) performs before the file'\"'\"'s own rows, with three tests. The reads ceiling with its inference budget is still open'",
+      "parents": [
+        "d3b042fa0c43652e"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "status",
+          "active"
+        ],
+        [
+          "r269",
+          "sort",
+          "claim"
+        ],
+        [
+          "r269",
+          "says",
+          "law 10's half is built: &catalogs answers as a foreign space and (package requires) performs before the file's own rows, with three tests. The reads ceiling with its inference budget is still open"
+        ],
+        [
+          "r269",
+          "supports",
+          {
+            "node": "a31.5",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "1d555d3383296fa7"
+    },
+    {
+      "at": "2026-09-19T18:40:23+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-claim c94 'wrapping the catalog match in forall/2 alone would skip an absent requirement in silence, because a match with no answer has zero solutions and forall succeeds over them; law 9 wants it refused by name, so the resolution is a conditional that throws' --because 'the first version loaded nothing and said nothing for a requirement no catalog holds, and the failure surfaced three layers later as the file opener refusing a path' --basis measured",
+      "parents": [
+        "1d555d3383296fa7"
+      ],
+      "assert": [
+        [
+          "c94",
+          "sort",
+          "claim"
+        ],
+        [
+          "c94",
+          "says",
+          "wrapping the catalog match in forall/2 alone would skip an absent requirement in silence, because a match with no answer has zero solutions and forall succeeds over them; law 9 wants it refused by name, so the resolution is a conditional that throws"
+        ],
+        [
+          "r270",
+          "sort",
+          "claim"
+        ],
+        [
+          "r270",
+          "basis",
+          "measured"
+        ],
+        [
+          "r270",
+          "says",
+          "the first version loaded nothing and said nothing for a requirement no catalog holds, and the failure surfaced three layers later as the file opener refusing a path"
+        ],
+        [
+          "r270",
+          "supports",
+          "c94"
+        ]
+      ],
+      "id": "e7b6f9926b25dbe5"
+    },
+    {
+      "at": "2026-09-19T18:40:23+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-claim c95 'the catalog has to check that a library is THERE in both branches, because library/2 builds a path from a name and never asks: without it the catalog answered for a name nobody holds and the refusal came from the file opener rather than by name' --because '!(match &catalogs (package lib_nothing_here $w) $w) answered a path before the check and answers nothing after' --basis measured",
+      "parents": [
+        "e7b6f9926b25dbe5"
+      ],
+      "assert": [
+        [
+          "c95",
+          "sort",
+          "claim"
+        ],
+        [
+          "c95",
+          "says",
+          "the catalog has to check that a library is THERE in both branches, because library/2 builds a path from a name and never asks: without it the catalog answered for a name nobody holds and the refusal came from the file opener rather than by name"
+        ],
+        [
+          "r271",
+          "sort",
+          "claim"
+        ],
+        [
+          "r271",
+          "basis",
+          "measured"
+        ],
+        [
+          "r271",
+          "says",
+          "!(match &catalogs (package lib_nothing_here $w) $w) answered a path before the check and answers nothing after"
+        ],
+        [
+          "r271",
+          "supports",
+          "c95"
+        ]
+      ],
+      "id": "72fdc33cd83911fc"
+    },
+    {
+      "at": "2026-09-19T18:40:23+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "add-claim c96 'a refusal must use an error term the engine renders: a term of this module'\"'\"'s own reads as Unknown error term to every caller, while existence_error(package_requirement, Name) renders as package_requirement `name'\"'\"' does not exist with the remedy in its context' --because 'compared the two refusals as the Python surface reported them' --basis measured",
+      "parents": [
+        "72fdc33cd83911fc"
+      ],
+      "assert": [
+        [
+          "c96",
+          "sort",
+          "claim"
+        ],
+        [
+          "c96",
+          "says",
+          "a refusal must use an error term the engine renders: a term of this module's own reads as Unknown error term to every caller, while existence_error(package_requirement, Name) renders as package_requirement `name' does not exist with the remedy in its context"
+        ],
+        [
+          "r272",
+          "sort",
+          "claim"
+        ],
+        [
+          "r272",
+          "basis",
+          "measured"
+        ],
+        [
+          "r272",
+          "says",
+          "compared the two refusals as the Python surface reported them"
+        ],
+        [
+          "r272",
+          "supports",
+          "c96"
+        ]
+      ],
+      "id": "25737f5e13318c71"
+    },
+    {
+      "at": "2026-09-19T18:40:23+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "link a31.5 c94 --as rests-on",
+      "parents": [
+        "25737f5e13318c71"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "rests_on",
+          "c94"
+        ]
+      ],
+      "id": "52c301ff66903e48"
+    },
+    {
+      "at": "2026-09-19T18:40:23+10:00",
+      "after": "43a7517452766a1e4fce2f25283325f33db7ae9e",
+      "did": "link a31.5 c95 --as rests-on",
+      "parents": [
+        "52c301ff66903e48"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "rests_on",
+          "c95"
+        ]
+      ],
+      "id": "d41e91255136b31f"
     }
   ]
 }

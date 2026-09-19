@@ -42,7 +42,7 @@
 :- prolog_load_context(directory, Here),
    atomic_list_concat([Here, '/../../../../ai-tmp'], Scratch),
    assertz(packages_scratch(Scratch)),
-   forall(member(Kind, [backed, unbacked, unclaimed]),
+   forall(member(Kind, [backed, unbacked, unclaimed, requires, absent]),
           ( atomic_list_concat([Here, '/../../../data/packages/', Kind, '.pl'], Relative),
             absolute_file_name(Relative, Artifact, [access(read)]),
             assertz(packages_artifact(Kind, Artifact)) )).
@@ -98,6 +98,50 @@ test(a_backing_no_claimant_answers_installs_nothing) :-
     \+ artifact_loaded(unclaimed),
     'import!'('&self', Path, _),
     \+ artifact_loaded(unclaimed).
+
+%Law 10. A requirement names a library and the CATALOGS say where it lives, so
+%the loader resolves one by matching and never looks in a directory itself.
+test(the_catalog_answers_where_a_library_lives) :-
+    eval([match, '&catalogs', [package, lib_regex, Where], Where], _),
+    nonvar(Where),
+    exists_directory_of(Where).
+
+test(the_catalog_enumerates_only_libraries) :-
+    findall(Name, eval([match, '&catalogs', [package, Name, _], Name], _), Names),
+    length(Names, Count),
+    Count > 1,
+    forall(member(Held, Names),
+           ( atom(Held), \+ sub_atom(Held, 0, 1, _, '.') )).
+
+test(a_requirement_loads_before_the_file_that_declares_it) :-
+    %The observable is the required library's OWN predicate, which nothing
+    %else defines, rather than the loader's bookkeeping: the file declares the
+    %requirement and imports nothing, so a defined regex_match/3 can only have
+    %come from the requirement being performed.
+    \+ regex_loaded,
+    package_fixture(requires, '(= (package requires) lib_regex) ; not ~w~n', Path),
+    'import!'('&self', Path, _),
+    regex_loaded.
+
+%Law 9. An absent requirement refuses BY NAME. It would otherwise be skipped
+%in silence: the catalog match has zero solutions and a `forall/2` over them
+%succeeds, so the failure would surface later as a head that does not answer.
+test(a_requirement_no_catalog_holds_refuses_by_name) :-
+    package_fixture(absent, '(= (package requires) lib_no_catalog_holds_this) ; not ~w~n', Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    Formal = existence_error(package_requirement, lib_no_catalog_holds_this).
+
+test(the_catalog_answers_nothing_for_a_library_it_does_not_hold) :-
+    \+ eval([match, '&catalogs', [package, lib_no_catalog_holds_this, _], x], _).
+
+regex_loaded :-
+    catch(predicate_property(_:regex_match(_, _, _), defined), _, fail).
+
+%A library is a directory holding a file named after it, so the catalog's
+%answer names the stem and the directory is what must be there.
+exists_directory_of(Where) :-
+    file_directory_name(Where, Directory),
+    exists_directory(Directory).
 
 %Law 1. Written as a clause rather than as an `(internal package)` row every
 %library would carry, so it holds in a space nobody declared anything in.

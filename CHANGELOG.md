@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library says what it NEEDS and the loader loads it first:
+  `(= (package requires) lib_regex)` loads `lib_regex` before the declaring
+  file's own rows perform. The loader holds no resolver: a requirement names a
+  library and `&catalogs` says where it lives, so resolving one is a match, and
+  adding a catalog is adding a row. `&catalogs` is a foreign space answering
+  from the `lib/` directory, which is the authority on what it holds. A
+  requirement no catalog holds refuses by name with its remedy rather than
+  being skipped.
+
 - A library describes what backs its heads instead of telling the engine to go
   and load it. Where a library wrote
   `!(import_prolog_functions_from_file (library lib_x.pl) (head ...))` it now
