@@ -1057,6 +1057,26 @@ metta_registration_names([Importer, _File, Names], Named) :-
     translator:prolog_function_importer(Importer),
     !,
     literal_registration_names(Names, Named).
+%A BACKING ROW is a registration form too, and the fifth this relation covers:
+%`(= (package backing) (<token> <file> (heads)))` publishes exactly the names
+%the importer spelling published, so a reader that does not know it reports
+%every migrated library as empty of its Prolog-backed heads. The reference page
+%is what noticed: lib_reflect read 21 heads under the old spelling and 12 after
+%the migration, the nine missing being its own backing row's list
+%[measured 2026-09-20; tested: packages:a_backing_row_publishes_the_heads_it_names].
+%
+%The token is left OPEN rather than matched against `prolog`, because which
+%tokens exist is the claimants' business and not this engine's: a row naming a
+%token nobody claims still SAYS which heads it would publish, and a reader
+%asking what a library declares wants that answer
+%[source: docs/journal/2026-09-09-packages-are-equations.md, laws 4 and 5].
+metta_registration_names(['=', [package, backing], Row], Named) :-
+    nonvar(Row),
+    Row = [Token|Rest],
+    atom(Token),
+    append(_, [Names], Rest),
+    !,
+    literal_registration_names(Names, Named).
 metta_registration_names(_, []).
 
 literal_registration_names(Names, Named) :-
