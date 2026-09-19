@@ -4789,6 +4789,34 @@
       "supersedes": [
         "configuring and building touch only the build directory, so they are safe while another job runs swipl, while ninja install replaces the interpreter under it; splitting the slow safe half from the brief risky half is what lets the work start now"
       ]
+    },
+    "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each": {
+      "title": "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+      "supports": [
+        {
+          "node": "configure and build the patched host with the archive package against the staged prefix now, and leave the install for a window when nothing is running against the interpreter",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "configuring and building touch only the build directory, so they are safe while another job runs swipl, while ninja install replaces the interpreter under it; splitting the slow safe half from the brief risky half is what lets the work start now",
+        "cmake found LibArchive 3.8.5 at the staged prefix and detected its read filters, the cache now carries LibArchive_INCLUDE_DIR and LibArchive_LIBRARY, and the build is running under nice with six jobs"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time": {
+      "title": "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time"
+    },
+    "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0": {
+      "title": "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0",
+      "supports": [
+        "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -5601,7 +5629,7 @@
     "configure and build the patched host with the archive package against the staged prefix now, and leave the install for a window when nothing is running against the interpreter": {
       "title": "configure and build the patched host with the archive package against the staged prefix now, and leave the install for a window when nothing is running against the interpreter",
       "effort": 2,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the patched SWI build ships no archive package, so every host-workarounds reproduction that opens an archive fails to load library(archive) and the lane refuses the tree on four findings that say nothing about it"
       ]
@@ -24971,6 +24999,85 @@
         ]
       ],
       "id": "4a366b21c11ff1b2"
+    },
+    {
+      "at": "2026-09-19T22:12:06.515228+00:00",
+      "after": "5d071859fc11ea39b2a78a38e219e99e4d362598",
+      "did": "[{\"op\": \"status\", \"id\": \"configure and build the patched host with the archive package against the staged prefix now, and leave the install for a window when nothing is running against the interpreter\", \"because\": \"the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0\", \"tags\": [\"source\"], \"title\": \"SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time\", \"fields\": {}}]",
+      "parents": [
+        "4a366b21c11ff1b2"
+      ],
+      "assert": [
+        [
+          "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time",
+          "sort",
+          "prop"
+        ],
+        [
+          "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time",
+          "title",
+          "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time"
+        ],
+        [
+          "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0",
+          "supports",
+          "SWI encloses its archive binding in if(LibArchive_FOUND), so a configure with no libarchive headers completes and silently ships no archive4pl.so: the absence is not reported at build time and only shows as library(archive) missing at run time"
+        ],
+        [
+          "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0",
+          "tags",
+          "source"
+        ],
+        [
+          "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0",
+          "title",
+          "read /home/user/Dev/swipl-devel/packages/archive/CMakeLists.txt, and measured 2026-09-20 that the existing build directory carried no LibArchive cache entry at all while cmake had exited 0"
+        ],
+        [
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+          "sort",
+          "prop"
+        ],
+        [
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+          "supersedes",
+          "configuring and building touch only the build directory, so they are safe while another job runs swipl, while ninja install replaces the interpreter under it; splitting the slow safe half from the brief risky half is what lets the work start now"
+        ],
+        [
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+          "supersedes",
+          "cmake found LibArchive 3.8.5 at the staged prefix and detected its read filters, the cache now carries LibArchive_INCLUDE_DIR and LibArchive_LIBRARY, and the build is running under nice with six jobs"
+        ],
+        [
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+          "supports",
+          {
+            "node": "configure and build the patched host with the archive package against the staged prefix now, and leave the install for a window when nothing is running against the interpreter",
+            "status": "done"
+          }
+        ],
+        [
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+          "tags",
+          "measured"
+        ],
+        [
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each",
+          "title",
+          "the build added exactly archive4pl.so and its Prolog library in six steps, the install ran with zero swipl processes on the box so no interpreter was replaced under a running job, library(archive) now loads under the patched swipl, and both host-workarounds and host-workarounds-selftest report ok where they carried four findings each"
+        ],
+        [
+          "configure and build the patched host with the archive package against the staged prefix now, and leave the install for a window when nothing is running against the interpreter",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "fef578682290a352"
     }
   ]
 }
