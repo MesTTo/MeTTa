@@ -12,8 +12,9 @@ activation services through `seam:kind/2`; the source reader exports its indexed
 package-row query. The library-surface check finds no unpublished engine calls,
 the engine layering check passes, and all 13 `metta_published_surface` and
 `engine_layering` tests pass. After consolidating the policy module, the
-library-surface command exits 0: 78 meaning comparisons pass, 2,466 clauses
-contain no unpublished engine calls, and all four planted reaches are seen.
+library-surface scanner passes 78 meaning comparisons, finds no unpublished
+engine calls in 2,466 clauses and sees all four planted reaches. Its official
+lane still exits 1 because `source_sink library(yaml) does not exist`.
 
 The contract is laws 6–13 and “the package is an argument record and the engine
 knows four things” in
@@ -181,7 +182,7 @@ external resources still need cleanup and concurrent flights must see edges
 before waiting.
 
 The latest memory-scale run completed without a regression line, after the
-claim bootstrap, native namespace and published-service repairs:
+claim bootstrap, native namespace, published-service and source-layout repairs:
 
 ```text
 load-metta: inferences [1147, 3847, 30847, 300847]; fit=linear expected=linear nrms=0.0000 noise=+/-0
@@ -189,9 +190,10 @@ load-fast: inferences [2371, 7771, 61771, 601771]; fit=linear expected=linear nr
 ```
 
 These are 83 inferences above each 10,000-atom pin, within allowances 15,039
-and 30,085. `ai-tmp/ai-package-boundary-memory-surface-final.log` records these
-values, all required boundary observations, 13 passing publication/layering
-tests and the llms check with zero findings.
+and 30,085. `ai-tmp/ai-package-consolidated-boundary-memory.log` records these
+values and all required boundary observations. The consolidated tree also
+passes all 13 publication/layering tests and the isolated Python file-library
+reproduction (`1 passed in 4.07s`).
 
 ## Prior art
 
@@ -207,6 +209,16 @@ stages. `owned_resources:with_outcome_cleanup/3` preserves the primary failure
 during compensation. No new dependency was introduced.
 
 ## Verification still being completed
+
+On commit `7bf1051f09ed1f585785bddc08521357ff5bd356`, the selected official
+lanes pass QLF freshness, layering, llms, fn-sync and all 20 fn-sync selftests.
+The library-surface scanner passes; the lane's one load error is the missing
+SWI YAML library. `ai-tmp/ai-package-consolidation-gates.log` retains the exact
+lane results. An earlier freshness invocation raised
+`FileNotFoundError: .../lib/lib_package/support/catalog.pl` because the battery
+had current source bytes but a stale Git index. Aligning its own detached HEAD
+and all eight component indexes to the provisioned revisions repaired that
+test setup; the source files were unchanged by the identity repair.
 
 The mutation runner passed all 78 witnesses: 69 library cases and seven changed
 package cases, with additional mutations for partial-overlap availability and
@@ -256,6 +268,18 @@ open: `engine_modules:removing_a_local_shadow_restores_a_library_export` raises
 The shadow-repair code treats a local native registration as a local equation
 and leaves its static import attached. The affected engine and consumer files
 are outside the assigned package section; ownership or repairs were requested.
+
+A runtime probe separates the native-shadow defect into two obligations.
+Detaching and restoring the provider import permits the shadow, but removal
+then leaves the caller unreduced. `module_owns_function/3` and
+`function_still_defined/2` must also recognize the surviving native registration.
+With both obligations supplied by wrappers in an isolated probe, the same
+caller answers `"HELLO"`, then `local`, then `"HELLO"`, and SWI reports its
+restored import from `lib_string`. That is diagnostic evidence, not a shipped
+repair; `ai-tmp/ai-package-native-shadow-repair-probe.log` records it.
+The generated library-reference page also needs regeneration for the three
+new package entries. Ownership for that artifact was requested alongside the
+engine and consumer repairs.
 
 The generated Python fn face now includes `setup!` and `package-prolog`.
 The Node wire-catalog test initially failed with
