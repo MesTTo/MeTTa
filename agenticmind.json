@@ -5334,6 +5334,27 @@
       "tags": [
         "measured"
       ]
+    },
+    "that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part": {
+      "title": "that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part",
+      "attacks": [
+        "r223"
+      ]
+    },
+    "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built": {
+      "title": "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built",
+      "supports": [
+        {
+          "node": "a31",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "r223"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5794,7 +5815,7 @@
     },
     "a31": {
       "title": "build the package design in the order its laws depend on each other, engine core first, then the prelude library, then the migration that proves it",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i19"
       ],
@@ -27179,6 +27200,65 @@
         ]
       ],
       "id": "87c3f84fbc3ec700"
+    },
+    {
+      "at": "2026-09-19T23:51:26.491830+00:00",
+      "after": "5fe91aaabceb9867e05c086f89c75d46a299240e",
+      "did": "[{\"op\": \"attack\", \"id\": \"r223\", \"because\": \"that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part\", \"tags\": []}, {\"op\": \"status\", \"id\": \"a31\", \"because\": \"every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "87c3f84fbc3ec700"
+      ],
+      "assert": [
+        [
+          "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built",
+          "sort",
+          "prop"
+        ],
+        [
+          "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built",
+          "supersedes",
+          "r223"
+        ],
+        [
+          "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built",
+          "supports",
+          {
+            "node": "a31",
+            "status": "done"
+          }
+        ],
+        [
+          "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built",
+          "tags",
+          "tested"
+        ],
+        [
+          "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built",
+          "title",
+          "every child is closed: a31.1 gave the engine its four fixed things, a31.2 landed lib/lib_package as the prelude library carrying laws 6 to 13's MeTTa and engine half, a31.3 migrated the libraries' Prolog halves to backing rows and a31.4 gates both directions; measured 2026-09-20 the parity lane reads 359 of 359 examples agreeing and engine_modules, lib_thread_scope, fn-sync, policy-inventory and binding-selftest are green, with law 13's Python manifest half tracked as its own approach because the delegated job's record states plainly that it is not built"
+        ],
+        [
+          "that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part",
+          "sort",
+          "prop"
+        ],
+        [
+          "that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part",
+          "attacks",
+          "r223"
+        ],
+        [
+          "that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part",
+          "title",
+          "that reading described the tree in an earlier session: as of 2026-09-20 the engine carries its four fixed things, lib/lib_package exists as the prelude library, the forty libraries declare their Prolog halves as package backing rows, and the lane that refuses the old spelling is green, so the clause about nothing of it existing is no longer true of any part"
+        ],
+        [
+          "a31",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "fd95ab2c7e9b7215"
     }
   ]
 }
