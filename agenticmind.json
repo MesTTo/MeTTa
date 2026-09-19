@@ -1,8 +1,8 @@
 {
   "goals": {
     "g1": {
-      "want": "tools/doororder.py finishes, and test_door_rows.py's slowest case stays under the 180s per-test timeout",
       "at": "2026-09-19",
+      "want": "tools/doororder.py finishes, and test_door_rows.py's slowest case stays under the 180s per-test timeout",
       "weight": 85
     },
     "g2": {
@@ -12,58 +12,77 @@
   },
   "issues": {
     "i1": {
-      "what": "one CallGraph scope evaluation costs time proportional to the sum of the value-set sizes it touches",
+      "at": "2026-09-19",
       "blocks": [
         "g1"
       ],
-      "at": "2026-09-19"
+      "what": "one CallGraph scope evaluation costs time proportional to the sum of the value-set sizes it touches"
     },
     "i2": {
-      "what": "metta._atoms.model.encode's return slot holds 3,104 abstract references, and every frozenset union, difference and membership over it is linear in that size",
+      "at": "2026-09-19",
       "blocks": [
         "g1"
       ],
-      "at": "2026-09-19"
+      "what": "metta._atoms.model.encode's return slot holds 3,104 abstract references, and every frozenset union, difference and membership over it is linear in that size"
     },
     "i3": {
-      "what": "the order must be maintained while the graph is still being discovered",
       "at": "2026-09-19",
-      "consequence": true
+      "consequence": true,
+      "what": "the order must be maintained while the graph is still being discovered"
     },
     "i4": {
-      "what": "verdicts become more conservative, so the generated _orders.py changes",
       "at": "2026-09-19",
-      "consequence": true
+      "consequence": true,
+      "what": "verdicts become more conservative, so the generated _orders.py changes"
     },
     "i5": {
-      "what": "_external_call returns Reference('unknown', '<site>: external value <external name>'), so an unresolved member on an external value makes one distinct unknown PER EXTERNAL NAME PER SITE, and those flow into every set the value reaches",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "at": "2026-09-19",
       "blocks": [
         "g1"
       ],
-      "at": "2026-09-19",
-      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+      "what": "_external_call returns Reference('unknown', '<site>: external value <external name>'), so an unresolved member on an external value makes one distinct unknown PER EXTERNAL NAME PER SITE, and those flow into every set the value reaches"
     },
     "i6": {
-      "what": "the analysis still scales badly: 158 modules take 15.6s and 171 take 460.7s, thirty times the cost for eight per cent more program",
-      "blocks": [
-        "g1"
-      ]
-    },
-    "i7": {
-      "what": "reset --mixed leaves the working tree, so a component whose tracked files git removed when the path became a gitlink stays missing them",
-      "blocks": [
-        "g2"
-      ]
-    },
-    "i8": {
-      "what": "on the merged tree the analysis DEGRADES thirty-one doors: verdicts that were Verdict(1), Verdict(2) or a clean dependency all become the same Verdict(None, mixed, open, recursive, dependency)",
       "blocks": [
         "g1"
       ],
+      "what": "the analysis still scales badly: 158 modules take 15.6s and 171 take 460.7s, thirty times the cost for eight per cent more program"
+    },
+    "i7": {
+      "blocks": [
+        "g2"
+      ],
+      "what": "reset --mixed leaves the working tree, so a component whose tracked files git removed when the path became a gitlink stays missing them"
+    },
+    "i8": {
+      "blocks": [
+        "g1"
+      ],
+      "what": "on the merged tree the analysis DEGRADES thirty-one doors: verdicts that were Verdict(1), Verdict(2) or a clean dependency all become the same Verdict(None, mixed, open, recursive, dependency)",
       "accepted": true
     },
     "i9": {
-      "what": "_attribute returns Reference('unknown', f'undeclared member {parameter}.{member}') for a member a supplied parameter does not declare, which is one abstract value per parameter TIMES member",
+      "blocks": [
+        "g1"
+      ],
+      "what": "_attribute returns Reference('unknown', f'undeclared member {parameter}.{member}') for a member a supplied parameter does not declare, which is one abstract value per parameter TIMES member"
+    },
+    "i10": {
+      "what": "the door-order GATE refuses any mixed, recursive or undeclared-open row, and the shipped table records 130 mixed and 131 recursive, so the lane exits 1 on this tree whatever the analysis costs",
+      "rests_on": [
+        "r72",
+        "r80",
+        "r73"
+      ]
+    },
+    "i11": {
+      "what": "difference propagation is slower than the analysis it replaced, and nothing yet says which of its costs carries that",
+      "rests_on": [
+        "c24",
+        "c26",
+        "r74"
+      ],
       "blocks": [
         "g1"
       ]
@@ -71,85 +90,83 @@
   },
   "approaches": {
     "a1": {
-      "title": "schedule scopes by a topological number maintained as call edges are discovered, instead of a FIFO deque",
-      "status": "failed",
       "addresses": [
         "i1"
       ],
       "at": "2026-09-19",
+      "cost": 8,
       "creates": [
         "i3"
-      ],
-      "cost": 8,
-      "rests_on": [
-        "c1"
       ],
       "history": [
         {
           "status": "untried",
           "until": "2026-09-19"
         }
-      ]
+      ],
+      "rests_on": [
+        "c1"
+      ],
+      "status": "failed",
+      "title": "schedule scopes by a topological number maintained as call edges are discovered, instead of a FIFO deque"
     },
     "a2": {
-      "title": "process the worklist depth-first, popping the newest scope",
-      "status": "failed",
       "addresses": [
         "i1"
       ],
       "at": "2026-09-19",
       "cost": 1,
-      "rests_on": [
-        "c1"
-      ],
       "history": [
         {
           "status": "untried",
           "until": "2026-09-19"
         }
-      ]
+      ],
+      "rests_on": [
+        "c1"
+      ],
+      "status": "failed",
+      "title": "process the worklist depth-first, popping the newest scope"
     },
     "a3": {
-      "title": "widen a value set past a threshold to one unknown reference",
-      "status": "unwanted",
       "addresses": [
         "i2"
       ],
       "at": "2026-09-19",
+      "cost": 4,
       "creates": [
         "i4"
       ],
-      "cost": 4,
       "history": [
         {
           "status": "untried",
           "until": "2026-09-19"
         }
-      ]
+      ],
+      "status": "unwanted",
+      "title": "widen a value set past a threshold to one unknown reference"
     },
     "a4": {
-      "title": "intern each Reference to an integer and carry Values as an int bitmask, so union, difference and membership stop being linear in set size",
-      "status": "failed",
       "addresses": [
         "i1",
         "i2"
       ],
       "at": "2026-09-19",
       "cost": 9,
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ],
       "rests_on": [
         "c6",
         "c7"
       ],
-      "history": [
-        {
-          "status": "untried",
-          "until": "2026-09-19"
-        }
-      ]
+      "status": "failed",
+      "title": "intern each Reference to an integer and carry Values as an int bitmask, so union, difference and membership stop being linear in set size"
     },
     "a5": {
-      "title": "memoise the container item-slot union in _protocol's __iter__ expansion, through the class's existing _memo that evicts when a read slot grows",
-      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -167,11 +184,11 @@
       ],
       "rests_on": [
         "c3"
-      ]
+      ],
+      "status": "done",
+      "title": "memoise the container item-slot union in _protocol's __iter__ expansion, through the class's existing _memo that evicts when a read slot grows"
     },
     "a6": {
-      "title": "memoise the same container item-slot union in _assign's destructuring branch, keyed by the element slot it reads",
-      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -189,11 +206,11 @@
       ],
       "rests_on": [
         "c3"
-      ]
+      ],
+      "status": "done",
+      "title": "memoise the same container item-slot union in _assign's destructuring branch, keyed by the element slot it reads"
     },
     "a7": {
-      "title": "keep memoising the pure recomputations the profile names, now _container_call and what remains of _protocol",
-      "status": "failed",
       "addresses": [
         "i1"
       ],
@@ -207,11 +224,11 @@
       ],
       "rests_on": [
         "c10"
-      ]
+      ],
+      "status": "failed",
+      "title": "keep memoising the pure recomputations the profile names, now _container_call and what remains of _protocol"
     },
     "a7.1": {
-      "title": "name the union one concept, _stored(container, slot), and have all three sites call it",
-      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -229,20 +246,17 @@
       ],
       "rests_on": [
         "c8"
-      ]
+      ],
+      "status": "done",
+      "title": "name the union one concept, _stored(container, slot), and have all three sites call it"
     },
     "a8": {
-      "title": "carry the SITE and not the external name in the unknown that _external_call returns",
-      "status": "done",
       "addresses": [
         "i5"
       ],
-      "at": "2026-09-19",
       "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "at": "2026-09-19",
       "cost": 1,
-      "rests_on": [
-        "c11"
-      ],
       "history": [
         {
           "status": "untried",
@@ -252,112 +266,220 @@
           "status": "active",
           "until": "2026-09-19"
         }
-      ]
+      ],
+      "rests_on": [
+        "c11"
+      ],
+      "status": "done",
+      "title": "carry the SITE and not the external name in the unknown that _external_call returns"
     },
     "a9": {
-      "title": "check the tracked files back out after the reset, refusing only on a MODIFIED file and ignoring gitlinks, which are the nested components the recursion sets",
-      "status": "done",
       "addresses": [
         "i7"
       ],
-      "cost": 1
+      "cost": 1,
+      "status": "done",
+      "title": "check the tracked files back out after the reset, refusing only on a MODIFIED file and ignoring gitlinks, which are the nested components the recursion sets"
     },
     "a10": {
-      "title": "carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read",
-      "status": "done",
       "addresses": [
         "i9"
       ],
       "cost": 1,
+      "status": "done",
+      "title": "carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read",
       "rests_on": [
         "c11"
       ]
     },
     "a11": {
-      "title": "key the solve cache on the sources, entries and lifetimes it reads, instead of on the whole row set",
-      "status": "done",
       "addresses": [
         "i1"
       ],
-      "cost": 2
+      "cost": 2,
+      "status": "done",
+      "title": "key the solve cache on the sources, entries and lifetimes it reads, instead of on the whole row set"
     },
     "a12": {
-      "title": "collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy",
-      "status": "untried",
       "addresses": [
         "i6"
       ],
       "cost": 8,
+      "status": "untried",
+      "title": "collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy",
       "rests_on": [
         "c14",
         "c15"
       ]
     },
     "a13": {
-      "title": "intern the value sets so equal sets become IDENTICAL objects, and short-circuit a store write that adds nothing on identity",
-      "status": "done",
       "addresses": [
         "i6"
       ],
       "cost": 2,
+      "status": "done",
+      "title": "intern the value sets so equal sets become IDENTICAL objects, and short-circuit a store write that adds nothing on identity",
       "rests_on": [
         "c17",
         "c14"
       ]
+    },
+    "a14": {
+      "title": "propagate differences: cache each distributive transfer function per AST site as the references already processed and what they found, so a re-evaluation processes only what arrived, which takes v out of the inner loop",
+      "status": "failed",
+      "addresses": [
+        "i1",
+        "i6",
+        "i2"
+      ],
+      "cost": 8,
+      "rests_on": [
+        "c18",
+        "c19",
+        "c20",
+        "c22",
+        "r60"
+      ],
+      "detail": [
+        "docs/record/a14-propagate-differences-cache-each-distributive-transfer-funct.md"
+      ]
+    },
+    "a15": {
+      "title": "cache _value per expression node with its reads and effects, so a re-evaluation skips whole subtrees",
+      "status": "unwanted",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 13,
+      "rests_on": [
+        "r71"
+      ]
+    },
+    "a16": {
+      "title": "apply difference propagation only where the per-reference work is expensive, which is _call and _protocol, and leave _attribute on the bulk frozenset path",
+      "status": "untried",
+      "addresses": [
+        "i11",
+        "i1"
+      ],
+      "cost": 3
+    },
+    "a17": {
+      "title": "call each distributive transfer function ONCE with the whole set: the loops collect their references and the call happens after the loop",
+      "status": "done",
+      "addresses": [
+        "i1",
+        "i6"
+      ],
+      "cost": 4,
+      "rests_on": [
+        "r92",
+        "r98",
+        "r100",
+        "r94"
+      ],
+      "detail": [
+        "docs/record/a17-call-each-distributive-transfer-function-once-with-the-whole.md"
+      ]
+    },
+    "a18": {
+      "title": "make Reference a NamedTuple so hashing and equality run in C rather than through a Python method and a generated six-tuple comparison",
+      "status": "done",
+      "addresses": [
+        "i1"
+      ],
+      "cost": 2
     }
   },
   "claims": {
-    "r1": {
-      "says": "the door-order lane and the door-rows suite both fail on the merged tree",
-      "at": "2026-09-19",
-      "supports": [
-        "g1"
-      ],
-      "basis": "measured"
-    },
-    "r2": {
-      "says": "13,557 evaluations take 200s on the merged tree against 20,843 in 13.8s without the classes-line modules: 0.66ms each becomes 14.8ms each",
-      "at": "2026-09-19",
-      "supports": [
-        "i1"
-      ],
-      "basis": "measured"
-    },
-    "r3": {
-      "says": "_put instrumentation names it as the slot feeding the container with 427 readers",
-      "at": "2026-09-19",
-      "supports": [
-        "i2"
-      ],
-      "basis": "measured"
-    },
     "c1": {
-      "says": "chaotic iteration reaches the same least fixed point under any fair order",
-      "at": "2026-09-19"
-    },
-    "r4": {
-      "says": "standard for monotone fixed points over a finite lattice",
       "at": "2026-09-19",
-      "supports": [
-        "c1"
-      ],
-      "basis": "source"
+      "says": "chaotic iteration reaches the same least fixed point under any fair order"
     },
     "c2": {
-      "says": "the configuration that does not finish performs FEWER scope evaluations than the one that finishes",
-      "at": "2026-09-19"
+      "at": "2026-09-19",
+      "says": "the configuration that does not finish performs FEWER scope evaluations than the one that finishes"
+    },
+    "c3": {
+      "at": "2026-09-19",
+      "says": "the union of a container's two item slots is a pure store lookup, so the existing _memo's eviction on slot growth is the whole correctness condition"
+    },
+    "c4": {
+      "at": "2026-09-19",
+      "says": "the missing memo is a pre-existing inefficiency the merged tree exposed, not the thing that changed: the same code analysed the branch tip in 14.9s without it"
+    },
+    "c5": {
+      "at": "2026-09-19",
+      "says": "a5 therefore moves the threshold rather than removing the superlinearity, unless the cost after it stops growing faster than the program"
+    },
+    "c6": {
+      "at": "2026-09-19",
+      "says": "after a5 and a6 the dominant cost is _put copying a frozenset on every growth, which is linear in the slot's current size"
+    },
+    "c7": {
+      "at": "2026-09-19",
+      "says": "an int bitmask makes union and difference 3x to 77x faster and element iteration 13x to 22x SLOWER, and this analysis iterates far more than it unions"
+    },
+    "c8": {
+      "at": "2026-09-19",
+      "says": "doororder.py in check mode comparing the generated table is a sufficient equivalence test for these memos"
+    },
+    "c9": {
+      "at": "2026-09-19",
+      "says": "comparing frozensets by repr is not comparing them: str hashing varies between runs, so the first differential reported 137 of 227 changed with identical repr LENGTHS, and a canonical dump showed them identical"
+    },
+    "c10": {
+      "at": "2026-09-19",
+      "says": "the memo is not sufficient: with it, doororder.py on the full module set has still not finished at 25 minutes, the same wall the unmemoised baseline hit"
+    },
+    "c11": {
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "at": "2026-09-19",
+      "says": "the external name in that reference is pure multiplicity: the published Verdict reads bool(open) and never its contents, and the detailed reason WITH the name is already added to open on the line above"
+    },
+    "r1": {
+      "at": "2026-09-19",
+      "basis": "measured",
+      "says": "the door-order lane and the door-rows suite both fail on the merged tree",
+      "supports": [
+        "g1"
+      ]
+    },
+    "r2": {
+      "at": "2026-09-19",
+      "basis": "measured",
+      "says": "13,557 evaluations take 200s on the merged tree against 20,843 in 13.8s without the classes-line modules: 0.66ms each becomes 14.8ms each",
+      "supports": [
+        "i1"
+      ]
+    },
+    "r3": {
+      "at": "2026-09-19",
+      "basis": "measured",
+      "says": "_put instrumentation names it as the slot feeding the container with 427 readers",
+      "supports": [
+        "i2"
+      ]
+    },
+    "r4": {
+      "at": "2026-09-19",
+      "basis": "source",
+      "says": "standard for monotone fixed points over a finite lattice",
+      "supports": [
+        "c1"
+      ]
     },
     "r5": {
-      "says": "20,843 over 2,358 scopes in 13.80s against 13,557 over 2,532 scopes in 200s",
       "at": "2026-09-19",
+      "basis": "measured",
+      "says": "20,843 over 2,358 scopes in 13.80s against 13,557 over 2,532 scopes in 200s",
       "supports": [
         "c2"
-      ],
-      "basis": "measured"
+      ]
     },
     "r6": {
-      "says": "measured: it touched fewer slots, 71,488, and still did not finish in 300s",
       "at": "2026-09-19",
+      "says": "measured: it touched fewer slots, 71,488, and still did not finish in 300s",
       "supports": [
         {
           "node": "a2",
@@ -366,8 +488,8 @@
       ]
     },
     "r7": {
-      "says": "c2 shows the count of evaluations is not what grew, so an order that reduces that count has nothing to remove",
       "at": "2026-09-19",
+      "says": "c2 shows the count of evaluations is not what grew, so an order that reduces that count has nothing to remove",
       "supports": [
         {
           "node": "a1",
@@ -376,8 +498,8 @@
       ]
     },
     "r8": {
-      "says": "it changes verdicts, and this repository refuses a sound-but-incomplete default without a differential proving the gate safe",
       "at": "2026-09-19",
+      "says": "it changes verdicts, and this repository refuses a sound-but-incomplete default without a differential proving the gate safe",
       "supports": [
         {
           "node": "a3",
@@ -386,8 +508,8 @@
       ]
     },
     "r9": {
-      "says": "profiled: _protocol self time 63.0s to 11.4s, Reference.__hash__ calls 515M to 158M, and 2.4x more store writes in the same 150s window",
       "at": "2026-09-19",
+      "says": "profiled: _protocol self time 63.0s to 11.4s, Reference.__hash__ calls 515M to 158M, and 2.4x more store writes in the same 150s window",
       "supports": [
         {
           "node": "a5",
@@ -395,45 +517,33 @@
         }
       ]
     },
-    "c3": {
-      "says": "the union of a container's two item slots is a pure store lookup, so the existing _memo's eviction on slot growth is the whole correctness condition",
-      "at": "2026-09-19"
-    },
     "r10": {
-      "says": "read from _memo's own contract in _analysis.py",
       "at": "2026-09-19",
+      "basis": "source",
+      "says": "read from _memo's own contract in _analysis.py",
       "supports": [
         "c3"
-      ],
-      "basis": "source"
-    },
-    "c4": {
-      "says": "the missing memo is a pre-existing inefficiency the merged tree exposed, not the thing that changed: the same code analysed the branch tip in 14.9s without it",
-      "at": "2026-09-19"
+      ]
     },
     "r11": {
-      "says": "doororder.py measured at 14.9s on 14f5c43b5, whose _analysis.py is identical in this respect",
       "at": "2026-09-19",
+      "basis": "measured",
+      "says": "doororder.py measured at 14.9s on 14f5c43b5, whose _analysis.py is identical in this respect",
       "supports": [
         "c4"
-      ],
-      "basis": "measured"
-    },
-    "c5": {
-      "says": "a5 therefore moves the threshold rather than removing the superlinearity, unless the cost after it stops growing faster than the program",
-      "at": "2026-09-19"
+      ]
     },
     "r12": {
-      "says": "follows from c4; the completion time now being measured decides it",
       "at": "2026-09-19",
+      "basis": "assumed",
+      "says": "follows from c4; the completion time now being measured decides it",
       "supports": [
         "c5"
-      ],
-      "basis": "assumed"
+      ]
     },
     "r13": {
-      "says": "profiled: _assign's 16.7s of self time and its 133M-call generator both leave the profile, and the same store work now happens in 120s where it took 150s",
       "at": "2026-09-19",
+      "says": "profiled: _assign's 16.7s of self time and its 133M-call generator both leave the profile, and the same store work now happens in 120s where it took 150s",
       "supports": [
         {
           "node": "a6",
@@ -441,33 +551,25 @@
         }
       ]
     },
-    "c6": {
-      "says": "after a5 and a6 the dominant cost is _put copying a frozenset on every growth, which is linear in the slot's current size",
-      "at": "2026-09-19"
-    },
     "r14": {
-      "says": "profiled: _put is 24.8s of self time over 10.6M calls, 2.3us each, and previous | added copies the whole previous set",
       "at": "2026-09-19",
+      "basis": "measured",
+      "says": "profiled: _put is 24.8s of self time over 10.6M calls, 2.3us each, and previous | added copies the whole previous set",
       "supports": [
         "c6"
-      ],
-      "basis": "measured"
-    },
-    "c7": {
-      "says": "an int bitmask makes union and difference 3x to 77x faster and element iteration 13x to 22x SLOWER, and this analysis iterates far more than it unions",
-      "at": "2026-09-19"
+      ]
     },
     "r15": {
-      "says": "microbenchmark at set sizes 32, 256 and 2048 against the profile's split: about 25s of set algebra in _put and _get against 35s or more of iteration in _protocol, _container_call and set.update",
       "at": "2026-09-19",
+      "basis": "measured",
+      "says": "microbenchmark at set sizes 32, 256 and 2048 against the profile's split: about 25s of set algebra in _put and _get against 35s or more of iteration in _protocol, _container_call and set.update",
       "supports": [
         "c7"
-      ],
-      "basis": "measured"
+      ]
     },
     "r16": {
-      "says": "c7: the mix falls on the iteration side, so the representation change is a net loss here, unlike the points-to setting it comes from",
       "at": "2026-09-19",
+      "says": "c7: the mix falls on the iteration side, so the representation change is a net loss here, unlike the points-to setting it comes from",
       "supports": [
         {
           "node": "a4",
@@ -476,8 +578,8 @@
       ]
     },
     "r17": {
-      "says": "a5 and a6 are the same move and each was measured to work",
       "at": "2026-09-19",
+      "says": "a5 and a6 are the same move and each was measured to work",
       "supports": [
         {
           "node": "a7",
@@ -486,8 +588,8 @@
       ]
     },
     "r18": {
-      "says": "the same union appeared three times, in the __iter__ expansion, in destructuring and in _container_call's key selection",
       "at": "2026-09-19",
+      "says": "the same union appeared three times, in the __iter__ expansion, in destructuring and in _container_call's key selection",
       "supports": [
         {
           "node": "a7.1",
@@ -496,8 +598,8 @@
       ]
     },
     "r19": {
-      "says": "applied and lint-clean; the differential that proves it is tools/doororder.py in check mode coming back 0, which compares all 227 generated verdicts",
       "at": "2026-09-19",
+      "says": "applied and lint-clean; the differential that proves it is tools/doororder.py in check mode coming back 0, which compares all 227 generated verdicts",
       "supports": [
         {
           "node": "a7.1",
@@ -505,21 +607,17 @@
         }
       ]
     },
-    "c8": {
-      "says": "doororder.py in check mode comparing the generated table is a sufficient equivalence test for these memos",
-      "at": "2026-09-19"
-    },
     "r20": {
-      "says": "it regenerates every one of the 227 shipped verdicts from the analysis and diffs them; rows outside the table are covered by the door-rows suite",
       "at": "2026-09-19",
+      "basis": "assumed",
+      "says": "it regenerates every one of the 227 shipped verdicts from the analysis and diffs them; rows outside the table are covered by the door-rows suite",
       "supports": [
         "c8"
-      ],
-      "basis": "assumed"
+      ]
     },
     "r21": {
-      "says": "differential: all 227 derived orders identical over the module set that completes, sets compared by sorted contents; committed and the seat re-pinned",
       "at": "2026-09-19",
+      "says": "differential: all 227 derived orders identical over the module set that completes, sets compared by sorted contents; committed and the seat re-pinned",
       "supports": [
         {
           "node": "a7.1",
@@ -527,33 +625,25 @@
         }
       ]
     },
-    "c9": {
-      "says": "comparing frozensets by repr is not comparing them: str hashing varies between runs, so the first differential reported 137 of 227 changed with identical repr LENGTHS, and a canonical dump showed them identical",
-      "at": "2026-09-19"
-    },
     "r22": {
-      "says": "measured twice; the first comparison also silently compared two EMPTY files after the dump raised, and reported identical",
       "at": "2026-09-19",
+      "basis": "measured",
+      "says": "measured twice; the first comparison also silently compared two EMPTY files after the dump raised, and reported identical",
       "supports": [
         "c9"
-      ],
-      "basis": "measured"
-    },
-    "c10": {
-      "says": "the memo is not sufficient: with it, doororder.py on the full module set has still not finished at 25 minutes, the same wall the unmemoised baseline hit",
-      "at": "2026-09-19"
+      ]
     },
     "r23": {
-      "says": "measured in wt-battery-6 and wt-battery-2, both runs past 25 and 17 minutes with no result, against 14.9s on the branch tip",
       "at": "2026-09-19",
+      "basis": "measured",
+      "says": "measured in wt-battery-6 and wt-battery-2, both runs past 25 and 17 minutes with no result, against 14.9s on the branch tip",
       "supports": [
         "c10"
-      ],
-      "basis": "measured"
+      ]
     },
     "r24": {
-      "says": "c10: memoising the pure recomputations the profile names is a real and measured improvement and does not bring the full set into range, which is c5 answered",
       "at": "2026-09-19",
+      "says": "c10: memoising the pure recomputations the profile names is a real and measured improvement and does not bring the full set into range, which is c5 answered",
       "supports": [
         {
           "node": "a7",
@@ -562,8 +652,8 @@
       ]
     },
     "r25": {
-      "says": "landed in the consolidated form a7.1 named it: _protocol's __iter__ expansion calls _stored(reference.name, '<items>'), and the differential over all 227 orders passed",
       "at": "2026-09-19",
+      "says": "landed in the consolidated form a7.1 named it: _protocol's __iter__ expansion calls _stored(reference.name, '<items>'), and the differential over all 227 orders passed",
       "supports": [
         {
           "node": "a5",
@@ -572,8 +662,8 @@
       ]
     },
     "r26": {
-      "says": "landed in the same consolidated form: _assign's destructuring calls _stored(reference.name, slot), and the differential over all 227 orders passed",
       "at": "2026-09-19",
+      "says": "landed in the same consolidated form: _assign's destructuring calls _stored(reference.name, slot), and the differential over all 227 orders passed",
       "supports": [
         {
           "node": "a6",
@@ -582,80 +672,75 @@
       ]
     },
     "r27": {
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "at": "2026-09-19",
+      "basis": "measured",
       "says": "measured: one slot held 3,627 unknowns, 3,619 of them a single site's, differing only in the external name embedded in the reason",
       "supports": [
         "i5"
-      ],
-      "basis": "measured",
-      "at": "2026-09-19",
-      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
-    },
-    "c11": {
-      "says": "the external name in that reference is pure multiplicity: the published Verdict reads bool(open) and never its contents, and the detailed reason WITH the name is already added to open on the line above",
-      "at": "2026-09-19",
-      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+      ]
     },
     "r28": {
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "at": "2026-09-19",
+      "basis": "source",
       "says": "read in _order.py: Verdict(number, mixed, bool(self.open), bool(cycles), bool(blocked_by)); _external_call calls self.open.add(reason) before returning the reference",
       "supports": [
         "c11"
-      ],
-      "basis": "source",
-      "at": "2026-09-19",
-      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+      ]
     },
     "r29": {
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "at": "2026-09-19",
       "says": "measured: unknowns in the biggest slot 3,627 -> 81, stored references 10,780,534 -> 3,005,161, biggest set 5,158 -> 1,801",
       "supports": [
         {
           "node": "a8",
           "status": "active"
         }
-      ],
-      "at": "2026-09-19",
-      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+      ]
     },
     "r30": {
+      "after": "effa7e77b002e2ed8a872a64d9164f7743e16614",
+      "at": "2026-09-19",
       "says": "committed; all 227 published verdicts identical and test_door_order.py passes whole, 123 tests, including the three asserting open reason text",
       "supports": [
         {
           "node": "a8",
           "status": "done"
         }
-      ],
-      "at": "2026-09-19",
-      "after": "effa7e77b002e2ed8a872a64d9164f7743e16614"
+      ]
     },
     "c12": {
       "says": "the collapse makes the generator COMPLETE: 460.7s on the full module set, against timing out at 1500s before, and it now reaches a verdict instead of never returning"
     },
     "r31": {
+      "basis": "measured",
       "says": "measured in wt-battery-6; the verdict it reaches is that the committed table is stale, which the merged tree's own drift explains and which was invisible while the run could not finish",
       "supports": [
         "c12"
-      ],
-      "basis": "measured"
+      ]
     },
     "r32": {
+      "basis": "measured",
       "says": "measured either side of the collapse; the biggest value set is now dominated by 805 container_method and 440 container references rather than by unknowns",
       "supports": [
         "i6"
-      ],
-      "basis": "measured"
+      ]
     },
     "r33": {
+      "basis": "source",
       "says": "the mount makes this the first thing every worktree, battery and the main checkout has to do",
       "supports": [
         "g2"
-      ],
-      "basis": "source"
+      ]
     },
     "r34": {
+      "basis": "measured",
       "says": "measured: the battery's seat came out with 866 deleted files and no tools/ directory",
       "supports": [
         "i7"
-      ],
-      "basis": "measured"
+      ]
     },
     "r35": {
       "says": "measured: the battery's seat goes from 866 deleted files to nothing outstanding, with tools/ restored",
@@ -667,28 +752,28 @@
       ]
     },
     "r36": {
+      "basis": "measured",
       "says": "measured by regenerating the table, which completes for the first time: 31 of 227 rows change and every one collapses to the same maximally degraded verdict",
       "supports": [
         "i8"
-      ],
-      "basis": "measured"
+      ]
     },
     "c13": {
       "says": "the collapse of external unknowns cannot cause that: coarsening an unknown's NAME cannot make open non-empty where it was empty, since one or more unknowns reaching a call becomes exactly one and never none, and cycles are derived from door-to-door calls which unknown references never enter"
     },
     "r37": {
+      "basis": "source",
       "says": "read in _analysis.py and _order.py: _call adds to open per unknown reaching it, and derive builds its graph from bodies.get(target)",
       "supports": [
         "c13"
-      ],
-      "basis": "source"
+      ]
     },
     "r38": {
+      "basis": "measured",
       "says": "measured: three degraded doors each carried 12,527 open entries, nearly all of them _map_atoms:504 once per supplied parameter; the branch immediately below it states the rule it breaks, 'one derived value per parameter, so the domain stays finite'",
       "supports": [
         "i9"
-      ],
-      "basis": "measured"
+      ]
     },
     "r39": {
       "says": "committed; test_door_order.py passes whole, 123 tests. It does not make test_door_rows.py pass, because one solve is still 460s",
@@ -712,11 +797,11 @@
       "says": "collapsing strongly connected components is the established fix for exactly this symptom, and it is precision-preserving: every pointer in an SCC of the constraint graph provably converges to the SAME set, so one representative can stand for all of them"
     },
     "r41": {
+      "basis": "source",
       "says": "Fahndrich, Foster, Su and Aiken, PLDI 1998, measure that the bulk of work and execution time is attributable to SCCs and that without cycles the analysis scales very well; Hardekopf and Lin PLDI 2007 add lazy and hybrid cycle detection; Pearce, Kelly and Hankin SCAM 2003 give online detection by keeping the graph topologically sorted",
       "supports": [
         "c14"
-      ],
-      "basis": "source"
+      ]
     },
     "r42": {
       "says": "measured: the degraded doors sit on an SCC of 152 scopes in metta._atoms.factories, and the cost model is stored references times mean set size, which an SCC divides by its own size",
@@ -731,21 +816,21 @@
       "says": "the two cycles in this analysis are different things and only one is a cost artefact: a cycle in the VALUE-FLOW graph means several slots provably converge to the same set, so collapsing it is representation and nothing else; a cycle in the CALL graph is what Order.cycles publishes as recursive=True and is a real property. Neither is a termination check, so collapsing the first cannot make the analysis miss a loop a developer wrote"
     },
     "r43": {
+      "basis": "source",
       "says": "user, 2026-09-19: with SCC we don't prevent the dev to create an infinite while loop; and Order.cycles is read by Verdict as recursive",
       "supports": [
         "c15"
-      ],
-      "basis": "source"
+      ]
     },
     "c16": {
       "says": "collapsing the undeclared-member value DOES cut the open sets, against this thread's own earlier reasoning: 12,527 to 9,290 entries, 26 per cent, because those unknowns are CALLED elsewhere and each distinct one added its own open entry at each call site"
     },
     "r44": {
+      "basis": "measured",
       "says": "measured on the merged tree before and after",
       "supports": [
         "c16"
-      ],
-      "basis": "measured"
+      ]
     },
     "r45": {
       "says": "the 31 degraded verdicts are the merged tree's truth, not a defect: answers:arrow called only rows:arrow at the branch tip and now also reaches space:map, space:match, space:atoms, space:__iter__, answers:one and rows:to-dicts, and space:map leads into _map_atoms in the parser's recursive region. The regenerated table is what to commit.",
@@ -769,11 +854,11 @@
       "says": "the store holds the same answer over and over: 103,943 slots hold only 19,912 distinct value sets, 93,143 of them share a set with another, and 90.7 per cent of all stored references sit in redundant copies, with one 1,361-element set held by 706 slots"
     },
     "r47": {
+      "basis": "measured",
       "says": "measured on the merged tree by grouping the final store by value set",
       "supports": [
         "c17"
-      ],
-      "basis": "measured"
+      ]
     },
     "r48": {
       "says": "captures the redundancy c17 measures from the ANSWERS side, which is available, rather than from the edges, which this analyser does not materialise",
@@ -800,6 +885,377 @@
           "node": "a13",
           "status": "done"
         }
+      ]
+    },
+    "every transfer function that loops over a value set is distributive over it: f(A or B) = f(A) or f(B), because no branch inside the loop reads another element, and the one aggregate is a monotone predicate whose union splits the same way": {
+      "says": "exhaustive: ast-grep for any/all over a value set finds one site, _analysis.py:1245 in _protocol, and it is monotone; every other per-element site is a per-reference loop or a filter"
+    },
+    "the cost equation is T = R times A times v: R scope evaluations, each re-walking A AST nodes, each node doing set operations linear in the value-set size v. R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew": {
+      "says": "r5: 20,843 evaluations in 13.80s against 13,557 in 200s, same analyser, same A"
+    },
+    "c18": {
+      "says": "every transfer function that loops over a value set is distributive over it, f(A or B) = f(A) or f(B), because no branch inside the loop reads another element of the set"
+    },
+    "r51": {
+      "says": "exhaustive over the per-element sites: ast-grep for any/all over a value set finds exactly one, _analysis.py:1245 in _protocol, and that aggregate is a monotone predicate so its union splits the same way; every other site is a per-reference loop or a filter",
+      "supports": [
+        "c18"
+      ],
+      "basis": "source"
+    },
+    "c19": {
+      "says": "the cost equation is T = R times A times v, for R scope evaluations each re-walking A AST nodes whose set operations are linear in the value-set size v; R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew",
+      "rests_on": [
+        "r57"
+      ]
+    },
+    "r52": {
+      "says": "r5: 20,843 evaluations in 13.80s against 13,557 in 200s, same analyser and same A",
+      "supports": [
+        "c19"
+      ],
+      "basis": "measured"
+    },
+    "r53": {
+      "says": "c18 makes it sound and c19 names v as the term to remove; Pearce, Kelly and Hankin measured 53 per cent off Andersen's analysis by combining difference propagation with cycle elimination",
+      "supports": [
+        {
+          "node": "a14",
+          "status": "untried"
+        }
+      ]
+    },
+    "r54": {
+      "says": "applied to _attribute, _protocol and _call; test_door_order.py passes whole, 123 tests, and the full-tree timing and table differential are running",
+      "supports": [
+        {
+          "node": "a14",
+          "status": "active"
+        }
+      ]
+    },
+    "c20": {
+      "says": "this analyser is an attribute grammar evaluated over the Python AST with a global store, so the general class of the fix is incremental attribute evaluation, and difference propagation is that plus the observation that the attributes are join-semilattice elements whose transfer functions distribute"
+    },
+    "r55": {
+      "says": "Reps, Teitelbaum and Demers 1983 give the incremental evaluator that re-evaluates only affected attributes; the distributive half is Datalog's semi-naive fixpoint. Neither the BDD representation nor sparse bitmaps beats it here, because c7 measured iteration, not union, as this analysis's dominant operation",
+      "supports": [
+        "c20"
+      ]
+    },
+    "c21": {
+      "says": "the patched analyser passes every fast gate: 123 of 123 in tests/repository/test_door_order.py, ruff clean, mypy clean"
+    },
+    "r56": {
+      "says": "run in wt-battery-3 and wt-battery-4 on the merged tree with difference propagation applied",
+      "supports": [
+        "c21"
+      ],
+      "basis": "tested"
+    },
+    "r57": {
+      "says": "on the full input, 177 modules: indexing 0.6s, solving 878s, 35,778 evaluations over 2,702 distinct scopes, 107,887 slots holding 3,169,717 references, mean 29.4 per slot. R/S_e is 13.2, so the average evaluated scope is walked thirteen times and parsing is free"
+    },
+    "r58": {
+      "says": "instrumented solve in wt-battery-2, on the analyser as it stood before hash consing, so the 878s is that era's figure and the structural ratios are what it establishes",
+      "supports": [
+        "r57"
+      ],
+      "basis": "measured"
+    },
+    "c22": {
+      "says": "difference propagation does not lower Andersen's cubic worst case; what it removes is v from the inner loop, so the work becomes proportional to facts discovered rather than facts held, and the crossover is at one re-evaluation per scope"
+    },
+    "r59": {
+      "says": "r57 measures 13.2 re-evaluations per evaluated scope, so every site above the crossover",
+      "supports": [
+        "c22"
+      ]
+    },
+    "r60": {
+      "says": "the f-string cache key costs 105ns against 56ns for a tuple key, so at a few million calls the whole saving is under two seconds and is not worth widening memo_readers key type; the context tuple _call rebuilds costs 126ns"
+    },
+    "r61": {
+      "says": "timeit over 2,000,000 iterations on this box, 2026-09-19",
+      "supports": [
+        "r60"
+      ],
+      "basis": "measured"
+    },
+    "c23": {
+      "says": "a cache whose entry accumulates its dependency set must register only the dependencies the current computation added, and must not scan the accumulated set on a hit; otherwise the entry's own bookkeeping is linear in its history and reproduces the cost the cache removed",
+      "rests_on": [
+        "r70"
+      ]
+    },
+    "r62": {
+      "says": "r61 is that failure caught in the act; the same shape is why _memo guards its narrowing check",
+      "supports": [
+        "c23"
+      ]
+    },
+    "r70": {
+      "says": "round one of difference propagation did not pay: the faulthandler caught the analysis at 180 seconds inside _spread's read-registration loop, which re-registered every slot the site had EVER read on every miss, so the cost the propagation removed came back as eviction-index bookkeeping"
+    },
+    "r63": {
+      "says": "pytest faulthandler stack in wt-battery-4, _analysis.py:547, reached through _protocol and _container_call",
+      "supports": [
+        "r70"
+      ],
+      "basis": "measured"
+    },
+    "r71": {
+      "says": "A is 43.3 expression nodes per scope on the mean, median 17, so R times A is 1.5 million _value calls, worth about two seconds. Each _value call therefore costs around 250 microseconds against a 378 second baseline: the AST re-walk is not the cost, the per-node set work is"
+    },
+    "r64": {
+      "says": "static count of ast.expr nodes per scope over the 177 analysed modules, excluding nested scope bodies, against the measured R of 35,778",
+      "supports": [
+        "r71"
+      ],
+      "basis": "measured"
+    },
+    "r65": {
+      "says": "r71: the term it removes is R times A, which is 1.5 million calls and about two seconds against a 378 second baseline. It would also need narrowing folded into the cache key, because _value on an IfExp mutates and restores self.narrowed across its own computation, so the narrowed-read test would pass after the restore",
+      "supports": [
+        {
+          "node": "a15",
+          "status": "unwanted"
+        }
+      ]
+    },
+    "r66": {
+      "says": "check.sh:832 runs doororder.py as a GATE, and its exit is nonzero when any of mixed, defect_open_dependencies or recursive is non-empty; the committed table at HEAD has mixed=130 recursive=131 open=161 of 227 rows",
+      "supports": [
+        "i10"
+      ],
+      "basis": "source"
+    },
+    "r72": {
+      "says": "the door-order lane's red predates this work and predates the merge: the table at seat HEAD~3, 3b58cc2a, already carried 106 mixed and 107 recursive rows, and the merge raised those to 130 and 131"
+    },
+    "r67": {
+      "says": "counted the Verdict flags in metta/doors/_orders.py at f40a8787, 3b58cc2a and 318f975f",
+      "supports": [
+        "r72"
+      ],
+      "basis": "measured"
+    },
+    "r73": {
+      "says": "the unpatched baseline on the full 177-module input is 392.4s, the committed verdict table is in sync with it, and it exits 1 on findings: 130 mixed, 131 recursive, 160 undeclared-open, 182 of 227 rows unordered"
+    },
+    "r68": {
+      "says": "wt-battery-5, doororder.py --json, ext providers verified byte-identical to the merge tree",
+      "supports": [
+        "r73"
+      ],
+      "basis": "measured"
+    },
+    "r74": {
+      "says": "difference propagation as built is SLOWER than the baseline: the patched arm passed 473s while the baseline arm finished at 392.4s, both started together on the same input under the same load"
+    },
+    "r69": {
+      "says": "wt-battery-4 against wt-battery-5, interleaved",
+      "supports": [
+        "r74"
+      ],
+      "basis": "measured"
+    },
+    "r75": {
+      "says": "r74: the approach was predicted to remove v from the inner loop and it made the analysis slower, so whatever carries the cost is not what the prediction named",
+      "attacks": [
+        "r53"
+      ]
+    },
+    "r76": {
+      "says": "r74",
+      "supports": [
+        "i11"
+      ]
+    },
+    "c24": {
+      "says": "the candidate costs are three: _intern hashes every input set, which is a Python-level call per element because Reference carries a custom __hash__; the eviction index gains one key per site per slot read, so every _put pops a far larger set; and the per-call swap allocates four sets and builds four frozensets"
+    },
+    "r77": {
+      "says": "read from the implementation; a profile of the baseline decides between them and is running",
+      "supports": [
+        "c24"
+      ],
+      "basis": "source"
+    },
+    "c25": {
+      "says": "difference propagation is not applied everywhere by the implementations that use it: WALA applies it only to edge adding and to virtual call receivers, because its benefit is in the work done PER abstract location, and a fast bulk set operation beats delta bookkeeping wherever that per-element work is cheap"
+    },
+    "r78": {
+      "says": "Sridharan and Fink, The Complexity of Andersen's Analysis in Practice, SAS 2009, section on difference propagation: 'A set implementation that enables propagation of abstract locations in parallel lessens the need for exhaustive difference propagation in practice. In our experience, the key benefit of difference propagation lies in operations performed for each abstract location in a points-to set, e.g., edge adding. WALA only uses difference propagation for edge adding and for handling virtual call receivers'",
+      "supports": [
+        "c25"
+      ],
+      "basis": "source"
+    },
+    "c26": {
+      "says": "the regression is predicted by c25: _spread was applied to _attribute as well as to _call and _protocol, and _attribute's per-reference work is a few dictionary lookups, so the delta bookkeeping costs more than the bulk frozenset operation it replaced"
+    },
+    "r79": {
+      "says": "c25 names the criterion and _attribute fails it; the cost probe on a 130-module input decides it",
+      "supports": [
+        "c26"
+      ]
+    },
+    "r80": {
+      "says": "the door-order GATE has never passed since the verdict table was introduced: at 0ee7b5ed, the commit that added metta/doors/_orders.py, the table already carried 104 mixed and 103 recursive rows, and doororder.py exits nonzero on either"
+    },
+    "r81": {
+      "says": "counted the Verdict flags at 0ee7b5ed, 5050f368, 3f38c2ea, 73cd1a3c and f40a8787: mixed runs 104, 111, 106, 106, 130",
+      "supports": [
+        "r80"
+      ],
+      "basis": "measured"
+    },
+    "r82": {
+      "says": "r74 measured the opposite: removing v from the inner loop made the analysis slower, so either v is not what the inner loop spends its time on, or the bookkeeping that removes it costs more than it saves. c25 names the criterion the prior art uses and c26 says which site fails it",
+      "attacks": [
+        "c22"
+      ]
+    },
+    "r83": {
+      "says": "r74: measured slower than the baseline on the same input, and c26 says why, so the approach as applied to every distributive site is refuted. What it establishes is kept: c18's distributivity and c23's rule about accumulated dependency sets both stand",
+      "supports": [
+        {
+          "node": "a14",
+          "status": "failed"
+        }
+      ]
+    },
+    "r84": {
+      "says": "c25: WALA applies it only to edge adding and virtual call receivers, because the benefit is in the work done per abstract location",
+      "supports": [
+        {
+          "node": "a16",
+          "status": "untried"
+        }
+      ]
+    },
+    "r85": {
+      "says": "cProfile of the unpatched baseline over the full input, 628s under the profiler against 392s without it, 1.459 billion calls: _protocol 31,779,766 calls, 90.6s self, 433s cumulative; _container_call 10,211,378 calls, 90.2s self, 526s cumulative; _put 76,444,351 calls, 79.7s self; set.update 54,889,758 calls 44.8s; _attribute 24,487,014 calls 31.4s; _call 24,486,218 calls 27.1s; Reference.__hash__ 176,041,197 calls 13.0s; the dataclass __eq__ 43,002,228 calls 5.9s; __post_init__ 54,589,698 calls 12.4s; _value only 2,494,402 calls"
+    },
+    "r86": {
+      "says": "cProfile in wt-battery-5 on the merged tree with the committed analyser",
+      "supports": [
+        "r85"
+      ],
+      "basis": "measured"
+    },
+    "c27": {
+      "says": "the cost is a distributive transfer function called once per reference instead of once per set. _protocol, _attribute, _call and _store each take a SET, and five sites hand them a singleton inside a loop, so the fixed per-call cost is paid once per reference rather than once. That is why _protocol reaches 31.8 million calls against 2.5 million _value calls",
+      "rests_on": [
+        "r85"
+      ]
+    },
+    "r87": {
+      "says": "r85 gives the call counts; the five sites are _call's class and instance branches, _container_call's bulk mutations, _assign's destructuring and _evaluate's lifetime protocols",
+      "supports": [
+        "c27"
+      ],
+      "basis": "source"
+    },
+    "r88": {
+      "says": "c27 names the shape and c18 proves the union of the singleton answers is the answer for the union",
+      "supports": [
+        {
+          "node": "a17",
+          "status": "untried"
+        }
+      ]
+    },
+    "r89": {
+      "says": "r85: 176M hash calls and 43M equality calls; microbenchmarked at 7.5x to 9.6x on the subset test _put performs on every write",
+      "supports": [
+        {
+          "node": "a18",
+          "status": "untried"
+        }
+      ]
+    },
+    "r90": {
+      "says": "applied to all five sites; test_door_order.py passes whole, 123 tests, and the full-tree timing is running",
+      "supports": [
+        {
+          "node": "a17",
+          "status": "active"
+        }
+      ]
+    },
+    "r91": {
+      "says": "applied; ruff and the 123 door-order tests pass",
+      "supports": [
+        {
+          "node": "a18",
+          "status": "active"
+        }
+      ]
+    },
+    "r92": {
+      "says": "batching the per-element calls and making Reference a tuple takes the full-input solve from 392.4s to 128.6s, a 3.05x speedup, and every published number is identical: stale None, 130 mixed, 131 recursive, 160 undeclared-open, 161 open, 227 rows, 29,583 sites, and the same order counts"
+    },
+    "r93": {
+      "says": "wt-battery-6 against wt-battery-5, byte-identical ext providers, doororder.py --json both sides",
+      "supports": [
+        "r92"
+      ],
+      "basis": "measured"
+    },
+    "r94": {
+      "says": "at 130 modules the counters show where it went: put 67,427,158 to 26,786,898, the eviction index 113,095,614 to 16,571,416, and the reader-key visits 1,480,726,150 to 28,360,853, a 52x fall, while the store is unchanged at 88,918 slots holding 2,456,703 references against 88,920 and 2,456,718"
+    },
+    "r95": {
+      "says": "ai_cost_probe.py at LIMIT=130 in wt-battery-3 and wt-battery-2",
+      "supports": [
+        "r94"
+      ],
+      "basis": "measured"
+    },
+    "r96": {
+      "says": "r92 and r93: 3.05x on the full input with the answers unchanged in both directions",
+      "supports": [
+        {
+          "node": "a17",
+          "status": "done"
+        }
+      ]
+    },
+    "r97": {
+      "says": "r92 measures the two together; r85 sizes this one at 176 million hash calls and 43 million equality calls",
+      "supports": [
+        {
+          "node": "a18",
+          "status": "done"
+        }
+      ]
+    },
+    "r98": {
+      "says": "the equivalence holds in both directions at row level: 227 rows on each side, none only in one, and the single differing field across all of them is one open-site string in three rows whose text differs only by the line number of a dict literal inside _analysis.py, which the analysis reads as its own input and which this change moved from 306 to 310"
+    },
+    "r99": {
+      "says": "ai_diff_orders.py over the two runs' full Order dumps, then the two site strings printed whole",
+      "supports": [
+        "r98"
+      ],
+      "basis": "measured"
+    },
+    "r100": {
+      "says": "equivalence is complete: over all 227 rows and every field of every row, normalising only the line and column of a container site inside _analysis.py itself, which the analysis reads as its own input, ZERO fields differ between the baseline and the batched analyser"
+    },
+    "r101": {
+      "says": "ai_diff_orders.py then a normalised field-by-field comparison over the two full Order dumps",
+      "supports": [
+        "r100"
+      ],
+      "basis": "measured"
+    },
+    "r102": {
+      "says": "r85: the profile shows _protocol entered 31,779,766 times against 2,494,402 expression evaluations, so the repeated work is a per-reference call and not an AST re-walk at full set width. The equation's terms are real but it names the wrong one as dominant",
+      "attacks": [
+        "r52"
       ]
     }
   },
@@ -3297,6 +3753,2080 @@
         ]
       ],
       "id": "19b4c6b3cce7723a"
+    },
+    {
+      "at": "2026-09-19T13:47:44+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim 'every transfer function that loops over a value set is distributive over it: f(A or B) = f(A) or f(B), because no branch inside the loop reads another element, and the one aggregate is a monotone predicate whose union splits the same way' --because 'exhaustive: ast-grep for any/all over a value set finds one site, _analysis.py:1245 in _protocol, and it is monotone; every other per-element site is a per-reference loop or a filter'",
+      "parents": [
+        "19b4c6b3cce7723a"
+      ],
+      "assert": [
+        [
+          "every transfer function that loops over a value set is distributive over it: f(A or B) = f(A) or f(B), because no branch inside the loop reads another element, and the one aggregate is a monotone predicate whose union splits the same way",
+          "sort",
+          "claim"
+        ],
+        [
+          "every transfer function that loops over a value set is distributive over it: f(A or B) = f(A) or f(B), because no branch inside the loop reads another element, and the one aggregate is a monotone predicate whose union splits the same way",
+          "says",
+          "exhaustive: ast-grep for any/all over a value set finds one site, _analysis.py:1245 in _protocol, and it is monotone; every other per-element site is a per-reference loop or a filter"
+        ]
+      ],
+      "id": "ae642cc08ef930cc"
+    },
+    {
+      "at": "2026-09-19T13:47:44+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim 'the cost equation is T = R times A times v: R scope evaluations, each re-walking A AST nodes, each node doing set operations linear in the value-set size v. R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew' --because 'r5: 20,843 evaluations in 13.80s against 13,557 in 200s, same analyser, same A'",
+      "parents": [
+        "ae642cc08ef930cc"
+      ],
+      "assert": [
+        [
+          "the cost equation is T = R times A times v: R scope evaluations, each re-walking A AST nodes, each node doing set operations linear in the value-set size v. R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew",
+          "sort",
+          "claim"
+        ],
+        [
+          "the cost equation is T = R times A times v: R scope evaluations, each re-walking A AST nodes, each node doing set operations linear in the value-set size v. R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew",
+          "says",
+          "r5: 20,843 evaluations in 13.80s against 13,557 in 200s, same analyser, same A"
+        ]
+      ],
+      "id": "7eaf9271031b5bbd"
+    },
+    {
+      "at": "2026-09-19T13:47:44+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-approach 'propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop' --cost 8",
+      "parents": [
+        "7eaf9271031b5bbd"
+      ],
+      "assert": [
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "sort",
+          "approach"
+        ],
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "cost",
+          8
+        ],
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "status",
+          "untried"
+        ],
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "title",
+          ""
+        ]
+      ],
+      "id": "8b203020a9bc02e7"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "undo",
+      "parents": [
+        "8b203020a9bc02e7"
+      ],
+      "retract": [
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "sort"
+        ]
+      ],
+      "id": "241208bd372dbc6b"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "undo",
+      "parents": [
+        "241208bd372dbc6b"
+      ],
+      "assert": [
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "sort",
+          "approach"
+        ],
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "cost",
+          8
+        ],
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "status",
+          "untried"
+        ],
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "title",
+          ""
+        ]
+      ],
+      "id": "100aa731b25c29f5"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "undo",
+      "parents": [
+        "100aa731b25c29f5"
+      ],
+      "retract": [
+        [
+          "propagate differences instead of recomputing: cache each distributive transfer function per AST site as the inputs already processed and the result so far, so a re-evaluation processes only the references that are new, removing v from the inner loop",
+          "sort"
+        ]
+      ],
+      "id": "707bd23d6687d1f5"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c18 'every transfer function that loops over a value set is distributive over it, f(A or B) = f(A) or f(B), because no branch inside the loop reads another element of the set' --because 'exhaustive over the per-element sites: ast-grep for any/all over a value set finds exactly one, _analysis.py:1245 in _protocol, and that aggregate is a monotone predicate so its union splits the same way; every other site is a per-reference loop or a filter' --basis source",
+      "parents": [
+        "707bd23d6687d1f5"
+      ],
+      "assert": [
+        [
+          "c18",
+          "sort",
+          "claim"
+        ],
+        [
+          "c18",
+          "says",
+          "every transfer function that loops over a value set is distributive over it, f(A or B) = f(A) or f(B), because no branch inside the loop reads another element of the set"
+        ],
+        [
+          "r51",
+          "sort",
+          "claim"
+        ],
+        [
+          "r51",
+          "basis",
+          "source"
+        ],
+        [
+          "r51",
+          "says",
+          "exhaustive over the per-element sites: ast-grep for any/all over a value set finds exactly one, _analysis.py:1245 in _protocol, and that aggregate is a monotone predicate so its union splits the same way; every other site is a per-reference loop or a filter"
+        ],
+        [
+          "r51",
+          "supports",
+          "c18"
+        ]
+      ],
+      "id": "c40d94c925e11c12"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c19 'the cost equation is T = R times A times v, for R scope evaluations each re-walking A AST nodes whose set operations are linear in the value-set size v; R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew' --because 'r5: 20,843 evaluations in 13.80s against 13,557 in 200s, same analyser and same A' --basis measured",
+      "parents": [
+        "c40d94c925e11c12"
+      ],
+      "assert": [
+        [
+          "c19",
+          "sort",
+          "claim"
+        ],
+        [
+          "c19",
+          "says",
+          "the cost equation is T = R times A times v, for R scope evaluations each re-walking A AST nodes whose set operations are linear in the value-set size v; R fell 1.54x between the two configurations while T rose 14.5x, so v is the term that grew"
+        ],
+        [
+          "r52",
+          "sort",
+          "claim"
+        ],
+        [
+          "r52",
+          "basis",
+          "measured"
+        ],
+        [
+          "r52",
+          "says",
+          "r5: 20,843 evaluations in 13.80s against 13,557 in 200s, same analyser and same A"
+        ],
+        [
+          "r52",
+          "supports",
+          "c19"
+        ]
+      ],
+      "id": "0f899ee5630b8531"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-approach a14 'propagate differences: cache each distributive transfer function per AST site as the references already processed and what they found, so a re-evaluation processes only what arrived, which takes v out of the inner loop' --addresses i1 --addresses i6 --addresses i2 --cost 8 --because 'c18 makes it sound and c19 names v as the term to remove; Pearce, Kelly and Hankin measured 53 per cent off Andersen'\"'\"'s analysis by combining difference propagation with cycle elimination'",
+      "parents": [
+        "0f899ee5630b8531"
+      ],
+      "assert": [
+        [
+          "a14",
+          "sort",
+          "approach"
+        ],
+        [
+          "a14",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a14",
+          "addresses",
+          "i6"
+        ],
+        [
+          "a14",
+          "addresses",
+          "i2"
+        ],
+        [
+          "a14",
+          "cost",
+          8
+        ],
+        [
+          "a14",
+          "status",
+          "untried"
+        ],
+        [
+          "a14",
+          "title",
+          "propagate differences: cache each distributive transfer function per AST site as the references already processed and what they found, so a re-evaluation processes only what arrived, which takes v out of the inner loop"
+        ],
+        [
+          "r53",
+          "sort",
+          "claim"
+        ],
+        [
+          "r53",
+          "says",
+          "c18 makes it sound and c19 names v as the term to remove; Pearce, Kelly and Hankin measured 53 per cent off Andersen's analysis by combining difference propagation with cycle elimination"
+        ],
+        [
+          "r53",
+          "supports",
+          {
+            "node": "a14",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "d30ccd989af3c382"
+    },
+    {
+      "at": "2026-09-19T13:54:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a14 active --because 'applied to _attribute, _protocol and _call; test_door_order.py passes whole, 123 tests, and the full-tree timing and table differential are running'",
+      "parents": [
+        "d30ccd989af3c382"
+      ],
+      "assert": [
+        [
+          "a14",
+          "status",
+          "active"
+        ],
+        [
+          "r54",
+          "sort",
+          "claim"
+        ],
+        [
+          "r54",
+          "says",
+          "applied to _attribute, _protocol and _call; test_door_order.py passes whole, 123 tests, and the full-tree timing and table differential are running"
+        ],
+        [
+          "r54",
+          "supports",
+          {
+            "node": "a14",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "17a3cadc8f6bec5d"
+    },
+    {
+      "at": "2026-09-19T13:58:13+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c20 'this analyser is an attribute grammar evaluated over the Python AST with a global store, so the general class of the fix is incremental attribute evaluation, and difference propagation is that plus the observation that the attributes are join-semilattice elements whose transfer functions distribute' --because 'Reps, Teitelbaum and Demers 1983 give the incremental evaluator that re-evaluates only affected attributes; the distributive half is Datalog'\"'\"'s semi-naive fixpoint. Neither the BDD representation nor sparse bitmaps beats it here, because c7 measured iteration, not union, as this analysis'\"'\"'s dominant operation'",
+      "parents": [
+        "17a3cadc8f6bec5d"
+      ],
+      "assert": [
+        [
+          "c20",
+          "sort",
+          "claim"
+        ],
+        [
+          "c20",
+          "says",
+          "this analyser is an attribute grammar evaluated over the Python AST with a global store, so the general class of the fix is incremental attribute evaluation, and difference propagation is that plus the observation that the attributes are join-semilattice elements whose transfer functions distribute"
+        ],
+        [
+          "r55",
+          "sort",
+          "claim"
+        ],
+        [
+          "r55",
+          "says",
+          "Reps, Teitelbaum and Demers 1983 give the incremental evaluator that re-evaluates only affected attributes; the distributive half is Datalog's semi-naive fixpoint. Neither the BDD representation nor sparse bitmaps beats it here, because c7 measured iteration, not union, as this analysis's dominant operation"
+        ],
+        [
+          "r55",
+          "supports",
+          "c20"
+        ]
+      ],
+      "id": "0dce9b306668919a"
+    },
+    {
+      "at": "2026-09-19T13:58:17+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c21 'the patched analyser passes every fast gate: 123 of 123 in tests/repository/test_door_order.py, ruff clean, mypy clean' --because 'run in wt-battery-3 and wt-battery-4 on the merged tree with difference propagation applied' --basis tested",
+      "parents": [
+        "0dce9b306668919a"
+      ],
+      "assert": [
+        [
+          "c21",
+          "sort",
+          "claim"
+        ],
+        [
+          "c21",
+          "says",
+          "the patched analyser passes every fast gate: 123 of 123 in tests/repository/test_door_order.py, ruff clean, mypy clean"
+        ],
+        [
+          "r56",
+          "sort",
+          "claim"
+        ],
+        [
+          "r56",
+          "basis",
+          "tested"
+        ],
+        [
+          "r56",
+          "says",
+          "run in wt-battery-3 and wt-battery-4 on the merged tree with difference propagation applied"
+        ],
+        [
+          "r56",
+          "supports",
+          "c21"
+        ]
+      ],
+      "id": "018ae683c6afe2d4"
+    },
+    {
+      "at": "2026-09-19T13:58:23+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a14 c18 --as rests-on",
+      "parents": [
+        "018ae683c6afe2d4"
+      ],
+      "assert": [
+        [
+          "a14",
+          "rests_on",
+          "c18"
+        ]
+      ],
+      "id": "145694fc00dbd04f"
+    },
+    {
+      "at": "2026-09-19T13:58:23+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a14 c19 --as rests-on",
+      "parents": [
+        "145694fc00dbd04f"
+      ],
+      "assert": [
+        [
+          "a14",
+          "rests_on",
+          "c19"
+        ]
+      ],
+      "id": "19913015ec719c67"
+    },
+    {
+      "at": "2026-09-19T13:58:23+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a14 c20 --as rests-on",
+      "parents": [
+        "19913015ec719c67"
+      ],
+      "assert": [
+        [
+          "a14",
+          "rests_on",
+          "c20"
+        ]
+      ],
+      "id": "4a15b3a2316b56ba"
+    },
+    {
+      "at": "2026-09-19T14:01:58+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r57 'on the full input, 177 modules: indexing 0.6s, solving 878s, 35,778 evaluations over 2,702 distinct scopes, 107,887 slots holding 3,169,717 references, mean 29.4 per slot. R/S_e is 13.2, so the average evaluated scope is walked thirteen times and parsing is free' --because 'instrumented solve in wt-battery-2, on the analyser as it stood before hash consing, so the 878s is that era'\"'\"'s figure and the structural ratios are what it establishes' --basis measured",
+      "parents": [
+        "4a15b3a2316b56ba"
+      ],
+      "assert": [
+        [
+          "r57",
+          "sort",
+          "claim"
+        ],
+        [
+          "r57",
+          "says",
+          "on the full input, 177 modules: indexing 0.6s, solving 878s, 35,778 evaluations over 2,702 distinct scopes, 107,887 slots holding 3,169,717 references, mean 29.4 per slot. R/S_e is 13.2, so the average evaluated scope is walked thirteen times and parsing is free"
+        ],
+        [
+          "r58",
+          "sort",
+          "claim"
+        ],
+        [
+          "r58",
+          "basis",
+          "measured"
+        ],
+        [
+          "r58",
+          "says",
+          "instrumented solve in wt-battery-2, on the analyser as it stood before hash consing, so the 878s is that era's figure and the structural ratios are what it establishes"
+        ],
+        [
+          "r58",
+          "supports",
+          "r57"
+        ]
+      ],
+      "id": "391d320d94ac554d"
+    },
+    {
+      "at": "2026-09-19T14:01:58+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c22 'difference propagation does not lower Andersen'\"'\"'s cubic worst case; what it removes is v from the inner loop, so the work becomes proportional to facts discovered rather than facts held, and the crossover is at one re-evaluation per scope' --because 'r57 measures 13.2 re-evaluations per evaluated scope, so every site above the crossover'",
+      "parents": [
+        "391d320d94ac554d"
+      ],
+      "assert": [
+        [
+          "c22",
+          "sort",
+          "claim"
+        ],
+        [
+          "c22",
+          "says",
+          "difference propagation does not lower Andersen's cubic worst case; what it removes is v from the inner loop, so the work becomes proportional to facts discovered rather than facts held, and the crossover is at one re-evaluation per scope"
+        ],
+        [
+          "r59",
+          "sort",
+          "claim"
+        ],
+        [
+          "r59",
+          "says",
+          "r57 measures 13.2 re-evaluations per evaluated scope, so every site above the crossover"
+        ],
+        [
+          "r59",
+          "supports",
+          "c22"
+        ]
+      ],
+      "id": "d65a9236efe00569"
+    },
+    {
+      "at": "2026-09-19T14:01:58+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a14 c22 --as rests-on",
+      "parents": [
+        "d65a9236efe00569"
+      ],
+      "assert": [
+        [
+          "a14",
+          "rests_on",
+          "c22"
+        ]
+      ],
+      "id": "7d6ec517a52a57f9"
+    },
+    {
+      "at": "2026-09-19T14:01:58+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "detail a14",
+      "parents": [
+        "7d6ec517a52a57f9"
+      ],
+      "assert": [
+        [
+          "a14",
+          "detail",
+          "docs/record/a14-propagate-differences-cache-each-distributive-transfer-funct.md"
+        ]
+      ],
+      "id": "453febd676cc1470"
+    },
+    {
+      "at": "2026-09-19T14:07:31+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r60 'the f-string cache key costs 105ns against 56ns for a tuple key, so at a few million calls the whole saving is under two seconds and is not worth widening memo_readers key type; the context tuple _call rebuilds costs 126ns' --because 'timeit over 2,000,000 iterations on this box, 2026-09-19' --basis measured",
+      "parents": [
+        "453febd676cc1470"
+      ],
+      "assert": [
+        [
+          "r60",
+          "sort",
+          "claim"
+        ],
+        [
+          "r60",
+          "says",
+          "the f-string cache key costs 105ns against 56ns for a tuple key, so at a few million calls the whole saving is under two seconds and is not worth widening memo_readers key type; the context tuple _call rebuilds costs 126ns"
+        ],
+        [
+          "r61",
+          "sort",
+          "claim"
+        ],
+        [
+          "r61",
+          "basis",
+          "measured"
+        ],
+        [
+          "r61",
+          "says",
+          "timeit over 2,000,000 iterations on this box, 2026-09-19"
+        ],
+        [
+          "r61",
+          "supports",
+          "r60"
+        ]
+      ],
+      "id": "2edfcb922f75ff5c"
+    },
+    {
+      "at": "2026-09-19T14:07:31+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c23 'a cache whose entry accumulates its dependency set must register only the dependencies the current computation added, and must not scan the accumulated set on a hit; otherwise the entry'\"'\"'s own bookkeeping is linear in its history and reproduces the cost the cache removed' --because 'r61 is that failure caught in the act; the same shape is why _memo guards its narrowing check'",
+      "parents": [
+        "2edfcb922f75ff5c"
+      ],
+      "assert": [
+        [
+          "c23",
+          "sort",
+          "claim"
+        ],
+        [
+          "c23",
+          "says",
+          "a cache whose entry accumulates its dependency set must register only the dependencies the current computation added, and must not scan the accumulated set on a hit; otherwise the entry's own bookkeeping is linear in its history and reproduces the cost the cache removed"
+        ],
+        [
+          "r62",
+          "sort",
+          "claim"
+        ],
+        [
+          "r62",
+          "says",
+          "r61 is that failure caught in the act; the same shape is why _memo guards its narrowing check"
+        ],
+        [
+          "r62",
+          "supports",
+          "c23"
+        ]
+      ],
+      "id": "1b29b725e3370a3f"
+    },
+    {
+      "at": "2026-09-19T14:07:50+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r70 'round one of difference propagation did not pay: the faulthandler caught the analysis at 180 seconds inside _spread'\"'\"'s read-registration loop, which re-registered every slot the site had EVER read on every miss, so the cost the propagation removed came back as eviction-index bookkeeping' --because 'pytest faulthandler stack in wt-battery-4, _analysis.py:547, reached through _protocol and _container_call' --basis measured",
+      "parents": [
+        "1b29b725e3370a3f"
+      ],
+      "assert": [
+        [
+          "r63",
+          "sort",
+          "claim"
+        ],
+        [
+          "r63",
+          "basis",
+          "measured"
+        ],
+        [
+          "r63",
+          "says",
+          "pytest faulthandler stack in wt-battery-4, _analysis.py:547, reached through _protocol and _container_call"
+        ],
+        [
+          "r63",
+          "supports",
+          "r70"
+        ],
+        [
+          "r70",
+          "sort",
+          "claim"
+        ],
+        [
+          "r70",
+          "says",
+          "round one of difference propagation did not pay: the faulthandler caught the analysis at 180 seconds inside _spread's read-registration loop, which re-registered every slot the site had EVER read on every miss, so the cost the propagation removed came back as eviction-index bookkeeping"
+        ]
+      ],
+      "id": "b42ef41cbabbf2de"
+    },
+    {
+      "at": "2026-09-19T14:07:50+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link c23 r70 --as rests-on",
+      "parents": [
+        "b42ef41cbabbf2de"
+      ],
+      "assert": [
+        [
+          "c23",
+          "rests_on",
+          "r70"
+        ]
+      ],
+      "id": "52bfcc3b5ff9a2d2"
+    },
+    {
+      "at": "2026-09-19T14:09:51+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r71 'A is 43.3 expression nodes per scope on the mean, median 17, so R times A is 1.5 million _value calls, worth about two seconds. Each _value call therefore costs around 250 microseconds against a 378 second baseline: the AST re-walk is not the cost, the per-node set work is' --because 'static count of ast.expr nodes per scope over the 177 analysed modules, excluding nested scope bodies, against the measured R of 35,778' --basis measured",
+      "parents": [
+        "52bfcc3b5ff9a2d2"
+      ],
+      "assert": [
+        [
+          "r64",
+          "sort",
+          "claim"
+        ],
+        [
+          "r64",
+          "basis",
+          "measured"
+        ],
+        [
+          "r64",
+          "says",
+          "static count of ast.expr nodes per scope over the 177 analysed modules, excluding nested scope bodies, against the measured R of 35,778"
+        ],
+        [
+          "r64",
+          "supports",
+          "r71"
+        ],
+        [
+          "r71",
+          "sort",
+          "claim"
+        ],
+        [
+          "r71",
+          "says",
+          "A is 43.3 expression nodes per scope on the mean, median 17, so R times A is 1.5 million _value calls, worth about two seconds. Each _value call therefore costs around 250 microseconds against a 378 second baseline: the AST re-walk is not the cost, the per-node set work is"
+        ]
+      ],
+      "id": "806e1348bc4f4281"
+    },
+    {
+      "at": "2026-09-19T14:09:51+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-approach a15 'cache _value per expression node with its reads and effects, so a re-evaluation skips whole subtrees' --addresses i1 --cost 13",
+      "parents": [
+        "806e1348bc4f4281"
+      ],
+      "assert": [
+        [
+          "a15",
+          "sort",
+          "approach"
+        ],
+        [
+          "a15",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a15",
+          "cost",
+          13
+        ],
+        [
+          "a15",
+          "status",
+          "untried"
+        ],
+        [
+          "a15",
+          "title",
+          "cache _value per expression node with its reads and effects, so a re-evaluation skips whole subtrees"
+        ]
+      ],
+      "id": "4071d49d181db08f"
+    },
+    {
+      "at": "2026-09-19T14:09:51+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a15 unwanted --because 'r71: the term it removes is R times A, which is 1.5 million calls and about two seconds against a 378 second baseline. It would also need narrowing folded into the cache key, because _value on an IfExp mutates and restores self.narrowed across its own computation, so the narrowed-read test would pass after the restore'",
+      "parents": [
+        "4071d49d181db08f"
+      ],
+      "assert": [
+        [
+          "a15",
+          "status",
+          "unwanted"
+        ],
+        [
+          "r65",
+          "sort",
+          "claim"
+        ],
+        [
+          "r65",
+          "says",
+          "r71: the term it removes is R times A, which is 1.5 million calls and about two seconds against a 378 second baseline. It would also need narrowing folded into the cache key, because _value on an IfExp mutates and restores self.narrowed across its own computation, so the narrowed-read test would pass after the restore"
+        ],
+        [
+          "r65",
+          "supports",
+          {
+            "node": "a15",
+            "status": "unwanted"
+          }
+        ]
+      ],
+      "id": "531cd848f4be7a0f"
+    },
+    {
+      "at": "2026-09-19T14:11:29+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-issue i10 'the door-order GATE refuses any mixed, recursive or undeclared-open row, and the shipped table records 130 mixed and 131 recursive, so the lane exits 1 on this tree whatever the analysis costs' --because 'check.sh:832 runs doororder.py as a GATE, and its exit is nonzero when any of mixed, defect_open_dependencies or recursive is non-empty; the committed table at HEAD has mixed=130 recursive=131 open=161 of 227 rows' --basis source",
+      "parents": [
+        "531cd848f4be7a0f"
+      ],
+      "assert": [
+        [
+          "i10",
+          "sort",
+          "issue"
+        ],
+        [
+          "i10",
+          "what",
+          "the door-order GATE refuses any mixed, recursive or undeclared-open row, and the shipped table records 130 mixed and 131 recursive, so the lane exits 1 on this tree whatever the analysis costs"
+        ],
+        [
+          "r66",
+          "sort",
+          "claim"
+        ],
+        [
+          "r66",
+          "basis",
+          "source"
+        ],
+        [
+          "r66",
+          "says",
+          "check.sh:832 runs doororder.py as a GATE, and its exit is nonzero when any of mixed, defect_open_dependencies or recursive is non-empty; the committed table at HEAD has mixed=130 recursive=131 open=161 of 227 rows"
+        ],
+        [
+          "r66",
+          "supports",
+          "i10"
+        ]
+      ],
+      "id": "5de72c87546b146f"
+    },
+    {
+      "at": "2026-09-19T14:11:29+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r72 'the door-order lane'\"'\"'s red predates this work and predates the merge: the table at seat HEAD~3, 3b58cc2a, already carried 106 mixed and 107 recursive rows, and the merge raised those to 130 and 131' --because 'counted the Verdict flags in metta/doors/_orders.py at f40a8787, 3b58cc2a and 318f975f' --basis measured",
+      "parents": [
+        "5de72c87546b146f"
+      ],
+      "assert": [
+        [
+          "r67",
+          "sort",
+          "claim"
+        ],
+        [
+          "r67",
+          "basis",
+          "measured"
+        ],
+        [
+          "r67",
+          "says",
+          "counted the Verdict flags in metta/doors/_orders.py at f40a8787, 3b58cc2a and 318f975f"
+        ],
+        [
+          "r67",
+          "supports",
+          "r72"
+        ],
+        [
+          "r72",
+          "sort",
+          "claim"
+        ],
+        [
+          "r72",
+          "says",
+          "the door-order lane's red predates this work and predates the merge: the table at seat HEAD~3, 3b58cc2a, already carried 106 mixed and 107 recursive rows, and the merge raised those to 130 and 131"
+        ]
+      ],
+      "id": "b2e63f4348b3a15f"
+    },
+    {
+      "at": "2026-09-19T14:11:29+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i10 r72 --as rests-on",
+      "parents": [
+        "b2e63f4348b3a15f"
+      ],
+      "assert": [
+        [
+          "i10",
+          "rests_on",
+          "r72"
+        ]
+      ],
+      "id": "7d11ec38ff98aba4"
+    },
+    {
+      "at": "2026-09-19T14:15:25+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r73 'the unpatched baseline on the full 177-module input is 392.4s, the committed verdict table is in sync with it, and it exits 1 on findings: 130 mixed, 131 recursive, 160 undeclared-open, 182 of 227 rows unordered' --because 'wt-battery-5, doororder.py --json, ext providers verified byte-identical to the merge tree' --basis measured",
+      "parents": [
+        "7d11ec38ff98aba4"
+      ],
+      "assert": [
+        [
+          "r68",
+          "sort",
+          "claim"
+        ],
+        [
+          "r68",
+          "basis",
+          "measured"
+        ],
+        [
+          "r68",
+          "says",
+          "wt-battery-5, doororder.py --json, ext providers verified byte-identical to the merge tree"
+        ],
+        [
+          "r68",
+          "supports",
+          "r73"
+        ],
+        [
+          "r73",
+          "sort",
+          "claim"
+        ],
+        [
+          "r73",
+          "says",
+          "the unpatched baseline on the full 177-module input is 392.4s, the committed verdict table is in sync with it, and it exits 1 on findings: 130 mixed, 131 recursive, 160 undeclared-open, 182 of 227 rows unordered"
+        ]
+      ],
+      "id": "d944c79915c00291"
+    },
+    {
+      "at": "2026-09-19T14:15:25+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r74 'difference propagation as built is SLOWER than the baseline: the patched arm passed 473s while the baseline arm finished at 392.4s, both started together on the same input under the same load' --because 'wt-battery-4 against wt-battery-5, interleaved' --basis measured",
+      "parents": [
+        "d944c79915c00291"
+      ],
+      "assert": [
+        [
+          "r69",
+          "sort",
+          "claim"
+        ],
+        [
+          "r69",
+          "basis",
+          "measured"
+        ],
+        [
+          "r69",
+          "says",
+          "wt-battery-4 against wt-battery-5, interleaved"
+        ],
+        [
+          "r69",
+          "supports",
+          "r74"
+        ],
+        [
+          "r74",
+          "sort",
+          "claim"
+        ],
+        [
+          "r74",
+          "says",
+          "difference propagation as built is SLOWER than the baseline: the patched arm passed 473s while the baseline arm finished at 392.4s, both started together on the same input under the same load"
+        ]
+      ],
+      "id": "ee9af16f16019ce6"
+    },
+    {
+      "at": "2026-09-19T14:15:25+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "attack r53 --because 'r74: the approach was predicted to remove v from the inner loop and it made the analysis slower, so whatever carries the cost is not what the prediction named'",
+      "parents": [
+        "ee9af16f16019ce6"
+      ],
+      "assert": [
+        [
+          "r75",
+          "sort",
+          "claim"
+        ],
+        [
+          "r75",
+          "attacks",
+          "r53"
+        ],
+        [
+          "r75",
+          "says",
+          "r74: the approach was predicted to remove v from the inner loop and it made the analysis slower, so whatever carries the cost is not what the prediction named"
+        ]
+      ],
+      "id": "d7b831568a61e7f1"
+    },
+    {
+      "at": "2026-09-19T14:17:26+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-issue i11 'difference propagation is slower than the analysis it replaced, and nothing yet says which of its costs carries that' --because r74",
+      "parents": [
+        "d7b831568a61e7f1"
+      ],
+      "assert": [
+        [
+          "i11",
+          "sort",
+          "issue"
+        ],
+        [
+          "i11",
+          "what",
+          "difference propagation is slower than the analysis it replaced, and nothing yet says which of its costs carries that"
+        ],
+        [
+          "r76",
+          "sort",
+          "claim"
+        ],
+        [
+          "r76",
+          "says",
+          "r74"
+        ],
+        [
+          "r76",
+          "supports",
+          "i11"
+        ]
+      ],
+      "id": "077f4d744a755200"
+    },
+    {
+      "at": "2026-09-19T14:17:26+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c24 'the candidate costs are three: _intern hashes every input set, which is a Python-level call per element because Reference carries a custom __hash__; the eviction index gains one key per site per slot read, so every _put pops a far larger set; and the per-call swap allocates four sets and builds four frozensets' --because 'read from the implementation; a profile of the baseline decides between them and is running' --basis source",
+      "parents": [
+        "077f4d744a755200"
+      ],
+      "assert": [
+        [
+          "c24",
+          "sort",
+          "claim"
+        ],
+        [
+          "c24",
+          "says",
+          "the candidate costs are three: _intern hashes every input set, which is a Python-level call per element because Reference carries a custom __hash__; the eviction index gains one key per site per slot read, so every _put pops a far larger set; and the per-call swap allocates four sets and builds four frozensets"
+        ],
+        [
+          "r77",
+          "sort",
+          "claim"
+        ],
+        [
+          "r77",
+          "basis",
+          "source"
+        ],
+        [
+          "r77",
+          "says",
+          "read from the implementation; a profile of the baseline decides between them and is running"
+        ],
+        [
+          "r77",
+          "supports",
+          "c24"
+        ]
+      ],
+      "id": "9f2d23306e899358"
+    },
+    {
+      "at": "2026-09-19T14:17:27+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i11 c24 --as rests-on",
+      "parents": [
+        "9f2d23306e899358"
+      ],
+      "assert": [
+        [
+          "i11",
+          "rests_on",
+          "c24"
+        ]
+      ],
+      "id": "fbda23487bf5fefd"
+    },
+    {
+      "at": "2026-09-19T14:20:26+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c25 'difference propagation is not applied everywhere by the implementations that use it: WALA applies it only to edge adding and to virtual call receivers, because its benefit is in the work done PER abstract location, and a fast bulk set operation beats delta bookkeeping wherever that per-element work is cheap' --because 'Sridharan and Fink, The Complexity of Andersen'\"'\"'s Analysis in Practice, SAS 2009, section on difference propagation: '\"'\"'A set implementation that enables propagation of abstract locations in parallel lessens the need for exhaustive difference propagation in practice. In our experience, the key benefit of difference propagation lies in operations performed for each abstract location in a points-to set, e.g., edge adding. WALA only uses difference propagation for edge adding and for handling virtual call receivers'\"'\"'' --basis source",
+      "parents": [
+        "fbda23487bf5fefd"
+      ],
+      "assert": [
+        [
+          "c25",
+          "sort",
+          "claim"
+        ],
+        [
+          "c25",
+          "says",
+          "difference propagation is not applied everywhere by the implementations that use it: WALA applies it only to edge adding and to virtual call receivers, because its benefit is in the work done PER abstract location, and a fast bulk set operation beats delta bookkeeping wherever that per-element work is cheap"
+        ],
+        [
+          "r78",
+          "sort",
+          "claim"
+        ],
+        [
+          "r78",
+          "basis",
+          "source"
+        ],
+        [
+          "r78",
+          "says",
+          "Sridharan and Fink, The Complexity of Andersen's Analysis in Practice, SAS 2009, section on difference propagation: 'A set implementation that enables propagation of abstract locations in parallel lessens the need for exhaustive difference propagation in practice. In our experience, the key benefit of difference propagation lies in operations performed for each abstract location in a points-to set, e.g., edge adding. WALA only uses difference propagation for edge adding and for handling virtual call receivers'"
+        ],
+        [
+          "r78",
+          "supports",
+          "c25"
+        ]
+      ],
+      "id": "b5026a11a2c6acaf"
+    },
+    {
+      "at": "2026-09-19T14:20:26+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c26 'the regression is predicted by c25: _spread was applied to _attribute as well as to _call and _protocol, and _attribute'\"'\"'s per-reference work is a few dictionary lookups, so the delta bookkeeping costs more than the bulk frozenset operation it replaced' --because 'c25 names the criterion and _attribute fails it; the cost probe on a 130-module input decides it'",
+      "parents": [
+        "b5026a11a2c6acaf"
+      ],
+      "assert": [
+        [
+          "c26",
+          "sort",
+          "claim"
+        ],
+        [
+          "c26",
+          "says",
+          "the regression is predicted by c25: _spread was applied to _attribute as well as to _call and _protocol, and _attribute's per-reference work is a few dictionary lookups, so the delta bookkeeping costs more than the bulk frozenset operation it replaced"
+        ],
+        [
+          "r79",
+          "sort",
+          "claim"
+        ],
+        [
+          "r79",
+          "says",
+          "c25 names the criterion and _attribute fails it; the cost probe on a 130-module input decides it"
+        ],
+        [
+          "r79",
+          "supports",
+          "c26"
+        ]
+      ],
+      "id": "847f5d8f458a8d96"
+    },
+    {
+      "at": "2026-09-19T14:20:26+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i11 c26 --as rests-on",
+      "parents": [
+        "847f5d8f458a8d96"
+      ],
+      "assert": [
+        [
+          "i11",
+          "rests_on",
+          "c26"
+        ]
+      ],
+      "id": "7acabebfdea79fef"
+    },
+    {
+      "at": "2026-09-19T14:21:00+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r80 'the door-order GATE has never passed since the verdict table was introduced: at 0ee7b5ed, the commit that added metta/doors/_orders.py, the table already carried 104 mixed and 103 recursive rows, and doororder.py exits nonzero on either' --because 'counted the Verdict flags at 0ee7b5ed, 5050f368, 3f38c2ea, 73cd1a3c and f40a8787: mixed runs 104, 111, 106, 106, 130' --basis measured",
+      "parents": [
+        "7acabebfdea79fef"
+      ],
+      "assert": [
+        [
+          "r80",
+          "sort",
+          "claim"
+        ],
+        [
+          "r80",
+          "says",
+          "the door-order GATE has never passed since the verdict table was introduced: at 0ee7b5ed, the commit that added metta/doors/_orders.py, the table already carried 104 mixed and 103 recursive rows, and doororder.py exits nonzero on either"
+        ],
+        [
+          "r81",
+          "sort",
+          "claim"
+        ],
+        [
+          "r81",
+          "basis",
+          "measured"
+        ],
+        [
+          "r81",
+          "says",
+          "counted the Verdict flags at 0ee7b5ed, 5050f368, 3f38c2ea, 73cd1a3c and f40a8787: mixed runs 104, 111, 106, 106, 130"
+        ],
+        [
+          "r81",
+          "supports",
+          "r80"
+        ]
+      ],
+      "id": "3d046b39ed0ac418"
+    },
+    {
+      "at": "2026-09-19T14:21:00+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i10 r80 --as rests-on",
+      "parents": [
+        "3d046b39ed0ac418"
+      ],
+      "assert": [
+        [
+          "i10",
+          "rests_on",
+          "r80"
+        ]
+      ],
+      "id": "7604b5f27cfd1c0c"
+    },
+    {
+      "at": "2026-09-19T14:23:05+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "attack c22 --because 'r74 measured the opposite: removing v from the inner loop made the analysis slower, so either v is not what the inner loop spends its time on, or the bookkeeping that removes it costs more than it saves. c25 names the criterion the prior art uses and c26 says which site fails it'",
+      "parents": [
+        "7604b5f27cfd1c0c"
+      ],
+      "assert": [
+        [
+          "r82",
+          "sort",
+          "claim"
+        ],
+        [
+          "r82",
+          "attacks",
+          "c22"
+        ],
+        [
+          "r82",
+          "says",
+          "r74 measured the opposite: removing v from the inner loop made the analysis slower, so either v is not what the inner loop spends its time on, or the bookkeeping that removes it costs more than it saves. c25 names the criterion the prior art uses and c26 says which site fails it"
+        ]
+      ],
+      "id": "1a5bf2cf936560c1"
+    },
+    {
+      "at": "2026-09-19T14:23:05+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a14 failed --because 'r74: measured slower than the baseline on the same input, and c26 says why, so the approach as applied to every distributive site is refuted. What it establishes is kept: c18'\"'\"'s distributivity and c23'\"'\"'s rule about accumulated dependency sets both stand'",
+      "parents": [
+        "1a5bf2cf936560c1"
+      ],
+      "assert": [
+        [
+          "a14",
+          "status",
+          "failed"
+        ],
+        [
+          "r83",
+          "sort",
+          "claim"
+        ],
+        [
+          "r83",
+          "says",
+          "r74: measured slower than the baseline on the same input, and c26 says why, so the approach as applied to every distributive site is refuted. What it establishes is kept: c18's distributivity and c23's rule about accumulated dependency sets both stand"
+        ],
+        [
+          "r83",
+          "supports",
+          {
+            "node": "a14",
+            "status": "failed"
+          }
+        ]
+      ],
+      "id": "e6c4f38f48b7ea2f"
+    },
+    {
+      "at": "2026-09-19T14:23:05+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-approach a16 'apply difference propagation only where the per-reference work is expensive, which is _call and _protocol, and leave _attribute on the bulk frozenset path' --addresses i11 --addresses i1 --cost 3 --because 'c25: WALA applies it only to edge adding and virtual call receivers, because the benefit is in the work done per abstract location'",
+      "parents": [
+        "e6c4f38f48b7ea2f"
+      ],
+      "assert": [
+        [
+          "a16",
+          "sort",
+          "approach"
+        ],
+        [
+          "a16",
+          "addresses",
+          "i11"
+        ],
+        [
+          "a16",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a16",
+          "cost",
+          3
+        ],
+        [
+          "a16",
+          "status",
+          "untried"
+        ],
+        [
+          "a16",
+          "title",
+          "apply difference propagation only where the per-reference work is expensive, which is _call and _protocol, and leave _attribute on the bulk frozenset path"
+        ],
+        [
+          "r84",
+          "sort",
+          "claim"
+        ],
+        [
+          "r84",
+          "says",
+          "c25: WALA applies it only to edge adding and virtual call receivers, because the benefit is in the work done per abstract location"
+        ],
+        [
+          "r84",
+          "supports",
+          {
+            "node": "a16",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "277648064cd5a502"
+    },
+    {
+      "at": "2026-09-19T14:29:55+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r85 'cProfile of the unpatched baseline over the full input, 628s under the profiler against 392s without it, 1.459 billion calls: _protocol 31,779,766 calls, 90.6s self, 433s cumulative; _container_call 10,211,378 calls, 90.2s self, 526s cumulative; _put 76,444,351 calls, 79.7s self; set.update 54,889,758 calls 44.8s; _attribute 24,487,014 calls 31.4s; _call 24,486,218 calls 27.1s; Reference.__hash__ 176,041,197 calls 13.0s; the dataclass __eq__ 43,002,228 calls 5.9s; __post_init__ 54,589,698 calls 12.4s; _value only 2,494,402 calls' --because 'cProfile in wt-battery-5 on the merged tree with the committed analyser' --basis measured",
+      "parents": [
+        "277648064cd5a502"
+      ],
+      "assert": [
+        [
+          "r85",
+          "sort",
+          "claim"
+        ],
+        [
+          "r85",
+          "says",
+          "cProfile of the unpatched baseline over the full input, 628s under the profiler against 392s without it, 1.459 billion calls: _protocol 31,779,766 calls, 90.6s self, 433s cumulative; _container_call 10,211,378 calls, 90.2s self, 526s cumulative; _put 76,444,351 calls, 79.7s self; set.update 54,889,758 calls 44.8s; _attribute 24,487,014 calls 31.4s; _call 24,486,218 calls 27.1s; Reference.__hash__ 176,041,197 calls 13.0s; the dataclass __eq__ 43,002,228 calls 5.9s; __post_init__ 54,589,698 calls 12.4s; _value only 2,494,402 calls"
+        ],
+        [
+          "r86",
+          "sort",
+          "claim"
+        ],
+        [
+          "r86",
+          "basis",
+          "measured"
+        ],
+        [
+          "r86",
+          "says",
+          "cProfile in wt-battery-5 on the merged tree with the committed analyser"
+        ],
+        [
+          "r86",
+          "supports",
+          "r85"
+        ]
+      ],
+      "id": "de7510d56b3c4525"
+    },
+    {
+      "at": "2026-09-19T14:29:56+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim c27 'the cost is a distributive transfer function called once per reference instead of once per set. _protocol, _attribute, _call and _store each take a SET, and five sites hand them a singleton inside a loop, so the fixed per-call cost is paid once per reference rather than once. That is why _protocol reaches 31.8 million calls against 2.5 million _value calls' --because 'r85 gives the call counts; the five sites are _call'\"'\"'s class and instance branches, _container_call'\"'\"'s bulk mutations, _assign'\"'\"'s destructuring and _evaluate'\"'\"'s lifetime protocols' --basis source",
+      "parents": [
+        "de7510d56b3c4525"
+      ],
+      "assert": [
+        [
+          "c27",
+          "sort",
+          "claim"
+        ],
+        [
+          "c27",
+          "says",
+          "the cost is a distributive transfer function called once per reference instead of once per set. _protocol, _attribute, _call and _store each take a SET, and five sites hand them a singleton inside a loop, so the fixed per-call cost is paid once per reference rather than once. That is why _protocol reaches 31.8 million calls against 2.5 million _value calls"
+        ],
+        [
+          "r87",
+          "sort",
+          "claim"
+        ],
+        [
+          "r87",
+          "basis",
+          "source"
+        ],
+        [
+          "r87",
+          "says",
+          "r85 gives the call counts; the five sites are _call's class and instance branches, _container_call's bulk mutations, _assign's destructuring and _evaluate's lifetime protocols"
+        ],
+        [
+          "r87",
+          "supports",
+          "c27"
+        ]
+      ],
+      "id": "15264ba1a7d6b46e"
+    },
+    {
+      "at": "2026-09-19T14:29:56+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-approach a17 'call each distributive transfer function ONCE with the whole set: the loops collect their references and the call happens after the loop' --addresses i1 --addresses i6 --cost 4 --because 'c27 names the shape and c18 proves the union of the singleton answers is the answer for the union'",
+      "parents": [
+        "15264ba1a7d6b46e"
+      ],
+      "assert": [
+        [
+          "a17",
+          "sort",
+          "approach"
+        ],
+        [
+          "a17",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a17",
+          "addresses",
+          "i6"
+        ],
+        [
+          "a17",
+          "cost",
+          4
+        ],
+        [
+          "a17",
+          "status",
+          "untried"
+        ],
+        [
+          "a17",
+          "title",
+          "call each distributive transfer function ONCE with the whole set: the loops collect their references and the call happens after the loop"
+        ],
+        [
+          "r88",
+          "sort",
+          "claim"
+        ],
+        [
+          "r88",
+          "says",
+          "c27 names the shape and c18 proves the union of the singleton answers is the answer for the union"
+        ],
+        [
+          "r88",
+          "supports",
+          {
+            "node": "a17",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "b7601f0506d3c7ad"
+    },
+    {
+      "at": "2026-09-19T14:29:56+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-approach a18 'make Reference a NamedTuple so hashing and equality run in C rather than through a Python method and a generated six-tuple comparison' --addresses i1 --cost 2 --because 'r85: 176M hash calls and 43M equality calls; microbenchmarked at 7.5x to 9.6x on the subset test _put performs on every write'",
+      "parents": [
+        "b7601f0506d3c7ad"
+      ],
+      "assert": [
+        [
+          "a18",
+          "sort",
+          "approach"
+        ],
+        [
+          "a18",
+          "addresses",
+          "i1"
+        ],
+        [
+          "a18",
+          "cost",
+          2
+        ],
+        [
+          "a18",
+          "status",
+          "untried"
+        ],
+        [
+          "a18",
+          "title",
+          "make Reference a NamedTuple so hashing and equality run in C rather than through a Python method and a generated six-tuple comparison"
+        ],
+        [
+          "r89",
+          "sort",
+          "claim"
+        ],
+        [
+          "r89",
+          "says",
+          "r85: 176M hash calls and 43M equality calls; microbenchmarked at 7.5x to 9.6x on the subset test _put performs on every write"
+        ],
+        [
+          "r89",
+          "supports",
+          {
+            "node": "a18",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "e33bfc618413e6f1"
+    },
+    {
+      "at": "2026-09-19T14:29:56+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a17 active --because 'applied to all five sites; test_door_order.py passes whole, 123 tests, and the full-tree timing is running'",
+      "parents": [
+        "e33bfc618413e6f1"
+      ],
+      "assert": [
+        [
+          "a17",
+          "status",
+          "active"
+        ],
+        [
+          "r90",
+          "sort",
+          "claim"
+        ],
+        [
+          "r90",
+          "says",
+          "applied to all five sites; test_door_order.py passes whole, 123 tests, and the full-tree timing is running"
+        ],
+        [
+          "r90",
+          "supports",
+          {
+            "node": "a17",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "cea5b458c131b1a7"
+    },
+    {
+      "at": "2026-09-19T14:29:56+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a18 active --because 'applied; ruff and the 123 door-order tests pass'",
+      "parents": [
+        "cea5b458c131b1a7"
+      ],
+      "assert": [
+        [
+          "a18",
+          "status",
+          "active"
+        ],
+        [
+          "r91",
+          "sort",
+          "claim"
+        ],
+        [
+          "r91",
+          "says",
+          "applied; ruff and the 123 door-order tests pass"
+        ],
+        [
+          "r91",
+          "supports",
+          {
+            "node": "a18",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "dddb83ea5e6a287d"
+    },
+    {
+      "at": "2026-09-19T14:33:16+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r92 'batching the per-element calls and making Reference a tuple takes the full-input solve from 392.4s to 128.6s, a 3.05x speedup, and every published number is identical: stale None, 130 mixed, 131 recursive, 160 undeclared-open, 161 open, 227 rows, 29,583 sites, and the same order counts' --because 'wt-battery-6 against wt-battery-5, byte-identical ext providers, doororder.py --json both sides' --basis measured",
+      "parents": [
+        "dddb83ea5e6a287d"
+      ],
+      "assert": [
+        [
+          "r92",
+          "sort",
+          "claim"
+        ],
+        [
+          "r92",
+          "says",
+          "batching the per-element calls and making Reference a tuple takes the full-input solve from 392.4s to 128.6s, a 3.05x speedup, and every published number is identical: stale None, 130 mixed, 131 recursive, 160 undeclared-open, 161 open, 227 rows, 29,583 sites, and the same order counts"
+        ],
+        [
+          "r93",
+          "sort",
+          "claim"
+        ],
+        [
+          "r93",
+          "basis",
+          "measured"
+        ],
+        [
+          "r93",
+          "says",
+          "wt-battery-6 against wt-battery-5, byte-identical ext providers, doororder.py --json both sides"
+        ],
+        [
+          "r93",
+          "supports",
+          "r92"
+        ]
+      ],
+      "id": "44e3fa2674913acb"
+    },
+    {
+      "at": "2026-09-19T14:33:16+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r94 'at 130 modules the counters show where it went: put 67,427,158 to 26,786,898, the eviction index 113,095,614 to 16,571,416, and the reader-key visits 1,480,726,150 to 28,360,853, a 52x fall, while the store is unchanged at 88,918 slots holding 2,456,703 references against 88,920 and 2,456,718' --because 'ai_cost_probe.py at LIMIT=130 in wt-battery-3 and wt-battery-2' --basis measured",
+      "parents": [
+        "44e3fa2674913acb"
+      ],
+      "assert": [
+        [
+          "r94",
+          "sort",
+          "claim"
+        ],
+        [
+          "r94",
+          "says",
+          "at 130 modules the counters show where it went: put 67,427,158 to 26,786,898, the eviction index 113,095,614 to 16,571,416, and the reader-key visits 1,480,726,150 to 28,360,853, a 52x fall, while the store is unchanged at 88,918 slots holding 2,456,703 references against 88,920 and 2,456,718"
+        ],
+        [
+          "r95",
+          "sort",
+          "claim"
+        ],
+        [
+          "r95",
+          "basis",
+          "measured"
+        ],
+        [
+          "r95",
+          "says",
+          "ai_cost_probe.py at LIMIT=130 in wt-battery-3 and wt-battery-2"
+        ],
+        [
+          "r95",
+          "supports",
+          "r94"
+        ]
+      ],
+      "id": "5f439842aec6b171"
+    },
+    {
+      "at": "2026-09-19T14:33:16+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a17 r92 --as rests-on",
+      "parents": [
+        "5f439842aec6b171"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r92"
+        ]
+      ],
+      "id": "da2441ef63ac8000"
+    },
+    {
+      "at": "2026-09-19T14:33:16+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a17 done --because 'r92 and r93: 3.05x on the full input with the answers unchanged in both directions'",
+      "parents": [
+        "da2441ef63ac8000"
+      ],
+      "assert": [
+        [
+          "a17",
+          "status",
+          "done"
+        ],
+        [
+          "r96",
+          "sort",
+          "claim"
+        ],
+        [
+          "r96",
+          "says",
+          "r92 and r93: 3.05x on the full input with the answers unchanged in both directions"
+        ],
+        [
+          "r96",
+          "supports",
+          {
+            "node": "a17",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "3fca9bad7771e859"
+    },
+    {
+      "at": "2026-09-19T14:33:17+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "status a18 done --because 'r92 measures the two together; r85 sizes this one at 176 million hash calls and 43 million equality calls'",
+      "parents": [
+        "3fca9bad7771e859"
+      ],
+      "assert": [
+        [
+          "a18",
+          "status",
+          "done"
+        ],
+        [
+          "r97",
+          "sort",
+          "claim"
+        ],
+        [
+          "r97",
+          "says",
+          "r92 measures the two together; r85 sizes this one at 176 million hash calls and 43 million equality calls"
+        ],
+        [
+          "r97",
+          "supports",
+          {
+            "node": "a18",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "3cacbf13ffc25118"
+    },
+    {
+      "at": "2026-09-19T14:33:31+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r98 'the equivalence holds in both directions at row level: 227 rows on each side, none only in one, and the single differing field across all of them is one open-site string in three rows whose text differs only by the line number of a dict literal inside _analysis.py, which the analysis reads as its own input and which this change moved from 306 to 310' --because 'ai_diff_orders.py over the two runs'\"'\"' full Order dumps, then the two site strings printed whole' --basis measured",
+      "parents": [
+        "3cacbf13ffc25118"
+      ],
+      "assert": [
+        [
+          "r98",
+          "sort",
+          "claim"
+        ],
+        [
+          "r98",
+          "says",
+          "the equivalence holds in both directions at row level: 227 rows on each side, none only in one, and the single differing field across all of them is one open-site string in three rows whose text differs only by the line number of a dict literal inside _analysis.py, which the analysis reads as its own input and which this change moved from 306 to 310"
+        ],
+        [
+          "r99",
+          "sort",
+          "claim"
+        ],
+        [
+          "r99",
+          "basis",
+          "measured"
+        ],
+        [
+          "r99",
+          "says",
+          "ai_diff_orders.py over the two runs' full Order dumps, then the two site strings printed whole"
+        ],
+        [
+          "r99",
+          "supports",
+          "r98"
+        ]
+      ],
+      "id": "cc781cab61667410"
+    },
+    {
+      "at": "2026-09-19T14:33:31+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a17 r98 --as rests-on",
+      "parents": [
+        "cc781cab61667410"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r98"
+        ]
+      ],
+      "id": "6d767876737c308e"
+    },
+    {
+      "at": "2026-09-19T14:36:23+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "add-claim r100 'equivalence is complete: over all 227 rows and every field of every row, normalising only the line and column of a container site inside _analysis.py itself, which the analysis reads as its own input, ZERO fields differ between the baseline and the batched analyser' --because 'ai_diff_orders.py then a normalised field-by-field comparison over the two full Order dumps' --basis measured",
+      "parents": [
+        "6d767876737c308e"
+      ],
+      "assert": [
+        [
+          "r100",
+          "sort",
+          "claim"
+        ],
+        [
+          "r100",
+          "says",
+          "equivalence is complete: over all 227 rows and every field of every row, normalising only the line and column of a container site inside _analysis.py itself, which the analysis reads as its own input, ZERO fields differ between the baseline and the batched analyser"
+        ],
+        [
+          "r101",
+          "sort",
+          "claim"
+        ],
+        [
+          "r101",
+          "basis",
+          "measured"
+        ],
+        [
+          "r101",
+          "says",
+          "ai_diff_orders.py then a normalised field-by-field comparison over the two full Order dumps"
+        ],
+        [
+          "r101",
+          "supports",
+          "r100"
+        ]
+      ],
+      "id": "c88986eb3328d3fe"
+    },
+    {
+      "at": "2026-09-19T14:36:23+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a17 r100 --as rests-on",
+      "parents": [
+        "c88986eb3328d3fe"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r100"
+        ]
+      ],
+      "id": "b4ba7f59a52ae858"
+    },
+    {
+      "at": "2026-09-19T14:37:41+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "detail a17",
+      "parents": [
+        "b4ba7f59a52ae858"
+      ],
+      "assert": [
+        [
+          "a17",
+          "detail",
+          "docs/record/a17-call-each-distributive-transfer-function-once-with-the-whole.md"
+        ]
+      ],
+      "id": "145908570921a15b"
+    },
+    {
+      "at": "2026-09-19T14:38:10+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link c27 r85 --as rests-on",
+      "parents": [
+        "145908570921a15b"
+      ],
+      "assert": [
+        [
+          "c27",
+          "rests_on",
+          "r85"
+        ]
+      ],
+      "id": "1553c41fb6954d6b"
+    },
+    {
+      "at": "2026-09-19T14:38:10+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a17 r94 --as rests-on",
+      "parents": [
+        "1553c41fb6954d6b"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r94"
+        ]
+      ],
+      "id": "fad058aec39ecfd6"
+    },
+    {
+      "at": "2026-09-19T14:38:10+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a15 r71 --as rests-on",
+      "parents": [
+        "fad058aec39ecfd6"
+      ],
+      "assert": [
+        [
+          "a15",
+          "rests_on",
+          "r71"
+        ]
+      ],
+      "id": "bfd5ec3d02d8acc5"
+    },
+    {
+      "at": "2026-09-19T14:38:10+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i11 r74 --as rests-on",
+      "parents": [
+        "bfd5ec3d02d8acc5"
+      ],
+      "assert": [
+        [
+          "i11",
+          "rests_on",
+          "r74"
+        ]
+      ],
+      "id": "5475752ba85498bc"
+    },
+    {
+      "at": "2026-09-19T14:38:10+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i10 r73 --as rests-on",
+      "parents": [
+        "5475752ba85498bc"
+      ],
+      "assert": [
+        [
+          "i10",
+          "rests_on",
+          "r73"
+        ]
+      ],
+      "id": "f250d5d9c1510eb9"
+    },
+    {
+      "at": "2026-09-19T14:38:24+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "doubt c19 --because 'r85: the profile shows _protocol entered 31,779,766 times against 2,494,402 expression evaluations, so the repeated work is a per-reference call and not an AST re-walk at full set width. The equation'\"'\"'s terms are real but it names the wrong one as dominant'",
+      "parents": [
+        "f250d5d9c1510eb9"
+      ],
+      "assert": [
+        [
+          "r102",
+          "sort",
+          "claim"
+        ],
+        [
+          "r102",
+          "attacks",
+          "r52"
+        ],
+        [
+          "r102",
+          "says",
+          "r85: the profile shows _protocol entered 31,779,766 times against 2,494,402 expression evaluations, so the repeated work is a per-reference call and not an AST re-walk at full set width. The equation's terms are real but it names the wrong one as dominant"
+        ]
+      ],
+      "id": "2892d2b29ec45320"
+    },
+    {
+      "at": "2026-09-19T14:38:30+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link i11 g1 --as blocks",
+      "parents": [
+        "2892d2b29ec45320"
+      ],
+      "assert": [
+        [
+          "i11",
+          "blocks",
+          "g1"
+        ]
+      ],
+      "id": "8e0d8dbba2099ef4"
+    },
+    {
+      "at": "2026-09-19T14:38:30+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link c19 r57 --as rests-on",
+      "parents": [
+        "8e0d8dbba2099ef4"
+      ],
+      "assert": [
+        [
+          "c19",
+          "rests_on",
+          "r57"
+        ]
+      ],
+      "id": "6b3457ad5a65b300"
+    },
+    {
+      "at": "2026-09-19T14:38:30+10:00",
+      "after": "cf679e68c8b774d63efdb79545fb7b0d29955c4f",
+      "did": "link a14 r60 --as rests-on",
+      "parents": [
+        "6b3457ad5a65b300"
+      ],
+      "assert": [
+        [
+          "a14",
+          "rests_on",
+          "r60"
+        ]
+      ],
+      "id": "9ae9c7887021e00c"
     }
   ]
 }

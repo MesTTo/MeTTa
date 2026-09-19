@@ -9,6 +9,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Door-order analysis calls each transfer function once with a whole value set
+  instead of once per reference in it. `_protocol`, `_attribute`, `_call` and
+  `_store` are distributive, so the union of the singleton answers is the answer
+  for the union, but six sites handed them one reference at a time inside a loop
+  and paid each function's fixed cost again for every reference: `_protocol` was
+  entered 31,779,766 times against 2,494,402 evaluations of an expression.
+  `Reference` is now a tuple as well, so the set algebra that is the analysis's
+  inner loop hashes and compares in C rather than through a Python method and a
+  generated six-field comparison. Registering a door the shipped table does not
+  name analyses the tree live, and that now costs 128.6 seconds where it cost
+  392.4, with every published verdict, order, crossing and open site unchanged.
+
 - The Node seat's provider-capability roster is the engine's own vocabulary row
   plus the three words its bridge registers, rather than a second list written
   out beside it; the written list had gone stale the moment the row gained
