@@ -166,7 +166,7 @@
     },
     "a7.1": {
       "title": "name the union one concept, _stored(container, slot), and have all three sites call it",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i1"
       ],
@@ -176,6 +176,10 @@
       "history": [
         {
           "status": "untried",
+          "until": "2026-09-19"
+        },
+        {
+          "status": "active",
           "until": "2026-09-19"
         }
       ],
@@ -394,6 +398,28 @@
         "c8"
       ],
       "basis": "assumed"
+    },
+    "r21": {
+      "says": "differential: all 227 derived orders identical over the module set that completes, sets compared by sorted contents; committed and the seat re-pinned",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a7.1",
+          "status": "done"
+        }
+      ]
+    },
+    "c9": {
+      "says": "comparing frozensets by repr is not comparing them: str hashing varies between runs, so the first differential reported 137 of 227 changed with identical repr LENGTHS, and a canonical dump showed them identical",
+      "at": "2026-09-19"
+    },
+    "r22": {
+      "says": "measured twice; the first comparison also silently compared two EMPTY files after the dump raised, and reported identical",
+      "at": "2026-09-19",
+      "supports": [
+        "c9"
+      ],
+      "basis": "measured"
     }
   }
 }
