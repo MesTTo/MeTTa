@@ -14,7 +14,7 @@
 % Guarantees: source_package_row/4 answers only the package rows the named load
 %   stored, so a later load into the same space re-performs none of them
 %   [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it;
-%   commit=WORKTREE].
+%   commit=c4876eac2ec5943c8eff70623f2ebe6202c40286].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: every source retirement restores surviving function registrations

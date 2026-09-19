@@ -11,7 +11,7 @@
 %   same space
 %   [tested: packages:a_backing_row_reaches_its_claimant_as_data,
 %   packages:a_backing_row_performs_only_for_the_file_that_carries_it;
-%   commit=WORKTREE].
+%   commit=c4876eac2ec5943c8eff70623f2ebe6202c40286].
 %
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their

@@ -265,7 +265,7 @@
 %   [tested: filereader_called_symbols:a_literal_head_hides_the_names_inside_it,
 %   filereader_called_symbols:a_head_that_becomes_a_function_shows_them_again,
 %   packages:importing_a_backed_library_leaves_the_package_head_alone;
-%   commit=WORKTREE].
+%   commit=c4876eac2ec5943c8eff70623f2ebe6202c40286].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
