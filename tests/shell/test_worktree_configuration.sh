@@ -3,7 +3,8 @@
 #   configuration the main checkout runs, once worktree.sh has linked the
 #   build artefacts git does not track.
 #
-#   A fresh worktree has no extensions/mork/mork_ffi/target/ and no extensions/mork/mork_ffi/morklib.so,
+#   A worktree with its components checked out still has no
+#   extensions/mork/mork_ffi/target/ and no extensions/mork/mork_ffi/morklib.so,
 #   both gitignored build output, and extensions/mork/extension.pl reads their absence
 #   as "this backend was not built" rather than as an error, exactly as it
 #   should for a tree that never built it. The consequence for a worktree
@@ -47,6 +48,17 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 git -C "$project_dir" worktree add --quiet -b "$branch" "$tree"
+
+# The components are submodules, so `git worktree add` leaves one EMPTY
+# directory per component and the worktree has no engine to probe at all.
+# Checking them out is not the property under test -- the artefacts git does
+# not track are -- so it happens before the first probe, and the before-state
+# stays the precise one this test needs: an engine that is there, running one
+# backend fewer. Without this the probe answers nothing and the test reports
+# that it can no longer show its own difference.
+bounded git -C "$tree" -c protocol.file.allow=always submodule update --init --recursive \
+    >/dev/null 2>&1 ||
+    { echo "FAIL: the probe worktree's components could not be checked out" >&2; exit 1; }
 
 # The probe asks the ENGINE whether the backend registered, rather than
 # looking for a file, because the file being present is not the property

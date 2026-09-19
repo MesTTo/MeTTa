@@ -1,10 +1,15 @@
 #!/bin/sh
 # Purpose: make a git worktree of this repository run the SAME configuration
-#   the main checkout runs, by copying the build artefacts git does not track.
+#   the main checkout runs, by populating its components and copying the build
+#   artefacts git does not track.
 # Assumes:
 #   - run from inside the worktree that needs setting up, and the main
 #     checkout has been built (`sh build.sh`).
 # Guarantees:
+#   - after this, a fresh worktree HAS its components: they are submodules, so
+#     `git worktree add` leaves one empty directory per component and nothing
+#     in this script, nor any suite, has an engine to run until they are
+#     checked out.
 #   - after this, the artefact `extensions/mork/extension.pl` declares is there
 #     and the MORK backend loads, so the suites gate the same configuration in
 #     both trees [tested: tests/shell/test_worktree_configuration.sh].
@@ -65,6 +70,24 @@ if [ "$MAIN" = "$HERE" ]; then
     echo "worktree.sh: this IS the main checkout; nothing to link" >&2
     exit 0
 fi
+
+# FIRST, because everything below reads files that live in a component:
+# engine/build.sh, engine/main.pl and the chapter 19 examples are all inside
+# one, and `git worktree add` leaves each component as an empty directory.
+#
+# `protocol.file.allow` is passed for this ONE command rather than written into
+# the repository's config. Git refuses the `file` transport for submodules by
+# default since CVE-2022-39253, because a repository you clone can name a local
+# path in its .gitmodules; here the paths are this repository's own committed
+# ones, and scoping the flag to the invocation means a clone of this repository
+# does not inherit a relaxed transport policy.
+#
+# --recursive because a component can mount another: the twins carry the .metta
+# corpus they are twins OF.
+bounded git -C "$HERE" -c protocol.file.allow=always submodule update --init --recursive ||
+    { echo "worktree.sh: the components could not be checked out; this worktree has no engine to run" >&2
+      exit 1; }
+echo "worktree.sh: populated $(git -C "$HERE" ls-files --stage | awk '$1=="160000"' | wc -l) component(s)"
 
 copied=0
 for artefact in extensions/mork/mork_ffi/target/release/libmork_ffi.so extensions/mork/mork_ffi/morklib.so; do
