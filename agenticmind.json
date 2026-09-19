@@ -32,6 +32,14 @@
       "blocks": [],
       "at": "2026-09-19",
       "consequence": true
+    },
+    "i5": {
+      "what": "_external_call returns Reference('unknown', '<site>: external value <external name>'), so an unresolved member on an external value makes one distinct unknown PER EXTERNAL NAME PER SITE, and those flow into every set the value reaches",
+      "blocks": [
+        "g1"
+      ],
+      "at": "2026-09-19",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
     }
   },
   "approaches": {
@@ -202,6 +210,30 @@
       ],
       "rests_on": [
         "c8"
+      ]
+    },
+    "a8": {
+      "title": "carry the SITE and not the external name in the unknown that _external_call returns",
+      "status": "done",
+      "addresses": [
+        "i5"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96",
+      "cost": 1,
+      "rests_on": [
+        "c11"
+      ],
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        },
+        {
+          "status": "active",
+          "until": "2026-09-19"
+        }
       ]
     }
   },
@@ -479,6 +511,51 @@
           "status": "done"
         }
       ]
+    },
+    "r27": {
+      "says": "measured: one slot held 3,627 unknowns, 3,619 of them a single site's, differing only in the external name embedded in the reason",
+      "supports": [
+        "i5"
+      ],
+      "basis": "measured",
+      "at": "2026-09-19",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+    },
+    "c11": {
+      "says": "the external name in that reference is pure multiplicity: the published Verdict reads bool(open) and never its contents, and the detailed reason WITH the name is already added to open on the line above",
+      "at": "2026-09-19",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+    },
+    "r28": {
+      "says": "read in _order.py: Verdict(number, mixed, bool(self.open), bool(cycles), bool(blocked_by)); _external_call calls self.open.add(reason) before returning the reference",
+      "supports": [
+        "c11"
+      ],
+      "basis": "source",
+      "at": "2026-09-19",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+    },
+    "r29": {
+      "says": "measured: unknowns in the biggest slot 3,627 -> 81, stored references 10,780,534 -> 3,005,161, biggest set 5,158 -> 1,801",
+      "supports": [
+        {
+          "node": "a8",
+          "status": "active"
+        }
+      ],
+      "at": "2026-09-19",
+      "after": "b1243df858dc468ce32a5d95cca68f857db1ad96"
+    },
+    "r30": {
+      "says": "committed; all 227 published verdicts identical and test_door_order.py passes whole, 123 tests, including the three asserting open reason text",
+      "supports": [
+        {
+          "node": "a8",
+          "status": "done"
+        }
+      ],
+      "at": "2026-09-19",
+      "after": "effa7e77b002e2ed8a872a64d9164f7743e16614"
     }
   }
 }
