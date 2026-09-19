@@ -5042,6 +5042,59 @@
       "tags": [
         "measured"
       ]
+    },
+    "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree": {
+      "title": "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+    },
+    "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2": {
+      "title": "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2",
+      "supports": [
+        "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect": {
+      "title": "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect",
+      "supports": [
+        {
+          "node": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "status": "untried"
+        },
+        {
+          "node": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "relation": "addresses",
+          "target": "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+        }
+      ]
+    },
+    "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings": {
+      "title": "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings",
+      "supports": [
+        {
+          "node": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration": {
+      "title": "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration"
+    },
+    "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass": {
+      "title": "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass",
+      "supports": [
+        "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -5881,6 +5934,14 @@
       "status": "done",
       "addresses": [
         "the Python seat's Prolog half calls six lib_thread predicates that the library's module exports but its backing row never declares as heads, and the package machinery imports only declared heads, so those calls now reach nothing"
+      ]
+    },
+    "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies": {
+      "title": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
       ]
     }
   },
@@ -25978,6 +26039,157 @@
         ]
       ],
       "id": "ced835fe710c4d0d"
+    },
+    {
+      "at": "2026-09-19T23:03:53.234105+00:00",
+      "after": "6c1847b4ae9a705bb24bec9962f6af95323c4b1c",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2\", \"tags\": [\"measured\"], \"title\": \"the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect\", \"tags\": [], \"title\": \"exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies\", \"fields\": {\"effort\": 1, \"addresses\": [\"the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree\"]}}, {\"op\": \"status\", \"id\": \"exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies\", \"because\": \"policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass\", \"tags\": [\"measured\"], \"title\": \"the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration\", \"fields\": {}}]",
+      "parents": [
+        "ced835fe710c4d0d"
+      ],
+      "assert": [
+        [
+          "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect",
+          "supports",
+          {
+            "node": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+            "status": "untried"
+          }
+        ],
+        [
+          "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect",
+          "supports",
+          {
+            "node": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+            "relation": "addresses",
+            "target": "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+          }
+        ],
+        [
+          "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect",
+          "title",
+          "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect"
+        ],
+        [
+          "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2",
+          "supports",
+          "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+        ],
+        [
+          "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2",
+          "title",
+          "measured 2026-09-20 after the package work landed: policy-inventory named three lists in lib/lib_package/lib_package.pl, and binding-selftest failed with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while package.json declares esbuild 0.28.2"
+        ],
+        [
+          "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass",
+          "supports",
+          "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration"
+        ],
+        [
+          "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass",
+          "title",
+          "measured 2026-09-20: it refused evidence=engine/metta/prelude.pl:prelude_declaration and accepted engine/metta/prelude.pl:prelude_declaration/2, and refused two invented predicate names in the same pass"
+        ],
+        [
+          "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings",
+          "sort",
+          "prop"
+        ],
+        [
+          "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings",
+          "supersedes",
+          "each list is a mechanism constant rather than an operator knob, the two spaces a boot declaration may live in, the two declarations that accept any argument and POSIX's own dot entries, and the node seat's absence is provisioning rather than a defect"
+        ],
+        [
+          "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings",
+          "supports",
+          {
+            "node": "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+            "status": "done"
+          }
+        ],
+        [
+          "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings",
+          "tags",
+          "tested"
+        ],
+        [
+          "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings",
+          "title",
+          "policy-inventory and binding-selftest both report ok, the latter with 85 passed; the exemption had to be one line in the category, reason and evidence form and the lane verifies the cited symbol exists, refusing three invented ones before accepting name-and-arity spellings"
+        ],
+        [
+          "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree",
+          "title",
+          "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+        ],
+        [
+          "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration",
+          "sort",
+          "prop"
+        ],
+        [
+          "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration",
+          "title",
+          "the policy-inventory lane checks its own citations: an exemption naming a symbol that does not exist is refused by name, so the evidence in one cannot rot into decoration"
+        ],
+        [
+          "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "sort",
+          "approach"
+        ],
+        [
+          "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "addresses",
+          "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+        ],
+        [
+          "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "effort",
+          1
+        ],
+        [
+          "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "status",
+          "done"
+        ],
+        [
+          "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies",
+          "title",
+          "exempt the three lists as mechanism-internal with real cited symbols, and install the node seat's declared dependencies"
+        ]
+      ],
+      "id": "e2c09bf88c14498c"
     }
   ]
 }
