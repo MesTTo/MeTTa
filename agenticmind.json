@@ -4994,6 +4994,54 @@
       "supports": [
         "chasing a missing predicate out of successive error messages is the wrong search: the first repair covered six names taken from one error and the next error simply named a seventh, while comparing the library's 59 module exports against the seat's unqualified calls answered the whole set at once"
       ]
+    },
+    "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form": {
+      "title": "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form"
+    },
+    "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'": {
+      "title": "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'",
+      "supports": [
+        "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values": {
+      "title": "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values"
+    },
+    "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12": {
+      "title": "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12",
+      "supports": [
+        "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations": {
+      "title": "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations"
+    },
+    "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike": {
+      "title": "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike",
+      "supports": [
+        "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space": {
+      "title": "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space"
+    },
+    "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example": {
+      "title": "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example",
+      "supports": [
+        "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -25799,6 +25847,137 @@
         ]
       ],
       "id": "19d0d0e4755b17c5"
+    },
+    {
+      "at": "2026-09-19T22:59:18.975016+00:00",
+      "after": "a4012d174efeb218fb02981a504f0607fb5765cd",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'\", \"tags\": [\"measured\"], \"title\": \"one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12\", \"tags\": [\"measured\"], \"title\": \"the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike\", \"tags\": [\"measured\"], \"title\": \"the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example\", \"tags\": [\"measured\"], \"title\": \"the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space\", \"fields\": {}}]",
+      "parents": [
+        "19d0d0e4755b17c5"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike",
+          "supports",
+          "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations"
+        ],
+        [
+          "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike",
+          "title",
+          "measured 2026-09-20: (evalc (area (Square 3)) &Shape) answers 9 while (evalc (Shape-describe (Square 3)) &Shape) answers (area-of (area (Square 3))), and a two-line file with (= (sq $x) (* $x $x)) under an undefined head answers (undefined-head 9) in the engine and the library alike"
+        ],
+        [
+          "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example",
+          "supports",
+          "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space"
+        ],
+        [
+          "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example",
+          "title",
+          "measured 2026-09-20: a five-line file merging (from &B (only (g))) into &A and &A into &self answers (undefined-head (g 3)) under both the engine and the library, which is neither configuration's answer for the real example"
+        ],
+        [
+          "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'",
+          "supports",
+          "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form"
+        ],
+        [
+          "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'",
+          "title",
+          "measured 2026-09-20: parity reports 358/359 agree, engine exits 0 and library exits 1 on examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, with verdict 'is (area-of (area (Square 3))), should (area-of 9)'"
+        ],
+        [
+          "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12",
+          "supports",
+          "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values"
+        ],
+        [
+          "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12",
+          "title",
+          "measured 2026-09-20: the battery 6 gate log at c66b6dc64 carries the same MeTTa test failure line, and docs/record/lib-package-laws-6-13.md records that the example also fails in the source-matched control, logged as ai-package-class-control.log in battery 12"
+        ],
+        [
+          "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form",
+          "sort",
+          "prop"
+        ],
+        [
+          "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form",
+          "title",
+          "one example of 359 disagrees between the engine and library configurations: the class-dispatch example's describe reduces its inner area call under the engine and leaves it unreduced under the library, so the parity gate refuses the tree on a single form"
+        ],
+        [
+          "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations",
+          "sort",
+          "prop"
+        ],
+        [
+          "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations",
+          "title",
+          "the class-dispatch gap is not about evaluation context and not about undefined heads: area reduces to 9 inside &Shape, evaluating the whole body explicitly in &Shape still leaves the inner call unreduced, and a minimal file with an undefined head over a computed argument answers (undefined-head 9) identically in both configurations"
+        ],
+        [
+          "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space",
+          "sort",
+          "prop"
+        ],
+        [
+          "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space",
+          "title",
+          "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space"
+        ],
+        [
+          "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values",
+          "sort",
+          "prop"
+        ],
+        [
+          "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values",
+          "title",
+          "the class-dispatch parity gap predates this session and the package work: it appears in the whole-gate log at revision c66b6dc64 before the delegated job's engine changes, and the delegated job's own source-matched control reproduces it with the same expected and actual values"
+        ]
+      ],
+      "id": "ced835fe710c4d0d"
     }
   ]
 }
