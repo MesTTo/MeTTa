@@ -9,6 +9,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `bounded.sh` carries a THIRD bound, `--memory KILOBYTES|none`, and applies
+  one by default: an eighth of what the box has, read from `/proc/meminfo`.
+  The two it already had are a deadline and a link to the starting process,
+  and neither bounds SIZE, so both were armed and neither helped when one
+  pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with
+  63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had
+  finished, so nothing was watching it, and its deadline had 815 seconds still
+  to run. The limit is RLIMIT_DATA rather than RLIMIT_AS, because a Python or
+  a JIT reserves address space it never touches while a limit that fits one
+  would refuse the other, and since Linux 4.7 RLIMIT_DATA still covers the
+  anonymous mmap a runaway heap lives in. Unlike the other two it needs no
+  process of its own: a resource limit is inherited across exec and by every
+  descendant, so a runner's workers each carry it. It only ever ratchets down,
+  since the soft and the hard limit are set together, and a rung that inherits
+  a tighter bound than it asked for says which one is in force rather than
+  announcing that nothing bounds the command.
+
 - A package row may be COMPUTED. A row whose head a claim answers is performed
   as written, and any other payload is normalised in the home space first, so
   `(= (package backing) (packages-row-for-this-platform))` reaches the loader

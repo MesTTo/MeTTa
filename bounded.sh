@@ -4,7 +4,7 @@
 #   spawns goes through here, and so does a command typed by hand.
 #
 #   Usage: sh bounded.sh [--ceiling SECONDS] [--grace SECONDS] [--owner PID]
-#                        COMMAND [ARG ...]
+#                        [--memory KILOBYTES|none] COMMAND [ARG ...]
 #          sh bounded.sh --enforcer      print the ceiling program and exit
 #
 #   Environment (the options above set these; either spelling works):
@@ -16,6 +16,8 @@
 #                           its own pid closes the whole startup race with
 #                           `--owner $$`; without it only the arming window is
 #                           closed.
+#     METTA_CHILD_MEMORY    kilobytes of data segment the command may take, or
+#                           `none` for no bound (default: an eighth of the box)
 #
 #   The ceiling and the grace are EXPORTED, so a command that bounds children
 #   of its own inherits them: `bounded --ceiling 290 sh run.sh f.metta` gives
@@ -23,7 +25,7 @@
 #   tighter of the two and the one the caller asked for [measured 2026-09-05:
 #   an inner call under `--ceiling 77` reads 77].
 #
-#   Two independent bounds, because either alone has a hole this repository has
+#   Three independent bounds, because each alone has a hole this repository has
 #   already paid for.
 #
 #   The DEADLINE lives in a process that shares the command's fate rather than
@@ -39,12 +41,26 @@
 #   `swipl ... materialization.plt` run 7,540 seconds at 97.8% CPU on
 #   2026-09-05: it was outside every lane, so nothing bounded it at all.
 #
+#   The MEMORY BOUND is RLIMIT_DATA, an eighth of what the box has. Neither of
+#   the other two is a bound on size, so both were armed and neither helped
+#   when one pytest-xdist worker reached 29.7 GB RSS on 2026-09-20 and took 56
+#   of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free. The
+#   lane it belonged to had already finished, so nothing was watching it, and
+#   its deadline had 815 seconds still to run. A command that asks for more
+#   than its share now fails its own allocation instead of the box failing
+#   everyone else's.
+#
 # Assumes:
 #   - a `timeout` on PATH, or one named by METTA_TIMEOUT. Without one this
 #     refuses rather than running unbounded.
 #   - setpriv(1) from util-linux for the owner link. Without it the deadline
 #     still applies and the refusal to start is announced once, because a
 #     silently weaker bound is the failure this file exists to prevent.
+#   - a shell whose `ulimit -d` sets RLIMIT_DATA, and a kernel at 4.7 or newer
+#     so that it covers anonymous mmap. Without either the other two bounds
+#     still apply and the gap is announced once, for the same reason.
+#   - /proc/meminfo, to derive the default share. Without it the default is no
+#     memory bound, which `--memory KILOBYTES` overrides.
 #   - it is EXEC'd into, never sourced. It adds no process of its own: every
 #     rung replaces this one, so `ps` shows the command's own argv and the exit
 #     status is the command's.
@@ -59,6 +75,11 @@
 #     syscall.StartProcess close it: the parent recorded before arming is
 #     compared with the parent after arming, and a mismatch refuses to start
 #     the command rather than running it with a signal that can never arrive
+#   - a command that allocates past its share fails its own allocation, rather
+#     than the box failing everyone else's: the limit is inherited across exec
+#     and by every descendant, so a runner's workers each carry it
+#     [tested: tests/shell/test_bounded_reaping.sh, whose negative control is
+#     the same allocation under `--memory none`]
 #   - `--enforcer` names the ceiling program, so a caller that spawns many
 #     children resolves it once instead of per spawn
 #   - the command runs headless: DISPLAY and WAYLAND_DISPLAY are unset before
@@ -136,6 +157,64 @@ metta_bounded_enforcer() {
     printf '%s\n' "$metta_bounded_fallback"
 }
 
+# The third bound: how much memory one command may take. RLIMIT_DATA rather
+# than RLIMIT_AS, because a Python or a JIT reserves address space it never
+# touches and a limit that fits the one would refuse the other; since Linux
+# 4.7 RLIMIT_DATA covers anonymous mmap, which is where a runaway heap lives
+# [measured 2026-09-20: a 600 MB bytearray under `ulimit -d 262144` raises
+# MemoryError, and the same allocation under `systemd-run --user --scope -p
+# MemoryMax=256M` succeeds, so the cgroup route does not bound a user scope
+# here and this one does].
+#
+# Derived from the box rather than frozen: an EIGHTH of what the machine has.
+# The gate runs four pytest workers at once and the box has to stay usable
+# while they do, so a single command may not take a quarter; the heaviest
+# legitimate worker measured 0.72 GB, so an eighth is an order of magnitude of
+# headroom above what any lane needs.
+metta_bounded_share() {
+    metta_bounded_total=$(awk '/^MemTotal:/ { print $2; exit }' /proc/meminfo 2>/dev/null) ||
+        metta_bounded_total=''
+    case $metta_bounded_total in
+        '' | *[!0-9]*) printf 'none\n' ;;
+        *) printf '%s\n' "$((metta_bounded_total / 8))" ;;
+    esac
+}
+
+# Said out loud ONCE PER TREE, for the reason the setpriv notice below is: a
+# bound that silently became the weaker one is the failure this file exists to
+# prevent.
+#
+# What it reports has to be READ rather than assumed, because `ulimit -d` sets
+# the soft and the hard limit together [measured 2026-09-20: after
+# `ulimit -d 262144`, `ulimit -Hd` reads 262144 and raising it is refused with
+# EPERM]. So the limit only ever ratchets down, and the usual reason the call
+# fails is not that this shell cannot meter memory but that an outer rung
+# already metered it TIGHTER. Announcing "no memory bound" there would be its
+# own false claim, of exactly the kind this notice exists to stop.
+#
+# Both limits, not the soft one alone: a command that could raise its own soft
+# limit is not bounded, and Python spells that `resource.setrlimit`.
+metta_bounded_memory_unchanged() {
+    metta_bounded_inforce=$(ulimit -Sd 2>/dev/null) || metta_bounded_inforce=unknown
+    [ -n "$metta_bounded_inforce" ] || metta_bounded_inforce=unknown
+    if [ -z "${METTA_BOUNDED_UNMETERED:-}" ]; then
+        case $metta_bounded_inforce in
+            unlimited | unknown)
+                echo "bounded.sh: this shell cannot set a data limit, so the command" >&2
+                echo "  carries its deadline and its owner link but no memory bound." >&2
+                echo "  A worker that reached 29.7 GB is why that is said out loud." >&2
+                ;;
+            *)
+                echo "bounded.sh: a data limit of $metta_bounded_inforce kB is already in" >&2
+                echo "  force and will not rise to the $1 kB asked for, so the command" >&2
+                echo "  carries the tighter bound it inherited." >&2
+                ;;
+        esac
+        METTA_BOUNDED_UNMETERED=1
+        export METTA_BOUNDED_UNMETERED
+    fi
+}
+
 if [ "${1:-}" = "--enforcer" ]; then
     metta_bounded_enforcer
     exit $?
@@ -154,6 +233,8 @@ while [ "$#" -gt 0 ]; do
                    METTA_CHILD_GRACE=$2; export METTA_CHILD_GRACE; shift 2 ;;
         --owner)   [ "$#" -ge 2 ] || { echo "bounded.sh: --owner needs a pid" >&2; exit 2; }
                    METTA_BOUNDED_OWNER=$2; export METTA_BOUNDED_OWNER; shift 2 ;;
+        --memory)  [ "$#" -ge 2 ] || { echo "bounded.sh: --memory needs kilobytes or none" >&2; exit 2; }
+                   METTA_CHILD_MEMORY=$2; export METTA_CHILD_MEMORY; shift 2 ;;
         --)        shift; break ;;
         *)         break ;;
     esac
@@ -161,7 +242,8 @@ done
 
 if [ "$#" -eq 0 ]; then
     echo "usage: sh bounded.sh [--ceiling SECONDS] [--grace SECONDS]" >&2
-    echo "                     [--owner PID] COMMAND [ARGUMENT ...]" >&2
+    echo "                     [--owner PID] [--memory KILOBYTES|none]" >&2
+    echo "                     COMMAND [ARGUMENT ...]" >&2
     echo "       sh bounded.sh --enforcer" >&2
     exit 2
 fi
@@ -183,6 +265,14 @@ if [ -n "${METTA_BOUNDED_ARMED:-}" ]; then
     fi
     metta_bounded_ceiling=${METTA_CHILD_CEILING:-3600}
     metta_bounded_grace=${METTA_CHILD_GRACE:-10}
+    metta_bounded_memory=${METTA_CHILD_MEMORY:-$(metta_bounded_share)}
+    if [ "$metta_bounded_memory" != none ]; then
+        # Set HERE, in the rung that execs, because a resource limit is
+        # inherited across exec and by every child: it needs no process of its
+        # own, which is what the deadline and the owner link each need one for.
+        ulimit -d "$metta_bounded_memory" 2>/dev/null ||
+            metta_bounded_memory_unchanged "$metta_bounded_memory"
+    fi
     metta_bounded_timeout=${METTA_TIMEOUT:?bounded.sh: no ceiling program}
     metta_bounded_setpriv=${METTA_BOUNDED_SETPRIV:?bounded.sh: no setpriv}
     unset METTA_BOUNDED_ARMED METTA_BOUNDED_OWNER METTA_BOUNDED_SETPRIV

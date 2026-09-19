@@ -3751,6 +3751,77 @@
       "tags": [
         "source"
       ]
+    },
+    "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run": {
+      "title": "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+      "blocks": [
+        "g3"
+      ]
+    },
+    "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane": {
+      "title": "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane",
+      "supports": [
+        "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+        {
+          "node": "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+          "relation": "blocks",
+          "target": "g3"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in": {
+      "title": "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in",
+      "supports": [
+        {
+          "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "status": "untried"
+        },
+        {
+          "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "relation": "addresses",
+          "target": "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run"
+        }
+      ]
+    },
+    "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set": {
+      "title": "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+    },
+    "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'": {
+      "title": "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'",
+      "supports": [
+        "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent": {
+      "title": "it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent",
+      "supports": [
+        {
+          "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "relation": "rests_on",
+          "target": "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+        }
+      ]
+    },
+    "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB": {
+      "title": "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB",
+      "supports": [
+        {
+          "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -4423,6 +4494,17 @@
       "parent": "a31",
       "detail": [
         "docs/record/law3-normalising-a-package-row.md"
+      ]
+    },
+    "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal": {
+      "title": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run"
+      ],
+      "rests_on": [
+        "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
       ]
     }
   },
@@ -20773,6 +20855,206 @@
         ]
       ],
       "id": "7a46c8b72d460dd7"
+    },
+    {
+      "at": "2026-09-19T18:33:19.021546+00:00",
+      "after": "023dd2fdd5760a3a4136fe60e071506e4051bfbd",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane\", \"tags\": [\"measured\"], \"title\": \"bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run\", \"fields\": {\"blocks\": [\"g3\"]}}]",
+      "parents": [
+        "7a46c8b72d460dd7"
+      ],
+      "assert": [
+        [
+          "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+          "sort",
+          "prop"
+        ],
+        [
+          "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+          "blocks",
+          "g3"
+        ],
+        [
+          "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+          "title",
+          "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run"
+        ],
+        [
+          "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane",
+          "supports",
+          "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run"
+        ],
+        [
+          "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane",
+          "supports",
+          {
+            "node": "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run",
+            "relation": "blocks",
+            "target": "g3"
+          }
+        ],
+        [
+          "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane",
+          "tags",
+          "measured"
+        ],
+        [
+          "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane",
+          "title",
+          "read free -h and ps -eo rss --sort=-rss while the box was unusable: PID 1688823 at 29.71 GB, 2,785 seconds elapsed, a [pytest-xdist] worker whose parent lane had moved on to the gallery lane"
+        ]
+      ],
+      "id": "8eb2de808ee7f57f"
+    },
+    {
+      "at": "2026-09-19T18:45:17.822916+00:00",
+      "after": "023dd2fdd5760a3a4136fe60e071506e4051bfbd",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in\", \"tags\": [], \"title\": \"bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal\", \"fields\": {\"effort\": 1, \"addresses\": [\"bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'\", \"tags\": [\"measured\"], \"title\": \"ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set\", \"fields\": {}}, {\"op\": \"link\", \"id\": \"bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal\", \"because\": \"it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent\", \"tags\": [], \"target\": \"ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set\", \"relation\": \"rests-on\"}, {\"op\": \"status\", \"id\": \"bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal\", \"because\": \"tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "8eb2de808ee7f57f"
+      ],
+      "assert": [
+        [
+          "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in",
+          "sort",
+          "prop"
+        ],
+        [
+          "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in",
+          "supports",
+          {
+            "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+            "status": "untried"
+          }
+        ],
+        [
+          "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in",
+          "supports",
+          {
+            "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+            "relation": "addresses",
+            "target": "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run"
+          }
+        ],
+        [
+          "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in",
+          "title",
+          "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in"
+        ],
+        [
+          "it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent",
+          "sort",
+          "prop"
+        ],
+        [
+          "it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent",
+          "supports",
+          {
+            "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+            "relation": "rests_on",
+            "target": "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+          }
+        ],
+        [
+          "it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent",
+          "title",
+          "it decides what the fallback notice may claim: over an inherited tighter bound, announcing no memory bound would be the silent weakening the wrapper exists to prevent"
+        ],
+        [
+          "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'",
+          "supports",
+          "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+        ],
+        [
+          "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'",
+          "title",
+          "measured 2026-09-20: after `ulimit -d 262144`, `ulimit -Hd` reads 262144 and `ulimit -d 524288` is refused with 'Operation not permitted'"
+        ],
+        [
+          "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB",
+          "supersedes",
+          "a resource limit is inherited across exec and by every descendant, so unlike the deadline and the owner link it needs no process of its own to enforce it, and RLIMIT_DATA rather than RLIMIT_AS because a Python or a JIT reserves address space it never touches while since Linux 4.7 RLIMIT_DATA still covers the anonymous mmap a runaway heap lives in"
+        ],
+        [
+          "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB",
+          "supports",
+          {
+            "node": "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+            "status": "done"
+          }
+        ],
+        [
+          "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB",
+          "tags",
+          "measured"
+        ],
+        [
+          "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB",
+          "title",
+          "tests/shell/test_bounded_reaping.sh passes every case with four new ones, and each was proven to fail without its subject: with the ulimit line replaced by a no-op 5c and 5e fail, and with the inherited-versus-absent distinction removed 5f fails reading 'this shell cannot set a data limit' over a 262144 kB bound that was in force; a 600 MB bytearray under --memory 262144 raises MemoryError and the derived default on this box is 7,925,185 kB against a heaviest legitimate pytest worker of 0.72 GB"
+        ],
+        [
+          "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set",
+          "sort",
+          "prop"
+        ],
+        [
+          "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set",
+          "title",
+          "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+        ],
+        [
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "sort",
+          "approach"
+        ],
+        [
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "addresses",
+          "bounded.sh bounds a command by DEADLINE and by OWNER DEATH and not by memory, so one pytest-xdist worker reached 29.7 GB RSS and took 56 of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free; the lane it belonged to had already finished, so nothing was watching it and its 3,600-second ceiling had 815 seconds still to run"
+        ],
+        [
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "effort",
+          1
+        ],
+        [
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "rests_on",
+          "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+        ],
+        [
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "status",
+          "done"
+        ],
+        [
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal",
+          "title",
+          "bound a command's data segment with ulimit -d in the rung of the bounded wrapper that execs, defaulting to an eighth of MemTotal"
+        ]
+      ],
+      "id": "c09609c983fe443b"
     }
   ]
 }

@@ -30,6 +30,13 @@
 #   - case 4: the ceiling still fires on a child nobody killed the starter of
 #   - case 5: the command's own exit status survives the wrapper, both an
 #     ordinary status and 128+n for a signalled command
+#   - case 5c: a command allocating far past its memory bound does not finish,
+#     which is the axis the deadline and the owner link both leave open
+#   - case 5d: `--memory none` runs it unbounded, for a lane that needs to
+#   - case 5e: the default is a number derived from this box rather than
+#     `unlimited`, so a caller that passes nothing is still bounded
+#   - case 5f: a rung that inherits a TIGHTER bound than it asked for says so,
+#     rather than announcing that nothing bounds the command
 #   - case 6: a child OUTLIVES the thread that spawned it. The parent-death
 #     signal is documented as firing when the spawning THREAD exits, which
 #     would kill live children under any threaded runner; this is what says the
@@ -223,6 +230,42 @@ if [ "$status" -eq 143 ]; then
 else
     fail "case 5b: a command killed by SIGTERM was reported as $status, not 143"
 fi
+
+# ---------------------------------------------------------------- case 5c
+# The THIRD bound. A worker that reached 29.7 GB took 56 of a 60 GB box with
+# 63 GB pushed into swap, and the two bounds above were both armed: its lane
+# had finished so nothing watched it, and its deadline had 815 seconds still
+# to run. Neither of them is a memory bound [measured 2026-09-20].
+if $WRAPPER --memory 262144 /bin/sh -c '
+        exec 2>/dev/null
+        awk "BEGIN { for (i = 0; i < 40000000; i++) hold[i] = i }" ' \
+        >/dev/null 2>&1; then
+    fail "case 5c: a command allocating far past --memory 262144 was not bounded"
+else
+    printf 'ok  5c a command past its memory bound does not finish\n'
+fi
+$WRAPPER --memory none /bin/echo bounded >/dev/null 2>&1 &&
+    printf 'ok  5d --memory none runs the command unbounded\n' ||
+    fail "case 5d: --memory none refused to run a trivial command"
+default_limit=$($WRAPPER /bin/sh -c 'ulimit -d' 2>/dev/null)
+case $default_limit in
+    unlimited | '' | *[!0-9]*)
+        fail "case 5e: the default memory bound read '$default_limit'" ;;
+    *)  printf 'ok  5e the default is derived from the box, %s kB\n' "$default_limit" ;;
+esac
+
+# `ulimit -d` sets the soft limit AND the hard one, so the bound only ratchets
+# down and the usual reason the call fails is not a shell that cannot meter
+# memory but an outer rung that already metered TIGHTER. Announcing "no memory
+# bound" over a bound that is in force is the same silent weakening the wrapper
+# exists to prevent, pointed the other way, so the notice has to distinguish
+# them and the command still has to run.
+notice=$(sh -c "ulimit -d 262144; exec $WRAPPER --memory 524288 /bin/echo ran" 2>&1)
+case $notice in
+    *"262144 kB is already in"*ran*)
+        printf 'ok  5f an inherited tighter bound is reported, not overstated\n' ;;
+    *)  fail "case 5f: the inherited-bound notice read '$notice'" ;;
+esac
 
 # ---------------------------------------------------------------- case 6
 # The parent-death signal is documented as firing when the spawning THREAD
