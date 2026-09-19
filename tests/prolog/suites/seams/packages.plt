@@ -41,6 +41,12 @@
 %   - a row PUBLISHES the heads it names, so a reader asking what a library
 %     declares sees them where the older spelling put them
 %     [tested: packages:a_backing_row_publishes_the_heads_it_names]
+%   - a row whose head no claim answers is NORMALISED before it is performed,
+%     in the home space, under law 3's reads ceiling and inference budget
+%     [tested: packages:a_computed_row_normalises_and_then_performs,
+%     packages:a_row_reaching_the_filesystem_refuses_by_name,
+%     packages:a_row_reading_the_runtime_is_allowed,
+%     packages:a_row_that_will_not_reduce_refuses_past_its_budget]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -58,7 +64,7 @@
    atomic_list_concat([Here, '/../../../../ai-tmp'], Scratch),
    assertz(packages_scratch(Scratch)),
    forall(member(Kind, [backed, unbacked, unclaimed, requires, absent, declared,
-                        undepended]),
+                        undepended, computed]),
           ( atomic_list_concat([Here, '/../../../data/packages/', Kind, '.pl'], Relative),
             absolute_file_name(Relative, Artifact, [access(read)]),
             assertz(packages_artifact(Kind, Artifact)) )).
@@ -248,6 +254,55 @@ test(an_atom_that_only_resembles_a_row_is_not_one) :-
     filereader:package_row(['=', [package, backing], packages_shape_probe], Kind, Payload),
     Kind == backing,
     Payload == packages_shape_probe.
+
+%Law 3. A row whose head a CLAIM answers is the answer already and is read as
+%written; anything else is a term and is evaluated in the home space first. The
+%fixture writes the row through an equation of its own, so the payload reaching
+%the loader is `(packages-computed-row)`, which no claim answers.
+test(a_computed_row_normalises_and_then_performs) :-
+    package_fixture(computed,
+                    '(= (packages-computed-row) (prolog "~w" (packages_computed_double)))\n\c
+                     (= (package backing) (packages-computed-row))\n',
+                    Path),
+    \+ artifact_loaded(computed),
+    'import!'('&self', Path, _),
+    artifact_loaded(computed),
+    packages_computed_double(21, 42).
+
+%The ceiling, refusing BY NAME and naming the operation rather than the class:
+%`it reads too much` says nothing a writer can act on where `exists_file` names
+%the line to move. The filesystem is what law 3 excludes first.
+test(a_row_reaching_the_filesystem_refuses_by_name) :-
+    package_fixture(ceiling,
+                    '(= (packages-ceiling-row) (prolog (exists_file "no-such-file.pl") (packages_ceiling_double)))\n\c
+                     (= (package backing) (packages-ceiling-row))\n',
+                    Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    Formal = permission_error(normalise, package_row, Named),
+    memberchk(exists_file, Named).
+
+%And the other side of the same ceiling. Law 2 makes `get-property` the way a
+%package reads the runtime facts law 3 allows, and the engine classifies it
+%`oracleIO`, so a ceiling written as a bare rank would refuse the one read the
+%design provides. It is admitted by name for that reason.
+test(a_row_reading_the_runtime_is_allowed) :-
+    package_fixture(runtime,
+                    '(= (package backing) (prolog (get-property lib version) (packages_runtime_double)))\n',
+                    Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    ( var(Formal) -> true ; Formal \= permission_error(normalise, package_row, _) ).
+
+%The budget, and the pragma that moves it. A row that will not converge is
+%refused rather than hanging the load, and the refusal names the budget so the
+%writer can tell "raise it" from "this does not terminate".
+test(a_row_that_will_not_reduce_refuses_past_its_budget) :-
+    package_fixture(budget,
+                    '!(pragma! package-budget 2000)\n\c
+                     (= (packages-budget-spin) (packages-budget-spin))\n\c
+                     (= (package backing) (packages-budget-spin))\n',
+                    Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    Formal = resource_error(package_budget).
 
 test(a_file_with_no_backing_row_installs_nothing) :-
     package_fixture(unbacked, '(= (package version) "0.0.1") ; no backing row for ~w~n', Path),
