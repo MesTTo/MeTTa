@@ -304,6 +304,26 @@ test(a_row_that_will_not_reduce_refuses_past_its_budget) :-
     catch('import!'('&self', Path, _), error(Formal, _), true),
     Formal = resource_error(package_budget).
 
+%A payload with NO ANSWER is a row that did not reduce, which law 3 calls a
+%row nobody claims. The written term passes through and the perform that
+%follows leaves it unreduced, which is what happened before normalisation
+%existed; refusing it by name waits on law 6, which decides when an unclaimed
+%backing is SKIPPED because its heads are covered rather than refused.
+%
+%The load must not fail, and it must not fail SILENTLY either: normalisation
+%failing where a bare conjunction would have propagated that failure would
+%have failed the forall, the perform and the whole load with no message.
+test(a_row_that_answers_nothing_leaves_the_load_standing) :-
+    package_fixture(unreduced,
+                    '(= (packages-unreduced-row) (empty))\n\c
+                     (= (package backing) (packages-unreduced-row))\n\c
+                     (= (packages-unreduced-witness) 42)\n',
+                    Path),
+    'import!'('&self', Path, _),
+    %The file loaded, which its own later equation is the witness for.
+    eval([match, '&self', ['=', ['packages-unreduced-witness'], V], V], Answer),
+    Answer == 42.
+
 test(a_file_with_no_backing_row_installs_nothing) :-
     package_fixture(unbacked, '(= (package version) "0.0.1") ; no backing row for ~w~n', Path),
     \+ artifact_loaded(unbacked),
