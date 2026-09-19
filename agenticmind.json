@@ -5136,6 +5136,47 @@
       "tags": [
         "tested"
       ]
+    },
+    "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow": {
+      "title": "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+    },
+    "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2": {
+      "title": "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2",
+      "supports": [
+        "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it": {
+      "title": "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it",
+      "supports": [
+        {
+          "node": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "status": "untried"
+        },
+        {
+          "node": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "relation": "addresses",
+          "target": "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+        }
+      ]
+    },
+    "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change": {
+      "title": "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change",
+      "supports": [
+        {
+          "node": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5991,6 +6032,14 @@
       "status": "done",
       "addresses": [
         "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+      ]
+    },
+    "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration": {
+      "title": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+      "effort": 3,
+      "status": "done",
+      "addresses": [
+        "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
       ]
     }
   },
@@ -26360,6 +26409,127 @@
         ]
       ],
       "id": "9e66250b843209f9"
+    },
+    {
+      "at": "2026-09-19T23:12:31.918955+00:00",
+      "after": "2255fc3cedb20523092e592c9c6df7c02d6724ca",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\\\"hello\\\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2\", \"tags\": [\"measured\"], \"title\": \"a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it\", \"tags\": [], \"title\": \"make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration\", \"fields\": {\"effort\": 3, \"addresses\": [\"a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow\"]}}, {\"op\": \"status\", \"id\": \"make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration\", \"because\": \"engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\\\"HELLO\\\"], shadow [local], after [\\\"HELLO\\\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "9e66250b843209f9"
+      ],
+      "assert": [
+        [
+          "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it",
+          "sort",
+          "prop"
+        ],
+        [
+          "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it",
+          "supports",
+          {
+            "node": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+            "status": "untried"
+          }
+        ],
+        [
+          "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it",
+          "supports",
+          {
+            "node": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+            "relation": "addresses",
+            "target": "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+          }
+        ],
+        [
+          "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it",
+          "title",
+          "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it"
+        ],
+        [
+          "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow",
+          "sort",
+          "prop"
+        ],
+        [
+          "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow",
+          "title",
+          "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+        ],
+        [
+          "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change",
+          "supersedes",
+          "a backing registers a head while the predicate stays an import, so fun_in alone cannot answer ownership; the repair records where a name came from precisely so the removal can put it back, and reading that record before dropping it is what makes the restore possible when the import is no longer materialised; and a head defined by an artifact is defined whether or not any module holds a clause for it"
+        ],
+        [
+          "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change",
+          "supports",
+          {
+            "node": "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+            "status": "done"
+          }
+        ],
+        [
+          "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change",
+          "tags",
+          "tested"
+        ],
+        [
+          "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change",
+          "title",
+          "engine_modules goes from 19 passed with the shadow test erroring to 20 passed with it green; a probe now reads before [\"HELLO\"], shadow [local], after [\"HELLO\"] with the import restored to lib_string; the one failure left, every_declared_service_is_exported_to_the_host, was already failing in both runs before this change"
+        ],
+        [
+          "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2",
+          "supports",
+          "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+        ],
+        [
+          "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2",
+          "title",
+          "measured 2026-09-20: adding the shadow raised 'string-upper with 1 arguments is one of Prolog's protected core predicates', and after that was fixed the removal left the caller answering ['string-upper',\"hello\"] with no import on the module, and function_still_defined and module_owns_function both answered no while metta_reference_prolog_head still answered 2"
+        ],
+        [
+          "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "sort",
+          "approach"
+        ],
+        [
+          "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "addresses",
+          "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+        ],
+        [
+          "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "effort",
+          3
+        ],
+        [
+          "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "status",
+          "done"
+        ],
+        [
+          "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration",
+          "title",
+          "make ownership mean registered here AND not resolving through an import, restore from the recorded source rather than a live import, and let both definedness tests see a surviving native registration"
+        ]
+      ],
+      "id": "5b645cdba1912cb0"
     }
   ]
 }
