@@ -156,13 +156,19 @@
     },
     "a7": {
       "title": "keep memoising the pure recomputations the profile names, now _container_call and what remains of _protocol",
-      "status": "untried",
+      "status": "failed",
       "addresses": [
         "i1"
       ],
       "kind": null,
       "at": "2026-09-19",
-      "cost": 3
+      "cost": 3,
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ]
     },
     "a7.1": {
       "title": "name the union one concept, _stored(container, slot), and have all three sites call it",
@@ -420,6 +426,28 @@
         "c9"
       ],
       "basis": "measured"
+    },
+    "c10": {
+      "says": "the memo is not sufficient: with it, doororder.py on the full module set has still not finished at 25 minutes, the same wall the unmemoised baseline hit",
+      "at": "2026-09-19"
+    },
+    "r23": {
+      "says": "measured in wt-battery-6 and wt-battery-2, both runs past 25 and 17 minutes with no result, against 14.9s on the branch tip",
+      "at": "2026-09-19",
+      "supports": [
+        "c10"
+      ],
+      "basis": "measured"
+    },
+    "r24": {
+      "says": "c10: memoising the pure recomputations the profile names is a real and measured improvement and does not bring the full set into range, which is c5 answered",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a7",
+          "status": "failed"
+        }
+      ]
     }
   }
 }
