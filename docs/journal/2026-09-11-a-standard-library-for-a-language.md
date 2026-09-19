@@ -1552,7 +1552,7 @@ The new budget prose explicitly distinguishes older drift from String's change.
 
 Verified: the card has34 heads,34 documentation rows,37 arrows and five direct
 examples. Its text, Rich and HTML displays all carry the heads and summary.
-Direct `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base python
+Direct `METTA_UPSTREAM=~/Dev/PyPeTTa1/PeTTa-base python
 extensions/python/tools/example_origins.py` reports143 derived/204 original
 examples. Logs: ai-libraries-string-card-final.log and
 ai-libraries-string-origins-live.log.
@@ -4024,7 +4024,7 @@ and ai-lib4-compression-suites-source-provider.log.
 Verified: the native object exports only install_lib_compression and does not
 link the system libarchive. The source archive and wheel carry every provider
 input; a fresh wheel installation builds and executes the native libraries and
-the Unicode extra-field fixture. Command: CHECK_PY=/home/user/Dev/.venv-pypetta/bin/python
+the Unicode extra-field fixture. Command: CHECK_PY=~/Dev/.venv-pypetta/bin/python
 sh extensions/python/test.sh tests/ch08_data/test_library_native_build.py
 -k test_native_sources_build_after_wheel_install. Result: one passing test.
 Receipts: ai-lib4-compression-{native-exports,native-links,wheel}.log.
