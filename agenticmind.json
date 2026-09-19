@@ -25,7 +25,9 @@
       ],
       "what": "metta._atoms.model.encode's return slot holds 3,104 abstract references, and every frozenset union, difference and membership over it is linear in that size",
       "rests_on": [
-        "c30"
+        "c30",
+        "r126",
+        "r124"
       ]
     },
     "i3": {
@@ -308,11 +310,12 @@
         "i6"
       ],
       "cost": 8,
-      "status": "unwanted",
+      "status": "untried",
       "title": "collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy",
       "rests_on": [
         "c14",
-        "c15"
+        "c15",
+        "r121"
       ]
     },
     "a13": {
@@ -381,7 +384,8 @@
         "r100",
         "r94",
         "r103",
-        "r107"
+        "r107",
+        "r122"
       ],
       "detail": [
         "docs/record/a17-call-each-distributive-transfer-function-once-with-the-whole.md"
@@ -1331,6 +1335,99 @@
           "status": "unwanted"
         }
       ]
+    },
+    "r112": {
+      "says": "fingerprinting was applied to ext/ and the comparison was still invalid, because engine/ and lib/ also differ between reused battery worktrees: engine hashes 1067bced, f9156c98 and 6b798f12 across three trees, and the door-rows failure that looked like a regression is a Prolog arity error, metta_release_space/2 against /1, which is an engine-version difference",
+      "attacks": [
+        "c29"
+      ],
+      "basis": "measured"
+    },
+    "c31": {
+      "says": "fingerprinting a named subset is not enough and neither is naming more subsets. Two arms of an A/B must differ in exactly one file, which is only reliable in ONE tree with that file swapped between runs, because a reused worktree differs from another in whatever its own commit and history left behind"
+    },
+    "r113": {
+      "says": "c28 and its attack: four invalid comparisons, three from ext/ and one from engine/ and lib/, each found only after the result was believed",
+      "supports": [
+        "c31"
+      ],
+      "basis": "measured"
+    },
+    "r114": {
+      "says": "it conflates two redundancies. Hash consing removed the MEMORY one, so equal sets are one object, and c17 measured that: 103,943 slots hold 19,912 distinct sets. It did nothing about the WORK one: each slot is still a separate node the worklist propagates a full-width set through, and the cost is linear in the sum of slot sizes, of which c17 measures 90.7 per cent as sitting in slots that share their set with another. The 130-module probe shows it directly: pre_add/handler, pre_add/<return>, Space.define/<return>, definitions.define/<return> and install_define/<return> each carry 765 to 771 references and are plainly the same set moving down a chain",
+      "attacks": [
+        "c30"
+      ],
+      "basis": "measured"
+    },
+    "r115": {
+      "says": "r110 rested on c30, which is now defeated. Collapsing provably-equal slots to one representative is aimed at exactly the 90.7 per cent c17 measured, and the obstruction is unchanged and real: it needs the constraint edges, which this analyser does not materialise, because holding the same set NOW is not a proof that two slots cannot diverge later",
+      "supports": [
+        {
+          "node": "a12",
+          "status": "untried"
+        }
+      ]
+    },
+    "r120": {
+      "says": "the store grows in one step and then stops: 100 modules 276,677 references at mean 4.3, 110 modules 767,672 at mean 11.0, 118 modules 770,115 at mean 10.9. So a rise happens between 100 and 110 and another above 118, and nothing happens in between"
+    },
+    "r116": {
+      "says": "ai_growth_probe.py at each count on the committed analyser",
+      "supports": [
+        "r120"
+      ],
+      "basis": "measured"
+    },
+    "r121": {
+      "says": "the biggest slot at 110 modules is metta._atoms.model.Expression.__init__ / parts with 1,081 references, 717 of them CONTAINER references, one abstract allocation site each. The next seven are 765 to 776 and look like the same set moving along a chain of returns through pre_add, define, install_define and Space.define"
+    },
+    "r117": {
+      "says": "ai_growth_probe.py printed the top slots and the composition of the largest",
+      "supports": [
+        "r121"
+      ],
+      "basis": "measured"
+    },
+    "r122": {
+      "says": "no regression, settled in ONE tree with only _analysis.py swapped: before the change 17 failed and 42 passed in 393.93s, after it 17 failed and 42 passed in 151.82s, and the two FAILED lists are byte-identical under diff. The suite is 2.6x faster and breaks nothing"
+    },
+    "r118": {
+      "says": "wt-battery-6, the same tree that produced the 17, re-run with _analysis.py reverted to d6e87a6a~1 and nothing else touched",
+      "supports": [
+        "r122"
+      ],
+      "basis": "measured"
+    },
+    "r123": {
+      "says": "the earlier 2-against-17 reading was an engine difference, not a regression: the two trees held different engine/ and lib/, and the failure text is a Prolog arity error, Unknown procedure metta_release_space/2 where /1 is defined, which no change to a Python analyser can produce"
+    },
+    "r119": {
+      "says": "fingerprinted engine/ at 1067bced, f9156c98 and 6b798f12 across the three trees",
+      "supports": [
+        "r123"
+      ],
+      "basis": "measured"
+    },
+    "r124": {
+      "says": "the store's jump is inside six modules: 118 modules hold 770,115 references and solve in 26.2s, 124 hold 2,440,214 and solve in 108.6s. The six are metta.algebra at 2,669 lines, metta.algebra._demand, metta.cli, metta.convert, metta.derivation and metta.doors"
+    },
+    "r125": {
+      "says": "ai_growth_probe.py at 118 and 124 with the module list printed in the same order the analysis reads it",
+      "supports": [
+        "r124"
+      ],
+      "basis": "measured"
+    },
+    "r126": {
+      "says": "at 124 modules the largest slot gains 346 container_method references, 345 named extend, beside 773 container references. So a slot holds 773 abstract containers with .extend called on it, and _call loops into _container_call once per container, each writing the argument into that container's own items slot"
+    },
+    "r127": {
+      "says": "ai_growth_probe.py printed the largest slot by kind and by name at 110 and at 124",
+      "supports": [
+        "r126"
+      ],
+      "basis": "measured"
     }
   },
   "log": [
@@ -6228,6 +6325,453 @@
         ]
       ],
       "id": "ba49b87e2ec28077"
+    },
+    {
+      "at": "2026-09-19T14:50:15+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "attack c29 --because 'fingerprinting was applied to ext/ and the comparison was still invalid, because engine/ and lib/ also differ between reused battery worktrees: engine hashes 1067bced, f9156c98 and 6b798f12 across three trees, and the door-rows failure that looked like a regression is a Prolog arity error, metta_release_space/2 against /1, which is an engine-version difference' --basis measured",
+      "parents": [
+        "ba49b87e2ec28077"
+      ],
+      "assert": [
+        [
+          "r112",
+          "sort",
+          "claim"
+        ],
+        [
+          "r112",
+          "attacks",
+          "c29"
+        ],
+        [
+          "r112",
+          "basis",
+          "measured"
+        ],
+        [
+          "r112",
+          "says",
+          "fingerprinting was applied to ext/ and the comparison was still invalid, because engine/ and lib/ also differ between reused battery worktrees: engine hashes 1067bced, f9156c98 and 6b798f12 across three trees, and the door-rows failure that looked like a regression is a Prolog arity error, metta_release_space/2 against /1, which is an engine-version difference"
+        ]
+      ],
+      "id": "1a400ae16a6aafc4"
+    },
+    {
+      "at": "2026-09-19T14:50:15+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim c31 'fingerprinting a named subset is not enough and neither is naming more subsets. Two arms of an A/B must differ in exactly one file, which is only reliable in ONE tree with that file swapped between runs, because a reused worktree differs from another in whatever its own commit and history left behind' --because 'c28 and its attack: four invalid comparisons, three from ext/ and one from engine/ and lib/, each found only after the result was believed' --basis measured",
+      "parents": [
+        "1a400ae16a6aafc4"
+      ],
+      "assert": [
+        [
+          "c31",
+          "sort",
+          "claim"
+        ],
+        [
+          "c31",
+          "says",
+          "fingerprinting a named subset is not enough and neither is naming more subsets. Two arms of an A/B must differ in exactly one file, which is only reliable in ONE tree with that file swapped between runs, because a reused worktree differs from another in whatever its own commit and history left behind"
+        ],
+        [
+          "r113",
+          "sort",
+          "claim"
+        ],
+        [
+          "r113",
+          "basis",
+          "measured"
+        ],
+        [
+          "r113",
+          "says",
+          "c28 and its attack: four invalid comparisons, three from ext/ and one from engine/ and lib/, each found only after the result was believed"
+        ],
+        [
+          "r113",
+          "supports",
+          "c31"
+        ]
+      ],
+      "id": "68763f9249b83b86"
+    },
+    {
+      "at": "2026-09-19T14:56:10+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "attack c30 --because 'it conflates two redundancies. Hash consing removed the MEMORY one, so equal sets are one object, and c17 measured that: 103,943 slots hold 19,912 distinct sets. It did nothing about the WORK one: each slot is still a separate node the worklist propagates a full-width set through, and the cost is linear in the sum of slot sizes, of which c17 measures 90.7 per cent as sitting in slots that share their set with another. The 130-module probe shows it directly: pre_add/handler, pre_add/<return>, Space.define/<return>, definitions.define/<return> and install_define/<return> each carry 765 to 771 references and are plainly the same set moving down a chain' --basis measured",
+      "parents": [
+        "68763f9249b83b86"
+      ],
+      "assert": [
+        [
+          "r114",
+          "sort",
+          "claim"
+        ],
+        [
+          "r114",
+          "attacks",
+          "c30"
+        ],
+        [
+          "r114",
+          "basis",
+          "measured"
+        ],
+        [
+          "r114",
+          "says",
+          "it conflates two redundancies. Hash consing removed the MEMORY one, so equal sets are one object, and c17 measured that: 103,943 slots hold 19,912 distinct sets. It did nothing about the WORK one: each slot is still a separate node the worklist propagates a full-width set through, and the cost is linear in the sum of slot sizes, of which c17 measures 90.7 per cent as sitting in slots that share their set with another. The 130-module probe shows it directly: pre_add/handler, pre_add/<return>, Space.define/<return>, definitions.define/<return> and install_define/<return> each carry 765 to 771 references and are plainly the same set moving down a chain"
+        ]
+      ],
+      "id": "50a053a388dfa8c3"
+    },
+    {
+      "at": "2026-09-19T14:56:10+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "status a12 untried --because 'r110 rested on c30, which is now defeated. Collapsing provably-equal slots to one representative is aimed at exactly the 90.7 per cent c17 measured, and the obstruction is unchanged and real: it needs the constraint edges, which this analyser does not materialise, because holding the same set NOW is not a proof that two slots cannot diverge later'",
+      "parents": [
+        "50a053a388dfa8c3"
+      ],
+      "assert": [
+        [
+          "a12",
+          "status",
+          "untried"
+        ],
+        [
+          "r115",
+          "sort",
+          "claim"
+        ],
+        [
+          "r115",
+          "says",
+          "r110 rested on c30, which is now defeated. Collapsing provably-equal slots to one representative is aimed at exactly the 90.7 per cent c17 measured, and the obstruction is unchanged and real: it needs the constraint edges, which this analyser does not materialise, because holding the same set NOW is not a proof that two slots cannot diverge later"
+        ],
+        [
+          "r115",
+          "supports",
+          {
+            "node": "a12",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "27638f633a9c3586"
+    },
+    {
+      "at": "2026-09-19T14:56:38+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim r120 'the store grows in one step and then stops: 100 modules 276,677 references at mean 4.3, 110 modules 767,672 at mean 11.0, 118 modules 770,115 at mean 10.9. So a rise happens between 100 and 110 and another above 118, and nothing happens in between' --because 'ai_growth_probe.py at each count on the committed analyser' --basis measured",
+      "parents": [
+        "27638f633a9c3586"
+      ],
+      "assert": [
+        [
+          "r116",
+          "sort",
+          "claim"
+        ],
+        [
+          "r116",
+          "basis",
+          "measured"
+        ],
+        [
+          "r116",
+          "says",
+          "ai_growth_probe.py at each count on the committed analyser"
+        ],
+        [
+          "r116",
+          "supports",
+          "r120"
+        ],
+        [
+          "r120",
+          "sort",
+          "claim"
+        ],
+        [
+          "r120",
+          "says",
+          "the store grows in one step and then stops: 100 modules 276,677 references at mean 4.3, 110 modules 767,672 at mean 11.0, 118 modules 770,115 at mean 10.9. So a rise happens between 100 and 110 and another above 118, and nothing happens in between"
+        ]
+      ],
+      "id": "c27bcfe3290d0dd3"
+    },
+    {
+      "at": "2026-09-19T14:56:38+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim r121 'the biggest slot at 110 modules is metta._atoms.model.Expression.__init__ / parts with 1,081 references, 717 of them CONTAINER references, one abstract allocation site each. The next seven are 765 to 776 and look like the same set moving along a chain of returns through pre_add, define, install_define and Space.define' --because 'ai_growth_probe.py printed the top slots and the composition of the largest' --basis measured",
+      "parents": [
+        "c27bcfe3290d0dd3"
+      ],
+      "assert": [
+        [
+          "r117",
+          "sort",
+          "claim"
+        ],
+        [
+          "r117",
+          "basis",
+          "measured"
+        ],
+        [
+          "r117",
+          "says",
+          "ai_growth_probe.py printed the top slots and the composition of the largest"
+        ],
+        [
+          "r117",
+          "supports",
+          "r121"
+        ],
+        [
+          "r121",
+          "sort",
+          "claim"
+        ],
+        [
+          "r121",
+          "says",
+          "the biggest slot at 110 modules is metta._atoms.model.Expression.__init__ / parts with 1,081 references, 717 of them CONTAINER references, one abstract allocation site each. The next seven are 765 to 776 and look like the same set moving along a chain of returns through pre_add, define, install_define and Space.define"
+        ]
+      ],
+      "id": "dd054617f13f5376"
+    },
+    {
+      "at": "2026-09-19T14:56:38+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "link a12 r121 --as rests-on",
+      "parents": [
+        "dd054617f13f5376"
+      ],
+      "assert": [
+        [
+          "a12",
+          "rests_on",
+          "r121"
+        ]
+      ],
+      "id": "10084ad88414125f"
+    },
+    {
+      "at": "2026-09-19T14:57:43+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim r122 'no regression, settled in ONE tree with only _analysis.py swapped: before the change 17 failed and 42 passed in 393.93s, after it 17 failed and 42 passed in 151.82s, and the two FAILED lists are byte-identical under diff. The suite is 2.6x faster and breaks nothing' --because 'wt-battery-6, the same tree that produced the 17, re-run with _analysis.py reverted to d6e87a6a~1 and nothing else touched' --basis measured",
+      "parents": [
+        "10084ad88414125f"
+      ],
+      "assert": [
+        [
+          "r118",
+          "sort",
+          "claim"
+        ],
+        [
+          "r118",
+          "basis",
+          "measured"
+        ],
+        [
+          "r118",
+          "says",
+          "wt-battery-6, the same tree that produced the 17, re-run with _analysis.py reverted to d6e87a6a~1 and nothing else touched"
+        ],
+        [
+          "r118",
+          "supports",
+          "r122"
+        ],
+        [
+          "r122",
+          "sort",
+          "claim"
+        ],
+        [
+          "r122",
+          "says",
+          "no regression, settled in ONE tree with only _analysis.py swapped: before the change 17 failed and 42 passed in 393.93s, after it 17 failed and 42 passed in 151.82s, and the two FAILED lists are byte-identical under diff. The suite is 2.6x faster and breaks nothing"
+        ]
+      ],
+      "id": "59cd3e9dc5c65da4"
+    },
+    {
+      "at": "2026-09-19T14:57:43+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim r123 'the earlier 2-against-17 reading was an engine difference, not a regression: the two trees held different engine/ and lib/, and the failure text is a Prolog arity error, Unknown procedure metta_release_space/2 where /1 is defined, which no change to a Python analyser can produce' --because 'fingerprinted engine/ at 1067bced, f9156c98 and 6b798f12 across the three trees' --basis measured",
+      "parents": [
+        "59cd3e9dc5c65da4"
+      ],
+      "assert": [
+        [
+          "r119",
+          "sort",
+          "claim"
+        ],
+        [
+          "r119",
+          "basis",
+          "measured"
+        ],
+        [
+          "r119",
+          "says",
+          "fingerprinted engine/ at 1067bced, f9156c98 and 6b798f12 across the three trees"
+        ],
+        [
+          "r119",
+          "supports",
+          "r123"
+        ],
+        [
+          "r123",
+          "sort",
+          "claim"
+        ],
+        [
+          "r123",
+          "says",
+          "the earlier 2-against-17 reading was an engine difference, not a regression: the two trees held different engine/ and lib/, and the failure text is a Prolog arity error, Unknown procedure metta_release_space/2 where /1 is defined, which no change to a Python analyser can produce"
+        ]
+      ],
+      "id": "9bfbe51989f3769e"
+    },
+    {
+      "at": "2026-09-19T14:57:43+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "link a17 r122 --as rests-on",
+      "parents": [
+        "9bfbe51989f3769e"
+      ],
+      "assert": [
+        [
+          "a17",
+          "rests_on",
+          "r122"
+        ]
+      ],
+      "id": "3b4ed195884d98e0"
+    },
+    {
+      "at": "2026-09-19T14:57:43+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim r124 'the store'\"'\"'s jump is inside six modules: 118 modules hold 770,115 references and solve in 26.2s, 124 hold 2,440,214 and solve in 108.6s. The six are metta.algebra at 2,669 lines, metta.algebra._demand, metta.cli, metta.convert, metta.derivation and metta.doors' --because 'ai_growth_probe.py at 118 and 124 with the module list printed in the same order the analysis reads it' --basis measured",
+      "parents": [
+        "3b4ed195884d98e0"
+      ],
+      "assert": [
+        [
+          "r124",
+          "sort",
+          "claim"
+        ],
+        [
+          "r124",
+          "says",
+          "the store's jump is inside six modules: 118 modules hold 770,115 references and solve in 26.2s, 124 hold 2,440,214 and solve in 108.6s. The six are metta.algebra at 2,669 lines, metta.algebra._demand, metta.cli, metta.convert, metta.derivation and metta.doors"
+        ],
+        [
+          "r125",
+          "sort",
+          "claim"
+        ],
+        [
+          "r125",
+          "basis",
+          "measured"
+        ],
+        [
+          "r125",
+          "says",
+          "ai_growth_probe.py at 118 and 124 with the module list printed in the same order the analysis reads it"
+        ],
+        [
+          "r125",
+          "supports",
+          "r124"
+        ]
+      ],
+      "id": "4cfb8655bb0ec8e4"
+    },
+    {
+      "at": "2026-09-19T14:57:53+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "add-claim r126 'at 124 modules the largest slot gains 346 container_method references, 345 named extend, beside 773 container references. So a slot holds 773 abstract containers with .extend called on it, and _call loops into _container_call once per container, each writing the argument into that container'\"'\"'s own items slot' --because 'ai_growth_probe.py printed the largest slot by kind and by name at 110 and at 124' --basis measured",
+      "parents": [
+        "4cfb8655bb0ec8e4"
+      ],
+      "assert": [
+        [
+          "r126",
+          "sort",
+          "claim"
+        ],
+        [
+          "r126",
+          "says",
+          "at 124 modules the largest slot gains 346 container_method references, 345 named extend, beside 773 container references. So a slot holds 773 abstract containers with .extend called on it, and _call loops into _container_call once per container, each writing the argument into that container's own items slot"
+        ],
+        [
+          "r127",
+          "sort",
+          "claim"
+        ],
+        [
+          "r127",
+          "basis",
+          "measured"
+        ],
+        [
+          "r127",
+          "says",
+          "ai_growth_probe.py printed the largest slot by kind and by name at 110 and at 124"
+        ],
+        [
+          "r127",
+          "supports",
+          "r126"
+        ]
+      ],
+      "id": "3d2701ddb05ee5cd"
+    },
+    {
+      "at": "2026-09-19T14:57:53+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "link i2 r126 --as rests-on",
+      "parents": [
+        "3d2701ddb05ee5cd"
+      ],
+      "assert": [
+        [
+          "i2",
+          "rests_on",
+          "r126"
+        ]
+      ],
+      "id": "a41ae6a999e98054"
+    },
+    {
+      "at": "2026-09-19T14:57:53+10:00",
+      "after": "9bbf56824b62667249d1e687387c4701ca6ea3f3",
+      "did": "link i2 r124 --as rests-on",
+      "parents": [
+        "a41ae6a999e98054"
+      ],
+      "assert": [
+        [
+          "i2",
+          "rests_on",
+          "r124"
+        ]
+      ],
+      "id": "8b655c1ee15cf858"
     }
   ]
 }
