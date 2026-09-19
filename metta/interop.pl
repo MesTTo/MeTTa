@@ -6,6 +6,12 @@
 % Guarantees: metta_host_probe_function/2 retires its probe at every swept
 %   inference budget while preserving the static-predicate refusal
 %   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+% Guarantees: a package row reaches its claimant as the file wrote it, and a
+%   file's rows perform for that file's own load and for no other load into the
+%   same space
+%   [tested: packages:a_backing_row_reaches_its_claimant_as_data,
+%   packages:a_backing_row_performs_only_for_the_file_that_carries_it;
+%   commit=WORKTREE].
 %
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their
@@ -62,6 +68,10 @@
 %   commit=ff4257005f562786e3ef7a5a37ce94b7d80e782d].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Open Obligations:
+%   To Do: None
+%   Hacks: None
+%   Future Enhancements: None
 
 %%% Prolog interop: %%%
 argv(K, _) :- var(K), !, refuse_unbound_input(argv, 1).
@@ -1989,17 +1999,16 @@ metta_catalog_holds(Base, Name) :-
 %A file's package rows, in the order the laws put them: what it REQUIRES loads
 %before its own rows perform, because a backing's claimant may be one of them
 %[source: docs/journal/2026-09-09-packages-are-equations.md, law 10].
-metta_perform_package_rows(Space) :-
-    metta_perform_package_requires(Space),
-    metta_perform_package_backings(Space).
+metta_perform_package_rows(CanonPath, Space) :-
+    metta_perform_package_requires(CanonPath, Space),
+    metta_perform_package_backings(CanonPath, Space).
 
 %A requirement names a library and the CATALOGS say where it lives, so this is
 %two matches and no resolver: the requirement is read from the file's own rows,
 %and `&catalogs` answers the path. The loader never looks in a directory
 %itself, which is what "adding a catalog is adding a row" buys.
-metta_perform_package_requires(Space) :-
-    Row = ['=', [package, requires], Required],
-    forall(eval([match, Space, Row, Required], _),
+metta_perform_package_requires(CanonPath, Space) :-
+    forall(filereader:source_package_row(CanonPath, Space, requires, Required),
            metta_require_one(Space, Required)).
 
 %An absent requirement REFUSES BY NAME rather than being skipped. Wrapping the
@@ -2022,23 +2031,58 @@ metta_require_one(Space, Required) :-
                              for it, or install the library it names')))
     ).
 
-metta_perform_package_backings(Space) :-
-    Backing = ['=', [package, backing], Row],
-    Perform = [evalc, [perform, Row], '&metta'],
+metta_perform_package_backings(CanonPath, Space) :-
     %`debug(packages)` turns this on; it costs nothing while the topic is off,
     %which a getenv check on every load would not. It names the SPACE as well
-    %as the rows, because the space a file loads into is not the one a reader
+    %as the file, because the space a file loads into is not the one a reader
     %expects: a file loaded through the Python door lands in `&pyspace_1`, not
     %`&self`, and reading the wrong space is why the first version of this
     %found nothing.
-    debug(packages, "space ~q carries package rows ~q", [Space, Backing]),
-    (   \+ eval([match, Space, Backing, Row], _)
+    debug(packages, "~q carries package rows into space ~q", [CanonPath, Space]),
+    %The rows are looked for before the claims are registered, so a file that
+    %declares none never loads lib_import at all.
+    (   \+ filereader:source_package_row(CanonPath, Space, backing, _)
     ->  true
     ;   metta_register_loader_claims,
-        forall(eval([match, Space, Backing, Perform], _), true)
+        forall(filereader:source_package_row(CanonPath, Space, backing, Row),
+               forall(eval([evalc, [perform, Row], '&metta'], _), true))
     ).
 
 :- dynamic(metta_loader_claims_registered/0).
+
+%The two rows the engine writes into `&metta` so that a package row can be
+%performed: what `perform` means, and the loader's own claim on the `prolog`
+%token. Source text rather than terms built here, because a claim's pattern
+%carries MeTTa variables and a term would be a second representation of the
+%same equation.
+%
+%A package row is DATA, and this Atom mask is what makes it so. Dispatch is
+%unification against a claimant's own equation, so evaluating inside the row
+%would mean the engine deciding what a token's payload means, which is the one
+%thing the design refuses [source:
+%docs/journal/2026-09-09-packages-are-equations.md, laws 4 and 5].
+%
+%Without it the row is an ordinary application and its subterms reduce before
+%any claim is tried: a one-name backing list is read as a nullary call, so
+%`(unify-mod)` in minimal_metta_lib became the `(Error ...)` its own arity
+%check answers and reached check_prolog_function_names/3 as a list where a
+%name belongs, `Type error: 'atom' expected, found ['unify-mod']`
+%[measured 2026-09-19; tested: a_backing_row_reaches_its_claimant_as_data].
+%
+%HERE rather than as a prelude_declaration/2 row, which is where an Atom mask
+%normally lives: the prelude tier is INHERITED, and
+%prelude_declaration_governs_in/2 withholds an inherited declaration from a
+%named module that defines the name itself. `&metta` defines `perform` -- the
+%claim below is its definition -- so a prelude row for it governs nowhere and
+%the mask is silently absent [measured 2026-09-19: the row loaded, 48
+%declarations registered, and the failure was unchanged].
+%
+%The `!(import_prolog_functions_from_file ...)` spelling never needed the mask
+%because translate_prolog_import_dl/5 compiles the name list where the literal
+%sits and never evaluates it. A claim body has a VARIABLE there, which that
+%special form passes through untouched, so the mask is what it was
+%[source: engine/translator/special_forms.pl, prolog_function_importer/1].
+metta_loader_source("(: perform (-> Atom %Undefined%))").
 
 %The loader's own claim on the `prolog` token, registered the way a seat or a
 %library registers one. The engine does not answer the token itself: the design
@@ -2047,22 +2091,31 @@ metta_perform_package_backings(Space) :-
 %testing a spelling [source: docs/journal/2026-09-09-packages-are-equations.md,
 %laws 4 and 5, and the rejection recorded above the laws].
 %
-%Registered from source text through the engine's own reader, because the
-%claim's pattern carries MeTTa variables and a term built here would be a
-%second representation of the same equation. `lib_import` comes first because
-%`import_prolog_functions_from_file` is ITS equation rather than a predicate of
-%this engine, so the claim's body has nothing to reach without it.
+%AFTER the declaration, by clause order: the mask governs the equation that
+%follows it, and a claim compiled first would be compiled without one.
 %
-%Once per process rather than per import: the claim is a row, and adding it
-%twice would leave two equations for one head where law 4 admits one claimant.
-metta_loader_claim("(= (perform (prolog $file $names)) \c
-                      (import_prolog_functions_from_file $file $names))").
+%`eval` on the FILE and nothing on the names, which is the claim saying what
+%its own two subterms mean: one is a locator to resolve, the other is a list
+%of names to register. The mask stops the engine deciding that for it, so
+%saying it here is the whole of the claimant's side of law 5. Both halves are
+%load-bearing -- without the `eval` the row's `(library "x.pl")` reaches the
+%importer as a two-element list and it consults `library` and `x.pl` as two
+%separate files, `source_sink 'library' does not exist`
+%[measured 2026-09-19; tested: a_backing_row_resolves_its_library_locator].
+metta_loader_source("(= (perform (prolog $file $names)) \c
+                       (import_prolog_functions_from_file (eval $file) \c
+                                                          $names))").
 
+%Once per process rather than per import: each row is a row, and adding one
+%twice would leave two equations for one head where law 4 admits one claimant.
+%`lib_import` comes first because `import_prolog_functions_from_file` is ITS
+%equation rather than a predicate of this engine, so the claim's body has
+%nothing to reach without it.
 metta_register_loader_claims :-
     (   metta_loader_claims_registered
     ->  true
     ;   assertz(metta_loader_claims_registered),
         importer_helper('&metta', [library, lib_import]),
-        forall(metta_loader_claim(Source),
+        forall(metta_loader_source(Source),
                filereader:process_loader_string(Source, _, '&metta'))
     ).

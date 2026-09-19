@@ -258,6 +258,14 @@
 %     test_no_binding_carries_its_own_verbosity_setter in
 %     extensions/python/tests/ch10_errors_and_refusals/test_engine_diagnostics.py,
 %     test_the_host_service_scoreboard_matches_the_tree; commit=562800cdac5d152f39fbd3b3c14c2d035ed18dea].
+% Guarantees: a definition depends on the symbols its body can CALL, not on
+%   every symbol it mentions: called_symbol/2 answers a literal head without
+%   descending into it, so a name reachable only through such a head records
+%   no edge and its arrival recompiles nothing
+%   [tested: filereader_called_symbols:a_literal_head_hides_the_names_inside_it,
+%   filereader_called_symbols:a_head_that_becomes_a_function_shows_them_again,
+%   packages:importing_a_backed_library_leaves_the_package_head_alone;
+%   commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -1750,7 +1758,7 @@ record_translated_supports(Module, Ref, [=, [G|_], Body]) :-
     atom(G),
     !,
     findall(Support,
-            ( mentioned_symbol(Body, Symbol),
+            ( called_symbol(Body, Symbol),
               Symbol \== G,
               Support = function_view(Module, Symbol) ),
             Supports0),
@@ -1783,7 +1791,7 @@ set_type_alias_support_scope(Scope, disabled) :-
 record_translated_alias_supports(Module, Ref, G, Body) :-
     type_annotation_supports(Module, G, Body, AnnotationSupports),
     findall(function_view(Module, Symbol),
-            ( mentioned_symbol(Body, Symbol), Symbol \== G ), Views),
+            ( called_symbol(Body, Symbol), Symbol \== G ), Views),
     append(Views, AnnotationSupports, Supports0),
     sort(Supports0, Supports),
     support_publish_compiled_form(Module, G, Ref, Supports, Body).
@@ -2019,6 +2027,60 @@ mentioned_symbol(Term, Term) :- atom(Term), !.
 mentioned_symbol(Term, Symbol) :- is_list(Term),
                                   member(Element, Term),
                                   mentioned_symbol(Element, Symbol).
+
+%The symbols a body can CALL, which is fewer than the symbols it mentions.
+%A term whose head the translator compiles to a literal is data all the way
+%down, so the names inside it are not call sites and a dependency on them is
+%one the compiled clause does not have.
+%
+%The head itself is still answered, and it is the guard for its own subtree:
+%if it later becomes a function this clause is invalidated through that edge
+%and retranslated, and the walk descends then. A name reachable only through
+%a literal head cannot be called before its head is, so import order still
+%cannot change what a definition means, which is what the whole-body walk was
+%protecting.
+%
+%Every backing row is why: `(= (package backing) (prolog F (heads)))` mentions
+%every head the artifact exports, so registering one recompiled the `package`
+%head, which carries a clause per library in the space. That recompile is a
+%no-op, the clause bodies being identical under =@= either side of it, and it
+%made importing N Prolog-backed libraries cost O(N^2)
+%[measured 2026-09-19: 1,527 inferences at the second import, 8,358 at the
+%twelfth; tested: packages:importing_a_backed_library_leaves_the_package_head_alone].
+called_symbol(Term, _) :- var(Term), !, fail.
+called_symbol(Term, Term) :- atom(Term), !.
+%is_list/1 rather than a [Head|Arguments] match, which mentioned_symbol/2 also
+%uses and for the same reason: a PARTIAL list matches that pattern with its
+%tail unbound, and member/2 over an unbound tail generates rather than
+%enumerating.
+called_symbol(Term, Symbol) :-
+    is_list(Term),
+    Term = [Head|_],
+    (   atom(Head),
+        literal_head(Head)
+    ->  Symbol = Head
+    ;   member(Element, Term),
+        called_symbol(Element, Symbol)
+    ).
+
+%A head whose payload is data. Two kinds reach this. The three below are
+%fixed by the language whatever else they are: quote and noeval carry syntax
+%and Error carries a diagnostic, and counting their contents as calls creates
+%false recursion. They are the same three support_memo_call_head/2 refuses,
+%for the same reason, and `quote` needs saying here because it IS a translator
+%form, so the test below would descend into it.
+% policy-inventory-exempt: arbiter-owned-language-law; reason=quote, noeval and Error payloads are syntax or data rather than executable calls; evidence=engine/support_graph.pl:support_memo_call_head/2
+literal_head(Head) :- var(Head), !, fail.
+literal_head(Head) :- memberchk(Head, [quote, noeval, 'Error']), !.
+%And a head the translator has nothing to compile: none of its own forms, no
+%function here or anywhere, no builtin. The order is by how often a check
+%succeeds, since one success ends the conjunction and a real call site is the
+%common case.
+literal_head(Head) :-
+    \+ fun(Head),
+    \+ builtin_fun(Head),
+    \+ metta_translated_head(Head),
+    \+ support_function_module(Head, _).
 
 % First pass converts MeTTa to Prolog terms without mutating registration state.
 parse_form(Form, Parsed) :-

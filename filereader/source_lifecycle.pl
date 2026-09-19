@@ -11,6 +11,10 @@
 % Guarantees: with_source_load/3 restores its context through metta_with_trailed/3;
 %   rollback_source_load_stable/1 retains its undo plan until retirement ends
 %   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+% Guarantees: source_package_row/4 answers only the package rows the named load
+%   stored, so a later load into the same space re-performs none of them
+%   [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it;
+%   commit=WORKTREE].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: every source retirement restores surviving function registrations
@@ -83,6 +87,10 @@
 %   test_a_failed_first_file_load_restores_existing_callers,
 %   test_file_replacement_updates_aliases_and_failed_replacement_restores_them;
 %   commit=acad923476d21110870f235192757281a737ee71].
+% Open Obligations:
+%   To Do: None
+%   Hacks: None
+%   Future Enhancements: None
 
 :- use_module(library(ugraphs), []).
 
@@ -1342,10 +1350,49 @@ metta_source_changed(CanonPath) :-
 %imported answered normally. After the transaction rather than inside it,
 %because a load that rolls back has no rows and must perform nothing
 %[source: docs/journal/2026-09-09-packages-are-equations.md, law 14].
+%
+%The PATH travels with the space, because the rows performed are this file's
+%and law 14 performs them at once, when the file carrying them loads.
 :- meta_predicate replacing_previous_load(+, +, 1, 0).
 replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
     replacing_previous_load_(CanonPath, Space, LoadInto, Goal),
-    metta_engine:metta_perform_package_rows(Space).
+    metta_engine:metta_perform_package_rows(CanonPath, Space).
+
+%One file's own package rows in one space, read from the journal its load
+%wrote rather than by matching the space.
+%
+%Matching answered every row the SPACE held, so each later load into a space
+%re-performed every earlier file's rows: N libraries in one space cost
+%N*(N+1)/2 performs instead of N, and a row that refuses raised on every load
+%after the one that carried it, including loads of files that declare nothing
+%[measured 2026-09-19: a backing naming a library nothing holds made the next
+%three unrelated imports raise its `source_sink ... does not exist`; tested:
+%packages:a_backing_row_performs_only_for_the_file_that_carries_it].
+%
+%Cost: one indexed lookup for the load plus one decode per atom this load
+%stored, which is the same walk source_load_function_names/2 makes over the
+%same journal, against the tens of thousands of inferences the load that just
+%finished spent.
+source_package_row(CanonPath, Space, Kind, Payload) :-
+    metta_source_load(CanonPath, Space, LoadId, _),
+    source_load_assertion(LoadId, stored, Ref),
+    spaces:stored_atom_of_ref(Ref, Space, Row, _),
+    package_row(Row, Kind, Payload).
+
+%A row is an EQUATION whose head is `(package <kind>)`, and every level of that
+%is tested rather than unified into, because a space can hold a bare VARIABLE
+%as an atom and a variable unifies with whatever pattern is offered to it. A
+%`$scalar` written on its own line answered as a backing row whose payload was
+%an unbound variable, and the loader carried it all the way to
+%check_prolog_function_names/3, which refused `a var` where the names belong
+%[tested: lib_import_tokens:static_equations_and_variable_data_remain_inert].
+package_row(Row, Kind, Payload) :-
+    nonvar(Row),
+    Row = ['=', Head, Payload],
+    nonvar(Head),
+    Head = [package, Kind],
+    nonvar(Kind),
+    nonvar(Payload).
 
 :- meta_predicate replacing_previous_load_(+, +, 1, 0).
 replacing_previous_load_(CanonPath, Space, LoadInto, Goal) :-
