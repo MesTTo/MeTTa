@@ -33,7 +33,7 @@ ROOT = next(parent for parent in Path(__file__).resolve().parents
             if (parent / "engine").is_dir() and (parent / "lib").is_dir())
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from check_package_backings import findings  # noqa: E402  -- the path is installed above
+from check_package_backings import _seat_set, disagreements, findings  # noqa: E402  -- the path is installed above
 
 MAKES_THE_CALL = '!(import_prolog_functions_from_file (library a.pl) (a-head))\n'
 
@@ -69,6 +69,16 @@ def main() -> int:
     assert "lib_describes" not in reported, f"a backing row was reported: {reported}"
     assert "lib_import" not in reported, f"the bootstrap library was reported: {reported}"
     assert reported == {"lib_calls"}, f"unexpected: {reported}"
+
+    # The reserved head is written on both sides of the engine boundary, since
+    # neither can derive it from the other: the engine fixes it as law 1 and the
+    # Python reader runs with no engine to ask. A disagreement either way is the
+    # finding, and the shipped tree must have none.
+    assert disagreements() == [], f"the two spellings disagree: {disagreements()}"
+    assert _seat_set('RESERVED_HEADS = frozenset({"one", "two"})') == {"one", "two"}, \
+        "the seat's set was not read as a literal"
+    assert _seat_set("NOTHING_HERE = 1") == frozenset(), \
+        "a file without the binding did not read as empty"
     with tempfile.TemporaryDirectory(dir=scratch) as empty:
         try:
             findings(Path(empty))
@@ -78,7 +88,8 @@ def main() -> int:
             message = "an empty roster was accepted"
             raise AssertionError(message)
     print("package-backings selftest: a library making the call is found; a comment, a string, "
-          "a backing row and lib_import are not; an empty roster is refused")
+          "a backing row and lib_import are not; an empty roster is refused; "
+          "and the reserved head agrees across the engine boundary")
     return 0
 
 

@@ -37,6 +37,9 @@ Guarantees:
   - an empty roster is refused, because a pass that found nothing to check
     reads exactly like a pass that checked everything
     [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
+  - the reserved head is named on both sides of the engine boundary or the
+    disagreement is reported, since neither side can derive it from the other
+    [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
 Fails when: run outside a checkout with a lib/ directory, which it reports.
 Open Obligations:
   To Do: None
@@ -46,6 +49,8 @@ Open Obligations:
 
 from __future__ import annotations
 
+import ast
+import re
 import sys
 from pathlib import Path
 
@@ -95,9 +100,56 @@ def findings(libraries: Path) -> list[str]:
     return out
 
 
+#: Where each side writes the reserved head down. The engine fixes it as law 1,
+#: so that one library's package rows are never read as its importer's own; the
+#: Python declarations reader runs with NO engine and cannot ask, so it carries
+#: the name again. Neither can be derived from the other across that boundary,
+#: which is what makes this a checkable duplication rather than a derivation.
+RESERVED_IN_ENGINE = ROOT / "engine/metta/references.pl"
+RESERVED_IN_SEAT = ROOT / "extensions/python/metta/_catalog/declarations.py"
+
+
+def reserved_heads() -> tuple[frozenset[str], frozenset[str]]:
+    """What each side calls reserved: the engine's clauses, then the seat's set."""
+    engine = frozenset(re.findall(r"^metta_reference_internal\(_, ([a-z_][\w-]*)\)\.",
+                                  RESERVED_IN_ENGINE.read_text(encoding="utf-8"),
+                                  re.MULTILINE))
+    return engine, _seat_set(RESERVED_IN_SEAT.read_text(encoding="utf-8"))
+
+
+def _seat_set(source: str) -> frozenset[str]:
+    """The seat's RESERVED_HEADS, read as a literal rather than imported.
+
+    Imported, this lane would need the seat on `sys.path` and would answer what
+    a stale installed copy holds; read, it answers what the file in this tree
+    says. The binding is `frozenset({...})`, so the literal is the call's
+    argument.
+    """
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(isinstance(target, ast.Name) and target.id == "RESERVED_HEADS"
+                   for target in node.targets):
+            continue
+        value = node.value
+        if isinstance(value, ast.Call) and value.args:
+            value = value.args[0]
+        return frozenset(ast.literal_eval(value))
+    return frozenset()
+
+
+def disagreements() -> list[str]:
+    """Each head one side reserves and the other does not."""
+    engine, seat = reserved_heads()
+    here = "engine/metta/references.pl"
+    there = "extensions/python/metta/_catalog/declarations.py"
+    return ([f"{name}: reserved in {here} and not in {there}" for name in sorted(engine - seat)]
+            + [f"{name}: reserved in {there} and not in {here}" for name in sorted(seat - engine)])
+
+
 def main() -> int:
-    """Report every library still making the call."""
-    problems = findings(LIBRARIES)
+    """Report every library still making the call, and any reserved head only one side knows."""
+    problems = findings(LIBRARIES) + disagreements()
     for problem in problems:
         print(f"  {problem}")
     print(f"package-backings: {len(problems)} finding(s)")
