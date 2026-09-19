@@ -362,6 +362,23 @@
             metta_reference_definition_changed/1,
             metta_reference_face_wave/0,
             metta_reference_prepare/3,
+            % The reference and package services the prelude library calls.
+            % A declaration publishes a callable service even where no Prolog
+            % clause in this engine reaches it, because Python calls engine
+            % predicates through query strings, so a declared service that is
+            % not exported is one the host cannot reach
+            % [tested: engine_modules:every_declared_service_is_exported_to_the_host].
+            metta_reference_check_prolog_source/1,
+            metta_reference_face/3,
+            metta_reference_option/3,
+            metta_reference_read_exports/3,
+            metta_reference_register_prolog/4,
+            metta_loader_source/1,
+            metta_package_loading/3,
+            metta_package_normalise/3,
+            metta_package_perform/3,
+            metta_package_reload/3,
+            metta_perform_package_rows/2,
             metta_source_singleflight/2,
             metta_graded_pair/5,
             'get-property'/2,
