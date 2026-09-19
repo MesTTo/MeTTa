@@ -7,6 +7,13 @@ and inference budget. A required library can replace `package-load`. The
 default interpreter owns coverage, catalogs, native contracts, setup, boot,
 receipts, locks and retirement.
 
+The engine publishes the prelude's evaluator, dispatch, source-locator and
+activation services through `seam:kind/2`; the source reader exports its indexed
+package-row query. The library-surface check finds no unpublished engine calls,
+the engine layering check passes, and all 13 `metta_published_surface` and
+`engine_layering` tests pass. The library-surface lane still exits nonzero for
+the three missing SWI libraries listed below.
+
 The contract is laws 6–13 and “the package is an argument record and the engine
 knows four things” in
 `docs/journal/2026-09-09-packages-are-equations.md`. Engine package-section
@@ -26,7 +33,7 @@ requires a disabling mutation for every library test and refuses nonexistent
 witnesses. Whole-gate attribution requires identical unrelated source bytes,
 Git identities and build configuration in the candidate and control.
 
-The latest focused run passed all 22 `packages` tests and 68 `lib_package`
+The latest focused run passed all 22 `packages` tests and 69 `lib_package`
 tests. The shipped `07-scopes_and_captured_calls.metta` example also passed.
 The subsequent no-autoload lane failed; its attribution and the final whole
 comparison remain open. Its exact output is
@@ -112,6 +119,22 @@ selection records the unused heads as available while performing the fresh
 heads. The selection partition retains O(h log h) cost. Both refusals/property
 observations have disabling mutations.
 
+A variable signature for a non-Prolog claimant formerly unified with the empty
+signature clause before its contract was read. The empty case now requires an
+actual empty list. The ordinary contract test includes a private artifact head
+and proves that only declared heads merge. Contract equations return computed
+values through `%Undefined%`; literal lists of declarations use `quote`.
+`a_claimed_backing_cannot_succeed_without_installing_its_heads` proves that a
+claimant returning `true` without publishing its named head refuses with
+`existence_error(package_export, 'lp-missing-export')` and rolls back the source.
+
+The included Prolog units sit beside `lib_package.pl`, within the boot's
+existing `lib/*/*.pl` freshness inventory. A unit initially placed one level
+deeper remained stale in an already-written QLF: the running contract call
+lacked a change visible in the source. Moving the units into the governed
+directory makes their edits invalidate the compiled prelude through the
+existing boot mechanism.
+
 Law 6 also supersedes the old
 `a_backing_no_claimant_answers_installs_nothing` test: accepting an uncovered
 head contradicted its required named refusal. The replacement is
@@ -149,8 +172,8 @@ and pending dependency edges deliberately survive Prolog transaction rollback:
 external resources still need cleanup and concurrent flights must see edges
 before waiting.
 
-Two memory-scale runs completed without a regression line; the latest saved
-output before the claim-bootstrap repair was:
+The latest memory-scale run completed without a regression line, after the
+claim bootstrap, native namespace and published-service repairs:
 
 ```text
 load-metta: inferences [1147, 3847, 30847, 300847]; fit=linear expected=linear nrms=0.0000 noise=+/-0
@@ -158,9 +181,9 @@ load-fast: inferences [2371, 7771, 61771, 601771]; fit=linear expected=linear nr
 ```
 
 These are 83 inferences above each 10,000-atom pin, within allowances 15,039
-and 30,085. Final verification reruns these probes after all implementation
-edits. `ai-tmp/ai-package-memory-final.log` also records the successful boundary
-observations and an earlier jscpd run with zero clones.
+and 30,085. `ai-tmp/ai-package-boundary-memory-surface-final.log` records these
+values, all required boundary observations, 13 passing publication/layering
+tests and the llms check with zero findings.
 
 ## Prior art
 
@@ -177,11 +200,12 @@ during compensation. No new dependency was introduced.
 
 ## Verification still being completed
 
-The mutation runner passed all 74 witnesses: 68 library cases and five changed
-package cases, with two independent mutations for partial-overlap selection
-and availability. Each fresh-process control exited 0 and each disabling
-mutation exited 1. The complete result is
-`ai-tmp/ai-package-mutations-74-and-math.log`.
+The mutation runner passed all 78 witnesses: 69 library cases and seven changed
+package cases, with additional mutations for partial-overlap availability and
+variable contract selection. Each fresh-process control exited 0 and each disabling
+mutation exited 1. The focused run also passes all 91 cases without choicepoint
+warnings, and jscpd reports zero clones. The complete result is
+`ai-tmp/ai-package-mutations-78.log`.
 Whole-gate results from batteries without their own Git identity are invalid.
 An earlier control also retained a stale detached HEAD and an empty
 `lib_package` directory after an orphan QLF prevented removal; it cannot
@@ -212,6 +236,29 @@ same expected/actual values (`ai-package-class-control.log` in battery 12).
 The other failures require comparison; they are not labeled pre-existing
 merely because they concern another component. No whole-gate completion is
 claimed.
+
+The comparison also exposed consumers of the old global native imports.
+`lib_thread_scope.plt` calls native predicates without a Prolog module import;
+Python `_binding/operations.pl` calls `metta_async_future_new/2` and its helper
+family unqualified. These helpers are not the named MeTTa backing heads in
+`lib_thread.metta`. Their consumers must name `lib_thread` now that a package
+publishes selected heads in its home. The native-shadow regression remains
+open: `engine_modules:removing_a_local_shadow_restores_a_library_export` raises
+`metta_builtin_redefinition('string-upper',1,'&plunit_module_library_shadow')`.
+The shadow-repair code treats a local native registration as a local equation
+and leaves its static import attached. The affected engine and consumer files
+are outside the assigned package section; ownership or repairs were requested.
+
+The generated Python fn face now includes `setup!` and `package-prolog`.
+The Node wire-catalog test initially failed with
+`Error [ERR_MODULE_NOT_FOUND]: Cannot find module '.../extensions/node/node_modules/esbuild/lib/main.js'`.
+In battery 13, `npm ci` installed the dependencies declared by the Node seat,
+then the unchanged test passed (`1 passed in 0.15s`). This failure was an absent
+build dependency, not a change to the wire catalog.
+The complete random-library suite plus the atom-reclamation case pass after
+native export isolation (`36 passed in 4.77s`, battery 13). Their earlier
+whole-run failures were checked individually rather than hidden by an already
+failing Python lane.
 
 ## Repaired integration and tooling failures
 

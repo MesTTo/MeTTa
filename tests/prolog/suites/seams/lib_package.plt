@@ -246,7 +246,7 @@ test(missing_artifact_names_setup_as_the_remedy) :-
     lp_package(missing, "(= (package backing) (prolog \"absent.pl\" (lp_missing)))", Path, Home),
     catch(lp_import(Path, Home), Error, true), nonvar(Error),
     Error = error(existence_error(source_sink, _), context(_, Remedy)),
-    sub_atom(Remedy, _, _, _, 'setup!').
+    once(sub_atom(Remedy, _, _, _, 'setup!')).
 
 test(offline_git_requires_a_lock) :-
     lp_package(git,
@@ -257,7 +257,7 @@ test(offline_git_requires_a_lock) :-
 
 test(claims_are_reflected_by_the_two_input_property_door) :-
     findall(Claim, eval(['get-property', perform, claims], Claim), Claims),
-    member([prolog,_,_], Claims), member(['lp-resource',_,_], Claims).
+    memberchk([prolog,_,_], Claims), memberchk(['lp-resource',_,_], Claims).
 
 test(a_required_library_can_replace_the_interpreter) :-
     lp_package(interpreter,
@@ -423,13 +423,13 @@ test(setup_pins_git_and_a_fresh_import_spawns_nothing) :-
     format(string(Source), '(= (package requires) (git ~q ~q))', [Url,Sha]), lp_write(Path, Source),
     eval(['setup!',Path],true),
     file_directory_name(Path, Directory), directory_file_path(Directory,'lock.metta',Lock),
-    lib_package:package_read_rows(Lock, Rows), member([requires,[git,Url,Sha],Locked],Rows), exists_file(Locked),
+    lib_package:package_read_rows(Lock, Rows), memberchk([requires,[git,Url,Sha],Locked],Rows), exists_file(Locked),
     source_file(lib_package_support:lp_install, Support),
     format(atom(Goal),
         'use_module(~q),use_module(library(prolog_wrap)),use_module(library(process)),filereader:metta_host_set_silent(true),wrap_predicate(process:process_create(A,B,C),forbid_spawn,_,throw(error(unexpected_package_spawn,A-B-C))),metta_engine:''import!''(''&self'',~q,_),findall(V,metta_engine:eval([''lp-git-value''],V),Vs),writeln(Vs)',
         [Support,Path]),
     lp_process(path(swipl), ['-q','-g',Goal,'-t',halt], Output),
-    sub_string(Output,_,_,_,"[42]").
+    once(sub_string(Output,_,_,_,"[42]")).
 
 test(two_requirers_cannot_pin_different_revisions_of_one_name) :-
     lp_package(pin_conflict, "", Path, _), lp_git_seed(Path, Url, Revision),
@@ -546,13 +546,24 @@ test(partially_overlapping_backings_only_merge_their_unselected_heads) :-
 
 test(ordinary_contract_equations_describe_an_attached_claimant) :-
     'new-space'(Artifact),metta_add_atom(Artifact,[=,['lp-contract-equation'],42],_),
+    metta_add_atom(Artifact,[=,['lp-contract-private'],43],_),
     format(string(Claims),
-        '(= (package-contract (lp-contract-symbol fixture $heads)) ((: lp-contract-equation (-> Number))))\n\c
+        '(= (package-contract (lp-contract-symbol fixture $heads)) (quote ((: lp-contract-equation (-> Number)))))\n\c
          (= (perform (lp-contract-symbol fixture $heads)) ~w)',[Artifact]),
     filereader:process_loader_string(Claims,_,'&metta'),
     lp_package(contract_equation,
         "(= (package backing) (lp-contract-symbol fixture $heads))",Path,Home),
-    lp_import(Path,Home),lp_answers(Home,['lp-contract-equation'],[42]).
+    lp_import(Path,Home),lp_answers(Home,['lp-contract-equation'],[42]),
+    lp_answers(Home,['lp-contract-private'],Private), \+ memberchk(43,Private).
+
+test(a_claimed_backing_cannot_succeed_without_installing_its_heads) :-
+    filereader:process_loader_string(
+        "(= (package-contract (lp-empty-backing fixture $heads)) (quote ((: lp-missing-export (-> Number)))))\n\c
+         (= (perform (lp-empty-backing fixture $heads)) true)", _, '&metta'),
+    lp_package(empty_backing,
+        "(= (package backing) (lp-empty-backing fixture (lp-missing-export)))", Path, Home),
+    lp_throws(lp_import(Path, Home), existence_error(package_export, 'lp-missing-export')),
+    \+ filereader:metta_source_load(Path, Home, _, _).
 
 test(successful_replacement_retires_the_old_handles_after_activation) :-
     lp_package(successful_replace,"(= (package boot) (lp-resource previous ()))",Path,Home),

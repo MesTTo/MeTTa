@@ -76,6 +76,7 @@ replacement(no_pattern, lib_package:package_heads_pattern(_,_,Names), _, Names=[
 replacement(no_arrow_check, lib_package:package_agree_type(_,_,_), _, true).
 replacement(no_equation_collision, lib_package:package_source_equation(_,_,_,_), _, fail).
 replacement(no_merge, lib_package:package_merge_answer(_,_,_), _, true).
+replacement(no_installed_heads, lib_package:package_installed_heads(_,_), _, true).
 replacement(no_receipts, spaces:metta_add_atom(_Space,Row,Result), Wrapped,
             (nonvar(Row), Row=[performed,_,_] -> Result=true ; call(Wrapped))).
 replacement(no_available, spaces:metta_add_atom(_Space,Row,Result), Wrapped,
@@ -89,6 +90,8 @@ replacement(import_runs_setup, lib_package:package_default(Path,Space,Rows), Wra
             (lib_package:package_prepare(Path,Space,Rows), call(Wrapped))).
 replacement(no_version_check, lib_package:package_versions(_), _, true).
 replacement(no_requires, lib_package:package_require(_,_,_), _, true).
+replacement(no_internal, metta_engine:metta_reference_internal(_Space,Name), Wrapped,
+            (Name==package -> fail ; call(Wrapped))).
 replacement(no_setup_remedy, lib_package:package_native_path(_,_,Locator,_), _,
             throw(error(existence_error(source_sink,Locator),context(package,missing)))).
 replacement(no_claim_reflection, lib_package:'get-property'(Subject,Key,_), Wrapped,
@@ -131,6 +134,9 @@ replacement(first_contract_only, lib_package:package_native_manifest(File,Declar
             (package_mutations:infer_every_arity(File,[First|_]),Declared=[First],Inferred=[])).
 replacement(no_generic_contracts, lib_package:package_contract(_,_,Row,_,_,_), Wrapped,
             (Row=[Token|_],Token=='lp-contract-symbol' -> fail ; call(Wrapped))).
+replacement(empty_generic_signature, lib_package:package_contract(_,_,Row,Pattern,Names,Contracts), Wrapped,
+            (Row=[Token|_],Token\==prolog,var(Pattern)
+             -> Pattern=[],Names=[],Contracts=[] ; call(Wrapped))).
 replacement(no_contract_requirement, lib_package:package_contract(_,_,Row,Pattern,Names,Contracts), Wrapped,
             (Row=[Token|_], Token\==prolog -> Names=Pattern, Contracts=[] ; call(Wrapped))).
 replacement(no_backing_shape, lib_package:package_backing_info(_,_,Row,Info), _,
@@ -149,6 +155,8 @@ witness(packages, a_row_that_answers_nothing_refuses_by_name, no_backing_shape).
 witness(packages, a_backing_row_installs_the_head_its_artifact_exports, no_home).
 witness(packages, importing_a_backed_library_leaves_the_package_head_alone, no_home).
 witness(packages, a_computed_row_normalises_and_then_performs, no_home).
+witness(packages, a_requirement_loads_before_the_file_that_declares_it, no_requires).
+witness(packages, the_package_head_is_internal_in_every_space, no_internal).
 
 group(no_claim_bootstrap, [default_claim_recovers_after_withdrawal_and_failed_activation]).
 group(no_coverage, [uncovered_backing_refuses_by_head]).
@@ -166,6 +174,7 @@ group(no_arrow_check, [contracts_refuse_before_native_directives]).
 group(no_equation_collision, [equation_and_backing_at_the_same_arity_refuse,
                              equation_and_native_arities_share_a_head_without_colliding]).
 group(no_merge, [backing_answer_spaces_merge_through_from]).
+group(no_installed_heads, [a_claimed_backing_cannot_succeed_without_installing_its_heads]).
 group(no_receipts, [backing_receipts_retain_the_actual_answer,
                    every_performer_answer_is_receipted_and_released]).
 group(no_release, [boot_runs_in_source_order_and_releases_in_reverse,
@@ -217,3 +226,4 @@ group(no_declared_contracts, [explicit_export_arities_are_native_contracts]).
 group(first_contract_only, [each_declared_arrow_matches_its_native_arity]).
 group(no_backing_shape, [empty_export_declarations_are_valid_signatures]).
 group(no_generic_contracts, [ordinary_contract_equations_describe_an_attached_claimant]).
+group(empty_generic_signature, [ordinary_contract_equations_describe_an_attached_claimant]).

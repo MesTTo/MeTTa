@@ -353,7 +353,7 @@ test(a_requirement_loads_before_the_file_that_declares_it) :-
     \+ regex_loaded,
     package_fixture(requires, '(= (package requires) lib_regex) ; not ~w~n', Path),
     'import!'('&self', Path, _),
-    regex_loaded.
+    once(regex_loaded).
 
 %Law 9. An absent requirement refuses BY NAME. It would otherwise be skipped
 %in silence: the catalog match has zero solutions and a `forall/2` over them
@@ -378,8 +378,7 @@ exists_directory_of(Where) :-
 %Law 1. Written as a clause rather than as an `(internal package)` row every
 %library would carry, so it holds in a space nobody declared anything in.
 test(the_package_head_is_internal_in_every_space) :-
-    metta_engine:metta_reference_internal('&self', package),
-    metta_engine:metta_reference_internal('&metta', package),
-    metta_engine:metta_reference_internal('a-space-that-was-never-made', package).
+    forall(member(Space, ['&self', '&metta', 'a-space-that-was-never-made']),
+           metta_engine:metta_reference_internal(Space, package)).
 
 :- end_tests(packages).

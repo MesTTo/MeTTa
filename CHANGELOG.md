@@ -22,6 +22,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   selected exports into the library home. Unselected exports leave MeTTa
   equation names free, private names outside a declared export list refuse,
   and partially selected backings retain their unused heads as alternatives.
+  The prelude uses published engine services and the source reader's indexed
+  package-row query.
+  Variable signatures from ordinary claimants are resolved against their
+  contracts, and a successful claimant that installs no named head refuses.
 
 - `bounded.sh` carries a THIRD bound, `--memory KILOBYTES|none`, and applies
   one by default: an eighth of what the box has, read from `/proc/meminfo`.
