@@ -337,13 +337,16 @@ def main() -> int:
 
         # 7. The path helper counts directory levels to reach `ext/`, so a
         # layout change can leave it pointing at nothing. It answers an empty
-        # roster rather than raising, which is why the lane compares it.
+        # roster rather than raising, which is why the lane compares it. The
+        # plant appends a reassignment rather than rewriting the count, so
+        # this case keeps testing the RULE however the count is later spelled;
+        # the directory it names is the one the helper really did reach after
+        # the distributions moved out of the seat on 2026-09-19.
         found = _reported(
             scratch,
             "extensions/python/_workspace.py",
-            (ROOT / "extensions/python/_workspace.py")
-            .read_text(encoding="utf-8")
-            .replace("parents[2]", "parent"),
+            (ROOT / "extensions/python/_workspace.py").read_text(encoding="utf-8")
+            + '\nEXT = SEAT / "ext"\n',
         )
         assert any("does not reach metta-solars" in line for line in found), found
 
