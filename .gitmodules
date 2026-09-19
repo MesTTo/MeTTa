@@ -1,24 +1,24 @@
 [submodule "engine"]
 	path = engine
-	url = /home/user/Dev/PyPeTTa1/repos/MeTTa-Kernel.git
+	url = /home/user/Dev/PyPeTTa1/components/MeTTa-Kernel.git
 [submodule "lib"]
 	path = lib
-	url = /home/user/Dev/PyPeTTa1/repos/metta-lib.git
+	url = /home/user/Dev/PyPeTTa1/components/metta-lib.git
 [submodule "examples"]
 	path = examples
-	url = /home/user/Dev/PyPeTTa1/repos/MeTTa-Examples.git
+	url = /home/user/Dev/PyPeTTa1/components/MeTTa-Examples.git
 [submodule "ext"]
 	path = ext
-	url = /home/user/Dev/PyPeTTa1/repos/metta-extensions.git
+	url = /home/user/Dev/PyPeTTa1/components/metta-extensions.git
 [submodule "extensions/python"]
 	path = extensions/python
-	url = /home/user/Dev/PyPeTTa1/repos/pymetta.git
+	url = /home/user/Dev/PyPeTTa1/components/pymetta.git
 [submodule "extensions/cmetta"]
 	path = extensions/cmetta
-	url = /home/user/Dev/PyPeTTa1/repos/cmetta.git
+	url = /home/user/Dev/PyPeTTa1/components/cmetta.git
 [submodule "extensions/node"]
 	path = extensions/node
-	url = /home/user/Dev/PyPeTTa1/repos/metta-node.git
+	url = /home/user/Dev/PyPeTTa1/components/metta-node.git
 [submodule "extensions/mork"]
 	path = extensions/mork
-	url = /home/user/Dev/PyPeTTa1/repos/metta-mork.git
+	url = /home/user/Dev/PyPeTTa1/components/metta-mork.git
