@@ -14,9 +14,6 @@
                                 transpose_ugraph/2, ugraph_union/3, vertices/2,
                                 vertices_edges_to_ugraph/3]).
 :- use_module(library(random), [random_between/3]).
-% Workaround: swi-ugraphs-append2 - import the host oracle's missing dependency.
-% The shipped graph equations no longer call this native algorithm.
-:- ugraphs:use_module(library(lists), [append/2]).
 :- load_collection_library(lib_graph).
 
 :- begin_tests(lib_graph).

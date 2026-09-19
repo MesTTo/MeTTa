@@ -4340,6 +4340,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree": {
+      "title": "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+    },
+    "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted": {
+      "title": "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted",
+      "supports": [
+        "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go": {
+      "title": "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go",
+      "supports": [
+        {
+          "node": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "status": "untried"
+        },
+        {
+          "node": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "relation": "addresses",
+          "target": "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+        }
+      ]
+    },
+    "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's": {
+      "title": "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's",
+      "supports": [
+        {
+          "node": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5099,6 +5140,14 @@
       "status": "done",
       "addresses": [
         "the guard mark set a __metta_guard__ attribute nothing ever read, and the type ignore written to silence mypy about it left ty as the only checker that could see it, so one dead line failed both the vulture and the ty gate lanes"
+      ]
+    },
+    "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch": {
+      "title": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
       ]
     }
   },
@@ -23147,6 +23196,127 @@
         ]
       ],
       "id": "562b8ddc6720c46c"
+    },
+    {
+      "at": "2026-09-19T21:14:02.396837+00:00",
+      "after": "614092320aefbbd818c5b5797be1cc067fbde7f7",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted\", \"tags\": [\"measured\"], \"title\": \"the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go\", \"tags\": [], \"title\": \"lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch\", \"fields\": {\"effort\": 1, \"addresses\": [\"the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree\"]}}, {\"op\": \"status\", \"id\": \"lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch\", \"because\": \"the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "562b8ddc6720c46c"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted",
+          "supports",
+          "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+        ],
+        [
+          "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted",
+          "title",
+          "measured 2026-09-20: swi-ugraphs-implicit-append and swi-ugraphs-append2 both describe top_sort/2 calling append/2 at library/ugraphs.pl:460 with the lists dependency declaring append/3, the first carries the Patch: line this host is built with, and the lane reported the second's reproduction answering absent and asked for the workaround to be lifted"
+        ],
+        [
+          "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go",
+          "sort",
+          "prop"
+        ],
+        [
+          "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go",
+          "supports",
+          {
+            "node": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+            "status": "untried"
+          }
+        ],
+        [
+          "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go",
+          "supports",
+          {
+            "node": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+            "relation": "addresses",
+            "target": "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+          }
+        ],
+        [
+          "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go",
+          "title",
+          "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go"
+        ],
+        [
+          "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree",
+          "title",
+          "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+        ],
+        [
+          "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's",
+          "supersedes",
+          "one defect wants one entry, and the surviving one is the one that names the patch this host is built with, so nothing about the defect is lost while the workaround and the second description both go"
+        ],
+        [
+          "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's",
+          "supports",
+          {
+            "node": "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+            "status": "done"
+          }
+        ],
+        [
+          "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's",
+          "tags",
+          "tested"
+        ],
+        [
+          "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's",
+          "title",
+          "the lib_graph suite passes 14 cases with the import removed, and the host-workarounds lane no longer reports swi-ugraphs-append2; the four findings left are all library(archive) missing from the patched SWI build, which the 2026-09-19 journal already recorded as the trunk's"
+        ],
+        [
+          "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "sort",
+          "approach"
+        ],
+        [
+          "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "addresses",
+          "the host-workarounds ledger carried two entries for one ugraphs defect, and the second one's workaround stayed in the graph suite after the patched host fixed it, so the lane refused the tree"
+        ],
+        [
+          "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "effort",
+          1
+        ],
+        [
+          "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "status",
+          "done"
+        ],
+        [
+          "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch",
+          "title",
+          "lift the graph suite's ugraphs import and delete the duplicate ledger entry and its reproduction, leaving the defect its one home under the entry that names the patch"
+        ]
+      ],
+      "id": "1f5b7ec1398275e8"
     }
   ]
 }
