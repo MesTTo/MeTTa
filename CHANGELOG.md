@@ -28,6 +28,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   contracts, and a successful claimant that installs no named head refuses.
   Package policy stays in one Prolog module so compiled-source freshness and
   library-surface checks cover every clause.
+  Requirement tests preload the native artifact and check a fresh importing
+  space, so their result is independent of earlier library tests.
 
 - `bounded.sh` carries a THIRD bound, `--memory KILOBYTES|none`, and applies
   one by default: an eighth of what the box has, read from `/proc/meminfo`.

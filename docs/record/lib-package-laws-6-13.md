@@ -55,7 +55,7 @@ open. Its output is `ai-tmp/ai-package-focused-88-and-noautoload.log`.
 | 9 | Import resolves existing artifacts and pins without running setup or fetching. Missing requirements/artifacts name `setup!`. Explicit setup may use the existing pinned Git importer. Native loading avoids the loader path that may invoke a compiler child. | `import_never_runs_setup`, `missing_artifact_names_setup_as_the_remedy`, `offline_git_requires_a_lock`, `setup_pins_git_and_a_fresh_import_spawns_nothing`. The last case prepares a local Git repository, then imports in a fresh process with process creation disabled. |
 | 10 | Names query catalogs, relative paths resolve against the requiring source, and Git requirements require full pins. Requirements load before local activation through existing source single-flight. Equal-digest aliases collapse; differing identities refuse. Conflicting pins name both requirers. Pending dependency edges remain visible outside transactions so a concurrent cycle is detected before waiting on another source flight. | Relative ordering, cycle, pending-edge, catalog insertion/space, equal/different alias and conflicting-pin tests. |
 | 11 | `(performed row answer)` records every actual answer at home. Setup persists these rows. The top package's lock records transitive resolved requirements, including Git pins. | Backing receipt, multiple-answer, setup receipt, transitive lock and fresh-process pinned Git tests; the boundary diagnostic observes backing and boot receipts. |
-| 12 | Source withdrawal removes native MeTTa registrations and releases owned answers. Host clauses remain loaded. Persistent setup receipts remain on disk. A failed replacement restores the previous source and its handles; a failed parent preserves a successfully loaded dependency. | Both home/`&self` withdrawal cases, both replacement cases, `a_failed_parent_preserves_a_successful_dependency`, `failure_with_a_failed_release_still_withdraws_the_source`, `space_release_closes_its_package_handles`. |
+| 12 | **Not fully built.** Single-source withdrawal, handle compensation, persistent receipts and failed replacement work. A native registration surviving in another home loses the shared function/arity summary when its first source retires. Native-name invalidation also needs repair for calls cached after a shadow's withdrawal. Both defects reach generic source retirement outside the assigned predicates. | Both home/`&self` withdrawal cases, both replacement cases, failed-parent and failed-release cases, and space release pass. The two-home production counterexample and shadow-withdrawal probe below establish the remaining failures. |
 | 13 | The MeTTa/engine half is built: an application can load its package in `&self`; every normalized local boot row is checked for a claimant and against available derived arrow declarations before any local effect, then handles follow law 8. | `all_boot_rows_are_validated_before_any_effect`, `boot_types_are_checked_before_effects`, computed-row multiplicity and lifecycle cases. The Python half is not built; see below. |
 
 Law 13's Python half requires edits to
@@ -102,6 +102,13 @@ Native clauses have process lifetime; native MeTTa registrations are local
 source artifacts. Three older package cases used direct unqualified Prolog
 calls, which required global host registration. They now call their public
 MeTTa heads and inspect the explicit importing module. This follows law 7.
+
+The requirement test also assumed the regex artifact had never loaded in the
+process. Running it after `engine_modules` refuted that assumption. It now
+preloads the native artifact deliberately, imports into a fresh space, then
+checks the required source's local declaration and public callable result.
+The revised test passes and its `no_requires` mutation fails. All 91 package
+cases and 78 mutations still pass (`ai-tmp/ai-package-requirement-isolation.log`).
 
 The whole comparison found an additional namespace leak:
 
@@ -277,6 +284,25 @@ With both obligations supplied by wrappers in an isolated probe, the same
 caller answers `"HELLO"`, then `local`, then `"HELLO"`, and SWI reports its
 restored import from `lib_string`. That is diagnostic evidence, not a shipped
 repair; `ai-tmp/ai-package-native-shadow-repair-probe.log` records it.
+The probe also passes all 112 engine-module and package cases together, but
+an additional source-withdrawal scenario refutes its completeness. A failed
+shadow source restores 42, a successful shadow answers 99, and withdrawing
+that shadow restores 42. Withdrawing the native source afterwards correctly
+removes its registrations, yet its cached call raises
+`metta_engine:call_goals_in_/2: Unknown procedure: ai_shadow_native/2`.
+Generic retirement must invalidate native names as well as equation names.
+
+A separate production probe uses no repair wrappers. Importing one native
+artifact into two homes lets the second answer 42. After withdrawing the
+first, the second's `fun_in` and `metta_reference_prolog_head` facts still belong
+to its live source, but `fun` and the arity summary were owned only by the
+retired source. A fresh call in the second home stays unreduced. The existing
+`restore_surviving_source_functions/1` enumerates surviving compiled/deferred
+equations and omits native registrations. The exact observations are in
+`ai-tmp/ai-package-native-two-homes.log`; ownership for this source-retirement
+repair was requested. These counterexamples keep law 12 open despite the
+passing focused suite.
+
 The generated library-reference page also needs regeneration for the three
 new package entries. Ownership for that artifact was requested alongside the
 engine and consumer repairs.

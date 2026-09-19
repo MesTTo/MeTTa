@@ -26,6 +26,10 @@
 %   - `package` is internal in every space, so one library's package rows are
 %     never read as its importer's own
 %     [tested: packages:the_package_head_is_internal_in_every_space]
+%   - a requirement publishes into its importing space even when the native
+%     artifact is already loaded elsewhere
+%     [tested: packages:a_requirement_loads_before_the_file_that_declares_it;
+%     commit=WORKTREE].
 %   - a row reaches its claimant as DATA, so a one-name list is a list and not
 %     a nullary call to the name in it
 %     [tested: packages:a_backing_row_reaches_its_claimant_as_data]
@@ -345,15 +349,17 @@ test(the_catalog_enumerates_only_libraries) :-
     forall(member(Held, Names),
            ( atom(Held), \+ sub_atom(Held, 0, 1, _, '.') )).
 
-test(a_requirement_loads_before_the_file_that_declares_it) :-
-    %The observable is the required library's OWN predicate, which nothing
-    %else defines, rather than the loader's bookkeeping: the file declares the
-    %requirement and imports nothing, so a defined regex_match/3 can only have
-    %come from the requirement being performed.
-    \+ regex_loaded,
+test(a_requirement_loads_before_the_file_that_declares_it,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    % Native clauses have process lifetime. A fresh space must receive the
+    % required source's declarations and callable heads even if another test
+    % or importing home already loaded its Prolog artifact.
+    library('lib_regex.pl', Native), use_module(Native, []),
+    \+ 'get-atoms'(Space, [':', regex_match, _]),
     package_fixture(requires, '(= (package requires) lib_regex) ; not ~w~n', Path),
-    'import!'('&self', Path, _),
-    once(regex_loaded).
+    'import!'(Space, Path, true),
+    once('get-atoms'(Space, [':', regex_match, _])),
+    findall(Result, eval([evalc, [regex_match, "^a$", "a"], Space], Result), [true]).
 
 %Law 9. An absent requirement refuses BY NAME. It would otherwise be skipped
 %in silence: the catalog match has zero solutions and a `forall/2` over them
@@ -365,9 +371,6 @@ test(a_requirement_no_catalog_holds_refuses_by_name) :-
 
 test(the_catalog_answers_nothing_for_a_library_it_does_not_hold) :-
     \+ eval([match, '&catalogs', [package, lib_no_catalog_holds_this, _], x], _).
-
-regex_loaded :-
-    catch(predicate_property(_:regex_match(_, _, _), defined), _, fail).
 
 %A library is a directory holding a file named after it, so the catalog's
 %answer names the stem and the directory is what must be there.
