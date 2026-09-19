@@ -4858,6 +4858,30 @@
       "tags": [
         "tested"
       ]
+    },
+    "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it": {
+      "title": "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it"
+    },
+    "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))": {
+      "title": "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))",
+      "supports": [
+        "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it": {
+      "title": "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it"
+    },
+    "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'": {
+      "title": "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'",
+      "supports": [
+        "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -25248,6 +25272,77 @@
         ]
       ],
       "id": "e201eaeb95f87504"
+    },
+    {
+      "at": "2026-09-19T22:22:02.846316+00:00",
+      "after": "380143a560cf0c8f4ac3623f422bee157afb260b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))\", \"tags\": [\"measured\"], \"title\": \"the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'\", \"tags\": [\"measured\"], \"title\": \"diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it\", \"fields\": {}}]",
+      "parents": [
+        "e201eaeb95f87504"
+      ],
+      "assert": [
+        [
+          "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it",
+          "sort",
+          "prop"
+        ],
+        [
+          "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it",
+          "title",
+          "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it"
+        ],
+        [
+          "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))",
+          "supports",
+          "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it"
+        ],
+        [
+          "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))",
+          "title",
+          "measured 2026-09-20 with the library's own debug topic enabled after load: the trace reads 'perform [prolog,[library,lib_thread.pl],[par_map,...]] in &self because its claim and contracts passed', the claim is registered as [prolog,_,_], and the claimant is now (= (perform (prolog $file $names)) (package-prolog $file $names))"
+        ],
+        [
+          "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'",
+          "supports",
+          "diagnosing the delegated job's code further is chasing a moving target and was stopped: lib/lib_package/support/native.pl, which held the claimant, was deleted between reading its line number and opening it"
+        ],
+        [
+          "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'",
+          "title",
+          "measured 2026-09-20: a grep located 'package-prolog'(File, Names, true) at lib/lib_package/support/native.pl:38 and a sed on that file minutes later answered 'No such file or directory'"
+        ],
+        [
+          "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it",
+          "title",
+          "the silent backing has narrowed rather than stalled: the row is now SELECTED and performed, where an hour earlier it was classified available and skipped, so what remains is the claimant not installing rather than the choice not reaching it"
+        ]
+      ],
+      "id": "d2f6b35fbd6a3536"
     }
   ]
 }
