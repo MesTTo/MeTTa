@@ -3477,6 +3477,111 @@
           "target": "the reads ceiling with its inference budget is the one of law 3's four engine-fixed things still unbuilt, and it is what keeps a31.1 and a31.5 open"
         }
       ]
+    },
+    "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise": {
+      "title": "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+    },
+    "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer": {
+      "title": "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer",
+      "supports": [
+        "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted": {
+      "title": "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+    },
+    "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080": {
+      "title": "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080",
+      "supports": [
+        "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims": {
+      "title": "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+      "supports": [
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "status": "untried"
+        },
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "relation": "addresses",
+          "target": "i24"
+        },
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "relation": "rests_on",
+          "target": "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+        },
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "relation": "rests_on",
+          "target": "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+        }
+      ]
+    },
+    "both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes": {
+      "title": "both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes",
+      "attacks": [
+        "r274"
+      ]
+    },
+    "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree": {
+      "title": "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree",
+      "supports": [
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims"
+      ]
+    },
+    "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem": {
+      "title": "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem"
+    },
+    "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads": {
+      "title": "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads",
+      "supports": [
+        "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers": {
+      "title": "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+      "supports": [
+        {
+          "node": "a31.1",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "r227",
+        "r237",
+        "r257"
+      ]
+    },
+    "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it": {
+      "title": "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it",
+      "supports": [
+        {
+          "node": "a31.5",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "r258",
+        "r269"
+      ]
     }
   },
   "approaches": {
@@ -3946,7 +4051,7 @@
     },
     "a31.1": {
       "title": "give the engine its four fixed things: the reserved head package, (package requires) performed before any packaging library is merged, perform dispatched by unification in the seam space, and the reads ceiling with its inference budget",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i19"
       ],
@@ -4009,7 +4114,7 @@
     },
     "a31.5": {
       "title": "perform (package requires) before any packaging library is merged, and normalise the other package questions under the reads effect ceiling with an inference budget, refusing by name past it",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i19"
       ],
@@ -4125,6 +4230,19 @@
       "status": "done",
       "addresses": [
         "i30"
+      ]
+    },
+    "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget": {
+      "title": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+      "effort": 6,
+      "kind": "and",
+      "status": "done",
+      "addresses": [
+        "i24"
+      ],
+      "rests_on": [
+        "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted",
+        "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
       ]
     }
   },
@@ -19681,6 +19799,317 @@
         ]
       ],
       "id": "622a7dd3ffafa29c"
+    },
+    {
+      "at": "2026-09-19T17:18:10.997962+00:00",
+      "after": "7f9b2af818502bfd3d17d337235fac9ea29fbc4e",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer\", \"tags\": [\"source\"], \"title\": \"a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080\", \"tags\": [\"source\"], \"title\": \"the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims\", \"tags\": [], \"title\": \"split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget\", \"fields\": {\"effort\": 6, \"children\": \"all\", \"addresses\": [\"i24\"], \"rests_on\": [\"the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted\", \"a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise\"]}}]",
+      "parents": [
+        "622a7dd3ffafa29c"
+      ],
+      "assert": [
+        [
+          "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise",
+          "sort",
+          "prop"
+        ],
+        [
+          "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise",
+          "title",
+          "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+        ],
+        [
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+          "sort",
+          "prop"
+        ],
+        [
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "status": "untried"
+          }
+        ],
+        [
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "relation": "addresses",
+            "target": "i24"
+          }
+        ],
+        [
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "relation": "rests_on",
+            "target": "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+          }
+        ],
+        [
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "relation": "rests_on",
+            "target": "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+          }
+        ],
+        [
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims",
+          "title",
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims"
+        ],
+        [
+          "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080",
+          "supports",
+          "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+        ],
+        [
+          "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080",
+          "title",
+          "read engine/metta/effects.pl:1155-1165 and engine/metta/control.pl:1055-1080"
+        ],
+        [
+          "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer",
+          "sort",
+          "prop"
+        ],
+        [
+          "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer",
+          "supports",
+          "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+        ],
+        [
+          "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer",
+          "tags",
+          "source"
+        ],
+        [
+          "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer",
+          "title",
+          "read law 3 against r274's two attempts: the law says Normalisation evaluates (package requires|setup|boot|backing), so the ceiling governs computing the ANSWER, and a row written as a literal is already the answer"
+        ],
+        [
+          "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted",
+          "title",
+          "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "sort",
+          "approach"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "addresses",
+          "i24"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "effort",
+          6
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "kind",
+          "and"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "rests_on",
+          "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "rests_on",
+          "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "status",
+          "untried"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "title",
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget"
+        ]
+      ],
+      "id": "ae4105bc06783705"
+    },
+    {
+      "at": "2026-09-19T17:27:15.655268+00:00",
+      "after": "b3f1480977723b35e088c4c71bb1ee5cae06f756",
+      "did": "[{\"op\": \"attack\", \"id\": \"r274\", \"because\": \"both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes\", \"tags\": []}, {\"op\": \"status\", \"id\": \"split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget\", \"because\": \"packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree\", \"tags\": [], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads\", \"tags\": [\"measured\"], \"title\": \"law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"a31.1\", \"because\": \"all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers\", \"tags\": [], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"a31.5\", \"because\": \"both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it\", \"tags\": [], \"status\": \"done\"}]",
+      "parents": [
+        "ae4105bc06783705"
+      ],
+      "assert": [
+        [
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+          "sort",
+          "prop"
+        ],
+        [
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+          "supersedes",
+          "r227"
+        ],
+        [
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+          "supersedes",
+          "r237"
+        ],
+        [
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+          "supersedes",
+          "r257"
+        ],
+        [
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+          "supports",
+          {
+            "node": "a31.1",
+            "status": "done"
+          }
+        ],
+        [
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers",
+          "title",
+          "all four of law 3's engine-fixed things are built and gated: package is reserved by metta_reference_internal/2, (package requires) performs before the declaring file's own rows through &catalogs, perform dispatches by unification against a claim in &metta, and the reads ceiling with its inference budget normalises a row no claim answers"
+        ],
+        [
+          "both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes",
+          "sort",
+          "prop"
+        ],
+        [
+          "both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes",
+          "attacks",
+          "r274"
+        ],
+        [
+          "both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes",
+          "title",
+          "both attempts charged something law 3 does not govern, and a third measurement says why the second could never work: metta_host_goal_effect_plan/4 answers about a compiled Prolog body and prices ANY list oracleIO, including (+ 1 2). metta_host_source_effect_plan/4 answers about MeTTa source and prices a literal row pureStructural with no operations at all, which is the split the law describes"
+        ],
+        [
+          "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it",
+          "sort",
+          "prop"
+        ],
+        [
+          "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it",
+          "supersedes",
+          "r258"
+        ],
+        [
+          "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it",
+          "supersedes",
+          "r269"
+        ],
+        [
+          "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it",
+          "supports",
+          {
+            "node": "a31.5",
+            "status": "done"
+          }
+        ],
+        [
+          "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it",
+          "title",
+          "both halves: (package requires) performs before any packaging library is merged, and the other package questions normalise under the reads ceiling with the package-budget pragma, refusing by name past it"
+        ],
+        [
+          "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem",
+          "sort",
+          "prop"
+        ],
+        [
+          "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem",
+          "title",
+          "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem"
+        ],
+        [
+          "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree",
+          "supersedes",
+          "law 4 already keeps the registry that answers it: a claim is an equation (= (perform (<token> ...)) ...) in the seam space, so a token some claim answers is one the loader can perform as written, and anything else is either a term to normalise or, after normalising, law 3's row nobody claims"
+        ],
+        [
+          "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "status": "done"
+          }
+        ],
+        [
+          "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree",
+          "title",
+          "packages.plt answers 17 passed 0 failed in a verified battery snapshot, with four cases on paths that did not exist before: a computed row normalises and then performs, one reaching the filesystem refuses naming exists_file, one reading the runtime through get-property is allowed, and one that will not converge refuses past a budget its own source set. lib_import, filereader, prolog_interface and fuel are clean in the same tree"
+        ],
+        [
+          "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads",
+          "sort",
+          "prop"
+        ],
+        [
+          "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads",
+          "supports",
+          "law 3's ceiling is not a single rank in this engine's lattice: (match &self a a) and (add-atom &self a) plan writesState while (get-property lib version) plans oracleIO, and law 2 makes get-property the way a package reads the runtime facts law 3 allows, so any single rank either refuses that read or admits the filesystem"
+        ],
+        [
+          "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads",
+          "tags",
+          "measured"
+        ],
+        [
+          "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads",
+          "title",
+          "planned each through metta_host_source_effect_plan/4 and read metta_builtin_effect_override/2; the ceiling is written as the classes below oracleIO plus the operations named as runtime reads"
+        ],
+        [
+          "a31.1",
+          "status",
+          "done"
+        ],
+        [
+          "a31.5",
+          "status",
+          "done"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "ec61d69d1808ba28"
     }
   ]
 }
