@@ -279,6 +279,17 @@
         "i1"
       ],
       "cost": 2
+    },
+    "a12": {
+      "title": "collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy",
+      "status": "untried",
+      "addresses": [
+        "i6"
+      ],
+      "cost": 8,
+      "rests_on": [
+        "c14"
+      ]
     }
   },
   "claims": {
@@ -680,6 +691,25 @@
         {
           "node": "a10",
           "status": "active"
+        }
+      ]
+    },
+    "c14": {
+      "says": "collapsing strongly connected components is the established fix for exactly this symptom, and it is precision-preserving: every pointer in an SCC of the constraint graph provably converges to the SAME set, so one representative can stand for all of them"
+    },
+    "r41": {
+      "says": "Fahndrich, Foster, Su and Aiken, PLDI 1998, measure that the bulk of work and execution time is attributable to SCCs and that without cycles the analysis scales very well; Hardekopf and Lin PLDI 2007 add lazy and hybrid cycle detection; Pearce, Kelly and Hankin SCAM 2003 give online detection by keeping the graph topologically sorted",
+      "supports": [
+        "c14"
+      ],
+      "basis": "source"
+    },
+    "r42": {
+      "says": "measured: the degraded doors sit on an SCC of 152 scopes in metta._atoms.factories, and the cost model is stored references times mean set size, which an SCC divides by its own size",
+      "supports": [
+        {
+          "node": "a12",
+          "status": "untried"
         }
       ]
     }
@@ -2646,6 +2676,105 @@
             "node": "a10",
             "status": "active"
           }
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:39:10+10:00",
+      "after": "0c345fc91b65154c2f73fc51d18d5a4b96e39789",
+      "did": "add-claim c14 'collapsing strongly connected components is the established fix for exactly this symptom, and it is precision-preserving: every pointer in an SCC of the constraint graph provably converges to the SAME set, so one representative can stand for all of them' --because 'Fahndrich, Foster, Su and Aiken, PLDI 1998, measure that the bulk of work and execution time is attributable to SCCs and that without cycles the analysis scales very well; Hardekopf and Lin PLDI 2007 add lazy and hybrid cycle detection; Pearce, Kelly and Hankin SCAM 2003 give online detection by keeping the graph topologically sorted' --basis source",
+      "assert": [
+        [
+          "c14",
+          "sort",
+          "claim"
+        ],
+        [
+          "c14",
+          "says",
+          "collapsing strongly connected components is the established fix for exactly this symptom, and it is precision-preserving: every pointer in an SCC of the constraint graph provably converges to the SAME set, so one representative can stand for all of them"
+        ],
+        [
+          "r41",
+          "sort",
+          "claim"
+        ],
+        [
+          "r41",
+          "basis",
+          "source"
+        ],
+        [
+          "r41",
+          "says",
+          "Fahndrich, Foster, Su and Aiken, PLDI 1998, measure that the bulk of work and execution time is attributable to SCCs and that without cycles the analysis scales very well; Hardekopf and Lin PLDI 2007 add lazy and hybrid cycle detection; Pearce, Kelly and Hankin SCAM 2003 give online detection by keeping the graph topologically sorted"
+        ],
+        [
+          "r41",
+          "supports",
+          "c14"
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:39:10+10:00",
+      "after": "0c345fc91b65154c2f73fc51d18d5a4b96e39789",
+      "did": "add-approach a12 'collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy' --addresses i6 --cost 8 --because 'measured: the degraded doors sit on an SCC of 152 scopes in metta._atoms.factories, and the cost model is stored references times mean set size, which an SCC divides by its own size'",
+      "assert": [
+        [
+          "a12",
+          "sort",
+          "approach"
+        ],
+        [
+          "a12",
+          "addresses",
+          "i6"
+        ],
+        [
+          "a12",
+          "cost",
+          8
+        ],
+        [
+          "a12",
+          "status",
+          "untried"
+        ],
+        [
+          "a12",
+          "title",
+          "collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy"
+        ],
+        [
+          "r42",
+          "sort",
+          "claim"
+        ],
+        [
+          "r42",
+          "says",
+          "measured: the degraded doors sit on an SCC of 152 scopes in metta._atoms.factories, and the cost model is stored references times mean set size, which an SCC divides by its own size"
+        ],
+        [
+          "r42",
+          "supports",
+          {
+            "node": "a12",
+            "status": "untried"
+          }
+        ]
+      ]
+    },
+    {
+      "at": "2026-09-19T12:39:10+10:00",
+      "after": "0c345fc91b65154c2f73fc51d18d5a4b96e39789",
+      "did": "link a12 c14 --as rests-on",
+      "assert": [
+        [
+          "a12",
+          "rests_on",
+          "c14"
         ]
       ]
     }
