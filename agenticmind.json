@@ -5095,6 +5095,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28": {
+      "title": "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+    },
+    "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports": {
+      "title": "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports",
+      "supports": [
+        "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_": {
+      "title": "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_",
+      "supports": [
+        {
+          "node": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "status": "untried"
+        },
+        {
+          "node": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "relation": "addresses",
+          "target": "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+        }
+      ]
+    },
+    "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder": {
+      "title": "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder",
+      "supports": [
+        {
+          "node": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -5942,6 +5983,14 @@
       "status": "done",
       "addresses": [
         "the package prelude carried three closed literal lists with no exemption, and the node seat had no installed dependencies, so the policy-inventory and binding-selftest gates both refused the tree"
+      ]
+    },
+    "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them": {
+      "title": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
       ]
     }
   },
@@ -26190,6 +26239,127 @@
         ]
       ],
       "id": "e2c09bf88c14498c"
+    },
+    {
+      "at": "2026-09-19T23:07:28.755108+00:00",
+      "after": "3f0efc88f6dd381ff5207a578d6643c30bb1d218",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports\", \"tags\": [\"measured\"], \"title\": \"the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_\", \"tags\": [], \"title\": \"import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them\", \"fields\": {\"effort\": 1, \"addresses\": [\"the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28\"]}}, {\"op\": \"status\", \"id\": \"import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them\", \"because\": \"the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "e2c09bf88c14498c"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports",
+          "supports",
+          "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+        ],
+        [
+          "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports",
+          "title",
+          "measured 2026-09-20: the suite raised 'Unknown procedure: plunit_lib_thread_scope:scope_open/4' at setup, and the delegated job's record names this file as a consumer of the old global native imports"
+        ],
+        [
+          "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder",
+          "sort",
+          "prop"
+        ],
+        [
+          "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder",
+          "supersedes",
+          "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_"
+        ],
+        [
+          "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder",
+          "supports",
+          {
+            "node": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+            "status": "done"
+          }
+        ],
+        [
+          "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder",
+          "tags",
+          "tested"
+        ],
+        [
+          "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder",
+          "title",
+          "the suite exits 0 with 28 passed and no unknown procedure, where it exited 1 with one case passing; the import alone took it to 27 and the three file-level helpers were the remainder"
+        ],
+        [
+          "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28",
+          "sort",
+          "prop"
+        ],
+        [
+          "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28",
+          "title",
+          "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+        ],
+        [
+          "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_",
+          "sort",
+          "prop"
+        ],
+        [
+          "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_",
+          "supports",
+          {
+            "node": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+            "status": "untried"
+          }
+        ],
+        [
+          "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_",
+          "supports",
+          {
+            "node": "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+            "relation": "addresses",
+            "target": "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+          }
+        ],
+        [
+          "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_",
+          "title",
+          "133 call sites are one fact about the suite's dependency, so one import states it where 133 prefixes would repeat it, and taking the names from the module's own export list keeps no second copy to drift; the three helpers outside the blocks are few enough to qualify, which is the spelling the file already used for scope_state_"
+        ],
+        [
+          "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "sort",
+          "approach"
+        ],
+        [
+          "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "addresses",
+          "the thread-scope suite called lib_thread's own predicates by name from inside its test blocks, and a plunit block is its own module, so after a backing began registering only the heads its row names the suite raised unknown procedure at setup and ran one case of 28"
+        ],
+        [
+          "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "effort",
+          1
+        ],
+        [
+          "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "status",
+          "done"
+        ],
+        [
+          "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them",
+          "title",
+          "import lib_thread's published export list into both of the suite's test modules at setup, and qualify the three call sites that sit outside them"
+        ]
+      ],
+      "id": "9e66250b843209f9"
     }
   ]
 }

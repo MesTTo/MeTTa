@@ -18,7 +18,27 @@
 sc_scope_setup :-
     process_metta_string("!(import! &self (library lib_thread))", _),
     import_prolog_functions(['sc-scope-done', 'sc-scope-loop', 'sc-scope-error',
-                             'sc-scope-unlocked'], _).
+                             'sc-scope-unlocked'], _),
+    sc_scope_import_library.
+
+%This suite's bodies call lib_thread's own predicates by name, and a plunit
+%block is its own module. A backing registers only the heads its row NAMES,
+%and scope_open and its siblings are module exports rather than named heads,
+%so nothing puts them in a test block's reach: before this the suite raised
+%`Unknown procedure: plunit_lib_thread_scope:scope_open/4` at setup
+%[measured 2026-09-20].
+%
+%Imported from the module that defines them, over the list that module already
+%publishes rather than a second copy of it here, which would be one more thing
+%to keep in step. Both blocks, because each is its own module. A name a block
+%defines itself is left alone: import/1 refuses it, and the block's own
+%definition is the one its bodies mean.
+sc_scope_import_library :-
+    module_property(lib_thread, exports(Exports)),
+    forall(( member(Unit, [plunit_lib_thread_scope,
+                           plunit_lib_thread_scope_deferred]),
+             member(Export, Exports) ),
+           catch(Unit:import(lib_thread:Export), error(permission_error(_,_,_), _), true)).
 
 'sc-scope-done'(Queue, N, N) :- sleep(0.01), thread_send_message(Queue, done(N)).
 'sc-scope-loop'(Queue, never) :-
@@ -29,10 +49,13 @@ sc_scope_spin :- sc_scope_spin.
 'sc-scope-error'(_) :- throw(error(scope_test_failure, context(test, child))).
 'sc-scope-unlocked'(Value, Value) :- mutex_property('$metta_scopes', status(unlocked)).
 
-sc_scope_spawn(Queue, N, Future) :- thread_spawn(['sc-scope-done', Queue, N], Future).
+%Qualified, as scope_state_ below already is: these helpers sit OUTSIDE the
+%test blocks, so the import into those blocks does not reach them.
+sc_scope_spawn(Queue, N, Future) :-
+    lib_thread:thread_spawn(['sc-scope-done', Queue, N], Future).
 sc_scope_cleanup(Id, Owner, Queue) :-
     ( lib_thread:scope_state_(Id, _, _, _, _)
-    -> scope_close(Id, Owner, failure, _) ; true ),
+    -> lib_thread:scope_close(Id, Owner, failure, _) ; true ),
     message_queue_destroy(Queue).
 
 :- begin_tests(lib_thread_scope).
@@ -152,7 +175,7 @@ deferred_setup(Space, Owner, Id) :-
     'new-space'(Space), thread_self(Owner), scope_open(none, Owner, infinite, Id).
 deferred_cleanup(Space, Owner, Id) :-
     ( lib_thread:scope_state_(Id, _, _, _, _)
-    -> scope_close(Id, Owner, failure, _) ; true ),
+    -> lib_thread:scope_close(Id, Owner, failure, _) ; true ),
     metta_release_space(Space).
 
 test(native_cleanups_run_in_reverse_acquisition_order,
