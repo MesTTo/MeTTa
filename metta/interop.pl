@@ -1919,6 +1919,109 @@ importer_helper_impl(Space, File) :-
 %Time: one match over the loaded space per import, and one perform per backing
 %row; a library carries one row, so this is a single pass over a space that has
 %just been read from one file.
+%`&catalogs` answers WHERE a requirement lives, and it is a space rather than a
+%lookup, so resolving one is a match and adding a catalog is adding a row:
+%
+%    (match &catalogs (package lib_json $where) $where)
+%
+%The loader holds no resolver of its own, which is the point
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 10 and the
+%amendment confirmed with it].
+%
+%The shipped catalog is the `lib/` directory, ANSWERED rather than enumerated
+%into rows: the directory is the authority on what it holds, and a row per
+%library would be a second copy of it that goes stale the day one is added.
+%A foreign space is how a space answers a query in this engine; the five hooks
+%below are the read half of that seam, and the catalog is read-only because
+%nothing installs a library by writing a row into it
+%[source: engine/ext_points.pl:foreign_match/3, and
+%tests/prolog/suites/spaces/reference_providers.plt for the shape].
+:- multifile seam:foreign_space/1, seam:foreign_capability/2,
+             seam:foreign_atoms/2, seam:foreign_match/3.
+
+metta_catalogs_space('&catalogs').
+
+seam:foreign_space(Space) :- metta_catalogs_space(Space).
+seam:foreign_capability(Space, Capability) :-
+    metta_catalogs_space(Space),
+    % policy-inventory-exempt: mechanism-internal; reason=a read-only catalog implements the two reading hooks of the foreign-provider protocol and no writing one; evidence=engine/metta/interop.pl:metta_catalog_entry/1
+    member(Capability, [match, enumerate]).
+seam:foreign_atoms(Space, Atom) :-
+    metta_catalogs_space(Space), metta_catalog_entry(Atom).
+seam:foreign_match(Space, Pattern, _Options) :-
+    metta_catalogs_space(Space), metta_catalog_entry(Pattern).
+
+%One row per library the catalog holds. A bound name is resolved directly,
+%because `library/2` normalises a name into a path and cannot run backwards;
+%an unbound one walks the directory, which is the only way to answer "what is
+%there" and is what makes `(match &catalogs (package $name $where) ...)` an
+%enumeration rather than a refusal.
+metta_catalog_entry([package, Name, Where]) :-
+    standard_library_path(Base),
+    (   nonvar(Name)
+    ->  true
+    ;   directory_files(Base, Entries),
+        member(Name, Entries)
+    ),
+    %Both branches, because `library/2` BUILDS a path from a name and never
+    %asks whether it is there: without this the catalog answers for a name
+    %nobody holds, and a requirement naming one is refused three layers later
+    %by the file opener rather than by name here.
+    metta_catalog_holds(Base, Name),
+    library(Name, Where0),
+    %Canonical, because `library/2` builds its answer from the engine's own
+    %directory and leaves the `engine/..` step in it, which is the same place
+    %spelled two ways and would read as two catalogs to anything comparing.
+    absolute_file_name(Where0, Where).
+
+%A library is a directory holding a file NAMED AFTER IT, which is the rule
+%`library/2` resolves by. Testing for a directory alone answered `.git` and
+%every other directory that happens to sit in the catalog.
+metta_catalog_holds(Base, Name) :-
+    \+ memberchk(Name, ['.', '..']),
+    directory_file_path(Base, Name, Held),
+    exists_directory(Held),
+    member(Extension, [metta, pl]),
+    file_name_extension(Name, Extension, File),
+    directory_file_path(Held, File, Source),
+    exists_file(Source), !.
+
+%A file's package rows, in the order the laws put them: what it REQUIRES loads
+%before its own rows perform, because a backing's claimant may be one of them
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 10].
+metta_perform_package_rows(Space) :-
+    metta_perform_package_requires(Space),
+    metta_perform_package_backings(Space).
+
+%A requirement names a library and the CATALOGS say where it lives, so this is
+%two matches and no resolver: the requirement is read from the file's own rows,
+%and `&catalogs` answers the path. The loader never looks in a directory
+%itself, which is what "adding a catalog is adding a row" buys.
+metta_perform_package_requires(Space) :-
+    Row = ['=', [package, requires], Required],
+    forall(eval([match, Space, Row, Required], _),
+           metta_require_one(Space, Required)).
+
+%An absent requirement REFUSES BY NAME rather than being skipped. Wrapping the
+%catalog match in `forall/2` alone would not: a match with no answer has zero
+%solutions and `forall/2` succeeds over them, so a requirement no catalog holds
+%would load nothing and say nothing, and the failure would surface later as a
+%head that does not answer [source:
+%docs/journal/2026-09-09-packages-are-equations.md, law 9, which refuses an
+%absent requirement by name].
+metta_require_one(Space, Required) :-
+    (   eval([match, '&catalogs', [package, Required, Where], Where], _),
+        nonvar(Where)
+    ->  importer_helper(Space, Where)
+        %`existence_error/2` rather than a term of this module's own, because
+        %the engine already renders it and a private term reads as "Unknown
+        %error term" to every caller.
+    ;   throw(error(existence_error(package_requirement, Required),
+                    context('package requires',
+                            'no catalog in force holds it; add a catalog row \c
+                             for it, or install the library it names')))
+    ).
+
 metta_perform_package_backings(Space) :-
     Backing = ['=', [package, backing], Row],
     Perform = [evalc, [perform, Row], '&metta'],

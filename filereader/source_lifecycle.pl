@@ -1345,7 +1345,7 @@ metta_source_changed(CanonPath) :-
 :- meta_predicate replacing_previous_load(+, +, 1, 0).
 replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
     replacing_previous_load_(CanonPath, Space, LoadInto, Goal),
-    metta_engine:metta_perform_package_backings(Space).
+    metta_engine:metta_perform_package_rows(Space).
 
 :- meta_predicate replacing_previous_load_(+, +, 1, 0).
 replacing_previous_load_(CanonPath, Space, LoadInto, Goal) :-
