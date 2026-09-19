@@ -5277,6 +5277,35 @@
       "tags": [
         "tested"
       ]
+    },
+    "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope": {
+      "title": "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope",
+      "supports": [
+        {
+          "node": "a31.2",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it": {
+      "title": "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it",
+      "supports": [
+        {
+          "node": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "status": "untried"
+        },
+        {
+          "node": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "relation": "addresses",
+          "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        }
+      ]
     }
   },
   "approaches": {
@@ -5763,7 +5792,7 @@
     },
     "a31.2": {
       "title": "write lib_package as a prelude library carrying everything laws 1 to 15 do not fix in the engine: version, setup, boot, backing, coverage, receipts, the lifecycle and the lock",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i19"
       ],
@@ -6156,6 +6185,14 @@
       "status": "done",
       "addresses": [
         "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses"
+      ]
+    },
+    "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens": {
+      "title": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+      "effort": 5,
+      "status": "untried",
+      "addresses": [
+        "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
       ]
     }
   },
@@ -26944,6 +26981,102 @@
         ]
       ],
       "id": "3b1bef695052856d"
+    },
+    {
+      "at": "2026-09-19T23:50:19.038686+00:00",
+      "after": "8f6d8b9288cfd0dceb6193319cad01a947f5958a",
+      "did": "[{\"op\": \"status\", \"id\": \"a31.2\", \"because\": \"landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it\", \"tags\": [], \"title\": \"build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens\", \"fields\": {\"effort\": 5, \"addresses\": [\"laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported\"]}}]",
+      "parents": [
+        "3b1bef695052856d"
+      ],
+      "assert": [
+        [
+          "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope",
+          "sort",
+          "prop"
+        ],
+        [
+          "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope",
+          "supersedes",
+          "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved"
+        ],
+        [
+          "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope",
+          "supports",
+          {
+            "node": "a31.2",
+            "status": "done"
+          }
+        ],
+        [
+          "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope",
+          "tags",
+          "tested"
+        ],
+        [
+          "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope",
+          "title",
+          "landed 2026-09-20 as lib/lib_package with lib_package.pl, lib_package.metta and fixtures, three lib commits and three engine commits ending af2157d which delegates lifecycle policy to it while the engine keeps bounded normalisation and home-aware dispatch; the engine's own metta_perform_package_backings/2 is gone and metta_perform_package_rows/2 is now a handoff into package_load/3; the delegated job's record carries a law-by-law table naming the case that establishes each of laws 6 to 13, and the lanes it broke on the way are green again: fn-sync, fn-sync-selftest, policy-inventory, binding-selftest, engine_modules and lib_thread_scope"
+        ],
+        [
+          "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it",
+          "supports",
+          {
+            "node": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+            "status": "untried"
+          }
+        ],
+        [
+          "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it",
+          "supports",
+          {
+            "node": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+            "relation": "addresses",
+            "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+          }
+        ],
+        [
+          "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it",
+          "title",
+          "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it"
+        ],
+        [
+          "a31.2",
+          "status",
+          "done"
+        ],
+        [
+          "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "sort",
+          "approach"
+        ],
+        [
+          "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "addresses",
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        ],
+        [
+          "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "effort",
+          5
+        ],
+        [
+          "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "status",
+          "untried"
+        ],
+        [
+          "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "title",
+          "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens"
+        ]
+      ],
+      "id": "0286bca2ef896ce0"
     }
   ]
 }
