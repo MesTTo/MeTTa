@@ -1163,8 +1163,6 @@ Workaround: lib_uuid validates all five group lengths and their hexadecimal digi
 Lifted when: the host accepts the valid control and rejects both malformed inputs.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
 
-Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
-
 ## swi-uuid-name-encoding
 Host: SWI-Prolog 10.1.13; packages-clib uuid.c:pl_uuid uses PL_get_chars with
   CVT_ATOM and passes a NUL-terminated name to OSSP uuid_make;
