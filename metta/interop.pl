@@ -2157,8 +2157,20 @@ metta_package_budget(Budget) :-
 %above the ceiling: the work belongs in a claimant, which runs when the row is
 %performed rather than while it is being read.
 metta_package_refuse_above_ceiling(Space, Written) :-
-    metta_module_space(Module, Space),
-    metta_host_source_effect_plan(Module, Written, Operations, Effect),
+    %FAIL-CLOSED, and loudly. Either of the two goals below can fail -- an
+    %unknown space has no module, and a planner that cannot read a term says so
+    %by failing -- and a bare conjunction would then fail this predicate, fail
+    %the forall that calls it, and fail the whole load with no message at all.
+    %A row nothing could plan is a row nothing can certify, so it is refused
+    %rather than allowed.
+    (   metta_module_space(Module, Space),
+        metta_host_source_effect_plan(Module, Written, Operations, Effect)
+    ->  true
+    ;   throw(error(permission_error(normalise, package_row, unplannable),
+                    context('package normalisation',
+                            'the row could not be planned, so nothing can say \c
+                             whether it stays under the reads ceiling')))
+    ),
     metta_package_ceiling(Ceiling),
     (   metta_effect_covered(Effect, Ceiling)
     ->  true
@@ -2192,11 +2204,20 @@ metta_package_above_ceiling(Ceiling, [Operation, Class]) :-
 %reduce in a million inferences is either doing work that belongs in a claimant
 %or is not converging at all.
 metta_package_reduce(Space, Written, Budget, Row) :-
-    catch(metta_call_with_inference_bound(
-              once(eval([evalc, Written, Space], Reduced)), Budget),
-          error(Formal, _),
-          metta_package_budget_refusal(Formal, Budget)),
-    Row = Reduced.
+    %A term with no answer is not a failure of this predicate: it is a row
+    %that did not reduce, which law 3 calls a row nobody claims. The written
+    %term passes through and the perform that follows leaves it unreduced,
+    %which is what happened before this normalisation existed. Refusing it by
+    %name waits on law 6's coverage rule, which decides when an unclaimed
+    %backing is skipped rather than refused [source:
+    %docs/journal/2026-09-09-packages-are-equations.md, laws 3 and 6].
+    (   catch(metta_call_with_inference_bound(
+                  once(eval([evalc, Written, Space], Reduced)), Budget),
+              error(Formal, _),
+              metta_package_budget_refusal(Formal, Budget))
+    ->  Row = Reduced
+    ;   Row = Written
+    ).
 
 %The engine's own signal names the limit but not WHICH budget, and a package
 %row can run out under either this one or the program's `max-inferences`, so
