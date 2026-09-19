@@ -7,7 +7,31 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A package row may be COMPUTED. A row whose head a claim answers is performed
+  as written, and any other payload is normalised in the home space first, so
+  `(= (package backing) (packages-row-for-this-platform))` reaches the loader
+  as whatever it reduces to. Normalisation runs under a ceiling of space reads
+  and runtime facts: a row reaching the filesystem or a host call refuses by
+  name, naming the operation, because that work belongs in a claimant, which
+  runs when the row is performed rather than while it is read. It also runs
+  under `!(pragma! package-budget N)`, 1,000,000 inferences by default, and a
+  row that will not converge refuses rather than hanging the load. That budget
+  is not `max-inferences`, which bounds a runnable the program wrote; a row is
+  normalised while its file is still being read and no runnable is in flight.
+
 ### Fixed
+
+- The cheat-sheet lane could not see this tree's own components. Every one of
+  the eight submodules holds a `.git`, and the lane called any directory
+  holding one a foreign checkout, so everything inside them was filtered out
+  and every glob naming one reported that it named nothing: `engine/metta/*.pl`
+  and eleven more. The mounted paths are derived from the `.gitmodules` that
+  mount them now, walked because a component mounts components of its own. A
+  path the tree deliberately does not hold is also no longer a finding, since
+  naming `_runtime/` is a claim about what a build produces, though scratch
+  under `ai-tmp/` still answers nothing.
 
 - A library says what it NEEDS and the loader loads it first:
   `(= (package requires) lib_regex)` loads `lib_regex` before the declaring
