@@ -55,7 +55,13 @@ EXEMPT = "# per-reference:"
 
 
 def spreading(tree: ast.Module) -> set[str]:
-    """Methods that take a whole value set, read off their own annotations."""
+    """Methods that dispatch over a whole value set, read off their own annotations.
+
+    The set they dispatch over is their FIRST parameter after `self`, which is the
+    convention rather than an accident: it is what separates them from `_put`, whose
+    `Values` is a payload written to the slot its first parameter names. Requiring the
+    position keeps the pass from having to know which is which.
+    """
     names: set[str] = set()
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
