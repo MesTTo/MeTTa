@@ -28,7 +28,9 @@
         "c30",
         "r126",
         "r124",
-        "r129"
+        "r129",
+        "c32",
+        "r133"
       ]
     },
     "i3": {
@@ -89,6 +91,13 @@
         "c26",
         "r74"
       ],
+      "blocks": [
+        "g1"
+      ]
+    },
+    "i12": {
+      "what": "every verdict is recomputed and the shipped table changes, in the direction of MORE precision",
+      "consequence": true,
       "blocks": [
         "g1"
       ]
@@ -400,6 +409,20 @@
         "i1"
       ],
       "cost": 2
+    },
+    "a19": {
+      "title": "make instance fields field-sensitive, keyed on the abstract object rather than on the class, so a tree walk over one structure cannot join with every other instance of the same class",
+      "status": "untried",
+      "addresses": [
+        "i2"
+      ],
+      "creates": [
+        "i12"
+      ],
+      "cost": 21,
+      "rests_on": [
+        "c33"
+      ]
     }
   },
   "claims": {
@@ -1450,6 +1473,36 @@
         "r130"
       ],
       "basis": "measured"
+    },
+    "c32": {
+      "says": "the store explosion is not a cost bug but the analysis being right about a tree walk. metta/algebra/__init__.py:1797 is stack.extend(reversed(current.children)) inside a worklist over an expression tree, and _demand.py:283 is the same shape. Abstractly, stack's items receive whatever any Expression's children can hold, current becomes any of them, and current.children feeds stack again, so the fixpoint saturates to everything any expression can contain. A context-insensitive field-based analysis cannot separate the children of THIS expression from the children of any expression"
+    },
+    "r132": {
+      "says": "r126 and r130: the jump is inside metta.algebra or metta.algebra._demand, the largest slot gains 345 container_method references named extend, and both modules contain exactly that stack.extend over .children pattern",
+      "supports": [
+        "c32"
+      ],
+      "basis": "source"
+    },
+    "r133": {
+      "says": "one module carries 70 of the 128 seconds: 118 modules hold 770,115 references and solve in 26.2s, and adding metta.algebra alone takes it to 2,406,911 references and 96.1s. metta.algebra._demand adds 10,943 more"
+    },
+    "r134": {
+      "says": "ai_growth_probe.py at 118, 119 and 120 on the committed analyser",
+      "supports": [
+        "r133"
+      ],
+      "basis": "measured"
+    },
+    "c33": {
+      "says": "this analyser is FIELD-BASED and coarser still: _set_attribute writes an instance field to the slot (class-name, <field:member>), so every instance of a class shares one slot per field and there is one abstract object per CLASS rather than per allocation site. Containers are the exception and are per site. Lhotak and Hendren name the distinction and measured it: a field-SENSITIVE reading keeps the field of only the objects in the receiver's points-to set and is more precise, and with the right solver it is competitive on cost"
+    },
+    "r135": {
+      "says": "read from _analysis.py:_set_attribute, which computes slot = f'<field:{member}>' and puts to (receiver.name, slot); Scaling Java Points-To Analysis using SPARK, CC 2003, section on field dereference expressions",
+      "supports": [
+        "c33"
+      ],
+      "basis": "source"
     }
   },
   "log": [
@@ -6908,6 +6961,249 @@
         ]
       ],
       "id": "f686577d01d4deb3"
+    },
+    {
+      "at": "2026-09-19T15:02:16+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "add-claim c32 'the store explosion is not a cost bug but the analysis being right about a tree walk. metta/algebra/__init__.py:1797 is stack.extend(reversed(current.children)) inside a worklist over an expression tree, and _demand.py:283 is the same shape. Abstractly, stack'\"'\"'s items receive whatever any Expression'\"'\"'s children can hold, current becomes any of them, and current.children feeds stack again, so the fixpoint saturates to everything any expression can contain. A context-insensitive field-based analysis cannot separate the children of THIS expression from the children of any expression' --because 'r126 and r130: the jump is inside metta.algebra or metta.algebra._demand, the largest slot gains 345 container_method references named extend, and both modules contain exactly that stack.extend over .children pattern' --basis source",
+      "parents": [
+        "f686577d01d4deb3"
+      ],
+      "assert": [
+        [
+          "c32",
+          "sort",
+          "claim"
+        ],
+        [
+          "c32",
+          "says",
+          "the store explosion is not a cost bug but the analysis being right about a tree walk. metta/algebra/__init__.py:1797 is stack.extend(reversed(current.children)) inside a worklist over an expression tree, and _demand.py:283 is the same shape. Abstractly, stack's items receive whatever any Expression's children can hold, current becomes any of them, and current.children feeds stack again, so the fixpoint saturates to everything any expression can contain. A context-insensitive field-based analysis cannot separate the children of THIS expression from the children of any expression"
+        ],
+        [
+          "r132",
+          "sort",
+          "claim"
+        ],
+        [
+          "r132",
+          "basis",
+          "source"
+        ],
+        [
+          "r132",
+          "says",
+          "r126 and r130: the jump is inside metta.algebra or metta.algebra._demand, the largest slot gains 345 container_method references named extend, and both modules contain exactly that stack.extend over .children pattern"
+        ],
+        [
+          "r132",
+          "supports",
+          "c32"
+        ]
+      ],
+      "id": "f01cb6ba128df0d5"
+    },
+    {
+      "at": "2026-09-19T15:02:16+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "link i2 c32 --as rests-on",
+      "parents": [
+        "f01cb6ba128df0d5"
+      ],
+      "assert": [
+        [
+          "i2",
+          "rests_on",
+          "c32"
+        ]
+      ],
+      "id": "28a26471345ea787"
+    },
+    {
+      "at": "2026-09-19T15:02:34+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "add-claim r133 'one module carries 70 of the 128 seconds: 118 modules hold 770,115 references and solve in 26.2s, and adding metta.algebra alone takes it to 2,406,911 references and 96.1s. metta.algebra._demand adds 10,943 more' --because 'ai_growth_probe.py at 118, 119 and 120 on the committed analyser' --basis measured",
+      "parents": [
+        "28a26471345ea787"
+      ],
+      "assert": [
+        [
+          "r133",
+          "sort",
+          "claim"
+        ],
+        [
+          "r133",
+          "says",
+          "one module carries 70 of the 128 seconds: 118 modules hold 770,115 references and solve in 26.2s, and adding metta.algebra alone takes it to 2,406,911 references and 96.1s. metta.algebra._demand adds 10,943 more"
+        ],
+        [
+          "r134",
+          "sort",
+          "claim"
+        ],
+        [
+          "r134",
+          "basis",
+          "measured"
+        ],
+        [
+          "r134",
+          "says",
+          "ai_growth_probe.py at 118, 119 and 120 on the committed analyser"
+        ],
+        [
+          "r134",
+          "supports",
+          "r133"
+        ]
+      ],
+      "id": "4c4720b9ed500b32"
+    },
+    {
+      "at": "2026-09-19T15:02:34+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "link i2 r133 --as rests-on",
+      "parents": [
+        "4c4720b9ed500b32"
+      ],
+      "assert": [
+        [
+          "i2",
+          "rests_on",
+          "r133"
+        ]
+      ],
+      "id": "3511b19ea19dc30f"
+    },
+    {
+      "at": "2026-09-19T15:03:32+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "add-claim c33 'this analyser is FIELD-BASED and coarser still: _set_attribute writes an instance field to the slot (class-name, <field:member>), so every instance of a class shares one slot per field and there is one abstract object per CLASS rather than per allocation site. Containers are the exception and are per site. Lhotak and Hendren name the distinction and measured it: a field-SENSITIVE reading keeps the field of only the objects in the receiver'\"'\"'s points-to set and is more precise, and with the right solver it is competitive on cost' --because 'read from _analysis.py:_set_attribute, which computes slot = f'\"'\"'<field:{member}>'\"'\"' and puts to (receiver.name, slot); Scaling Java Points-To Analysis using SPARK, CC 2003, section on field dereference expressions' --basis source",
+      "parents": [
+        "3511b19ea19dc30f"
+      ],
+      "assert": [
+        [
+          "c33",
+          "sort",
+          "claim"
+        ],
+        [
+          "c33",
+          "says",
+          "this analyser is FIELD-BASED and coarser still: _set_attribute writes an instance field to the slot (class-name, <field:member>), so every instance of a class shares one slot per field and there is one abstract object per CLASS rather than per allocation site. Containers are the exception and are per site. Lhotak and Hendren name the distinction and measured it: a field-SENSITIVE reading keeps the field of only the objects in the receiver's points-to set and is more precise, and with the right solver it is competitive on cost"
+        ],
+        [
+          "r135",
+          "sort",
+          "claim"
+        ],
+        [
+          "r135",
+          "basis",
+          "source"
+        ],
+        [
+          "r135",
+          "says",
+          "read from _analysis.py:_set_attribute, which computes slot = f'<field:{member}>' and puts to (receiver.name, slot); Scaling Java Points-To Analysis using SPARK, CC 2003, section on field dereference expressions"
+        ],
+        [
+          "r135",
+          "supports",
+          "c33"
+        ]
+      ],
+      "id": "85b4873448dc13e9"
+    },
+    {
+      "at": "2026-09-19T15:03:32+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "add-approach a19 'make instance fields field-sensitive, keyed on the abstract object rather than on the class, so a tree walk over one structure cannot join with every other instance of the same class' --addresses i2 --cost 21 --creates 'every verdict is recomputed and the shipped table changes, in the direction of MORE precision'",
+      "parents": [
+        "85b4873448dc13e9"
+      ],
+      "assert": [
+        [
+          "i12",
+          "sort",
+          "issue"
+        ],
+        [
+          "i12",
+          "consequence",
+          true
+        ],
+        [
+          "i12",
+          "what",
+          "every verdict is recomputed and the shipped table changes, in the direction of MORE precision"
+        ],
+        [
+          "a19",
+          "sort",
+          "approach"
+        ],
+        [
+          "a19",
+          "addresses",
+          "i2"
+        ],
+        [
+          "a19",
+          "cost",
+          21
+        ],
+        [
+          "a19",
+          "creates",
+          "i12"
+        ],
+        [
+          "a19",
+          "status",
+          "untried"
+        ],
+        [
+          "a19",
+          "title",
+          "make instance fields field-sensitive, keyed on the abstract object rather than on the class, so a tree walk over one structure cannot join with every other instance of the same class"
+        ]
+      ],
+      "id": "4d48b94c8b4f3a78"
+    },
+    {
+      "at": "2026-09-19T15:03:32+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "link a19 c33 --as rests-on",
+      "parents": [
+        "4d48b94c8b4f3a78"
+      ],
+      "assert": [
+        [
+          "a19",
+          "rests_on",
+          "c33"
+        ]
+      ],
+      "id": "d585afdfdcf0e2aa"
+    },
+    {
+      "at": "2026-09-19T15:03:47+10:00",
+      "after": "ba075477ca7a5a9665924746c81cac5d33f6b50b",
+      "did": "link i12 g1 --as blocks",
+      "parents": [
+        "d585afdfdcf0e2aa"
+      ],
+      "assert": [
+        [
+          "i12",
+          "blocks",
+          "g1"
+        ]
+      ],
+      "id": "d913bda849a3cdbc"
     }
   ]
 }
