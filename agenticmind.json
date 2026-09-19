@@ -117,7 +117,8 @@
       "consequence": true,
       "blocks": [
         "g1"
-      ]
+      ],
+      "accepted": true
     },
     "i13": {
       "title": "what counts as a guard becomes a thing to get right, and a wrong mark hides a real crossing",
@@ -3606,6 +3607,138 @@
       "supersedes": [
         "r197"
       ]
+    },
+    "the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out": {
+      "title": "the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out",
+      "attacks": [
+        "r229"
+      ]
+    },
+    "&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only": {
+      "title": "&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only",
+      "attacks": [
+        "r264"
+      ]
+    },
+    "the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read": {
+      "title": "the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read",
+      "attacks": [
+        "r286"
+      ]
+    },
+    "the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call": {
+      "title": "the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call",
+      "attacks": [
+        "r276"
+      ]
+    },
+    "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated": {
+      "title": "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated",
+      "supports": [
+        {
+          "node": "a31.6",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "r274"
+      ]
+    },
+    "it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things": {
+      "title": "it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things",
+      "supports": [
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "field": "parent",
+          "value": "a31"
+        }
+      ]
+    },
+    "it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space": {
+      "title": "it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space",
+      "supports": [
+        {
+          "node": "a31.8",
+          "relation": "addresses",
+          "target": "i20"
+        }
+      ]
+    },
+    "&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine": {
+      "title": "&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine",
+      "supports": [
+        {
+          "node": "a31.5",
+          "relation": "addresses",
+          "target": "i23"
+        }
+      ]
+    },
+    "the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count": {
+      "title": "the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count",
+      "supports": [
+        {
+          "node": "a31.7",
+          "relation": "addresses",
+          "target": "i25"
+        }
+      ]
+    },
+    "the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it": {
+      "title": "the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it",
+      "supports": [
+        {
+          "node": "a31.9.1",
+          "relation": "addresses",
+          "target": "i28"
+        }
+      ]
+    },
+    "it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings": {
+      "title": "it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings",
+      "supports": [
+        {
+          "node": "a31.9.1",
+          "field": "parent",
+          "value": "a31"
+        }
+      ]
+    },
+    "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry": {
+      "title": "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry",
+      "supports": [
+        {
+          "node": "i12",
+          "status": "accepted"
+        }
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide": {
+      "title": "dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide",
+      "supports": [
+        {
+          "node": "a31.2",
+          "field": "assigned",
+          "value": [
+            "codex-genius"
+          ]
+        }
+      ]
+    },
+    "three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence": {
+      "title": "three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence",
+      "supports": [
+        {
+          "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "field": "detail",
+          "value": [
+            "docs/record/law3-normalising-a-package-row.md"
+          ]
+        }
+      ]
     }
   },
   "approaches": {
@@ -4096,7 +4229,10 @@
       "addresses": [
         "i19"
       ],
-      "effort": 9
+      "effort": 9,
+      "assigned": [
+        "codex-genius"
+      ]
     },
     "a31.3": {
       "title": "replace the 40 libraries' !(import_prolog_functions_from_file (library lib_x.pl) (names)) with (= (package backing) (prolog \"lib_x.pl\" (names))), derived from the calls rather than retyped",
@@ -4140,7 +4276,8 @@
       "title": "perform (package requires) before any packaging library is merged, and normalise the other package questions under the reads effect ceiling with an inference budget, refusing by name past it",
       "status": "done",
       "addresses": [
-        "i19"
+        "i19",
+        "i23"
       ],
       "effort": 7,
       "rests_on": [
@@ -4154,7 +4291,7 @@
     },
     "a31.6": {
       "title": "apply law 3's reads ceiling by planning the package row's effect and refusing anything above nondeterministicReadOnly",
-      "status": "failed",
+      "status": "unwanted",
       "addresses": [
         "i19"
       ],
@@ -4167,7 +4304,8 @@
       "title": "declare (: perform (-> Atom %Undefined%)) into &metta beside the loader's claim, and have the claim resolve the locator itself with (eval $file)",
       "status": "done",
       "addresses": [
-        "i26"
+        "i26",
+        "i25"
       ],
       "effort": 2,
       "rests_on": [
@@ -4184,7 +4322,8 @@
       "title": "read a load's own package rows from the source-assertion journal through filereader:source_package_row/4 instead of matching the space",
       "status": "done",
       "addresses": [
-        "i27"
+        "i27",
+        "i20"
       ],
       "effort": 2,
       "detail": [
@@ -4237,7 +4376,8 @@
       ],
       "detail": [
         "docs/record/a31.9.1-guard-support-memo-call-head-2-s-descent-on-whether-the-tran.md"
-      ]
+      ],
+      "parent": "a31"
     },
     "a33": {
       "title": "ask for a pyproject.toml as well as a .git at every one of the eleven sites, which is the rule metta._roots already states, and teach tests/checks/check_root_walks.py to refuse a single-marker derivation",
@@ -4267,6 +4407,10 @@
       "rests_on": [
         "the engine already holds both halves the ceiling needs: metta_host_goal_effect_plan/4 answers a body's effect and metta_effect_covered/2 tests coverage, and metta_open_fuel_scope/0 with the $metta_fuel_remaining global is the budget, reading its pragma table when unstarted",
         "a31.6 charged the wrong thing twice: planning the effect of the package HEAD walks every equation for it, so asking about the requires question drags in the backing row's body, and planning the ROW's body charges a literal payload as oracleIO because its token shares a name with a known operation. Neither is what law 3 governs, which is normalisation, and a literal row has nothing to normalise"
+      ],
+      "parent": "a31",
+      "detail": [
+        "docs/record/law3-normalising-a-package-row.md"
       ]
     }
   },
@@ -20203,6 +20347,379 @@
         ]
       ],
       "id": "5293962ad15adbb0"
+    },
+    {
+      "at": "2026-09-19T17:29:57.883475+00:00",
+      "after": "03e0e200c350e0210289fa7481859548f431b9c2",
+      "did": "[{\"op\": \"doubt\", \"id\": \"i20\", \"because\": \"the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out\", \"tags\": []}, {\"op\": \"doubt\", \"id\": \"i23\", \"because\": \"&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only\", \"tags\": []}, {\"op\": \"doubt\", \"id\": \"i28\", \"because\": \"the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read\", \"tags\": []}, {\"op\": \"doubt\", \"id\": \"i25\", \"because\": \"the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call\", \"tags\": []}, {\"op\": \"status\", \"id\": \"a31.6\", \"because\": \"superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated\", \"tags\": [], \"status\": \"unwanted\"}, {\"op\": \"edit\", \"id\": \"split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget\", \"because\": \"it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things\", \"tags\": [], \"field\": \"parent\", \"value\": \"a31\"}]",
+      "parents": [
+        "5293962ad15adbb0"
+      ],
+      "assert": [
+        [
+          "&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only",
+          "sort",
+          "prop"
+        ],
+        [
+          "&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only",
+          "attacks",
+          "r264"
+        ],
+        [
+          "&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only",
+          "title",
+          "&catalogs is built and answers: it is a FOREIGN space with a declared match capability through seam:foreign_match/3, which is how a space answers a query in this engine, rather than a space hook. The hooks were the wrong place to look, being write-time pre-add and post-add only"
+        ],
+        [
+          "it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "field": "parent",
+            "value": "a31"
+          }
+        ],
+        [
+          "it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things",
+          "title",
+          "it is a step of the package build like its siblings, and law 3 is one of the engine's four fixed things"
+        ],
+        [
+          "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated",
+          "sort",
+          "prop"
+        ],
+        [
+          "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated",
+          "supersedes",
+          "r274"
+        ],
+        [
+          "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated",
+          "supports",
+          {
+            "node": "a31.6",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated",
+          "title",
+          "superseded rather than retried: the approach that replaced it splits a row before charging anything, which is what both of a31.6's wirings were missing, and it is built and gated"
+        ],
+        [
+          "the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out",
+          "sort",
+          "prop"
+        ],
+        [
+          "the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out",
+          "attacks",
+          "r229"
+        ],
+        [
+          "the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out",
+          "title",
+          "the predicate was located and the loader reads rows through it: filereader:source_package_row/4 walks the journal the load itself wrote, metta_source_load/4 to source_load_assertion/3 to spaces:stored_atom_of_ref/4, which is the same record withdraw_source_load/3 uses to take a source's atoms back out"
+        ],
+        [
+          "the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read",
+          "sort",
+          "prop"
+        ],
+        [
+          "the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read",
+          "attacks",
+          "r286"
+        ],
+        [
+          "the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read",
+          "title",
+          "the quadratic is gone: asking what a body can CALL rather than what it mentions removed the term, and twelve one-row files imported in sequence went from 702i + 6,438 inferences per import to 11i + 5,874, which is the same noise floor a row nobody claims already read"
+        ],
+        [
+          "the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call",
+          "sort",
+          "prop"
+        ],
+        [
+          "the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call",
+          "attacks",
+          "r276"
+        ],
+        [
+          "the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call",
+          "title",
+          "the suite completes: the full gate reached the end of its pytest lane and reported a count, and test_minimal_lib_install_is_idempotent_after_cross_file_traffic passes, the type error it raised having been the package row's name list being read as a nullary call"
+        ],
+        [
+          "a31.6",
+          "status",
+          "unwanted"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "parent",
+          "a31"
+        ]
+      ],
+      "id": "430d7b33979c5802"
+    },
+    {
+      "at": "2026-09-19T17:31:24.366173+00:00",
+      "after": "03e0e200c350e0210289fa7481859548f431b9c2",
+      "did": "[{\"op\": \"link\", \"id\": \"a31.8\", \"because\": \"it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space\", \"tags\": [], \"target\": \"i20\", \"relation\": \"addresses\"}, {\"op\": \"link\", \"id\": \"a31.5\", \"because\": \"&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine\", \"tags\": [], \"target\": \"i23\", \"relation\": \"addresses\"}, {\"op\": \"link\", \"id\": \"a31.7\", \"because\": \"the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count\", \"tags\": [], \"target\": \"i25\", \"relation\": \"addresses\"}, {\"op\": \"link\", \"id\": \"a31.9.1\", \"because\": \"the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it\", \"tags\": [], \"target\": \"i28\", \"relation\": \"addresses\"}]",
+      "parents": [
+        "430d7b33979c5802"
+      ],
+      "assert": [
+        [
+          "&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine",
+          "sort",
+          "prop"
+        ],
+        [
+          "&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine",
+          "supports",
+          {
+            "node": "a31.5",
+            "relation": "addresses",
+            "target": "i23"
+          }
+        ],
+        [
+          "&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine",
+          "title",
+          "&catalogs was built without the space hooks the issue said could not carry it: a foreign space with a declared match capability answers the query, which is how a space answers one in this engine"
+        ],
+        [
+          "it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space",
+          "supports",
+          {
+            "node": "a31.8",
+            "relation": "addresses",
+            "target": "i20"
+          }
+        ],
+        [
+          "it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space",
+          "title",
+          "it is the reading that predicate was wanted for: rows come from filereader:source_package_row/4, which walks the journal the load itself wrote rather than matching the space"
+        ],
+        [
+          "the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it",
+          "supports",
+          {
+            "node": "a31.9.1",
+            "relation": "addresses",
+            "target": "i28"
+          }
+        ],
+        [
+          "the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it",
+          "title",
+          "the quadratic was the package head being recompiled on every import, and asking what a body can CALL rather than what it mentions removes the edge that caused it"
+        ],
+        [
+          "the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count",
+          "sort",
+          "prop"
+        ],
+        [
+          "the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count",
+          "supports",
+          {
+            "node": "a31.7",
+            "relation": "addresses",
+            "target": "i25"
+          }
+        ],
+        [
+          "the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count",
+          "title",
+          "the suite's one incomplete test failed on the package row's name list being read as a nullary call, which the Atom mask stops; it passes and the lane reaches its count"
+        ],
+        [
+          "a31.5",
+          "addresses",
+          "i23"
+        ],
+        [
+          "a31.7",
+          "addresses",
+          "i25"
+        ],
+        [
+          "a31.8",
+          "addresses",
+          "i20"
+        ]
+      ],
+      "id": "60d47c474c77af47"
+    },
+    {
+      "at": "2026-09-19T17:31:43.148640+00:00",
+      "after": "03e0e200c350e0210289fa7481859548f431b9c2",
+      "did": "[{\"op\": \"edit\", \"id\": \"a31.9.1\", \"because\": \"it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings\", \"tags\": [], \"field\": \"parent\", \"value\": \"a31\"}]",
+      "parents": [
+        "60d47c474c77af47"
+      ],
+      "assert": [
+        [
+          "it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings",
+          "sort",
+          "prop"
+        ],
+        [
+          "it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings",
+          "supports",
+          {
+            "node": "a31.9.1",
+            "field": "parent",
+            "value": "a31"
+          }
+        ],
+        [
+          "it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings",
+          "title",
+          "it was written as a step of a31.9, which was refuted and marked unwanted, so the one approach that actually removed the quadratic went out of play with its parent; it is a step of the package build like its siblings"
+        ],
+        [
+          "a31.9.1",
+          "parent",
+          "a31"
+        ]
+      ],
+      "id": "8a4028d07f1b8c87"
+    },
+    {
+      "at": "2026-09-19T17:31:58.195148+00:00",
+      "after": "03e0e200c350e0210289fa7481859548f431b9c2",
+      "did": "[{\"op\": \"accept\", \"id\": \"i12\", \"because\": \"the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry\", \"tags\": [\"tested\"]}]",
+      "parents": [
+        "8a4028d07f1b8c87"
+      ],
+      "assert": [
+        [
+          "i12",
+          "accepted",
+          true
+        ],
+        [
+          "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry",
+          "sort",
+          "prop"
+        ],
+        [
+          "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry",
+          "supports",
+          {
+            "node": "i12",
+            "status": "accepted"
+          }
+        ],
+        [
+          "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry",
+          "tags",
+          "tested"
+        ],
+        [
+          "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry",
+          "title",
+          "the recomputation happened and the table was rewritten to match: doorgen answers 227 contracts and every projection agree, tests/repository/test_artifact_projections.py answers 20 passed, and the direction is the one the issue names, more precision rather than less. A consequence with its consumer is not a cost to carry"
+        ]
+      ],
+      "id": "a8c276eb53ed1a7c"
+    },
+    {
+      "at": "2026-09-19T17:34:49.638183+00:00",
+      "after": "03e0e200c350e0210289fa7481859548f431b9c2",
+      "did": "[{\"op\": \"assign\", \"id\": \"a31.2\", \"because\": \"dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide\", \"tags\": [], \"agent\": \"codex-genius\", \"remove\": false}]",
+      "parents": [
+        "a8c276eb53ed1a7c"
+      ],
+      "assert": [
+        [
+          "dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide",
+          "sort",
+          "prop"
+        ],
+        [
+          "dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide",
+          "supports",
+          {
+            "node": "a31.2",
+            "field": "assigned",
+            "value": [
+              "codex-genius"
+            ]
+          }
+        ],
+        [
+          "dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide",
+          "title",
+          "dispatched as job_20260920T033439AEST_3672b007 with laws 6 to 13 as its scope, owning lib/lib_package/**, tests/prolog/suites/seams/lib_package.plt and tests/data/lib_package/**, and barred from engine/ and the existing packages.plt so the two of us do not collide"
+        ],
+        [
+          "a31.2",
+          "assigned",
+          "codex-genius"
+        ]
+      ],
+      "id": "363201086850f7b1"
+    },
+    {
+      "at": "2026-09-19T17:44:02.307702+00:00",
+      "after": "118f0164b61f4201860fd00b045d3fa0f7cb5310",
+      "did": "[{\"op\": \"detail\", \"id\": \"split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget\", \"because\": \"three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence\", \"tags\": [], \"reference\": \"docs/record/law3-normalising-a-package-row.md\", \"remove\": false, \"content\": \"# Law 3: normalising a package row\\n\\napproach, done, on i24.\\n\\n## What this had to establish\\n\\nA universal with two cases, and the whole difficulty was finding where the\\ncases divide. Every package row must be performed, and every row that is\\nCOMPUTED must have its computation charged against law 3's `reads` ceiling and\\nits inference budget. Two earlier attempts put the division in the wrong place\\nand refused every shipped row; the third measurement said why neither could\\nhave worked.\\n\\n## Three attempts, and what separated them\\n\\n**Charge the question.** Plan the effect of `(package requires)` and refuse if\\nit exceeds the ceiling. Refused every `requires` row, because planning a HEAD\\nwalks every equation for it, so asking about `requires` drags in the backing\\nrow's body.\\n\\n**Charge the row.** Plan the effect of the payload. Refused every backing row,\\nbecause `(prolog F (heads))` reads as a call to a known operation and prices\\n`oracleIO`.\\n\\nBoth are recorded against a31.6. The third measurement shows the second could\\nnever have worked whatever it charged:\\n\\n    metta_host_goal_effect_plan(M, [prolog, \\\"x.pl\\\", [a_head]], O, E)\\n      E = oracleIO,  O = [['[|]', oracleIO]]\\n    metta_host_goal_effect_plan(M, [+, 1, 2], O, E)\\n      E = oracleIO,  O = [['[|]', oracleIO]]\\n\\nThat planner answers about a compiled Prolog BODY, so it prices any list\\n`oracleIO`, including `(+ 1 2)`. Its source-level sibling answers about MeTTa\\nsource:\\n\\n    metta_host_source_effect_plan(M, [prolog, \\\"x.pl\\\", [a_head]], O, E)\\n      E = pureStructural,  O = []\\n    metta_host_source_effect_plan(M, [+, 1, 2], O, E)\\n      E = pureStructural,  O = [[+, pureStructural]]\\n\\nA literal row prices `pureStructural` with no operations at all, which is the\\nsplit the law describes: normalisation evaluates the question, and a row\\nwritten as a literal is already the answer.\\n\\n## Where the division actually is\\n\\nLaw 4 keeps the registry that answers it. A claim is the equation\\n`(= (perform (<token> ...)) ...)` a seat, library or program adds to `&metta`,\\nso a token some claim answers is a row the loader performs as written. Anything\\nelse is a term.\\n\\nThe claims are enumerated and the token tested rather than matched with\\n`[Token|_]` in the pattern: measured 2026-09-20, the partial pattern answered\\nnothing through the space's index while the full shape `(= (perform $pattern) $_)`\\nanswered `[prolog,_,_]`. There are as many claims as attached seats, so\\nenumerating them is the small side of the join.\\n\\n## The ceiling is not a rank\\n\\nLaw 3 allows \\\"space reads and runtime facts\\\" and excludes the filesystem and\\nhost calls. The engine's lattice does not divide there:\\n\\n| term | class |\\n|---|---|\\n| a literal row | `pureStructural` |\\n| `(match &self a a)` | `writesState` |\\n| `(add-atom &self a)` | `writesState` |\\n| `(get-property lib version)` | `oracleIO` |\\n| `(py-call m f)` | `oracleIO`, through the seat's `seam:extension_builtin/2` |\\n\\nLaw 2 makes `get-property` the way a package reads the runtime facts law 3\\nallows, and the engine classifies it `oracleIO`. So a ceiling at any single\\nrank either refuses the one read the design provides or admits the filesystem.\\nIt is written the way the law writes it: the classes below `oracleIO`, plus the\\noperations named as reads of the runtime.\\n\\nThe refusal names the OPERATIONS rather than the class, because \\\"it reads too\\nmuch\\\" says nothing a writer can act on where `exists_file` names the line to\\nmove.\\n\\n## The budget\\n\\n`package-budget`, defaulting to law 3's 1,000,000. It is not `max-inferences`:\\nthat bounds a runnable the program wrote, and this bounds the loader\\nnormalising a row while the file is still being read, where no runnable is in\\nflight. `pragma!`'s registry is closed, so the key had to be added to it.\\n\\nThe engine's bound raises `metta_control_signal(inference_limit, N)`, which\\nnames the limit and not which budget, so the refusal renames it.\\n\\n## Two silent paths, found by reading it back\\n\\n`metta_package_refuse_above_ceiling/2` opened with a bare conjunction of goals\\nthat can each fail, and either would have failed the predicate, the forall, and\\nthe whole load with no message. A row nothing could plan is refused now.\\n\\n`metta_package_reduce/4` had the same shape around `eval`. A term with no\\nanswer is a row that did not reduce, which law 3 calls a row nobody claims; the\\nwritten term passes through and the perform leaves it unreduced, which is what\\nhappened before normalisation existed. Refusing it by name waits on law 6,\\nwhich decides when an unclaimed backing is SKIPPED because its heads are\\ncovered rather than refused.\\n\\nThe first version of the culprit branch also passed while checking nothing: it\\nended in a `; true` arm and the branch above it failed on `pairs_keys/2`\\nreading `[Name, Class]` lists as pairs, so every row was allowed. The arm is\\ngone.\\n\\n## The cases\\n\\n| case | what it asserts |\\n|---|---|\\n| `a_computed_row_normalises_and_then_performs` | a payload no claim answers reduces and the artifact loads |\\n| `a_row_reaching_the_filesystem_refuses_by_name` | the refusal names `exists_file` |\\n| `a_row_reading_the_runtime_is_allowed` | `get-property` is admitted, which a bare rank would refuse |\\n| `a_row_that_will_not_reduce_refuses_past_its_budget` | the file's own `!(pragma! package-budget 2000)` bounds it |\\n| `a_row_that_answers_nothing_leaves_the_load_standing` | no silent failure |\\n\\nTwenty-one cases in the suite, 0 failures, in a verified battery snapshot.\\n\"}]",
+      "parents": [
+        "363201086850f7b1"
+      ],
+      "assert": [
+        [
+          "three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence",
+          "sort",
+          "prop"
+        ],
+        [
+          "three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence",
+          "supports",
+          {
+            "node": "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+            "field": "detail",
+            "value": [
+              "docs/record/law3-normalising-a-package-row.md"
+            ]
+          }
+        ],
+        [
+          "three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence",
+          "title",
+          "three attempts at law 3's ceiling failed for three different reasons and the measurements that separated them do not fit in a sentence"
+        ],
+        [
+          "split a package row into normal and computed by asking whether its head is a CLAIMED token, perform a normal one as read, and normalise the other in the home space under the reads ceiling and the fuel budget",
+          "detail",
+          "docs/record/law3-normalising-a-package-row.md"
+        ]
+      ],
+      "id": "5944fcbba87f083e"
     }
   ]
 }
