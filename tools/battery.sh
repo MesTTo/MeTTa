@@ -107,6 +107,12 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 snapshot() {
     caches=$1
     shift
+    # Prepended, so rsync reads them before the caller's own arguments and the
+    # two paths. Component paths carry no spaces in this repository and the
+    # glob-free word split is what keeps this a list of separate arguments.
+    for component in $(battery_component_paths); do
+        set -- "--filter=P /$component/.git" "$@"
+    done
     rsync -a -O --delete \
           --filter="H .git" --filter="P /.git" \
           --filter="H __pycache__/" --filter="H .pytest_cache/" \
@@ -174,15 +180,31 @@ occupant() {
 # superproject's index carries their gitlinks, which is what the lanes ask for
 # [measured 2026-09-20: after this, `git -C <tree> ls-files -s engine` reads
 # `160000 59a5bb2b9 0 engine`].
+# Every name here is prefixed, because sh has no locals and this is called
+# from a loop over `tree`: assigning a bare `tree` rewrote the caller's and the
+# loop walked engine, then engine/lib, then engine/lib/examples, giving the
+# first component an identity and none of the rest one [measured 2026-09-20].
 battery_git_identity() {
-    tree=$1
-    [ -e "$tree/.git" ] && return 0
-    seed="$tree.gitseed"
-    rm -rf "$seed"
-    git -C "$ROOT" worktree add --detach "$seed" HEAD >/dev/null 2>&1 || return 0
-    mv "$seed/.git" "$tree/.git"
-    rm -rf "$seed"
-    git -C "$ROOT" worktree repair "$tree" >/dev/null 2>&1 || true
+    identity_source=$1
+    identity_tree=$2
+    [ -d "$identity_tree" ] || return 0
+    [ -e "$identity_tree/.git" ] && return 0
+    identity_seed="$identity_tree.gitseed"
+    rm -rf "$identity_seed"
+    git -C "$identity_source" worktree add --detach "$identity_seed" HEAD \
+        >/dev/null 2>&1 || return 0
+    mv "$identity_seed/.git" "$identity_tree/.git"
+    rm -rf "$identity_seed"
+    git -C "$identity_source" worktree repair "$identity_tree" >/dev/null 2>&1 || true
+}
+
+# Read from .gitmodules rather than from `git submodule`, so it answers before
+# anything is initialised and needs no work tree of its own.
+battery_component_paths() {
+    [ -f "$ROOT/.gitmodules" ] || return 0
+    git -C "$ROOT" config --file "$ROOT/.gitmodules" \
+        --get-regexp '^submodule\..*\.path$' 2>/dev/null |
+        while read -r _ component; do printf '%s\n' "$component"; done
 }
 
 provision() {
@@ -192,8 +214,13 @@ provision() {
         exit 1
     fi
     mkdir -p "$tree"
-    battery_git_identity "$tree"
+    battery_git_identity "$ROOT" "$tree"
     snapshot "" "$ROOT/" "$tree/"
+    # AFTER the snapshot, because the component directories have to exist and
+    # the snapshot is what creates them on a first provision.
+    for component in $(battery_component_paths); do
+        battery_git_identity "$ROOT/$component" "$tree/$component"
+    done
     mkdir -p "$tree/ai-tmp"
     {
         echo "source:   $ROOT"

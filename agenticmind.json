@@ -4202,6 +4202,59 @@
       "tags": [
         "tested"
       ]
+    },
+    "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked": {
+      "title": "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+    },
+    "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files": {
+      "title": "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files",
+      "supports": [
+        "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised": {
+      "title": "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised",
+      "supports": [
+        {
+          "node": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "status": "untried"
+        },
+        {
+          "node": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "relation": "addresses",
+          "target": "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+        }
+      ]
+    },
+    "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout": {
+      "title": "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout",
+      "supports": [
+        {
+          "node": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest": {
+      "title": "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest"
+    },
+    "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree": {
+      "title": "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree",
+      "supports": [
+        "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -4941,6 +4994,14 @@
       "status": "done",
       "addresses": [
         "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+      ]
+    },
+    "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path": {
+      "title": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
       ]
     }
   },
@@ -22602,6 +22663,157 @@
         ]
       ],
       "id": "34fc92c103abc04f"
+    },
+    {
+      "at": "2026-09-19T20:35:02.253923+00:00",
+      "after": "37d6f71b7f62fdc8a5f26a1f03b3d52ded7ef878",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files\", \"tags\": [\"measured\"], \"title\": \"a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised\", \"tags\": [], \"title\": \"give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path\", \"fields\": {\"effort\": 2, \"addresses\": [\"a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked\"]}}, {\"op\": \"status\", \"id\": \"give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path\", \"because\": \"all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree\", \"tags\": [\"measured\"], \"title\": \"sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest\", \"fields\": {}}]",
+      "parents": [
+        "34fc92c103abc04f"
+      ],
+      "assert": [
+        [
+          "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked",
+          "sort",
+          "prop"
+        ],
+        [
+          "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked",
+          "title",
+          "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+        ],
+        [
+          "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout",
+          "sort",
+          "prop"
+        ],
+        [
+          "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout",
+          "supersedes",
+          "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised"
+        ],
+        [
+          "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout",
+          "supports",
+          {
+            "node": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+            "status": "done"
+          }
+        ],
+        [
+          "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout",
+          "tags",
+          "measured"
+        ],
+        [
+          "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout",
+          "title",
+          "all eight components now carry one and the battery discovers 15 component runners, the same as the checkout; the evidence lane went from 669 unbacked tags in 1305 claims against 125 files to 5 in 8753 against 1388, which is figure for figure what the same lane reports in the checkout"
+        ],
+        [
+          "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree",
+          "supports",
+          "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest"
+        ],
+        [
+          "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree",
+          "title",
+          "measured 2026-09-20 under sh -x, which shows the third call receiving ai-tmp/wt-battery-6/engine/lib/examples as its tree"
+        ],
+        [
+          "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files",
+          "supports",
+          "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+        ],
+        [
+          "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files",
+          "title",
+          "measured 2026-09-20: inside a battery _component_runners() returned zero against 15 in the checkout, and the lane read 669 unbacked tags in 1305 claims against 10881 test names in 125 files"
+        ],
+        [
+          "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised",
+          "sort",
+          "prop"
+        ],
+        [
+          "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised",
+          "supports",
+          {
+            "node": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+            "status": "untried"
+          }
+        ],
+        [
+          "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised",
+          "supports",
+          {
+            "node": "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+            "relation": "addresses",
+            "target": "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+          }
+        ],
+        [
+          "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised",
+          "title",
+          "owned() asks the component's own repository what it tracks, so the identity has to exist at that level too, and the component paths come from .gitmodules which answers before anything is initialised"
+        ],
+        [
+          "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest",
+          "sort",
+          "prop"
+        ],
+        [
+          "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest",
+          "title",
+          "sh has no locals, so a function assigning a bare variable name rewrites its caller's: battery_git_identity taking tree=$2 clobbered the loop variable and the walk nested engine, then engine/lib, then engine/lib/examples, giving one component an identity and none of the rest"
+        ],
+        [
+          "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "sort",
+          "approach"
+        ],
+        [
+          "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "addresses",
+          "a battery's components have no git identity either, so owned() finds nothing a component's repository tracks and the evidence model loses every component runner, which makes the tags citing tests only those lanes run read as unbacked"
+        ],
+        [
+          "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "effort",
+          2
+        ],
+        [
+          "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "status",
+          "done"
+        ],
+        [
+          "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path",
+          "title",
+          "give every component in a battery the same seeded worktree registration the battery itself gets, and protect each one from the snapshot's delete by path"
+        ]
+      ],
+      "id": "b1366248d5dc6e04"
     }
   ]
 }
