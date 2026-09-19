@@ -11,7 +11,8 @@
 %     every line after it [tested:
 %     test_a_prelude_derived_form_matches_its_fused_twin_on_the_corpus;
 %     commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].
-%   - an application error prints `ANSWER-ERROR ` and stops; SWI unwind
+%   - an application error prints `ANSWER-ERROR ` and stops, exiting NONZERO
+%     so a comparator reading process status sees the failure; SWI unwind
 %     exceptions retain process control without becoming answer errors
 %     [tested: test_process_exit_is_not_an_answer_error; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - reader variable names carried with collected answers are rendered by the
@@ -39,7 +40,18 @@ main :-
                    ( parser:sdisplay_answer_group(Group, Written),
                      format("ANSWER-GROUP ~w~n", [Written]) )) ),
           Error,
-          report_error(Error)),
+          %NONZERO, because the comparator reads process status beside the
+          %answer lines and an application error that exits 0 makes a failing
+          %example read as agreement. The engine door captured a failed MeTTa
+          %test as an ANSWER-ERROR line and still exited 0 while the library
+          %door raised and exited 1, so the parity lane reported 'the
+          %configurations exited differently' for a failure BOTH doors had
+          %[measured 2026-09-20 on
+          %examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta].
+          %This is what engine/main.pl already does for a failed selftest.
+          %report_error/1's unwind clause rethrows before reaching here, so a
+          %normal halt still keeps its own status.
+          ( report_error(Error), halt(1) )),
     halt.
 
 %The loader's own flattening path is right for a program and wrong here: the
