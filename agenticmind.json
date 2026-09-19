@@ -3899,6 +3899,83 @@
       "tags": [
         "measured"
       ]
+    },
+    "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries": {
+      "title": "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries"
+    },
+    "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve": {
+      "title": "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve",
+      "supports": [
+        "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders": {
+      "title": "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders"
+    },
+    "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s": {
+      "title": "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s",
+      "supports": [
+        "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all": {
+      "title": "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+    },
+    "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690": {
+      "title": "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690",
+      "supports": [
+        "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode": {
+      "title": "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode"
+    },
+    "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on": {
+      "title": "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on",
+      "supports": [
+        "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom": {
+      "title": "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom",
+      "supports": [
+        {
+          "node": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "status": "untried"
+        },
+        {
+          "node": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "relation": "addresses",
+          "target": "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+        }
+      ]
+    },
+    "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions": {
+      "title": "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions",
+      "supports": [
+        {
+          "node": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -4590,6 +4667,14 @@
       "status": "done",
       "addresses": [
         "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+      ]
+    },
+    "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded": {
+      "title": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
       ]
     }
   },
@@ -21362,6 +21447,228 @@
         ]
       ],
       "id": "55ac16793573c18e"
+    },
+    {
+      "at": "2026-09-19T19:10:54.945760+00:00",
+      "after": "c66b6dc642a2ce22c29934aaa7f562c15e3c78ed",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve\", \"tags\": [\"measured\"], \"title\": \"registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s\", \"tags\": [\"measured\"], \"title\": \"the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders\", \"fields\": {}}]",
+      "parents": [
+        "55ac16793573c18e"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve",
+          "supports",
+          "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries"
+        ],
+        [
+          "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve",
+          "title",
+          "measured 2026-09-20 in the checkout: orders() over the 210 shipped rows plus one provider row took 105.03s on a cold cache and 3.79s on the same key again, while callers passing 3 and 5 shipped rows each missed the cache and the whole-program analysis dominates, the module's own comment putting the fixed point at 95.28s of a 97.73s solve"
+        ],
+        [
+          "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s",
+          "supports",
+          "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders"
+        ],
+        [
+          "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s",
+          "title",
+          "measured 2026-09-20 with a probe replicating the test body: table 0.00s, orders 105.03s, atoms 3.94s, the whole visit loop including every catalog type crossing 0.08s"
+        ],
+        [
+          "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries",
+          "sort",
+          "prop"
+        ],
+        [
+          "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries",
+          "title",
+          "registering any door the generated verdict table does not name makes the Python seat solve the shipped call graph's least fixed point in-process, which costs about 100 seconds and is paid again for every distinct entry set a caller passes, because the cached core is keyed on the caller's records rather than on the shipped table's own entries"
+        ],
+        [
+          "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders",
+          "title",
+          "the door-order cost is in the source analysis and not in the engine: over the 572 atoms a door record set produces, every engine crossing the nested-types test makes costs 0.08 seconds in total across 27 distinct door heads, against 105 seconds for the one call to orders"
+        ]
+      ],
+      "id": "284b007f3ed47272"
+    },
+    {
+      "at": "2026-09-19T19:31:50.424778+00:00",
+      "after": "c66b6dc642a2ce22c29934aaa7f562c15e3c78ed",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690\", \"tags\": [\"measured\"], \"title\": \"performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on\", \"tags\": [\"measured\"], \"title\": \"the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom\", \"tags\": [], \"title\": \"ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded\", \"fields\": {\"effort\": 2, \"addresses\": [\"performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all\"]}}, {\"op\": \"status\", \"id\": \"ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded\", \"because\": \"load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "284b007f3ed47272"
+      ],
+      "assert": [
+        [
+          "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom",
+          "sort",
+          "prop"
+        ],
+        [
+          "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom",
+          "supports",
+          {
+            "node": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+            "status": "untried"
+          }
+        ],
+        [
+          "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom",
+          "supports",
+          {
+            "node": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+            "relation": "addresses",
+            "target": "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+          }
+        ],
+        [
+          "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom",
+          "title",
+          "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom"
+        ],
+        [
+          "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions",
+          "sort",
+          "prop"
+        ],
+        [
+          "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions",
+          "supersedes",
+          "a fixed expression uses clause indexing in the native store, so a space holding no row of that shape answers nothing for the question, and the journal join is what keeps the per-file scope that matching alone had lost; this is the same answer engine/spaces/native_matching.pl already reached one level down, where filtering an enumeration had cost an inference per stored atom"
+        ],
+        [
+          "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions",
+          "supports",
+          {
+            "node": "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+            "status": "done"
+          }
+        ],
+        [
+          "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions",
+          "tags",
+          "measured"
+        ],
+        [
+          "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions",
+          "title",
+          "load-metta now reads 311948 against a 300764 pin with a 15039 allowance and load-fast 602873 against 601688 with 30085, so neither is a regression, and the per-atom slope is 31 either way, identical to the hook being disabled; the 22 cases of packages.plt pass with the same four pre-existing choicepoint warnings, source_loading.plt passes, and compiled_sources.plt fails identically before and after with the same nine assertions"
+        ],
+        [
+          "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on",
+          "supports",
+          "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode"
+        ],
+        [
+          "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on",
+          "title",
+          "measured 2026-09-20 by replacing the decode and the shape test with a failure-driven enumeration and re-running the load-metta probe, which read 311916 against 310765 with the hook off and 571917 with it on"
+        ],
+        [
+          "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690",
+          "supports",
+          "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+        ],
+        [
+          "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690",
+          "title",
+          "measured 2026-09-20 on the memory-scale probes: load-metta read 571917 inferences against a 300764 pin and load-fast 862842 against 601688, both exactly +261152, and disabling the hook returned 310765 and 601690"
+        ],
+        [
+          "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all",
+          "title",
+          "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+        ],
+        [
+          "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode",
+          "sort",
+          "prop"
+        ],
+        [
+          "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode",
+          "title",
+          "the journal walk was never the cost: enumerating one load's stored references without decoding them read +1151 inferences over a ten-thousand-atom corpus, against +261152 for the same walk with the decode"
+        ],
+        [
+          "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "sort",
+          "approach"
+        ],
+        [
+          "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "addresses",
+          "performing a file's package rows decoded every atom the load stored in order to test its shape, which cost 26 inferences per atom and nearly doubled a load that declares no package row at all"
+        ],
+        [
+          "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "effort",
+          2
+        ],
+        [
+          "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "status",
+          "done"
+        ],
+        [
+          "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded",
+          "title",
+          "ask the space for the package head by symbol and join the answers against the load's journal for ownership, so only a candidate is ever decoded"
+        ]
+      ],
+      "id": "75c5860e1e631cf9"
     }
   ]
 }
