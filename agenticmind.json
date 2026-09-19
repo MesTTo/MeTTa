@@ -295,7 +295,7 @@
     },
     "a13": {
       "title": "intern the value sets so equal sets become IDENTICAL objects, and short-circuit a store write that adds nothing on identity",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i6"
       ],
@@ -790,6 +790,15 @@
         {
           "node": "a13",
           "status": "active"
+        }
+      ]
+    },
+    "r50": {
+      "says": "committed; measured: tools/doororder.py 460.7s to 323.0s on the merged tree, the three changes since that baseline taken together, and test_door_order.py passes whole, 123 tests",
+      "supports": [
+        {
+          "node": "a13",
+          "status": "done"
         }
       ]
     }
@@ -3254,6 +3263,40 @@
         ]
       ],
       "id": "6d4ec143f16769ae"
+    },
+    {
+      "at": "2026-09-19T13:14:52+10:00",
+      "after": "e51ee56ae883207dd296c7871afd5546b6fcca7e",
+      "did": "status a13 done --because 'committed; measured: tools/doororder.py 460.7s to 323.0s on the merged tree, the three changes since that baseline taken together, and test_door_order.py passes whole, 123 tests'",
+      "parents": [
+        "6d4ec143f16769ae"
+      ],
+      "assert": [
+        [
+          "a13",
+          "status",
+          "done"
+        ],
+        [
+          "r50",
+          "sort",
+          "claim"
+        ],
+        [
+          "r50",
+          "says",
+          "committed; measured: tools/doororder.py 460.7s to 323.0s on the merged tree, the three changes since that baseline taken together, and test_door_order.py passes whole, 123 tests"
+        ],
+        [
+          "r50",
+          "supports",
+          {
+            "node": "a13",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "19b4c6b3cce7723a"
     }
   ]
 }
