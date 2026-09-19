@@ -438,13 +438,14 @@
     },
     "a21": {
       "title": "memoise the dispatching transfer functions on the IDENTITY of their interned input set rather than on the call site, so two sites asking the same question share one answer",
-      "status": "untried",
+      "status": "failed",
       "addresses": [
         "i1"
       ],
       "cost": 13,
       "rests_on": [
-        "c37"
+        "c37",
+        "c41"
       ]
     },
     "a22": {
@@ -1810,6 +1811,15 @@
         {
           "node": "a23",
           "status": "done"
+        }
+      ]
+    },
+    "r171": {
+      "says": "a22 is its implementation, with the purity gate c38 showed it needs, and r165 measures it at 1.658x. c41 says why no fourth arrangement of the idea will do better",
+      "supports": [
+        {
+          "node": "a21",
+          "status": "failed"
         }
       ]
     }
@@ -8759,6 +8769,56 @@
         ]
       ],
       "id": "65570af3b06f49db"
+    },
+    {
+      "at": "2026-09-19T15:39:44+10:00",
+      "after": "9b1d5229b7c35bb942f3afa29c3423818b753066",
+      "did": "status a21 failed --because 'a22 is its implementation, with the purity gate c38 showed it needs, and r165 measures it at 1.658x. c41 says why no fourth arrangement of the idea will do better'",
+      "parents": [
+        "65570af3b06f49db"
+      ],
+      "assert": [
+        [
+          "a21",
+          "status",
+          "failed"
+        ],
+        [
+          "r171",
+          "sort",
+          "claim"
+        ],
+        [
+          "r171",
+          "says",
+          "a22 is its implementation, with the purity gate c38 showed it needs, and r165 measures it at 1.658x. c41 says why no fourth arrangement of the idea will do better"
+        ],
+        [
+          "r171",
+          "supports",
+          {
+            "node": "a21",
+            "status": "failed"
+          }
+        ]
+      ],
+      "id": "50d3143d86137811"
+    },
+    {
+      "at": "2026-09-19T15:39:44+10:00",
+      "after": "9b1d5229b7c35bb942f3afa29c3423818b753066",
+      "did": "link a21 c41 --as rests-on",
+      "parents": [
+        "50d3143d86137811"
+      ],
+      "assert": [
+        [
+          "a21",
+          "rests_on",
+          "c41"
+        ]
+      ],
+      "id": "39ef72cb55161e13"
     }
   ]
 }
