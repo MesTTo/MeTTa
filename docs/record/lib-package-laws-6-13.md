@@ -11,8 +11,9 @@ The engine publishes the prelude's evaluator, dispatch, source-locator and
 activation services through `seam:kind/2`; the source reader exports its indexed
 package-row query. The library-surface check finds no unpublished engine calls,
 the engine layering check passes, and all 13 `metta_published_surface` and
-`engine_layering` tests pass. The library-surface lane still exits nonzero for
-the three missing SWI libraries listed below.
+`engine_layering` tests pass. After consolidating the policy module, the
+library-surface command exits 0: 78 meaning comparisons pass, 2,466 clauses
+contain no unpublished engine calls, and all four planted reaches are seen.
 
 The contract is laws 6–13 and “the package is an argument record and the engine
 knows four things” in
@@ -34,10 +35,14 @@ witnesses. Whole-gate attribution requires identical unrelated source bytes,
 Git identities and build configuration in the candidate and control.
 
 The latest focused run passed all 22 `packages` tests and 69 `lib_package`
-tests. The shipped `07-scopes_and_captured_calls.metta` example also passed.
-The subsequent no-autoload lane failed; its attribution and the final whole
-comparison remain open. Its exact output is
-`ai-tmp/ai-package-focused-88-and-noautoload.log`.
+tests, followed by all 78 disabling mutations. The consolidated module's
+result is `ai-tmp/ai-package-consolidation-tests.log`. Its first surface
+invocation used the wrong working directory and raised
+`source_sink '../conformance/petta/lib/lib_he.metta' does not exist`;
+rerunning from `tests/prolog` passed. The shipped
+`07-scopes_and_captured_calls.metta` example also passed. The earlier
+no-autoload lane failed; its attribution and the final whole comparison remain
+open. Its output is `ai-tmp/ai-package-focused-88-and-noautoload.log`.
 
 ## Law accounting
 
@@ -128,12 +133,15 @@ values through `%Undefined%`; literal lists of declarations use `quote`.
 claimant returning `true` without publishing its named head refuses with
 `existence_error(package_export, 'lp-missing-export')` and rolls back the source.
 
-The included Prolog units sit beside `lib_package.pl`, within the boot's
-existing `lib/*/*.pl` freshness inventory. A unit initially placed one level
-deeper remained stale in an already-written QLF: the running contract call
-lacked a change visible in the source. Moving the units into the governed
-directory makes their edits invalidate the compiled prelude through the
-existing boot mechanism.
+The policy lives in one Prolog module. Included units one directory below it
+escaped the boot's `lib/*/*.pl` freshness inventory: an already-written QLF
+kept running the old contract code. Moving those units beside the umbrella
+made freshness work, but the library-surface gate loaded them independently
+and reported weak-import overrides. Included clauses had also escaped that
+gate's source attribution; the full scan exposed six unpublished engine calls.
+Consolidating the units into `lib_package.pl` gives compilation and surface
+checking the same source boundary. Their six engine services are published
+through the existing seam.
 
 Law 6 also supersedes the old
 `a_backing_no_claimant_answers_installs_nothing` test: accepting an uncovered

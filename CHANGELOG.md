@@ -26,6 +26,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   package-row query.
   Variable signatures from ordinary claimants are resolved against their
   contracts, and a successful claimant that installs no named head refuses.
+  Package policy stays in one Prolog module so compiled-source freshness and
+  library-surface checks cover every clause.
 
 - `bounded.sh` carries a THIRD bound, `--memory KILOBYTES|none`, and applies
   one by default: an eighth of what the box has, read from `/proc/meminfo`.
