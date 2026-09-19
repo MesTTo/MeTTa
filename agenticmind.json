@@ -308,7 +308,7 @@
         "i6"
       ],
       "cost": 8,
-      "status": "untried",
+      "status": "unwanted",
       "title": "collapse the strongly connected components of the value-flow graph so the scopes in one cycle share a single set instead of each holding a converging copy",
       "rests_on": [
         "c14",
@@ -360,7 +360,7 @@
     },
     "a16": {
       "title": "apply difference propagation only where the per-reference work is expensive, which is _call and _protocol, and leave _attribute on the bulk frozenset path",
-      "status": "untried",
+      "status": "unwanted",
       "addresses": [
         "i11",
         "i1"
@@ -1312,6 +1312,24 @@
       "says": "r107",
       "supports": [
         "c30"
+      ]
+    },
+    "r110": {
+      "says": "c30: the store is not large because slots hold redundant copies of one another, which c17 measured and a13's hash consing removed. It is large because the sets themselves are large, and collapsing a cycle makes slots SHARE a set rather than making any set smaller. The cost is linear in stored references at 46us each, so the only remaining lever is holding fewer of them",
+      "supports": [
+        {
+          "node": "a12",
+          "status": "unwanted"
+        }
+      ]
+    },
+    "r111": {
+      "says": "it was the repair for a14, which a17 replaced rather than repaired. r107 shows the cost is now linear in stored references at 41 to 48 microseconds each across a tenfold range, so a cache over the fixpoint has nothing left to remove, and c30 says the only remaining lever is the size of the store",
+      "supports": [
+        {
+          "node": "a16",
+          "status": "unwanted"
+        }
       ]
     }
   },
@@ -6142,6 +6160,74 @@
         ]
       ],
       "id": "24cfedb2dc9506be"
+    },
+    {
+      "at": "2026-09-19T14:48:15+10:00",
+      "after": "d5bd614e0efd9b7a458c600b86fe1a591284578b",
+      "did": "status a12 unwanted --because 'c30: the store is not large because slots hold redundant copies of one another, which c17 measured and a13'\"'\"'s hash consing removed. It is large because the sets themselves are large, and collapsing a cycle makes slots SHARE a set rather than making any set smaller. The cost is linear in stored references at 46us each, so the only remaining lever is holding fewer of them'",
+      "parents": [
+        "24cfedb2dc9506be"
+      ],
+      "assert": [
+        [
+          "a12",
+          "status",
+          "unwanted"
+        ],
+        [
+          "r110",
+          "sort",
+          "claim"
+        ],
+        [
+          "r110",
+          "says",
+          "c30: the store is not large because slots hold redundant copies of one another, which c17 measured and a13's hash consing removed. It is large because the sets themselves are large, and collapsing a cycle makes slots SHARE a set rather than making any set smaller. The cost is linear in stored references at 46us each, so the only remaining lever is holding fewer of them"
+        ],
+        [
+          "r110",
+          "supports",
+          {
+            "node": "a12",
+            "status": "unwanted"
+          }
+        ]
+      ],
+      "id": "4d03d0e42e97d58f"
+    },
+    {
+      "at": "2026-09-19T14:48:26+10:00",
+      "after": "d5bd614e0efd9b7a458c600b86fe1a591284578b",
+      "did": "status a16 unwanted --because 'it was the repair for a14, which a17 replaced rather than repaired. r107 shows the cost is now linear in stored references at 41 to 48 microseconds each across a tenfold range, so a cache over the fixpoint has nothing left to remove, and c30 says the only remaining lever is the size of the store'",
+      "parents": [
+        "4d03d0e42e97d58f"
+      ],
+      "assert": [
+        [
+          "a16",
+          "status",
+          "unwanted"
+        ],
+        [
+          "r111",
+          "sort",
+          "claim"
+        ],
+        [
+          "r111",
+          "says",
+          "it was the repair for a14, which a17 replaced rather than repaired. r107 shows the cost is now linear in stored references at 41 to 48 microseconds each across a tenfold range, so a cache over the fixpoint has nothing left to remove, and c30 says the only remaining lever is the size of the store"
+        ],
+        [
+          "r111",
+          "supports",
+          {
+            "node": "a16",
+            "status": "unwanted"
+          }
+        ]
+      ],
+      "id": "ba49b87e2ec28077"
     }
   ]
 }
