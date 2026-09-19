@@ -24,8 +24,14 @@
 #   [measured 2026-09-19: wt-battery-6 ran the Python tree from one revision
 #   against an engine from another and reported 169 failures against a
 #   4-failure baseline, every one of them an artifact of the mismatch].
-#   Each battery keeps its own .git worktree registration, which is STALE by
-#   design and must not be trusted; ai-tmp/battery.provenance is authoritative.
+#   A battery is therefore NOT a git repository: it holds no .git at any level
+#   [measured 2026-09-20: none of wt-battery-6 through 11 has one], so a `git`
+#   run inside one walks up and answers about the ENCLOSING checkout, which is
+#   why a lane that shells out to git still works and why its answers are about
+#   the source rather than the snapshot. Older indices can also carry a stale
+#   registration in the superproject's admin area, left by a `git worktree add`
+#   that predates this tool -- wt-battery-6 is registered at 14f5c43b5 with no
+#   gitfile in the tree. Neither is authoritative: ai-tmp/battery.provenance is.
 #   Three provisioners exist and each does a different job. components.sh makes
 #   one checkout's components into repositories pinned where the superproject
 #   pins them. worktree.sh makes a git worktree run the same CONFIGURATION as
@@ -60,10 +66,31 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 # ai-tmp/ into the tree it just copied, so comparing dir times reported drift
 # the checker had caused. A directory present on one side only is still
 # reported, because that is a creation or a deletion rather than a time.
-SYNC="-a -O --delete
-      --exclude=.git --exclude=ai-tmp/ --exclude=ai-tmp-*
-      --exclude=__pycache__/ --exclude=.pytest_cache/ --exclude=.mypy_cache/
-      --exclude=.ruff_cache/ --exclude=node_modules/ --exclude=.venv*/"
+# A function rather than a string of flags, because the .git rule needs a
+# quoted argument that word-splitting would tear in half.
+#
+# `--exclude=.git` would be two rules fused: HIDE it from the sender, so no
+# .git is copied, and PROTECT it at the receiver, so none is ever deleted.
+# Only the first is wanted. A gate run leaves git repositories behind -- the
+# packaging fixtures write repos/<name>/.git -- and a protected .git keeps its
+# parent non-empty for ever, so the next provision dies with `cannot delete
+# non-empty directory: repos` and that index is unusable from then on
+# [measured 2026-09-20: wt-battery-6 refused for exactly this]. `H` is the
+# hide-only half. Protecting nothing costs nothing here, because a battery has
+# no .git of its own, as the header says.
+#
+# The other entries stay `--exclude`, where BOTH halves are wanted: ai-tmp/
+# holds this tree's own occupancy record, provenance and logs, and deleting
+# those is how a run loses the evidence it was started to produce.
+snapshot() {
+    rsync -a -O --delete \
+          --filter="H .git" \
+          --exclude=ai-tmp/ --exclude='ai-tmp-*' \
+          --exclude=__pycache__/ --exclude=.pytest_cache/ \
+          --exclude=.mypy_cache/ --exclude=.ruff_cache/ \
+          --exclude=node_modules/ --exclude='.venv*/' \
+          "$@"
+}
 
 usage() {
     cat >&2 <<USAGE
@@ -103,23 +130,22 @@ provision() {
         exit 1
     fi
     mkdir -p "$tree"
-    # shellcheck disable=SC2086
-    rsync $SYNC "$ROOT/" "$tree/"
+    snapshot "$ROOT/" "$tree/"
     mkdir -p "$tree/ai-tmp"
     {
         echo "source:   $ROOT"
         echo "revision: $(git -C "$ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
         echo "taken:    $(date -Is)"
         echo "note:     a snapshot of the WORKING tree, uncommitted state included."
-        echo "          this tree's own .git is a stale worktree registration."
+        echo "          this tree holds no .git, so git run here answers about"
+        echo "          $ROOT, not about this snapshot."
     } > "$tree/ai-tmp/battery.provenance"
 }
 
 verify() {
     tree=$(tree_for "$1")
     [ -d "$tree" ] || { echo "battery $1 does not exist; provision it first" >&2; exit 1; }
-    # shellcheck disable=SC2086
-    drift=$(rsync $SYNC -in "$ROOT/" "$tree/")
+    drift=$(snapshot -in "$ROOT/" "$tree/")
     if [ -n "$drift" ]; then
         echo "battery $1 is NOT a copy of $ROOT; it differs in:" >&2
         echo "$drift" >&2

@@ -3822,6 +3822,83 @@
       "tags": [
         "measured"
       ]
+    },
+    "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline": {
+      "title": "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline"
+    },
+    "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'": {
+      "title": "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'",
+      "supports": [
+        "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists": {
+      "title": "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists"
+    },
+    "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump": {
+      "title": "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump",
+      "supports": [
+        "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'": {
+      "title": "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+    },
+    "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission": {
+      "title": "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission",
+      "supports": [
+        "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live": {
+      "title": "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live",
+      "supports": [
+        {
+          "node": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "status": "untried"
+        },
+        {
+          "node": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "relation": "addresses",
+          "target": "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+        }
+      ]
+    },
+    "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1": {
+      "title": "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1",
+      "supports": [
+        {
+          "node": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot": {
+      "title": "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot"
+    },
+    "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area": {
+      "title": "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area",
+      "supports": [
+        "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -4505,6 +4582,14 @@
       ],
       "rests_on": [
         "ulimit -d in dash sets the hard limit as well as the soft one, so the bound only ratchets down and the only call that fails is one asking to raise a limit an outer rung already set"
+      ]
+    },
+    "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives": {
+      "title": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
       ]
     }
   },
@@ -21055,6 +21140,228 @@
         ]
       ],
       "id": "c09609c983fe443b"
+    },
+    {
+      "at": "2026-09-19T18:47:44.199095+00:00",
+      "after": "b7d86e04b58e1b329998e6d4058ac991e1ade889",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'\", \"tags\": [\"source\"], \"title\": \"pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump\", \"tags\": [\"measured\"], \"title\": \"five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists\", \"fields\": {}}]",
+      "parents": [
+        "c09609c983fe443b"
+      ],
+      "assert": [
+        [
+          "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists",
+          "sort",
+          "prop"
+        ],
+        [
+          "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists",
+          "title",
+          "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists"
+        ],
+        [
+          "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump",
+          "supports",
+          "five cases in tests/repository/test_door_rows.py run past the 180s faulthandler threshold, the slowest at 244.81s, so a passing run prints a thread dump and the two numbers in the Python seat's pyproject are justified against a 89.78s slowest case that no longer exists"
+        ],
+        [
+          "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump",
+          "title",
+          "measured 2026-09-20 in battery 8: 59 passed in 2185.48s with slowest durations 244.81, 184.17, 177.19, 155.62 and 152.94 seconds, and the captured output opens with a faulthandler frame dump"
+        ],
+        [
+          "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline",
+          "sort",
+          "prop"
+        ],
+        [
+          "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline",
+          "title",
+          "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline"
+        ],
+        [
+          "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'",
+          "supports",
+          "pytest's faulthandler_timeout only dumps every thread's stack and lets the item continue, while `timeout` is what ends one, so the 180 and the 900 in the Python seat's pyproject are a diagnostic threshold and a failure bound rather than two spellings of one deadline"
+        ],
+        [
+          "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'",
+          "title",
+          "read extensions/python/pyproject.toml lines 352-390, whose own comments say so: 180 is 'twice the slowest test measured' for reporting and 900 is 'the bound that ends a stuck item'"
+        ]
+      ],
+      "id": "27856a2b324341e9"
+    },
+    {
+      "at": "2026-09-19T18:53:34.805587+00:00",
+      "after": "748ba6411a50163c54e3be47382288f3a7d21116",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission\", \"tags\": [\"measured\"], \"title\": \"rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live\", \"tags\": [], \"title\": \"split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives\", \"fields\": {\"effort\": 1, \"addresses\": [\"rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'\"]}}, {\"op\": \"status\", \"id\": \"split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives\", \"because\": \"tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area\", \"tags\": [\"measured\"], \"title\": \"a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot\", \"fields\": {}}]",
+      "parents": [
+        "27856a2b324341e9"
+      ],
+      "assert": [
+        [
+          "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot",
+          "sort",
+          "prop"
+        ],
+        [
+          "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot",
+          "title",
+          "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot"
+        ],
+        [
+          "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission",
+          "supports",
+          "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+        ],
+        [
+          "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission",
+          "title",
+          "measured 2026-09-20: `sh tools/battery.sh run 6 -- sh check.sh` exited 1 before any lane ran, naming repos/.sources/metta_fixture_lib, and the directories were mode 775 so it was protection rather than permission"
+        ],
+        [
+          "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area",
+          "supports",
+          "a battery tree holds no git directory at any level, so a git command run inside one walks up and answers about the enclosing checkout rather than the snapshot"
+        ],
+        [
+          "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area",
+          "title",
+          "measured 2026-09-20: none of wt-battery-6 through 11 has a .git, `git -C ai-tmp/wt-battery-6 rev-parse --show-toplevel` answers /home/user/Dev/PyPeTTa1/PeTTa/ai-tmp/wt-merge, and only index 6 carries a stale worktree registration in the superproject's admin area"
+        ],
+        [
+          "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'",
+          "sort",
+          "prop"
+        ],
+        [
+          "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'",
+          "title",
+          "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+        ],
+        [
+          "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live",
+          "sort",
+          "prop"
+        ],
+        [
+          "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live",
+          "supports",
+          {
+            "node": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+            "status": "untried"
+          }
+        ],
+        [
+          "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live",
+          "supports",
+          {
+            "node": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+            "relation": "addresses",
+            "target": "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+          }
+        ],
+        [
+          "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live",
+          "title",
+          "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live"
+        ],
+        [
+          "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1",
+          "sort",
+          "prop"
+        ],
+        [
+          "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1",
+          "supersedes",
+          "the receiver-side half protects nothing worth protecting, since a battery holds no git directory of its own, while the ai-tmp exclusion keeps both halves because that is where a battery's occupancy record and logs live"
+        ],
+        [
+          "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1",
+          "supports",
+          {
+            "node": "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+            "status": "done"
+          }
+        ],
+        [
+          "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1",
+          "tags",
+          "tested"
+        ],
+        [
+          "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1",
+          "title",
+          "tools/battery_selftest.sh grew a case that plants a leftover repository and requires the next provision to clear it; all seven cases pass, and against the old exclusion the case fails, showing the leftover survives silently at that depth with exit 0 while the real tree failed loudly with exit 1"
+        ],
+        [
+          "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "sort",
+          "approach"
+        ],
+        [
+          "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "addresses",
+          "rsync's --exclude is a hide rule and a protect rule at once, so the battery provisioner protected every git directory at the receiver and could not remove one a packaging fixture had left under repos, which stranded battery index 6 with 'cannot delete non-empty directory: repos'"
+        ],
+        [
+          "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "effort",
+          1
+        ],
+        [
+          "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "status",
+          "done"
+        ],
+        [
+          "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives",
+          "title",
+          "split the battery provisioner's git rule into its hide half with an rsync filter, and move the flags from a word-split string into a function so the quoted rule survives"
+        ]
+      ],
+      "id": "55ac16793573c18e"
     }
   ]
 }

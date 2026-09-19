@@ -1,7 +1,8 @@
 #!/bin/sh
 # Purpose: prove tools/battery.sh refuses a battery tree that is not a copy of
 #   its source, by planting each shape of drift in a fixture and requiring a
-#   refusal that names it.
+#   refusal that names it, and prove it can CLEAR what a previous run left,
+#   including a git repository a fixture wrote.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
 # Guarantees: exits nonzero if any planted drift goes unreported, or if the
 #   excluded-scratch case is reported (the false positive -O exists to stop).
@@ -78,6 +79,38 @@ printf 'log\n' > "$TREE/ai-tmp/run.log"
 printf 'bytes\n' > "$TREE/package/__pycache__/mid.pyc"
 expect "excluded scratch written into the battery" 0
 
+# Drift is one half of the contract and clearing it is the other: a battery
+# that cannot be re-provisioned is a battery lost. A gate run leaves what the
+# source does not have, and some of it is git repositories -- the packaging
+# fixtures write repos/<name>/.git. While the .git rule was an `--exclude` it
+# protected those at the receiver, so `repos/` could never be emptied and
+# survived the provision that was supposed to remove it -- loudly on the real
+# tree, `cannot delete non-empty directory: repos` and exit 1, leaving that
+# index unusable [measured 2026-09-20 on wt-battery-6], and SILENTLY at this
+# fixture's depth, exit 0 with the directory still there. The quiet one is
+# why this asserts the tree rather than the status.
+BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+mkdir -p "$TREE/repos/fixture_lib/.git/refs/heads"
+printf 'ref: refs/heads/master\n' > "$TREE/repos/fixture_lib/.git/HEAD"
+printf 'built\n' > "$TREE/repos/fixture_lib/setup.py"
+if BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX" \
+       > "$FIXTURE/out" 2>&1
+then
+    if [ -e "$TREE/repos" ]; then
+        echo "  FAIL a run's leftover git repository: provision said it worked" \
+             "and repos/ is still there"
+        failures=$((failures + 1))
+    else
+        echo "  ok   a run's leftover git repository: cleared by the next provision"
+    fi
+else
+    echo "  FAIL a run's leftover git repository: provision refused"
+    cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+expect "the tree that provision has just cleared" 0
+
 rm -rf "$TREE"
 [ "$failures" -eq 0 ] || { echo "battery selftest: $failures case(s) failed"; exit 1; }
-echo "battery selftest: every planted drift was refused and no excluded write was"
+echo "battery selftest: every planted drift was refused, no excluded write was,"
+echo "  and a leftover git repository did not strand the tree"
