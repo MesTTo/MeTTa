@@ -59,6 +59,17 @@ CATALOG = Path(__file__).resolve().parents[0] / "door_catalog.pl"
 
 THE_DERIVATION = '''
 from pathlib import Path
+SEAT = next(parent for parent in Path(__file__).resolve().parents
+            if (parent / "pyproject.toml").exists() or (parent / ".git").exists())
+'''
+
+# The marker set matters even when the root it reaches is right here. A component
+# is a distribution OR a repository, and a tree copied without its history has only
+# the first, which is the tree every gate in this repository runs in. Asking for
+# `.git` alone therefore answers a different directory there, and the failure
+# arrives as whatever reads the path rather than at the walk.
+DERIVES_FROM_ONE_MARKER = '''
+from pathlib import Path
 SEAT = next(parent for parent in Path(__file__).resolve().parents if (parent / '.git').exists())
 '''
 
@@ -115,6 +126,7 @@ def main() -> int:
         (package / "reaches_above.py").write_text(REACHES_ABOVE_THE_SEAT, encoding="utf-8")
         (package / "stays_inside.py").write_text(STAYS_INSIDE_THE_SEAT, encoding="utf-8")
         (package / "derives_it.py").write_text(THE_DERIVATION, encoding="utf-8")
+        (package / "one_marker.py").write_text(DERIVES_FROM_ONE_MARKER, encoding="utf-8")
         (package / "wrong_root.py").write_text(DERIVES_THE_WRONG_ROOT, encoding="utf-8")
         (package / "right_root.py").write_text(DERIVES_THE_RIGHT_ROOT, encoding="utf-8")
         (package / "scratch_output.py").write_text(WRITES_ITS_OWN_SCRATCH, encoding="utf-8")
@@ -123,14 +135,17 @@ def main() -> int:
     assert "reaches_above.py" in reported, f"a walk above the seat was not found: {reported}"
     assert "stays_inside.py" not in reported, f"a package-relative walk was reported: {reported}"
     assert "derives_it.py" not in reported, f"the derivation was reported: {reported}"
+    assert "one_marker.py" in reported, f"a `.git`-only derivation was not found: {reported}"
     assert "_roots.py" not in reported, f"the file defining the derivation was reported: {reported}"
     assert "wrong_root.py" in reported, f"a derivation on the wrong root was not found: {reported}"
     assert "right_root.py" not in reported, f"a correct derivation was reported: {reported}"
     assert "scratch_output.py" not in reported, f"a scratch output was reported: {reported}"
-    assert reported == {"reaches_the_seat.py", "reaches_above.py", "wrong_root.py"}, f"unexpected: {reported}"
-    print("root-walks selftest: a walk to the seat, one above it, and a derivation that "
-          "lands on the wrong root are found; a walk inside the seat, a correct derivation, "
-          "a scratch output, and _roots.py itself are not")
+    assert reported == {"reaches_the_seat.py", "reaches_above.py", "wrong_root.py",
+                        "one_marker.py"}, f"unexpected: {reported}"
+    print("root-walks selftest: a walk to the seat, one above it, a derivation that "
+          "lands on the wrong root, and one asking for `.git` alone are found; a walk "
+          "inside the seat, a correct derivation, a scratch output, and _roots.py "
+          "itself are not")
     return 0
 
 

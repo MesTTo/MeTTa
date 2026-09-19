@@ -46,6 +46,9 @@ Guarantees:
   - a derivation whose root is wrong is named through the path it goes on to miss,
     which is what a marker check cannot see
     [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
+  - a derivation asking for `.git` ALONE is named, because that marker is absent
+    in a tree copied without its history and every gate here runs in one
+    [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
 Fails when: run outside a checkout with a Python seat, which it reports.
 Open Obligations:
   To Do: None
@@ -114,6 +117,11 @@ def findings(seat: Path) -> list[str]:
         if ".parents" not in source:
             continue
         out.extend(
+            f"extensions/python/{rel}:{line}: derives a root from `.git` alone, which "
+            f"is absent in a tree copied without its history; ask for a "
+            f"`pyproject.toml` too, as metta._roots.seat() does"
+            for line in _single_marker(tree))
+        out.extend(
             f"extensions/python/{rel}:{line}: {name} derives a root and then names "
             f"{value}, which does not exist; the walk reached the wrong ancestor, so "
             f"check whether it wants the seat's marker or the workspace's engine/ and lib/"
@@ -128,6 +136,37 @@ def findings(seat: Path) -> list[str]:
 #: own ai-tmp/ would otherwise exempt everything in it, which is how the first
 #: version of this check passed while catching nothing.
 SCRATCH = ("ai-tmp", "ai-tmp-")
+
+
+def _single_marker(tree: ast.Module) -> list[int]:
+    """Each parents-walk whose marker test names `.git` and nothing else.
+
+    A marker check cannot say which root a walk SHOULD reach, which is why the
+    result is what the check above compares. It can say when the marker set is
+    incomplete, and that is a different failure: `seat()` asks for a
+    `pyproject.toml` OR a `.git` because a component is a distribution or a
+    repository, and a tree copied without its history has only the first. Every
+    gate in this repository runs in such a tree, so a `.git`-only walk answers a
+    different directory there and the failure arrives as whatever reads the path
+    [measured 2026-09-19: eleven sites, and the door-order gate reported thirteen
+    false findings from one of them].
+    """
+    out: list[int] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.GeneratorExp, ast.ListComp, ast.SetComp)):
+            continue
+        for generator in node.generators:
+            if not (isinstance(generator.iter, ast.Attribute)
+                    and generator.iter.attr == "parents"):
+                continue
+            markers = {constant.value
+                       for test in generator.ifs
+                       for constant in ast.walk(test)
+                       if isinstance(constant, ast.Constant)
+                       and isinstance(constant.value, str)}
+            if markers == {".git"}:
+                out.append(node.lineno)
+    return out
 
 
 def _derived_paths(tree: ast.Module, filename: str) -> list[tuple[str, int, Path, str]]:
