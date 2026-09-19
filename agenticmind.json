@@ -5218,6 +5218,36 @@
       "tags": [
         "tested"
       ]
+    },
+    "measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one": {
+      "title": "measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one",
+      "attacks": [
+        "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space"
+      ]
+    },
+    "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses": {
+      "title": "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses"
+    },
+    "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0": {
+      "title": "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0",
+      "supports": [
+        "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge": {
+      "title": "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge"
+    },
+    "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it": {
+      "title": "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it",
+      "supports": [
+        "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -26700,6 +26730,92 @@
         ]
       ],
       "id": "bf45fb1b48929153"
+    },
+    {
+      "at": "2026-09-19T23:15:59.490793+00:00",
+      "after": "69d91c178f3cbedf291a9ecf3fdf28d32a34a436",
+      "did": "[{\"op\": \"attack\", \"id\": \"the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space\", \"because\": \"measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one\", \"tags\": []}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0\", \"tags\": [\"measured\"], \"title\": \"the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it\", \"tags\": [\"measured\"], \"title\": \"the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge\", \"fields\": {}}]",
+      "parents": [
+        "bf45fb1b48929153"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one",
+          "attacks",
+          "the class-dispatch gap needs the example's fuller merge topology to appear: a minimal file with one only-restricted merge behaves the SAME in both configurations, leaving the inner call unreduced, so what differs involves the mutual from between the base and its subclasses, the two sources for one head, or the three merges into the caller's space"
+        ],
+        [
+          "measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one",
+          "title",
+          "measured 2026-09-20: both configurations compute the SAME answer for the real example, (area-of (area (Square 3))), so there is no evaluation difference to explain; running the real file with its tests through the engine harness reports one MeTTa test failed and still exits 0, while the library's load raises, so what parity detected is an exit-status difference rather than a semantic one"
+        ],
+        [
+          "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0",
+          "supports",
+          "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses"
+        ],
+        [
+          "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0",
+          "title",
+          "measured 2026-09-20: running examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta through tests/conformance/answer_groups.pl reports one 'MeTTa test failed' line and exits 0"
+        ],
+        [
+          "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it",
+          "supports",
+          "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge"
+        ],
+        [
+          "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it",
+          "title",
+          "measured 2026-09-20: the same file without its test forms answers (area-of (area (Square 3))) under the engine and under the library alike, and a prior top-level (area (Square 3)) answering 9 does not change it"
+        ],
+        [
+          "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge",
+          "sort",
+          "prop"
+        ],
+        [
+          "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge",
+          "title",
+          "the class-dispatch example's own expectation is unmet by BOTH configurations: (describe (Square 3)) answers (area-of (area (Square 3))) rather than (area-of 9), so the inner call is not reduced inside the body of an equation reached through a merge"
+        ],
+        [
+          "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses",
+          "title",
+          "the engine side of the example-parity comparison exits 0 while reporting a failed MeTTa test, so a genuine engine-side test failure reads as agreement and the lane would only notice it because the library half refuses"
+        ]
+      ],
+      "id": "d7292a94f99f76e6"
     }
   ]
 }
