@@ -723,6 +723,16 @@
         "c15"
       ],
       "basis": "source"
+    },
+    "c16": {
+      "says": "collapsing the undeclared-member value DOES cut the open sets, against this thread's own earlier reasoning: 12,527 to 9,290 entries, 26 per cent, because those unknowns are CALLED elsewhere and each distinct one added its own open entry at each call site"
+    },
+    "r44": {
+      "says": "measured on the merged tree before and after",
+      "supports": [
+        "c16"
+      ],
+      "basis": "measured"
     }
   },
   "log": [
@@ -2206,7 +2216,9 @@
             "status": "done"
           }
         ]
-      ]
+      ],
+      "parents": [],
+      "id": "e7e7db657b69c50c"
     },
     {
       "at": "2026-09-19T12:10:40+10:00",
@@ -2243,7 +2255,11 @@
           "supports",
           "c12"
         ]
-      ]
+      ],
+      "parents": [
+        "e7e7db657b69c50c"
+      ],
+      "id": "e71cc08e1bf3440e"
     },
     {
       "at": "2026-09-19T12:10:40+10:00",
@@ -2285,7 +2301,11 @@
           "supports",
           "i6"
         ]
-      ]
+      ],
+      "parents": [
+        "e71cc08e1bf3440e"
+      ],
+      "id": "4bb66de059b5c15e"
     },
     {
       "at": "2026-09-19T12:13:02+10:00",
@@ -2327,7 +2347,11 @@
           "supports",
           "g2"
         ]
-      ]
+      ],
+      "parents": [
+        "4bb66de059b5c15e"
+      ],
+      "id": "b3ef780320a0759f"
     },
     {
       "at": "2026-09-19T12:13:02+10:00",
@@ -2369,7 +2393,11 @@
           "supports",
           "i7"
         ]
-      ]
+      ],
+      "parents": [
+        "b3ef780320a0759f"
+      ],
+      "id": "2ec4482f287deae3"
     },
     {
       "at": "2026-09-19T12:13:02+10:00",
@@ -2401,7 +2429,11 @@
           "title",
           "check the tracked files back out after the reset, refusing only on a MODIFIED file and ignoring gitlinks, which are the nested components the recursion sets"
         ]
-      ]
+      ],
+      "parents": [
+        "2ec4482f287deae3"
+      ],
+      "id": "fec2fcc128787c42"
     },
     {
       "at": "2026-09-19T12:13:02+10:00",
@@ -2431,7 +2463,11 @@
             "status": "done"
           }
         ]
-      ]
+      ],
+      "parents": [
+        "fec2fcc128787c42"
+      ],
+      "id": "1a26d5f11b7bec92"
     },
     {
       "at": "2026-09-19T12:21:36+10:00",
@@ -2473,7 +2509,11 @@
           "supports",
           "i8"
         ]
-      ]
+      ],
+      "parents": [
+        "1a26d5f11b7bec92"
+      ],
+      "id": "a5b4433035a968bd"
     },
     {
       "at": "2026-09-19T12:21:36+10:00",
@@ -2510,7 +2550,11 @@
           "supports",
           "c13"
         ]
-      ]
+      ],
+      "parents": [
+        "a5b4433035a968bd"
+      ],
+      "id": "19efc12a3254f2de"
     },
     {
       "at": "2026-09-19T12:34:46+10:00",
@@ -2552,7 +2596,11 @@
           "supports",
           "i9"
         ]
-      ]
+      ],
+      "parents": [
+        "19efc12a3254f2de"
+      ],
+      "id": "8993813ae4670ccd"
     },
     {
       "at": "2026-09-19T12:34:46+10:00",
@@ -2584,7 +2632,11 @@
           "title",
           "carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read"
         ]
-      ]
+      ],
+      "parents": [
+        "8993813ae4670ccd"
+      ],
+      "id": "e08292a0eb31a3ae"
     },
     {
       "at": "2026-09-19T12:34:46+10:00",
@@ -2596,7 +2648,11 @@
           "rests_on",
           "c11"
         ]
-      ]
+      ],
+      "parents": [
+        "e08292a0eb31a3ae"
+      ],
+      "id": "90361b6f37ce65ff"
     },
     {
       "at": "2026-09-19T12:34:46+10:00",
@@ -2628,7 +2684,11 @@
           "title",
           "key the solve cache on the sources, entries and lifetimes it reads, instead of on the whole row set"
         ]
-      ]
+      ],
+      "parents": [
+        "90361b6f37ce65ff"
+      ],
+      "id": "1be23d3f1c592231"
     },
     {
       "at": "2026-09-19T12:34:46+10:00",
@@ -2658,7 +2718,11 @@
             "status": "done"
           }
         ]
-      ]
+      ],
+      "parents": [
+        "1be23d3f1c592231"
+      ],
+      "id": "20298b961432bd8b"
     },
     {
       "at": "2026-09-19T12:34:54+10:00",
@@ -2688,7 +2752,11 @@
             "status": "active"
           }
         ]
-      ]
+      ],
+      "parents": [
+        "20298b961432bd8b"
+      ],
+      "id": "fe81a78f3459bf22"
     },
     {
       "at": "2026-09-19T12:39:10+10:00",
@@ -2725,7 +2793,11 @@
           "supports",
           "c14"
         ]
-      ]
+      ],
+      "parents": [
+        "fe81a78f3459bf22"
+      ],
+      "id": "67096924b8f75a9d"
     },
     {
       "at": "2026-09-19T12:39:10+10:00",
@@ -2775,7 +2847,11 @@
             "status": "untried"
           }
         ]
-      ]
+      ],
+      "parents": [
+        "67096924b8f75a9d"
+      ],
+      "id": "e17a15dcc944012c"
     },
     {
       "at": "2026-09-19T12:39:10+10:00",
@@ -2787,7 +2863,11 @@
           "rests_on",
           "c14"
         ]
-      ]
+      ],
+      "parents": [
+        "e17a15dcc944012c"
+      ],
+      "id": "910326d27bf0af19"
     },
     {
       "at": "2026-09-19T12:40:56+10:00",
@@ -2824,7 +2904,11 @@
           "supports",
           "c15"
         ]
-      ]
+      ],
+      "parents": [
+        "910326d27bf0af19"
+      ],
+      "id": "781dae87477bdf95"
     },
     {
       "at": "2026-09-19T12:40:56+10:00",
@@ -2836,7 +2920,52 @@
           "rests_on",
           "c15"
         ]
-      ]
+      ],
+      "parents": [
+        "781dae87477bdf95"
+      ],
+      "id": "87cf40c04e7a5569"
+    },
+    {
+      "at": "2026-09-19T12:59:51+10:00",
+      "after": "6fa0e53929e9b07c92dcfd6e97242c1d04b01d3c",
+      "did": "add-claim c16 'collapsing the undeclared-member value DOES cut the open sets, against this thread'\"'\"'s own earlier reasoning: 12,527 to 9,290 entries, 26 per cent, because those unknowns are CALLED elsewhere and each distinct one added its own open entry at each call site' --because 'measured on the merged tree before and after' --basis measured",
+      "parents": [
+        "87cf40c04e7a5569"
+      ],
+      "assert": [
+        [
+          "c16",
+          "sort",
+          "claim"
+        ],
+        [
+          "c16",
+          "says",
+          "collapsing the undeclared-member value DOES cut the open sets, against this thread's own earlier reasoning: 12,527 to 9,290 entries, 26 per cent, because those unknowns are CALLED elsewhere and each distinct one added its own open entry at each call site"
+        ],
+        [
+          "r44",
+          "sort",
+          "claim"
+        ],
+        [
+          "r44",
+          "basis",
+          "measured"
+        ],
+        [
+          "r44",
+          "says",
+          "measured on the merged tree before and after"
+        ],
+        [
+          "r44",
+          "supports",
+          "c16"
+        ]
+      ],
+      "id": "dd7bf7c9af43b2ee"
     }
   ]
 }
