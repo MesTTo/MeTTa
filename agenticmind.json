@@ -4508,6 +4508,59 @@
       "tags": [
         "measured"
       ]
+    },
+    "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases": {
+      "title": "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+    },
+    "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat": {
+      "title": "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat",
+      "supports": [
+        "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy": {
+      "title": "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy",
+      "supports": [
+        {
+          "node": "make both of that lane's paths absolute, the way the first already was",
+          "status": "untried"
+        },
+        {
+          "node": "make both of that lane's paths absolute, the way the first already was",
+          "relation": "addresses",
+          "target": "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+        }
+      ]
+    },
+    "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path": {
+      "title": "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path",
+      "supports": [
+        {
+          "node": "make both of that lane's paths absolute, the way the first already was",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake": {
+      "title": "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake"
+    },
+    "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path": {
+      "title": "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path",
+      "supports": [
+        "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -5291,6 +5344,14 @@
       "status": "done",
       "addresses": [
         "the fn-sync lane's drift is the package library's own new names arriving, not a stale generator: regenerating adds exactly package_prolog and setup, and both are exported by the untracked lib/lib_package/lib_package.pl the delegated job is still writing"
+      ]
+    },
+    "make both of that lane's paths absolute, the way the first already was": {
+      "title": "make both of that lane's paths absolute, the way the first already was",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
       ]
     }
   },
@@ -23846,6 +23907,157 @@
         ]
       ],
       "id": "c36c284ce0074ae9"
+    },
+    {
+      "at": "2026-09-19T21:53:10.097740+00:00",
+      "after": "ddf0b01afb9e202edcbae8e9481c2563a0153dd3",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat\", \"tags\": [\"measured\"], \"title\": \"the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy\", \"tags\": [], \"title\": \"make both of that lane's paths absolute, the way the first already was\", \"fields\": {\"effort\": 1, \"addresses\": [\"the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases\"]}}, {\"op\": \"status\", \"id\": \"make both of that lane's paths absolute, the way the first already was\", \"because\": \"the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path\", \"tags\": [\"measured\"], \"title\": \"pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake\", \"fields\": {}}]",
+      "parents": [
+        "c36c284ce0074ae9"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat",
+          "supports",
+          "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+        ],
+        [
+          "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat",
+          "title",
+          "measured 2026-09-20: extensions/python/test.sh line 48 does cd to the seat, the absolute path alone passes 32 cases, the pair reports 'no tests ran in 1.30s', and ext/metta-arrays/tests/test_library_face.py exists at the root and not under the seat"
+        ],
+        [
+          "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path",
+          "supports",
+          "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake"
+        ],
+        [
+          "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path",
+          "title",
+          "measured 2026-09-20: the same command with the bad path removed collects 32 cases and with it present collects none, and no error names the path"
+        ],
+        [
+          "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake",
+          "sort",
+          "prop"
+        ],
+        [
+          "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake",
+          "title",
+          "pytest given one collectable path and one that does not exist reports 'no tests ran' rather than naming the missing path, so a mis-spelled lane argument reads as an empty suite instead of as a mistake"
+        ],
+        [
+          "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases",
+          "sort",
+          "prop"
+        ],
+        [
+          "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases",
+          "title",
+          "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+        ],
+        [
+          "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path",
+          "supersedes",
+          "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy"
+        ],
+        [
+          "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path",
+          "supports",
+          {
+            "node": "make both of that lane's paths absolute, the way the first already was",
+            "status": "done"
+          }
+        ],
+        [
+          "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path",
+          "tags",
+          "tested"
+        ],
+        [
+          "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path",
+          "title",
+          "the lane now reports 33 passed and ok where it reported 'no tests ran' and FAIL, and no other lane in check.sh hands a runner a bare root-relative path"
+        ],
+        [
+          "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy",
+          "sort",
+          "prop"
+        ],
+        [
+          "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy",
+          "supports",
+          {
+            "node": "make both of that lane's paths absolute, the way the first already was",
+            "status": "untried"
+          }
+        ],
+        [
+          "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy",
+          "supports",
+          {
+            "node": "make both of that lane's paths absolute, the way the first already was",
+            "relation": "addresses",
+            "target": "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+          }
+        ],
+        [
+          "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy",
+          "title",
+          "the runner's own cd is what makes a root-relative path wrong there, and the lane's first argument already spells the remedy"
+        ],
+        [
+          "make both of that lane's paths absolute, the way the first already was",
+          "sort",
+          "approach"
+        ],
+        [
+          "make both of that lane's paths absolute, the way the first already was",
+          "addresses",
+          "the face-sync-selftest lane passed one absolute path and one path relative to the repository root to a runner that changes into the Python seat first, and pytest given one good path and one bad collects nothing, so the lane ran zero of its 33 cases"
+        ],
+        [
+          "make both of that lane's paths absolute, the way the first already was",
+          "effort",
+          1
+        ],
+        [
+          "make both of that lane's paths absolute, the way the first already was",
+          "status",
+          "done"
+        ],
+        [
+          "make both of that lane's paths absolute, the way the first already was",
+          "title",
+          "make both of that lane's paths absolute, the way the first already was"
+        ]
+      ],
+      "id": "7905cba5d6424fbe"
     }
   ]
 }
