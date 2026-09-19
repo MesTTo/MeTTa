@@ -50,7 +50,7 @@ MARKER = re.compile(r"^(<<<<<<<|>>>>>>>) ", re.MULTILINE)
 def tracked_files(root: Path) -> list[str]:
     """Every path git tracks, which is the set a commit can carry a marker in."""
     done = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=root, capture_output=True, text=True, check=False
+        ["git", "ls-files", "--recurse-submodules", "-z"], cwd=root, capture_output=True, text=True, check=False
     )
     if done.returncode != 0:
         message = f"not a git checkout: {root}"

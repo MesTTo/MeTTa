@@ -606,6 +606,11 @@ run GATE provenance-pin-selftest "$PY" "$HERE/tests/checks/check_pin_provenance_
 # asks the committed tree instead, and its selftest plants the setext heading
 # underline that a matcher reading `=======` alone would report as a conflict.
 run GATE conflict-markers "$PY" "$HERE/tests/checks/check_conflict_markers.py"
+# Before any lane that walks the tree: `git ls-files --recurse-submodules` SKIPS a
+# component that was never populated, so an unpopulated checkout would scan a fraction
+# of the tree and report a pass.
+run GATE submodules "$PY" "$HERE/tests/checks/check_submodules_populated.py"
+run GATE submodules-selftest "$PY" "$HERE/tests/checks/check_submodules_populated_selftest.py"
 run GATE conflict-markers-selftest "$PY" "$HERE/tests/checks/check_conflict_markers_selftest.py"
 
 # b54dea73 renamed the chapter-19 C artifacts on 2026-08-27 and left THREE
@@ -869,7 +874,7 @@ run REPORT kernel      "$PY" "$HERE/tests/checks/check_jupyter_kernel.py"
 # pattern that hides it is one more thing to keep true. What the repository
 # tracks is the answer to what the repository is responsible for.
 check_component_python() {
-    found=$(cd "$HERE" && git ls-files -- 'engine/*.py' 'extensions/*/*.py' \
+    found=$(cd "$HERE" && git ls-files --recurse-submodules -- 'engine/*.py' 'extensions/*/*.py' \
                 'extensions/*/*/*.py' 'examples/ch19-*/*.py' 'tests/checks/*.py' |
             grep -v '^extensions/python/')
     [ -n "$found" ] || return 0

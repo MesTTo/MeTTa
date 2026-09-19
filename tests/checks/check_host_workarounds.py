@@ -125,7 +125,7 @@ class Report:
 def tracked_files(root: Path) -> list[Path]:
     """Every file git tracks or has staged under root, relative to it."""
     listing = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True
+        ["git", "ls-files", "--recurse-submodules", "-z"], cwd=root, capture_output=True, check=True
     )
     return [Path(name) for name in listing.stdout.decode("utf-8").split("\0") if name]
 

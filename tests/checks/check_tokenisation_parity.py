@@ -98,7 +98,7 @@ def probes(text: str) -> list[tuple[str, str]]:
 def corpus() -> list[tuple[str, str]]:
     """Every tracked `.metta` file, as (label, source)."""
     listed = subprocess.run(
-        ["git", "ls-files", "-z", "--", "*.metta"],
+        ["git", "ls-files", "--recurse-submodules", "-z", "--", "*.metta"],
         cwd=ROOT, capture_output=True, text=True, check=True,
     )
     return [

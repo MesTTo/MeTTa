@@ -97,7 +97,7 @@ def tracked(root: Path) -> frozenset[Path]:
     a repository owns nothing, so a planted tree is one (`git init -q`, then
     `git add -A` before the checker runs).
     """
-    listing = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True, check=False)
+    listing = subprocess.run(["git", "ls-files", "--recurse-submodules", "-z"], cwd=root, capture_output=True, check=False)
     if listing.returncode != 0:
         msg = (
             f"{root} is not a git repository, so it owns no files: evidence walks read the tracked set, "

@@ -69,7 +69,7 @@ COMMENT_STARTS = ("%", "//", "*", "/*", "#")
 def tracked_loader_files() -> list[Path]:
     """Every tracked file that could carry an engine load, in any language."""
     listed = subprocess.run(
-        ["git", "ls-files", "-z", *LOADER_GLOBS],
+        ["git", "ls-files", "--recurse-submodules", "-z", *LOADER_GLOBS],
         cwd=ROOT, capture_output=True, text=True, check=True,
     ).stdout
     return [ROOT / name for name in listed.split("\0") if name]
