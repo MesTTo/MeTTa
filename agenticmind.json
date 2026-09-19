@@ -264,7 +264,7 @@
     },
     "a10": {
       "title": "carry one canonical value for an undeclared-member read, leaving the parameter and member in open where they are read",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i9"
       ],
@@ -741,6 +741,15 @@
         {
           "node": "i8",
           "status": "accepted"
+        }
+      ]
+    },
+    "r46": {
+      "says": "committed; measured: stored references 3,005,161 -> 2,921,081 and the open entries on a degraded door 12,527 -> 9,290, twenty-six per cent, because those unknowns are called elsewhere and each distinct one added its own open entry per call site; test_door_order.py passes whole, 123 tests",
+      "supports": [
+        {
+          "node": "a10",
+          "status": "done"
         }
       ]
     }
@@ -3010,6 +3019,40 @@
         ]
       ],
       "id": "1c522661d22be452"
+    },
+    {
+      "at": "2026-09-19T13:00:44+10:00",
+      "after": "96559d5ed94e7563f9c059154163b889bd3536b5",
+      "did": "status a10 done --because 'committed; measured: stored references 3,005,161 -> 2,921,081 and the open entries on a degraded door 12,527 -> 9,290, twenty-six per cent, because those unknowns are called elsewhere and each distinct one added its own open entry per call site; test_door_order.py passes whole, 123 tests'",
+      "parents": [
+        "1c522661d22be452"
+      ],
+      "assert": [
+        [
+          "a10",
+          "status",
+          "done"
+        ],
+        [
+          "r46",
+          "sort",
+          "claim"
+        ],
+        [
+          "r46",
+          "says",
+          "committed; measured: stored references 3,005,161 -> 2,921,081 and the open entries on a degraded door 12,527 -> 9,290, twenty-six per cent, because those unknowns are called elsewhere and each distinct one added its own open entry per call site; test_door_order.py passes whole, 123 tests"
+        ],
+        [
+          "r46",
+          "supports",
+          {
+            "node": "a10",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "01bb595288734280"
     }
   ]
 }
