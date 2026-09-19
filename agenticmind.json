@@ -678,7 +678,7 @@
     },
     "a31.4": {
       "title": "gate it: a lane refusing a library that declares its Prolog body the old way, and a head with neither an equation nor a claimed backing refusing by name at import",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i19"
       ],
@@ -686,7 +686,7 @@
     },
     "a32": {
       "title": "give every file that runs as a script the inline derivation rather than an import, and gate it by running each tool check.sh invokes and requiring it to start",
-      "status": "active",
+      "status": "done",
       "addresses": [
         "i22"
       ],
@@ -2851,6 +2851,34 @@
         "c89"
       ],
       "basis": "source"
+    },
+    "r261": {
+      "says": "two gate pairs: tests/prolog/suites/seams/packages.plt passes 4 of 4 inside a full engine run, and the package-backings lane pair refuses a library written the old way while sparing a comment, a string, a backing row and lib_import, and refuses an empty roster",
+      "supports": [
+        {
+          "node": "a31.4",
+          "status": "done"
+        }
+      ]
+    },
+    "r262": {
+      "says": "the ten tools are repaired and committed as 646bc385, and the tool-startup lane pair gates it: it probes only files guarding a block on __main__, puts the tool's own directory on sys.path as running a script does, and refuses an empty roster",
+      "supports": [
+        {
+          "node": "a32",
+          "status": "done"
+        }
+      ]
+    },
+    "c90": {
+      "says": "every shipped library now describes its backing: 23 faces through the generator, 9 hand-written lib_* libraries and 5 outside lib_*, with lib_import alone keeping the call"
+    },
+    "r263": {
+      "says": "the package-backings lane answers 0 findings over lib/*/*.metta, and the skel builtin module plus lib_datastructures, lib_combinatorics and lib_crypto all import cleanly",
+      "supports": [
+        "c90"
+      ],
+      "basis": "measured"
     }
   },
   "log": [
@@ -14290,6 +14318,115 @@
         ]
       ],
       "id": "8b1f72643869fefb"
+    },
+    {
+      "at": "2026-09-19T18:29:34+10:00",
+      "after": "7be716d7ad6a616a8337b756cbefadd728ec357b",
+      "did": "status a31.4 done --because 'two gate pairs: tests/prolog/suites/seams/packages.plt passes 4 of 4 inside a full engine run, and the package-backings lane pair refuses a library written the old way while sparing a comment, a string, a backing row and lib_import, and refuses an empty roster'",
+      "parents": [
+        "8b1f72643869fefb"
+      ],
+      "assert": [
+        [
+          "a31.4",
+          "status",
+          "done"
+        ],
+        [
+          "r261",
+          "sort",
+          "claim"
+        ],
+        [
+          "r261",
+          "says",
+          "two gate pairs: tests/prolog/suites/seams/packages.plt passes 4 of 4 inside a full engine run, and the package-backings lane pair refuses a library written the old way while sparing a comment, a string, a backing row and lib_import, and refuses an empty roster"
+        ],
+        [
+          "r261",
+          "supports",
+          {
+            "node": "a31.4",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "b01b601eb17ae7b6"
+    },
+    {
+      "at": "2026-09-19T18:29:34+10:00",
+      "after": "7be716d7ad6a616a8337b756cbefadd728ec357b",
+      "did": "status a32 done --because 'the ten tools are repaired and committed as 646bc385, and the tool-startup lane pair gates it: it probes only files guarding a block on __main__, puts the tool'\"'\"'s own directory on sys.path as running a script does, and refuses an empty roster'",
+      "parents": [
+        "b01b601eb17ae7b6"
+      ],
+      "assert": [
+        [
+          "a32",
+          "status",
+          "done"
+        ],
+        [
+          "r262",
+          "sort",
+          "claim"
+        ],
+        [
+          "r262",
+          "says",
+          "the ten tools are repaired and committed as 646bc385, and the tool-startup lane pair gates it: it probes only files guarding a block on __main__, puts the tool's own directory on sys.path as running a script does, and refuses an empty roster"
+        ],
+        [
+          "r262",
+          "supports",
+          {
+            "node": "a32",
+            "status": "done"
+          }
+        ]
+      ],
+      "id": "279f317f19ca5d74"
+    },
+    {
+      "at": "2026-09-19T18:29:34+10:00",
+      "after": "7be716d7ad6a616a8337b756cbefadd728ec357b",
+      "did": "add-claim c90 'every shipped library now describes its backing: 23 faces through the generator, 9 hand-written lib_* libraries and 5 outside lib_*, with lib_import alone keeping the call' --because 'the package-backings lane answers 0 findings over lib/*/*.metta, and the skel builtin module plus lib_datastructures, lib_combinatorics and lib_crypto all import cleanly' --basis measured",
+      "parents": [
+        "279f317f19ca5d74"
+      ],
+      "assert": [
+        [
+          "c90",
+          "sort",
+          "claim"
+        ],
+        [
+          "c90",
+          "says",
+          "every shipped library now describes its backing: 23 faces through the generator, 9 hand-written lib_* libraries and 5 outside lib_*, with lib_import alone keeping the call"
+        ],
+        [
+          "r263",
+          "sort",
+          "claim"
+        ],
+        [
+          "r263",
+          "basis",
+          "measured"
+        ],
+        [
+          "r263",
+          "says",
+          "the package-backings lane answers 0 findings over lib/*/*.metta, and the skel builtin module plus lib_datastructures, lib_combinatorics and lib_crypto all import cleanly"
+        ],
+        [
+          "r263",
+          "supports",
+          "c90"
+        ]
+      ],
+      "id": "fd69a1f3cb31811d"
     }
   ]
 }

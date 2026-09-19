@@ -18,10 +18,13 @@ understands [source: docs/journal/2026-09-09-packages-are-equations.md, law 14].
 own Prolog half, so it cannot reach a claim whose body is that operation. That
 is the bootstrap bottoming out at a library that requires nothing.
 
-The scan strips comments and strings before looking, because the call is
-MENTIONED in the comments of libraries that do not make it: `lib_memo` and
-`lib_zar` both discuss it while importing one head at a time. A pattern over
-the raw text reports those and reads as a false alarm on the first run.
+The forms come from the engine's own reader, `positioned_forms`, which is what
+`metta.library.LibrarySource` uses to read a library without loading or running
+it. That matters twice. The call is MENTIONED in the comments of libraries that
+do not make it, `lib_memo` and `lib_zar` both discuss it while importing one
+head at a time, and a pattern over the raw text reports those. And a form's
+HEAD is what decides, not a substring: the reader says where each top-level
+form begins and ends, so a mention inside a larger form cannot be read as one.
 
 Assumes: the shipped libraries are at `lib/*/*.metta`.
 Guarantees:
@@ -49,42 +52,23 @@ from pathlib import Path
 #: Derived, not counted, so moving this file cannot silently point it elsewhere.
 ROOT = next(parent for parent in Path(__file__).resolve().parents
             if (parent / "engine").is_dir() and (parent / "lib").is_dir())
+sys.path.insert(0, str(ROOT / "extensions" / "python"))
+
+from metta._binding.positions import positioned_forms  # noqa: E402  -- the seat is installed above
+
 LIBRARIES = ROOT / "lib"
-CALL = "!(import_prolog_functions_from_file"
+OPERATION = "import_prolog_functions_from_file"
 #: Where the operation is defined and applied to its own Prolog half.
 EXEMPT = ("lib_import",)
 
 
-def code_only(source: str) -> str:
-    """The source with comments and string contents blanked, keeping offsets.
-
-    Blanked rather than removed so a reported position still names the line it
-    came from. A `;` opens a comment to end of line, and neither a `;` nor a
-    parenthesis inside a string means anything.
-    """
-    out, index, in_string, in_comment = [], 0, False, False
-    while index < len(source):
-        char = source[index]
-        if in_comment:
-            out.append("\n" if char == "\n" else " ")
-            in_comment = char != "\n"
-        elif in_string:
-            if char == "\\":
-                out.append("  ")
-                index += 2
-                continue
-            out.append(" ")
-            in_string = char != '"'
-        elif char == '"':
-            in_string = True
-            out.append(" ")
-        elif char == ";":
-            in_comment = True
-            out.append(" ")
-        else:
-            out.append(char)
-        index += 1
-    return "".join(out)
+def called_at(text: str) -> bool:
+    """Whether this top-level form IS the importer call, by its head."""
+    body = text.lstrip()
+    if body.startswith("!"):
+        body = body[1:].lstrip()
+    return body.startswith("(" + OPERATION) and (
+        len(body) <= len(OPERATION) + 1 or not body[len(OPERATION) + 1].isalnum())
 
 
 def findings(libraries: Path) -> list[str]:
@@ -100,11 +84,11 @@ def findings(libraries: Path) -> list[str]:
     for source in sources:
         if source.parent.name in EXEMPT:
             continue
-        code = code_only(source.read_text(encoding="utf-8"))
-        start = code.find(CALL)
-        if start < 0:
+        forms = positioned_forms(source.read_text(encoding="utf-8"))
+        calls = [form for form in forms if called_at(form.text)]
+        if not calls:
             continue
-        line = code.count("\n", 0, start) + 1
+        line = calls[0].line
         out.append(f"lib/{source.parent.name}/{source.name}:{line}: tells the engine to load "
                    f"its Prolog body; write (= (package backing) (prolog <file> (heads))) instead, "
                    f"which the loader performs and another implementation can read")
