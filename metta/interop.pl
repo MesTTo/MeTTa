@@ -1956,6 +1956,12 @@ seam:kind(resolve_unimport_path/3, service).
 seam:kind(metta_package_loading/3, service).
 seam:kind(metta_package_reload/3, service).
 seam:kind(metta_perform_package_rows/2, service).
+seam:kind(importer_helper/2, service).
+seam:kind(metta_reference_check_prolog_source/1, service).
+seam:kind(metta_reference_face/3, service).
+seam:kind(metta_reference_read_exports/3, service).
+seam:kind(metta_reference_register_prolog/4, service).
+seam:kind(record_extension_membership/2, service).
 
 % Time: one indexed source/package join plus O(p) rows, p = package rows in
 % this load. A file with no package rows never decodes its other atoms.
