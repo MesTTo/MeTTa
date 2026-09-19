@@ -292,6 +292,18 @@
         "c14",
         "c15"
       ]
+    },
+    "a13": {
+      "title": "intern the value sets so equal sets become IDENTICAL objects, and short-circuit a store write that adds nothing on identity",
+      "status": "active",
+      "addresses": [
+        "i6"
+      ],
+      "cost": 2,
+      "rests_on": [
+        "c17",
+        "c14"
+      ]
     }
   },
   "claims": {
@@ -750,6 +762,34 @@
         {
           "node": "a10",
           "status": "done"
+        }
+      ]
+    },
+    "c17": {
+      "says": "the store holds the same answer over and over: 103,943 slots hold only 19,912 distinct value sets, 93,143 of them share a set with another, and 90.7 per cent of all stored references sit in redundant copies, with one 1,361-element set held by 706 slots"
+    },
+    "r47": {
+      "says": "measured on the merged tree by grouping the final store by value set",
+      "supports": [
+        "c17"
+      ],
+      "basis": "measured"
+    },
+    "r48": {
+      "says": "captures the redundancy c17 measures from the ANSWERS side, which is available, rather than from the edges, which this analyser does not materialise",
+      "supports": [
+        {
+          "node": "a13",
+          "status": "untried"
+        }
+      ]
+    },
+    "r49": {
+      "says": "applied; test_door_order.py passes whole, 123 tests; the full-generator timing against the 460.7s baseline is running",
+      "supports": [
+        {
+          "node": "a13",
+          "status": "active"
         }
       ]
     }
@@ -3053,6 +3093,167 @@
         ]
       ],
       "id": "01bb595288734280"
+    },
+    {
+      "at": "2026-09-19T13:08:14+10:00",
+      "after": "f7ee67a7184a0fd86d95db0c655bdd2ee41dc6e8",
+      "did": "add-claim c17 'the store holds the same answer over and over: 103,943 slots hold only 19,912 distinct value sets, 93,143 of them share a set with another, and 90.7 per cent of all stored references sit in redundant copies, with one 1,361-element set held by 706 slots' --because 'measured on the merged tree by grouping the final store by value set' --basis measured",
+      "parents": [
+        "01bb595288734280"
+      ],
+      "assert": [
+        [
+          "c17",
+          "sort",
+          "claim"
+        ],
+        [
+          "c17",
+          "says",
+          "the store holds the same answer over and over: 103,943 slots hold only 19,912 distinct value sets, 93,143 of them share a set with another, and 90.7 per cent of all stored references sit in redundant copies, with one 1,361-element set held by 706 slots"
+        ],
+        [
+          "r47",
+          "sort",
+          "claim"
+        ],
+        [
+          "r47",
+          "basis",
+          "measured"
+        ],
+        [
+          "r47",
+          "says",
+          "measured on the merged tree by grouping the final store by value set"
+        ],
+        [
+          "r47",
+          "supports",
+          "c17"
+        ]
+      ],
+      "id": "617cbee62b6cbfe3"
+    },
+    {
+      "at": "2026-09-19T13:08:14+10:00",
+      "after": "f7ee67a7184a0fd86d95db0c655bdd2ee41dc6e8",
+      "did": "add-approach a13 'intern the value sets so equal sets become IDENTICAL objects, and short-circuit a store write that adds nothing on identity' --addresses i6 --cost 2 --because 'captures the redundancy c17 measures from the ANSWERS side, which is available, rather than from the edges, which this analyser does not materialise'",
+      "parents": [
+        "617cbee62b6cbfe3"
+      ],
+      "assert": [
+        [
+          "a13",
+          "sort",
+          "approach"
+        ],
+        [
+          "a13",
+          "addresses",
+          "i6"
+        ],
+        [
+          "a13",
+          "cost",
+          2
+        ],
+        [
+          "a13",
+          "status",
+          "untried"
+        ],
+        [
+          "a13",
+          "title",
+          "intern the value sets so equal sets become IDENTICAL objects, and short-circuit a store write that adds nothing on identity"
+        ],
+        [
+          "r48",
+          "sort",
+          "claim"
+        ],
+        [
+          "r48",
+          "says",
+          "captures the redundancy c17 measures from the ANSWERS side, which is available, rather than from the edges, which this analyser does not materialise"
+        ],
+        [
+          "r48",
+          "supports",
+          {
+            "node": "a13",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "16dea3abb828a4ad"
+    },
+    {
+      "at": "2026-09-19T13:08:14+10:00",
+      "after": "f7ee67a7184a0fd86d95db0c655bdd2ee41dc6e8",
+      "did": "link a13 c17 --as rests-on",
+      "parents": [
+        "16dea3abb828a4ad"
+      ],
+      "assert": [
+        [
+          "a13",
+          "rests_on",
+          "c17"
+        ]
+      ],
+      "id": "68cbbb4516ced839"
+    },
+    {
+      "at": "2026-09-19T13:08:14+10:00",
+      "after": "f7ee67a7184a0fd86d95db0c655bdd2ee41dc6e8",
+      "did": "link a13 c14 --as rests-on",
+      "parents": [
+        "68cbbb4516ced839"
+      ],
+      "assert": [
+        [
+          "a13",
+          "rests_on",
+          "c14"
+        ]
+      ],
+      "id": "00d6d2ae67a39a0d"
+    },
+    {
+      "at": "2026-09-19T13:08:14+10:00",
+      "after": "f7ee67a7184a0fd86d95db0c655bdd2ee41dc6e8",
+      "did": "status a13 active --because 'applied; test_door_order.py passes whole, 123 tests; the full-generator timing against the 460.7s baseline is running'",
+      "parents": [
+        "00d6d2ae67a39a0d"
+      ],
+      "assert": [
+        [
+          "a13",
+          "status",
+          "active"
+        ],
+        [
+          "r49",
+          "sort",
+          "claim"
+        ],
+        [
+          "r49",
+          "says",
+          "applied; test_door_order.py passes whole, 123 tests; the full-generator timing against the 460.7s baseline is running"
+        ],
+        [
+          "r49",
+          "supports",
+          {
+            "node": "a13",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "6d4ec143f16769ae"
     }
   ]
 }
