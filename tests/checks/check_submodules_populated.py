@@ -16,7 +16,8 @@ Guarantees:
   - a gitlink absent from `.gitmodules`, and a `.gitmodules` entry with no gitlink, are each
     reported [tested: tests/checks/check_submodules_populated_selftest.py; commit=WORKTREE]
   - a checkout with no submodules passes and says so, so this lane is silent until the split
-    lands rather than needing to be added with it
+    lands rather than needing to be added with it [tested:
+    tests/checks/check_submodules_populated_selftest.py; commit=WORKTREE]
 Fails when: run outside a git checkout, which it reports rather than passing.
 Open Obligations:
   To Do: None
