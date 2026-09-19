@@ -231,6 +231,24 @@ test(a_computed_head_list_publishes_nothing) :-
     metta_engine:metta_registration_names(Row, Named),
     Named == [].
 
+%Every constant in a row's shape is RECOGNISED rather than unified into, so an
+%atom that merely could be a row is not one. A space holds whatever a file
+%wrote, including a bare variable and a form with a variable in head position,
+%and a variable unifies with any pattern offered to it: reading one as a row
+%carried an unbound payload to check_prolog_function_names/3, which refused
+%`a var` where the names belong
+%[measured 2026-09-20; the field case is
+% lib_import_tokens:static_equations_and_variable_data_remain_inert].
+test(an_atom_that_only_resembles_a_row_is_not_one) :-
+    \+ filereader:package_row(_, _, _),
+    \+ filereader:package_row([_, [package, backing], packages_shape_probe], _, _),
+    \+ filereader:package_row(['=', [_, backing], packages_shape_probe], _, _),
+    \+ filereader:package_row(['=', [package, _], packages_shape_probe], _, _),
+    \+ filereader:package_row(['=', [package, backing], _], _, _),
+    filereader:package_row(['=', [package, backing], packages_shape_probe], Kind, Payload),
+    Kind == backing,
+    Payload == packages_shape_probe.
+
 test(a_file_with_no_backing_row_installs_nothing) :-
     package_fixture(unbacked, '(= (package version) "0.0.1") ; no backing row for ~w~n', Path),
     \+ artifact_loaded(unbacked),
