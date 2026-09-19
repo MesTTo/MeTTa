@@ -1,0 +1,399 @@
+{
+  "goals": {
+    "g1": {
+      "want": "tools/doororder.py finishes, and test_door_rows.py's slowest case stays under the 180s per-test timeout",
+      "at": "2026-09-19",
+      "weight": 85
+    }
+  },
+  "issues": {
+    "i1": {
+      "what": "one CallGraph scope evaluation costs time proportional to the sum of the value-set sizes it touches",
+      "blocks": [
+        "g1"
+      ],
+      "at": "2026-09-19"
+    },
+    "i2": {
+      "what": "metta._atoms.model.encode's return slot holds 3,104 abstract references, and every frozenset union, difference and membership over it is linear in that size",
+      "blocks": [
+        "g1"
+      ],
+      "at": "2026-09-19"
+    },
+    "i3": {
+      "what": "the order must be maintained while the graph is still being discovered",
+      "blocks": [],
+      "at": "2026-09-19",
+      "consequence": true
+    },
+    "i4": {
+      "what": "verdicts become more conservative, so the generated _orders.py changes",
+      "blocks": [],
+      "at": "2026-09-19",
+      "consequence": true
+    }
+  },
+  "approaches": {
+    "a1": {
+      "title": "schedule scopes by a topological number maintained as call edges are discovered, instead of a FIFO deque",
+      "status": "failed",
+      "addresses": [
+        "i1"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "creates": [
+        "i3"
+      ],
+      "cost": 8,
+      "rests_on": [
+        "c1"
+      ],
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ]
+    },
+    "a2": {
+      "title": "process the worklist depth-first, popping the newest scope",
+      "status": "failed",
+      "addresses": [
+        "i1"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "cost": 1,
+      "rests_on": [
+        "c1"
+      ],
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ]
+    },
+    "a3": {
+      "title": "widen a value set past a threshold to one unknown reference",
+      "status": "unwanted",
+      "addresses": [
+        "i2"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "creates": [
+        "i4"
+      ],
+      "cost": 4,
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ]
+    },
+    "a4": {
+      "title": "intern each Reference to an integer and carry Values as an int bitmask, so union, difference and membership stop being linear in set size",
+      "status": "failed",
+      "addresses": [
+        "i1",
+        "i2"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "cost": 9,
+      "rests_on": [
+        "c6",
+        "c7"
+      ],
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ]
+    },
+    "a5": {
+      "title": "memoise the container item-slot union in _protocol's __iter__ expansion, through the class's existing _memo that evicts when a read slot grows",
+      "status": "active",
+      "addresses": [
+        "i1"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "cost": 2,
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ],
+      "rests_on": [
+        "c3"
+      ]
+    },
+    "a6": {
+      "title": "memoise the same container item-slot union in _assign's destructuring branch, keyed by the element slot it reads",
+      "status": "active",
+      "addresses": [
+        "i1"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "cost": 2,
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ],
+      "rests_on": [
+        "c3"
+      ]
+    },
+    "a7": {
+      "title": "keep memoising the pure recomputations the profile names, now _container_call and what remains of _protocol",
+      "status": "untried",
+      "addresses": [
+        "i1"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "cost": 3
+    },
+    "a7.1": {
+      "title": "name the union one concept, _stored(container, slot), and have all three sites call it",
+      "status": "active",
+      "addresses": [
+        "i1"
+      ],
+      "kind": null,
+      "at": "2026-09-19",
+      "cost": 1,
+      "history": [
+        {
+          "status": "untried",
+          "until": "2026-09-19"
+        }
+      ],
+      "rests_on": [
+        "c8"
+      ]
+    }
+  },
+  "claims": {
+    "r1": {
+      "says": "the door-order lane and the door-rows suite both fail on the merged tree",
+      "at": "2026-09-19",
+      "supports": [
+        "g1"
+      ],
+      "basis": "measured"
+    },
+    "r2": {
+      "says": "13,557 evaluations take 200s on the merged tree against 20,843 in 13.8s without the classes-line modules: 0.66ms each becomes 14.8ms each",
+      "at": "2026-09-19",
+      "supports": [
+        "i1"
+      ],
+      "basis": "measured"
+    },
+    "r3": {
+      "says": "_put instrumentation names it as the slot feeding the container with 427 readers",
+      "at": "2026-09-19",
+      "supports": [
+        "i2"
+      ],
+      "basis": "measured"
+    },
+    "c1": {
+      "says": "chaotic iteration reaches the same least fixed point under any fair order",
+      "at": "2026-09-19"
+    },
+    "r4": {
+      "says": "standard for monotone fixed points over a finite lattice",
+      "at": "2026-09-19",
+      "supports": [
+        "c1"
+      ],
+      "basis": "source"
+    },
+    "c2": {
+      "says": "the configuration that does not finish performs FEWER scope evaluations than the one that finishes",
+      "at": "2026-09-19"
+    },
+    "r5": {
+      "says": "20,843 over 2,358 scopes in 13.80s against 13,557 over 2,532 scopes in 200s",
+      "at": "2026-09-19",
+      "supports": [
+        "c2"
+      ],
+      "basis": "measured"
+    },
+    "r6": {
+      "says": "measured: it touched fewer slots, 71,488, and still did not finish in 300s",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a2",
+          "status": "failed"
+        }
+      ]
+    },
+    "r7": {
+      "says": "c2 shows the count of evaluations is not what grew, so an order that reduces that count has nothing to remove",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a1",
+          "status": "failed"
+        }
+      ]
+    },
+    "r8": {
+      "says": "it changes verdicts, and this repository refuses a sound-but-incomplete default without a differential proving the gate safe",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a3",
+          "status": "unwanted"
+        }
+      ]
+    },
+    "r9": {
+      "says": "profiled: _protocol self time 63.0s to 11.4s, Reference.__hash__ calls 515M to 158M, and 2.4x more store writes in the same 150s window",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a5",
+          "status": "active"
+        }
+      ]
+    },
+    "c3": {
+      "says": "the union of a container's two item slots is a pure store lookup, so the existing _memo's eviction on slot growth is the whole correctness condition",
+      "at": "2026-09-19"
+    },
+    "r10": {
+      "says": "read from _memo's own contract in _analysis.py",
+      "at": "2026-09-19",
+      "supports": [
+        "c3"
+      ],
+      "basis": "source"
+    },
+    "c4": {
+      "says": "the missing memo is a pre-existing inefficiency the merged tree exposed, not the thing that changed: the same code analysed the branch tip in 14.9s without it",
+      "at": "2026-09-19"
+    },
+    "r11": {
+      "says": "doororder.py measured at 14.9s on 14f5c43b5, whose _analysis.py is identical in this respect",
+      "at": "2026-09-19",
+      "supports": [
+        "c4"
+      ],
+      "basis": "measured"
+    },
+    "c5": {
+      "says": "a5 therefore moves the threshold rather than removing the superlinearity, unless the cost after it stops growing faster than the program",
+      "at": "2026-09-19"
+    },
+    "r12": {
+      "says": "follows from c4; the completion time now being measured decides it",
+      "at": "2026-09-19",
+      "supports": [
+        "c5"
+      ],
+      "basis": "assumed"
+    },
+    "r13": {
+      "says": "profiled: _assign's 16.7s of self time and its 133M-call generator both leave the profile, and the same store work now happens in 120s where it took 150s",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a6",
+          "status": "active"
+        }
+      ]
+    },
+    "c6": {
+      "says": "after a5 and a6 the dominant cost is _put copying a frozenset on every growth, which is linear in the slot's current size",
+      "at": "2026-09-19"
+    },
+    "r14": {
+      "says": "profiled: _put is 24.8s of self time over 10.6M calls, 2.3us each, and previous | added copies the whole previous set",
+      "at": "2026-09-19",
+      "supports": [
+        "c6"
+      ],
+      "basis": "measured"
+    },
+    "c7": {
+      "says": "an int bitmask makes union and difference 3x to 77x faster and element iteration 13x to 22x SLOWER, and this analysis iterates far more than it unions",
+      "at": "2026-09-19"
+    },
+    "r15": {
+      "says": "microbenchmark at set sizes 32, 256 and 2048 against the profile's split: about 25s of set algebra in _put and _get against 35s or more of iteration in _protocol, _container_call and set.update",
+      "at": "2026-09-19",
+      "supports": [
+        "c7"
+      ],
+      "basis": "measured"
+    },
+    "r16": {
+      "says": "c7: the mix falls on the iteration side, so the representation change is a net loss here, unlike the points-to setting it comes from",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a4",
+          "status": "failed"
+        }
+      ]
+    },
+    "r17": {
+      "says": "a5 and a6 are the same move and each was measured to work",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a7",
+          "status": "untried"
+        }
+      ]
+    },
+    "r18": {
+      "says": "the same union appeared three times, in the __iter__ expansion, in destructuring and in _container_call's key selection",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a7.1",
+          "status": "untried"
+        }
+      ]
+    },
+    "r19": {
+      "says": "applied and lint-clean; the differential that proves it is tools/doororder.py in check mode coming back 0, which compares all 227 generated verdicts",
+      "at": "2026-09-19",
+      "supports": [
+        {
+          "node": "a7.1",
+          "status": "active"
+        }
+      ]
+    },
+    "c8": {
+      "says": "doororder.py in check mode comparing the generated table is a sufficient equivalence test for these memos",
+      "at": "2026-09-19"
+    },
+    "r20": {
+      "says": "it regenerates every one of the 227 shipped verdicts from the analysis and diffs them; rows outside the table are covered by the door-rows suite",
+      "at": "2026-09-19",
+      "supports": [
+        "c8"
+      ],
+      "basis": "assumed"
+    }
+  }
+}
