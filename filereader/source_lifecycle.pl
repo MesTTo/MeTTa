@@ -1369,15 +1369,47 @@ replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
 %three unrelated imports raise its `source_sink ... does not exist`; tested:
 %packages:a_backing_row_performs_only_for_the_file_that_carries_it].
 %
-%Cost: one indexed lookup for the load plus one decode per atom this load
-%stored, which is the same walk source_load_function_names/2 makes over the
-%same journal, against the tens of thousands of inferences the load that just
-%finished spent.
+%Cost: one indexed lookup for the load, one for the rows, and a decode per
+%CANDIDATE rather than per stored atom. Decoding the load's every atom to test
+%its shape read 26 inferences each and nearly doubled a load: 310,765 against
+%571,917 on the memory-scale load-metta corpus, and the same +261,152 on
+%load-fast, both of which declare no package row at all [measured 2026-09-20].
+%The walk itself was never the cost -- enumerating the same journal without
+%decoding read +1,151 over the whole corpus -- so what had to go was the
+%decode, not the enumeration.
 source_package_row(CanonPath, Space, Kind, Payload) :-
     metta_source_load(CanonPath, Space, LoadId, _),
-    source_load_assertion(LoadId, stored, Ref),
+    package_row_reference(Space, LoadId, Ref),
     spaces:stored_atom_of_ref(Ref, Space, Row, _),
     package_row(Row, Kind, Payload).
+
+%Candidates by HEAD SYMBOL, then the load's journal for ownership. This is the
+%answer engine/spaces/native_matching.pl already reached for the same question
+%one level down: ask the storage predicate for the shape, because a fixed
+%expression uses clause indexing and a space holding none of that shape pays
+%nothing, where filtering an enumeration costs an inference per stored atom
+%[source: engine/spaces/native_matching.pl:compiled_half_atom/3, which records
+%+20,002 inferences on py-method-call for the filtering form, measured
+%2026-08-19].
+%
+%Matching ALONE is what the journal was brought in to fix, and it still is:
+%the space answers every package row any file put there, so the join on
+%source_load_assertion/3 is what keeps this file to its own rows and stops a
+%later load re-performing an earlier one's
+%[tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it].
+%The two together are the indexed lookup AND the per-file scope; either alone
+%is a defect this repository has already paid for.
+%
+%A FOREIGN space answers tokens rather than clause references, so there is no
+%reference to join on and its own journal is the only scope available. It
+%keeps the walk, which is what it always did.
+package_row_reference(Space, LoadId, Ref) :-
+    \+ seam:foreign_space(Space),
+    !,
+    spaces:metta_native_pair(Space, ['=', [package, _], _], _, Ref),
+    source_load_assertion(LoadId, stored, Ref).
+package_row_reference(_, LoadId, Ref) :-
+    source_load_assertion(LoadId, stored, Ref).
 
 %A row is an EQUATION whose head is `(package <kind>)`, and every level of that
 %is tested rather than unified into, because a space can hold a bare VARIABLE
