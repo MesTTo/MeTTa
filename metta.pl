@@ -1144,7 +1144,7 @@ guard_arithmetic_goal_expansion_clause(Ref) :-
 %USER loses, so the two libraries the fast cache needs are one row.
 %
 %So the census is the rule extensions/cmetta/extension.pl and
-%extension.pl already state for a SEAT, aimed at the platform:
+%extensions/python/extension.pl already state for a SEAT, aimed at the platform:
 %NOT PRESENT IS NOT AN ERROR, HALF PRESENT IS. A capability whose library is
 %there loads exactly as before, through the same directive in the same place;
 %one whose library is absent is RECORDED absent, and the forms resting on it
