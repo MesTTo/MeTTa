@@ -5177,6 +5177,47 @@
       "tags": [
         "tested"
       ]
+    },
+    "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to": {
+      "title": "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+    },
+    "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user": {
+      "title": "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user",
+      "supports": [
+        "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane": {
+      "title": "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane",
+      "supports": [
+        {
+          "node": "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "status": "untried"
+        },
+        {
+          "node": "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "relation": "addresses",
+          "target": "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+        }
+      ]
+    },
+    "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session": {
+      "title": "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session",
+      "supports": [
+        {
+          "node": "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -6040,6 +6081,14 @@
       "status": "done",
       "addresses": [
         "a local shadow over a backed library head could not be written, and once the refusal was lifted it could not be removed cleanly: the ownership test read a native registration as local ownership, the restore threw away the source it had recorded, and the two definedness tests did not see the registration that survives the shadow"
+      ]
+    },
+    "add the eleven to the engine module's export list, beside the reference group they belong with": {
+      "title": "add the eleven to the engine module's export list, beside the reference group they belong with",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
       ]
     }
   },
@@ -26530,6 +26579,127 @@
         ]
       ],
       "id": "5b645cdba1912cb0"
+    },
+    {
+      "at": "2026-09-19T23:14:05.925934+00:00",
+      "after": "38b5efc0664d783fc529a395c8a45da89cf8b557",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user\", \"tags\": [\"measured\"], \"title\": \"eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane\", \"tags\": [], \"title\": \"add the eleven to the engine module's export list, beside the reference group they belong with\", \"fields\": {\"effort\": 1, \"addresses\": [\"eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to\"]}}, {\"op\": \"status\", \"id\": \"add the eleven to the engine module's export list, beside the reference group they belong with\", \"because\": \"engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "5b645cdba1912cb0"
+      ],
+      "assert": [
+        [
+          "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to",
+          "sort",
+          "prop"
+        ],
+        [
+          "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to",
+          "title",
+          "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+        ],
+        [
+          "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session",
+          "supersedes",
+          "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane"
+        ],
+        [
+          "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session",
+          "supports",
+          {
+            "node": "add the eleven to the engine module's export list, beside the reference group they belong with",
+            "status": "done"
+          }
+        ],
+        [
+          "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session",
+          "tags",
+          "tested"
+        ],
+        [
+          "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session",
+          "title",
+          "engine_modules.plt exits 0 with 21 passed and no errors, where it exited 1 with 19 passed and two failing tests at the start of this session"
+        ],
+        [
+          "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user",
+          "supports",
+          "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+        ],
+        [
+          "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user",
+          "title",
+          "measured 2026-09-20: the census answered eleven names, metta_package_normalise/3, metta_package_perform/3, metta_loader_source/1, metta_reference_option/3, metta_package_loading/3, metta_package_reload/3, metta_perform_package_rows/2, metta_reference_check_prolog_source/1, metta_reference_face/3, metta_reference_read_exports/3 and metta_reference_register_prolog/4, each defined in metta_engine and none exported and visible in user"
+        ],
+        [
+          "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane",
+          "supports",
+          {
+            "node": "add the eleven to the engine module's export list, beside the reference group they belong with",
+            "status": "untried"
+          }
+        ],
+        [
+          "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane",
+          "supports",
+          {
+            "node": "add the eleven to the engine module's export list, beside the reference group they belong with",
+            "relation": "addresses",
+            "target": "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+          }
+        ],
+        [
+          "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane",
+          "title",
+          "the list is grouped by topic rather than sorted, so they go with the reference services they extend, and one comment there says why a declared service must be exported rather than leaving the next reader to infer it from the lane"
+        ],
+        [
+          "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "sort",
+          "approach"
+        ],
+        [
+          "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "addresses",
+          "eleven package and reference services were declared as services but never exported from the engine module, so the host could not reach them: a declaration publishes a callable service and Python calls engine predicates through query strings, which no Prolog clause in the engine has to"
+        ],
+        [
+          "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "effort",
+          1
+        ],
+        [
+          "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "status",
+          "done"
+        ],
+        [
+          "add the eleven to the engine module's export list, beside the reference group they belong with",
+          "title",
+          "add the eleven to the engine module's export list, beside the reference group they belong with"
+        ]
+      ],
+      "id": "bf45fb1b48929153"
     }
   ]
 }
