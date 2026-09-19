@@ -27,7 +27,8 @@
       "rests_on": [
         "c30",
         "r126",
-        "r124"
+        "r124",
+        "r129"
       ]
     },
     "i3": {
@@ -315,7 +316,8 @@
       "rests_on": [
         "c14",
         "c15",
-        "r121"
+        "r121",
+        "r128"
       ]
     },
     "a13": {
@@ -1426,6 +1428,26 @@
       "says": "ai_growth_probe.py printed the largest slot by kind and by name at 110 and at 124",
       "supports": [
         "r126"
+      ],
+      "basis": "measured"
+    },
+    "r128": {
+      "says": "the collapse is priced at a CEILING of 13.1x, not a predicted win: at 120 modules the sum of slot sizes is 2,417,854 references while the distinct sets hold 184,007 across 12,979 of them. A mechanism doing the work once per distinct set rather than once per slot cannot beat that ratio, and how much of it is realisable depends on what the work is actually per, which the profile of the committed analyser will say"
+    },
+    "r129": {
+      "says": "ai_growth_probe.py at 120 and 122 modules, grouping the final store by the identity of the interned set",
+      "supports": [
+        "r128"
+      ],
+      "basis": "measured"
+    },
+    "r130": {
+      "says": "the store's jump is inside two modules, not six: 118 modules hold 770,115 references and solve in 26.2s, 120 hold 2,417,854 and solve in 99.9s, and 122 adds only 24,658 more. So metta.algebra or metta.algebra._demand triples the store on its own"
+    },
+    "r131": {
+      "says": "ai_growth_probe.py at 118, 120 and 122 on the committed analyser",
+      "supports": [
+        "r130"
       ],
       "basis": "measured"
     }
@@ -6772,6 +6794,120 @@
         ]
       ],
       "id": "8b655c1ee15cf858"
+    },
+    {
+      "at": "2026-09-19T15:00:55+10:00",
+      "after": "5e0e1aabec77338287cccc5c44b78ca594a79dcf",
+      "did": "add-claim r128 'the collapse is priced at a CEILING of 13.1x, not a predicted win: at 120 modules the sum of slot sizes is 2,417,854 references while the distinct sets hold 184,007 across 12,979 of them. A mechanism doing the work once per distinct set rather than once per slot cannot beat that ratio, and how much of it is realisable depends on what the work is actually per, which the profile of the committed analyser will say' --because 'ai_growth_probe.py at 120 and 122 modules, grouping the final store by the identity of the interned set' --basis measured",
+      "parents": [
+        "8b655c1ee15cf858"
+      ],
+      "assert": [
+        [
+          "r128",
+          "sort",
+          "claim"
+        ],
+        [
+          "r128",
+          "says",
+          "the collapse is priced at a CEILING of 13.1x, not a predicted win: at 120 modules the sum of slot sizes is 2,417,854 references while the distinct sets hold 184,007 across 12,979 of them. A mechanism doing the work once per distinct set rather than once per slot cannot beat that ratio, and how much of it is realisable depends on what the work is actually per, which the profile of the committed analyser will say"
+        ],
+        [
+          "r129",
+          "sort",
+          "claim"
+        ],
+        [
+          "r129",
+          "basis",
+          "measured"
+        ],
+        [
+          "r129",
+          "says",
+          "ai_growth_probe.py at 120 and 122 modules, grouping the final store by the identity of the interned set"
+        ],
+        [
+          "r129",
+          "supports",
+          "r128"
+        ]
+      ],
+      "id": "43fa5977c7c2bea6"
+    },
+    {
+      "at": "2026-09-19T15:00:55+10:00",
+      "after": "5e0e1aabec77338287cccc5c44b78ca594a79dcf",
+      "did": "link a12 r128 --as rests-on",
+      "parents": [
+        "43fa5977c7c2bea6"
+      ],
+      "assert": [
+        [
+          "a12",
+          "rests_on",
+          "r128"
+        ]
+      ],
+      "id": "a415b92ad95ec2f5"
+    },
+    {
+      "at": "2026-09-19T15:00:55+10:00",
+      "after": "5e0e1aabec77338287cccc5c44b78ca594a79dcf",
+      "did": "link i2 r129 --as rests-on",
+      "parents": [
+        "a415b92ad95ec2f5"
+      ],
+      "assert": [
+        [
+          "i2",
+          "rests_on",
+          "r129"
+        ]
+      ],
+      "id": "a9a1d23e5ce4f197"
+    },
+    {
+      "at": "2026-09-19T15:01:10+10:00",
+      "after": "5e0e1aabec77338287cccc5c44b78ca594a79dcf",
+      "did": "add-claim r130 'the store'\"'\"'s jump is inside two modules, not six: 118 modules hold 770,115 references and solve in 26.2s, 120 hold 2,417,854 and solve in 99.9s, and 122 adds only 24,658 more. So metta.algebra or metta.algebra._demand triples the store on its own' --because 'ai_growth_probe.py at 118, 120 and 122 on the committed analyser' --basis measured",
+      "parents": [
+        "a9a1d23e5ce4f197"
+      ],
+      "assert": [
+        [
+          "r130",
+          "sort",
+          "claim"
+        ],
+        [
+          "r130",
+          "says",
+          "the store's jump is inside two modules, not six: 118 modules hold 770,115 references and solve in 26.2s, 120 hold 2,417,854 and solve in 99.9s, and 122 adds only 24,658 more. So metta.algebra or metta.algebra._demand triples the store on its own"
+        ],
+        [
+          "r131",
+          "sort",
+          "claim"
+        ],
+        [
+          "r131",
+          "basis",
+          "measured"
+        ],
+        [
+          "r131",
+          "says",
+          "ai_growth_probe.py at 118, 120 and 122 on the committed analyser"
+        ],
+        [
+          "r131",
+          "supports",
+          "r130"
+        ]
+      ],
+      "id": "f686577d01d4deb3"
     }
   ]
 }

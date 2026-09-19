@@ -216,6 +216,37 @@ named next fix. Collapsing a cycle makes several slots share one set. The store 
 large because slots hold redundant copies of each other, which hash consing already
 measured and removed; it is large because the sets themselves are large.
 
+## Plan for the 128 seconds that are left
+
+Written before building anything, because the last round's lesson was that a diagnosis
+reasoned from counts rather than a profile sends the construction at the wrong target.
+
+**What has to be established, and in what order.**
+
+1. *Where the remaining time goes.* Abductive, and it cannot be reasoned from the old
+   profile, because that profile is of the analyser this change replaced. A profile of the
+   committed one is the only thing that says whether `_protocol` and `_container_call` are
+   still the leaders and what took their place. Independent of everything below, and first,
+   because 2 and 3 are answers to different questions and only this says which is being asked.
+
+2. *Whether slots that hold the same set can share the work.* The ceiling is measured, not
+   guessed: at 120 modules the sum of slot sizes is 2,417,854 references while the 12,979
+   distinct sets hold 184,007, a ratio of 13.1x. That is a ceiling on any mechanism that does
+   the work once per distinct set rather than once per slot, and the realised fraction depends
+   on what the work is per, which is step 1's answer. The obstruction is unchanged and real:
+   holding the same set now is not a proof that two slots cannot diverge later, which is why
+   the literature reads equality off the constraint edges rather than off the answers.
+
+3. *Why one slot holds 773 abstract containers.* The store triples between 118 and 120
+   modules, so `metta.algebra` or `metta.algebra._demand` does it alone, and the arrivals are
+   346 `container_method` references, 345 of them `extend`. That is a precision question: the
+   analysis is context-insensitive, so every caller's container pools into one parameter slot.
+   Its fixes are context sensitivity or a coarser container abstraction, and both change
+   verdicts, which this repository refuses by default.
+
+Steps 2 and 3 are alternatives, not a sequence, and step 1 chooses between them. If the work
+is per slot, 2. If it is per element of a set that should not be that large, 3.
+
 ## A gate that has never been green
 
 Separately, and independent of any of this. The door-order lane is a GATE, and `doororder.py`
