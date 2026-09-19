@@ -1,12 +1,15 @@
 #!/bin/sh
 # Purpose: prove tools/battery.sh refuses a battery tree that is not a copy of
 #   its source, by planting each shape of drift in a fixture and requiring a
-#   refusal that names it, and prove it can CLEAR what a previous run left,
-#   including a git repository a fixture wrote.
+#   refusal that names it; prove it can CLEAR what a previous run left,
+#   including a git repository a fixture wrote and a cache inside a directory
+#   the source does not have; and prove a provisioned battery answers `git`
+#   about ITSELF rather than about the checkout it sits inside.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
 # Guarantees: exits nonzero if any planted drift goes unreported, or if the
 #   excluded-scratch case is reported (the false positive -O exists to stop).
-# Fails when: run concurrently with itself, since it owns one fixture path.
+# Fails when: run concurrently with itself, since it owns one fixture path; or
+#   where `git worktree add` is unavailable, which the identity case needs.
 # Decides: the drift shapes are enumerated rather than sampled. The space is
 #   closed -- a file can differ, be extra, or be absent -- so exhausting it
 #   discharges the claim outright instead of supporting it.
@@ -109,6 +112,55 @@ else
     failures=$((failures + 1))
 fi
 expect "the tree that provision has just cleared" 0
+
+# The same stranding one level along: a PROTECTED entry inside a directory the
+# source does not have keeps that directory non-empty, and rsync will not
+# remove a non-empty directory. A run left .mutmut/mutants/**/__pycache__ and
+# `.mutmut/` became permanent [measured 2026-09-20]. Naming .mutmut in the
+# exclusions would fix that directory and strand on the next tool's scratch,
+# so the caches are swept instead and this is what says so.
+BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+mkdir -p "$TREE/scratch/inner/__pycache__"
+printf 'bytes\n' > "$TREE/scratch/inner/__pycache__/mid.pyc"
+if BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX" \
+       > "$FIXTURE/out" 2>&1
+then
+    if [ -e "$TREE/scratch" ]; then
+        echo "  FAIL a cache in a directory the source lacks: scratch/ survived"
+        failures=$((failures + 1))
+    else
+        echo "  ok   a cache in a directory the source lacks: cleared with it"
+    fi
+else
+    echo "  FAIL a cache in a directory the source lacks: provision refused"
+    cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+
+# A battery has to answer `git` about ITSELF. It lives inside the checkout, so
+# without its own .git every git command and every root-marker walk run in one
+# reports on the ENCLOSING tree: the submodules lane refused all eight
+# components, root-walks resolved a marker in the parent, and the llms selftest
+# resolved a path that exists only under ai-tmp/ [measured 2026-09-20, in a
+# whole-gate run where none of it was about the tree under test]. This needs a
+# real repository as the source, which the layout fixture above is not.
+REPO="$FIXTURE/repo"
+mkdir -p "$REPO"
+(   cd "$REPO" && git init -q .
+    printf 'one\n' > top.txt
+    git add top.txt
+    git -c user.email=selftest@example.invalid -c user.name=selftest \
+        commit -qm "fixture" ) > "$FIXTURE/out" 2>&1
+BATTERY_SOURCE="$REPO" sh "$BATTERY" provision "$INDEX" > "$FIXTURE/out" 2>&1
+answered=$(git -C "$TREE" rev-parse --show-toplevel 2>/dev/null)
+if [ "$answered" = "$(cd "$TREE" && pwd -P)" ]; then
+    echo "  ok   the battery answers git about itself, not about its parent"
+else
+    echo "  FAIL the battery answers git about '$answered', wanted '$TREE'"
+    failures=$((failures + 1))
+fi
+git -C "$REPO" worktree remove --force "$TREE" > /dev/null 2>&1 || true
+rm -rf "$TREE/.git"
 
 rm -rf "$TREE"
 [ "$failures" -eq 0 ] || { echo "battery selftest: $failures case(s) failed"; exit 1; }

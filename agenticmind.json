@@ -4120,6 +4120,88 @@
       "tags": [
         "measured"
       ]
+    },
+    "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test": {
+      "title": "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+    },
+    "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim": {
+      "title": "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim",
+      "supports": [
+        "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content": {
+      "title": "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content",
+      "supports": [
+        {
+          "node": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "status": "untried"
+        },
+        {
+          "node": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "relation": "addresses",
+          "target": "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+        }
+      ]
+    },
+    "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead": {
+      "title": "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead",
+      "supports": [
+        {
+          "node": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent": {
+      "title": "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+    },
+    "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory": {
+      "title": "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory",
+      "supports": [
+        "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs": {
+      "title": "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs",
+      "supports": [
+        {
+          "node": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "status": "untried"
+        },
+        {
+          "node": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "relation": "addresses",
+          "target": "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+        }
+      ]
+    },
+    "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for": {
+      "title": "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for",
+      "supports": [
+        {
+          "node": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -4843,6 +4925,22 @@
       "status": "done",
       "addresses": [
         "the cached solved door call graph is keyed on the entry set its caller's records name, so a caller passing a subset of the shipped rows misses and solves the whole program again, and the cache fills with several copies of one answer"
+      ]
+    },
+    "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete": {
+      "title": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+      ]
+    },
+    "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift": {
+      "title": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
       ]
     }
   },
@@ -22273,6 +22371,237 @@
         ]
       ],
       "id": "73e431deab7ca40c"
+    },
+    {
+      "at": "2026-09-19T20:27:55.437334+00:00",
+      "after": "20ff88f691e4b17ee2ea5ca724e1e0a789250deb",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim\", \"tags\": [\"measured\"], \"title\": \"a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content\", \"tags\": [], \"title\": \"seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete\", \"fields\": {\"effort\": 2, \"addresses\": [\"a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test\"]}}, {\"op\": \"status\", \"id\": \"seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete\", \"because\": \"after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory\", \"tags\": [\"measured\"], \"title\": \"any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs\", \"tags\": [], \"title\": \"hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift\", \"fields\": {\"effort\": 1, \"addresses\": [\"any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent\"]}}, {\"op\": \"status\", \"id\": \"hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift\", \"because\": \"provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "73e431deab7ca40c"
+      ],
+      "assert": [
+        [
+          "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test",
+          "sort",
+          "prop"
+        ],
+        [
+          "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test",
+          "title",
+          "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+        ],
+        [
+          "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead",
+          "sort",
+          "prop"
+        ],
+        [
+          "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead",
+          "supersedes",
+          "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content"
+        ],
+        [
+          "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead",
+          "supports",
+          {
+            "node": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+            "status": "done"
+          }
+        ],
+        [
+          "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead",
+          "tags",
+          "tested"
+        ],
+        [
+          "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead",
+          "title",
+          "after provisioning, git -C the tree rev-parse --show-toplevel answers the battery and ls-files -s engine lib reads two 160000 gitlinks; the selftest grew a case asserting it, which without the identity step reports the enclosing checkout instead"
+        ],
+        [
+          "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent",
+          "sort",
+          "prop"
+        ],
+        [
+          "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent",
+          "title",
+          "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim",
+          "supports",
+          "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim",
+          "title",
+          "measured 2026-09-20 in a whole gate: the submodules lane reported that .gitmodules names engine and the index holds no gitlink there, for all eight components; root-walks reported a derived root naming extensions/python/metta/_binding which does not exist; the llms selftest reported that a file existing only under ai-tmp/ resolved a bare-name claim"
+        ],
+        [
+          "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory",
+          "supports",
+          "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+        ],
+        [
+          "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory",
+          "title",
+          "measured 2026-09-20: provisioning refused with 'cannot delete non-empty directory: .mutmut/mutants' over a tree whose only contents were protected __pycache__ directories, the same shape as the repos/<name>/.git case, and rsync's --force did not help because in 3.x it covers only replacing a directory with a non-directory"
+        ],
+        [
+          "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for",
+          "sort",
+          "prop"
+        ],
+        [
+          "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for",
+          "supersedes",
+          "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs"
+        ],
+        [
+          "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for",
+          "supports",
+          {
+            "node": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+            "status": "done"
+          }
+        ],
+        [
+          "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for",
+          "tags",
+          "tested"
+        ],
+        [
+          "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for",
+          "title",
+          "provisioning is clean and verify reports no drift; the selftest grew a case planting a cache inside a directory the source lacks, which fails with the caches protected at the receiver and passes with them swept, and the pre-existing excluded-scratch case still passes, which is what the split is for"
+        ],
+        [
+          "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content",
+          "sort",
+          "prop"
+        ],
+        [
+          "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content",
+          "supports",
+          {
+            "node": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+            "status": "untried"
+          }
+        ],
+        [
+          "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content",
+          "supports",
+          {
+            "node": "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+            "relation": "addresses",
+            "target": "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+          }
+        ],
+        [
+          "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content",
+          "title",
+          "the registration gives the tree a correct toplevel and an index carrying the superproject's submodule gitlinks, which is exactly what the lanes ask for, and seeding through a fresh path is needed because git worktree add refuses a path that already has content"
+        ],
+        [
+          "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs",
+          "supports",
+          {
+            "node": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs",
+          "supports",
+          {
+            "node": "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+            "relation": "addresses",
+            "target": "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+          }
+        ],
+        [
+          "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs",
+          "title",
+          "the two callers ask different questions of one tree, and naming the offending directory in the exclusions would fix that one and strand on the next tool's scratch; what must keep both halves is the configuration whose absence changes what runs rather than how fast, which is ai-tmp, node_modules and the venvs"
+        ],
+        [
+          "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "sort",
+          "approach"
+        ],
+        [
+          "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "addresses",
+          "any receiver-protected pattern strands a directory the source does not have, because rsync will not delete a non-empty directory, so a cache left inside one makes it permanent"
+        ],
+        [
+          "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "effort",
+          1
+        ],
+        [
+          "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "status",
+          "done"
+        ],
+        [
+          "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift",
+          "title",
+          "hide the pure caches from the sender always and protect them at the receiver only when the question is drift, so a provision sweeps them and a verify does not call them drift"
+        ],
+        [
+          "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "sort",
+          "approach"
+        ],
+        [
+          "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "addresses",
+          "a battery tree has no git identity and lives inside the checkout, so every git command and every root-marker walk a lane runs in one answers about the ENCLOSING tree, which turned a whole-gate run into 43 failing lanes that were not about the tree under test"
+        ],
+        [
+          "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "effort",
+          2
+        ],
+        [
+          "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "status",
+          "done"
+        ],
+        [
+          "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete",
+          "title",
+          "seed each battery a git worktree registration through a fresh path, move the gitfile in and repair the back-pointer, and protect that one entry from the snapshot's delete"
+        ]
+      ],
+      "id": "34fc92c103abc04f"
     }
   ]
 }

@@ -32,16 +32,12 @@
 #   registration in the superproject's admin area, left by a `git worktree add`
 #   that predates this tool -- wt-battery-6 is registered at 14f5c43b5 with no
 #   gitfile in the tree. Neither is authoritative: ai-tmp/battery.provenance is.
-#   Three provisioners exist and each does a different job. components.sh makes
-#   one checkout's components into repositories pinned where the superproject
-#   pins them. worktree.sh makes a git worktree run the same CONFIGURATION as
-#   the main checkout, checking components out at their pinned commits and
-#   copying the build artefacts git does not track. Both work from COMMITTED
-#   state, which is why neither can serve a gate run before a commit: 134
-#   modified files and an untracked module are exactly what a pinned checkout
-#   does not carry. This copies the working tree as it stands. Use
-#   components.sh or worktree.sh to make a checkout valid; use this to ask what
-#   a gate says about the tree you are editing right now.
+#   This is the ONLY provisioner. The header used to name components.sh and
+#   worktree.sh beside it; neither file exists, and a reader sent to them for a
+#   gate that needs committed state found nothing [measured 2026-09-20: tools/
+#   holds battery.sh and battery_selftest.sh and nothing else]. What this does
+#   is copy the working tree as it stands, which is how to ask what a gate says
+#   about the tree you are editing right now, uncommitted state included.
 
 set -eu
 
@@ -76,18 +72,50 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 # parent non-empty for ever, so the next provision dies with `cannot delete
 # non-empty directory: repos` and that index is unusable from then on
 # [measured 2026-09-20: wt-battery-6 refused for exactly this]. `H` is the
-# hide-only half. Protecting nothing costs nothing here, because a battery has
-# no .git of its own, as the header says.
+# hide-only half, and `P /.git` is the one protection worth keeping: the
+# battery's OWN registration, which battery_git_identity below puts there and
+# which --delete would otherwise take away on the next provision. The rule is
+# asymmetric because the two .git entries are different things -- one is the
+# battery's identity and the rest are litter a test dropped.
 #
-# The other entries stay `--exclude`, where BOTH halves are wanted: ai-tmp/
-# holds this tree's own occupancy record, provenance and logs, and deleting
-# those is how a run loses the evidence it was started to produce.
+# The split between the two halves below is the same question asked of each
+# pattern: does protecting it at the receiver ever strand a directory?
+#
+# A protected entry keeps its parent non-empty and rsync will not remove a
+# non-empty directory, so ANY protected entry inside a directory the source
+# does not have strands that directory for ever. A run left
+# .mutmut/mutants/**/__pycache__ behind and `.mutmut/` could then never be
+# removed [measured 2026-09-20, the same shape as repos/<name>/.git above].
+# rsync cannot say "protect this unless its parent is doomed", and `--force`
+# does not help: in rsync 3.x it covers only replacing a directory with a
+# non-directory, and adding it left the same three refusals.
+#
+# So the pure CACHES are hidden from the sender always, and protected at the
+# receiver only when the question is DRIFT. The two callers ask different
+# things of one tree. `provision` is making the battery identical, so it
+# sweeps them and nothing is left to strand a doomed directory. `verify` is
+# asking whether it still is, and a cache the battery's own run wrote is not
+# drift -- reporting it is the false positive the -O case below exists to
+# stop. Sweeping costs a recompile and nothing else, which is the right price
+# for never stranding a tree.
+#
+# ai-tmp/, node_modules/ and .venv*/ keep both halves, because losing them
+# changes WHAT RUNS rather than how fast: ai-tmp/ holds this tree's own
+# occupancy record, provenance and logs, and the other two are the installed
+# configuration a lane gates on, whose absence makes a suite skip and report
+# green.
 snapshot() {
+    caches=$1
+    shift
     rsync -a -O --delete \
-          --filter="H .git" \
+          --filter="H .git" --filter="P /.git" \
+          --filter="H __pycache__/" --filter="H .pytest_cache/" \
+          --filter="H .mypy_cache/" --filter="H .ruff_cache/" \
+          ${caches:+--filter="P __pycache__/"} \
+          ${caches:+--filter="P .pytest_cache/"} \
+          ${caches:+--filter="P .mypy_cache/"} \
+          ${caches:+--filter="P .ruff_cache/"} \
           --exclude=ai-tmp/ --exclude='ai-tmp-*' \
-          --exclude=__pycache__/ --exclude=.pytest_cache/ \
-          --exclude=.mypy_cache/ --exclude=.ruff_cache/ \
           --exclude=node_modules/ --exclude='.venv*/' \
           "$@"
 }
@@ -123,6 +151,40 @@ occupant() {
     echo "$pid"
 }
 
+# A battery has to be able to answer `git` about ITSELF. Without a .git it has
+# none, and because a battery lives INSIDE the checkout, every git command and
+# every root-marker walk run in one then answers about the enclosing tree. That
+# is not a smaller verdict, it is a verdict about the wrong tree, and it reads
+# as lane failures that have nothing to do with the code under test: on
+# 2026-09-20 the submodules lane read the superproject's index, found no gitlink
+# at ai-tmp/wt-battery-6/engine and refused all eight components; root-walks
+# resolved a marker in the parent checkout; the llms selftest resolved a path
+# that exists only under ai-tmp/. It fails the other way too, and that is worse,
+# because a lane asking git about the parent can pass while the snapshot is
+# broken.
+#
+# Seeded through a fresh path rather than created in place, because the battery
+# already holds content by the time anyone wants this and `git worktree add`
+# refuses a path that is not empty. Moving the gitfile in and repairing is what
+# `git worktree repair` is for: it rewrites the admin directory's back-pointer
+# to wherever the tree now is.
+#
+# The submodules stay filesystem copies -- `git worktree add` does not
+# materialise one, which is the reason this tool exists at all -- but the
+# superproject's index carries their gitlinks, which is what the lanes ask for
+# [measured 2026-09-20: after this, `git -C <tree> ls-files -s engine` reads
+# `160000 59a5bb2b9 0 engine`].
+battery_git_identity() {
+    tree=$1
+    [ -e "$tree/.git" ] && return 0
+    seed="$tree.gitseed"
+    rm -rf "$seed"
+    git -C "$ROOT" worktree add --detach "$seed" HEAD >/dev/null 2>&1 || return 0
+    mv "$seed/.git" "$tree/.git"
+    rm -rf "$seed"
+    git -C "$ROOT" worktree repair "$tree" >/dev/null 2>&1 || true
+}
+
 provision() {
     tree=$(tree_for "$1")
     if held=$(occupant "$tree"); then
@@ -130,7 +192,8 @@ provision() {
         exit 1
     fi
     mkdir -p "$tree"
-    snapshot "$ROOT/" "$tree/"
+    battery_git_identity "$tree"
+    snapshot "" "$ROOT/" "$tree/"
     mkdir -p "$tree/ai-tmp"
     {
         echo "source:   $ROOT"
@@ -145,7 +208,7 @@ provision() {
 verify() {
     tree=$(tree_for "$1")
     [ -d "$tree" ] || { echo "battery $1 does not exist; provision it first" >&2; exit 1; }
-    drift=$(snapshot -in "$ROOT/" "$tree/")
+    drift=$(snapshot keep -in "$ROOT/" "$tree/")
     if [ -n "$drift" ]; then
         echo "battery $1 is NOT a copy of $ROOT; it differs in:" >&2
         echo "$drift" >&2
