@@ -2069,8 +2069,8 @@ called_symbol(Term, Symbol) :-
 %false recursion. They are the same three support_memo_call_head/2 refuses,
 %for the same reason, and `quote` needs saying here because it IS a translator
 %form, so the test below would descend into it.
-% policy-inventory-exempt: arbiter-owned-language-law; reason=quote, noeval and Error payloads are syntax or data rather than executable calls; evidence=engine/support_graph.pl:support_memo_call_head/2
 literal_head(Head) :- var(Head), !, fail.
+% policy-inventory-exempt: arbiter-owned-language-law; reason=quote, noeval and Error payloads are syntax or data rather than executable calls; evidence=engine/support_graph.pl:support_memo_call_head/2
 literal_head(Head) :- memberchk(Head, [quote, noeval, 'Error']), !.
 %And a head the translator has nothing to compile: none of its own forms, no
 %function here or anywhere, no builtin. The order is by how often a check
