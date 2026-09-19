@@ -4255,6 +4255,50 @@
       "tags": [
         "measured"
       ]
+    },
+    "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved": {
+      "title": "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved",
+      "supports": [
+        {
+          "node": "a31.2",
+          "status": "active"
+        }
+      ]
+    },
+    "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row": {
+      "title": "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+    },
+    "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta": {
+      "title": "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta",
+      "supports": [
+        "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built": {
+      "title": "the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built",
+      "supports": [
+        {
+          "node": "a31.2",
+          "relation": "rests_on",
+          "target": "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+        }
+      ]
+    },
+    "one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked": {
+      "title": "one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked",
+      "supports": [
+        {
+          "node": "a31.2",
+          "field": "assigned",
+          "value": [
+            "codex-genius",
+            "codex-job-56585666"
+          ]
+        }
+      ]
     }
   },
   "approaches": {
@@ -4741,13 +4785,17 @@
     },
     "a31.2": {
       "title": "write lib_package as a prelude library carrying everything laws 1 to 15 do not fix in the engine: version, setup, boot, backing, coverage, receipts, the lifecycle and the lock",
-      "status": "untried",
+      "status": "active",
       "addresses": [
         "i19"
       ],
       "effort": 9,
       "assigned": [
-        "codex-genius"
+        "codex-genius",
+        "codex-job-56585666"
+      ],
+      "rests_on": [
+        "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
       ]
     },
     "a31.3": {
@@ -22814,6 +22862,121 @@
         ]
       ],
       "id": "b1366248d5dc6e04"
+    },
+    {
+      "at": "2026-09-19T20:37:18.540606+00:00",
+      "after": "cac14b54b1fe1f7e50f4c07501ff17628858d98b",
+      "did": "[{\"op\": \"status\", \"id\": \"a31.2\", \"because\": \"in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved\", \"tags\": [], \"status\": \"active\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta\", \"tags\": [\"source\"], \"title\": \"what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row\", \"fields\": {}}, {\"op\": \"link\", \"id\": \"a31.2\", \"because\": \"the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built\", \"tags\": [], \"target\": \"what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row\", \"relation\": \"rests-on\"}, {\"op\": \"assign\", \"id\": \"a31.2\", \"because\": \"one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked\", \"tags\": [], \"agent\": \"codex-job-56585666\", \"remove\": false}]",
+      "parents": [
+        "b1366248d5dc6e04"
+      ],
+      "assert": [
+        [
+          "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved",
+          "sort",
+          "prop"
+        ],
+        [
+          "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved",
+          "supports",
+          {
+            "node": "a31.2",
+            "status": "active"
+          }
+        ],
+        [
+          "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved",
+          "title",
+          "in flight as of 2026-09-20 under the delegated genius job job_20260920T053724AEST_56585666, which owns lib/lib_package/**, the engine's package section, packages.plt, lib_package.plt, tests/data/lib_package/** and the record; its first attempt job_20260920T033439AEST_3672b007 ended blocked after 1088 seconds and that block is resolved"
+        ],
+        [
+          "one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked",
+          "sort",
+          "prop"
+        ],
+        [
+          "one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked",
+          "supports",
+          {
+            "node": "a31.2",
+            "field": "assigned",
+            "value": [
+              "codex-genius",
+              "codex-job-56585666"
+            ]
+          }
+        ],
+        [
+          "one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked",
+          "title",
+          "one job owns the whole boundary, engine handoff and library together, which is what the first attempt lacked"
+        ],
+        [
+          "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta",
+          "sort",
+          "prop"
+        ],
+        [
+          "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta",
+          "supports",
+          "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+        ],
+        [
+          "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta",
+          "tags",
+          "source"
+        ],
+        [
+          "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta",
+          "title",
+          "the journal's section on the engine knowing four things assigns version, setup, boot, backing, coverage, catalogs, receipts, the lifecycle and the lock to lib_package, and engine/metta/interop.pl:2057-2073 performs backings and discards their answers in &metta"
+        ],
+        [
+          "the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built",
+          "sort",
+          "prop"
+        ],
+        [
+          "the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built",
+          "supports",
+          {
+            "node": "a31.2",
+            "relation": "rests_on",
+            "target": "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+          }
+        ],
+        [
+          "the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built",
+          "title",
+          "the relaunch gives the engine's package section to the same job, and if that reading is wrong the library cannot be built where it is now being built"
+        ],
+        [
+          "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row",
+          "sort",
+          "prop"
+        ],
+        [
+          "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row",
+          "title",
+          "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+        ],
+        [
+          "a31.2",
+          "assigned",
+          "codex-job-56585666"
+        ],
+        [
+          "a31.2",
+          "rests_on",
+          "what blocked the first attempt at the package lifecycle library was the assignment rather than the engine: the library was asked for while the engine still executed backing rows itself, which the design assigns to lib_package, so there was no point at which a packaging library could choose coverage, capture an answer or validate a boot row"
+        ],
+        [
+          "a31.2",
+          "status",
+          "active"
+        ]
+      ],
+      "id": "2835ae772d9e465a"
     }
   ]
 }
