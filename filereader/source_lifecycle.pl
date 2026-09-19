@@ -1386,11 +1386,18 @@ source_package_row(CanonPath, Space, Kind, Payload) :-
 %an unbound variable, and the loader carried it all the way to
 %check_prolog_function_names/3, which refused `a var` where the names belong
 %[tested: lib_import_tokens:static_equations_and_variable_data_remain_inert].
+%
+%`==` on the two CONSTANTS for the same reason one level down: `Row = ['=', ...]`
+%accepts a row whose head position is an unbound variable and binds it, so
+%`(= ($x backing) ...)` would read as a package row. Recognising before matching
+%is the rule, and a constant is recognised with `==`.
 package_row(Row, Kind, Payload) :-
     nonvar(Row),
-    Row = ['=', Head, Payload],
+    Row = [Equation, Head, Payload],
+    Equation == '=',
     nonvar(Head),
-    Head = [package, Kind],
+    Head = [Reserved, Kind],
+    Reserved == package,
     nonvar(Kind),
     nonvar(Payload).
 
