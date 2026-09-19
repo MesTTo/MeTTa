@@ -632,6 +632,18 @@ run GATE spread-calls-selftest "$PY" "$HERE/tests/checks/check_spread_calls_self
 run GATE root-walks "$PY" "$HERE/tests/checks/check_root_walks.py"
 run GATE root-walks-selftest "$PY" "$HERE/tests/checks/check_root_walks_selftest.py"
 
+# A gate reading a tree somebody is still editing returns a verdict about no
+# particular state. tools/battery.sh snapshots the working tree, uncommitted
+# work included, and REFUSES to run unless the snapshot is still exact. This
+# proves the refusal by planting each shape of drift -- a changed file, an
+# extra one, a missing one -- and requiring the tool to name it, plus the
+# false positive it was born with, where provision wrote the excluded ai-tmp/
+# into the tree it had just copied and the moved directory mtime read as
+# drift. Four A/B comparisons were invalid before this existed; the last
+# reported 169 failures against a 4-failure baseline purely because a battery
+# ran one revision's Python tree against another revision's engine.
+run GATE battery-selftest sh "$HERE/tools/battery_selftest.sh"
+
 # b54dea73 renamed the chapter-19 C artifacts on 2026-08-27 and left THREE
 # consumers holding the old directory. Each was found separately by somebody
 # noticing a test skip -- test_benchmarks.py and benchmarks/configuration.py

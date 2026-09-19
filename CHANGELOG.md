@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh` makes a battery tree a byte-identical snapshot of the
+  working tree and REFUSES to run a gate in one that has drifted, so a verdict
+  names a known state. This repository mounts eight submodules, and
+  `git worktree add` materialises none of their worktrees while
+  `git stash create` captures none of their working trees, so every battery was
+  populated by hand and drifted independently; four A/B comparisons were invalid
+  before this existed, the last reporting 169 failures against a 4-failure
+  baseline purely because one revision's Python tree ran against another
+  revision's engine. The copy and the comparison expand the same flag string, so
+  "identical" cannot come to mean two things.
+
 - A file finds the seat and the workspace by ASCENDING for a marker rather than
   counting directory levels to them. `Path(__file__).resolve().parents[N]` is a
   literal distance that still resolves after the file moves, to somewhere else,
