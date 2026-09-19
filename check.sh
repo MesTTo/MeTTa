@@ -641,6 +641,14 @@ run GATE root-walks-selftest "$PY" "$HERE/tests/checks/check_root_walks_selftest
 run GATE tool-startup "$PY" "$HERE/tests/checks/check_tool_startup.py"
 run GATE tool-startup-selftest "$PY" "$HERE/tests/checks/check_tool_startup_selftest.py"
 
+# A library DESCRIBES what backs its heads rather than telling this engine to
+# go and load it, so another implementation can read the row, decide whether it
+# can perform it, and refuse by name when it cannot. The scan strips comments
+# and strings first: the call is discussed in the comments of libraries that do
+# not make it, and a pattern over the raw text reports those.
+run GATE package-backings "$PY" "$HERE/tests/checks/check_package_backings.py"
+run GATE package-backings-selftest "$PY" "$HERE/tests/checks/check_package_backings_selftest.py"
+
 # A gate reading a tree somebody is still editing returns a verdict about no
 # particular state. tools/battery.sh snapshots the working tree, uncommitted
 # work included, and REFUSES to run unless the snapshot is still exact. This

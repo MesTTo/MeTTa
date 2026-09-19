@@ -636,7 +636,7 @@
     },
     "a31.1": {
       "title": "give the engine its four fixed things: the reserved head package, (package requires) performed before any packaging library is merged, perform dispatched by unification in the seam space, and the reads ceiling with its inference budget",
-      "status": "done",
+      "status": "active",
       "addresses": [
         "i19"
       ],
@@ -693,6 +693,17 @@
       "cost": 3,
       "rests_on": [
         "c83"
+      ]
+    },
+    "a31.5": {
+      "title": "perform (package requires) before any packaging library is merged, and normalise the other package questions under the reads effect ceiling with an inference budget, refusing by name past it",
+      "status": "untried",
+      "addresses": [
+        "i19"
+      ],
+      "cost": 7,
+      "rests_on": [
+        "c88"
       ]
     }
   },
@@ -2794,6 +2805,50 @@
       "says": "read replacing_previous_load/4, whose materialization_transaction rolls back both source and image changes on a throw",
       "supports": [
         "c87"
+      ],
+      "basis": "source"
+    },
+    "r256": {
+      "says": "it claims the engine's four fixed things reduce to two edits, and only two of the four are built: the reserved head and perform-by-unification are in, while (package requires) performed before any packaging library is merged, and the reads effect ceiling with its inference budget, are not",
+      "attacks": [
+        "r237"
+      ]
+    },
+    "r257": {
+      "says": "two of the engine's four fixed things are built and committed as 5f37dcf: package is reserved by metta_reference_internal(_, package), and perform dispatches by unification through evalc in &metta. The other two are open: requires-first, and normalisation under the reads ceiling with a budget",
+      "supports": [
+        {
+          "node": "a31.1",
+          "status": "active"
+        }
+      ]
+    },
+    "r258": {
+      "says": "the two the engine still owes; the ceiling maps onto the five-rank effect lattice, admitting up to nondeterministicReadOnly and refusing writesState and oracleIO",
+      "supports": [
+        {
+          "node": "a31.5",
+          "status": "untried"
+        }
+      ]
+    },
+    "c88": {
+      "says": "the reads ceiling has a mechanism to build on: the engine composes a five-rank effect lattice, pureStructural, readOnlyLookup, nondeterministicReadOnly, writesState and oracleIO, with metta_effect_canonical_rank/2 giving oracleIO rank 4"
+    },
+    "r259": {
+      "says": "read engine/metta/effects.pl:598-606 and the rank names in engine/ext_points.pl:1176",
+      "supports": [
+        "c88"
+      ],
+      "basis": "source"
+    },
+    "c89": {
+      "says": "there are TWO bootstraps and the lib commit message 20f5f8b conflated them: the journal's initiality is about the REQUIRES chain, which bottoms out at lib_package because it requires nothing, while lib_import is a different one, the library defining the operation the prolog claim's BODY calls, so it cannot reach a claim whose body is that operation"
+    },
+    "r260": {
+      "says": "read docs/journal/2026-09-09-packages-are-equations.md:288-297 against lib/lib_import/lib_import.metta:27, which defines import_prolog_functions_from_file, and :41, which applies it to load its own Prolog half",
+      "supports": [
+        "c89"
       ],
       "basis": "source"
     }
@@ -14012,6 +14067,229 @@
         ]
       ],
       "id": "8bcc9bf0998f7a54"
+    },
+    {
+      "at": "2026-09-19T18:26:59+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "attack r237 --because 'it claims the engine'\"'\"'s four fixed things reduce to two edits, and only two of the four are built: the reserved head and perform-by-unification are in, while (package requires) performed before any packaging library is merged, and the reads effect ceiling with its inference budget, are not'",
+      "parents": [
+        "8bcc9bf0998f7a54"
+      ],
+      "assert": [
+        [
+          "r256",
+          "sort",
+          "claim"
+        ],
+        [
+          "r256",
+          "attacks",
+          "r237"
+        ],
+        [
+          "r256",
+          "says",
+          "it claims the engine's four fixed things reduce to two edits, and only two of the four are built: the reserved head and perform-by-unification are in, while (package requires) performed before any packaging library is merged, and the reads effect ceiling with its inference budget, are not"
+        ]
+      ],
+      "id": "a9275df869a7014b"
+    },
+    {
+      "at": "2026-09-19T18:26:59+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "status a31.1 active --because 'two of the engine'\"'\"'s four fixed things are built and committed as 5f37dcf: package is reserved by metta_reference_internal(_, package), and perform dispatches by unification through evalc in &metta. The other two are open: requires-first, and normalisation under the reads ceiling with a budget'",
+      "parents": [
+        "a9275df869a7014b"
+      ],
+      "assert": [
+        [
+          "a31.1",
+          "status",
+          "active"
+        ],
+        [
+          "r257",
+          "sort",
+          "claim"
+        ],
+        [
+          "r257",
+          "says",
+          "two of the engine's four fixed things are built and committed as 5f37dcf: package is reserved by metta_reference_internal(_, package), and perform dispatches by unification through evalc in &metta. The other two are open: requires-first, and normalisation under the reads ceiling with a budget"
+        ],
+        [
+          "r257",
+          "supports",
+          {
+            "node": "a31.1",
+            "status": "active"
+          }
+        ]
+      ],
+      "id": "fd7608ca5b6a7b64"
+    },
+    {
+      "at": "2026-09-19T18:26:59+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "add-approach a31.5 'perform (package requires) before any packaging library is merged, and normalise the other package questions under the reads effect ceiling with an inference budget, refusing by name past it' --addresses i19 --cost 7",
+      "parents": [
+        "fd7608ca5b6a7b64"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "sort",
+          "approach"
+        ],
+        [
+          "a31.5",
+          "addresses",
+          "i19"
+        ],
+        [
+          "a31.5",
+          "cost",
+          7
+        ],
+        [
+          "a31.5",
+          "status",
+          "untried"
+        ],
+        [
+          "a31.5",
+          "title",
+          "perform (package requires) before any packaging library is merged, and normalise the other package questions under the reads effect ceiling with an inference budget, refusing by name past it"
+        ]
+      ],
+      "id": "6f3dfbe23adf3f70"
+    },
+    {
+      "at": "2026-09-19T18:26:59+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "status a31.5 untried --because 'the two the engine still owes; the ceiling maps onto the five-rank effect lattice, admitting up to nondeterministicReadOnly and refusing writesState and oracleIO'",
+      "parents": [
+        "6f3dfbe23adf3f70"
+      ],
+      "assert": [
+        [
+          "r258",
+          "sort",
+          "claim"
+        ],
+        [
+          "r258",
+          "says",
+          "the two the engine still owes; the ceiling maps onto the five-rank effect lattice, admitting up to nondeterministicReadOnly and refusing writesState and oracleIO"
+        ],
+        [
+          "r258",
+          "supports",
+          {
+            "node": "a31.5",
+            "status": "untried"
+          }
+        ]
+      ],
+      "id": "25cd20e92a36397c"
+    },
+    {
+      "at": "2026-09-19T18:26:59+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "add-claim c88 'the reads ceiling has a mechanism to build on: the engine composes a five-rank effect lattice, pureStructural, readOnlyLookup, nondeterministicReadOnly, writesState and oracleIO, with metta_effect_canonical_rank/2 giving oracleIO rank 4' --because 'read engine/metta/effects.pl:598-606 and the rank names in engine/ext_points.pl:1176' --basis source",
+      "parents": [
+        "25cd20e92a36397c"
+      ],
+      "assert": [
+        [
+          "c88",
+          "sort",
+          "claim"
+        ],
+        [
+          "c88",
+          "says",
+          "the reads ceiling has a mechanism to build on: the engine composes a five-rank effect lattice, pureStructural, readOnlyLookup, nondeterministicReadOnly, writesState and oracleIO, with metta_effect_canonical_rank/2 giving oracleIO rank 4"
+        ],
+        [
+          "r259",
+          "sort",
+          "claim"
+        ],
+        [
+          "r259",
+          "basis",
+          "source"
+        ],
+        [
+          "r259",
+          "says",
+          "read engine/metta/effects.pl:598-606 and the rank names in engine/ext_points.pl:1176"
+        ],
+        [
+          "r259",
+          "supports",
+          "c88"
+        ]
+      ],
+      "id": "8bfea834c08a895b"
+    },
+    {
+      "at": "2026-09-19T18:26:59+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "link a31.5 c88 --as rests-on",
+      "parents": [
+        "8bfea834c08a895b"
+      ],
+      "assert": [
+        [
+          "a31.5",
+          "rests_on",
+          "c88"
+        ]
+      ],
+      "id": "0d39b180fed327c7"
+    },
+    {
+      "at": "2026-09-19T18:28:28+10:00",
+      "after": "8d286397861758a14fb6f5de5ee2961a3553468b",
+      "did": "add-claim c89 'there are TWO bootstraps and the lib commit message 20f5f8b conflated them: the journal'\"'\"'s initiality is about the REQUIRES chain, which bottoms out at lib_package because it requires nothing, while lib_import is a different one, the library defining the operation the prolog claim'\"'\"'s BODY calls, so it cannot reach a claim whose body is that operation' --because 'read docs/journal/2026-09-09-packages-are-equations.md:288-297 against lib/lib_import/lib_import.metta:27, which defines import_prolog_functions_from_file, and :41, which applies it to load its own Prolog half' --basis source",
+      "parents": [
+        "0d39b180fed327c7"
+      ],
+      "assert": [
+        [
+          "c89",
+          "sort",
+          "claim"
+        ],
+        [
+          "c89",
+          "says",
+          "there are TWO bootstraps and the lib commit message 20f5f8b conflated them: the journal's initiality is about the REQUIRES chain, which bottoms out at lib_package because it requires nothing, while lib_import is a different one, the library defining the operation the prolog claim's BODY calls, so it cannot reach a claim whose body is that operation"
+        ],
+        [
+          "r260",
+          "sort",
+          "claim"
+        ],
+        [
+          "r260",
+          "basis",
+          "source"
+        ],
+        [
+          "r260",
+          "says",
+          "read docs/journal/2026-09-09-packages-are-equations.md:288-297 against lib/lib_import/lib_import.metta:27, which defines import_prolog_functions_from_file, and :41, which applies it to load its own Prolog half"
+        ],
+        [
+          "r260",
+          "supports",
+          "c89"
+        ]
+      ],
+      "id": "8b1f72643869fefb"
     }
   ]
 }

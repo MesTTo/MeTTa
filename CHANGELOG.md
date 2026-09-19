@@ -20,9 +20,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   loader registers a claim, `(= (perform (prolog $file $names)) ...)`, the way a
   seat or a library registers one, and `(perform Row)` reaches it by
   unification. `package` is reserved: it is internal in every space, so one
-  library's version and backing rows are never read as its importer's own. 32 of
-  the 33 shipped libraries carrying the old call have moved; `lib_import` keeps
-  it, since it defines the operation the claim's body calls.
+  library's version and backing rows are never read as its importer's own. Every
+  shipped library carrying the old call has moved except `lib_import`, which
+  defines the operation the claim's body calls and so cannot reach a claim whose
+  body is that operation; a gate refuses a new one written the old way, reading
+  the source rather than its text so the mentions in other libraries' comments
+  are not reported.
 
 - Registering a door the shipped verdict table does not name analyses that door
   against a SOLVED core instead of solving the whole program again. Its body is
