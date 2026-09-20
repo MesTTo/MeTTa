@@ -14441,6 +14441,61 @@
       "supersedes": [
         "the protocol records observed extrema exactly and refuses an invented allowance, so the only lawful way to cover a tail is to observe it; ten rounds missed 23659 by two inferences"
       ]
+    },
+    "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories": {
+      "title": "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories",
+      "worth": 60,
+      "wanted": true
+    },
+    "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme": {
+      "title": "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme",
+      "supports": [
+        "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change": {
+      "title": "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change",
+      "supports": [
+        {
+          "node": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "status": "untried"
+        },
+        {
+          "node": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "relation": "addresses",
+          "target": "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+        }
+      ]
+    },
+    "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a": {
+      "title": "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a",
+      "supports": [
+        {
+          "node": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries": {
+      "title": "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "a contract block that contradicts its file is the same debris as an unused import, except it is believed": {
+      "title": "a contract block that contradicts its file is the same debris as an unused import, except it is believed",
+      "supports": [
+        "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries"
+      ]
     }
   },
   "approaches": {
@@ -16289,6 +16344,14 @@
       "status": "active",
       "addresses": [
         "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+      ]
+    },
+    "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract": {
+      "title": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
       ]
     }
   },
@@ -63237,6 +63300,170 @@
         ]
       ],
       "id": "eb27d35e42ee3455"
+    },
+    {
+      "at": "2026-09-20T23:27:20.292110+00:00",
+      "after": "1836eaa0a6cb9d18df83706b61547e3029e5750f",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"the user asked for the pymetta and tsmetta material to come out of the metta repo's readme\", \"tags\": [\"user\"], \"title\": \"the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories\", \"fields\": {\"worth\": 60}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change\", \"tags\": [], \"title\": \"remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract\", \"fields\": {\"effort\": 2, \"addresses\": [\"the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories\"]}}, {\"op\": \"status\", \"id\": \"remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract\", \"because\": \"355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a contract block that contradicts its file is the same debris as an unused import, except it is believed\", \"tags\": [\"reasoning\"], \"title\": \"the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries\", \"fields\": {}}]",
+      "parents": [
+        "eb27d35e42ee3455"
+      ],
+      "assert": [
+        [
+          "a contract block that contradicts its file is the same debris as an unused import, except it is believed",
+          "sort",
+          "prop"
+        ],
+        [
+          "a contract block that contradicts its file is the same debris as an unused import, except it is believed",
+          "supports",
+          "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries"
+        ],
+        [
+          "a contract block that contradicts its file is the same debris as an unused import, except it is believed",
+          "title",
+          "a contract block that contradicts its file is the same debris as an unused import, except it is believed"
+        ],
+        [
+          "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change",
+          "sort",
+          "prop"
+        ],
+        [
+          "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change",
+          "supports",
+          {
+            "node": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+            "status": "untried"
+          }
+        ],
+        [
+          "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change",
+          "supports",
+          {
+            "node": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+            "relation": "addresses",
+            "target": "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+          }
+        ],
+        [
+          "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change",
+          "title",
+          "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change"
+        ],
+        [
+          "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries",
+          "sort",
+          "prop"
+        ],
+        [
+          "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries",
+          "title",
+          "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries"
+        ],
+        [
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories",
+          "title",
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+        ],
+        [
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories",
+          "wanted",
+          true
+        ],
+        [
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories",
+          "worth",
+          60
+        ],
+        [
+          "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme",
+          "supports",
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+        ],
+        [
+          "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme",
+          "tags",
+          "user"
+        ],
+        [
+          "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme",
+          "title",
+          "the user asked for the pymetta and tsmetta material to come out of the metta repo's readme"
+        ],
+        [
+          "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a",
+          "sort",
+          "prop"
+        ],
+        [
+          "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a",
+          "supersedes",
+          "every Python fence and the single TypeScript fence lived inside those two sections, so the module-level guard asserting the README HAS python blocks fires on a loss that is now deliberate; leaving the guard in place would have been a red gate over an intended change"
+        ],
+        [
+          "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a",
+          "supports",
+          {
+            "node": "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+            "status": "done"
+          }
+        ],
+        [
+          "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a",
+          "tags",
+          "tested"
+        ],
+        [
+          "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a",
+          "title",
+          "355 lines removed, no reference remains, test_readme.py is 67 passed with its metta half and c mirror intact, the other three README-reading suites are 132 passed and ruff is clean; committed as 1836eaa0a"
+        ],
+        [
+          "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "sort",
+          "approach"
+        ],
+        [
+          "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "addresses",
+          "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+        ],
+        [
+          "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "effort",
+          2
+        ],
+        [
+          "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "status",
+          "done"
+        ],
+        [
+          "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract",
+          "title",
+          "remove both sections whole, with their install lines, their component-table rows and the one sentence naming them, and change the test module that encoded the old contract"
+        ]
+      ],
+      "telemetry": {
+        "focus": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema"
+      },
+      "id": "0d2a7e01f6d97f0a"
     }
   ]
 }
