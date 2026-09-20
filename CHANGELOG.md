@@ -62,6 +62,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The builtin-type table's test reads the contract it is testing. It asserted
+  the table equals `lib_builtin_types.metta` plus the prelude, which forbids
+  the extension `engine/metta.pl` documents: an external Prolog library extends
+  `seam:builtin_type_declaration/2` without replacing the engine's rows, and
+  `lib_package` declares `setup!`, `package-prolog` and the three-argument
+  `get-property`. The two are now told apart by where the CLAUSE came from,
+  since a row the file or the prelude registered was asserted and has no source
+  file while a library's is a compiled clause that names one, so a library that
+  starts or stops declaring a type needs no edit to the test. The
+  written-twice check still runs over every row.
+
 - Specialization verification no longer changes the answers it is checking.
   Two defects held the `spec-differential` lane red over two examples. The
   engine still carried its `swi-findall-bag-push-window` workaround, replacing

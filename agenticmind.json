@@ -7382,6 +7382,124 @@
       "tags": [
         "source"
       ]
+    },
+    "the plunit and dev-typed lanes exit zero": {
+      "title": "the plunit and dev-typed lanes exit zero",
+      "worth": 60,
+      "wanted": true
+    },
+    "they are the last two lanes red beyond the recorded baseline and the release bar is no new red": {
+      "title": "they are the last two lanes red beyond the recorded baseline and the release bar is no new red",
+      "supports": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows": {
+      "title": "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows": {
+      "title": "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows",
+      "supports": [
+        "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+        {
+          "node": "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to": {
+      "title": "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to",
+      "supports": [
+        {
+          "node": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "status": "untried"
+        },
+        {
+          "node": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "relation": "addresses",
+          "target": "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows"
+        }
+      ]
+    },
+    "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught": {
+      "title": "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught",
+      "supports": [
+        {
+          "node": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane": {
+      "title": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2": {
+      "title": "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2",
+      "supports": [
+        "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+        {
+          "node": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers": {
+      "title": "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers"
+    },
+    "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read": {
+      "title": "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read",
+      "supports": [
+        "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known": {
+      "title": "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known"
+    },
+    "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both": {
+      "title": "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both",
+      "supports": [
+        "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken": {
+      "title": "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken",
+      "supports": [
+        {
+          "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "status": "untried"
+        },
+        {
+          "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "relation": "addresses",
+          "target": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+        }
+      ]
     }
   },
   "approaches": {
@@ -8533,6 +8651,22 @@
       "status": "done",
       "addresses": [
         "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+      ]
+    },
+    "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total": {
+      "title": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows"
+      ]
+    },
+    "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause": {
+      "title": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
       ]
     }
   },
@@ -35349,6 +35483,343 @@
         ]
       ],
       "id": "5db01d64c5b890c9"
+    },
+    {
+      "at": "2026-09-20T06:05:52.667127+00:00",
+      "after": "306dfd622ab593e047c6a1efe407e615785e4d05",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"they are the last two lanes red beyond the recorded baseline and the release bar is no new red\", \"tags\": [], \"title\": \"the plunit and dev-typed lanes exit zero\", \"fields\": {\"worth\": 60}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows\", \"tags\": [\"source\"], \"title\": \"metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to\", \"tags\": [], \"title\": \"tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total\", \"fields\": {\"effort\": 1, \"addresses\": [\"metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows\"]}}, {\"op\": \"status\", \"id\": \"tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total\", \"because\": \"MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2\", \"tags\": [\"measured\"], \"title\": \"a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}]",
+      "parents": [
+        "5db01d64c5b890c9"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught",
+          "supersedes",
+          "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to"
+        ],
+        [
+          "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught",
+          "supports",
+          {
+            "node": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+            "status": "done"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught",
+          "tags",
+          "tested"
+        ],
+        [
+          "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught",
+          "title",
+          "MEASURED 2026-09-20: setup! and package-prolog answer lib/lib_package/lib_package.pl and `if` answers no file; all 9 tests of metta_builtin_type_surface pass, and the duplicate check still runs over every row so a name written in both places is still caught"
+        ],
+        [
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+          "title",
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+        ],
+        [
+          "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to",
+          "sort",
+          "prop"
+        ],
+        [
+          "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to",
+          "supports",
+          {
+            "node": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+            "status": "untried"
+          }
+        ],
+        [
+          "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to",
+          "supports",
+          {
+            "node": "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+            "relation": "addresses",
+            "target": "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows"
+          }
+        ],
+        [
+          "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to",
+          "title",
+          "a row the file or the prelude registered is asserted and has no source file, while a library's is a compiled clause that names one, so the distinction is read from the database rather than kept as a list of names that a later library would have to be added to"
+        ],
+        [
+          "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows",
+          "supports",
+          "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows"
+        ],
+        [
+          "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows",
+          "supports",
+          {
+            "node": "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows",
+          "tags",
+          "source"
+        ],
+        [
+          "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows",
+          "title",
+          "lib_package compiles three seam:builtin_type_declaration/2 clauses for setup!, package-prolog and get-property/3, and engine/metta.pl:191 says external Prolog libraries extend that seam without replacing the engine's rows"
+        ],
+        [
+          "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+          "sort",
+          "prop"
+        ],
+        [
+          "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows",
+          "title",
+          "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows"
+        ],
+        [
+          "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2",
+          "supports",
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+        ],
+        [
+          "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2",
+          "supports",
+          {
+            "node": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2",
+          "title",
+          "the lane's own lock-order report names it: 23 mutexes, 57 acquisition orders, known cycle of 2"
+        ],
+        [
+          "the plunit and dev-typed lanes exit zero",
+          "sort",
+          "prop"
+        ],
+        [
+          "the plunit and dev-typed lanes exit zero",
+          "title",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "the plunit and dev-typed lanes exit zero",
+          "wanted",
+          true
+        ],
+        [
+          "the plunit and dev-typed lanes exit zero",
+          "worth",
+          60
+        ],
+        [
+          "they are the last two lanes red beyond the recorded baseline and the release bar is no new red",
+          "sort",
+          "prop"
+        ],
+        [
+          "they are the last two lanes red beyond the recorded baseline and the release bar is no new red",
+          "supports",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "they are the last two lanes red beyond the recorded baseline and the release bar is no new red",
+          "title",
+          "they are the last two lanes red beyond the recorded baseline and the release bar is no new red"
+        ],
+        [
+          "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "sort",
+          "approach"
+        ],
+        [
+          "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "addresses",
+          "metta.plt asserts the builtin-type table equals lib_builtin_types.metta plus the prelude, which forbids the library extension engine/metta.pl's own contract allows"
+        ],
+        [
+          "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "effort",
+          1
+        ],
+        [
+          "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "status",
+          "done"
+        ],
+        [
+          "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total",
+          "title",
+          "tell a library's row from a file-derived one by where its CLAUSE came from, so the test checks the contract instead of a fixed total"
+        ]
+      ],
+      "id": "72a6134a5acb36f9"
+    },
+    {
+      "at": "2026-09-20T06:06:37.329977+00:00",
+      "after": "306dfd622ab593e047c6a1efe407e615785e4d05",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read\", \"tags\": [\"measured\"], \"title\": \"the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both\", \"tags\": [\"source\"], \"title\": \"dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken\", \"tags\": [], \"title\": \"read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause\", \"fields\": {\"effort\": 1, \"addresses\": [\"a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane\"]}}]",
+      "parents": [
+        "72a6134a5acb36f9"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read",
+          "supports",
+          "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers"
+        ],
+        [
+          "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read",
+          "title",
+          "MEASURED 2026-09-20 for the case that motivated it: 12-dict_lib.metta's dict-update writes land once and the file answers 10, and the corpus agrees on 220 specializations; NOT yet established for a snapshot nested inside an engine transaction, which engine/materialize.pl governs with its own ownership rule, and the plunit and dev-typed batteries exercise transactions heavily so they are the evidence to read"
+        ],
+        [
+          "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known",
+          "title",
+          "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known"
+        ],
+        [
+          "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both",
+          "supports",
+          "dev-typed's lock-order line is informational, not its failure: the cycle is already listed as known"
+        ],
+        [
+          "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both",
+          "tags",
+          "source"
+        ],
+        [
+          "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both",
+          "title",
+          "tests/prolog/lock_order.pl:331 carries known_cycle(['$metta_typing_policy',metta_deferred_translation], translator_rule_extra_variables_exemption), so the lane's report names a cycle it expects; dev-typed runs the same plt suites as plunit under the typed build, so the metta.plt row-count assertion is the likelier cause of both"
+        ],
+        [
+          "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers",
+          "sort",
+          "prop"
+        ],
+        [
+          "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers",
+          "title",
+          "the specialization snapshot rests on space writes going through the dynamic database, which snapshot/1 covers"
+        ],
+        [
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken",
+          "supports",
+          {
+            "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken",
+          "supports",
+          {
+            "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+            "relation": "addresses",
+            "target": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+          }
+        ],
+        [
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken",
+          "title",
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken"
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "sort",
+          "approach"
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "addresses",
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "effort",
+          1
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "status",
+          "untried"
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "title",
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause"
+        ]
+      ],
+      "id": "cd7d84ad3a5a0f23"
     }
   ]
 }

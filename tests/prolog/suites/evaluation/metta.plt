@@ -1853,6 +1853,18 @@ canonical_rows(Rows, Canonical) :-
     maplist(canonical_row, Rows, Numbered),
     sort(Numbered, Canonical).
 
+%A row a Prolog library compiled in is its own: engine/metta.pl's contract is
+%that an external library extends this seam without replacing the engine's
+%rows. The two are told apart by where the CLAUSE came from rather than by a
+%list of names, so a library that starts or stops declaring a type needs no
+%edit here: a row the file or the prelude registered was ASSERTED and has no
+%source file, and a library's row is a compiled clause that names one
+%[measured 2026-09-20: 'setup!' and 'package-prolog' answer
+%lib/lib_package/lib_package.pl, and `if` answers no file].
+library_declared_row(Name, Type) :-
+    clause(seam:builtin_type_declaration(Name, Type), true, Ref),
+    clause_property(Ref, file(_)).
+
 test(the_table_is_built_from_the_file_rather_than_written_twice) :-
     library('lib_builtin_types.metta', Path),
     read_file_to_string(Path, Text, []),
@@ -1862,13 +1874,20 @@ test(the_table_is_built_from_the_file_rather_than_written_twice) :-
               atom(Name) ),
             InFile),
     findall(Name-Type, prelude_type_declaration(Name, Type), FromPrelude),
-    findall(Name-Type, seam:builtin_type_declaration(Name, Type), Loaded),
+    findall(Name-Type, seam:builtin_type_declaration(Name, Type), Everything),
+    findall(Name-Type,
+            ( seam:builtin_type_declaration(Name, Type),
+              \+ library_declared_row(Name, Type) ),
+            Registered),
     append(InFile, FromPrelude, Sources),
     canonical_rows(Sources, ExpectedRows),
-    canonical_rows(Loaded, LoadedRows),
-    assertion(ExpectedRows == LoadedRows),
-    length(Loaded, RowCount),
-    length(LoadedRows, DistinctCount),
+    canonical_rows(Registered, RegisteredRows),
+    assertion(ExpectedRows == RegisteredRows),
+    %Over EVERY row, library ones included, because a name written both in the
+    %file and by a library is exactly the duplication this test is named for.
+    length(Everything, RowCount),
+    canonical_rows(Everything, DistinctRows),
+    length(DistinctRows, DistinctCount),
     assertion(RowCount == DistinctCount),
     InFile \== [],
     FromPrelude \== [].
