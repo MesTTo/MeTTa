@@ -98,6 +98,76 @@ seam:foreign_space(Name) :- ...
 `tests/prolog/static_checks.pl` in the superproject refuses a backend that
 reaches past these points.
 
+## Changing what a form compiles to
+
+A translator rule is a definition, so the compiler is extensible from MeTTa.
+
+```metta
+(= (runtime42 $arg)
+   (cons 42 $arg))
+
+(= (compileeval42 $arg)
+   (cons 42 $arg))
+
+(= (compile42 $arg)
+   (noeval (cons 42 $arg)))
+
+!(add-translator-rule! compileeval42)
+!(add-translator-rule! compile42)
+
+!(test (runtime42 (43)) (42 43))
+!(test (compileeval42 (43)) (42 43))
+!(test (compile42 (43)) (42 43))
+```
+
+## Prolog underneath
+
+```metta
+!(test (progn (translatePredicate (is $x 2))
+              (translatePredicate (+ $x 40 $z)) $z)
+       42)
+```
+
+## Watching it run
+
+```metta
+!(import! &self (library lib_observe))
+(= (trace-increment $x) (+ $x 1))
+(= (trace-outer $x) (trace-increment $x))
+!(bind! &trace (trace-source &self "!(trace-outer 4)" (trace-increment) 10))
+!(test (match &trace (trace-event $seq $time $depth call (trace-increment 4) $answer) $depth) 1)
+!(test (match &trace (trace-event $seq $time $depth exit (trace-increment 4) $answer) $answer) 5)
+!(test (match &trace (trace-event 0 $time $depth call (trace-increment 4) $answer) $depth) 1)
+!(test (match &trace (trace-stopped $reason) $reason) False)
+!(test (space-atom-count &trace) 3)
+```
+
+## A space of your own
+
+A space that answers what it can and inherits the rest.
+
+```metta
+!(add-atom &family-parent (edge a b))
+!(add-atom &family-parent (parent-only kept))
+!(add-atom &family-parent (layer parent))
+!(new-space &family-child (inherits &family-parent))
+!(add-atom &family-child (edge b c))
+!(add-atom &family-child (child-only local))
+!(add-atom &family-child (layer child))
+
+!(test (collapse (match &family-child
+                         (, (edge $x $y) (edge $y $z))
+                         ($x $z)))
+       ((a c)))
+
+!(test (collapse (match &family-child (layer $x) $x)) (child parent))
+!(test (space-atom-count &family-child) 3)
+
+!(test (collapse (match &family-parent (parent-only $x) $x)) (kept))
+!(test (collapse (match &family-child (parent-only $x) $x)) (kept))
+!(test (collapse (match &family-parent (child-only $x) $x)) ())
+```
+
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).
