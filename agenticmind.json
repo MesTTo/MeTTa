@@ -14267,6 +14267,130 @@
       "tags": [
         "measured"
       ]
+    },
+    "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it": {
+      "title": "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it"
+    },
+    "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached": {
+      "title": "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached",
+      "supports": [
+        "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker": {
+      "title": "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker"
+    },
+    "measured by running all three with -p no:xdist: 1 failed, 2 passed": {
+      "title": "measured by running all three with -p no:xdist: 1 failed, 2 passed",
+      "supports": [
+        "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run": {
+      "title": "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run",
+      "supports": [
+        {
+          "node": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "status": "untried"
+        },
+        {
+          "node": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "relation": "addresses",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ]
+    },
+    "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes": {
+      "title": "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes",
+      "supports": [
+        {
+          "node": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design": {
+      "title": "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design"
+    },
+    "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so": {
+      "title": "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so",
+      "supports": [
+        "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107": {
+      "title": "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107"
+    },
+    "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance": {
+      "title": "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance",
+      "supports": [
+        "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it": {
+      "title": "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it"
+    },
+    "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test": {
+      "title": "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test",
+      "supports": [
+        "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either": {
+      "title": "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either",
+      "supports": [
+        {
+          "node": "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "status": "untried"
+        },
+        {
+          "node": "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "relation": "addresses",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ]
+    },
+    "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe": {
+      "title": "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe",
+      "attacks": [
+        "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one": {
+      "title": "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one"
+    },
+    "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort": {
+      "title": "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort",
+      "supports": [
+        "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -16091,6 +16215,22 @@
       "status": "failed",
       "addresses": [
         "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
+      ]
+    },
+    "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names": {
+      "title": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers": {
+      "title": "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
       ]
     }
   },
@@ -62528,6 +62668,371 @@
         ]
       ],
       "id": "03ee54023cc532ad"
+    },
+    {
+      "at": "2026-09-20T22:48:44.583629+00:00",
+      "after": "90c81bea4ab5b97a2179dede74f6f5a6b4794a62",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached\", \"tags\": [\"measured\"], \"title\": \"the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by running all three with -p no:xdist: 1 failed, 2 passed\", \"tags\": [\"measured\"], \"title\": \"of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run\", \"tags\": [], \"title\": \"regenerate website/reference/metta-libraries.md, which is the remedy the failing test names\", \"fields\": {\"effort\": 1, \"addresses\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"status\", \"id\": \"regenerate website/reference/metta-libraries.md, which is the remedy the failing test names\", \"because\": \"libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "03ee54023cc532ad"
+      ],
+      "assert": [
+        [
+          "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached",
+          "sort",
+          "prop"
+        ],
+        [
+          "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached",
+          "supports",
+          "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it"
+        ],
+        [
+          "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached",
+          "tags",
+          "measured"
+        ],
+        [
+          "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached",
+          "title",
+          "both runs carry '[gw0] node down: Not properly terminated' and the pass counts differ by the tests the dead worker never reached"
+        ],
+        [
+          "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes",
+          "sort",
+          "prop"
+        ],
+        [
+          "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes",
+          "supersedes",
+          "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run"
+        ],
+        [
+          "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes",
+          "supports",
+          {
+            "node": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+            "status": "done"
+          }
+        ],
+        [
+          "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes",
+          "tags",
+          "tested"
+        ],
+        [
+          "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes",
+          "title",
+          "libdoc.py --write changed exactly one line, database-atoms from Expression to Atom, and the test passes"
+        ],
+        [
+          "measured by running all three with -p no:xdist: 1 failed, 2 passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by running all three with -p no:xdist: 1 failed, 2 passed",
+          "supports",
+          "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker"
+        ],
+        [
+          "measured by running all three with -p no:xdist: 1 failed, 2 passed",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured by running all three with -p no:xdist: 1 failed, 2 passed",
+          "title",
+          "measured by running all three with -p no:xdist: 1 failed, 2 passed"
+        ],
+        [
+          "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker",
+          "sort",
+          "prop"
+        ],
+        [
+          "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker",
+          "title",
+          "of the three NEW failures in the second run, exactly one is mine: test_the_metta_library_page_is_up_to_date fails in isolation because regenerating two library faces left the generated page stale, while test_dropping_a_space_reclaims_its_atoms and test_twin_refuses_engine_only_bodies both PASS in isolation and are collateral from the downed worker"
+        ],
+        [
+          "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run",
+          "sort",
+          "prop"
+        ],
+        [
+          "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run",
+          "supports",
+          {
+            "node": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+            "status": "untried"
+          }
+        ],
+        [
+          "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run",
+          "supports",
+          {
+            "node": "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+            "relation": "addresses",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run",
+          "title",
+          "the page is generated from the libraries' @doc atoms and a type change moves what a library advertises; hand-editing generated output would be discarded by the next run"
+        ],
+        [
+          "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it",
+          "title",
+          "the pytest crash REPRODUCES: a second full-suite run took the worker down again at test_mm2_exec_transforms_inside_mork, so it is not a one-off, and the run reported 4 failed against 4474 passed where the first reported 1 against 4571 because a downed worker takes its remaining tests with it"
+        ],
+        [
+          "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "sort",
+          "approach"
+        ],
+        [
+          "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "addresses",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "effort",
+          1
+        ],
+        [
+          "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "status",
+          "done"
+        ],
+        [
+          "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names",
+          "title",
+          "regenerate website/reference/metta-libraries.md, which is the remedy the failing test names"
+        ]
+      ],
+      "id": "17f95950e297cfed"
+    },
+    {
+      "at": "2026-09-20T22:50:02.385623+00:00",
+      "after": "90c81bea4ab5b97a2179dede74f6f5a6b4794a62",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so\", \"tags\": [\"measured\"], \"title\": \"the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance\", \"tags\": [\"measured\"], \"title\": \"the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test\", \"tags\": [\"measured\"], \"title\": \"the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either\", \"tags\": [], \"title\": \"run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers\", \"fields\": {\"effort\": 2, \"addresses\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}]",
+      "parents": [
+        "17f95950e297cfed"
+      ],
+      "assert": [
+        [
+          "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test",
+          "supports",
+          "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it"
+        ],
+        [
+          "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test",
+          "title",
+          "measured three ways: -p no:xdist alone, the file through extensions/python/test.sh, and two full-suite runs that both took gw0 down at the same test"
+        ],
+        [
+          "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance",
+          "sort",
+          "prop"
+        ],
+        [
+          "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance",
+          "supports",
+          "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107"
+        ],
+        [
+          "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance",
+          "tags",
+          "measured"
+        ],
+        [
+          "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance",
+          "title",
+          "read /proc/meminfo and bounded.sh:44, and the load_all_sexpr comment states the avoidance"
+        ],
+        [
+          "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so",
+          "sort",
+          "prop"
+        ],
+        [
+          "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so",
+          "supports",
+          "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design"
+        ],
+        [
+          "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so",
+          "tags",
+          "measured"
+        ],
+        [
+          "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so",
+          "title",
+          "symbolised the five offsets in the pytest log against extensions/mork/mork_ffi/target/release/libmork_ffi.so"
+        ],
+        [
+          "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design",
+          "sort",
+          "prop"
+        ],
+        [
+          "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design",
+          "title",
+          "the MORK crash is MEASURED now, not assumed: the abort is SIGABRT from libmork_ffi.so and addr2line names the frames __rustc::__rust_alloc_error_handler, std::alloc::rust_oom and std::process::abort, so an allocation was refused and Rust aborted by design"
+        ],
+        [
+          "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107",
+          "sort",
+          "prop"
+        ],
+        [
+          "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107",
+          "title",
+          "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107"
+        ],
+        [
+          "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it",
+          "title",
+          "the trigger is accumulated ENGINE state rather than the transform: the test passes alone and passes with its whole 28-test file through the lane's own bounded path, and the mork fixture clears its space on teardown, but the crashing test also takes the shared metta engine, which in a full-suite worker carries everything that ran before it"
+        ],
+        [
+          "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either",
+          "supports",
+          {
+            "node": "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either",
+          "supports",
+          {
+            "node": "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+            "relation": "addresses",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either",
+          "title",
+          "the two hypotheses predict opposite outcomes for that one run, which is the cheapest observation that can eliminate either"
+        ],
+        [
+          "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "sort",
+          "approach"
+        ],
+        [
+          "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "addresses",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "effort",
+          2
+        ],
+        [
+          "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "status",
+          "untried"
+        ],
+        [
+          "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers",
+          "title",
+          "run the full suite single-worker and unshuffled, which separates concurrency from accumulated state: if it still aborts, the cause is what the worker accumulated, and if it passes, the cause is contention between workers"
+        ]
+      ],
+      "id": "a0293523ca4befd0"
+    },
+    {
+      "at": "2026-09-20T23:05:12.326938+00:00",
+      "after": "90c81bea4ab5b97a2179dede74f6f5a6b4794a62",
+      "did": "[{\"op\": \"attack\", \"id\": \"the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107\", \"because\": \"what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe\", \"tags\": [\"measured\"]}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort\", \"tags\": [\"measured\"], \"title\": \"the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one\", \"fields\": {}}]",
+      "parents": [
+        "a0293523ca4befd0"
+      ],
+      "assert": [
+        [
+          "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort",
+          "sort",
+          "prop"
+        ],
+        [
+          "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort",
+          "supports",
+          "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one"
+        ],
+        [
+          "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort",
+          "tags",
+          "measured"
+        ],
+        [
+          "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort",
+          "title",
+          "addr2line named the frames; nothing sampled the process's memory or read its limits at the moment of the abort"
+        ],
+        [
+          "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one",
+          "title",
+          "the MORK abort is established as a Rust allocator OOM and no further: __rust_alloc_error_handler and std::alloc::rust_oom are in the symbolised frames, so an allocation was refused, but neither the limit in force nor the RSS at failure was measured, and RLIMIT_DATA is one candidate mechanism rather than an observed one"
+        ],
+        [
+          "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe",
+          "sort",
+          "prop"
+        ],
+        [
+          "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe",
+          "attacks",
+          "the bound it hits is tools/bounded.sh's RLIMIT_DATA, a quarter of the box, which on this 60.5 GiB machine is 15.1 GiB; the 4 GiB up-front reservation in MORK's public loader is NOT the cause, because the bridge avoids that loader on purpose and says so at mork_ffi/src/lib.rs:107"
+        ],
+        [
+          "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe",
+          "tags",
+          "measured"
+        ],
+        [
+          "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe",
+          "title",
+          "what was MEASURED is that Rust's allocation error handler aborted; which limit refused the allocation was not measured, and the log separately names gnutimeout as the process that dumped core, so attributing it to RLIMIT_DATA specifically is a mechanism I did not observe"
+        ]
+      ],
+      "id": "803befae9319301e"
     }
   ]
 }
