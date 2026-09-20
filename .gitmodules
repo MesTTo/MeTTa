@@ -1,6 +1,6 @@
 [submodule "engine"]
 	path = engine
-	url = https://github.com/MesTTo/metta-engine.git
+	url = https://github.com/MesTTo/MeTTa-Kernel.git
 [submodule "lib"]
 	path = lib
 	url = https://github.com/MesTTo/metta-lib.git
@@ -12,10 +12,10 @@
 	url = https://github.com/MesTTo/metta-extensions.git
 [submodule "extensions/python"]
 	path = extensions/python
-	url = https://github.com/MesTTo/pymetta.git
+	url = https://github.com/MesTTo/PyMeTTa.git
 [submodule "extensions/cmetta"]
 	path = extensions/cmetta
-	url = https://github.com/MesTTo/cmetta.git
+	url = https://github.com/MesTTo/CMeTTa.git
 [submodule "extensions/node"]
 	path = extensions/node
 	url = https://github.com/MesTTo/metta-node.git
