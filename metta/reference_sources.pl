@@ -165,8 +165,18 @@ metta_reference_source_rewrite_body(Goal, Space, Origin, Out, Rewritten, 1) :-
     Result == Out,
     ( Identity == (Out = Bound) ; Identity == (Bound = Out) ), !,
     Rewritten = metta_reference_resolve_source(Space, Origin, tokens, Bound, Out).
+%COMPOUND, not merely nonvar. compound_name_arguments/3 THROWS
+%type_error(compound, X) when its first argument is an atom, and a body reaches
+%here holding the bare cut: this producer asserts a projected reader as
+%(Head :- !, Resolve, Body), so rewriting one walks into its `!` and the walk
+%dies where it should have stopped. The third clause below is already the right
+%answer for a goal with no sub-goals, handing it back unchanged; this guard is
+%what kept it from being reached
+%[measured 2026-09-20 over eight runs of a 6,000-iteration loop on the
+%suspended-background reference load: two ended in compound_name_arguments/3:
+%Type error: `compound' expected, found `!', and none did with this guard].
 metta_reference_source_rewrite_body(Goal, Space, Origin, Out, Rewritten, Count) :-
-    nonvar(Goal), compound_name_arguments(Goal, Operator, [Left, Right]),
+    compound(Goal), compound_name_arguments(Goal, Operator, [Left, Right]),
     metta_reference_source_control(Operator), !,
     metta_reference_source_rewrite_body(Left, Space, Origin, Out, BoundLeft, LCount),
     metta_reference_source_rewrite_body(Right, Space, Origin, Out, BoundRight, RCount),
