@@ -5473,6 +5473,56 @@
       "tags": [
         "source"
       ]
+    },
+    "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run": {
+      "title": "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run"
+    },
+    "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed": {
+      "title": "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed",
+      "supports": [
+        "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them": {
+      "title": "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them"
+    },
+    "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move": {
+      "title": "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move",
+      "supports": [
+        "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary": {
+      "title": "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary",
+      "supports": [
+        {
+          "node": "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "status": "untried"
+        },
+        {
+          "node": "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "relation": "addresses",
+          "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        }
+      ]
+    },
+    "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too": {
+      "title": "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too",
+      "supports": [
+        {
+          "node": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+          "status": "untried"
+        }
+      ],
+      "supersedes": [
+        "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it"
+      ]
     }
   },
   "approaches": {
@@ -6376,6 +6426,14 @@
       "status": "done",
       "addresses": [
         "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+      ]
+    },
+    "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format": {
+      "title": "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
       ]
     }
   },
@@ -27736,6 +27794,152 @@
         ]
       ],
       "id": "ba279e15fd668d35"
+    },
+    {
+      "at": "2026-09-20T00:43:35.104941+00:00",
+      "after": "dd23fe81e2c35166d2ace347c059fc620c626132",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed\", \"tags\": [\"measured\"], \"title\": \"the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move\", \"tags\": [\"measured\"], \"title\": \"the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary\", \"tags\": [], \"title\": \"settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format\", \"fields\": {\"effort\": 3, \"addresses\": [\"laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported\"]}}, {\"op\": \"status\", \"id\": \"build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens\", \"because\": \"attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too\", \"tags\": [], \"status\": \"untried\"}]",
+      "parents": [
+        "ba279e15fd668d35"
+      ],
+      "assert": [
+        [
+          "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too",
+          "sort",
+          "prop"
+        ],
+        [
+          "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too",
+          "supersedes",
+          "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it"
+        ],
+        [
+          "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too",
+          "supports",
+          {
+            "node": "build law 13's Python half: the manifest boot that loads an application's package in &self, binds connections and the serve policy as rows, type-checks every boot row against the doors' derived signatures before any performs, and owns the handles it opens",
+            "status": "untried"
+          }
+        ],
+        [
+          "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too",
+          "title",
+          "attempted 2026-09-20 and reverted to the last verified state rather than left half-migrated: the tree is clean and the 18 manifest cases pass, and the attempt established that the format change is two edits plus a mechanical conversion, with the declared-versus-performed distinction as the one thing to settle first; a partly-migrated public manifest format is worse than an unmigrated one, and the CLI advertises the old spelling too"
+        ],
+        [
+          "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed",
+          "supports",
+          "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run"
+        ],
+        [
+          "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed",
+          "title",
+          "measured 2026-09-20: a package row reads as kind 'function' where a bare boot form reads as 'expression', and after changing _read_forms and _validated plus converting the tests' 36 inline manifests, pytest answered 4 failed and 14 passed"
+        ],
+        [
+          "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move",
+          "supports",
+          "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them"
+        ],
+        [
+          "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move",
+          "title",
+          "measured 2026-09-20: converting those four queries alongside the manifests broke the topology assertions, and reverting them alone took the count from 4 failures to 5, so neither spelling is right for all four and the declared-versus-performed split has to be decided before the rows move"
+        ],
+        [
+          "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary",
+          "sort",
+          "prop"
+        ],
+        [
+          "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary",
+          "supports",
+          {
+            "node": "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+            "status": "untried"
+          }
+        ],
+        [
+          "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary",
+          "supports",
+          {
+            "node": "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+            "relation": "addresses",
+            "target": "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+          }
+        ],
+        [
+          "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary",
+          "title",
+          "the format change is two edits and a mechanical test conversion, and the only thing that made it oscillate was rewriting queries that read the performed record as though they read the declaration; deciding that split first makes the rest ordinary"
+        ],
+        [
+          "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them",
+          "sort",
+          "prop"
+        ],
+        [
+          "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them",
+          "title",
+          "the friction that stopped the migration is one distinction the tests encode and the design does not yet settle: a manifest ROW is what the app declares, while the boot atom the assembler writes is what it PERFORMED, and four match queries in the tests read the second, so a blanket rewrite of the first corrupted them"
+        ],
+        [
+          "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run",
+          "sort",
+          "prop"
+        ],
+        [
+          "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run",
+          "title",
+          "the manifest format change is mostly mechanical and was measured, not guessed: reading a package boot row instead of a bare boot form took two edits, the reader's kind test and the validator's shape test, and carried 14 of the 18 cases on the first run"
+        ],
+        [
+          "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "sort",
+          "approach"
+        ],
+        [
+          "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "addresses",
+          "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+        ],
+        [
+          "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "effort",
+          3
+        ],
+        [
+          "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "status",
+          "untried"
+        ],
+        [
+          "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format",
+          "title",
+          "settle whether a performed boot row is recorded as its own atom or read back from the package rows themselves, and only then move the manifest format"
+        ]
+      ],
+      "id": "cee19412b0205934"
     }
   ]
 }
