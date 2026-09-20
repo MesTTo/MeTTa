@@ -122,6 +122,7 @@
 :- use_module(library(prolog_source)).
 :- use_module(library(filesex)).
 :- ensure_loaded(surface_walk).
+:- ensure_loaded(deferred_references).
 :- initialization(main, main).
 
 main :-
@@ -146,7 +147,18 @@ main :-
     list_redefined,
     list_void_declarations,
     list_autoload,
+    %check/0 bundles seven checkers and runs list_undefined among them. This
+    %lane runs with --on-warning=status, so that checker's one warning -- a
+    %reference this tree defers on purpose -- would fail it. library(check)
+    %documents its own way out: "The predicate is dynamic, so you can disable
+    %checks with retract/1", with retract(check:checker(list_redefined,_)) as
+    %the worked example. So the row goes and the same walk runs below through
+    %undefined_report/0, filtered by the one table in deferred_references.pl
+    %that every lane enforcing undefined-ness shares. Retracting the row rather
+    %than unrolling the bundle keeps any checker a later SWI adds.
+    ( retract(check:checker(list_undefined, _)) -> true ; true ),
     check,
+    undefined_report,
     a_backend_calls_only_published_surface,
     a_host_binding_calls_only_published_surface,
     every_dispatch_row_declares_the_arity_its_clause_accepts,

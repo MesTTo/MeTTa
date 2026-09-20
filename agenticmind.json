@@ -6709,6 +6709,242 @@
       "tags": [
         "measured"
       ]
+    },
+    "the prolog-static lane exits zero without suppressing a true finding": {
+      "title": "the prolog-static lane exits zero without suppressing a true finding",
+      "worth": 70,
+      "wanted": true
+    },
+    "it is one of six lanes red beyond the recorded baseline, and the release bar is no new red": {
+      "title": "it is one of six lanes red beyond the recorded baseline, and the release bar is no new red",
+      "supports": [
+        "the prolog-static lane exits zero without suppressing a true finding"
+      ]
+    },
+    "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it": {
+      "title": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+      "blocks": [
+        "the prolog-static lane exits zero without suppressing a true finding"
+      ]
+    },
+    "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time": {
+      "title": "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time",
+      "supports": [
+        "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+        {
+          "node": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+          "relation": "blocks",
+          "target": "the prolog-static lane exits zero without suppressing a true finding"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl": {
+      "title": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+      "blocks": [
+        "the prolog-static lane exits zero without suppressing a true finding"
+      ]
+    },
+    "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other": {
+      "title": "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other",
+      "supports": [
+        "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+        {
+          "node": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+          "relation": "blocks",
+          "target": "the prolog-static lane exits zero without suppressing a true finding"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time": {
+      "title": "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time"
+    },
+    "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand": {
+      "title": "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand",
+      "supports": [
+        "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified": {
+      "title": "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified"
+    },
+    "read engine/metta/interop.pl:1972-2184": {
+      "title": "read engine/metta/interop.pl:1972-2184",
+      "supports": [
+        "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the analysis would see what the running system sees at that moment": {
+      "title": "the analysis would see what the running system sees at that moment",
+      "supports": [
+        {
+          "node": "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "status": "untried"
+        },
+        {
+          "node": "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "relation": "addresses",
+          "target": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        }
+      ]
+    },
+    "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks": {
+      "title": "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks",
+      "supports": [
+        {
+          "node": "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the analysis would see what the running system sees at that moment"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating": {
+      "title": "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating",
+      "supports": [
+        {
+          "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "status": "untried"
+        },
+        {
+          "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "relation": "addresses",
+          "target": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        },
+        {
+          "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "relation": "addresses",
+          "target": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+        }
+      ]
+    },
+    "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false": {
+      "title": "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+    },
+    "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded": {
+      "title": "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded",
+      "supports": [
+        "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate": {
+      "title": "if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate",
+      "supports": [
+        {
+          "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "relation": "rests_on",
+          "target": "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+        }
+      ]
+    },
+    "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag": {
+      "title": "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag",
+      "attacks": [
+        "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations": {
+      "title": "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+      "supports": [
+        {
+          "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "status": "untried"
+        },
+        {
+          "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "relation": "addresses",
+          "target": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+        },
+        {
+          "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "relation": "addresses",
+          "target": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        }
+      ]
+    },
+    "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal": {
+      "title": "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal",
+      "supports": [
+        {
+          "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all": {
+      "title": "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all"
+    },
+    "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else": {
+      "title": "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else",
+      "supports": [
+        "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module": {
+      "title": "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module"
+    },
+    "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate": {
+      "title": "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate",
+      "supports": [
+        "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised": {
+      "title": "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised"
+    },
+    "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets": {
+      "title": "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets",
+      "supports": [
+        "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file": {
+      "title": "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file"
+    },
+    "MEASURED 2026-09-20 in the suite's own configuration": {
+      "title": "MEASURED 2026-09-20 in the suite's own configuration",
+      "supports": [
+        "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -7775,6 +8011,35 @@
       "status": "failed",
       "addresses": [
         "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+      ]
+    },
+    "load lib_file in the static-check driver before check/0 so the reference resolves": {
+      "title": "load lib_file in the static-check driver before check/0 so the reference resolves",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+      ]
+    },
+    "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot": {
+      "title": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+        "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+      ],
+      "rests_on": [
+        "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+      ]
+    },
+    "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded": {
+      "title": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+      "effort": 3,
+      "status": "active",
+      "addresses": [
+        "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+        "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
       ]
     }
   },
@@ -32702,6 +32967,656 @@
         ]
       ],
       "id": "60e853550d43d525"
+    },
+    {
+      "at": "2026-09-20T05:12:01.311852+00:00",
+      "after": "ee7faebc0a7919b5ec656de354c3197fa6c42b2a",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"it is one of six lanes red beyond the recorded baseline, and the release bar is no new red\", \"tags\": [], \"title\": \"the prolog-static lane exits zero without suppressing a true finding\", \"fields\": {\"worth\": 70}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time\", \"tags\": [\"source\"], \"title\": \"lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it\", \"fields\": {\"blocks\": [\"the prolog-static lane exits zero without suppressing a true finding\"]}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other\", \"tags\": [\"source\"], \"title\": \"the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl\", \"fields\": {\"blocks\": [\"the prolog-static lane exits zero without suppressing a true finding\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand\", \"tags\": [\"source\"], \"title\": \"the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/metta/interop.pl:1972-2184\", \"tags\": [\"source\"], \"title\": \"making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the analysis would see what the running system sees at that moment\", \"tags\": [], \"title\": \"load lib_file in the static-check driver before check/0 so the reference resolves\", \"fields\": {\"effort\": 1, \"addresses\": [\"lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it\"]}}, {\"op\": \"status\", \"id\": \"load lib_file in the static-check driver before check/0 so the reference resolves\", \"because\": \"static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks\", \"tags\": [\"source\"], \"status\": \"unwanted\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating\", \"tags\": [], \"title\": \"declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot\", \"fields\": {\"effort\": 2, \"addresses\": [\"lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it\", \"the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded\", \"tags\": [\"assumed\"], \"title\": \"an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false\", \"fields\": {}}, {\"op\": \"link\", \"id\": \"declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot\", \"because\": \"if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate\", \"tags\": [], \"target\": \"an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false\", \"relation\": \"rests-on\"}]",
+      "parents": [
+        "60e853550d43d525"
+      ],
+      "assert": [
+        [
+          "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded",
+          "sort",
+          "prop"
+        ],
+        [
+          "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded",
+          "supports",
+          "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+        ],
+        [
+          "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded",
+          "tags",
+          "assumed"
+        ],
+        [
+          "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded",
+          "title",
+          "UNVERIFIED: the flag is documented to govern implicit index autoloading, but SWI may convert explicit directives to use_module at load time, which would reintroduce the boot cost the measurement of battery 13 recorded"
+        ],
+        [
+          "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false",
+          "sort",
+          "prop"
+        ],
+        [
+          "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false",
+          "title",
+          "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+        ],
+        [
+          "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating",
+          "sort",
+          "prop"
+        ],
+        [
+          "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating",
+          "supports",
+          {
+            "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+            "status": "untried"
+          }
+        ],
+        [
+          "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating",
+          "supports",
+          {
+            "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+            "relation": "addresses",
+            "target": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+          }
+        ],
+        [
+          "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating",
+          "supports",
+          {
+            "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+            "relation": "addresses",
+            "target": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+          }
+        ],
+        [
+          "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating",
+          "title",
+          "every mature linter puts a suppression at the site rather than in a central list, and an explicit autoload declaration is not a suppression at all: it states the dependency, which is what the three hand-written tables were each approximating"
+        ],
+        [
+          "if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate",
+          "sort",
+          "prop"
+        ],
+        [
+          "if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate",
+          "supports",
+          {
+            "node": "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+            "relation": "rests_on",
+            "target": "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+          }
+        ],
+        [
+          "if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate",
+          "title",
+          "if the directive loads eagerly under autoload=false, this approach is the load-time use_module that was already measured to break lib-surface and memory-scale-gate"
+        ],
+        [
+          "it is one of six lanes red beyond the recorded baseline, and the release bar is no new red",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is one of six lanes red beyond the recorded baseline, and the release bar is no new red",
+          "supports",
+          "the prolog-static lane exits zero without suppressing a true finding"
+        ],
+        [
+          "it is one of six lanes red beyond the recorded baseline, and the release bar is no new red",
+          "title",
+          "it is one of six lanes red beyond the recorded baseline, and the release bar is no new red"
+        ],
+        [
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+          "blocks",
+          "the prolog-static lane exits zero without suppressing a true finding"
+        ],
+        [
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+          "title",
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        ],
+        [
+          "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time",
+          "supports",
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        ],
+        [
+          "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time",
+          "supports",
+          {
+            "node": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it",
+            "relation": "blocks",
+            "target": "the prolog-static lane exits zero without suppressing a true finding"
+          }
+        ],
+        [
+          "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time",
+          "tags",
+          "source"
+        ],
+        [
+          "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time",
+          "title",
+          "lib_package loads lib_file inside the clause that calls it, at lib/lib_package/lib_package.pl:901 and 906, so the qualified call is correct and the name is absent at analysis time"
+        ],
+        [
+          "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified",
+          "sort",
+          "prop"
+        ],
+        [
+          "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified",
+          "title",
+          "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified"
+        ],
+        [
+          "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other",
+          "sort",
+          "prop"
+        ],
+        [
+          "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other",
+          "supports",
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+        ],
+        [
+          "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other",
+          "supports",
+          {
+            "node": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+            "relation": "blocks",
+            "target": "the prolog-static lane exits zero without suppressing a true finding"
+          }
+        ],
+        [
+          "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other",
+          "tags",
+          "source"
+        ],
+        [
+          "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other",
+          "title",
+          "nothing checks the shell regex against the Prolog table, so the next deferred name lands in one lane and silently passes the other"
+        ],
+        [
+          "read engine/metta/interop.pl:1972-2184",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/metta/interop.pl:1972-2184",
+          "supports",
+          "making lib_package lazy too would move the undefined count from one name to five, because interop.pl already calls package_context/3, package_load/3, package_require/3, package_loading/3 and package_register_claims/0 module-qualified"
+        ],
+        [
+          "read engine/metta/interop.pl:1972-2184",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/metta/interop.pl:1972-2184",
+          "title",
+          "read engine/metta/interop.pl:1972-2184"
+        ],
+        [
+          "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand",
+          "supports",
+          "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time"
+        ],
+        [
+          "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand",
+          "tags",
+          "source"
+        ],
+        [
+          "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand",
+          "title",
+          "read the directive; lib_compression at lib/lib_compression/lib_compression.pl:37 does import it at load time and does not break the boot, and the difference is that import! reaches lib_compression only on demand"
+        ],
+        [
+          "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks",
+          "sort",
+          "prop"
+        ],
+        [
+          "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks",
+          "supersedes",
+          "the analysis would see what the running system sees at that moment"
+        ],
+        [
+          "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks",
+          "supports",
+          {
+            "node": "load lib_file in the static-check driver before check/0 so the reference resolves",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks",
+          "tags",
+          "source"
+        ],
+        [
+          "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks",
+          "title",
+          "static_checks.pl loads the shipped libraries LAST on purpose so library loading cannot perturb earlier checks (tests/prolog/static_checks.pl:738-741,762-769), and check/0 runs before that sweep, so loading lib_file early changes what every later check walks"
+        ],
+        [
+          "the analysis would see what the running system sees at that moment",
+          "sort",
+          "prop"
+        ],
+        [
+          "the analysis would see what the running system sees at that moment",
+          "supports",
+          {
+            "node": "load lib_file in the static-check driver before check/0 so the reference resolves",
+            "status": "untried"
+          }
+        ],
+        [
+          "the analysis would see what the running system sees at that moment",
+          "supports",
+          {
+            "node": "load lib_file in the static-check driver before check/0 so the reference resolves",
+            "relation": "addresses",
+            "target": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+          }
+        ],
+        [
+          "the analysis would see what the running system sees at that moment",
+          "title",
+          "the analysis would see what the running system sees at that moment"
+        ],
+        [
+          "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time",
+          "title",
+          "the engine boot loads lib_package eagerly at engine/metta/interop.pl:1942, which is why lib_package cannot import lib_file at load time"
+        ],
+        [
+          "the prolog-static lane exits zero without suppressing a true finding",
+          "sort",
+          "prop"
+        ],
+        [
+          "the prolog-static lane exits zero without suppressing a true finding",
+          "title",
+          "the prolog-static lane exits zero without suppressing a true finding"
+        ],
+        [
+          "the prolog-static lane exits zero without suppressing a true finding",
+          "wanted",
+          true
+        ],
+        [
+          "the prolog-static lane exits zero without suppressing a true finding",
+          "worth",
+          70
+        ],
+        [
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+          "blocks",
+          "the prolog-static lane exits zero without suppressing a true finding"
+        ],
+        [
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
+          "title",
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "sort",
+          "approach"
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "addresses",
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "addresses",
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "effort",
+          2
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "rests_on",
+          "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "status",
+          "untried"
+        ],
+        [
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot",
+          "title",
+          "declare the deferred dependency at the call site with SWI's :- autoload/2 directive, so the name is defined for static analysis without loading lib_file at boot"
+        ],
+        [
+          "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "sort",
+          "approach"
+        ],
+        [
+          "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "addresses",
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        ],
+        [
+          "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "effort",
+          1
+        ],
+        [
+          "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "status",
+          "unwanted"
+        ],
+        [
+          "load lib_file in the static-check driver before check/0 so the reference resolves",
+          "title",
+          "load lib_file in the static-check driver before check/0 so the reference resolves"
+        ]
+      ],
+      "id": "0fd2b9a07dbad0a9"
+    },
+    {
+      "at": "2026-09-20T05:12:54.600513+00:00",
+      "after": "ee7faebc0a7919b5ec656de354c3197fa6c42b2a",
+      "did": "[{\"op\": \"attack\", \"id\": \"an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false\", \"because\": \"MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag\", \"tags\": [\"measured\"]}]",
+      "parents": [
+        "0fd2b9a07dbad0a9"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag",
+          "attacks",
+          "an explicit :- autoload/2 directive still defers the load when the autoload prolog flag is false"
+        ],
+        [
+          "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag",
+          "title",
+          "MEASURED 2026-09-20: a two-module probe under set_prolog_flag(autoload,false) printed the provider's load-time message during consult of the consumer, so current_module(provider) was already true before any call; the directive is eager under that flag"
+        ]
+      ],
+      "id": "8ff97c32084af85d"
+    },
+    {
+      "at": "2026-09-20T05:25:03.345407+00:00",
+      "after": "ee7faebc0a7919b5ec656de354c3197fa6c42b2a",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations\", \"tags\": [], \"title\": \"put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded\", \"fields\": {\"effort\": 3, \"addresses\": [\"the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl\", \"lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it\"]}}, {\"op\": \"status\", \"id\": \"put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded\", \"because\": \"tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal\", \"tags\": [\"tested\"], \"status\": \"active\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else\", \"tags\": [\"measured\"], \"title\": \"PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate\", \"tags\": [\"source\"], \"title\": \"the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets\", \"tags\": [\"measured\"], \"title\": \"SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 in the suite's own configuration\", \"tags\": [\"measured\"], \"title\": \"under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file\", \"fields\": {}}]",
+      "parents": [
+        "8ff97c32084af85d"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 in the suite's own configuration",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 in the suite's own configuration",
+          "supports",
+          "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file"
+        ],
+        [
+          "MEASURED 2026-09-20 in the suite's own configuration",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 in the suite's own configuration",
+          "title",
+          "MEASURED 2026-09-20 in the suite's own configuration"
+        ],
+        [
+          "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else",
+          "supports",
+          "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all"
+        ],
+        [
+          "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else",
+          "title",
+          "MEASURED 2026-09-20: the raw list_undefined over engine/main.pl with autoload off reports lib_file:metta_staged_publish/2 and nothing else"
+        ],
+        [
+          "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets",
+          "supports",
+          "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised"
+        ],
+        [
+          "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets",
+          "title",
+          "MEASURED 2026-09-20: write_canonical(zzz_m:zzz_n/1-[somewhere]) prints :(zzz_m,-(/(zzz_n,1),[somewhere])), which is why list_undefined prints its own rows with brackets"
+        ],
+        [
+          "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all",
+          "title",
+          "PROLOG_KNOWN_UNDEFINED carried a stale row: the walk over a tokenless engine boot no longer reports mettafunc/2 at all"
+        ],
+        [
+          "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised",
+          "sort",
+          "prop"
+        ],
+        [
+          "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised",
+          "title",
+          "SWI's : is priority 600 xfy and - is 500, so a predicate indicator paired with its locations does not split unless the indicator is parenthesised"
+        ],
+        [
+          "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate",
+          "supports",
+          "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module"
+        ],
+        [
+          "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate",
+          "tags",
+          "source"
+        ],
+        [
+          "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate",
+          "title",
+          "engine/main.pl is module metta_main while the generated mettafunc/2 is resolved through the &self execution module, so the declaration would create a different, empty predicate"
+        ],
+        [
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+          "sort",
+          "prop"
+        ],
+        [
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+          "supports",
+          {
+            "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+            "status": "untried"
+          }
+        ],
+        [
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+          "supports",
+          {
+            "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+            "relation": "addresses",
+            "target": "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+          }
+        ],
+        [
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+          "supports",
+          {
+            "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+            "relation": "addresses",
+            "target": "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+          }
+        ],
+        [
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+          "title",
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations"
+        ],
+        [
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal",
+          "supersedes",
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations"
+        ],
+        [
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal",
+          "supports",
+          {
+            "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+            "status": "active"
+          }
+        ],
+        [
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal",
+          "tags",
+          "tested"
+        ],
+        [
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal",
+          "title",
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal"
+        ],
+        [
+          "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module",
+          "title",
+          "the repair engine/check.sh records for mettafunc/2, a dynamic declaration in engine/main.pl, would have named the wrong module"
+        ],
+        [
+          "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file",
+          "sort",
+          "prop"
+        ],
+        [
+          "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file",
+          "title",
+          "under the engine's QLF boot, source_file/2 attributes almost nothing: 6 predicate-to-file pairs over 118 loaded files, none of them the engine's, so predicate_property/2 file(F) is the route to a clause in a named file"
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "sort",
+          "approach"
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "addresses",
+          "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl"
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "addresses",
+          "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "effort",
+          3
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "status",
+          "active"
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "title",
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded"
+        ]
+      ],
+      "id": "1795a873e176bfbc"
     }
   ]
 }

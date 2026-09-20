@@ -14,13 +14,19 @@
 %     - exits nonzero naming every undefined name a shipped library's clauses
 %       reach, with the file and line of the clause that reaches it, and the
 %       two spellings that fix it
-%     - exits nonzero when the walk stops seeing a planted call to an
-%       autoloadable name, so a clean result is a claim this file has just
-%       tested rather than an assumption
-%       [tested: prove_eyesight/0, which plants a call to the first library
-%       export this tree does not import; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3]
-%     - allows exactly the names in allowed/2, each with the reason it is
-%       deferred rather than missing, and nothing else
+%     - exits nonzero when the walk stops seeing the call it plants itself, so a
+%       clean result is a claim just tested rather than an assumption. The plant
+%       and the proof belong to deferred_references.pl now, and it owns the name
+%       it plants, so nothing this tree starts importing can quietly define it.
+%       This file used to pick from five real library exports and move between
+%       them for exactly that reason
+%       [tested: deferred_references:the_walk_refuses_to_answer_when_blinded;
+%       commit=WORKTREE]
+%     - allows exactly the names in deferred_reference/3, each with its reason
+%       and the files allowed to reach it, and nothing else; a row this lane's
+%       configuration has made unnecessary fails the lane rather than sitting
+%       there, and the same table serves engine/check.sh's `prolog` lane and
+%       tests/prolog/static_checks.pl, so the fact is written once
 %     - exits nonzero naming every head a library face registers that a module
 %       above the libraries in the execution chain answers instead, with the
 %       module that answers it, because a MeTTa call reaches a registered head by
@@ -63,7 +69,7 @@
 % halt tests/prolog/library_autoload.pl; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
 
 :- set_prolog_flag(autoload, false).
-:- use_module(library(check), [list_undefined/0]).
+:- ensure_loaded(deferred_references).
 % The checker runs in user, which imports only the engine's public interface.
 % [tested: sh check.sh lib-autoload; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- use_module(library(lists), [member/2, memberchk/2]).
@@ -72,36 +78,6 @@
 :- ensure_loaded('../../engine/main.pl').
 
 library_glob('../../lib/*/*.pl').
-
-% A name a library reaches that is deferred by design rather than missing.
-% Each row carries the reason, and a row with no reason is a row that should be
-% a repair instead.
-allowed(source_observation:observe_source/4,
-        'lib_observe calls metta_ensure_source_observation/0 first, which is \c
-         what loads engine/source_observation.pl: an engine nobody asks for an \c
-         observation pays nothing for one, so the module is absent at load \c
-         time on purpose').
-allowed(user:py_call/2,
-        'janus\'s, and every lib_thread call site is guarded by \c
-         current_predicate(py_call/2) or current_predicate/1 on a Python-seat \c
-         predicate; a tokenless engine has no Python seat').
-allowed(user:py_call/1,
-        'janus\'s, the call that discards its return: converting the return of \c
-         a host cleanup or cancellation callable raised on a leaf Atom \c
-         (docs/journal/2026-09-08-a-scope-owns-its-children.md), so lib_thread \c
-         calls those through py_call/1, and only for a host(...) record a \c
-         Python seat wrote; a tokenless engine has no Python seat').
-
-% Candidates for the eyesight plant: library exports the engine and its
-% libraries do not import, so a call to one is undefined exactly when the
-% autoloader is off. Several, because a later engine change may legitimately
-% start importing any one of them, and the plant then moves to the next rather
-% than passing vacuously.
-plant_candidate(top_sort/2).
-plant_candidate(list_to_assoc/2).
-plant_candidate(rb_new/1).
-plant_candidate(varnumbers/2).
-plant_candidate(dicts_to_same_keys/3).
 
 % A name a tier above the libraries answers, and no library publishes, so a
 % published head of that name proves the shadow walk can see one. Several,
@@ -112,31 +88,20 @@ shadow_candidate(permutation/2).
 shadow_candidate(list_to_set/2).
 shadow_candidate(max_member/2).
 
-:- dynamic reported/2.
-:- multifile user:message_hook/3.
-% Taking the message as DATA and suppressing the print: list_undefined's own
-% warning is a page of text per name, and this lane runs it twice, so a clean
-% run would bury its own verdict under the two names it allows. The hook
-% succeeds, which is what stops the message being printed
-% [source: SWI-Prolog 10.1 Reference Manual, message_hook/3].
-user:message_hook(check(undefined_procedures, Rows), _Kind, _Lines) :-
-    forall(member(PI-Locations, Rows), assertz(reported(PI, Locations))).
-
 % halt/1 on the way out, both ways, because engine/main.pl carries
 % initialization(main, main) and would otherwise run its demo over this lane's
 % verdict once the goal returns.
 library_autoload_gate :-
     load_shipped_libraries,
-    prove_eyesight,
-    undefined_names(Names),
-    exclude(is_allowed, Names, Findings),
+    undefined_findings(Findings, Stale),
     load_face_registrations,
     prove_shadow_eyesight,
     prove_shadow_enumeration,
     shadowed_heads(Shadowed),
     report(Findings),
+    report_stale(Stale),
     report_shadowed(Shadowed),
-    (   Findings == [], Shadowed == []
+    (   Findings == [], Stale == [], Shadowed == []
     ->  halt(0)
     ;   halt(1)
     ).
@@ -152,63 +117,16 @@ load_shipped_libraries :-
                            were not read~n', [File]),
                    halt(1) ))).
 
-undefined_names(Names) :-
-    retractall(reported(_, _)),
-    list_undefined,
-    findall(PI, reported(PI, _), Names0),
-    sort(Names0, Names).
-
-is_allowed(PI) :- allowed(PI, _).
-
-% A clean answer has to be a tested claim. The plant is a clause calling a
-% library export nothing here imports, which is undefined only because the
-% autoloader is off, so seeing it is the exact eyesight this lane needs.
-prove_eyesight :-
-    (   plant_candidate(Name/Arity), \+ current_predicate(Name/Arity)
-    ->  true
-    ;   format(user_error,
-               'library autoload: every plant candidate is already defined, so \c
-                the walk could not be tested; add one this tree does not \c
-                import to plant_candidate/1~n', []),
-        halt(1)
-    ),
-    functor(Goal, Name, Arity),
-    assertz((user:'$library_autoload_plant' :- Goal), Ref),
-    undefined_names(WithPlant),
-    erase(Ref),
-    (   memberchk(user:Name/Arity, WithPlant)
-    ->  true
-    ;   format(user_error,
-               'library autoload: the walk did not see a planted call to ~w, \c
-                so a clean result would say nothing~n', [Name/Arity]),
-        halt(1)
-    ).
-
-% The clause references list_undefined hands back locate the caller exactly,
-% which is what turns a name into an edit.
-finding_site(PI, Site) :-
-    reported(PI, Locations),
-    member(Location, Locations),
-    clause_reference(Location, Ref),
-    clause_property(Ref, file(File)),
-    clause_property(Ref, line_count(Line)),
-    format(atom(Site), '~w:~d', [File, Line]),
-    !.
-finding_site(_, 'location unavailable').
-
-clause_reference(clause_term_position(Ref, _), Ref) :- !.
-clause_reference(clause(Ref), Ref) :- !.
-clause_reference(Ref, Ref) :- blob(Ref, clause).
-
 report([]) :-
     library_glob(Glob),
     expand_file_name(Glob, Files),
     length(Files, Count),
-    findall(PI, allowed(PI, _), Allowed),
-    length(Allowed, AllowedCount),
+    findall(PI, deferred_reference(PI, _, _), Deferred),
+    length(Deferred, DeferredCount),
     format("library autoload: no shipped library reaches a name only the \c
-            autoloader would find, over ~d files, with ~d allowed by name~n",
-           [Count, AllowedCount]).
+            autoloader would find, over ~d files, against the ~d deferred \c
+            references every lane shares~n",
+           [Count, DeferredCount]).
 report([First|Rest]) :-
     Findings = [First|Rest],
     length(Findings, Count),
@@ -216,15 +134,15 @@ report([First|Rest]) :-
            'library autoload: ~d name(s) a shipped library calls resolve only \c
             through SWI\'s library index, so the call raises wherever the \c
             autoloader is off~n', [Count]),
-    forall(member(PI, Findings),
-           ( finding_site(PI, Site),
-             format(user_error, '  ~w~t~34| ~w~n', [PI, Site]) )),
+    forall(member(PI-Site, Findings),
+           format(user_error, '  ~w~t~34| ~w~n', [PI, Site])),
     format(user_error,
            'each is one declaration: `:- autoload(library(L), [Name/Arity]).` \c
             for a core library, or the capability\'s own \c
             metta_platform_load/2 import list for an optional one. Add a row \c
-            to allowed/2 in tests/prolog/library_autoload.pl only when the \c
-            name is deferred by design, with the reason~n', []).
+            to deferred_reference/3 in tests/prolog/deferred_references.pl \c
+            only when the name is deferred by design, with the reason and the \c
+            files allowed to reach it~n', []).
 
 % ------------------------------- what a published name resolves to -------------
 

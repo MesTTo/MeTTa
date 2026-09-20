@@ -62,6 +62,38 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The names this tree reaches without defining are one table. They were written
+  three times in three notations: a shell regex in `engine/check.sh`, an
+  `allowed/2` table in `tests/prolog/library_autoload.pl`, and nothing at all in
+  `tests/prolog/static_checks.pl`, which therefore could not pass with
+  `--on-warning=status`. Nothing checked that the three agreed, so a new
+  deferred name landed in one lane and slipped past another. They are rows in
+  `tests/prolog/deferred_references.pl` now, which also owns the walk, so the
+  three lanes run one implementation over one table. A row names the files
+  allowed to reach it, and a name reached from any other file is reported even
+  though the row exists, so widening a deferred call is a finding rather than a
+  free pass.
+- A deferred-reference row that has stopped being needed now fails its lane.
+  That is the half every mature suppression mechanism ends up with, and this
+  tree needed it: the regex carried `mettafunc/2` under a note saying
+  `:- dynamic mettafunc/2.` would clear it, and both halves were wrong. Measured
+  2026-09-20, the walk no longer reports the name at all, and the suggested
+  declaration would have named the wrong module, since `engine/main.pl` is
+  module `metta_main` while the generated `mettafunc/2` resolves through the
+  `&self` execution module. A row counts as needed only where its name is
+  absent and the file it names is loaded, so the same table stays honest in the
+  `lib-autoload` lane, which loads `lib_file` and resolves the name, and in the
+  `prolog` lane, which never reaches it.
+- The `prolog` lane stops piping `swipl` through two greps. A pipeline reports
+  the last filter's status, so a walk that died was indistinguishable from one
+  that found nothing; the walk prints its own findings and sets the status.
+- The undefined walk proves it can still see, on every run, by planting a call
+  to a name it owns and refusing to answer when the walk does not report it.
+  `lib-autoload` proved the same thing by planting a call to one of five real
+  library exports, a list that had to be maintained as the tree started
+  importing them; an owned name cannot be defined by accident. Both lanes run
+  one walk rather than two, which took `lib-autoload` from about 4s to 1s.
+
 - Every command the repository starts through `bounded.sh` now runs with
   `DEBUGINFOD_URLS` empty, so a command that symbolizes a native frame reads
   debug info built here instead of fetching it from a server. Ubuntu's
