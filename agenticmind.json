@@ -13464,6 +13464,99 @@
       "tags": [
         "source"
       ]
+    },
+    "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported": {
+      "title": "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+      "supports": [
+        {
+          "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends",
+        "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary": {
+      "title": "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+      "supports": [
+        {
+          "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted",
+        "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error": {
+      "title": "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist": {
+      "title": "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist",
+      "supports": [
+        "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+        {
+          "node": "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property": {
+      "title": "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property",
+      "supports": [
+        {
+          "node": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "status": "untried"
+        },
+        {
+          "node": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "relation": "addresses",
+          "target": "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
+        }
+      ]
+    },
+    "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1": {
+      "title": "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1",
+      "supports": [
+        {
+          "node": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles": {
+      "title": "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles"
+    },
+    "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run": {
+      "title": "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run",
+      "supports": [
+        "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -15213,7 +15306,7 @@
     "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list": {
       "title": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
       ]
@@ -15221,7 +15314,7 @@
     "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising": {
       "title": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
       "effort": 2,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
       ]
@@ -15232,6 +15325,14 @@
       "status": "unwanted",
       "addresses": [
         "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+      ]
+    },
+    "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression": {
+      "title": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
       ]
     }
   },
@@ -59432,6 +59533,247 @@
         ]
       ],
       "id": "3b32f84fd4d6af7d"
+    },
+    {
+      "at": "2026-09-20T21:32:24.693910+00:00",
+      "after": "d86131206171395568059b47222dfa7192eef2ba",
+      "did": "[{\"op\": \"status\", \"id\": \"enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list\", \"because\": \"applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising\", \"because\": \"spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist\", \"tags\": [\"measured\"], \"title\": \"the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property\", \"tags\": [], \"title\": \"add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression\", \"fields\": {\"effort\": 1, \"addresses\": [\"the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error\"]}}, {\"op\": \"status\", \"id\": \"add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression\", \"because\": \"the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run\", \"tags\": [\"measured\"], \"title\": \"the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles\", \"fields\": {}}]",
+      "parents": [
+        "3b32f84fd4d6af7d"
+      ],
+      "assert": [
+        [
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+          "sort",
+          "prop"
+        ],
+        [
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+          "supersedes",
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends"
+        ],
+        [
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+          "supersedes",
+          "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state"
+        ],
+        [
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+          "supports",
+          {
+            "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+            "status": "done"
+          }
+        ],
+        [
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+          "tags",
+          "measured"
+        ],
+        [
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported",
+          "title",
+          "applied, committed as 310f805ac, and the orphan count went from 2 to 0 while the check keeps its power: the planted orphan is still reported"
+        ],
+        [
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+          "sort",
+          "prop"
+        ],
+        [
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+          "supersedes",
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted"
+        ],
+        [
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+          "supersedes",
+          "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held"
+        ],
+        [
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+          "supports",
+          {
+            "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+            "status": "done"
+          }
+        ],
+        [
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+          "tags",
+          "tested"
+        ],
+        [
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary",
+          "title",
+          "spliced into tests/checks/check_twin_coverage_selftest.py and committed as cba9ce9bc; the suite passes with it, and the plant asserts the walk reaches the foreign file so a silent answer cannot pass for a boundary"
+        ],
+        [
+          "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist",
+          "supports",
+          "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
+        ],
+        [
+          "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist",
+          "supports",
+          {
+            "node": "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist",
+          "tags",
+          "measured"
+        ],
+        [
+          "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist",
+          "title",
+          "the gate printed disabling_mutation a_backing_row_registers_before_the_equations_calling_it_translate does not exist"
+        ],
+        [
+          "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property",
+          "supports",
+          {
+            "node": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+            "status": "untried"
+          }
+        ],
+        [
+          "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property",
+          "supports",
+          {
+            "node": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+            "relation": "addresses",
+            "target": "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
+          }
+        ],
+        [
+          "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property",
+          "title",
+          "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property"
+        ],
+        [
+          "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1",
+          "supersedes",
+          "the lane encodes formally the negative control already run by hand, so the mutation should be the same edit: drop the guard and leave predicate_property"
+        ],
+        [
+          "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1",
+          "supports",
+          {
+            "node": "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+            "status": "done"
+          }
+        ],
+        [
+          "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1",
+          "tags",
+          "tested"
+        ],
+        [
+          "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1",
+          "title",
+          "the lane now reports mutation_witnesses 79 passed at exit 0, and the new witness reads control=0 mutant=1"
+        ],
+        [
+          "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+          "sort",
+          "prop"
+        ],
+        [
+          "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error",
+          "title",
+          "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
+        ],
+        [
+          "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles",
+          "sort",
+          "prop"
+        ],
+        [
+          "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles",
+          "title",
+          "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles"
+        ],
+        [
+          "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run",
+          "sort",
+          "prop"
+        ],
+        [
+          "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run",
+          "supports",
+          "the redis twin now runs: it no longer appears in the lane's findings, leaving only a pin drift on 35-math_lib which the corpus re-pin handles"
+        ],
+        [
+          "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run",
+          "tags",
+          "measured"
+        ],
+        [
+          "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run",
+          "title",
+          "twin_coverage.py over both examples reported 1 finding over 2 twinned examples, and that finding is a budget line rather than a failure to run"
+        ],
+        [
+          "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "sort",
+          "approach"
+        ],
+        [
+          "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "addresses",
+          "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
+        ],
+        [
+          "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "effort",
+          1
+        ],
+        [
+          "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "status",
+          "done"
+        ],
+        [
+          "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression",
+          "title",
+          "add the resolving_head_source mutation, which removes the guard and leaves the resolving question, and bind it to the new regression"
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "status",
+          "done"
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "970ec75e5ca128bd"
     }
   ]
 }
