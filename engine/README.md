@@ -52,18 +52,18 @@ sh bench.sh      # against the committed pins
 
 ## The C half
 
-Each `.c` builds beside its Prolog half and the Prolog stays the specification
+Each `c/*.c` builds to a `.so` beside its Prolog half and the Prolog stays the specification
 and the fallback.
 
 | file | lines | what it does |
 |---|---:|---|
-| `json_codec.c` | 1,219 | answers a document exactly as `library(json)` does, or declines |
-| `reader.c` | 949 | parses shipped-grammar sources, returning signatures and declaration summaries from the same walk |
-| `writer.c` | 913 | writes terms back |
-| `mbr.c` | 355 | minimum bounding rectangles for segment matching |
-| `empty_prune.c` | 307 | drops branches that cannot match |
-| `atom_index.c` | 166 | the atom index |
-| `storage.c` | 55 | the storage shim |
+| `c/json_codec.c` | 1,219 | answers a document exactly as `library(json)` does, or declines |
+| `c/reader.c` | 949 | parses shipped-grammar sources, returning signatures and declaration summaries from the same walk |
+| `c/writer.c` | 913 | writes terms back |
+| `c/mbr.c` | 355 | minimum bounding rectangles for segment matching |
+| `c/empty_prune.c` | 307 | drops branches that cannot match |
+| `c/atom_index.c` | 166 | the atom index |
+| `c/storage.c` | 55 | the storage shim |
 
 ## Metatheory
 

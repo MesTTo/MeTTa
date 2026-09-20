@@ -146,8 +146,8 @@
 %the Prolog grammar", so a refused shlib is the same absence, not an error.
 :- catch(use_module(library(shlib)), _, true).
 
-%The C reader rides beside this file as reader.c, compiled to reader.so by
-%check.sh or by hand with `swipl-ld -shared -O2 -o reader.so reader.c`. It is
+%The C reader is c/reader.c, compiled to reader.so beside this file by
+%check.sh or by hand with `swipl-ld -shared -O2 -o reader.so c/reader.c`. It is
 %a port of the SHIPPED grammar only, so the dispatches below consult it only
 %while metta_reader_mode(shipped) holds; the Prolog grammar in this file
 %remains the reader's specification, the custom-token path, and the fallback
@@ -190,7 +190,7 @@ metta_c_parse_source(S, Forms) :-
 metta_c_reader_refuse :-
     throw(error(existence_error(metta_c_reader, 'engine/reader.so'),
                 context(metta_c_parse_source/4,
-                        'build it: swipl-ld -shared -O2 -o engine/reader.so engine/reader.c'))).
+                        'build it: swipl-ld -shared -O2 -o engine/reader.so engine/c/reader.c'))).
 
 :- metta_try_load_c_reader.
 

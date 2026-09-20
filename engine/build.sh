@@ -40,11 +40,14 @@ bounded() { sh "$HERE/../tools/bounded.sh" "$@"; }
 
 # Discovered rather than listed, so adding a C unit beside its Prolog file
 # needs no edit here.
-for source in "$HERE"/*.c; do
+# The sources live in c/ and each .so is written beside the .pl it accelerates,
+# because every one of those loads its artifact from its OWN directory through
+# prolog_load_context/2 [source: engine/atom_index.pl].
+for source in "$HERE"/c/*.c; do
     [ -f "$source" ] || continue
     unit=$(basename "$source" .c)
     if [ ! -f "$HERE/$unit.so" ] || [ "$source" -nt "$HERE/$unit.so" ] ||
-       [ "$HERE/metta_token.h" -nt "$HERE/$unit.so" ]; then
-        ( cd "$HERE" && bounded swipl-ld -shared -O2 -o "$unit.so" "$unit.c" )
+       [ "$HERE/c/metta_token.h" -nt "$HERE/$unit.so" ]; then
+        ( cd "$HERE" && bounded swipl-ld -shared -O2 -o "$unit.so" "c/$unit.c" )
     fi
 done
