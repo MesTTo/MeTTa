@@ -62,6 +62,36 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Every command the repository starts through `bounded.sh` now runs with
+  `DEBUGINFOD_URLS` empty, so a command that symbolizes a native frame reads
+  debug info built here instead of fetching it from a server. Ubuntu's
+  `/etc/profile.d/debuginfod.sh` points every login shell at
+  `https://debuginfod.ubuntu.com`, which this box cannot connect to, so
+  elfutils' `libdebuginfod` waits out its own timeout for each build-id it
+  cannot resolve locally. Measured 2026-09-20: the `memray` lane's
+  `limit_leaks` plant sat 37 minutes at 0% CPU in `poll_schedule_timeout`
+  holding a `SYN-SENT` socket to `91.189.92.195:443`, and would have spent its
+  whole 3600s ceiling on each of two invocations; `curl
+  https://debuginfod.ubuntu.com/` never completes a connection. The same defect
+  hung `llvm-symbolizer` under the C seat's sanitizer on 2026-09-03 and was
+  cleared only inside `extensions/cmetta/sanitize.sh`, which is what left this
+  instance free to happen; that script keeps its own clearing because it runs
+  each sanitized binary directly rather than through the wrapper. Nothing is
+  lost: the symbols a server would add are the host's, and every frame these
+  lanes read belongs to a source built in this tree. `bounded.sh` had claimed a
+  normalised environment since 2026-09-15 with no test pinning it, so
+  `test_bounded_reaping.sh` case 5g now asserts what the command itself sees
+  rather than what the wrapper writes, which also catches a re-set between the
+  clearing and `exec` -- the profile script re-derives the value from
+  `/etc/debuginfod/*.urls` whenever `[ -z ]` holds, so a rung that started a
+  login shell would hand the server back.
+
+- `check.sh` reports each lane's seconds, the run's total, and the ten lanes
+  that cost the most. The gate ran 206 lanes and reported no timing at all, so
+  the only cost signal a finished run left was a battery's provenance stamp
+  against its log's mtime: one number for everything, which cannot separate a
+  slow lane from a stalled one.
+
 - Registering a door the generated verdict table does not name solved the
   shipped call graph's least fixed point in the running process, and paid it
   again for every distinct set of rows a caller passed, because the cached core

@@ -5621,6 +5621,76 @@
       "tags": [
         "measured"
       ]
+    },
+    "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id": {
+      "title": "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+    },
+    "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script": {
+      "title": "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script",
+      "supports": [
+        "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through": {
+      "title": "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+    },
+    "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it": {
+      "title": "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it",
+      "supports": [
+        "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days": {
+      "title": "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days",
+      "supports": [
+        {
+          "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "status": "untried"
+        },
+        {
+          "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "relation": "addresses",
+          "target": "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+        },
+        {
+          "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "relation": "rests_on",
+          "target": "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+        }
+      ]
+    },
+    "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total": {
+      "title": "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total",
+      "supports": [
+        {
+          "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating": {
+      "title": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+    },
+    "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply": {
+      "title": "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply",
+      "supports": [
+        "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -6540,6 +6610,17 @@
       "status": "done",
       "addresses": [
         "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+      ]
+    },
+    "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees": {
+      "title": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+      ],
+      "rests_on": [
+        "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
       ]
     }
   },
@@ -28323,6 +28404,201 @@
         ]
       ],
       "id": "97820c1a53440c54"
+    },
+    {
+      "at": "2026-09-20T02:24:18.829450+00:00",
+      "after": "b715694f3f5aad0801009e8c8d5c54c4ce75e6b3",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script\", \"tags\": [\"measured\"], \"title\": \"every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it\", \"tags\": [\"source\"], \"title\": \"the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days\", \"tags\": [], \"title\": \"clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees\", \"fields\": {\"effort\": 1, \"addresses\": [\"every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id\"], \"rests_on\": [\"the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through\"]}}, {\"op\": \"status\", \"id\": \"clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees\", \"because\": \"in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply\", \"tags\": [\"measured\"], \"title\": \"the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating\", \"fields\": {}}]",
+      "parents": [
+        "97820c1a53440c54"
+      ],
+      "assert": [
+        [
+          "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id",
+          "sort",
+          "prop"
+        ],
+        [
+          "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id",
+          "title",
+          "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+        ],
+        [
+          "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total",
+          "sort",
+          "prop"
+        ],
+        [
+          "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total",
+          "supersedes",
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days"
+        ],
+        [
+          "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total",
+          "supports",
+          {
+            "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+            "status": "done"
+          }
+        ],
+        [
+          "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total",
+          "tags",
+          "measured"
+        ],
+        [
+          "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total",
+          "title",
+          "in battery 8 the memray lane completes in 24 seconds where it had hung 2268 seconds, the reaping lane passes with ok 5g naming the new case, and the whole two-lane run reports 50s total"
+        ],
+        [
+          "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply",
+          "supports",
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        ],
+        [
+          "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply",
+          "title",
+          "measured 2026-09-20 in battery 8, once the debuginfod hang stopped masking it: the leaked allocation's stack is tmp_realloc, stack_realloc, growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va, which is SWI growing its own Prolog stacks inside findall rather than anything the cursors hold; the kept half still fails correctly at 19.5 MiB in runtime apply"
+        ],
+        [
+          "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script",
+          "supports",
+          "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+        ],
+        [
+          "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script",
+          "title",
+          "measured 2026-09-20: the memray lane's limit_leaks plant sat 2268 seconds at 0 percent CPU in poll_schedule_timeout holding a SYN-SENT socket to 91.189.92.195 port 443, and a curl to the same host never completes a connection; Ubuntu sets the variable for every login shell from a profile script"
+        ],
+        [
+          "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it",
+          "supports",
+          "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+        ],
+        [
+          "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it",
+          "title",
+          "read extensions/cmetta/sanitize.sh, whose comment records the LeakSanitizer hang and the same remedy, and the CHANGELOG entry that shipped it"
+        ],
+        [
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating",
+          "sort",
+          "prop"
+        ],
+        [
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating",
+          "title",
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        ],
+        [
+          "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through",
+          "title",
+          "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+        ],
+        [
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days",
+          "sort",
+          "prop"
+        ],
+        [
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days",
+          "supports",
+          {
+            "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+            "status": "untried"
+          }
+        ],
+        [
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days",
+          "supports",
+          {
+            "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+            "relation": "addresses",
+            "target": "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+          }
+        ],
+        [
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days",
+          "supports",
+          {
+            "node": "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+            "relation": "rests_on",
+            "target": "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+          }
+        ],
+        [
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days",
+          "title",
+          "the wrapper already guarantees a normalised environment and already clears DISPLAY and WAYLAND_DISPLAY for the identical reason, a box-level variable that makes a lane answer differently from CI, so this is one more variable of a class the file already owns rather than a new responsibility; the guarantee had no test, which is exactly how a sibling variable stayed uncovered for seventeen days"
+        ],
+        [
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "sort",
+          "approach"
+        ],
+        [
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "addresses",
+          "every command the repository starts inherits DEBUGINFOD_URLS pointing at a debuginfod server this box cannot connect to, so anything symbolizing a native frame waits out a connection timeout per unresolved build-id"
+        ],
+        [
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "effort",
+          1
+        ],
+        [
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "rests_on",
+          "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+        ],
+        [
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "status",
+          "done"
+        ],
+        [
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees",
+          "title",
+          "clear the variable in the bounded wrapper beside the display variables it already clears, and pin the whole normalised environment with a case in the reaping suite that asserts what the command sees"
+        ]
+      ],
+      "id": "1b5924e66e33a0f6"
     }
   ]
 }

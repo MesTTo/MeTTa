@@ -13,7 +13,8 @@
 #
 #     sh tests/shell/test_bounded_reaping.sh timeout --preserve-status -k 10 3600
 #
-#   That control must FAIL cases 1 to 3. A reaping check that passes with the
+#   That control must FAIL cases 1 to 3 and 5g, since a bare `timeout` neither
+#   reaps nor normalises. A reaping check that passes with the
 #   mechanism removed is checking nothing, and the two 122-CPU-hour orphans of
 #   2026-09-01 are what a check like that would have missed.
 #
@@ -37,6 +38,9 @@
 #     `unlimited`, so a caller that passes nothing is still bounded
 #   - case 5f: a rung that inherits a TIGHTER bound than it asked for says so,
 #     rather than announcing that nothing bounds the command
+#   - case 5g: the command starts in the normalised environment the wrapper
+#     promises -- DISPLAY and WAYLAND_DISPLAY gone, DEBUGINFOD_URLS empty --
+#     which is the one guarantee in bounded.sh that nothing used to pin
 #   - case 6: a child OUTLIVES the thread that spawned it. The parent-death
 #     signal is documented as firing when the spawning THREAD exits, which
 #     would kill live children under any threaded runner; this is what says the
@@ -272,6 +276,35 @@ case $notice in
     *"262144 kB is already in"*ran*)
         printf 'ok  5f an inherited tighter bound is reported, not overstated\n' ;;
     *)  fail "case 5f: the inherited-bound notice read '$notice'" ;;
+esac
+
+# ---------------------------------------------------------------- case 5g
+# The normalised environment was a guarantee with nothing pinning it, and the
+# gap has now cost a lane. DISPLAY has been cleared in bounded.sh since
+# 2026-09-15, but DEBUGINFOD_URLS was cleared only inside
+# extensions/cmetta/sanitize.sh on 2026-09-03, so when memray's limit_leaks
+# plant symbolized a native frame on 2026-09-20 it still reached for
+# https://debuginfod.ubuntu.com, which this box cannot connect to, and sat 37
+# minutes at 0% CPU in poll_schedule_timeout against a 3600s ceiling.
+#
+# Asserted on what the COMMAND sees rather than on what bounded.sh writes, so
+# anything re-setting a variable between here and exec is caught too:
+# /etc/profile.d/debuginfod.sh re-derives DEBUGINFOD_URLS from
+# /etc/debuginfod/*.urls whenever `[ -z ]` holds, so a rung that ever started a
+# LOGIN shell would hand the server back with the clearing still in place.
+#
+# `${VAR-...}` rather than `${VAR}`, because empty-and-exported and unset are
+# different answers and the guarantee names the first: an unset variable cannot
+# be told in /proc/<pid>/environ from one this box never configured.
+seen=$(DISPLAY=:9 WAYLAND_DISPLAY=wayland-9 \
+       DEBUGINFOD_URLS=https://debuginfod.invalid \
+       $WRAPPER /bin/sh -c \
+       'printf "display=%s wayland=%s urls=[%s]" "${DISPLAY-cleared}" \
+            "${WAYLAND_DISPLAY-cleared}" "${DEBUGINFOD_URLS-unset}"' 2>&1)
+case $seen in
+    'display=cleared wayland=cleared urls=[]')
+        printf 'ok  5g the command starts headless and reaches no debuginfod server\n' ;;
+    *)  fail "case 5g: the command saw '$seen'" ;;
 esac
 
 # ---------------------------------------------------------------- case 6

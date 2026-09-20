@@ -92,6 +92,21 @@
 #     host-workarounds-selftest and the Python examples lane failed that way
 #     on an unchanged tree and pass headless; SWI-Prolog 10.1.13;
 #     commit=c4e75b3206191b8fd969a1449e75e928227883b8]
+#   - the command reaches no debuginfod server: DEBUGINFOD_URLS is emptied
+#     before anything starts, so a command that symbolizes a native frame
+#     answers from debug info built here instead of fetching it. Ubuntu's
+#     /etc/profile.d/debuginfod.sh points every login shell at
+#     https://debuginfod.ubuntu.com, which this box cannot reach at all, so
+#     elfutils' libdebuginfod waits out its own timeout for every build-id it
+#     cannot resolve locally [measured 2026-09-20: the memray lane's
+#     limit_leaks plant sat 37 minutes at 0% CPU in poll_schedule_timeout
+#     holding a SYN-SENT socket to 91.189.92.195:443, and would have burned
+#     its whole 3600s ceiling; `curl https://debuginfod.ubuntu.com/` never
+#     completes a connection. llvm-symbolizer hung the same way under the C
+#     seat's sanitizer on 2026-09-03 and was cleared in that one script rather
+#     than here, which is what left this instance free to happen].
+#     Nothing is lost: the symbols a server would add are the host's, and every
+#     frame these lanes read belongs to a source built in this tree.
 # Fails when:
 #   - no `timeout` is reachable: exit 2, naming the package that ships one.
 #   - the caller died before the signal was armed: exit 125, the same status
@@ -110,10 +125,22 @@
 #   Future Enhancements: None
 
 set -u
-# Headless by construction: see the Guarantees above. The variables are
-# unset here, before either exec path, so the deadline-only rung and the
-# owner-linked rung start the command in the same environment.
+# Normalised by construction: see the Guarantees above. Both are cleared here,
+# before either exec path, so the deadline-only rung and the owner-linked rung
+# start the command in the same environment.
+#
+# DEBUGINFOD_URLS is EMPTIED and exported rather than unset. Either stops
+# libdebuginfod, which reads the variable and nothing else, and neither
+# survives a login shell, since /etc/profile.d/debuginfod.sh re-derives the
+# value from /etc/debuginfod/*.urls whenever `[ -z ]` holds. What an exported
+# empty buys is that the decision is READABLE: it shows in the command's own
+# /proc/<pid>/environ, where an unset variable cannot be told from one this
+# box never configured, and reading that file is how the 2026-09-20 hang was
+# attributed in the first place. It is also the spelling the C seat's
+# sanitizer already used, so the tree says this one way.
 unset DISPLAY WAYLAND_DISPLAY
+DEBUGINFOD_URLS=
+export DEBUGINFOD_URLS
 
 # An absolute path to this file, because the arming rung re-enters it through
 # setpriv's execvp, which does a PATH lookup on a name with no slash in it. The
