@@ -32,9 +32,9 @@
 run_example_corpus() {
     py_prefix=$(dirname "$(dirname "$PY")")
     if [ -f "$py_prefix/pyvenv.cfg" ]; then
-        ( cd "$HERE" && bounded env VIRTUAL_ENV="$py_prefix" PATH="$py_prefix/bin:$PATH" sh test.sh )
+        ( cd "$HERE" && bounded env VIRTUAL_ENV="$py_prefix" PATH="$py_prefix/bin:$PATH" sh tools/test.sh )
     else
-        ( cd "$HERE" && bounded sh test.sh )
+        ( cd "$HERE" && bounded sh tools/test.sh )
     fi
 }
 
@@ -436,7 +436,7 @@ run GATE cumulative-syntax-selftest "$PY" "$HERE/tests/checks/check_cumulative_s
 # inside FILE.pl's own load-time directives, because -g goals run only after
 # every -s/-l file has finished loading. Hence tests/fixtures/no_autoload_boot.pl, which
 # run.sh boots through when NO_AUTOLOAD=1 [measured 2026-08-19: 200/200].
-run GATE   no-autoload  sh -c "cd '$HERE' && NO_AUTOLOAD=1 sh test.sh"
+run GATE   no-autoload  sh -c "cd '$HERE' && NO_AUTOLOAD=1 sh tools/test.sh"
 
 # The same walk as the backend GATE above, over lib/ instead. It was a REPORT
 # while the library tier's surface was undecided: a backend is third-party and
