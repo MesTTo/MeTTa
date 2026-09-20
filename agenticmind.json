@@ -6603,6 +6603,59 @@
       "tags": [
         "measured"
       ]
+    },
+    "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed": {
+      "title": "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+    },
+    "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise": {
+      "title": "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise",
+      "supports": [
+        "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not": {
+      "title": "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not",
+      "supports": [
+        {
+          "node": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "status": "untried"
+        },
+        {
+          "node": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "relation": "addresses",
+          "target": "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+        }
+      ]
+    },
+    "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up": {
+      "title": "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up",
+      "supports": [
+        {
+          "node": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level": {
+      "title": "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level"
+    },
+    "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form": {
+      "title": "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form",
+      "supports": [
+        "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -7653,6 +7706,14 @@
       "status": "untried",
       "addresses": [
         "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+      ]
+    },
+    "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory": {
+      "title": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
       ]
     }
   },
@@ -32278,6 +32339,157 @@
         ]
       ],
       "id": "9bd15f220623bb81"
+    },
+    {
+      "at": "2026-09-20T04:41:56.991188+00:00",
+      "after": "05bd6b1c3f80c9a1a7c32d6cf30c85effbd9ff9d",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise\", \"tags\": [\"measured\"], \"title\": \"the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not\", \"tags\": [], \"title\": \"write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory\", \"fields\": {\"effort\": 2, \"addresses\": [\"the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed\"]}}, {\"op\": \"status\", \"id\": \"write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory\", \"because\": \"examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form\", \"tags\": [\"measured\"], \"title\": \"registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level\", \"fields\": {}}]",
+      "parents": [
+        "9bd15f220623bb81"
+      ],
+      "assert": [
+        [
+          "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up",
+          "sort",
+          "prop"
+        ],
+        [
+          "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up",
+          "supersedes",
+          "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not"
+        ],
+        [
+          "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up",
+          "supports",
+          {
+            "node": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+            "status": "done"
+          }
+        ],
+        [
+          "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up",
+          "tags",
+          "tested"
+        ],
+        [
+          "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up",
+          "title",
+          "examples/ch20-extending-the-engine/20-03-prolog-underneath/06-package_rows.metta passes four assertions and exits 0, leaving the tree clean, and battery 12 reports corpus-coverage ok, cumulative-syntax ok, example-origins ok, shell ok, examples ok, no-autoload ok, with llms and llms-selftest ok after the count and the sheet caught up"
+        ],
+        [
+          "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise",
+          "supports",
+          "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+        ],
+        [
+          "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise",
+          "title",
+          "measured 2026-09-20: no file under examples/ names setup!, package-prolog or the (= (package ...)) form, and the corpus-coverage allowlist refuses a row for a head absent from the corpus entirely, so an allowlist entry was not available even as a compromise"
+        ],
+        [
+          "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form",
+          "supports",
+          "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level"
+        ],
+        [
+          "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form",
+          "title",
+          "measured 2026-09-20: the same call inside a let* body answered (greet) unevaluated and answered hello when the registration was a top-level form"
+        ],
+        [
+          "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level",
+          "sort",
+          "prop"
+        ],
+        [
+          "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level",
+          "title",
+          "registration by a package row is a LOAD-time effect, so a head it registers cannot be called from a function body compiled before the row performed, which is why the example registers at top level"
+        ],
+        [
+          "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed",
+          "title",
+          "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+        ],
+        [
+          "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not",
+          "supports",
+          {
+            "node": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+            "status": "untried"
+          }
+        ],
+        [
+          "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not",
+          "supports",
+          {
+            "node": "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+            "relation": "addresses",
+            "target": "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+          }
+        ],
+        [
+          "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not",
+          "title",
+          "the record's precedent for three uncovered heads was one example calling all three rather than an allowlist, and examples/ is this repository's executable semantics documentation, so the coverage gap and the documentation gap are the same gap; a temporary directory is what keeps setup!'s published receipts out of the tree, which calling it on a shipped library does not"
+        ],
+        [
+          "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "sort",
+          "approach"
+        ],
+        [
+          "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "addresses",
+          "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+        ],
+        [
+          "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "effort",
+          2
+        ],
+        [
+          "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "status",
+          "done"
+        ],
+        [
+          "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory",
+          "title",
+          "write one example that calls both heads for real, a backing row performed against a Prolog fixture and a setup! over a package the example builds in a temporary directory"
+        ]
+      ],
+      "id": "3882ad686a20e60d"
     }
   ]
 }
