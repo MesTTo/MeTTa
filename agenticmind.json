@@ -12451,6 +12451,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair": {
+      "title": "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair"
+    },
+    "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it": {
+      "title": "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it",
+      "supports": [
+        "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons": {
+      "title": "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons"
+    },
+    "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either": {
+      "title": "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either",
+      "supports": [
+        "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not": {
+      "title": "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not"
+    },
+    "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead": {
+      "title": "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead",
+      "supports": [
+        "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -55534,6 +55570,107 @@
         ]
       ],
       "id": "6a5c20e99c397aba"
+    },
+    {
+      "at": "2026-09-20T18:11:20.710154+00:00",
+      "after": "19910690d8820c3f891d58fe1fdcc4a8c1c36da9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it\", \"tags\": [\"measured\"], \"title\": \"the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either\", \"tags\": [\"measured\"], \"title\": \"that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead\", \"tags\": [\"measured\"], \"title\": \"the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not\", \"fields\": {}}]",
+      "parents": [
+        "6a5c20e99c397aba"
+      ],
+      "assert": [
+        [
+          "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either",
+          "supports",
+          "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons"
+        ],
+        [
+          "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either",
+          "title",
+          "counted from the re-measure; the distribution is what prompted sampling three of the singletons rather than assuming either"
+        ],
+        [
+          "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it",
+          "supports",
+          "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair"
+        ],
+        [
+          "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it",
+          "title",
+          "measured 2026-09-21 over all 38 debt suites re-run with VIRTUAL_ENV exported the way tools/select-python.sh exports it"
+        ],
+        [
+          "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead",
+          "supports",
+          "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not"
+        ],
+        [
+          "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead",
+          "title",
+          "measured on lib_pairs, lib_logging and lib_markup; lib_markup fails an assertion instead"
+        ],
+        [
+          "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons",
+          "sort",
+          "prop"
+        ],
+        [
+          "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons",
+          "title",
+          "that debt is long-tailed: 15, 11, 10, 10, 8 and 8 in six suites and exactly ONE failure in eighteen others, which is the shape that would follow either from one systematic cause touching many suites once or from eighteen unrelated singletons"
+        ],
+        [
+          "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not",
+          "sort",
+          "prop"
+        ],
+        [
+          "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not",
+          "title",
+          "the singletons are not one cause, though a lead survives: two of three sampled fail with plunit's 'Generated unexpected warning or error', which is what it says when a test emits output it did not declare, and the typed build adds diagnostics. lib_pairs' underlying error is a genuine MeTTa assertion, so the message is shared and the cause is not"
+        ],
+        [
+          "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair",
+          "title",
+          "the typed build's genuine debt is 120 failures over 35 suites, not the 141 over 38 I quoted: shim.plt's 18 were my missing VIRTUAL_ENV, lib_database's 2 are fixed by the mode-line change and source_observation_artifacts' 1 by the tools/run.sh repair"
+        ]
+      ],
+      "id": "386eecd0c440363b"
     }
   ]
 }
