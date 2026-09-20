@@ -12166,6 +12166,74 @@
       "tags": [
         "measured"
       ]
+    },
+    "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one": {
+      "title": "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one",
+      "supports": [
+        {
+          "node": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "status": "untried"
+        },
+        {
+          "node": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "relation": "addresses",
+          "target": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        }
+      ]
+    },
+    "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before": {
+      "title": "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before",
+      "supports": [
+        {
+          "node": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said": {
+      "title": "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said"
+    },
+    "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes": {
+      "title": "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes",
+      "supports": [
+        "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent": {
+      "title": "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)": {
+      "title": "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)",
+      "supports": [
+        "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike": {
+      "title": "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike"
+    },
+    "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that": {
+      "title": "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that",
+      "supports": [
+        "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -13846,6 +13914,14 @@
       "status": "unwanted",
       "addresses": [
         "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
+      ]
+    },
+    "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes": {
+      "title": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
       ]
     }
   },
@@ -54392,6 +54468,195 @@
         ]
       ],
       "id": "4ac9e84dd22a2929"
+    },
+    {
+      "at": "2026-09-20T17:57:27.641115+00:00",
+      "after": "aa5240c7f4af854b6687cf9a9fc606cf4abc6e43",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one\", \"tags\": [], \"title\": \"leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes\", \"fields\": {\"effort\": 1, \"addresses\": [\"two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip\"]}}, {\"op\": \"status\", \"id\": \"leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes\", \"because\": \"measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes\", \"tags\": [\"measured\"], \"title\": \"my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that\", \"tags\": [\"source\"], \"title\": \"the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike\", \"fields\": {}}]",
+      "parents": [
+        "4ac9e84dd22a2929"
+      ],
+      "assert": [
+        [
+          "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one",
+          "sort",
+          "prop"
+        ],
+        [
+          "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one",
+          "supports",
+          {
+            "node": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+            "status": "untried"
+          }
+        ],
+        [
+          "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one",
+          "supports",
+          {
+            "node": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+            "relation": "addresses",
+            "target": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+          }
+        ],
+        [
+          "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one",
+          "title",
+          "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one"
+        ],
+        [
+          "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that",
+          "supports",
+          "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike"
+        ],
+        [
+          "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that",
+          "tags",
+          "source"
+        ],
+        [
+          "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that",
+          "title",
+          "dev_typed.pl states it in its own header and Decides and had measured it on two suites in 2026-08-19; this is the same defect in a library that was written after that"
+        ],
+        [
+          "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before",
+          "supersedes",
+          "a mode line type on an argument holding variables becomes when(ground(V), must_be(T,V)), and an unbound when/2 leaves an attribute on every variable in the term; persistent_value/1 refuses an attributed term on purpose and =@= is false against one"
+        ],
+        [
+          "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before",
+          "supports",
+          {
+            "node": "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+            "status": "done"
+          }
+        ],
+        [
+          "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before",
+          "title",
+          "measured 2026-09-21: the suite goes from 10 passed 21 failed to 31 passed 0 failed under the typed build, the untyped build still answers 33 passed 0 failed, and lib_csv, lib_socket and lib_http stay at 0 typed failures. An isolated probe answers variant(=@=) yes with no attribute on the read where it answered no with one before"
+        ],
+        [
+          "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)",
+          "supports",
+          "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent"
+        ],
+        [
+          "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)",
+          "title",
+          "measured in an isolated probe under the typed build; calling persistent_value([pair,X,X]) directly succeeded while the same value inside database-add! raised domain_error(persistent_value,_)"
+        ],
+        [
+          "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said",
+          "sort",
+          "prop"
+        ],
+        [
+          "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said",
+          "title",
+          "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said"
+        ],
+        [
+          "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent",
+          "sort",
+          "prop"
+        ],
+        [
+          "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent",
+          "title",
+          "the attribute is invisible after the fact: term_attvars on the value answered [] both before and after a failing database-add!, because the error unwinds the binding that when/2 attached, which is why three separate checks made the attribute look absent"
+        ],
+        [
+          "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike",
+          "sort",
+          "prop"
+        ],
+        [
+          "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike",
+          "title",
+          "the general rule this case instances: under the typed build a mode line type is only safe on an argument that is GROUND at the call, and any argument carrying a MeTTa value with variables must record only its mode, inputs and outputs alike"
+        ],
+        [
+          "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes",
+          "sort",
+          "prop"
+        ],
+        [
+          "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes",
+          "supports",
+          "my earlier attempt at this removed only the two INPUT types and measured identical, which I read as the mode lines not being the cause; the real reason is that database-atoms annotates its OUTPUT, and that annotation kept attaching an attribute to every answer no matter what the inputs said"
+        ],
+        [
+          "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes",
+          "tags",
+          "measured"
+        ],
+        [
+          "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes",
+          "title",
+          "with only the inputs untyped the probe stores successfully and still answers read=[_1180] with variant(=@=) no; with the output untyped as well it answers read=[] and yes"
+        ],
+        [
+          "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "sort",
+          "approach"
+        ],
+        [
+          "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "addresses",
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        ],
+        [
+          "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "effort",
+          1
+        ],
+        [
+          "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "status",
+          "done"
+        ],
+        [
+          "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes",
+          "title",
+          "leave every lib_database argument that carries a MeTTa value untyped, the INPUTS of database-add!/remove! and the OUTPUT of database-atoms, which is what dev_typed.pl's own Decides prescribes"
+        ]
+      ],
+      "telemetry": {
+        "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+      },
+      "id": "0defeda02145a003"
     }
   ]
 }
