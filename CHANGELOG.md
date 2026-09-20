@@ -86,6 +86,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `/etc/debuginfod/*.urls` whenever `[ -z ]` holds, so a rung that started a
   login shell would hand the server back.
 
+- The `memray` lane discriminates again. Both halves of its plant now exclude
+  SWI's own stack growth, which is the engine's arena rather than anything the
+  caller retains: Prolog stacks grow to hold a term and are never returned to
+  the OS, so they read as leaked whichever half is running. That quantity moved
+  from 924.6 KiB at the largest single location on 2026-09-07 to 8.1 MiB on
+  2026-09-20 -- `tmp_realloc`, `stack_realloc`, `growStacks`,
+  `f_ensureStackSpace___LD`, `pl_collect_findall_bag2_va`, about 41 KiB for
+  each of 200 cursors -- which crossed the 8 MB bound and failed the control
+  without anything about cursors changing. Raising the bound was rejected: it
+  defers the same failure to the next time the arena grows and widens the
+  lane's blind spot by exactly the amount raised. Warming the arena first was
+  rejected on measurement: each cursor opens its own engine, so the growth is
+  per-cursor and pre-growing one engine pre-grows nothing. With the filter the
+  lane reports `ok` in 24s, the control passing in 8.53s and the plant still
+  reporting `MEMORY PROBLEMS` in 8.35s.
+
 - `check.sh` reports each lane's seconds, the run's total, and the ten lanes
   that cost the most. The gate ran 206 lanes and reported no timing at all, so
   the only cost signal a finished run left was a battery's provenance stamp

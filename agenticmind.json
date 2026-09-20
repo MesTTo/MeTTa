@@ -5691,6 +5691,90 @@
       "tags": [
         "measured"
       ]
+    },
+    "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it": {
+      "title": "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it",
+      "supports": [
+        {
+          "node": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "status": "untried"
+        },
+        {
+          "node": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "relation": "addresses",
+          "target": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        }
+      ]
+    },
+    "a wider bound would put the control back under it today": {
+      "title": "a wider bound would put the control back under it today",
+      "supports": [
+        {
+          "node": "raise the memray bound above the engine's arena",
+          "status": "untried"
+        },
+        {
+          "node": "raise the memray bound above the engine's arena",
+          "relation": "addresses",
+          "target": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        }
+      ]
+    },
+    "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass": {
+      "title": "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass",
+      "supports": [
+        {
+          "node": "raise the memray bound above the engine's arena",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "a wider bound would put the control back under it today"
+      ]
+    },
+    "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame": {
+      "title": "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame",
+      "supports": [
+        {
+          "node": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "status": "untried"
+        },
+        {
+          "node": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "relation": "addresses",
+          "target": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        }
+      ]
+    },
+    "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes": {
+      "title": "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes",
+      "supports": [
+        {
+          "node": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates": {
+      "title": "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates",
+      "supports": [
+        {
+          "node": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -6621,6 +6705,30 @@
       ],
       "rests_on": [
         "the same defect was diagnosed on 2026-09-03 for llvm-symbolizer and cleared only inside the C seat's sanitize script, so the rule lived at one spawn path instead of at the wrapper every command passes through"
+      ]
+    },
+    "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does": {
+      "title": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+      ]
+    },
+    "raise the memray bound above the engine's arena": {
+      "title": "raise the memray bound above the engine's arena",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+      ]
+    },
+    "warm the engine's stack arena before the measured window so its growth is not attributed to the test": {
+      "title": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
       ]
     }
   },
@@ -28599,6 +28707,252 @@
         ]
       ],
       "id": "1b5924e66e33a0f6"
+    },
+    {
+      "at": "2026-09-20T02:30:17.589831+00:00",
+      "after": "0b0529fe14cac66a026924d2d7386b1e4f351b3c",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it\", \"tags\": [], \"title\": \"exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does\", \"fields\": {\"effort\": 1, \"addresses\": [\"the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a wider bound would put the control back under it today\", \"tags\": [], \"title\": \"raise the memray bound above the engine's arena\", \"fields\": {\"effort\": 1, \"addresses\": [\"the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating\"]}}, {\"op\": \"status\", \"id\": \"raise the memray bound above the engine's arena\", \"because\": \"it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass\", \"tags\": [], \"status\": \"unwanted\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame\", \"tags\": [], \"title\": \"warm the engine's stack arena before the measured window so its growth is not attributed to the test\", \"fields\": {\"effort\": 2, \"addresses\": [\"the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating\"]}}, {\"op\": \"status\", \"id\": \"warm the engine's stack arena before the measured window so its growth is not attributed to the test\", \"because\": \"each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"status\", \"id\": \"exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does\", \"because\": \"battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "1b5924e66e33a0f6"
+      ],
+      "assert": [
+        [
+          "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame",
+          "sort",
+          "prop"
+        ],
+        [
+          "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame",
+          "supports",
+          {
+            "node": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+            "status": "untried"
+          }
+        ],
+        [
+          "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame",
+          "supports",
+          {
+            "node": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+            "relation": "addresses",
+            "target": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+          }
+        ],
+        [
+          "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame",
+          "title",
+          "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame"
+        ],
+        [
+          "a wider bound would put the control back under it today",
+          "sort",
+          "prop"
+        ],
+        [
+          "a wider bound would put the control back under it today",
+          "supports",
+          {
+            "node": "raise the memray bound above the engine's arena",
+            "status": "untried"
+          }
+        ],
+        [
+          "a wider bound would put the control back under it today",
+          "supports",
+          {
+            "node": "raise the memray bound above the engine's arena",
+            "relation": "addresses",
+            "target": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+          }
+        ],
+        [
+          "a wider bound would put the control back under it today",
+          "title",
+          "a wider bound would put the control back under it today"
+        ],
+        [
+          "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates",
+          "supersedes",
+          "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it"
+        ],
+        [
+          "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates",
+          "supports",
+          {
+            "node": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+            "status": "done"
+          }
+        ],
+        [
+          "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates",
+          "tags",
+          "measured"
+        ],
+        [
+          "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates",
+          "title",
+          "battery 8 reports the lane ok in 24s: the clean control passes in 8.53s where it had failed, and the kept plant still reports MEMORY PROBLEMS and fails in 8.35s, so the pair still discriminates"
+        ],
+        [
+          "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes",
+          "sort",
+          "prop"
+        ],
+        [
+          "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes",
+          "supersedes",
+          "a steady-state measurement is how the benchmark rows already handle cold-start effects, so the same protocol would remove the confound without naming any frame"
+        ],
+        [
+          "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes",
+          "supports",
+          {
+            "node": "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes",
+          "tags",
+          "measured"
+        ],
+        [
+          "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes",
+          "title",
+          "each cursor opens its OWN engine, so the growth is per-cursor at about 41 KiB each over 200 cursors and pre-growing one engine pre-grows nothing; the arena cannot be brought to steady state ahead of a workload that creates the engines as it goes"
+        ],
+        [
+          "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass",
+          "supersedes",
+          "a wider bound would put the control back under it today"
+        ],
+        [
+          "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass",
+          "supports",
+          {
+            "node": "raise the memray bound above the engine's arena",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass",
+          "title",
+          "it defers the identical failure to the next time the arena grows, and it widens the lane's blind spot by exactly the amount raised, so a real cursor leak of that size would pass"
+        ],
+        [
+          "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it",
+          "supports",
+          {
+            "node": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+            "status": "untried"
+          }
+        ],
+        [
+          "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it",
+          "supports",
+          {
+            "node": "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+            "relation": "addresses",
+            "target": "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+          }
+        ],
+        [
+          "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it",
+          "title",
+          "the arena is not a function of what the caller holds, so counting it makes a frozen bound race a quantity that belongs to the engine and drifts with it; pytest-memray 1.10.0 takes a filter_fn on the marker that decides per stack, which is the instrument for removing a confound rather than budgeting for it"
+        ],
+        [
+          "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "sort",
+          "approach"
+        ],
+        [
+          "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "addresses",
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        ],
+        [
+          "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "effort",
+          1
+        ],
+        [
+          "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "status",
+          "done"
+        ],
+        [
+          "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does",
+          "title",
+          "exclude SWI's own stack growth from both halves of the memray plant with a limit_leaks filter, so each half measures what the caller retains rather than what the engine's arena does"
+        ],
+        [
+          "raise the memray bound above the engine's arena",
+          "sort",
+          "approach"
+        ],
+        [
+          "raise the memray bound above the engine's arena",
+          "addresses",
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        ],
+        [
+          "raise the memray bound above the engine's arena",
+          "effort",
+          1
+        ],
+        [
+          "raise the memray bound above the engine's arena",
+          "status",
+          "unwanted"
+        ],
+        [
+          "raise the memray bound above the engine's arena",
+          "title",
+          "raise the memray bound above the engine's arena"
+        ],
+        [
+          "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "sort",
+          "approach"
+        ],
+        [
+          "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "addresses",
+          "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+        ],
+        [
+          "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "effort",
+          2
+        ],
+        [
+          "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "status",
+          "unwanted"
+        ],
+        [
+          "warm the engine's stack arena before the measured window so its growth is not attributed to the test",
+          "title",
+          "warm the engine's stack arena before the measured window so its growth is not attributed to the test"
+        ]
+      ],
+      "id": "3357d3e67f9efd9a"
     }
   ]
 }

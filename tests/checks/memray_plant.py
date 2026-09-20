@@ -36,10 +36,17 @@ The file is therefore named so that pytest's own file discovery never reaches
 it: `python_files` defaults to `test_*.py`, and this is collected only because
 the lane names its path outright.
 
+Both halves exclude the engine's own stack arena, for the reason recorded on
+ENGINE_ARENA below: it is not a function of what the caller retains, it moved
+by 8.8x in thirteen days, and while it was counted the control was failing on
+the engine's growth rather than on anything about cursors.
+
 Assumes: `metta` imports, which the lane's interpreter is the one that can do
 Guarantees:
   - the kept half exceeds the bound and the dropped half stays under it
     [tested: sh check.sh memray]
+  - both halves measure the same quantity, so the comparison between them means
+    something: the same filter is on both marks
 Owns resources: the module list below deliberately outlives the leaking test,
   which is the leak; the process ends with the lane
 Open Obligations:
@@ -53,6 +60,7 @@ from __future__ import annotations
 import gc
 
 import pytest
+from pytest_memray import Stack
 
 from metta import S, V
 from metta._faces.space import Space
@@ -63,6 +71,37 @@ CURSORS = 200
 
 #: The bound, sitting between the measured clean floor and the measured leak.
 BOUND = "8 MB"
+
+#: SWI's own stack grower. An allocation made below it is the engine's ARENA:
+#: Prolog stacks that grow to hold a term and are never returned to the OS, so
+#: they read as leaked whatever the caller does with its handles. Excluding
+#: them is what makes both halves measure the same thing -- what the CALLER
+#: retains -- instead of racing a frozen bound against a quantity that belongs
+#: to the engine.
+#:
+#: It moved: 924.6 KiB at the largest single location on 2026-09-07, 8.1 MiB on
+#: 2026-09-20, which crossed BOUND and turned the control red without anything
+#: about cursors changing. The stack was tmp_realloc, stack_realloc,
+#: growStacks, f_ensureStackSpace___LD, pl_collect_findall_bag2_va -- findall
+#: growing the global stack, 8.1 MiB over 200 cursors, about 41 KiB each.
+#:
+#: Warming the arena first was the alternative and cannot work here: each
+#: cursor opens its OWN engine, so the growth is per-cursor and pre-growing one
+#: engine pre-grows nothing. Raising BOUND was the other, and only defers this:
+#: the bound would still be a frozen guess racing a moving quantity, and a
+#: wider one hides a real cursor leak of the size it was widened by.
+#:
+#: Matched on the frame name because a stack is all memray offers and SWI's own
+#: source is where the name comes from. A rename breaks the match, the arena
+#: reappears in the measurement and the control fails loudly, which is the
+#: direction a stale filter should fail in.
+ENGINE_ARENA = "growStacks"
+
+
+def outside_the_engine_arena(stack: Stack) -> bool:
+    """Report this allocation unless SWI made it growing its own stacks."""
+    return all(frame.function != ENGINE_ARENA for frame in stack.frames)
+
 
 #: What the leaking half keeps. A module-level list is the smallest leak there
 #: is: nothing is wrong with any object, they are simply still referenced.
@@ -83,7 +122,7 @@ def _cursor(space):
     return cursor
 
 
-@pytest.mark.limit_leaks(BOUND)
+@pytest.mark.limit_leaks(BOUND, filter_fn=outside_the_engine_arena)
 def test_two_hundred_dropped_cursors_stay_under_the_bound():
     """The control. It has to PASS, or the bound is too tight to be a lane."""
     space = _stocked()
@@ -95,7 +134,7 @@ def test_two_hundred_dropped_cursors_stay_under_the_bound():
         space.drop()
 
 
-@pytest.mark.limit_leaks(BOUND)
+@pytest.mark.limit_leaks(BOUND, filter_fn=outside_the_engine_arena)
 def test_two_hundred_kept_cursors_are_reported():
     """The plant. It has to FAIL, or the lane has stopped being able to see."""
     space = _stocked()
