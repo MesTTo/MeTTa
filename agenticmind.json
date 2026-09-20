@@ -10503,6 +10503,69 @@
       "supports": [
         "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be"
       ]
+    },
+    "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes": {
+      "title": "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+    },
+    "measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August": {
+      "title": "measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August",
+      "supports": [
+        "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+      ]
+    },
+    "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage": {
+      "title": "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage",
+      "supports": [
+        {
+          "node": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "status": "untried"
+        },
+        {
+          "node": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "relation": "addresses",
+          "target": "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+        }
+      ]
+    },
+    "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility": {
+      "title": "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility",
+      "supports": [
+        {
+          "node": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared": {
+      "title": "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared"
+    },
+    "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1": {
+      "title": "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1",
+      "supports": [
+        "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.": {
+      "title": "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.",
+      "supports": [
+        {
+          "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+        "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta"
+      ]
     }
   },
   "approaches": {
@@ -12004,6 +12067,14 @@
       "status": "done",
       "addresses": [
         "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+      ]
+    },
+    "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out": {
+      "title": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
       ]
     }
   },
@@ -47899,6 +47970,197 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "f16b4957b3655ae4"
+    },
+    {
+      "at": "2026-09-20T13:22:51.305348+00:00",
+      "after": "f3568f1c5bfdb322cb4e768c19b227fc9d87a83e",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August\", \"tags\": [], \"title\": \"evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage\", \"tags\": [], \"title\": \"name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out\", \"fields\": {\"effort\": 1, \"addresses\": [\"evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes\"]}}, {\"op\": \"status\", \"id\": \"name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out\", \"because\": \"A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1\", \"tags\": [\"measured\"], \"title\": \"the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared\", \"fields\": {}}]",
+      "parents": [
+        "f16b4957b3655ae4"
+      ],
+      "assert": [
+        [
+          "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility",
+          "sort",
+          "prop"
+        ],
+        [
+          "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility",
+          "supersedes",
+          "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage"
+        ],
+        [
+          "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility",
+          "supports",
+          {
+            "node": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+            "status": "done"
+          }
+        ],
+        [
+          "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility",
+          "tags",
+          "measured"
+        ],
+        [
+          "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility",
+          "title",
+          "A/B on the same tree: 395 unbacked evidence tags over 943 executed files before, 136 over 1,030 after, so the fix recovered 87 files and 259 tags of visibility"
+        ],
+        [
+          "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage",
+          "sort",
+          "prop"
+        ],
+        [
+          "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage",
+          "supports",
+          {
+            "node": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+            "status": "untried"
+          }
+        ],
+        [
+          "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage",
+          "supports",
+          {
+            "node": "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+            "relation": "addresses",
+            "target": "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+          }
+        ],
+        [
+          "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage",
+          "title",
+          "a filter turns a wrong path into silence, which is the one failure mode a checker must not have; a refusal turns the next move into a message instead of a quiet loss of coverage"
+        ],
+        [
+          "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes",
+          "sort",
+          "prop"
+        ],
+        [
+          "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes",
+          "title",
+          "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+        ],
+        [
+          "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1",
+          "sort",
+          "prop"
+        ],
+        [
+          "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1",
+          "supports",
+          "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared"
+        ],
+        [
+          "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1",
+          "tags",
+          "measured"
+        ],
+        [
+          "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1",
+          "title",
+          "git blame on examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta line 4 names e27341b4 dated 2026-08-27, and check_evidence_tags.py exits 1"
+        ],
+        [
+          "measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August",
+          "supports",
+          "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+        ],
+        [
+          "measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August",
+          "title",
+          "measured: gate_scripts() returned five component check.sh files and not the root driver; the function's docstring already records three readers going blind the same way in August"
+        ],
+        [
+          "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared",
+          "title",
+          "the 136 unbacked evidence tags that remain are older than today: the sampled one was written 2026-08-27 in e27341b, the corpus reorganisation, so the evidence GATE lane was red before this session and remains red, improved rather than cleared"
+        ],
+        [
+          "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "sort",
+          "approach"
+        ],
+        [
+          "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "addresses",
+          "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+        ],
+        [
+          "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "effort",
+          1
+        ],
+        [
+          "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "status",
+          "done"
+        ],
+        [
+          "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out",
+          "title",
+          "name the runners at tools/ and make gate_scripts() refuse a named script that is not in the tree rather than filtering it out"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "2dd8ab58a53820ad"
+    },
+    {
+      "at": "2026-09-20T13:23:49.148133+00:00",
+      "after": "f3568f1c5bfdb322cb4e768c19b227fc9d87a83e",
+      "did": "[{\"op\": \"status\", \"id\": \"dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree\", \"because\": \"half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "2dd8ab58a53820ad"
+      ],
+      "assert": [
+        [
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.",
+          "sort",
+          "prop"
+        ],
+        [
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.",
+          "supersedes",
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss"
+        ],
+        [
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.",
+          "supersedes",
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta"
+        ],
+        [
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.",
+          "supports",
+          {
+            "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+            "status": "active"
+          }
+        ],
+        [
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it.",
+          "title",
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it."
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "0426935bf9ffbdd7"
     }
   ]
 }
