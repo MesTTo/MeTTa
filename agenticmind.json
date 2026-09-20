@@ -10745,6 +10745,203 @@
       "tags": [
         "tested"
       ]
+    },
+    "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392": {
+      "title": "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392"
+    },
+    "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0": {
+      "title": "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0",
+      "supports": [
+        "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure": {
+      "title": "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the same tags read as backed once the Collector named tools/test.sh, with no change to any tag": {
+      "title": "the same tags read as backed once the Collector named tools/test.sh, with no change to any tag",
+      "supports": [
+        "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure"
+      ]
+    },
+    "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/": {
+      "title": "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/"
+    },
+    "measured: with the refusal reverted and the rename kept, the selftest still read the same defect": {
+      "title": "measured: with the refusal reverted and the rename kept, the selftest still read the same defect",
+      "supports": [
+        "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'": {
+      "title": "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'"
+    },
+    "read ai-tmp/ev.log:1, present in every run from the first; the design was sound": {
+      "title": "read ai-tmp/ev.log:1, present in every run from the first; the design was sound",
+      "supports": [
+        "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause": {
+      "title": "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice": {
+      "title": "the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice",
+      "supports": [
+        "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause"
+      ]
+    },
+    "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered": {
+      "title": "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered",
+      "supports": [
+        {
+          "node": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "status": "untried"
+        },
+        {
+          "node": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "relation": "addresses",
+          "target": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        }
+      ]
+    },
+    "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on": {
+      "title": "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on",
+      "supports": [
+        {
+          "node": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered"
+      ],
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it": {
+      "title": "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+    },
+    "measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent": {
+      "title": "measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent",
+      "supports": [
+        "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+      ]
+    },
+    "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell": {
+      "title": "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell",
+      "supports": [
+        {
+          "node": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "status": "untried"
+        },
+        {
+          "node": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "relation": "addresses",
+          "target": "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+        }
+      ]
+    },
+    "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0": {
+      "title": "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0",
+      "supports": [
+        {
+          "node": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed": {
+      "title": "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed"
+    },
+    "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier": {
+      "title": "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier",
+      "supports": [
+        "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.": {
+      "title": "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+      "supports": [
+        {
+          "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+        "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta",
+        "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it."
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl": {
+      "title": "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+    },
+    "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight": {
+      "title": "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight",
+      "supports": [
+        "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the work is real and its own gates pass, so the capability belongs in the package eventually": {
+      "title": "the work is real and its own gates pass, so the capability belongs in the package eventually",
+      "supports": [
+        {
+          "node": "merge seat/node-parity into the released TSMeTTa and republish",
+          "status": "untried"
+        },
+        {
+          "node": "merge seat/node-parity into the released TSMeTTa and republish",
+          "relation": "addresses",
+          "target": "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+        }
+      ]
+    },
+    "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.": {
+      "title": "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.",
+      "supports": [
+        {
+          "node": "merge seat/node-parity into the released TSMeTTa and republish",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the work is real and its own gates pass, so the capability belongs in the package eventually"
+      ],
+      "tags": [
+        "user"
+      ]
     }
   },
   "approaches": {
@@ -12144,7 +12341,7 @@
     "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree": {
       "title": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
       "effort": 5,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
       ]
@@ -12278,6 +12475,30 @@
       "status": "done",
       "addresses": [
         "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+      ]
+    },
+    "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong": {
+      "title": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+      ]
+    },
+    "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to": {
+      "title": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+      ]
+    },
+    "merge seat/node-parity into the released TSMeTTa and republish": {
+      "title": "merge seat/node-parity into the released TSMeTTa and republish",
+      "effort": 3,
+      "status": "unwanted",
+      "addresses": [
+        "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
       ]
     }
   },
@@ -48886,6 +49107,591 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "c7b1fc286c178688"
+    },
+    {
+      "at": "2026-09-20T14:33:46.505004+00:00",
+      "after": "50df1f460a6b9b6a5b3e78f5c6555bad5e891813",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0\", \"tags\": [\"measured\"], \"title\": \"the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the same tags read as backed once the Collector named tools/test.sh, with no change to any tag\", \"tags\": [\"reasoning\"], \"title\": \"I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: with the refusal reverted and the rename kept, the selftest still read the same defect\", \"tags\": [\"measured\"], \"title\": \"my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/\", \"fields\": {}}]",
+      "parents": [
+        "c7b1fc286c178688"
+      ],
+      "assert": [
+        [
+          "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure",
+          "sort",
+          "prop"
+        ],
+        [
+          "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure",
+          "title",
+          "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure"
+        ],
+        [
+          "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0",
+          "supports",
+          "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392"
+        ],
+        [
+          "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0",
+          "title",
+          "measured across four runs: 138, then 89 after the tag citations, then 85, then 1 after the Collector, then 0"
+        ],
+        [
+          "measured: with the refusal reverted and the rename kept, the selftest still read the same defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: with the refusal reverted and the rename kept, the selftest still read the same defect",
+          "supports",
+          "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/"
+        ],
+        [
+          "measured: with the refusal reverted and the rename kept, the selftest still read the same defect",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: with the refusal reverted and the rename kept, the selftest still read the same defect",
+          "title",
+          "measured: with the refusal reverted and the rename kept, the selftest still read the same defect"
+        ],
+        [
+          "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/",
+          "sort",
+          "prop"
+        ],
+        [
+          "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/",
+          "title",
+          "my gate_scripts refusal was not the cause of the 42-defect selftest regression; reverting it alone left the count unchanged, and the cause was the fixture building its driver at the fixture root while the collectors look in tools/"
+        ],
+        [
+          "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392",
+          "sort",
+          "prop"
+        ],
+        [
+          "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392",
+          "title",
+          "the evidence lane's 138 unbacked tags were entirely my tools/ move, not a pre-existing backlog: repointing the corpus Collector's runner, 54 tag citations and the GATE_COMMAND regex took it to 0, and the executed-file count from 1,033 to 1,392"
+        ],
+        [
+          "the same tags read as backed once the Collector named tools/test.sh, with no change to any tag",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same tags read as backed once the Collector named tools/test.sh, with no change to any tag",
+          "supports",
+          "I told the user this red was pre-existing on the strength of git blame dating the TAG to 2026-08-27, which was true of the tag and false of the finding: the tag became unbacked today when the runner moved. Blaming the artifact is not the same as attributing the failure"
+        ],
+        [
+          "the same tags read as backed once the Collector named tools/test.sh, with no change to any tag",
+          "title",
+          "the same tags read as backed once the Collector named tools/test.sh, with no change to any tag"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "35d09312786fb48a"
+    },
+    {
+      "at": "2026-09-20T14:35:03.838826+00:00",
+      "after": "50df1f460a6b9b6a5b3e78f5c6555bad5e891813",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read ai-tmp/ev.log:1, present in every run from the first; the design was sound\", \"tags\": [\"source\"], \"title\": \"no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice\", \"tags\": [\"reasoning\"], \"title\": \"I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"three of today's expensive detours were the same shape: a truncated view of a tool that had already answered\", \"tags\": [], \"title\": \"read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong\", \"fields\": {\"effort\": 1, \"addresses\": [\"the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure\"]}}, {\"op\": \"status\", \"id\": \"read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong\", \"because\": \"recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on\", \"tags\": [\"reasoning\"], \"status\": \"done\"}]",
+      "parents": [
+        "35d09312786fb48a"
+      ],
+      "assert": [
+        [
+          "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause",
+          "sort",
+          "prop"
+        ],
+        [
+          "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause",
+          "title",
+          "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause"
+        ],
+        [
+          "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'",
+          "sort",
+          "prop"
+        ],
+        [
+          "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'",
+          "title",
+          "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'"
+        ],
+        [
+          "read ai-tmp/ev.log:1, present in every run from the first; the design was sound",
+          "sort",
+          "prop"
+        ],
+        [
+          "read ai-tmp/ev.log:1, present in every run from the first; the design was sound",
+          "supports",
+          "no new check is needed for a collector whose runner moved: evidence_runners already refuses one whose lane text it cannot find, and it printed the exact cause on line 1 of the first run, 'test.sh: the shell lane no longer contains find ./examples ... so what it runs cannot be modelled'"
+        ],
+        [
+          "read ai-tmp/ev.log:1, present in every run from the first; the design was sound",
+          "tags",
+          "source"
+        ],
+        [
+          "read ai-tmp/ev.log:1, present in every run from the first; the design was sound",
+          "title",
+          "read ai-tmp/ev.log:1, present in every run from the first; the design was sound"
+        ],
+        [
+          "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on",
+          "supersedes",
+          "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered"
+        ],
+        [
+          "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on",
+          "supports",
+          {
+            "node": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+            "status": "done"
+          }
+        ],
+        [
+          "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on",
+          "title",
+          "recorded as the lesson; the evidence lane went to 0 once the line-1 finding was acted on"
+        ],
+        [
+          "the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice",
+          "sort",
+          "prop"
+        ],
+        [
+          "the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice",
+          "supports",
+          "I spent several turns deriving a mechanism the tool had already named, because I read its output through tail -1 and greps for patterns I expected rather than reading the first lines. A summary line answers how many; the findings answer which, and the first finding was the cause"
+        ],
+        [
+          "the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice",
+          "title",
+          "the collector refusal was line 1 of ev.log while I was reading tail -1 and grepping for 'no runner executes'; the same truncation habit hid the engine/c reference count earlier today and under-counted the red lane set twice"
+        ],
+        [
+          "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered",
+          "sort",
+          "prop"
+        ],
+        [
+          "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered",
+          "supports",
+          {
+            "node": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+            "status": "untried"
+          }
+        ],
+        [
+          "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered",
+          "supports",
+          {
+            "node": "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+            "relation": "addresses",
+            "target": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+          }
+        ],
+        [
+          "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered",
+          "title",
+          "three of today's expensive detours were the same shape: a truncated view of a tool that had already answered"
+        ],
+        [
+          "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "sort",
+          "approach"
+        ],
+        [
+          "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "addresses",
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        ],
+        [
+          "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "effort",
+          1
+        ],
+        [
+          "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "status",
+          "done"
+        ],
+        [
+          "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong",
+          "title",
+          "read a checker's first findings before reasoning about its mechanism, and never let tail or head stand in for the output when the question is what is wrong"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "63e373b508af1ab4"
+    },
+    {
+      "at": "2026-09-20T14:56:33.251611+00:00",
+      "after": "50df1f460a6b9b6a5b3e78f5c6555bad5e891813",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent\", \"tags\": [], \"title\": \"killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell\", \"tags\": [], \"title\": \"identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to\", \"fields\": {\"effort\": 1, \"addresses\": [\"killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it\"]}}, {\"op\": \"status\", \"id\": \"identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to\", \"because\": \"the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier\", \"tags\": [\"measured\"], \"title\": \"I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed\", \"fields\": {}}]",
+      "parents": [
+        "63e373b508af1ab4"
+      ],
+      "assert": [
+        [
+          "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed",
+          "sort",
+          "prop"
+        ],
+        [
+          "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed",
+          "title",
+          "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed"
+        ],
+        [
+          "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it",
+          "sort",
+          "prop"
+        ],
+        [
+          "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it",
+          "title",
+          "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+        ],
+        [
+          "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier",
+          "supports",
+          "I left two runaway gates competing for about half an hour, which is the failure tools/bounded.sh exists to prevent and which its own refusal prices at 122 CPU-hours; the gate I was waiting on was sharing the machine with the one I thought I had killed"
+        ],
+        [
+          "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier",
+          "title",
+          "measured: three xdist workers at 93 to 99 percent CPU, two of them in the tree whose gate I had killed 27 minutes earlier"
+        ],
+        [
+          "measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent",
+          "supports",
+          "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+        ],
+        [
+          "measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent",
+          "title",
+          "measured: two pytest-xdist workers showed 27 minutes elapsed against a 20-minute-old gate, and their /proc/<pid>/cwd named wt-battery-2; killing the two let a third appear seconds later, which is what exposed the live parent"
+        ],
+        [
+          "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0",
+          "supersedes",
+          "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell"
+        ],
+        [
+          "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0",
+          "supports",
+          {
+            "node": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+            "status": "done"
+          }
+        ],
+        [
+          "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0",
+          "tags",
+          "tested"
+        ],
+        [
+          "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0",
+          "title",
+          "the cwd sweep found eleven live battery-2 processes under root 397964, a TERM to that root cleared the whole tree, and a second sweep counts 0"
+        ],
+        [
+          "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell",
+          "sort",
+          "prop"
+        ],
+        [
+          "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell",
+          "supports",
+          {
+            "node": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+            "status": "untried"
+          }
+        ],
+        [
+          "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell",
+          "supports",
+          {
+            "node": "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+            "relation": "addresses",
+            "target": "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+          }
+        ],
+        [
+          "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell",
+          "title",
+          "the working directory is the one attribute that distinguishes two runs of the same command in two trees, where a pidfile records only one process of the tree and pgrep -f matches the reader's own shell"
+        ],
+        [
+          "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "sort",
+          "approach"
+        ],
+        [
+          "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "addresses",
+          "killing a battery gate by the PID in its battery.pid file does not stop the run: battery 2's gate shell was a different process, 397964, which survived for 105 minutes and kept spawning pytest lanes that competed with the gate I had started to replace it"
+        ],
+        [
+          "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "effort",
+          1
+        ],
+        [
+          "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "status",
+          "done"
+        ],
+        [
+          "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to",
+          "title",
+          "identify a battery's processes by /proc/<pid>/cwd rather than by the pidfile or a name match, then kill the root the child chain leads to"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "c279a177da8829e2"
+    },
+    {
+      "at": "2026-09-20T14:58:05.391268+00:00",
+      "after": "50df1f460a6b9b6a5b3e78f5c6555bad5e891813",
+      "did": "[{\"op\": \"status\", \"id\": \"dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree\", \"because\": \"Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "c279a177da8829e2"
+      ],
+      "assert": [
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "sort",
+          "prop"
+        ],
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "supersedes",
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss"
+        ],
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "supersedes",
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta"
+        ],
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "supersedes",
+          "half settled, half deliberately still in flight as of 2026-09-20 23:45. The cmetta agent finished BLOCKED after 2h37m on a memory gate no tree can pass, because a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property of the host; the fix, if it is resumed, is to baseline-subtract the host's own leaks rather than require zero. The node agent has run 3h14m in ai-tmp/seat-node-tree with activity within the minute and has delivered nothing into the shipping tree. NEITHER is on the release path: main was cut, published and clone-verified without them, which is the separation the user asked for when they said to note the commit so they could release even though codex keeps working. Left running rather than cancelled for that reason; nothing waits on it."
+        ],
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "supports",
+          {
+            "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+            "status": "done"
+          }
+        ],
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "tags",
+          "measured"
+        ],
+        [
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch.",
+          "title",
+          "Both agents finished. The node one completed 2026-09-21 00:41 after 4h32m, exit 0, with 19 commits on seat/node-parity in ai-tmp/seat-node-tree covering native algebra carriers, query scopes, Prolog registration, host-value identity, observation provenance and a capability receipt, reporting its own gates green. The cmetta one ended blocked after 2h37m on a memory gate that measures the host rather than the seat: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, so the brief asked the seat to establish a property it does not own; if resumed, baseline-subtract the host's own leaks rather than require zero. NEITHER IS MERGED and the release was cut, published and clone-verified without them, which is the separation the user asked for on dispatch."
+        ],
+        [
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "9b36eb17f7677387"
+    },
+    {
+      "at": "2026-09-20T14:58:18.448791+00:00",
+      "after": "50df1f460a6b9b6a5b3e78f5c6555bad5e891813",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight\", \"tags\": [\"measured\"], \"title\": \"the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the work is real and its own gates pass, so the capability belongs in the package eventually\", \"tags\": [], \"title\": \"merge seat/node-parity into the released TSMeTTa and republish\", \"fields\": {\"effort\": 3, \"addresses\": [\"the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl\"]}}, {\"op\": \"status\", \"id\": \"merge seat/node-parity into the released TSMeTTa and republish\", \"because\": \"the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.\", \"tags\": [\"user\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "9b36eb17f7677387"
+      ],
+      "assert": [
+        [
+          "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight",
+          "supports",
+          "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+        ],
+        [
+          "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight",
+          "title",
+          "measured in ai-tmp/seat-node-tree/extensions/node against a fetched gh/main: merge-base c15482f, parity ahead 19, released ahead 3, and comm over the two changed-file lists gives the eight"
+        ],
+        [
+          "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl",
+          "sort",
+          "prop"
+        ],
+        [
+          "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl",
+          "title",
+          "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+        ],
+        [
+          "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.",
+          "supersedes",
+          "the work is real and its own gates pass, so the capability belongs in the package eventually"
+        ],
+        [
+          "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.",
+          "supports",
+          {
+            "node": "merge seat/node-parity into the released TSMeTTa and republish",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.",
+          "tags",
+          "user"
+        ],
+        [
+          "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision.",
+          "title",
+          "the user scoped it out when dispatching: 'note the current commit so that then i could just release it even though codex keeps working'. The release is cut, published and clone-verified without it, and merging changes what is published, which is the user's decision rather than mine. The four rename-critical files are exactly the overlap, so the merge is a real integration needing the node suite re-run afterwards, not a formality. The branch keeps the work until that decision."
+        ],
+        [
+          "the work is real and its own gates pass, so the capability belongs in the package eventually",
+          "sort",
+          "prop"
+        ],
+        [
+          "the work is real and its own gates pass, so the capability belongs in the package eventually",
+          "supports",
+          {
+            "node": "merge seat/node-parity into the released TSMeTTa and republish",
+            "status": "untried"
+          }
+        ],
+        [
+          "the work is real and its own gates pass, so the capability belongs in the package eventually",
+          "supports",
+          {
+            "node": "merge seat/node-parity into the released TSMeTTa and republish",
+            "relation": "addresses",
+            "target": "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+          }
+        ],
+        [
+          "the work is real and its own gates pass, so the capability belongs in the package eventually",
+          "title",
+          "the work is real and its own gates pass, so the capability belongs in the package eventually"
+        ],
+        [
+          "merge seat/node-parity into the released TSMeTTa and republish",
+          "sort",
+          "approach"
+        ],
+        [
+          "merge seat/node-parity into the released TSMeTTa and republish",
+          "addresses",
+          "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+        ],
+        [
+          "merge seat/node-parity into the released TSMeTTa and republish",
+          "effort",
+          3
+        ],
+        [
+          "merge seat/node-parity into the released TSMeTTa and republish",
+          "status",
+          "unwanted"
+        ],
+        [
+          "merge seat/node-parity into the released TSMeTTa and republish",
+          "title",
+          "merge seat/node-parity into the released TSMeTTa and republish"
+        ]
+      ],
+      "id": "25cab93cfdc224b2"
     }
   ]
 }
