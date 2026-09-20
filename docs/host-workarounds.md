@@ -1030,26 +1030,29 @@ Reproduction: tests/checks/host_workarounds/swi-findall-bag-push-window.pl,
   a findall over two hundred budgets each bounding a goal that runs a nested
   findall; 13 of 200 are collected on 10.1.13, and a thrown ball through the
   same nesting collects 200.
-Workaround: engine/metta/limits.pl wraps `'$bags':cleanup_bag/2` and
-  `'$bags':findnsols2/5` from the first `call_with_inference_limit/3` of the
-  process on, and the wrappers stay. findall's loop is deterministic and
-  never fails, so its bag is pushed and then the loop and the pop are caught
-  together, with the pop in the recovery: one inference more than the host's
-  own shape. findnsols keeps a registered cleanup, registered before the
-  push, with the push followed by catch/3 and the record of the push as the
-  first goal inside it, and a cleanup that is itself a catch/3 term whose
-  drop records before it pops. Each step rests on the host's rule that a
-  trip on catch/3's call port is raised at the next call port instead.
 Patch: tests/checks/host_workarounds/swi-cleanup-window.patch, whose
   deferred inference check is exactly the "honours the atomic region" below:
   the bag is pushed in a Setup, so the window between the push and the
-  cleanup's registration is the cleanup window; the reproduction answers
-  absent on the build that carries it (the host-workarounds lane,
-  2026-09-18, on the tree that merged the trunk). The wrappers in
-  engine/metta/limits.pl stay until the trunk's sites are lifted together.
+  cleanup's registration is the cleanup window. The reproduction answers
+  absent on the build that carries it and present on stock 10.1.13
+  [measured 2026-09-20].
 Lifted when: the inference-limit check honours the atomic region, or
   cleanup_bag/2 and findnsols2/5 register their cleanup before the push and
-  the push records itself.
+  the push records itself. MET by the patch above, and engine/metta/limits.pl's
+  wrappers were LIFTED on 2026-09-20. They wrapped `'$bags':cleanup_bag/2` and
+  `'$bags':findnsols2/5` from the first `call_with_inference_limit/3` of the
+  process on, and on the patched host they had stopped being redundant and
+  become wrong: with them installed, a nested `call_with_inference_limit`
+  inside a live evaluation emptied the ENCLOSING collection, which is the same
+  short-answer-set symptom this entry describes, produced by the cure rather
+  than the defect. Budgets from 100 to 20,000,000 behaved alike, so no budget
+  was being spent; it was the replacement bag discipline meeting the patched
+  host's deferral [measured 2026-09-20:
+  `!(test (grammar-parse (alt (integer) (lit "x")) "7") 7)` answers `()` under
+  METTA_VERIFY_SPECIALIZATIONS with the wrappers and `7` without them, and it
+  is what held the spec-differential lane red over two examples]. Lifting also
+  returns findall to the host's own cost, the one inference per findall this
+  entry used to charge.
 Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the section on the
   final gate's reds; docs/journal/2026-09-07-every-intermittent-root-caused.md.
 

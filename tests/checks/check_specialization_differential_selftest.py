@@ -7,6 +7,10 @@ Guarantees:
     the plain-call control stays clean under the same plant
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=de2a69fbea43d7bbc641fd93240cf7572285bb5c]
+  - a specialization whose call WRITES is still compared, and the write lands
+    once rather than three times, because the comparison runs in a snapshot
+    [tested: the effectful control below, whose second assertion counts the
+    writes; commit=WORKTREE]
   - a clean specialized call reports an agreed count and a one-inference
     budget reports the same attempted check as unverified
     [tested: tests/checks/check_specialization_differential_selftest.py;
@@ -49,6 +53,22 @@ CONTROL = """(: wrap-one (-> %Undefined% %Undefined%))
 COVERED = """(= (coverage-inc $x) (+ $x 1))
 (= (coverage-twice $f $x) ($f ($f $x)))
 !(test (coverage-twice coverage-inc 20) 22)
+"""
+
+#: The same shape with a WRITE in the inner function. Comparing a
+#: specialization runs the clone and then the generic, and the wrapper then
+#: runs the call the program actually made, so without a sandbox each write
+#: lands three times instead of once. The second assertion is the one that
+#: catches it: it counts the writes rather than the arithmetic, which stays 22
+#: either way. This is the shape
+#: examples/ch08-data/08-03-the-shipped-libraries/12-dict_lib.metta found in
+#: the corpus, where the same tripling answered 22 against an asserted 10
+#: because 4 + 6 + 6 + 6 is 22.
+EFFECTFUL = """!(bind! &tally (new-space))
+(= (effectful-inc $x) (let $seen (add-atom &tally (bumped $x)) (+ $x 1)))
+(= (effectful-twice $f $x) ($f ($f $x)))
+!(test (effectful-twice effectful-inc 20) 22)
+!(test (size-atom (collapse (get-atoms &tally))) 2)
 """
 
 #: The engine's own three-line report for a failing assertion, byte for byte
@@ -106,9 +126,11 @@ def main() -> int:
         planted = directory / "wrap_one_sleep.metta"
         control = directory / "wrap_one_plain.metta"
         covered = directory / "covered.metta"
+        effectful = directory / "effectful.metta"
         planted.write_text(PLANTED, encoding="utf-8")
         control.write_text(CONTROL, encoding="utf-8")
         covered.write_text(COVERED, encoding="utf-8")
+        effectful.write_text(EFFECTFUL, encoding="utf-8")
         entrypoint = _planted_entrypoint(directory)
 
         planted_finding = specialization_finding(planted, entrypoint=entrypoint)
@@ -117,6 +139,7 @@ def main() -> int:
         bounded_result = specialization_result(
             covered, environment={"METTA_VERIFY_BUDGET": "1"}
         )
+        effectful_result = specialization_result(effectful)
 
         if planted_finding is None:
             problems.append("the production detector stayed quiet on wrap-one/sleep")
@@ -152,6 +175,15 @@ def main() -> int:
                 "an unrelated engine error beside a demonstrated report was "
                 f"not reported: {verifier_errors(DEMONSTRATED_REPORT + UNRELATED_ERROR)}"
             )
+        if effectful_result.finding is not None:
+            problems.append(
+                f"the effectful control failed: {effectful_result.finding}"
+            )
+        elif effectful_result.coverage.agreed < 1:
+            problems.append(
+                "the effectful control was not actually compared: "
+                f"{effectful_result.coverage}"
+            )
         if bounded_result.finding is not None:
             problems.append(f"the bounded control failed: {bounded_result.finding}")
         elif (
@@ -169,8 +201,8 @@ def main() -> int:
     print(
         "spec-differential selftest: "
         f"{len(problems)} problem(s), 1 planted disagreement, 1 plain control, "
-        "1 agreed control, 1 inference-bounded control and 2 assertion-report "
-        "scans"
+        "1 agreed control, 1 inference-bounded control, 1 effectful control "
+        "and 2 assertion-report scans"
     )
     return 1 if problems else 0
 

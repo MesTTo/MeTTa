@@ -62,6 +62,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Specialization verification no longer changes the answers it is checking.
+  Two defects held the `spec-differential` lane red over two examples. The
+  engine still carried its `swi-findall-bag-push-window` workaround, replacing
+  `findall`'s bag machinery, after the host patch closed the window it worked
+  around; on the patched host those wrappers had stopped being redundant and
+  become wrong, so a nested `call_with_inference_limit` inside a live
+  evaluation emptied the enclosing collection. That is the same short-answer-set
+  symptom the workaround exists to prevent, produced by the cure. They are
+  lifted, which also returns `findall` to the host's own cost.
+- The specialization comparison runs in a snapshot. It runs the call twice more
+  than the program asked, once as the clone and once as the generic, which is
+  invisible for a call that reads and wrong for one that writes:
+  `12-dict_lib.metta` asserts that `(dict-update &stock plum (|-> ($v) (+ $v 6)))`
+  takes `plum` from 4 to 10 and the mode answered 22, which is 4 + 6 + 6 + 6.
+  The comparison now runs against a temporary view of the dynamic database and
+  its changes are discarded, so a write lands once however many times the
+  comparison ran. Measured 2026-09-20: 233 checked, 220 agreed, 13
+  inference-bounded. A static admission test was tried first and cannot work
+  here, because the effect walk refuses a higher-order goal and every goal the
+  specializer holds is one; it admitted 4 of 235 and suppressed the lane's own
+  planted disagreement.
+
 - The package-law mutation harness is run. `tests/data/lib_package/mutations.pl`
   disables one package policy at a time and reruns the witnesses assigned to it
   in a child process each, requiring the unmutated control to exit 0 and the

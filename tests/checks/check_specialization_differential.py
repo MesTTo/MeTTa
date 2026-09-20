@@ -15,8 +15,11 @@ Guarantees:
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=de2a69fbea43d7bbc641fd93240cf7572285bb5c]
   - a clean corpus is accepted only when the engine reports at least one
-    checked specialization, and the final line gives agreed and inference-
-    bounded totals rather than discarding the verifier's coverage
+    AGREED specialization, and the final line gives agreed and inference-
+    bounded totals rather than discarding the verifier's coverage. Agreed
+    rather than checked, because a corpus every one of whose specializations
+    exceeded the bound would have compared nothing while still reporting
+    coverage
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=694dff934a11dbc2ee99267b60f39564053baf87]
   - an example whose SUBJECT is a failing assertion prints the engine's own
@@ -232,9 +235,13 @@ def main() -> int:
     checked = sum(result.coverage.checked for result in results)
     agreed = sum(result.coverage.agreed for result in results)
     unverified = sum(result.coverage.unverified for result in results)
-    if checked == 0:
+    # AGREED rather than checked, because a corpus every one of whose
+    # specializations exceeded the bound would have compared nothing while
+    # still reporting coverage.
+    if agreed == 0:
         print(
-            "specialization differential: no specialization coverage was reported",
+            "specialization differential: no specialization was actually "
+            f"compared ({checked} checked, {unverified} inference-bounded)",
             file=sys.stderr,
         )
         return 1

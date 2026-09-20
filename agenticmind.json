@@ -6970,7 +6970,8 @@
     "it is one of the lanes red beyond the recorded baseline and the release bar is no new red": {
       "title": "it is one of the lanes red beyond the recorded baseline and the release bar is no new red",
       "supports": [
-        "the evidence lane exits zero"
+        "the evidence lane exits zero",
+        "the spec-differential lane exits zero"
       ]
     },
     "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run": {
@@ -7058,6 +7059,325 @@
       "title": "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted",
       "supports": [
         "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the spec-differential lane exits zero": {
+      "title": "the spec-differential lane exits zero",
+      "worth": 60,
+      "wanted": true
+    },
+    "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing": {
+      "title": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+      "blocks": [
+        "the spec-differential lane exits zero"
+      ]
+    },
+    "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way": {
+      "title": "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way",
+      "supports": [
+        "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+        {
+          "node": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+          "relation": "blocks",
+          "target": "the spec-differential lane exits zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the failure is not about ref or recursion: alt alone reproduces it": {
+      "title": "the failure is not about ref or recursion: alt alone reproduces it"
+    },
+    "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()": {
+      "title": "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()",
+      "supports": [
+        "the failure is not about ref or recursion: alt alone reproduces it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the check's EXECUTION is what damages the call, not the wrapper's control flow": {
+      "title": "the check's EXECUTION is what damages the call, not the wrapper's control flow"
+    },
+    "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7": {
+      "title": "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7",
+      "supports": [
+        "the check's EXECUTION is what damages the call, not the wrapper's control flow"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the damage is confined to the one call the check wraps, and happens exactly once": {
+      "title": "the damage is confined to the one call the check wraps, and happens exactly once"
+    },
+    "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again": {
+      "title": "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again",
+      "supports": [
+        "the damage is confined to the one call the check wraps, and happens exactly once"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the inference budget the check spends is NOT the mechanism": {
+      "title": "the inference budget the check spends is NOT the mechanism"
+    },
+    "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running": {
+      "title": "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running",
+      "supports": [
+        "the inference budget the check spends is NOT the mechanism"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here": {
+      "title": "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here",
+      "supports": [
+        {
+          "node": "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "status": "untried"
+        },
+        {
+          "node": "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "relation": "addresses",
+          "target": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        }
+      ]
+    },
+    "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection": {
+      "title": "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection"
+    },
+    "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out": {
+      "title": "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out",
+      "supports": [
+        "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect": {
+      "title": "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect",
+      "supports": [
+        {
+          "node": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "status": "untried"
+        },
+        {
+          "node": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "relation": "addresses",
+          "target": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        }
+      ]
+    },
+    "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost": {
+      "title": "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost",
+      "supports": [
+        {
+          "node": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it would keep a stock host working while letting the patched host run clean": {
+      "title": "it would keep a stock host working while letting the patched host run clean",
+      "supports": [
+        {
+          "node": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "status": "untried"
+        },
+        {
+          "node": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "relation": "addresses",
+          "target": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        }
+      ]
+    },
+    "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there": {
+      "title": "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there",
+      "supports": [
+        {
+          "node": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "it would keep a stock host working while letting the patched host run clean"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications": {
+      "title": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+      "blocks": [
+        "the spec-differential lane exits zero"
+      ]
+    },
+    "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call": {
+      "title": "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call",
+      "supports": [
+        "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+        {
+          "node": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+          "relation": "blocks",
+          "target": "the spec-differential lane exits zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity": {
+      "title": "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity",
+      "supports": [
+        {
+          "node": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "status": "untried"
+        },
+        {
+          "node": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "relation": "addresses",
+          "target": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        }
+      ]
+    },
+    "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement": {
+      "title": "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement"
+    },
+    "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep": {
+      "title": "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep",
+      "supports": [
+        "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2": {
+      "title": "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2"
+    },
+    "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals": {
+      "title": "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals",
+      "supports": [
+        "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes": {
+      "title": "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes"
+    },
+    "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass": {
+      "title": "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass",
+      "supports": [
+        "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable": {
+      "title": "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable"
+    },
+    "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again": {
+      "title": "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again",
+      "supports": [
+        "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced": {
+      "title": "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced"
+    },
+    "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second": {
+      "title": "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second",
+      "supports": [
+        "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict": {
+      "title": "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict",
+      "supports": [
+        {
+          "node": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four": {
+      "title": "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four",
+      "supports": [
+        {
+          "node": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "status": "untried"
+        },
+        {
+          "node": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "relation": "addresses",
+          "target": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        }
+      ]
+    },
+    "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed": {
+      "title": "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed",
+      "supports": [
+        {
+          "node": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings": {
+      "title": "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings"
+    },
+    "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global": {
+      "title": "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global",
+      "supports": [
+        "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times": {
+      "title": "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times"
+    },
+    "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice": {
+      "title": "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice",
+      "supports": [
+        "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times"
       ],
       "tags": [
         "source"
@@ -8173,6 +8493,46 @@
       "status": "unwanted",
       "addresses": [
         "the evidence lane exits zero"
+      ]
+    },
+    "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives": {
+      "title": "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+      ]
+    },
+    "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted": {
+      "title": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+      ]
+    },
+    "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does": {
+      "title": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+      "effort": 3,
+      "status": "unwanted",
+      "addresses": [
+        "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+      ]
+    },
+    "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones": {
+      "title": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+      "effort": 2,
+      "status": "failed",
+      "addresses": [
+        "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+      ]
+    },
+    "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once": {
+      "title": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
       ]
     }
   },
@@ -34068,6 +34428,927 @@
         ]
       ],
       "id": "ea6884686576e65a"
+    },
+    {
+      "at": "2026-09-20T05:45:04.452038+00:00",
+      "after": "acbd1a00e82a6f3499fd1386fb87df729cecb1e7",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"it is one of the lanes red beyond the recorded baseline and the release bar is no new red\", \"tags\": [], \"title\": \"the spec-differential lane exits zero\", \"fields\": {\"worth\": 60}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way\", \"tags\": [\"measured\"], \"title\": \"turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing\", \"fields\": {\"blocks\": [\"the spec-differential lane exits zero\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()\", \"tags\": [\"measured\"], \"title\": \"the failure is not about ref or recursion: alt alone reproduces it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7\", \"tags\": [\"measured\"], \"title\": \"the check's EXECUTION is what damages the call, not the wrapper's control flow\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again\", \"tags\": [\"measured\"], \"title\": \"the damage is confined to the one call the check wraps, and happens exactly once\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running\", \"tags\": [\"measured\"], \"title\": \"the inference budget the check spends is NOT the mechanism\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here\", \"tags\": [], \"title\": \"isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives\", \"fields\": {\"effort\": 1, \"addresses\": [\"turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing\"]}}]",
+      "parents": [
+        "ea6884686576e65a"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()",
+          "supports",
+          "the failure is not about ref or recursion: alt alone reproduces it"
+        ],
+        [
+          "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()",
+          "title",
+          "MEASURED 2026-09-20 over an orthogonal four-cell probe: a ref to a non-alt grammar passes, while alt with no ref, alt behind a ref, and alt behind a recursive ref all answer ()"
+        ],
+        [
+          "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again",
+          "supports",
+          "the damage is confined to the one call the check wraps, and happens exactly once"
+        ],
+        [
+          "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again",
+          "title",
+          "MEASURED 2026-09-20: a warm-up collapse of the same grammar answers () and the identical test right after it answers 7, because ho_specialization_agrees/1 is asserted by then and the check does not run again"
+        ],
+        [
+          "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running",
+          "supports",
+          "the inference budget the check spends is NOT the mechanism"
+        ],
+        [
+          "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running",
+          "title",
+          "MEASURED 2026-09-20: at METTA_VERIFY_BUDGET=100 the check exceeds the bound immediately, reporting 0 agreed and 2 unchecked, and the call still answers (); so the damage happens before or independently of the comparison running"
+        ],
+        [
+          "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7",
+          "supports",
+          "the check's EXECUTION is what damages the call, not the wrapper's control flow"
+        ],
+        [
+          "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7",
+          "title",
+          "MEASURED 2026-09-20: making metta_check_specialization/2 a no-op first clause, leaving metta_verified_specialization/2's branches untouched, makes the same case answer 7"
+        ],
+        [
+          "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way",
+          "supports",
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        ],
+        [
+          "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way",
+          "supports",
+          {
+            "node": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+            "relation": "blocks",
+            "target": "the spec-differential lane exits zero"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way",
+          "title",
+          "MEASURED 2026-09-20: the same command on examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta answers 7 without METTA_VERIFY_SPECIALIZATIONS and () with it, reporting 10 agreed and 0 unchecked either way"
+        ],
+        [
+          "it is one of the lanes red beyond the recorded baseline and the release bar is no new red",
+          "supports",
+          "the spec-differential lane exits zero"
+        ],
+        [
+          "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here",
+          "sort",
+          "prop"
+        ],
+        [
+          "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here",
+          "supports",
+          {
+            "node": "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+            "status": "untried"
+          }
+        ],
+        [
+          "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here",
+          "supports",
+          {
+            "node": "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+            "relation": "addresses",
+            "target": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+          }
+        ],
+        [
+          "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here",
+          "title",
+          "the budget probe leaves only the check's prologue and call_with_inference_limit itself, and the engine already records that a swallowed limit signal DISARMS call_with_inference_limit for the rest of the call, so the predicate is the suspect with a known history here"
+        ],
+        [
+          "the check's EXECUTION is what damages the call, not the wrapper's control flow",
+          "sort",
+          "prop"
+        ],
+        [
+          "the check's EXECUTION is what damages the call, not the wrapper's control flow",
+          "title",
+          "the check's EXECUTION is what damages the call, not the wrapper's control flow"
+        ],
+        [
+          "the damage is confined to the one call the check wraps, and happens exactly once",
+          "sort",
+          "prop"
+        ],
+        [
+          "the damage is confined to the one call the check wraps, and happens exactly once",
+          "title",
+          "the damage is confined to the one call the check wraps, and happens exactly once"
+        ],
+        [
+          "the failure is not about ref or recursion: alt alone reproduces it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the failure is not about ref or recursion: alt alone reproduces it",
+          "title",
+          "the failure is not about ref or recursion: alt alone reproduces it"
+        ],
+        [
+          "the inference budget the check spends is NOT the mechanism",
+          "sort",
+          "prop"
+        ],
+        [
+          "the inference budget the check spends is NOT the mechanism",
+          "title",
+          "the inference budget the check spends is NOT the mechanism"
+        ],
+        [
+          "the spec-differential lane exits zero",
+          "sort",
+          "prop"
+        ],
+        [
+          "the spec-differential lane exits zero",
+          "title",
+          "the spec-differential lane exits zero"
+        ],
+        [
+          "the spec-differential lane exits zero",
+          "wanted",
+          true
+        ],
+        [
+          "the spec-differential lane exits zero",
+          "worth",
+          60
+        ],
+        [
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+          "sort",
+          "prop"
+        ],
+        [
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+          "blocks",
+          "the spec-differential lane exits zero"
+        ],
+        [
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing",
+          "title",
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        ],
+        [
+          "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "sort",
+          "approach"
+        ],
+        [
+          "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "addresses",
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        ],
+        [
+          "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "effort",
+          1
+        ],
+        [
+          "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "status",
+          "untried"
+        ],
+        [
+          "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives",
+          "title",
+          "isolate call_with_inference_limit/3 by running the check's two findalls unbounded, temporarily, and seeing whether the damage survives"
+        ]
+      ],
+      "id": "d734204cd90efec7"
+    },
+    {
+      "at": "2026-09-20T05:52:44.242870+00:00",
+      "after": "acbd1a00e82a6f3499fd1386fb87df729cecb1e7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out\", \"tags\": [\"measured\"], \"title\": \"the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect\", \"tags\": [], \"title\": \"lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted\", \"fields\": {\"effort\": 2, \"addresses\": [\"turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing\"]}}, {\"op\": \"status\", \"id\": \"lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted\", \"because\": \"host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it would keep a stock host working while letting the patched host run clean\", \"tags\": [], \"title\": \"feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does\", \"fields\": {\"effort\": 3, \"addresses\": [\"turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing\"]}}, {\"op\": \"status\", \"id\": \"feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does\", \"because\": \"the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there\", \"tags\": [\"source\"], \"status\": \"unwanted\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call\", \"tags\": [\"measured\"], \"title\": \"the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications\", \"fields\": {\"blocks\": [\"the spec-differential lane exits zero\"]}}]",
+      "parents": [
+        "d734204cd90efec7"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call",
+          "supports",
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        ],
+        [
+          "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call",
+          "supports",
+          {
+            "node": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+            "relation": "blocks",
+            "target": "the spec-differential lane exits zero"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call",
+          "title",
+          "MEASURED 2026-09-20: 12-dict_lib.metta asserts (dict-update &stock plum (|-> ($v) (+ $v 6))) reaches 10 from a starting 4, and under verification it answers 22, which is 4 + 6 + 6 + 6: the check runs the specialized clone and the generic, then the wrapper runs the real call"
+        ],
+        [
+          "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out",
+          "supports",
+          "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection"
+        ],
+        [
+          "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out",
+          "title",
+          "MEASURED 2026-09-20: disabling only the two '$bags' wraps makes the alt case answer 7 and takes 27-parsing_lib.metta from one failed assertion to zero; the reproduction answers absent on the patched host and present on stock 10.1.13, so the patch is what closed the defect and the host-workarounds lane is what keeps a stock host out"
+        ],
+        [
+          "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost",
+          "sort",
+          "prop"
+        ],
+        [
+          "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost",
+          "supersedes",
+          "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect"
+        ],
+        [
+          "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost",
+          "supports",
+          {
+            "node": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+            "status": "done"
+          }
+        ],
+        [
+          "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost",
+          "tags",
+          "measured"
+        ],
+        [
+          "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost",
+          "title",
+          "host-workarounds ok 24s reporting 60 entries, 22 patched, 76 sites, every patched defect absent; 27-parsing_lib.metta has zero failed assertions under verification; 3174 characters of engine machinery removed and findall returns to the host's own cost"
+        ],
+        [
+          "it would keep a stock host working while letting the patched host run clean",
+          "sort",
+          "prop"
+        ],
+        [
+          "it would keep a stock host working while letting the patched host run clean",
+          "supports",
+          {
+            "node": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+            "status": "untried"
+          }
+        ],
+        [
+          "it would keep a stock host working while letting the patched host run clean",
+          "supports",
+          {
+            "node": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+            "relation": "addresses",
+            "target": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+          }
+        ],
+        [
+          "it would keep a stock host working while letting the patched host run clean",
+          "title",
+          "it would keep a stock host working while letting the patched host run clean"
+        ],
+        [
+          "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection",
+          "title",
+          "the engine's swi-findall-bag-push-window workaround was itself the cause on the patched host: with the wrappers installed a nested call_with_inference_limit emptied the enclosing collection"
+        ],
+        [
+          "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there",
+          "sort",
+          "prop"
+        ],
+        [
+          "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there",
+          "supersedes",
+          "it would keep a stock host working while letting the patched host run clean"
+        ],
+        [
+          "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there",
+          "supports",
+          {
+            "node": "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there",
+          "tags",
+          "source"
+        ],
+        [
+          "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there",
+          "title",
+          "the host-workarounds lane ALREADY refuses an environment whose patched defects answer present and names the patch to rebuild with, so runtime detection would be a second guard beside one that exists; the tree's rule is to use the mechanism already there"
+        ],
+        [
+          "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect",
+          "supports",
+          {
+            "node": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+            "status": "untried"
+          }
+        ],
+        [
+          "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect",
+          "supports",
+          {
+            "node": "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+            "relation": "addresses",
+            "target": "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+          }
+        ],
+        [
+          "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect",
+          "title",
+          "the ledger's own Lifted when condition, that the inference-limit check honours the atomic region, is met by swi-cleanup-window.patch, and the tree's rule is to lift a workaround the host patch made obsolete rather than carry two fixes for one defect"
+        ],
+        [
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+          "sort",
+          "prop"
+        ],
+        [
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+          "blocks",
+          "the spec-differential lane exits zero"
+        ],
+        [
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications",
+          "title",
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        ],
+        [
+          "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "sort",
+          "approach"
+        ],
+        [
+          "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "addresses",
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        ],
+        [
+          "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "effort",
+          3
+        ],
+        [
+          "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "status",
+          "unwanted"
+        ],
+        [
+          "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does",
+          "title",
+          "feature-detect the defect at runtime and install the wrappers only on a host that still shows it, the way a JavaScript polyfill does"
+        ],
+        [
+          "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "sort",
+          "approach"
+        ],
+        [
+          "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "addresses",
+          "turning specialization verification on changes the ANSWER of a call from 7 to no answers at all, while the verifier reports every specialization as agreeing"
+        ],
+        [
+          "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "effort",
+          2
+        ],
+        [
+          "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "status",
+          "done"
+        ],
+        [
+          "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted",
+          "title",
+          "lift the '$bags':cleanup_bag/2 and findnsols2/5 wrappers from engine/metta/limits.pl and mark the ledger entry lifted"
+        ]
+      ],
+      "id": "8c86be2d7bf287d2"
+    },
+    {
+      "at": "2026-09-20T05:57:12.782736+00:00",
+      "after": "acbd1a00e82a6f3499fd1386fb87df729cecb1e7",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity\", \"tags\": [], \"title\": \"decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones\", \"fields\": {\"effort\": 2, \"addresses\": [\"the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep\", \"tags\": [\"measured\"], \"title\": \"a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals\", \"tags\": [\"source\"], \"title\": \"the engine already publishes the admission check this needs, metta_host_goal_repeatable/2\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass\", \"tags\": [\"measured\"], \"title\": \"the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes\", \"fields\": {}}]",
+      "parents": [
+        "8c86be2d7bf287d2"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass",
+          "supports",
+          "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes"
+        ],
+        [
+          "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass",
+          "title",
+          "MEASURED 2026-09-20 with a probe printing each classified goal: dict-update('&json-2',plum,lambda_1,_) -> oracleIO, and declining those two is what makes 12-dict_lib.metta pass"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep",
+          "supports",
+          "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep",
+          "title",
+          "MEASURED 2026-09-20: spec-differential reported 235 checked, 2 agreed, 233 not repeatable where 27-parsing_lib.metta alone used to report 10 agreed, and spec-differential-selftest failed with the planted file no longer exposing metta_specialization_disagrees because its plant calls sleep"
+        ],
+        [
+          "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity",
+          "sort",
+          "prop"
+        ],
+        [
+          "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity",
+          "supports",
+          {
+            "node": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+            "status": "untried"
+          }
+        ],
+        [
+          "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity",
+          "supports",
+          {
+            "node": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+            "relation": "addresses",
+            "target": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+          }
+        ],
+        [
+          "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity",
+          "title",
+          "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity"
+        ],
+        [
+          "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement",
+          "sort",
+          "prop"
+        ],
+        [
+          "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement",
+          "title",
+          "a hand-rolled ceiling test against nondeterministicReadOnly is too coarse: it declined 233 of 235 corpus specializations and suppressed the selftest's planted disagreement"
+        ],
+        [
+          "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals",
+          "supports",
+          "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2"
+        ],
+        [
+          "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals",
+          "tags",
+          "source"
+        ],
+        [
+          "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals",
+          "title",
+          "engine/metta/effects.pl:121, exported at engine/metta.pl:590, declared a host_service at engine/ext_points.pl:1402, already used by extensions/python/metta/_binding/query.pl and evaluation.pl, and tested in tests/prolog/suites/evaluation/metta.plt:37-47 for pure, effectful, unknown and bounded goals"
+        ],
+        [
+          "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes",
+          "title",
+          "the effect classifier is RIGHT about dict-update: it answers oracleIO because the call writes"
+        ],
+        [
+          "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2",
+          "title",
+          "the engine already publishes the admission check this needs, metta_host_goal_repeatable/2"
+        ],
+        [
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "sort",
+          "approach"
+        ],
+        [
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "addresses",
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        ],
+        [
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "effort",
+          2
+        ],
+        [
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "status",
+          "untried"
+        ],
+        [
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "title",
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones"
+        ]
+      ],
+      "id": "69e1818280234729"
+    },
+    {
+      "at": "2026-09-20T05:58:54.970387+00:00",
+      "after": "acbd1a00e82a6f3499fd1386fb87df729cecb1e7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again\", \"tags\": [\"measured\"], \"title\": \"metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second\", \"tags\": [\"measured\"], \"title\": \"12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced\", \"fields\": {}}]",
+      "parents": [
+        "69e1818280234729"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again",
+          "supports",
+          "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable"
+        ],
+        [
+          "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again",
+          "title",
+          "MEASURED 2026-09-20: swapping the specializer's guard to it gives 235 checked, 4 agreed, 231 not repeatable, where the lane used to compare all 235; engine/metta/effects.pl's walk throws whenever metta_annotated_operation_effect answers anything other than pureStructural, which is the right ceiling for the Python seat's held-cursor question and the wrong one for whether a goal may be run again"
+        ],
+        [
+          "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second",
+          "sort",
+          "prop"
+        ],
+        [
+          "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second",
+          "supports",
+          "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced"
+        ],
+        [
+          "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second",
+          "tags",
+          "measured"
+        ],
+        [
+          "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second",
+          "title",
+          "at session start, with the bag workaround still installed and no admission guard, spec-differential reported both 12-dict_lib and 27-parsing_lib; lifting the workaround fixed only the second"
+        ],
+        [
+          "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable",
+          "sort",
+          "prop"
+        ],
+        [
+          "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable",
+          "title",
+          "metta_host_goal_repeatable/2 is fail-closed AND pureStructural-only, so it declines a read-only lookup that is perfectly repeatable"
+        ],
+        [
+          "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced",
+          "sort",
+          "prop"
+        ],
+        [
+          "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced",
+          "title",
+          "12-dict_lib.metta was failing under verification before any change in this session, so the three-runs-of-an-effect defect is pre-existing rather than introduced"
+        ]
+      ],
+      "id": "84b22a711eb8b80e"
+    },
+    {
+      "at": "2026-09-20T06:00:23.937355+00:00",
+      "after": "acbd1a00e82a6f3499fd1386fb87df729cecb1e7",
+      "did": "[{\"op\": \"status\", \"id\": \"decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones\", \"because\": \"MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four\", \"tags\": [], \"title\": \"run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once\", \"fields\": {\"effort\": 2, \"addresses\": [\"the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications\"]}}]",
+      "parents": [
+        "84b22a711eb8b80e"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict",
+          "supersedes",
+          "a differential runs its subject more than once, so it is sound only for a call that can be run more than once, and the engine already ranks effect classes so the admission is an existing ceiling test rather than a new notion of purity"
+        ],
+        [
+          "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict",
+          "supports",
+          {
+            "node": "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+            "status": "failed"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict",
+          "title",
+          "MEASURED 2026-09-20: the effect walk refuses a higher-order goal outright with error(metta_higher_order_goal(2),none), and the specializer exists to specialize higher-order calls, so every goal this caller holds is higher-order and the admission check can never admit one; it is structurally inapplicable rather than merely strict"
+        ],
+        [
+          "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four",
+          "sort",
+          "prop"
+        ],
+        [
+          "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four",
+          "supports",
+          {
+            "node": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+            "status": "untried"
+          }
+        ],
+        [
+          "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four",
+          "supports",
+          {
+            "node": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+            "relation": "addresses",
+            "target": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+          }
+        ],
+        [
+          "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four",
+          "title",
+          "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four"
+        ],
+        [
+          "decline to verify a specialization whose call is not repeatable, recording it beside the inference-bounded ones",
+          "status",
+          "failed"
+        ],
+        [
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "sort",
+          "approach"
+        ],
+        [
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "addresses",
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        ],
+        [
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "effort",
+          2
+        ],
+        [
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "status",
+          "untried"
+        ],
+        [
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "title",
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once"
+        ]
+      ],
+      "id": "64c0edd99d651ea1"
+    },
+    {
+      "at": "2026-09-20T06:03:47.329314+00:00",
+      "after": "acbd1a00e82a6f3499fd1386fb87df729cecb1e7",
+      "did": "[{\"op\": \"status\", \"id\": \"run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once\", \"because\": \"MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global\", \"tags\": [\"measured\"], \"title\": \"snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice\", \"tags\": [\"source\"], \"title\": \"the snapshot does not contain IO, so a checked specialization still prints or sleeps three times\", \"fields\": {}}]",
+      "parents": [
+        "64c0edd99d651ea1"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed",
+          "supersedes",
+          "sandbox-and-discard is the standard shape for speculative execution, an SMT solver's push and pop or a database savepoint, and SWI ships it for exactly this; it needs no static analysis, so the higher-order wall that defeated the admission check does not apply, and coverage stays at every specialization instead of collapsing to four"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed",
+          "supports",
+          {
+            "node": "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+            "status": "done"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed",
+          "title",
+          "MEASURED 2026-09-20: spec-differential ok at 233 checked, 220 agreed, 13 unverified, against 4 agreed under the admission check; 12-dict_lib.metta compares both of its specializations and answers 10; the selftest's new effectful control counts the writes and FAILS when the snapshot is replaced by a plain call, so the control is tested rather than assumed"
+        ],
+        [
+          "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global",
+          "supports",
+          "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings"
+        ],
+        [
+          "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global",
+          "title",
+          "MEASURED 2026-09-20: the comparison reports both lists and agrees on 220 corpus specializations with nothing smuggled through a global"
+        ],
+        [
+          "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice",
+          "sort",
+          "prop"
+        ],
+        [
+          "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice",
+          "supports",
+          "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times"
+        ],
+        [
+          "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice",
+          "tags",
+          "source"
+        ],
+        [
+          "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice",
+          "title",
+          "snapshot/1 covers the dynamic database only; this corrupts no answer and the mode only runs under the gate, which is the residual the specializer header already accepted when it said running both ways runs a function's effects twice"
+        ],
+        [
+          "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings",
+          "sort",
+          "prop"
+        ],
+        [
+          "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings",
+          "title",
+          "snapshot/1 discards database changes and not bindings, so the two answer lists come back as ordinary bindings"
+        ],
+        [
+          "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times",
+          "sort",
+          "prop"
+        ],
+        [
+          "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times",
+          "title",
+          "the snapshot does not contain IO, so a checked specialization still prints or sleeps three times"
+        ],
+        [
+          "run the comparison inside SWI's snapshot/1 so the two extra runs write to a temporary view of the dynamic database and are discarded, leaving the program's own call to write once",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "5db01d64c5b890c9"
     }
   ]
 }
