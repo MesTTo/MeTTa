@@ -13557,6 +13557,458 @@
       "tags": [
         "measured"
       ]
+    },
+    "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions": {
+      "title": "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change": {
+      "title": "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change",
+      "supports": [
+        "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+        {
+          "node": "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))": {
+      "title": "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))",
+      "supports": [
+        {
+          "node": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "status": "untried"
+        },
+        {
+          "node": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "relation": "addresses",
+          "target": "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions"
+        }
+      ]
+    },
+    "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0": {
+      "title": "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0",
+      "supports": [
+        {
+          "node": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion": {
+      "title": "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion"
+    },
+    "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes": {
+      "title": "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes",
+      "supports": [
+        "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description": {
+      "title": "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description"
+    },
+    "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode": {
+      "title": "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode",
+      "supports": [
+        "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump": {
+      "title": "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump"
+    },
+    "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines": {
+      "title": "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines",
+      "supports": [
+        "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present": {
+      "title": "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present"
+    },
+    "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them": {
+      "title": "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them",
+      "supports": [
+        "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73": {
+      "title": "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73"
+    },
+    "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852": {
+      "title": "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852",
+      "supports": [
+        "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET": {
+      "title": "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET",
+      "supports": [
+        {
+          "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "status": "untried"
+        },
+        {
+          "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "relation": "addresses",
+          "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        }
+      ]
+    },
+    "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background": {
+      "title": "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background",
+      "supports": [
+        {
+          "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET"
+      ]
+    },
+    "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget": {
+      "title": "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget"
+    },
+    "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved": {
+      "title": "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved",
+      "supports": [
+        "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example": {
+      "title": "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example"
+    },
+    "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT": {
+      "title": "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT",
+      "supports": [
+        "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes": {
+      "title": "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes",
+      "attacks": [
+        "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression": {
+      "title": "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14": {
+      "title": "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14",
+      "supports": [
+        "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+        {
+          "node": "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)": {
+      "title": "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)"
+    },
+    "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so": {
+      "title": "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so",
+      "supports": [
+        "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded": {
+      "title": "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded",
+      "supports": [
+        {
+          "node": "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "status": "untried"
+        },
+        {
+          "node": "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "relation": "addresses",
+          "target": "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression"
+        }
+      ]
+    },
+    "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in": {
+      "title": "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in"
+    },
+    "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under": {
+      "title": "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under",
+      "supports": [
+        "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause": {
+      "title": "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause"
+    },
+    "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture": {
+      "title": "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture",
+      "supports": [
+        "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way": {
+      "title": "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way"
+    },
+    "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here": {
+      "title": "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here",
+      "supports": [
+        "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19": {
+      "title": "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19",
+      "supports": [
+        {
+          "node": "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "status": "untried"
+        },
+        {
+          "node": "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "relation": "addresses",
+          "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        }
+      ]
+    },
+    "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads": {
+      "title": "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads"
+    },
+    "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890": {
+      "title": "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890",
+      "supports": [
+        "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort": {
+      "title": "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort"
+    },
+    "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root": {
+      "title": "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root",
+      "supports": [
+        "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70": {
+      "title": "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70"
+    },
+    "measured by running suites/seams/lib_package.plt under dev_typed_suites": {
+      "title": "measured by running suites/seams/lib_package.plt under dev_typed_suites",
+      "supports": [
+        "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it": {
+      "title": "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it"
+    },
+    "counted from the gate log's dev-typed section by suite": {
+      "title": "counted from the gate log's dev-typed section by suite",
+      "supports": [
+        "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf": {
+      "title": "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf"
+    },
+    "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs": {
+      "title": "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs",
+      "supports": [
+        "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it": {
+      "title": "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it"
+    },
+    "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only": {
+      "title": "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only",
+      "supports": [
+        "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check": {
+      "title": "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain": {
+      "title": "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain",
+      "supports": [
+        "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+        {
+          "node": "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)": {
+      "title": "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)"
+    },
+    "library(error)'s has_type/is_not structure, established earlier this session": {
+      "title": "library(error)'s has_type/is_not structure, established earlier this session",
+      "supports": [
+        "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step": {
+      "title": "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step"
+    },
+    "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'": {
+      "title": "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'",
+      "supports": [
+        "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission": {
+      "title": "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission"
+    },
+    "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev": {
+      "title": "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev",
+      "supports": [
+        "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components": {
+      "title": ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components"
+    },
+    "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file": {
+      "title": "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file",
+      "supports": [
+        ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly": {
+      "title": "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly"
+    },
+    "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards": {
+      "title": "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards",
+      "supports": [
+        "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs": {
+      "title": "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs"
+    },
+    "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight": {
+      "title": "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight",
+      "supports": [
+        "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork": {
+      "title": "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork"
+    },
+    "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds": {
+      "title": "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds",
+      "supports": [
+        "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh": {
+      "title": "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh"
+    },
+    "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation": {
+      "title": "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation",
+      "supports": [
+        "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -15333,6 +15785,38 @@
       "status": "done",
       "addresses": [
         "the package-mutations lane refused the new backing-row regression because every lib_package test must carry a mutation that makes it fail, and a new test with none is an existence_error"
+      ]
+    },
+    "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check": {
+      "title": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions"
+      ]
+    },
+    "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism": {
+      "title": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+      "effort": 2,
+      "status": "active",
+      "addresses": [
+        "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+      ]
+    },
+    "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression": {
+      "title": "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression"
+      ]
+    },
+    "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt": {
+      "title": "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
       ]
     }
   },
@@ -59774,6 +60258,1287 @@
         ]
       ],
       "id": "970ec75e5ca128bd"
+    },
+    {
+      "at": "2026-09-20T21:41:04.878533+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change\", \"tags\": [\"measured\"], \"title\": \"leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))\", \"tags\": [], \"title\": \"type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check\", \"fields\": {\"effort\": 2, \"addresses\": [\"leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions\"]}}, {\"op\": \"status\", \"id\": \"type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check\", \"because\": \"suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes\", \"tags\": [\"measured\"], \"title\": \"my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode\", \"tags\": [\"measured\"], \"title\": \"writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description\", \"fields\": {}}]",
+      "parents": [
+        "970ec75e5ca128bd"
+      ],
+      "assert": [
+        [
+          "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))",
+          "sort",
+          "prop"
+        ],
+        [
+          "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))",
+          "supports",
+          {
+            "node": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+            "status": "untried"
+          }
+        ],
+        [
+          "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))",
+          "supports",
+          {
+            "node": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+            "relation": "addresses",
+            "target": "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions"
+          }
+        ],
+        [
+          "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))",
+          "title",
+          "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))"
+        ],
+        [
+          "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+          "sort",
+          "prop"
+        ],
+        [
+          "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+          "title",
+          "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions"
+        ],
+        [
+          "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion",
+          "sort",
+          "prop"
+        ],
+        [
+          "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion",
+          "title",
+          "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion"
+        ],
+        [
+          "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0",
+          "supersedes",
+          "exclude(subsumes_term(the(any,_)), AllTypes, Types) at vendor/mavis.pl was added on 2026-08-19 for this exact hazard, so `any` attaches nothing while a narrower type becomes when(ground(V), must_be(T,V))"
+        ],
+        [
+          "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0",
+          "supports",
+          {
+            "node": "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+            "status": "done"
+          }
+        ],
+        [
+          "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0",
+          "title",
+          "suites/libraries/lib_database.plt is 29/29 under dev_typed_suites including variable_occurrence_and_snapshot and variable_nonidentical_removal, 29/29 on the ordinary build, and the prolog-face lane reports 0 findings at exit 0"
+        ],
+        [
+          "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes",
+          "supports",
+          "my earlier conclusion that NO type could be written on a term-under-construction argument was WRONG, and the probe that supported it measured the wrong thing: it called the/2 DIRECTLY, where a mode line never does, because mavis filters the(any,_) out at expansion"
+        ],
+        [
+          "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes",
+          "tags",
+          "measured"
+        ],
+        [
+          "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes",
+          "title",
+          "the direct probe showed any, term and Atom all attaching an attribute, while vendor/mavis.pl line 164 drops the(any,_) before the clause is built and the typed suite now passes"
+        ],
+        [
+          "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change",
+          "supports",
+          "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions"
+        ],
+        [
+          "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change",
+          "supports",
+          {
+            "node": "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change",
+          "tags",
+          "measured"
+        ],
+        [
+          "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change",
+          "title",
+          "the gate printed lib/lib_database/lib_database.pl:database-add!/3: every PlDoc argument needs a name and explicit type, and that undeclared state was this session's own earlier change"
+        ],
+        [
+          "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode",
+          "sort",
+          "prop"
+        ],
+        [
+          "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode",
+          "supports",
+          "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description"
+        ],
+        [
+          "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode",
+          "tags",
+          "measured"
+        ],
+        [
+          "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode",
+          "title",
+          "the regenerated face carried the when(ground(...)) paragraph in @desc, and the next run reported database-add!/3: add a PlDoc description and typed mode"
+        ],
+        [
+          "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description",
+          "sort",
+          "prop"
+        ],
+        [
+          "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description",
+          "title",
+          "writing the rationale inside the %! block leaked an implementation note into the library's user-facing @desc, and moving it directly above %! without a blank line made PlDoc stop seeing a structured comment at all, so the door lost its description"
+        ],
+        [
+          "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "sort",
+          "approach"
+        ],
+        [
+          "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "addresses",
+          "leaving the database store's held values undeclared failed the prolog-face lane, which requires a name and explicit type on every PlDoc argument, and made the generated face advertise Atom for an argument accepting Symbols, Strings, Numbers, plain Variables and expressions"
+        ],
+        [
+          "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "effort",
+          2
+        ],
+        [
+          "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "status",
+          "done"
+        ],
+        [
+          "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check",
+          "title",
+          "type the held values `any`, the top type, which vendor/mavis.pl drops before building the clause, so the argument is documented without emitting a runtime check"
+        ]
+      ],
+      "id": "8357e253f48a7f77"
+    },
+    {
+      "at": "2026-09-20T21:44:46.135733+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines\", \"tags\": [\"measured\"], \"title\": \"the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them\", \"tags\": [\"measured\"], \"title\": \"my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852\", \"tags\": [\"measured\"], \"title\": \"parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET\", \"tags\": [], \"title\": \"re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism\", \"fields\": {\"effort\": 2, \"addresses\": [\"the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane\"]}}, {\"op\": \"status\", \"id\": \"re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism\", \"because\": \"trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "8357e253f48a7f77"
+      ],
+      "assert": [
+        [
+          "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them",
+          "supports",
+          "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present"
+        ],
+        [
+          "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them",
+          "title",
+          "measured: tests/checks/host_workarounds/swi-cleanup-window.pl answers present under /usr/bin/swipl and absent under the patched build, and both report version 10.1.14 so the version string cannot distinguish them"
+        ],
+        [
+          "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present",
+          "sort",
+          "prop"
+        ],
+        [
+          "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present",
+          "title",
+          "my gate run used the PATCHED SWI host, so the earlier session's host-mismatch explanation does not excuse the three instruction regressions: tools/select-python.sh exports PATH with the venv bin first, the venv's swipl symlinks to swipl-patched, the host-workarounds lane passed, and that lane refuses an environment whose patched defects answer present"
+        ],
+        [
+          "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73",
+          "sort",
+          "prop"
+        ],
+        [
+          "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73",
+          "title",
+          "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73"
+        ],
+        [
+          "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines",
+          "sort",
+          "prop"
+        ],
+        [
+          "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines",
+          "supports",
+          "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump"
+        ],
+        [
+          "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines",
+          "tags",
+          "measured"
+        ],
+        [
+          "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines",
+          "title",
+          "read from the gate log lane by lane: parity-perf reports TREE DRIFT with combinatorics_lib at 749968 against a frozen 78161, the same 9.6x magnitude the twins corpus shows, while benchmarks reports an ERROR at teardown of test_add_table_rows and instructions reports four named cases against baselines"
+        ],
+        [
+          "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump",
+          "title",
+          "the gate's twelve failing lanes decompose into SEVEN causes, not twelve problems: stale measurement pins from the sixty-library merge (twins, parity-perf's frozen counts, and the three bench lanes to confirm); three instruction regressions plus one unpinned improvement measured on the CORRECT host; a pytest-benchmark fixture teardown error; the typed build's 120 known failures; the door-order burn-down that has never been green; the worktree lane blocked on pushes that are the user's call; and the pytest lane's worker core dump"
+        ],
+        [
+          "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852",
+          "supports",
+          "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73"
+        ],
+        [
+          "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852",
+          "title",
+          "the lane printed unmeasurable-null with medians around 1.455 billion instructions and a resolution of -13405/+12852"
+        ],
+        [
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET",
+          "supports",
+          {
+            "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+            "status": "untried"
+          }
+        ],
+        [
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET",
+          "supports",
+          {
+            "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+            "relation": "addresses",
+            "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+          }
+        ],
+        [
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET",
+          "title",
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET"
+        ],
+        [
+          "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background",
+          "sort",
+          "prop"
+        ],
+        [
+          "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background",
+          "supersedes",
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET"
+        ],
+        [
+          "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background",
+          "supports",
+          {
+            "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+            "status": "active"
+          }
+        ],
+        [
+          "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background",
+          "title",
+          "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background"
+        ],
+        [
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "sort",
+          "approach"
+        ],
+        [
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "addresses",
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        ],
+        [
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "effort",
+          2
+        ],
+        [
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "status",
+          "active"
+        ],
+        [
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "title",
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+        ]
+      ],
+      "id": "3e41b5da07110aa7"
+    },
+    {
+      "at": "2026-09-20T21:47:30.270152+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved\", \"tags\": [\"measured\"], \"title\": \"my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT\", \"tags\": [\"measured\"], \"title\": \"I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example\", \"fields\": {}}, {\"op\": \"attack\", \"id\": \"parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73\", \"because\": \"the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes\", \"tags\": [\"source\"]}]",
+      "parents": [
+        "3e41b5da07110aa7"
+      ],
+      "assert": [
+        [
+          "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example",
+          "sort",
+          "prop"
+        ],
+        [
+          "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example",
+          "title",
+          "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example"
+        ],
+        [
+          "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget",
+          "title",
+          "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget"
+        ],
+        [
+          "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes",
+          "attacks",
+          "parity-perf's NOT MEASURED ON THIS BOX entries are a box condition rather than a defect: the null program's own instruction count spans a range wider than the resolution the comparison needs, at loadavg 5.73"
+        ],
+        [
+          "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes",
+          "tags",
+          "source"
+        ],
+        [
+          "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes",
+          "title",
+          "the lane's source treats a measurement refusal as its own status, reported with the load and kept separate from inference drift, rather than as harmless noise; calling it 'not a defect' dismisses a status the lane deliberately distinguishes"
+        ],
+        [
+          "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT",
+          "sort",
+          "prop"
+        ],
+        [
+          "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT",
+          "supports",
+          "I caught that false clause only after launching it across the corpus, and it had already been written into 52 twins before the run was stopped and reverted; a wrong mechanism in a pin chain is exactly what the chain exists to prevent, so the reason should have been checked against the tool's own licensing path BEFORE the sweep rather than after the trial on one example"
+        ],
+        [
+          "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT",
+          "tags",
+          "measured"
+        ],
+        [
+          "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT",
+          "title",
+          "the single-example trial proved the FORM of the written paragraph and I read that as proving its CONTENT"
+        ],
+        [
+          "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved",
+          "sort",
+          "prop"
+        ],
+        [
+          "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved",
+          "supports",
+          "my first re-pin reason was FALSE for the 249 point budgets: it claimed the corpus growing from 294 to 323 changed the envelope those budgets were licensed under, but full_lane_protocol/1 is called only at twin_coverage.py:3092 and 3116, both in the --observe path, so corpus width licenses the ENVELOPE budgets and never a point budget"
+        ],
+        [
+          "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved",
+          "tags",
+          "measured"
+        ],
+        [
+          "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved",
+          "title",
+          "verified against source after the claim was flagged; --repin prices a point budget from isolated run_twin samples compared against an integer, with no protocol involved"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "021602398f0dc0ed"
+    },
+    {
+      "at": "2026-09-20T21:49:26.779762+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14\", \"tags\": [\"source\"], \"title\": \"the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so\", \"tags\": [\"measured\"], \"title\": \"the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded\", \"tags\": [], \"title\": \"add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression\", \"fields\": {\"effort\": 2, \"addresses\": [\"the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under\", \"tags\": [\"source\"], \"title\": \"the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in\", \"fields\": {}}]",
+      "parents": [
+        "021602398f0dc0ed"
+      ],
+      "assert": [
+        [
+          "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under",
+          "sort",
+          "prop"
+        ],
+        [
+          "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under",
+          "supports",
+          "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in"
+        ],
+        [
+          "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under",
+          "tags",
+          "source"
+        ],
+        [
+          "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under",
+          "title",
+          "ext/metta-benchmarking/metta_benchmarking.py:709 raises AssertionError when stored != dict(live), and its own docstring says a subset runner must not rewrite the fingerprint the other pins were measured under"
+        ],
+        [
+          "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14",
+          "supports",
+          "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression"
+        ],
+        [
+          "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14",
+          "supports",
+          {
+            "node": "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14",
+          "tags",
+          "source"
+        ],
+        [
+          "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14",
+          "title",
+          "extensions/python/benchmarks/configuration.py returns exactly c_reader, c_writer, c_json and c_extension, while baseline.json's re-pin note says rows were measured under both 10.1.13 and patched 10.1.14"
+        ],
+        [
+          "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so",
+          "supports",
+          "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)"
+        ],
+        [
+          "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so",
+          "title",
+          "measured by asking both binaries for version, version_git, home, arch, executable and compiled_at, and by readelf -n on each libswipl.so"
+        ],
+        [
+          "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+          "sort",
+          "prop"
+        ],
+        [
+          "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression",
+          "title",
+          "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression"
+        ],
+        [
+          "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in",
+          "sort",
+          "prop"
+        ],
+        [
+          "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in",
+          "title",
+          "the host-stamp change must land AFTER the three instruction regressions are root-caused, not before: observe_configuration raises on any stamp difference, so adding a key blocks the lane until the owning full-battery updater restamps, and that updater re-measures, which would re-pin the regressions away and bake them in"
+        ],
+        [
+          "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded",
+          "sort",
+          "prop"
+        ],
+        [
+          "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded",
+          "supports",
+          {
+            "node": "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+            "status": "untried"
+          }
+        ],
+        [
+          "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded",
+          "supports",
+          {
+            "node": "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+            "relation": "addresses",
+            "target": "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression"
+          }
+        ],
+        [
+          "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded",
+          "title",
+          "the stamp's own stated purpose is that a baseline measured in one configuration is unreadable in another and the stamp is what makes a pin refuse to compare across that line; configuration_drift's docstring makes the same argument for the C reader, naming a parser regression where only the box differed, and the host is that axis left unrecorded"
+        ],
+        [
+          "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)",
+          "title",
+          "the two SWI builds on this box are distinguishable for free by the engine's own flags, without ELF parsing or hashing: /usr/bin/swipl answers version=100114 and has NO version_git, while the patched build answers version_git=10.1.14-DIRTY and compiled_at='Sep 16 2026, 22:48:43'; their libswipl.so build-ids also differ (92611745... against 631e83b7...)"
+        ],
+        [
+          "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "sort",
+          "approach"
+        ],
+        [
+          "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "addresses",
+          "the benchmark counter_configuration stamp records four C-artifact booleans and no host identity, so a baseline pinned on one SWI build can be compared against a run on another with nothing refusing it; the baseline's own note prices a host change at +491,277,571 instructions, six times the gap the lane calls a regression"
+        ],
+        [
+          "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "effort",
+          2
+        ],
+        [
+          "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "status",
+          "untried"
+        ],
+        [
+          "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression",
+          "title",
+          "add the engine's own build identity to counter_configuration, so a comparison across SWI builds refuses instead of naming a code regression"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "272ea1c6970ea75c"
+    },
+    {
+      "at": "2026-09-20T21:50:40.218517+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture\", \"tags\": [\"measured\"], \"title\": \"the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here\", \"tags\": [\"source\"], \"title\": \"the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19\", \"tags\": [], \"title\": \"provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt\", \"fields\": {\"effort\": 3, \"addresses\": [\"the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane\"]}}]",
+      "parents": [
+        "272ea1c6970ea75c"
+      ],
+      "assert": [
+        [
+          "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here",
+          "sort",
+          "prop"
+        ],
+        [
+          "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here",
+          "supports",
+          "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way"
+        ],
+        [
+          "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here",
+          "tags",
+          "source"
+        ],
+        [
+          "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here",
+          "title",
+          "baseline.json's trunk-merge re-pin comment states the condition in its own words, and tools/battery.sh is the only provisioner that produces a tree a verdict can name here"
+        ],
+        [
+          "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19",
+          "supports",
+          {
+            "node": "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+            "status": "untried"
+          }
+        ],
+        [
+          "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19",
+          "supports",
+          {
+            "node": "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+            "relation": "addresses",
+            "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+          }
+        ],
+        [
+          "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19",
+          "title",
+          "battery.sh refuses to run unless verify reports byte-identity with the source, so the verdict names a known tree; the worktree recipe cannot do this here because git worktree does not materialise a submodule's working tree, which produced 169 phantom failures on 2026-09-19"
+        ],
+        [
+          "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture",
+          "sort",
+          "prop"
+        ],
+        [
+          "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture",
+          "supports",
+          "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause"
+        ],
+        [
+          "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture",
+          "tags",
+          "measured"
+        ],
+        [
+          "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture",
+          "title",
+          "read from the gate log: the benchmarks lane fails on an inference assertion in ext/metta-benchmarking, not on the pytest-benchmark teardown warning, which is the downstream symptom of the test failing before it used the fixture"
+        ],
+        [
+          "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way",
+          "sort",
+          "prop"
+        ],
+        [
+          "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way",
+          "title",
+          "the instruction baselines were measured in a PROVISIONED BATTERY WORKTREE with the .qlf set rebuilt on the patched host, which my gate run was not, so the three 2-4 percent regressions cannot be judged from that run either way"
+        ],
+        [
+          "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause",
+          "sort",
+          "prop"
+        ],
+        [
+          "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause",
+          "title",
+          "the measurement lanes split by MAGNITUDE, not by lane: twins, parity-perf and benchmarks all show multi-fold moves (3x to 26x; benchmarks' add-table-rows reads 307153 against a pin of 64126, which is 4.8x, last set 2026-08-27), which is the library-derivation signature, while the instructions lane's three cases move 2.1 to 3.7 percent, which is a different quantity and cannot be the same cause"
+        ],
+        [
+          "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "sort",
+          "approach"
+        ],
+        [
+          "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "addresses",
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        ],
+        [
+          "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "effort",
+          3
+        ],
+        [
+          "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "status",
+          "untried"
+        ],
+        [
+          "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt",
+          "title",
+          "provision a battery from the re-pinned tree and run the full gate there, so every measurement lane reports against a named state with the artifact set rebuilt"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "3ce89a58a81d5e31"
+    },
+    {
+      "at": "2026-09-20T21:53:10.309926+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890\", \"tags\": [\"measured\"], \"title\": \"engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root\", \"tags\": [\"source\"], \"title\": \"the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by running suites/seams/lib_package.plt under dev_typed_suites\", \"tags\": [\"measured\"], \"title\": \"the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"counted from the gate log's dev-typed section by suite\", \"tags\": [\"measured\"], \"title\": \"the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs\", \"tags\": [\"source\"], \"title\": \"the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf\", \"fields\": {}}]",
+      "parents": [
+        "3ce89a58a81d5e31"
+      ],
+      "assert": [
+        [
+          "counted from the gate log's dev-typed section by suite",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted from the gate log's dev-typed section by suite",
+          "supports",
+          "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it"
+        ],
+        [
+          "counted from the gate log's dev-typed section by suite",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted from the gate log's dev-typed section by suite",
+          "title",
+          "counted from the gate log's dev-typed section by suite"
+        ],
+        [
+          "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs",
+          "sort",
+          "prop"
+        ],
+        [
+          "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs",
+          "supports",
+          "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf"
+        ],
+        [
+          "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs",
+          "tags",
+          "source"
+        ],
+        [
+          "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs",
+          "title",
+          "docs/journal/2026-09-19-the-ledger-re-take-on-the-merged-tree.md, the Decided and Found paragraphs"
+        ],
+        [
+          "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads",
+          "title",
+          "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads"
+        ],
+        [
+          "measured by running suites/seams/lib_package.plt under dev_typed_suites",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by running suites/seams/lib_package.plt under dev_typed_suites",
+          "supports",
+          "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70"
+        ],
+        [
+          "measured by running suites/seams/lib_package.plt under dev_typed_suites",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured by running suites/seams/lib_package.plt under dev_typed_suites",
+          "title",
+          "measured by running suites/seams/lib_package.plt under dev_typed_suites"
+        ],
+        [
+          "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890",
+          "supports",
+          "engine-bench's boot row printed NOT MEASURED IN THIS CONFIGURATION because this session works in a worktree, not because anything regressed: the lane's own line reads 'checkout length 45, depth 7; canonical length 29, depth 5', 45 being the wt-merge path and 29 the canonical checkout, and the boot row's inference count is sensitive to the path atoms it loads"
+        ],
+        [
+          "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890",
+          "title",
+          "measured: the two path lengths are exactly 45 and 29 bytes, and the 2026-09-19 journal records the same refusal from a battery at length 49, where the C row read 549,599 inferences against its pin of 457,890"
+        ],
+        [
+          "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf",
+          "title",
+          "the 2026-09-19 journal is the authoritative prior analysis of exactly these lanes and it already settles three of them: door-order is red on the trunk itself and stays the trunk's, parity-perf's unmeasurable rows are the box's while its TREE DRIFT rows are re-frozen through --rebaseline, and the governed QLF inventory was attributed at 26 units naming engine/atom_index.qlf, engine/host_transactions.qlf and engine/host_listeners.qlf"
+        ],
+        [
+          "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root",
+          "supports",
+          "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort"
+        ],
+        [
+          "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root",
+          "tags",
+          "source"
+        ],
+        [
+          "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root",
+          "title",
+          "the 2026-09-19 journal says both rows keep their pins and stay until measured from the canonical checkout, and this session's brief forbids running commands from the original repository root"
+        ],
+        [
+          "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort",
+          "sort",
+          "prop"
+        ],
+        [
+          "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort",
+          "title",
+          "the boot rows of engine-bench and c-bench CANNOT be judged from this session at all: they refuse any checkout but the canonical one, the harness instructs this session to work in the worktree and not to cd to the repository root, so that measurement is environmentally blocked rather than a matter of effort"
+        ],
+        [
+          "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70",
+          "sort",
+          "prop"
+        ],
+        [
+          "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70",
+          "title",
+          "the ten lib_package failures under the typed engine are pre-existing and not caused by the loader guard: the suite reports 10 failures while the new backing-row regression passes at 70 of 70"
+        ],
+        [
+          "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it",
+          "title",
+          "the typed build's debt is 27 failing tests over 8 suites in this gate run, not the 120 over 35 this session had been carrying, and it is concentrated: lib_package 10 and lib_cli 8 are two thirds of it"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "16b4197abecd7c3f"
+    },
+    {
+      "at": "2026-09-20T21:55:49.673140+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only\", \"tags\": [\"source\"], \"title\": \"lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \\\"guest\\\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain\", \"tags\": [\"measured\"], \"title\": \"check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"library(error)'s has_type/is_not structure, established earlier this session\", \"tags\": [\"source\"], \"title\": \"an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)\", \"fields\": {}}]",
+      "parents": [
+        "16b4197abecd7c3f"
+      ],
+      "assert": [
+        [
+          "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)",
+          "sort",
+          "prop"
+        ],
+        [
+          "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)",
+          "title",
+          "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)"
+        ],
+        [
+          "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+          "title",
+          "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check"
+        ],
+        [
+          "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain",
+          "supports",
+          "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check"
+        ],
+        [
+          "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain",
+          "supports",
+          {
+            "node": "check_argument_type_under_live_policy/3 fails for a plain string under the typed build where it succeeds under the ordinary one, and every caller that reports the failure names the VALUE rather than the check",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain",
+          "tags",
+          "measured"
+        ],
+        [
+          "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain",
+          "title",
+          "engine/metta/terms.pl:804 carries no mode line of its own and delegates to check_argument_type_in/4, so the inserted check is further down the call chain"
+        ],
+        [
+          "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it",
+          "title",
+          "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it"
+        ],
+        [
+          "library(error)'s has_type/is_not structure, established earlier this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "library(error)'s has_type/is_not structure, established earlier this session",
+          "supports",
+          "an undefined or failing type check accuses the VALUE, because must_be/2 falls to is_not/2 which raises type_error(Type, Value) without asking whether the type was ever defined; that is why 'guest', which IS a string, is reported as failing cli_value(string)"
+        ],
+        [
+          "library(error)'s has_type/is_not structure, established earlier this session",
+          "tags",
+          "source"
+        ],
+        [
+          "library(error)'s has_type/is_not structure, established earlier this session",
+          "title",
+          "library(error)'s has_type/is_not structure, established earlier this session"
+        ],
+        [
+          "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only",
+          "sort",
+          "prop"
+        ],
+        [
+          "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only",
+          "supports",
+          "lib_cli's eight typed failures are ONE error repeated, and it is not lib_cli's own type as previously recorded: every one reports Type error: cli_value(string) expected, found \"guest\" (a string), which lib_cli raises itself at lib_cli.pl:226 when check_argument_type_under_live_policy/3 FAILS; cli_value(...) is an internal optparse descriptor from cli_builtin_type/3 and is not a mode-line annotation, so mavis never sees it"
+        ],
+        [
+          "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only",
+          "tags",
+          "source"
+        ],
+        [
+          "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only",
+          "title",
+          "read at lib/lib_cli/lib_cli.pl:220-227, where cli_validate_value(parsed(Expected,Origin,_),Value) refuses when the engine check fails, and the mode lines of cli-parse use Atom, Expression, Symbol and list only"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "9e0b86dd4762fdb8"
+    },
+    {
+      "at": "2026-09-20T21:57:34.704138+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'\", \"tags\": [\"measured\"], \"title\": \"the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev\", \"tags\": [\"measured\"], \"title\": \"those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file\", \"tags\": [\"measured\"], \"title\": \".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components\", \"fields\": {}}]",
+      "parents": [
+        "9e0b86dd4762fdb8"
+      ],
+      "assert": [
+        [
+          ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components",
+          "sort",
+          "prop"
+        ],
+        [
+          ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components",
+          "title",
+          ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components"
+        ],
+        [
+          "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file",
+          "sort",
+          "prop"
+        ],
+        [
+          "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file",
+          "supports",
+          ".gitmodules lists SEVEN submodules and engine is not among them: engine has no .git and is a plain directory of the superproject, where the workspace notes say eight components"
+        ],
+        [
+          "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file",
+          "tags",
+          "measured"
+        ],
+        [
+          "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file",
+          "title",
+          "git config --file .gitmodules --get-regexp submodule..*.path returns lib, examples, ext and the four extensions; ls engine/.git reports no such file"
+        ],
+        [
+          "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev",
+          "sort",
+          "prop"
+        ],
+        [
+          "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev",
+          "supports",
+          "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission"
+        ],
+        [
+          "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev",
+          "tags",
+          "measured"
+        ],
+        [
+          "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev",
+          "title",
+          "git remote get-url origin answers a filesystem path for all seven, and /home/user/Dev/CLAUDE.md says never git push without explicit permission and governs everything under /home/user/Dev"
+        ],
+        [
+          "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'",
+          "supports",
+          "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step"
+        ],
+        [
+          "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'",
+          "title",
+          "measured with git cat-file -e against each origin; the lane's own message is 'FAIL: the probe worktree components could not be checked out'"
+        ],
+        [
+          "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step",
+          "title",
+          "the worktree lane is blocked by seven component commits that exist only in their working trees: every one of lib, examples, ext and extensions/{python,cmetta,node,mork} has a HEAD absent from its origin, so a probe worktree cannot check the components out and the lane fails at exactly that step"
+        ],
+        [
+          "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission",
+          "sort",
+          "prop"
+        ],
+        [
+          "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission",
+          "title",
+          "those origins are LOCAL BARE REPOSITORIES on this machine, /home/user/Dev/PyPeTTa1/components/*.git, not GitHub, so the push that would unblock the lane is private and non-destructive rather than a publication; it still needs the user's word because this workspace's standing rule is never to push without explicit permission"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "fd686750fb808c65"
+    },
+    {
+      "at": "2026-09-20T22:06:21.860213+00:00",
+      "after": "979b4c4ce58ffde6dcae74644a26d99a20153d49",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards\", \"tags\": [\"user\"], \"title\": \"the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight\", \"tags\": [\"measured\"], \"title\": \"the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds\", \"tags\": [\"measured\"], \"title\": \"the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation\", \"tags\": [\"measured\"], \"title\": \"the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh\", \"fields\": {}}]",
+      "parents": [
+        "fd686750fb808c65"
+      ],
+      "assert": [
+        [
+          "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards",
+          "sort",
+          "prop"
+        ],
+        [
+          "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards",
+          "supports",
+          "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly"
+        ],
+        [
+          "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards",
+          "tags",
+          "user"
+        ],
+        [
+          "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards",
+          "title",
+          "git cat-file -e against each origin answers present for lib, examples, ext and extensions/python, and the nested PyMeTTa-Examples mirror advanced 6fa473e1..f25c7142 with the object verified afterwards"
+        ],
+        [
+          "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh",
+          "title",
+          "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh"
+        ],
+        [
+          "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds",
+          "supports",
+          "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork"
+        ],
+        [
+          "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds",
+          "tags",
+          "measured"
+        ],
+        [
+          "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds",
+          "title",
+          "the gate's own pytest lane run through extensions/python/test.sh, 1936 seconds"
+        ],
+        [
+          "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork",
+          "title",
+          "the pytest lane is down to ONE failure over 4571 passing and 91 skipped: tests/ch19_spaces_backed_by_anything/test_mork_space.py::test_mm2_exec_transforms_inside_mork"
+        ],
+        [
+          "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly",
+          "sort",
+          "prop"
+        ],
+        [
+          "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly",
+          "title",
+          "the seven component commits and the nested twins repository are now in their local mirrors, every push a verified fast-forward, and the user granted that push explicitly"
+        ],
+        [
+          "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation",
+          "sort",
+          "prop"
+        ],
+        [
+          "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation",
+          "supports",
+          "the earlier pytest invocation from the workspace notes is stale: python -m pytest python/tests/ --rootdir=python -c python/pyproject.toml fails because no python/ directory exists since the seat moved to extensions/python; the gate's own lane is env CHECK_PY=... sh extensions/python/test.sh"
+        ],
+        [
+          "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation",
+          "tags",
+          "measured"
+        ],
+        [
+          "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation",
+          "title",
+          "the stale command raised FileNotFoundError on python/pyproject.toml, and extensions/python/check.sh:47 shows the real invocation"
+        ],
+        [
+          "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight",
+          "sort",
+          "prop"
+        ],
+        [
+          "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight",
+          "supports",
+          "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs"
+        ],
+        [
+          "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight",
+          "tags",
+          "measured"
+        ],
+        [
+          "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight",
+          "title",
+          "the unmuted probe printed 'components.sh: examples has modified tracked files; commit or discard them first' while git status reports extensions/python dirty and the re-pin is in flight"
+        ],
+        [
+          "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs",
+          "title",
+          "the worktree lane still fails after the pushes, but for a TRANSIENT reason rather than a missing commit: components.sh refuses a component with modified tracked files, and the twins re-pin is rewriting that component as the probe runs"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "4f1e3dec93df5117"
     }
   ]
 }

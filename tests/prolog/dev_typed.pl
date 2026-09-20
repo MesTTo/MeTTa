@@ -134,6 +134,14 @@
 % evaluated.
 error:has_type('Atom', _).
 
+%And therefore TOTAL: this clause accepts every term, so the deferred check
+%decides nothing while its when/2 coroutine attaches to every variable in the
+%argument and stops the term being a variant of itself. Saying so here keeps
+%the two facts together: the clause that makes 'Atom' total and the
+%declaration that it needs no runtime check.
+:- multifile mavis:total_type/1.
+mavis:total_type('Atom').
+
 % A symptom of the syntax, not of the running program: `metatype_of/2` answers
 % 'Grounded' for a name this engine holds a function for, so deriving from it
 % would refuse `car-atom` where a mode line saying 'Symbol' means to accept it.

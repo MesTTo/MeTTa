@@ -161,8 +161,27 @@ build_type_assertions(Slash, Head, TypeGoal) :-
     %subsumes_term/2 drops every the(any, _) whatever the argument is, which is
     %what the line meant, and dropping a check that checks nothing cannot change
     %what is checked.
-    exclude(subsumes_term(the(any, _)), AllTypes, Types),
+    %CHANGED HERE a second time. The rule is not "any needs no check", it is
+    %"a TOTAL type needs no check": a check that cannot fail contributes
+    %nothing but the when/2 coroutine, and that coroutine is what stops a term
+    %being a VARIANT of itself. `any` is total by library(error)'s own
+    %has_type/2. A vocabulary that declares another total type says so through
+    %mavis:total_type/1 beside the has_type/2 clause that makes it true, which
+    %is where that knowledge already lives; hard-coding a second name here
+    %would put it in two places and let them disagree.
+    exclude(dropped_total_check, AllTypes, Types),
     xfy_list(',', TypeGoal, Types).
+
+%A the/2 assertion whose type accepts every term, and so decides nothing.
+dropped_total_check(Assertion) :-
+    subsumes_term(the(_, _), Assertion),
+    Assertion = the(Type, _),
+    nonvar(Type),
+    total_type(Type).
+
+:- multifile total_type/1.
+total_type(any).
+
 
 user:term_expansion((Head:-Body), (Head:-TypeGoal,Body)) :-
     Slash = '/',
