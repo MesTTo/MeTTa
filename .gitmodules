@@ -18,7 +18,7 @@
 	url = https://github.com/MesTTo/CMeTTa.git
 [submodule "extensions/node"]
 	path = extensions/node
-	url = https://github.com/MesTTo/metta-node.git
+	url = https://github.com/MesTTo/TSMeTTa.git
 [submodule "extensions/mork"]
 	path = extensions/mork
 	url = https://github.com/MesTTo/metta-mork.git
