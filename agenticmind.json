@@ -9241,6 +9241,64 @@
       "supports": [
         "checking whether the three were already fixed, before reading 160 lines of the ledger that describes them, was the right order: two probes and two greps settled it and the ledger's own text would have said they were open"
       ]
+    },
+    "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched": {
+      "title": "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+      "blocks": [
+        "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+      ]
+    },
+    "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents": {
+      "title": "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents",
+      "supports": [
+        "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+        {
+          "node": "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+          "relation": "blocks",
+          "target": "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+        }
+      ]
+    },
+    "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net": {
+      "title": "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net",
+      "supports": [
+        {
+          "node": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "status": "untried"
+        },
+        {
+          "node": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "relation": "addresses",
+          "target": "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
+        }
+      ]
+    },
+    "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files": {
+      "title": "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files",
+      "supports": [
+        {
+          "node": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given": {
+      "title": "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given"
+    },
+    "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface": {
+      "title": "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface",
+      "supports": [
+        "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -10595,6 +10653,14 @@
       "status": "untried",
       "addresses": [
         "I ran lanes concurrently on a box with 60GB and filled it, which killed a gate and five processes earlier"
+      ]
+    },
+    "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs": {
+      "title": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
       ]
     }
   },
@@ -42513,7 +42579,7 @@
     {
       "at": "2026-09-20T09:09:16.580019+00:00",
       "after": "f93e31a3d19a6d72ea7cacb60d7e4ac75a2cdb8e",
-      "did": "[{\"op\": \"status\", \"id\": \"add host_transactions:try_erase/1 as the single named tolerant release and route every vulnerable site through it, module-qualified the way this codebase already calls across modules\", \"because\": \"the twelve bare-erase sites plus four textually identical ignore/1 sites now call it; the seven error-absorbing catch sites were reverted after source_retirement.plt's oracle refused one; layering passes with four new reaches/3 lines each carrying its reason; the full Prolog battery is 173 passed and 9 failed, exactly the 9 that fail pre-change; prolog, prolog-static, evidence, host-workarounds, lib-autoload and lib-surface are green; and the race reproduction is clean over 78,000 iterations\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/prolog/probes/reference_load_race.pl declared two Guarantees with no evidence tag; after tagging one measured and one source the lane reads 0 unbacked tags in 8,803 claims\", \"tags\": [\"tested\"], \"title\": \"the evidence lane caught two unbacked guarantees in my own probe file, which is the lane doing its job on work written this session rather than on inherited debt\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the evidence lane reports them in its informational line and still exits 0\", \"tags\": [\"measured\"], \"title\": \"87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step\", \"fields\": {}}]",
+      "did": "[{\"op\": \"status\", \"id\": \"add host_transactions:try_erase/1 as the single named tolerant release and route every vulnerable site through it, module-qualified the way this codebase already calls across modules\", \"because\": \"the twelve bare-erase sites plus four textually identical ignore/1 sites now call it; the seven error-absorbing catch sites were reverted after source_retirement.plt's oracle refused one; layering passes with four new reaches/3 lines each carrying its reason; the full Prolog battery is 173 passed and 9 failed, exactly the 9 that fail pre-change; prolog, prolog-static, evidence, host-workarounds, lib-autoload and lib-surface are green; and the race reproduction is clean over 78,000 iterations\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/prolog/probes/reference_load_race.pl declared two Guarantees with no evidence tag; after tagging one measured and one source the lane reads 0 unbacked tags in 8,803 claims\", \"tags\": [\"tested\"], \"title\": \"the evidence lane caught two unbacked guarantees in my own probe file, which is the lane doing its job on work written this session rather than on inherited debt\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the evidence lane reports them in its informational line and still exits 0\", \"tags\": [\"measured\"], \"title\": \"87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step\", \"fields\": {}}]",
       "parents": [
         "f41ab63d192d7c72"
       ],
@@ -42556,7 +42622,7 @@
         [
           "the evidence lane reports them in its informational line and still exits 0",
           "supports",
-          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
+          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
         ],
         [
           "the evidence lane reports them in its informational line and still exits 0",
@@ -42602,14 +42668,14 @@
           "the twelve bare-erase sites plus four textually identical ignore/1 sites now call it; the seven error-absorbing catch sites were reverted after source_retirement.plt's oracle refused one; layering passes with four new reaches/3 lines each carrying its reason; the full Prolog battery is 173 passed and 9 failed, exactly the 9 that fail pre-change; prolog, prolog-static, evidence, host-workarounds, lib-autoload and lib-surface are green; and the race reproduction is clean over 78,000 iterations"
         ],
         [
-          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
+          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
           "sort",
           "prop"
         ],
         [
-          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
+          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
           "title",
-          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
+          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
         ],
         [
           "add host_transactions:try_erase/1 as the single named tolerant release and route every vulnerable site through it, module-qualified the way this codebase already calls across modules",
@@ -42760,6 +42826,166 @@
         ]
       ],
       "id": "abc9cbdeee567b2c"
+    },
+    {
+      "at": "2026-09-20T09:21:07.705300+00:00",
+      "after": "7b4432427ff71f1a03e42805d97ec8d037fa84cd",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents\", \"tags\": [], \"title\": \"pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched\", \"fields\": {\"blocks\": [\"every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net\", \"tags\": [], \"title\": \"decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs\", \"fields\": {\"effort\": 2, \"addresses\": [\"pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched\"]}}, {\"op\": \"status\", \"id\": \"decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs\", \"because\": \"pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface\", \"tags\": [\"source\"], \"title\": \"a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given\", \"fields\": {}}]",
+      "parents": [
+        "abc9cbdeee567b2c"
+      ],
+      "assert": [
+        [
+          "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents",
+          "sort",
+          "prop"
+        ],
+        [
+          "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents",
+          "supports",
+          "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
+        ],
+        [
+          "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents",
+          "supports",
+          {
+            "node": "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+            "relation": "blocks",
+            "target": "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+          }
+        ],
+        [
+          "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents",
+          "title",
+          "I added agenticmind.json to the pin globs earlier in this same session to satisfy the out-of-glob net, without knowing the store is hash-chained; pinning its five placeholders in commit 7b4432427 made agenticmind list fail with transaction 520578131a041d1a does not hash to its contents"
+        ],
+        [
+          "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given",
+          "sort",
+          "prop"
+        ],
+        [
+          "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given",
+          "title",
+          "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given"
+        ],
+        [
+          "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files",
+          "sort",
+          "prop"
+        ],
+        [
+          "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files",
+          "supersedes",
+          "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net"
+        ],
+        [
+          "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files",
+          "supports",
+          {
+            "node": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+            "status": "done"
+          }
+        ],
+        [
+          "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files",
+          "tags",
+          "tested"
+        ],
+        [
+          "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files",
+          "title",
+          "pin_provenance --check exits 0 with 0 pins awaiting and 0 files outside the globs, and the selftest proves the guard can fail: with UNPINNABLE emptied it reports 6 defects including agenticmind.json:2 was rewritten and should not have been, and with it restored 0 over 89 planted placeholders in 30 files"
+        ],
+        [
+          "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+          "sort",
+          "prop"
+        ],
+        [
+          "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+          "blocks",
+          "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+        ],
+        [
+          "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched",
+          "title",
+          "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
+        ],
+        [
+          "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net",
+          "sort",
+          "prop"
+        ],
+        [
+          "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net",
+          "supports",
+          {
+            "node": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+            "status": "untried"
+          }
+        ],
+        [
+          "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net",
+          "supports",
+          {
+            "node": "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+            "relation": "addresses",
+            "target": "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
+          }
+        ],
+        [
+          "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net",
+          "title",
+          "scan/0 adds a path to the seen set BEFORE it tests for the placeholder, so a file whose sites are all declined is still visited and the out-of-glob net does not then report it; one change therefore does both jobs, where dropping the glob would have needed a second exclusion in the net"
+        ],
+        [
+          "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface",
+          "sort",
+          "prop"
+        ],
+        [
+          "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface",
+          "supports",
+          "a claim in the record can never be pinned, by the record's own design rather than by this tool's limitation: a claim is never edited, only attacked, so commit=WORKTREE inside a reason is an account of what was believed when the reason was given"
+        ],
+        [
+          "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface",
+          "tags",
+          "source"
+        ],
+        [
+          "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface",
+          "title",
+          "~/.claude/skills/agenticmind/SKILL.md states claims are never edited only attacked, and the store refuses any content change made outside its authoring interface"
+        ],
+        [
+          "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "sort",
+          "approach"
+        ],
+        [
+          "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "addresses",
+          "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
+        ],
+        [
+          "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "effort",
+          2
+        ],
+        [
+          "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "status",
+          "done"
+        ],
+        [
+          "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs",
+          "title",
+          "decline the record's pins inside sites/2, the single function that decides what gets rewritten, rather than dropping it from the globs"
+        ]
+      ],
+      "id": "3268b44a9ee8c671"
     }
   ]
 }

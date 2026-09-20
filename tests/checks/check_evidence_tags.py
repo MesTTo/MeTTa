@@ -463,7 +463,10 @@ PROVENANCE_SOURCES = (
     # why, not source claims for the evidence gate to resolve
     # [measured 2026-09-20: 5 pins, and the net exits 1 on any file it cannot
     # reach, so an unreachable one blocks the release pass rather than only
-    # the report].
+    # the report]. It is listed so the net REACHES it and stops reporting it;
+    # the pins themselves are declined at the write point, because the file is
+    # hash-chained and rewriting it in place destroys the record. The reason
+    # lives once, on pin_provenance.UNPINNABLE.
     "agenticmind.json",
     "*.sh",
     "engine/*.sh",

@@ -92,6 +92,7 @@ Open Obligations:
 from __future__ import annotations
 
 import argparse
+import json
 import ast
 import re
 import subprocess
@@ -419,8 +420,48 @@ def _backticked(text: str, at: int) -> bool:
     return any(low <= at < high for low, high in _code_spans(text))
 
 
+# A hash-chained record is not a pin target. An agenticmind record stores every
+# log entry beside `after`, the id of the entry before it, so rewriting one byte
+# in place breaks the chain and the WHOLE record stops reading rather than just
+# the line that moved [measured 2026-09-20: pinning the live record's five
+# placeholders made every later read fail with `transaction 520578131a041d1a
+# does not hash to its contents; was deleted at #551 outside the authoring
+# interface`, and it had to be restored from the previous commit]. Nor is a pin
+# owed there: a claim in that record is never edited, only attacked, so
+# `commit=WORKTREE` inside a reason is an account of what was believed when the
+# reason was given, not a source pin awaiting resolution.
+#
+# Keyed on the SHAPE rather than on the filename, because this tree has
+# submodules and each can carry its own record, while a file that merely happens
+# to share the name is not one. The glob decides what is LOOKED AT and this
+# decides what is REWRITABLE, so a record reached by a future glob is declined
+# without anyone having to remember it.
+#
+# Declining here rather than dropping the glob is what makes ONE change do both
+# jobs: scan/0 still VISITS the file, so it lands in the seen set and unscanned/1
+# does not then report it as a pin nothing reaches.
+UNPINNABLE_REASON = (
+    "a hash-chained record: rewriting it in place breaks the chain and the "
+    "whole record stops reading"
+)
+
+
+def _hash_chained(text: str) -> bool:
+    """Whether this is a record whose entries hash over the entries before them."""
+    try:
+        loaded = json.loads(text)
+    except (ValueError, RecursionError):
+        return False
+    log = loaded.get("log") if isinstance(loaded, dict) else None
+    return (isinstance(log, list) and bool(log) and isinstance(log[0], dict)
+            and "after" in log[0] and "id" in log[0])
+
+
 def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
     """Every placeholder in one file as (offset, line, reason it is declined)."""
+    if _hash_chained(text):
+        return [(m.start(), text.count("\n", 0, m.start()) + 1, UNPINNABLE_REASON)
+                for m in TOKEN.finditer(text)]
     grammar = _grammar(path)
     found = []
     # The TOML parser already knows every string form. A comment substitution

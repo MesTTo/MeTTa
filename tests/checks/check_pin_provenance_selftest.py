@@ -74,6 +74,18 @@ WHEN = "2026-08-31"
 
 # (path, text, lines that must be rewritten, lines that must be declined)
 PLANTS = (
+    # The record is hash-chained, so a rewrite destroys it rather than moving a
+    # line. Both pins here must be DECLINED, and the pass must still visit the
+    # file, because a file it does not visit is reported by the out-of-glob net
+    # instead [measured 2026-09-20: pinning the live record made every later
+    # read fail on the hash of a transaction the pass had not touched].
+    (
+        "agenticmind.json",
+        ['{"format": 1, "log": [',
+         f'  {{"id": "a", "after": null, "assert": "a case [{TAG} {WHEN}: measured; {WORD}]"}},',
+         f'  {{"id": "b", "after": "a", "assert": "a next [{TAG} {WHEN}: measured; {WORD}]"}}]}}'],
+        [], [2, 3],
+    ),
     *(
         (name,
          [f"# A configuration pin [{TAG} {WHEN}: a case; {WORD}].",
