@@ -6656,6 +6656,59 @@
       "tags": [
         "measured"
       ]
+    },
+    "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent": {
+      "title": "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+    },
+    "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl": {
+      "title": "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl",
+      "supports": [
+        "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision": {
+      "title": "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision",
+      "supports": [
+        {
+          "node": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "status": "untried"
+        },
+        {
+          "node": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "relation": "addresses",
+          "target": "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+        }
+      ]
+    },
+    "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL": {
+      "title": "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL",
+      "supports": [
+        {
+          "node": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired": {
+      "title": "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired"
+    },
+    "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0": {
+      "title": "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0",
+      "supports": [
+        "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -7714,6 +7767,14 @@
       "status": "done",
       "addresses": [
         "the package machinery shipped with no example at all, so corpus-coverage refused setup! and package-prolog as engine callables no example calls, and the semantics documentation carried nothing about how a package is performed"
+      ]
+    },
+    "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency": {
+      "title": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+      "effort": 1,
+      "status": "failed",
+      "addresses": [
+        "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
       ]
     }
   },
@@ -32490,6 +32551,157 @@
         ]
       ],
       "id": "3882ad686a20e60d"
+    },
+    {
+      "at": "2026-09-20T04:51:16.655559+00:00",
+      "after": "cd086bd223b1dd1c8a625427c78457693228aa31",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl\", \"tags\": [\"measured\"], \"title\": \"the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision\", \"tags\": [], \"title\": \"declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency\", \"fields\": {\"effort\": 1, \"addresses\": [\"the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent\"]}}, {\"op\": \"status\", \"id\": \"declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency\", \"because\": \"it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0\", \"tags\": [\"measured\"], \"title\": \"the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired\", \"fields\": {}}]",
+      "parents": [
+        "3882ad686a20e60d"
+      ],
+      "assert": [
+        [
+          "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL",
+          "sort",
+          "prop"
+        ],
+        [
+          "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL",
+          "supersedes",
+          "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision"
+        ],
+        [
+          "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL",
+          "supports",
+          {
+            "node": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+            "status": "failed"
+          }
+        ],
+        [
+          "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL",
+          "tags",
+          "measured"
+        ],
+        [
+          "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL",
+          "title",
+          "it makes the prolog lane green and BREAKS THE BOOT: a library loaded while the engine is still coming up registers its own builtins too early, so lib-surface refuses with unregistered_builtin_implementation(lib_file:'append-file!'/3), and memory-scale-gate fails on the boot cost it adds; battery 13 read prolog ok, lib-surface FAIL, memory-scale-gate FAIL"
+        ],
+        [
+          "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision",
+          "supports",
+          {
+            "node": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+            "status": "untried"
+          }
+        ],
+        [
+          "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision",
+          "supports",
+          {
+            "node": "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+            "relation": "addresses",
+            "target": "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+          }
+        ],
+        [
+          "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision",
+          "title",
+          "lib_string declares its dependencies with plain load-time use_module directives, lib_package is already loaded at engine boot, and the runtime load appears at only these two sites in the whole tree, so it looked like an oversight rather than a decision"
+        ],
+        [
+          "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl",
+          "supports",
+          "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+        ],
+        [
+          "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl",
+          "title",
+          "measured 2026-09-20: the lane's whole output was that one warning, and the predicate is defined and exported at lib/lib_file/lib_file.pl"
+        ],
+        [
+          "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0",
+          "supports",
+          "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired"
+        ],
+        [
+          "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0",
+          "title",
+          "the failed arm above is the measurement, and after reverting it and naming the reference the same battery reads prolog ok, lib-surface ok and memory-scale-gate ok with the run exiting 0"
+        ],
+        [
+          "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired",
+          "title",
+          "the lazy load is therefore deliberate, and it is what keeps a library out of the engine's boot, so the reference is deferred on purpose and belongs in the lane's known-undefined list with that reason rather than being repaired"
+        ],
+        [
+          "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent",
+          "sort",
+          "prop"
+        ],
+        [
+          "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent",
+          "title",
+          "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+        ],
+        [
+          "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "sort",
+          "approach"
+        ],
+        [
+          "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "addresses",
+          "the prolog lane reported lib_file:metta_staged_publish/2 undefined, because lib_package publishes its receipts through lib_file and loads that library inside the clause that calls it, so a tokenless static analysis sees the qualified call with the module absent"
+        ],
+        [
+          "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "effort",
+          1
+        ],
+        [
+          "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "status",
+          "failed"
+        ],
+        [
+          "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency",
+          "title",
+          "declare the import at load time, which is the pattern every other library here uses for a cross-library Prolog dependency"
+        ]
+      ],
+      "id": "60e853550d43d525"
     }
   ]
 }
