@@ -8,9 +8,11 @@ Guarantees:
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=de2a69fbea43d7bbc641fd93240cf7572285bb5c]
   - a specialization whose call WRITES is still compared, and the write lands
-    once rather than three times, because the comparison runs in a snapshot
-    [tested: the effectful control below, whose second assertion counts the
-    writes; commit=WORKTREE]
+    once rather than three times, because the comparison runs in a snapshot.
+    The EFFECTFUL control's second assertion counts the writes rather than the
+    arithmetic, which reads 22 either way
+    [tested: tests/checks/check_specialization_differential_selftest.py;
+    commit=WORKTREE]
   - a clean specialized call reports an agreed count and a one-inference
     budget reports the same attempted check as unverified
     [tested: tests/checks/check_specialization_differential_selftest.py;
