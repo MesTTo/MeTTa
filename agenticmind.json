@@ -12621,6 +12621,74 @@
       "tags": [
         "measured"
       ]
+    },
+    "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most": {
+      "title": "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most"
+    },
+    "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before": {
+      "title": "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before",
+      "supports": [
+        "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from": {
+      "title": "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from"
+    },
+    "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time": {
+      "title": "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time",
+      "supports": [
+        "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION": {
+      "title": "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution": {
+      "title": "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution",
+      "supports": [
+        "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+        {
+          "node": "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session": {
+      "title": "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session"
+    },
+    "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results": {
+      "title": "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results",
+      "supports": [
+        "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below": {
+      "title": "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below"
+    },
+    "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts": {
+      "title": "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts",
+      "supports": [
+        "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -56178,6 +56246,181 @@
         ]
       ],
       "id": "dee79052232d3fba"
+    },
+    {
+      "at": "2026-09-20T19:33:42.273218+00:00",
+      "after": "84d5db03fc961e25cc1dfabe9d81eff74cb27e85",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before\", \"tags\": [\"measured\"], \"title\": \"examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time\", \"tags\": [\"measured\"], \"title\": \"docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution\", \"tags\": [\"measured\"], \"title\": \"engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results\", \"tags\": [\"source\"], \"title\": \"re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts\", \"tags\": [\"measured\"], \"title\": \"the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below\", \"fields\": {}}]",
+      "parents": [
+        "dee79052232d3fba"
+      ],
+      "assert": [
+        [
+          "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from",
+          "sort",
+          "prop"
+        ],
+        [
+          "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from",
+          "title",
+          "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from"
+        ],
+        [
+          "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+          "title",
+          "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION"
+        ],
+        [
+          "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most",
+          "sort",
+          "prop"
+        ],
+        [
+          "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most",
+          "title",
+          "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most"
+        ],
+        [
+          "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution",
+          "supports",
+          "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION"
+        ],
+        [
+          "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution",
+          "supports",
+          {
+            "node": "engine-bench fails three of ten cases on deterministic pin drift, and boot reports NOT MEASURED IN THIS CONFIGURATION",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution",
+          "title",
+          "measured 2026-09-21: evaluate 562418 inferences against a 562288 baseline, translate 317192 against 315192, constructor-sorted an instruction regression, each identical across three samples so it is drift rather than noise; engine-bench was in the original thirty, so it predates this session and none of this session's changes reach engine execution"
+        ],
+        [
+          "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before",
+          "supports",
+          "examples is green at HEAD: the engine/check.sh repair carries the whole corpus, which is the lane that exercises it most"
+        ],
+        [
+          "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before",
+          "title",
+          "measured 2026-09-21: sh tools/check.sh examples exits 0 in 15s where it died on 'cannot open test.sh' before"
+        ],
+        [
+          "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts",
+          "supports",
+          "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below"
+        ],
+        [
+          "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts",
+          "title",
+          "measured 2026-09-21; the example's own history names e16917d and 2ce32f7, which consolidated the Statistics contracts"
+        ],
+        [
+          "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time",
+          "supports",
+          "docs is green: the five dead links were structural rather than typos, because website/extensions/cmetta/index.md is a one-line @include of the extension's README, so a relative link written to resolve beside its own files cannot resolve at the path the page is served from"
+        ],
+        [
+          "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time",
+          "title",
+          "measured: vitepress builds clean after the five became absolute MesTTo/CMeTTa URLs; the targets all existed the whole time"
+        ],
+        [
+          "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session",
+          "sort",
+          "prop"
+        ],
+        [
+          "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session",
+          "title",
+          "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session"
+        ],
+        [
+          "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results",
+          "sort",
+          "prop"
+        ],
+        [
+          "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results",
+          "supports",
+          "re-pinning those baselines is not work to do on this box today: the project's push gate requires the whole benchmark suite interleaved against upstream with min-of-3 and perf instructions per bench, and the loadavg has been between 5 and 31 all session"
+        ],
+        [
+          "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results",
+          "tags",
+          "source"
+        ],
+        [
+          "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results",
+          "title",
+          "the project's own CLAUDE.md sets that protocol, and its measurement note says wall-clock A/B under load is bimodal garbage that has already produced two false results"
+        ],
+        [
+          "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below",
+          "title",
+          "the twins failures are prior-session Math and Statistics consolidation work, not mine: 35-math_lib.metta runs clean through tools/run.sh and fails only through the TWIN path with a function_input_arities domain error, while 36-random_lib and 37-statistics_lib have inference pins drifted in OPPOSITE directions, one above and one below"
+        ]
+      ],
+      "id": "58572bc616744656"
     }
   ]
 }
