@@ -115,27 +115,47 @@ metta_reference_source_clear(Space) :-
                transaction(metta_reference_source_replace(Space, []))).
 
 metta_reference_source_replace(Space, Clauses) :-
-    forall(retract(metta_reference_source_reader(Space, _, Ref)), erase(Ref)),
+    forall(retract(metta_reference_source_reader(Space, _, Ref)), host_transactions:try_erase(Ref)),
     reverse(Clauses, Reversed),
     forall(member(reader(Kind, Module, Clause), Reversed),
            ( asserta(Module:Clause, Ref),
              assertz(metta_reference_source_reader(Space, Kind, Ref)) )).
 
-% Read the ordinary bodies while holding the source-publication mutex, so
-% excluding owned clauses observes the same publication as clause discovery.
+% Read the ordinary bodies while holding the source-publication mutex, so the
+% list this computes is the list that gets installed: both callers hold that
+% mutex across this call AND metta_reference_source_replace/2, so no other
+% publication interleaves between the read and the asserts.
 % SWI wrappers change a predicate's supervisor, leaving its clauses here:
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wrap.c#L315-L377
+%A reader this file installs is ASSERTED, and an asserted clause carries no
+%file: clause_property(Ref, file(_)) is therefore the clause store's own record
+%of which clauses are the engine's, and it needs no second table agreeing with
+%it. The subtraction it replaces, \+ metta_reference_source_reader(_, _, Ref),
+%read a dynamic fact, so inside transaction/1 it answered from the CALLING
+%THREAD'S SNAPSHOT: a thread whose transaction opened before another thread
+%installed a reader never saw that reader's row, took its clause for a generic
+%one and projected an already projected body. That arrives as
+%metta_source_reader_template(process_loader_form/3, FourReaders), two of them
+%carrying a doubled resolve, and it is the same isolation mismatch
+%host_transactions:try_erase/1 exists for, met in the filter instead of in the
+%erase. This is not the liveness question the waiver journal bars asking of a
+%clause reference: `file` is immutable metadata fixed when the clause was
+%created, not a fact about whether it still exists
+%[measured 2026-09-20: eight runs of a 6,000-iteration suspended-background load
+%raised the template error in eight, and in none with this filter; the property
+%separates them under both a source consult and the shipped .qlf boot;
+%commit=WORKTREE].
 metta_reference_source_clauses(Space, Clauses) :-
     findall(reader(rewrite, metta_engine, (Head :- !, Projected)),
             ( Head = rewrite_parsed_form(Space, Origin, _, _, Out),
               clause(Head, Body, Ref),
-              \+ metta_reference_source_reader(_, _, Ref),
+              clause_property(Ref, file(_)),
               metta_reference_source_rewrite_body(Body, Space, Origin, Out, Projected, 1) ), Rewrite),
     ( Rewrite = [_] -> true
     ; throw(error(metta_source_reader_template(rewrite_parsed_form/5, Rewrite), none)) ),
     findall(reader(loader, filereader, (Head :- !, Resolve, Body)),
             ( clause(filereader:process_loader_form(Space, Parsed, Result), Body, Ref),
-              \+ metta_reference_source_reader(_, _, Ref), nonvar(Parsed),
+              clause_property(Ref, file(_)), nonvar(Parsed),
               metta_reference_source_expression(Parsed, BoundParsed, Origins, Term, Bound),
               Head = process_loader_form(Space, BoundParsed, Result),
               Resolve = metta_engine:metta_reference_resolve_source(

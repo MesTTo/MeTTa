@@ -2142,7 +2142,7 @@ set_type_alias_mutation_scope(Scope, enabled) :-
                      Observer),
              assertz(type_alias_mutation_scope_ref(Scope, Observer)) )).
 set_type_alias_mutation_scope(Scope, disabled) :-
-    forall(retract(type_alias_mutation_scope_ref(Scope, Ref)), erase(Ref)).
+    forall(retract(type_alias_mutation_scope_ref(Scope, Ref)), host_transactions:try_erase(Ref)).
 
 % Install only in participating spaces. Copy standing bodies in their original
 % order, as alias observers do, so write policy retains one implementation.
@@ -2172,7 +2172,7 @@ metta_reference_mutation_scope(Space, enabled) :-
                 sort(Found, Names)), Program),
     assertz(metta_reference_mutation_ref(Space, Program)).
 metta_reference_mutation_scope(Space, disabled) :-
-    forall(retract(metta_reference_mutation_ref(Space, Ref)), erase(Ref)).
+    forall(retract(metta_reference_mutation_ref(Space, Ref)), host_transactions:try_erase(Ref)).
 
 % Only a participating foreign receiver changes storage doors. Copying the
 % standing semantic bodies keeps type invalidation, hooks and equation cleanup
@@ -2242,7 +2242,7 @@ metta_reference_lazy_equations(Space, enabled) :-
             Installed),
     assertz(metta_reference_defer_ref(Space, Installed)).
 metta_reference_lazy_equations(Space, disabled) :-
-    forall(retract(metta_reference_defer_ref(Space, Ref)), erase(Ref)).
+    forall(retract(metta_reference_defer_ref(Space, Ref)), host_transactions:try_erase(Ref)).
 
 metta_reference_observer(Space, _, metta_add_atom(Space, Row, Token, _), true,
                          metta_engine:metta_reference_added(Space, Row, Token)).

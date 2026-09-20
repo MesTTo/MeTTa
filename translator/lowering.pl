@@ -1594,7 +1594,7 @@ self_tier_note(Module, Space) :-
 %erase/1 by the remembered reference, so the catch-all &self clause above,
 %whose head also unifies a bound module, is never swept with it.
 self_tier_forget(Module) :-
-    forall(retract(self_tier_ref(Module, Ref)), erase(Ref)).
+    forall(retract(self_tier_ref(Module, Ref)), host_transactions:try_erase(Ref)).
 
 %The space branch is the direct atoms-table probe, one indexed read like
 %the &self literal above it: match_stored here cost about +140 inferences

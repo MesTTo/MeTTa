@@ -880,7 +880,7 @@ metta_reference_source_reader(Space, enabled) :-
     forall(member(Clause, Reversed),
            ( asserta(Clause, Ref), assertz(metta_reference_admission_ref(Space, Ref)) )).
 metta_reference_source_reader(Space, disabled) :-
-    forall(retract(metta_reference_admission_ref(Space, Ref)), erase(Ref)).
+    forall(retract(metta_reference_admission_ref(Space, Ref)), host_transactions:try_erase(Ref)).
 
 process_loader_string(S, Results, Space) :-
     prepare_metta_source_in(Space, S, ParsedForms, Names),
@@ -1831,7 +1831,7 @@ set_type_alias_support_scope(Scope, enabled) :-
              member(Support, Supports) ),
            support_record(translated_form(Module, Id), Support)).
 set_type_alias_support_scope(Scope, disabled) :-
-    forall(retract(type_alias_support_scope_ref(Scope, Ref)), erase(Ref)).
+    forall(retract(type_alias_support_scope_ref(Scope, Ref)), host_transactions:try_erase(Ref)).
 
 record_translated_alias_supports(Module, Ref, G, Body) :-
     type_annotation_supports(Module, G, Body, AnnotationSupports),
@@ -2323,7 +2323,7 @@ metta_reference_lazy_reader(Space, enabled) :-
                 defer_metta_equation(Space, Module, Term, Ref)), Installed),
     assertz(metta_reference_lazy_ref(Space, Installed)).
 metta_reference_lazy_reader(Space, disabled) :-
-    forall(retract(metta_reference_lazy_ref(Space, Ref)), erase(Ref)).
+    forall(retract(metta_reference_lazy_ref(Space, Ref)), host_transactions:try_erase(Ref)).
 
 store_metta_equation(Space, Module, Term, BoundTerm, StoredRef, _) :-
     silent(true),

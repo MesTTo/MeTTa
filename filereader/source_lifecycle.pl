@@ -1600,7 +1600,7 @@ run_with_loading_marker(Marker, Goal) :-
     setup_call_catcher_cleanup(true,
         ( sig_atomic(( assertz(Marker, Ref),
                        catch(nb_setarg(1,Owner,Ref), AcquireBall,
-                             (ignore(erase(Ref)), throw(AcquireBall))) )),
+                             (host_transactions:try_erase(Ref), throw(AcquireBall))) )),
           once(Goal) ),
         Catcher,
         catch(retire_loading_marker(Catcher, Owner), Ball,
@@ -1608,7 +1608,7 @@ run_with_loading_marker(Marker, Goal) :-
 
 retire_loading_marker(exit, _) :- !.
 retire_loading_marker(_, Owner) :-
-    arg(1, Owner, Ref), ( Ref == none -> true ; ignore(erase(Ref)) ).
+    arg(1, Owner, Ref), ( Ref == none -> true ; host_transactions:try_erase(Ref) ).
 
 % Resolve the journal's owner once at scope entry. A recompile replaces an
 % artifact for its original owners; a nested pin supersedes that context

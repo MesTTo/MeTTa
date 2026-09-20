@@ -1907,7 +1907,7 @@ uninstall_idle_translation_cache_hooks :-
     (   ( translated_form_cache(_, _, _, _, _, _)
         ; translated_form_pending(_, _, _) )
     ->  true
-    ;   forall(retract(translation_cache_hook_ref(_, Ref)), erase(Ref))
+    ;   forall(retract(translation_cache_hook_ref(_, Ref)), host_transactions:try_erase(Ref))
     ).
 
 clear_translation_cache :-

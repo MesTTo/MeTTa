@@ -411,7 +411,7 @@ metta_host_probe_function(Name, PredArity) :-
     functor(Probe, Name, PredArity),
     % Workaround: swi-cleanup-window - mask signals over the probe and retire it through catch-port deferral.
     catch(sig_atomic(( assertz((Base:Probe :- fail), Ref),
-                       catch(erase(Ref), Ball, (ignore(erase(Ref)), throw(Ball))) )),
+                       catch(erase(Ref), Ball, (host_transactions:try_erase(Ref), throw(Ball))) )),
           error(permission_error(modify, static_procedure, _), _),
           metta_host_refuse_taken_name(Name, PredArity, Probe)).
 

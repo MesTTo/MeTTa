@@ -1,4 +1,7 @@
-% Purpose: run registered reconciliation after native transactions and snapshots return.
+% Purpose: the engine's interface to SWI transaction semantics: reconciliation
+%   registered to run after a native transaction or snapshot returns, and
+%   try_erase/1, the release of a clause reference another thread's transaction
+%   may already have erased.
 % Assumes: native transactions cross '$transaction'/2,3 and '$snapshot'/1,
 %   the primitives behind transaction/1,2,3 and snapshot/1
 %   [source: SWI-Prolog 10.1.14 boot/init.pl; commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
@@ -20,8 +23,16 @@
 % Guarded by: the registry is a SWI global variable, local to its engine and
 %   thread [tested: host_transactions:concurrent_registries_keep_their_owners;
 %   commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
+% Guarantees: try_erase/1 releases a clause reference held in a transactional
+%   table and succeeds whether or not the clause was still there, so a lost
+%   race cannot fail the cleanup that contains it; a non-clause blob still
+%   raises
+%   [tested: host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase,
+%   host_transactions:try_erase_still_raises_on_an_argument_that_is_not_a_clause_reference;
+%   commit=WORKTREE].
 
-:- module(host_transactions, [host_transaction_on_exit/1, host_transaction_on_exit/2]).
+:- module(host_transactions,
+          [ host_transaction_on_exit/1, host_transaction_on_exit/2, try_erase/1 ]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4]).
 % Declared, not left to the library index: the engine runs with autoload off
 % (engine/check.sh lib-autoload and no-autoload), where an undeclared foldl/4
@@ -29,6 +40,44 @@
 :- autoload(library(apply), [foldl/4]).
 :- autoload(library(lists), [reverse/2]).
 :- meta_predicate host_transaction_on_exit(0), host_transaction_on_exit(0, ?).
+
+%!  try_erase(+Ref) is det.
+%
+%   Release a clause reference recorded in a table, tolerating one another
+%   thread has already erased. Here erase/1 is the LIVENESS TEST rather than a
+%   precondition; engine/filereader.pl's retirement loop records that same
+%   reading for its own references.
+%
+%   The row and the clause sit at DIFFERENT ISOLATION LEVELS and no discipline
+%   inside one thread can make them agree. A table row is a dynamic fact, so
+%   inside transaction/1 each thread reads its own snapshot, while erase/1 acts
+%   on the shared clause store and is not isolated: a thread whose transaction
+%   opened before another thread committed still SEES the row and reaches a
+%   clause that is already physically gone. Declaring the row '$notransact'
+%   only moves the mismatch, because a rolled-back installer would then leave
+%   rows naming clauses the rollback removed
+%   [tested: host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase;
+%   commit=WORKTREE].
+%
+%   ignore/1 rather than catch/3: every stale path FAILS and none throws, so
+%   ignore tolerates the lost race while a real type_error from a non-clause
+%   blob still reaches the caller
+%   [measured 2026-09-20: double erase, erase after retractall, erase after
+%   abolish and erase after garbage_collect_clauses each failed and none
+%   raised; commit=WORKTREE].
+%
+%   That measurement covers STALENESS and nothing else, so try_erase/1 is not
+%   the right call at an erase whose clause carries a prolog_listen/2 callback:
+%   the callback runs inside erase/1 and can raise for its own reasons, and a
+%   retirement that must finish has to contain that. Those sites keep
+%   catch(erase(Ref), _, true), and the difference is pinned rather than
+%   remembered: source_retirement.plt compares filereader:retire_source_artifacts/1
+%   against an oracle written as that exact spelling, and it refuses the
+%   substitution [tested: source_retirement:callbacks_and_failure_prefixes_match;
+%   commit=WORKTREE].
+%
+%   Time: one erase attempt. Space: none.
+try_erase(Ref) :- ignore(erase(Ref)).
 
 % Native transaction event callbacks run under SWI's global event-list mutex,
 % so completion that can acquire an application lock belongs after the native

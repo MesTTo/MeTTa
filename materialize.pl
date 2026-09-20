@@ -810,7 +810,7 @@ discard_space_rows(Space) :-
 % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 discard_image_rows(Space, Token) :-
     % Workaround: swi-cleanup-window - retain retirement records until their effects finish.
-    forall(materialized_dispatch_ref(Token, Ref), ignore(erase(Ref))),
+    forall(materialized_dispatch_ref(Token, Ref), host_transactions:try_erase(Ref)),
     retractall(materialized_dispatch_ref(Token, _)),
     retractall(materialized_predicate(_, _, _, Token)),
     retractall(materialized_owner(_, Space, Token)),

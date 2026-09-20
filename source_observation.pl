@@ -540,6 +540,9 @@ install_exception_observers :-
 %hook clause outlives the whole rest of the process. Nothing hides behind the
 %catch, because the_observer_holds_no_hook_outside_an_observation asks the
 %database whether the clauses are actually gone.
+%This is the one erase in the engine that is NOT host_transactions:try_erase/1,
+%which propagates a raise on purpose. Here a raise has somewhere worse to go
+%than the caller.
 remove_exception_observers :-
     forall(retract(installed_hook(Reference)),
            catch(erase(Reference), _, true)).

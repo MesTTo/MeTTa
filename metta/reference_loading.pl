@@ -149,7 +149,7 @@ metta_reference_admission_scope(Home, Policy, enabled) :-
     filereader:metta_reference_source_reader(Home, enabled).
 metta_reference_admission_scope(Home, _, disabled) :-
     filereader:metta_reference_source_reader(Home, disabled),
-    forall(retract(metta_reference_admission_option(Home, Ref)), erase(Ref)).
+    forall(retract(metta_reference_admission_option(Home, Ref)), host_transactions:try_erase(Ref)).
 
 % A map is an answer relation, including empty and multiple answers. Its
 % read-only enumeration is part of row publication, not an initializer.
@@ -361,7 +361,7 @@ metta_reference_release_loader(Home) :-
     retractall(metta_reference_library_home(Home, _)),
     retractall(metta_reference_prolog_head(Home, _, _)),
     retractall(metta_reference_space_option(Home, _, _)),
-    forall(retract(metta_reference_finish_ref(Home, Ref)), erase(Ref)),
+    forall(retract(metta_reference_finish_ref(Home, Ref)), host_transactions:try_erase(Ref)),
     metta_reference_update_namespace_watch.
 
 metta_reference_prolog_context(Home, Module) :-

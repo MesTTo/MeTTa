@@ -352,7 +352,7 @@ type_alias_scope_space(local(Module), Space) :- metta_module_space(Module, Space
 
 retire_type_alias_scope(Module) :-
     type_alias_scope(Module, Scope),
-    forall(retract(type_alias_gate_ref(Scope, Ref)), erase(Ref)),
+    forall(retract(type_alias_gate_ref(Scope, Ref)), host_transactions:try_erase(Ref)),
     filereader:set_type_alias_support_scope(Scope, disabled),
     spaces:set_type_alias_mutation_scope(Scope, disabled).
 
