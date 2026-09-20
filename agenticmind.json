@@ -11004,6 +11004,18 @@
       "tags": [
         "source"
       ]
+    },
+    "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert": {
+      "title": "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert"
+    },
+    "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added": {
+      "title": "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added",
+      "supports": [
+        "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -49938,6 +49950,47 @@
         ]
       ],
       "id": "3693e94a2801b5c2"
+    },
+    {
+      "at": "2026-09-20T15:55:29.008442+00:00",
+      "after": "0e4f244ee4469a16610accf709e63f4a73a4ed81",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added\", \"tags\": [\"tested\"], \"title\": \"my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert\", \"fields\": {}}]",
+      "parents": [
+        "3693e94a2801b5c2"
+      ],
+      "assert": [
+        [
+          "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert",
+          "sort",
+          "prop"
+        ],
+        [
+          "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert",
+          "title",
+          "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert"
+        ],
+        [
+          "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added",
+          "sort",
+          "prop"
+        ],
+        [
+          "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added",
+          "supports",
+          "my script-reference selftest passed while testing neither of the module's stated guarantees: it exercised bases() and the reference pattern and never called findings(), so the end-to-end promise rested on a docstring and one manual revert"
+        ],
+        [
+          "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added",
+          "tags",
+          "tested"
+        ],
+        [
+          "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added",
+          "title",
+          "the semantic-search recall named it against check_process_bounds_selftest, which plants a fixture and calls findings(); blinding my checker afterwards proved the gap, since the selftest had passed with it blind until the planted tree was added"
+        ]
+      ],
+      "id": "3fedbd4774470e8e"
     }
   ]
 }
