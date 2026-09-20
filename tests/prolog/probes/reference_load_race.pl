@@ -11,8 +11,14 @@
 % Guarantees:
 %   - stops at the FIRST failure and prints the iteration and the error, or
 %     reports the count when every iteration passed
+%     [measured 2026-09-20: on the unfixed tree it printed `iteration 421
+%     raised:` and stopped, and on the fixed tree `6000 iterations, no
+%     failure`; commit=WORKTREE].
 %   - a failure that raises and a failure that merely fails are reported
-%     apart, because this defect has produced both
+%     apart, because this defect has produced both. Only the raising branch has
+%     been observed here; the other is read from the code
+%     [source: main/1's forall prints `failed without raising` where
+%     iteration/1's catch_with_backtrace prints `raised:`; commit=WORKTREE].
 % Fails when: the failure needs state from the other 37 tests in the suite.
 %   It does not: measured 2026-09-20, one test alone failed 1 run in 20 through
 %   plunit, and this loop reaches the same refusal within a few hundred

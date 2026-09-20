@@ -6,13 +6,17 @@
 %   swi-nested-retract-loses-outer-assert, patched), older rows survive
 %   rollback, and completion registries remain local to their executing thread
 %   [tested: host_transactions; commit=7ead07e090b85ad2b541fc271dd59b4d8faaf636].
+% Guarantees: a clause reference held in a transactional table outlives its
+%   clause whenever another thread commits the erase first, and try_erase/1 is
+%   what releases it without failing the cleanup around it
+%   [tested: host_transactions; commit=WORKTREE].
 % Owns resources: each test removes its private rows; worker threads are joined.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/host_transactions', []).
 :- use_module(library(prolog_wrap), [unwrap_predicate/2]).
 
 :- begin_tests(host_transactions).
-:- dynamic row/1, clock/1, permanent/1.
+:- dynamic row/1, clock/1, permanent/1, reference_row/1, guarded/1.
 :- '$notransact'(permanent/1).
 
 later_rows(Rows) :-
@@ -139,6 +143,51 @@ test(reinstalling_one_door_keeps_the_existing_primitive,
           transaction(host_transactions:host_transaction_on_exit(nb_setval(host_completion_pending, true))),
           nb_getval(host_completion_pending, Pending), assertion(Pending == true) ),
         host_transactions:install_host_transaction_completion).
+
+%A dynamic row is snapshot-isolated per thread and erase/1 is not isolated at
+%all, so a thread whose transaction opened before another thread committed
+%still SEES a row naming a clause that is already physically gone. That is the
+%whole of host_transactions:try_erase/1's reason for existing, and the test
+%pins both halves: the bare erase FAILS there, and try_erase/1 does not.
+%The observer reports rather than asserts, so a failed expectation names which
+%of the three observations moved instead of only failing the thread.
+release_observer(In, Out) :-
+    transaction(( thread_send_message(Out, opened),
+                  thread_get_message(In, committed),
+                  (   reference_row(Ref)
+                  ->  ( erase(Ref) -> Bare = succeeded ; Bare = failed ),
+                      ( host_transactions:try_erase(Ref)
+                      -> Tolerant = succeeded ; Tolerant = failed ),
+                      Report = report(visible, Bare, Tolerant)
+                  ;   Report = report(gone, not_reached, not_reached) ) )),
+    thread_send_message(Out, Report).
+
+test(a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase,
+     [cleanup(( retractall(reference_row(_)), retractall(guarded(_)) ))]) :-
+    assertz(guarded(installed), Ref),
+    assertz(reference_row(Ref)),
+    message_queue_create(ToObserver), message_queue_create(FromObserver),
+    thread_create(release_observer(ToObserver, FromObserver), Observer, []),
+    thread_get_message(FromObserver, opened),
+    transaction(( retract(reference_row(_)), erase(Ref) )),
+    thread_send_message(ToObserver, committed),
+    thread_get_message(FromObserver, Report),
+    thread_join(Observer, Status),
+    message_queue_destroy(ToObserver), message_queue_destroy(FromObserver),
+    assertion(Status == true),
+    assertion(Report == report(visible, failed, succeeded)).
+
+%The other direction. try_erase/1 tolerates a lost race and nothing else, so a
+%caller defect still reaches the caller; ignore/1 is what draws that line and
+%catch(erase(R), _, true), which three sites used to spell, does not.
+bad_reference(not_a_reference, type_error(db_reference, not_a_reference)).
+bad_reference(7,               type_error(db_reference, 7)).
+bad_reference(_,               instantiation_error).
+
+test(try_erase_still_raises_on_an_argument_that_is_not_a_clause_reference,
+     [forall(bad_reference(Bad, Expected))]) :-
+    catch(host_transactions:try_erase(Bad), error(Raised, _), true),
+    assertion(Raised == Expected).
 
 :- end_tests(host_transactions).
 

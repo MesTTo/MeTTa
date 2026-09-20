@@ -62,6 +62,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Loading a source that declares `(from "<file>" ...)` no longer fails
+  intermittently while a background or suspended query runs in another thread.
+  Two steps of reference publication asked a per-thread transaction snapshot a
+  question about the shared clause store. Releasing a recorded clause reference
+  used a bare `erase/1`, which fails rather than raises when another thread has
+  already committed the same erase, and that failure propagated out of the
+  publication and surfaced as `Could not translate MeTTa form`. Deciding which
+  reader clauses are the engine's own subtracted the installed-reader table,
+  which a thread that opened its transaction earlier cannot see in full, so an
+  already-projected reader was projected again and raised an unrecognized
+  projection template. The release now tolerates a reference another thread
+  erased, and the reader question is answered from the clause store's own
+  record of which clauses came from a file.
+
 - A clause body that is an atom no longer kills the reference-source rewrite.
   `metta_reference_source_rewrite_body/6` guarded its decomposition with
   `nonvar`, and `compound_name_arguments/3` throws for an atom rather than

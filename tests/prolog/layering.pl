@@ -367,6 +367,7 @@ reaches(filereader, support_graph, 'a load records what its assertions support s
 reaches(filereader, translator, 'a load compiles the forms it read').
 reaches(filereader, translator_rules, 'a fast-cache image is a whole program and a program includes its translator rules, so capture, restore and the rollback of a failed restore all cross here').
 reaches(filereader, type_rules, 'source compilation and rollback hold the typing policy stable while rebuilding affected clauses').
+reaches(filereader, host_transactions, 'source retirement, the loading marker and the type-alias support scope release clause references recorded in transactional tables, and whether such a reference is still live is a transaction-semantics question rather than a loader one').
 reaches(kernel, metta, 'the kernel builtins are typed and refuse through the core\'s own vocabulary').
 reaches(kernel, spaces, 'the kernel builtins ask spaces about their atoms').
 reaches(prelude, metta, 'the prelude vocabulary is written in the core\'s own operations: it compares with =alpha, asserts through assert-answers, evaluates through metta_eval_step and asks get-metatype what it was handed').
@@ -383,6 +384,7 @@ reaches(materialize, host_listeners, 'the erase listener that retires a collecte
 reaches(materialize, spaces, 'native storage, compiled source signatures and dispatch policies define the relation being materialized').
 reaches(materialize, support_graph, 'prepared relations depend on their compiled function definitions').
 reaches(materialize, translator_rules, 'rewritten match calls and evaluated result constructors remain outside relational admission').
+reaches(materialize, host_transactions, 'discarding an image\'s dispatch rows releases clause references another transaction may already have erased').
 reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exists').
 reaches(metta, materialize, 'effect classification retains operation identity and user transactions own image publication').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
@@ -414,6 +416,7 @@ reaches(spaces, support_graph, 'content clear keeps live consumers and lifetime 
 reaches(spaces, translator, 'storing an equation compiles it').
 reaches(spaces, translator_rules, 'a release retires global translator registrations before clearing their owning module').
 reaches(spaces, type_rules, 'equation compilation holds the typing policy stable while installing translated clauses, and a release retires the user typing rules declared in the module it is clearing').
+reaches(spaces, host_transactions, 'mutation scopes, deferral guards and capacity hooks install clauses and release them by reference, which is the same transactional release the loader does').
 reaches(specializer, filereader, 'records and forgets the assertion of a generated specialization').
 reaches(specializer, metta, 'reads the module and space context and the type declarations it specializes over').
 reaches(specializer, parser, 'a minted specialization name must be a symbol the reader reads back').
@@ -437,6 +440,7 @@ reaches(translator, spaces, 'compiles into a space\'s execution module and asks 
 reaches(translator, specializer, 'a higher-order call may specialize').
 reaches(translator, translator_rules, 'the shipped rule set is the compiler\'s own first tier').
 reaches(translator, type_rules, 'a compile-time type check resolves through the typing-rule registry').
+reaches(translator, host_transactions, 'the self tier and the idle translation-cache hooks are installed clauses released by reference').
 reaches(source_observation, filereader, 'observes source execution, file identities and completed answers').
 reaches(source_observation, metta, 'resolves the execution module for an observed space').
 reaches(source_observation, source_positions, 'maps parsed source to side-table positions').
