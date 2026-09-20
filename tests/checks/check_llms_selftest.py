@@ -58,12 +58,12 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
-    _unreachable,
-    dotted_findings,
     REPO,
+    _unreachable,
     closed_value_findings,
     closed_value_source_findings,
     count_findings,
+    dotted_findings,
     head_findings,
     library_findings,
     method_findings,
