@@ -5355,6 +5355,47 @@
       "tags": [
         "tested"
       ]
+    },
+    "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout": {
+      "title": "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+    },
+    "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth": {
+      "title": "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth",
+      "supports": [
+        "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete": {
+      "title": "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete",
+      "supports": [
+        {
+          "node": "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "status": "untried"
+        },
+        {
+          "node": "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "relation": "addresses",
+          "target": "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+        }
+      ]
+    },
+    "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass": {
+      "title": "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass",
+      "supports": [
+        {
+          "node": "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -6242,6 +6283,14 @@
       "status": "untried",
       "addresses": [
         "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+      ]
+    },
+    "link each install directory the source has into a battery that lacks one, after the snapshot": {
+      "title": "link each install directory the source has into a battery that lacks one, after the snapshot",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
       ]
     }
   },
@@ -27259,6 +27308,127 @@
         ]
       ],
       "id": "fd95ab2c7e9b7215"
+    },
+    {
+      "at": "2026-09-20T00:36:06.985885+00:00",
+      "after": "059d927a31baf996dd58da75b8971247ad941107",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth\", \"tags\": [\"measured\"], \"title\": \"an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete\", \"tags\": [], \"title\": \"link each install directory the source has into a battery that lacks one, after the snapshot\", \"fields\": {\"effort\": 1, \"addresses\": [\"an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout\"]}}, {\"op\": \"status\", \"id\": \"link each install directory the source has into a battery that lacks one, after the snapshot\", \"because\": \"after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "fd95ab2c7e9b7215"
+      ],
+      "assert": [
+        [
+          "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass",
+          "supersedes",
+          "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete"
+        ],
+        [
+          "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass",
+          "supports",
+          {
+            "node": "link each install directory the source has into a battery that lacks one, after the snapshot",
+            "status": "done"
+          }
+        ],
+        [
+          "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass",
+          "tags",
+          "measured"
+        ],
+        [
+          "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass",
+          "title",
+          "after provisioning, the battery carries the link and the lane's own node invocation runs there, bundling from the battery's cwd and answering 'bundle ok 1' where it had answered ERR_MODULE_NOT_FOUND; the link survives a re-provision because the exclusion protects it, and the battery selftest's seven cases still pass"
+        ],
+        [
+          "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout",
+          "sort",
+          "prop"
+        ],
+        [
+          "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout",
+          "title",
+          "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+        ],
+        [
+          "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth",
+          "supports",
+          "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+        ],
+        [
+          "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth",
+          "title",
+          "measured 2026-09-20: a whole gate in battery 6 refused with ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild/lib/main.js while the same lane was ok in the source, and the battery held no node_modules at any depth"
+        ],
+        [
+          "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete",
+          "sort",
+          "prop"
+        ],
+        [
+          "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete",
+          "supports",
+          {
+            "node": "link each install directory the source has into a battery that lacks one, after the snapshot",
+            "status": "untried"
+          }
+        ],
+        [
+          "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete",
+          "supports",
+          {
+            "node": "link each install directory the source has into a battery that lacks one, after the snapshot",
+            "relation": "addresses",
+            "target": "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+          }
+        ],
+        [
+          "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete",
+          "title",
+          "these are install artifacts of a declared lockfile rather than code under test, so the battery must READ the same dependencies and copying hundreds of megabytes per provision to own a second identical set buys nothing; a battery that already has its own is left alone, and the exclusion still protects it from the delete"
+        ],
+        [
+          "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "sort",
+          "approach"
+        ],
+        [
+          "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "addresses",
+          "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+        ],
+        [
+          "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "effort",
+          1
+        ],
+        [
+          "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "status",
+          "done"
+        ],
+        [
+          "link each install directory the source has into a battery that lacks one, after the snapshot",
+          "title",
+          "link each install directory the source has into a battery that lacks one, after the snapshot"
+        ]
+      ],
+      "id": "ef03cb4d65934c69"
     }
   ]
 }

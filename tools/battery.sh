@@ -207,6 +207,31 @@ battery_component_paths() {
         while read -r _ component; do printf '%s\n' "$component"; done
 }
 
+# An install directory is EXCLUDED from the snapshot, which keeps a battery's
+# own copy from being swept -- and also means a battery that never had one
+# never gets one. A lane that needs it then fails in the battery while passing
+# in the checkout, which is a verdict about provisioning rather than about the
+# tree: binding-selftest refused a whole gate with
+# `ERR_MODULE_NOT_FOUND ... extensions/node/node_modules/esbuild/lib/main.js`
+# while the same lane was ok in the source [measured 2026-09-20].
+#
+# Linked rather than copied, because these are install artifacts of a declared
+# lockfile rather than code under test: the battery must READ the same
+# dependencies, and copying hundreds of megabytes per provision to own a second
+# identical set buys nothing. A battery that already has its own is left alone.
+battery_link_installs() {
+    install_tree=$1
+    for install_dir in $(cd "$ROOT" && find . -maxdepth 4 -type d -name node_modules \
+                             -not -path '*/node_modules/*' 2>/dev/null); do
+        install_source=$ROOT/${install_dir#./}
+        install_target=$install_tree/${install_dir#./}
+        [ -d "$install_source" ] || continue
+        [ -e "$install_target" ] && continue
+        mkdir -p "$(dirname "$install_target")"
+        ln -s "$install_source" "$install_target" 2>/dev/null || true
+    done
+}
+
 provision() {
     tree=$(tree_for "$1")
     if held=$(occupant "$tree"); then
@@ -221,6 +246,7 @@ provision() {
     for component in $(battery_component_paths); do
         battery_git_identity "$ROOT/$component" "$tree/$component"
     done
+    battery_link_installs "$tree"
     mkdir -p "$tree/ai-tmp"
     {
         echo "source:   $ROOT"
