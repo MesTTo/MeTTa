@@ -14009,6 +14009,264 @@
       "tags": [
         "measured"
       ]
+    },
+    "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads": {
+      "title": "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads"
+    },
+    "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to": {
+      "title": "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to",
+      "supports": [
+        "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing": {
+      "title": "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing"
+    },
+    "the two answers differ for all seven components, and the difference is the whole of this failure": {
+      "title": "the two answers differ for all seven components, and the difference is the whole of this failure",
+      "supports": [
+        "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push": {
+      "title": "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed": {
+      "title": ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed",
+      "supports": [
+        "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+        {
+          "node": "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane": {
+      "title": "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane"
+    },
+    "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not": {
+      "title": "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not",
+      "supports": [
+        "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames": {
+      "title": "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames"
+    },
+    "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0": {
+      "title": "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0",
+      "supports": [
+        "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done": {
+      "title": "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done"
+    },
+    "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration": {
+      "title": "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration",
+      "supports": [
+        "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be": {
+      "title": "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+      "supports": [
+        {
+          "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET",
+        "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary": {
+      "title": "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary"
+    },
+    "counted from the lane's own output after the re-pin": {
+      "title": "counted from the lane's own output after the re-pin",
+      "supports": [
+        "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding": {
+      "title": "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding",
+      "supports": [
+        {
+          "node": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "status": "untried"
+        },
+        {
+          "node": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "relation": "addresses",
+          "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        }
+      ]
+    },
+    "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed": {
+      "title": "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed",
+      "supports": [
+        {
+          "node": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written": {
+      "title": "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written"
+    },
+    "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared": {
+      "title": "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared",
+      "supports": [
+        "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run": {
+      "title": "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run"
+    },
+    "read at extensions/python/tools/twin_coverage.py:3102-3122": {
+      "title": "read at extensions/python/tools/twin_coverage.py:3102-3122",
+      "supports": [
+        "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion": {
+      "title": "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion"
+    },
+    "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged": {
+      "title": "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged",
+      "supports": [
+        "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead": {
+      "title": "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2": {
+      "title": "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2",
+      "supports": [
+        "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+        {
+          "node": "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks": {
+      "title": "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks"
+    },
+    "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation": {
+      "title": "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation",
+      "supports": [
+        "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds": {
+      "title": "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds",
+      "supports": [
+        {
+          "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "status": "untried"
+        },
+        {
+          "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "relation": "addresses",
+          "target": "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
+        }
+      ]
+    },
+    "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again": {
+      "title": "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again",
+      "supports": [
+        {
+          "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it": {
+      "title": "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it"
+    },
+    "the change turned 9 failures into 66, and every new one is a context that does not match": {
+      "title": "the change turned 9 failures into 66, and every new one is a context that does not match",
+      "supports": [
+        "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it": {
+      "title": "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it"
+    },
+    "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree": {
+      "title": "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree",
+      "supports": [
+        "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -15798,7 +16056,7 @@
     "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism": {
       "title": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
       "effort": 2,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
       ]
@@ -15817,6 +16075,22 @@
       "status": "untried",
       "addresses": [
         "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+      ]
+    },
+    "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain": {
+      "title": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+      ]
+    },
+    "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case": {
+      "title": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+      "effort": 3,
+      "status": "failed",
+      "addresses": [
+        "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
       ]
     }
   },
@@ -61539,6 +61813,721 @@
         "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
       },
       "id": "4f1e3dec93df5117"
+    },
+    {
+      "at": "2026-09-20T22:16:43.797682+00:00",
+      "after": "6e09cb25d5495c2db3283166e6ce4e07eefecfb2",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to\", \"tags\": [\"measured\"], \"title\": \"I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the two answers differ for all seven components, and the difference is the whole of this failure\", \"tags\": [\"measured\"], \"title\": \"the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed\", \"tags\": [\"source\"], \"title\": \"the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not\", \"tags\": [\"measured\"], \"title\": \"the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane\", \"fields\": {}}]",
+      "parents": [
+        "4f1e3dec93df5117"
+      ],
+      "assert": [
+        [
+          ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed",
+          "sort",
+          "prop"
+        ],
+        [
+          ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed",
+          "supports",
+          "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push"
+        ],
+        [
+          ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed",
+          "supports",
+          {
+            "node": "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed",
+          "tags",
+          "source"
+        ],
+        [
+          ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed",
+          "title",
+          ".gitmodules names github.com/MesTTo urls and /home/user/Dev/CLAUDE.md requires the full benchmark suite on the exact tree being pushed"
+        ],
+        [
+          "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads",
+          "sort",
+          "prop"
+        ],
+        [
+          "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads",
+          "title",
+          "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads"
+        ],
+        [
+          "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not",
+          "sort",
+          "prop"
+        ],
+        [
+          "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not",
+          "supports",
+          "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane"
+        ],
+        [
+          "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not",
+          "tags",
+          "measured"
+        ],
+        [
+          "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not",
+          "title",
+          "git cat-file -e against each local origin answers present, while the probe worktree fetching GitHub does not"
+        ],
+        [
+          "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to",
+          "supports",
+          "I told the user the component push was private and non-destructive and that it was the only thing blocking the worktree lane. The first half is true and the second is FALSE: .gitmodules points every component at https://github.com/MesTTo/..., and components.sh fetches from .gitmodules rather than from the working copy's origin, so the local mirrors it pushed to are not what the lane reads"
+        ],
+        [
+          "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to",
+          "title",
+          "measured: every submodule url in .gitmodules is a GitHub https url while every working copy's origin is /home/user/Dev/PyPeTTa1/components/*.git, and the probe still fails with 'nonexistent object' for exactly the three components this session committed to"
+        ],
+        [
+          "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing",
+          "title",
+          "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing"
+        ],
+        [
+          "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane",
+          "title",
+          "the local mirror pushes were still worth making and are not wasted: the mirrors now carry every component commit, so the recorded pointers resolve from a local clone, but they do not satisfy the lane"
+        ],
+        [
+          "the two answers differ for all seven components, and the difference is the whole of this failure",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two answers differ for all seven components, and the difference is the whole of this failure",
+          "supports",
+          "the error was inferring the remote from the working copies' origin instead of reading .gitmodules, which is the manifest the tooling consults; the check that would have caught it before asking is one git config --file .gitmodules read, and it costs nothing"
+        ],
+        [
+          "the two answers differ for all seven components, and the difference is the whole of this failure",
+          "tags",
+          "measured"
+        ],
+        [
+          "the two answers differ for all seven components, and the difference is the whole of this failure",
+          "title",
+          "the two answers differ for all seven components, and the difference is the whole of this failure"
+        ],
+        [
+          "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push",
+          "title",
+          "the worktree lane needs the seven component commits on GitHub, which is a PUBLIC push, and this workspace's push gate additionally requires the entire benchmark suite green with zero regressions before any push"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "6144b5416e5f7cbe"
+    },
+    {
+      "at": "2026-09-20T22:17:44.357544+00:00",
+      "after": "6e09cb25d5495c2db3283166e6ce4e07eefecfb2",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0\", \"tags\": [\"measured\"], \"title\": \"the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration\", \"tags\": [\"assumed\"], \"title\": \"the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done\", \"fields\": {}}]",
+      "parents": [
+        "6144b5416e5f7cbe"
+      ],
+      "assert": [
+        [
+          "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration",
+          "supports",
+          "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done"
+        ],
+        [
+          "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration",
+          "tags",
+          "assumed"
+        ],
+        [
+          "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration",
+          "title",
+          "extensions/python/test.sh routes workers through bounded.sh and the crash appears only in the concurrent configuration"
+        ],
+        [
+          "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0",
+          "supports",
+          "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames"
+        ],
+        [
+          "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0",
+          "title",
+          "measured both ways: the lane log carries 'gnutimeout: the monitored command dumped core' and '[gw0] node down: Not properly terminated' with binary frames naming that test, and a single -p no:xdist run exits 0"
+        ],
+        [
+          "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done",
+          "sort",
+          "prop"
+        ],
+        [
+          "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done",
+          "title",
+          "the likely mechanism is the per-process RLIMIT_DATA that tools/bounded.sh enforces, which the repository added after a worker reached 29.7 GB RSS; what would PROVE it is running that test under the same bounded xdist configuration while watching RSS, which has not been done"
+        ],
+        [
+          "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames",
+          "sort",
+          "prop"
+        ],
+        [
+          "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames",
+          "title",
+          "the one remaining pytest failure is a native CRASH rather than a failed assertion, and it does not reproduce in isolation: test_mm2_exec_transforms_inside_mork passes alone in 1.52 seconds, while under the lane's xdist run the worker core-dumps at that test with _Py_DumpStack frames"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "00fead6672ced988"
+    },
+    {
+      "at": "2026-09-20T22:20:28.952158+00:00",
+      "after": "6e09cb25d5495c2db3283166e6ce4e07eefecfb2",
+      "did": "[{\"op\": \"status\", \"id\": \"re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism\", \"because\": \"the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"counted from the lane's own output after the re-pin\", \"tags\": [\"measured\"], \"title\": \"the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding\", \"tags\": [], \"title\": \"drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain\", \"fields\": {\"effort\": 1, \"addresses\": [\"the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane\"]}}, {\"op\": \"status\", \"id\": \"drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain\", \"because\": \"the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared\", \"tags\": [\"measured\"], \"title\": \"I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read at extensions/python/tools/twin_coverage.py:3102-3122\", \"tags\": [\"source\"], \"title\": \"--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run\", \"fields\": {}}]",
+      "parents": [
+        "00fead6672ced988"
+      ],
+      "assert": [
+        [
+          "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run",
+          "sort",
+          "prop"
+        ],
+        [
+          "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run",
+          "title",
+          "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run"
+        ],
+        [
+          "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written",
+          "sort",
+          "prop"
+        ],
+        [
+          "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written",
+          "title",
+          "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written"
+        ],
+        [
+          "counted from the lane's own output after the re-pin",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted from the lane's own output after the re-pin",
+          "supports",
+          "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary"
+        ],
+        [
+          "counted from the lane's own output after the re-pin",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted from the lane's own output after the re-pin",
+          "title",
+          "counted from the lane's own output after the re-pin"
+        ],
+        [
+          "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding",
+          "sort",
+          "prop"
+        ],
+        [
+          "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding",
+          "supports",
+          {
+            "node": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+            "status": "untried"
+          }
+        ],
+        [
+          "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding",
+          "supports",
+          {
+            "node": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+            "relation": "addresses",
+            "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+          }
+        ],
+        [
+          "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding",
+          "title",
+          "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py:3102-3122",
+          "sort",
+          "prop"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py:3102-3122",
+          "supports",
+          "--observe only REPORTS: its docstring is 'Report empirical extrema without changing any declaration', so the seventeen envelope budgets must be widened by hand from its observations, and it needs at least ten FULL-lane rounds because the protocol string it writes is computed from the number of examples in the run"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py:3102-3122",
+          "tags",
+          "source"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py:3102-3122",
+          "title",
+          "read at extensions/python/tools/twin_coverage.py:3102-3122"
+        ],
+        [
+          "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed",
+          "supersedes",
+          "each of the six now costs less than the ceiling its band alone gives, and the lane reports an unnecessary allowance as a finding"
+        ],
+        [
+          "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed",
+          "supports",
+          {
+            "node": "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+            "status": "done"
+          }
+        ],
+        [
+          "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed",
+          "title",
+          "the lane reports 0 findings over those six twinned examples; committed as f6a91e4e with 8 and 2 historical paragraphs retained where chains existed"
+        ],
+        [
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+          "supersedes",
+          "the tool's --repin appends the move and its mechanism to each twin's own chain, which is the designed door, and a single-example trial wrote exactly the expected paragraph and BUDGET"
+        ],
+        [
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+          "supersedes",
+          "trialled on 35-math_lib, which wrote 359493 to 439898 with the reason and commit=WORKTREE, then launched over the full corpus in the background"
+        ],
+        [
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+          "supports",
+          {
+            "node": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+            "status": "done"
+          }
+        ],
+        [
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be",
+          "title",
+          "the lane went from 288 findings over 323 twinned examples to 23, with zero budget overruns, zero orphans, zero failed twins and zero divergences remaining; 261 twins re-pinned and committed as ec9888be"
+        ],
+        [
+          "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared",
+          "sort",
+          "prop"
+        ],
+        [
+          "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared",
+          "supports",
+          "I nearly destroyed the overrun history: my first removal script dropped EVERY #: OVERRUN paragraph, which is nine in datastructures_fingertree against one assignment, and the dry run's 80-line count is what exposed it. A dry run that prints a count per file is what made an over-broad edit visible before it was written"
+        ],
+        [
+          "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared",
+          "tags",
+          "measured"
+        ],
+        [
+          "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared",
+          "title",
+          "the project's rule, and the journal's, is to remove the stale declaration while retaining the record of why an allowance was ever declared"
+        ],
+        [
+          "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary",
+          "title",
+          "the twins lane now holds exactly 23 findings of two kinds, both with designed remedies: 17 empirical ENVELOPE budgets measured under full-lane/294 against a current full-lane/323, and 6 overrun allowances the re-pin made unnecessary"
+        ],
+        [
+          "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "sort",
+          "approach"
+        ],
+        [
+          "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "addresses",
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        ],
+        [
+          "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "effort",
+          1
+        ],
+        [
+          "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "status",
+          "done"
+        ],
+        [
+          "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain",
+          "title",
+          "drop the six overrun allowances and the paragraph that set each, retaining the earlier paragraphs of any chain"
+        ],
+        [
+          "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "re-pin the twins corpus with the sixty-library MeTTa derivation and the 294-to-323 corpus growth named as the mechanism"
+      },
+      "id": "651e8163660d0e50"
+    },
+    {
+      "at": "2026-09-20T22:25:28.540926+00:00",
+      "after": "6e09cb25d5495c2db3283166e6ce4e07eefecfb2",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged\", \"tags\": [\"measured\"], \"title\": \"the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2\", \"tags\": [\"measured\"], \"title\": \"the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation\", \"tags\": [\"measured\"], \"title\": \"the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds\", \"tags\": [], \"title\": \"make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case\", \"fields\": {\"effort\": 3, \"addresses\": [\"the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead\"]}}]",
+      "parents": [
+        "651e8163660d0e50"
+      ],
+      "assert": [
+        [
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds",
+          "sort",
+          "prop"
+        ],
+        [
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds",
+          "supports",
+          {
+            "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+            "status": "untried"
+          }
+        ],
+        [
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds",
+          "supports",
+          {
+            "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+            "relation": "addresses",
+            "target": "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
+          }
+        ],
+        [
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds",
+          "title",
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds"
+        ],
+        [
+          "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation",
+          "supports",
+          "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks"
+        ],
+        [
+          "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation",
+          "tags",
+          "measured"
+        ],
+        [
+          "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation",
+          "title",
+          "dev_typed_selftest answers 'checked' under the dev build and 'stripped' under -O, so only the body check survives optimisation"
+        ],
+        [
+          "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged",
+          "sort",
+          "prop"
+        ],
+        [
+          "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged",
+          "supports",
+          "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion"
+        ],
+        [
+          "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged",
+          "tags",
+          "measured"
+        ],
+        [
+          "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged",
+          "title",
+          "each measured with dev_typed_suites before and after, and each verified to leave the ordinary build unchanged"
+        ],
+        [
+          "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2",
+          "supports",
+          "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
+        ],
+        [
+          "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2",
+          "supports",
+          {
+            "node": "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2",
+          "title",
+          "measured on lib_vector_surface:nonnumber_component, where Expected and Got differ only in the second argument of error/2"
+        ],
+        [
+          "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks",
+          "sort",
+          "prop"
+        ],
+        [
+          "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks",
+          "title",
+          "the duplication those tests trip over is DELIBERATE and must stay: the mode line checks under the development build and mavis strips it under -O, so the body's own must_be is the production check. The defect is that the inserted check does not say where it fired, not that there are two checks"
+        ],
+        [
+          "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+          "sort",
+          "prop"
+        ],
+        [
+          "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead",
+          "title",
+          "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
+        ],
+        [
+          "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion",
+          "title",
+          "the typed build's debt fell from 27 failures over 8 suites to 9 over 6 this session: lib_package's 10 closed by one input-path annotation, lib_cli's 8 by declaring cli_value to has_type and fixing a negated assertion, and lib_database's 2 by the total-type exclusion"
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "sort",
+          "approach"
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "addresses",
+          "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "effort",
+          3
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "status",
+          "untried"
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "title",
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case"
+        ]
+      ],
+      "id": "93c74f5e264727a6"
+    },
+    {
+      "at": "2026-09-20T22:26:28.879711+00:00",
+      "after": "6e09cb25d5495c2db3283166e6ce4e07eefecfb2",
+      "did": "[{\"op\": \"status\", \"id\": \"make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case\", \"because\": \"built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the change turned 9 failures into 66, and every new one is a context that does not match\", \"tags\": [\"measured\"], \"title\": \"the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree\", \"tags\": [\"measured\"], \"title\": \"the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it\", \"fields\": {}}]",
+      "parents": [
+        "93c74f5e264727a6"
+      ],
+      "assert": [
+        [
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again",
+          "sort",
+          "prop"
+        ],
+        [
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again",
+          "supersedes",
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds"
+        ],
+        [
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again",
+          "supports",
+          {
+            "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+            "status": "failed"
+          }
+        ],
+        [
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again",
+          "tags",
+          "measured"
+        ],
+        [
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again",
+          "title",
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again"
+        ],
+        [
+          "the change turned 9 failures into 66, and every new one is a context that does not match",
+          "sort",
+          "prop"
+        ],
+        [
+          "the change turned 9 failures into 66, and every new one is a context that does not match",
+          "supports",
+          "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it"
+        ],
+        [
+          "the change turned 9 failures into 66, and every new one is a context that does not match",
+          "tags",
+          "measured"
+        ],
+        [
+          "the change turned 9 failures into 66, and every new one is a context that does not match",
+          "title",
+          "the change turned 9 failures into 66, and every new one is a context that does not match"
+        ],
+        [
+          "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree",
+          "supports",
+          "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it"
+        ],
+        [
+          "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree",
+          "tags",
+          "measured"
+        ],
+        [
+          "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree",
+          "title",
+          "the inserted check cannot know the context the body's own check attaches, and the body's check is the one that survives -O, so no mechanical change makes the two agree"
+        ],
+        [
+          "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it",
+          "title",
+          "the nine remaining typed failures have two honest resolutions and both are content decisions rather than defects to fix blind: leave them as a characterised development-build-only difference, or relax those nine tests to accept either context on the ground that their subject is the type error and not which layer raised it"
+        ],
+        [
+          "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it",
+          "title",
+          "the safety argument I gave for that change was false and checkable before building: I claimed a test accepting any context still unifies with a named one, without checking that plunit compares error terms by variance. One look at how the comparison is made would have killed it"
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "status",
+          "failed"
+        ]
+      ],
+      "id": "03ee54023cc532ad"
     }
   ]
 }
