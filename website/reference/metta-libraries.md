@@ -800,7 +800,7 @@ Returns: Done
 *lib_database.metta:17*
 
 ```metta
-(: database-atoms (-> %Undefined% Expression))
+(: database-atoms (-> %Undefined% Atom))
 ```
 
 Return an expression containing every stored value in insertion order, including duplicates. Each value has fresh variables on each snapshot, with sharing preserved within that value. Binding a snapshot never changes the store. Nothing is evaluated. Compose selection and joins with let segment patterns, and explicit rule reconstruction with eval or add-atom. Snapshot memory is proportional to the complete stored syntax.
