@@ -608,6 +608,51 @@ test(the_verifier_runs_a_clone_in_its_own_module,
     assertion(Out == 2),
     assertion(specializer:ho_specialization_agrees(SpecName)).
 
+%The comparison runs the call two more times than the program asked, once as
+%the clone and once as the generic, and then the wrapper runs the real one.
+%That is invisible for a read and WRONG for a write, so the comparison runs
+%inside snapshot/1 and its writes are discarded. This counts them: the tally
+%must gain exactly one atom across a verified call, and gains three without
+%the snapshot. examples/ch08-data/08-03-the-shipped-libraries/12-dict_lib.metta
+%is where the corpus showed it, answering 22 against an asserted 10 because
+%4 + 6 + 6 + 6 is 22.
+test(a_verified_call_writes_once_however_often_the_comparison_ran,
+     [ setup(( retractall(silent(_)), assertz(silent(true)) )),
+       cleanup(( forall(member(E, [['plunit-write'|_], ['plunit-write-inc'|_],
+                                   ['plunit-write-use'|_]]),
+                        remove_sexp('&plunit_spec_write', [=, E, _])),
+                 forall('get-atoms'('&plunit_spec_tally', Atom),
+                        remove_sexp('&plunit_spec_tally', Atom)),
+                 space_module('&plunit_spec_write', M),
+                 forall(member(N, ['plunit-write', 'plunit-write-inc',
+                                   'plunit-write-use']),
+                        ( specializer:invalidate_specializations(M, N),
+                          specializer:forget_symbol(M, N) )),
+                 retractall(silent(_)), assertz(silent(false)) )) ]) :-
+    Space = '&plunit_spec_write',
+    Tally = '&plunit_spec_tally',
+    space_module(Space, Module),
+    'add-atom'(Space, [=, ['plunit-write-inc', X],
+                          [let, _Ignored, ['add-atom', Tally, [wrote]],
+                                ['+', X, 1]]], _),
+    'add-atom'(Space, [=, ['plunit-write', F, Y], [F, Y]], _),
+    'add-atom'(Space, [=, ['plunit-write-use', Z],
+                          ['plunit-write', 'plunit-write-inc', Z]], _),
+    with_metta_module(Module, reduce(['plunit-write-use', 1], _, _)),
+    ho_specialization(Module, 'plunit-write', SpecName),
+    %A DELTA rather than a total, because reduce/3 above already ran the
+    %function once to trigger the specialization.
+    findall(Before, 'get-atoms'(Tally, Before), Started),
+    length(Started, StartCount),
+    SpecGoal =.. [SpecName, 'plunit-write-inc', 1, Answer],
+    specializer:metta_verified_specialization(SpecName, Module:SpecGoal),
+    findall(After, 'get-atoms'(Tally, After), Ended),
+    length(Ended, EndCount),
+    Written is EndCount - StartCount,
+    assertion(Answer == 2),
+    assertion(Written == 1),
+    assertion(specializer:ho_specialization_agrees(SpecName)).
+
 % A specialization belongs to the space whose code triggered it, and
 % ho_specialization/3 has said so in its first argument since it was written.
 % specializer:invalidate_specializations/2's predecessor read that argument with a WILDCARD, so adding an

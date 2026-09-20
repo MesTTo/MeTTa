@@ -7500,6 +7500,35 @@
           "target": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
         }
       ]
+    },
+    "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run": {
+      "title": "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run",
+      "supports": [
+        {
+          "node": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "status": "untried"
+        },
+        {
+          "node": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "relation": "addresses",
+          "target": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        }
+      ]
+    },
+    "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail": {
+      "title": "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail",
+      "supports": [
+        {
+          "node": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -8667,6 +8696,14 @@
       "status": "untried",
       "addresses": [
         "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+      ]
+    },
+    "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes": {
+      "title": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
       ]
     }
   },
@@ -35820,6 +35857,97 @@
         ]
       ],
       "id": "cd7d84ad3a5a0f23"
+    },
+    {
+      "at": "2026-09-20T06:10:16.709571+00:00",
+      "after": "ee62fb04e582885c497ada1daf439bdff647a4f9",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run\", \"tags\": [], \"title\": \"pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes\", \"fields\": {\"effort\": 1, \"addresses\": [\"the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications\"]}}, {\"op\": \"status\", \"id\": \"pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes\", \"because\": \"MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "cd7d84ad3a5a0f23"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail",
+          "supersedes",
+          "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run"
+        ],
+        [
+          "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail",
+          "supports",
+          {
+            "node": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+            "status": "done"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail",
+          "tags",
+          "tested"
+        ],
+        [
+          "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail",
+          "title",
+          "MEASURED 2026-09-20: specializer_invalidation passes all 13 tests with the snapshot and the new test fails its Written == 1 assertion without it, so the count is a delta across the verified call rather than a total and the test is proven able to fail"
+        ],
+        [
+          "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run",
+          "sort",
+          "prop"
+        ],
+        [
+          "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run",
+          "supports",
+          {
+            "node": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+            "status": "untried"
+          }
+        ],
+        [
+          "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run",
+          "supports",
+          {
+            "node": "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+            "relation": "addresses",
+            "target": "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+          }
+        ],
+        [
+          "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run",
+          "title",
+          "the Python selftest exercises the whole lane and a plunit test pins the engine predicate itself, so a later change to metta_compare_specialization/6 is caught by the suite rather than only by a corpus run"
+        ],
+        [
+          "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "sort",
+          "approach"
+        ],
+        [
+          "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "addresses",
+          "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+        ],
+        [
+          "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "effort",
+          1
+        ],
+        [
+          "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "status",
+          "done"
+        ],
+        [
+          "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes",
+          "title",
+          "pin the snapshot at the Prolog level too, with a test that counts the atoms a verified call writes"
+        ]
+      ],
+      "id": "bac9b762dc81a790"
     }
   ]
 }
