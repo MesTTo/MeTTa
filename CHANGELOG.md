@@ -86,6 +86,27 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `/etc/debuginfod/*.urls` whenever `[ -z ]` holds, so a rung that started a
   login shell would hand the server back.
 
+- Four rows of the Node seat's benchmark baseline record that this box does not
+  reproduce them, and their pins are unchanged. The `node-bench` lane appears
+  as a new failure only because it had been passing without measuring;
+  once it ran, six cases sat outside the band — `define-call` at 86,785
+  inferences against a pinned 86,353, `host-op` and `query-rows` below their
+  inference pins, and three instruction minima below theirs.
+  Every reading is identical across all three samples, and identical in four
+  independent tree provenances: a battery, the long-lived checkout, a
+  `git worktree` at the submodule mount's parent, and a fresh clone at the pin
+  commit with its submodules populated from the component remotes and its own
+  `npm run build`. Controlled reversal eliminated the rest, each arm
+  re-provisioned and measured: the engine alone at the pin's gitlink, engine
+  with `lib`, the benchmark harness alone, and all four together; the Node
+  seat's own three commits in the range touch only `llms.txt`, a `.gitignore`
+  and the runner scripts. Both MORK objects and `engine/reader.so` were placed
+  in every arm, and the configuration stamp matches on all five fields. No
+  mechanism survived, so nothing was re-pinned: a pin moved without one is the
+  fabrication the benchmark protocol exists to prevent, and this repository
+  ruled the same way on 2026-09-06, keeping the pin and recording which trees
+  read what.
+
 - A lane that could not run says so. Twenty-two prerequisite guards across six
   runners printed a note and exited or returned `0`, so the gate reported `ok`
   for a lane that compiled nothing, ran no test, or compared not one row. They

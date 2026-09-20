@@ -6134,6 +6134,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree": {
+      "title": "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree"
+    },
+    "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353": {
+      "title": "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353",
+      "supports": [
+        "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination": {
+      "title": "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination",
+      "supports": [
+        {
+          "node": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "status": "untried"
+        },
+        {
+          "node": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "relation": "addresses",
+          "target": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        }
+      ]
+    },
+    "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions": {
+      "title": "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions",
+      "supports": [
+        {
+          "node": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -7118,6 +7159,14 @@
       "title": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
       "effort": 1,
       "status": "unwanted",
+      "addresses": [
+        "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+      ]
+    },
+    "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated": {
+      "title": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+      "effort": 1,
+      "status": "done",
       "addresses": [
         "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
       ]
@@ -30398,6 +30447,127 @@
         ]
       ],
       "id": "115ea8a448e50efa"
+    },
+    {
+      "at": "2026-09-20T03:10:20.281899+00:00",
+      "after": "ac3c88706b65ee6b1aa688401f6858363819931c",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353\", \"tags\": [\"measured\"], \"title\": \"a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination\", \"tags\": [], \"title\": \"keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated\", \"fields\": {\"effort\": 1, \"addresses\": [\"the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one\"]}}, {\"op\": \"status\", \"id\": \"keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated\", \"because\": \"the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "115ea8a448e50efa"
+      ],
+      "assert": [
+        [
+          "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree",
+          "sort",
+          "prop"
+        ],
+        [
+          "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree",
+          "title",
+          "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree"
+        ],
+        [
+          "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353",
+          "supports",
+          "a freshly cloned tree does not reproduce the pin either: cloned at the pin commit with its submodules populated from the component remotes, given both MORK objects and the native reader and its own npm build, define-call reads 86785 in all three samples, the same as the battery, the checkout and the pre-mount worktree"
+        ],
+        [
+          "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353",
+          "title",
+          "measured 2026-09-20, which refutes the rewrite-in-place effect as the explanation for THIS row and leaves no tree provenance on this box that reads 86353"
+        ],
+        [
+          "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions",
+          "sort",
+          "prop"
+        ],
+        [
+          "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions",
+          "supersedes",
+          "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination"
+        ],
+        [
+          "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions",
+          "supports",
+          {
+            "node": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+            "status": "done"
+          }
+        ],
+        [
+          "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions",
+          "tags",
+          "measured"
+        ],
+        [
+          "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions",
+          "title",
+          "the four affected rows in the node baseline carry the note, the pinned values are unchanged with define-call still 86353, and the file's diff is eight insertions against four trailing-comma deletions"
+        ],
+        [
+          "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination",
+          "supports",
+          {
+            "node": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+            "status": "untried"
+          }
+        ],
+        [
+          "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination",
+          "supports",
+          {
+            "node": "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+            "relation": "addresses",
+            "target": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+          }
+        ],
+        [
+          "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination",
+          "title",
+          "this is the ruling this repository already made when a pin failed to reproduce at its own commit: the number is the measurement environment rather than the engine, the pin stands, and the note beside it says which trees read what; moving a pin with no surviving mechanism is the fabrication the benchmark protocol exists to prevent, and the note is what stops the next reader repeating a four-arm elimination"
+        ],
+        [
+          "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "sort",
+          "approach"
+        ],
+        [
+          "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "addresses",
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        ],
+        [
+          "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "effort",
+          1
+        ],
+        [
+          "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "status",
+          "done"
+        ],
+        [
+          "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated",
+          "title",
+          "keep the six node pins and record beside each affected row that this box does not reproduce them, naming every provenance tried and every arm eliminated"
+        ]
+      ],
+      "id": "410f9343e1cb3bd8"
     }
   ]
 }
