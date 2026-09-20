@@ -732,7 +732,8 @@ metta_verified_specialization(SpecName, Spec) :-
         call(Spec)
     ).
 
-%The check, run once per specialization and BOUNDED WHOLE. Both sides are
+%The check, run once per specialization, inside a snapshot and BOUNDED WHOLE.
+%Both sides are
 %bounded, not just the slow one: comparing answer sets means forcing all
 %answers of a call the program may only have wanted one of, so the
 %specialized side can blow up exactly as the generic side can, and a
@@ -755,6 +756,10 @@ metta_check_specialization(SpecName, Spec) :-
     copy_term(Args, PlainArgs),
     SpecCopy =.. [SpecName|SpecArgs],
     metta_specialization_generic(Module, SpecName, PlainArgs, Generic),
+    metta_compare_specialization(SpecName, Module, SpecCopy, Generic,
+                                 SpecArgs, PlainArgs).
+
+metta_compare_specialization(SpecName, Module, SpecCopy, Generic, SpecArgs, PlainArgs) :-
     metta_specialization_budget(Budget),
     %Both sides run with that module IN FORCE as well as qualified. The
     %generic side reaches reduce/3 for a higher-order argument, and reduce/3
@@ -765,10 +770,11 @@ metta_check_specialization(SpecName, Spec) :-
     %specializer_invalidation:the_verifier_runs_a_clone_in_its_own_module].
     catch(
         (   call_with_inference_limit(
+                metta_discarding_writes(
                 with_metta_module(Module,
                 (   findall(SpecArgs, call(Module:SpecCopy), Specialized),
                     findall(PlainArgs, call(Module:Generic), Plain)
-                )), Budget, Result),
+                ))), Budget, Result),
             (   Result == inference_limit_exceeded
             ->  Outcome = unbounded
             ;   Outcome = both(Specialized, Plain)
@@ -777,6 +783,36 @@ metta_check_specialization(SpecName, Spec) :-
         Error,
         (   control_exception(Error) -> throw(Error) ; Outcome = raised(Error) )),
     metta_specialization_verdict(SpecName, Outcome).
+
+%The comparison runs the call two more times than the program asked for: once
+%as the clone and once as the generic. That is invisible for a call that only
+%reads and WRONG for one that writes, and the specializer's own header already
+%said so -- running both ways would run a function's effects twice, which is
+%why this is a checking mode rather than a production one. The half that was
+%missing is that the checking mode still has to contain them.
+%
+%snapshot/1 is the host's own speculative-execution door: the goal runs against
+%a temporary view of the dynamic database and every change it makes is
+%discarded, which is the same shape as a solver's push and pop or a database
+%savepoint. The program's own call happens OUTSIDE it, in
+%metta_verified_specialization/2, so a write lands exactly once however many
+%times the comparison ran
+%[measured 2026-09-20: 12-dict_lib.metta asserts that
+%(dict-update &stock plum (|-> ($v) (+ $v 6))) takes plum from 4 to 10, and the
+%mode answered 22, which is 4 + 6 + 6 + 6].
+%
+%A static admission test was tried first and is structurally impossible here:
+%the engine's effect walk refuses a higher-order goal, and the specializer
+%exists to specialize higher-order calls, so every goal it holds is one
+%[measured 2026-09-20: error(metta_higher_order_goal(2), none) on the parsing
+%corpus, and metta_host_goal_repeatable/2 admitted 4 of 235].
+%
+%The two answer lists come back as ordinary bindings: a snapshot discards
+%DATABASE changes, not the goal's bindings. It also wraps with_metta_module/2
+%rather than sitting inside it, because that switches the module every goal
+%under it resolves in, and this predicate lives in the specializer.
+metta_discarding_writes(Goal) :-
+    snapshot(Goal).
 
 metta_specialization_verdict(SpecName, both(Specialized, Plain)) :-
     (   Specialized =@= Plain

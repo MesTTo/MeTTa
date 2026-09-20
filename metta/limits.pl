@@ -191,55 +191,40 @@ metta_host_indicator_head(Name/Arity, user:Head) :-
 metta_host_repair_resolution(Head) :-
     catch(ignore('$define_predicate'(Head)), _, true).
 
-%%%%%%%%%% A bag the bound cut between its push and its cleanup is popped %%%%%%%%%%
+%%%%%%%%%% The bound's own exception hooks, installed on first use %%%%%%%%%%
 %
-%Workaround: swi-findall-bag-push-window - pop a findall's bag from a catch
-%whose entry the host defers past, and give findnsols a cleanup registered
-%before its push.
+%A process that bounds something wants seam:bound_hook/2's clauses reachable
+%from prolog_exception_hook/5 when the limit trips. That costs one assert per
+%hook and a process that never bounds should pay nothing, so the install rides
+%on the first call_with_inference_limit/3 of the process. The wrapper stays,
+%because unwrap_predicate/2 releases the closure blob another thread may be
+%inside at that moment. The limit predicate is defined in '$syspreds' and only
+%imported into system, and a wrapper goes on the definition; the deferral on
+%its call port survives, because raiseInferenceLimitException compares
+%definitions and wrapping keeps the definition.
 %
-%findall/4 is cleanup_bag(findall_loop(...), '$destroy_findall_bag'), and
-%cleanup_bag/2 is '$new_findall_bag' followed by '$call_cleanup'. The bag is
-%on the thread's bag stack from the push on, the cleanup that pops it is
-%registered one call port later, and an inference limit that trips on that
-%port unwinds with the bag in place and no cleanup owed. The enclosing
-%findall then adds every later answer to the stale bag and collects its own,
-%which is now short [measured 2026-09-11: swipl -q -f none, a findall over
-%two hundred budgets each bounding a goal that runs a nested findall,
-%collects 13 of 200; a thrown ball through the same nesting collects 200
-%and a depth limit collects 200; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]. The cleanup's own entry
-%is a second window of the same shape: a trip on '$destroy_findall_bag''s
-%call port leaves the bag as well. findnsols2/5 pushes the same way through
-%setup_call_cleanup/3 and has both windows too.
+%This used to install two MORE wrappers here, replacing '$bags':cleanup_bag/2
+%and '$bags':findnsols2/5 to work around swi-findall-bag-push-window: on an
+%unpatched host an inference limit that trips between findall's bag push and
+%its cleanup registration unwinds with the bag still on the stack and no
+%cleanup owed, so the enclosing findall collects a SHORT answer set.
+%tests/checks/host_workarounds/swi-cleanup-window.patch closed that window by
+%deferring the inference check past the atomic region, which is word for word
+%the ledger's lift condition for that entry.
 %
-%Both shapes below rest on the host's own rule: a trip on the call port of
-%catch/3 is not raised there but at the next call port, which is inside the
-%catch. So a push followed by catch/3 cannot be separated from what the catch
-%protects, and a cleanup that IS a catch/3 term cannot be cut before it runs.
-%
-%findall's loop is deterministic and never fails, so its bag needs no
-%registered cleanup at all: push, then catch the loop and the pop together,
-%and pop from the recovery. A trip on the loop's port, inside the loop, or on
-%the pop's port is caught with the bag still pushed, so the recovery pops it
-%once and the ball goes on; the ordinary exit pops it inside the catch. That
-%is the host's own three call ports, so an unbounded findall pays nothing for
-%this. findnsols's loop yields chunks and is cut by its callers, so it keeps a
-%registered cleanup: registered BEFORE the push, with the push and the record
-%of it made consistent the same way, and a cleanup that is a catch/3 term
-%whose drop records before it pops. The record is a per-thread global, which
-%is also per-engine, exactly as the bag stack is.
-%
-%The shape costs one inference per findall, the catch, against the host's
-%own [measured 2026-09-11: 16 inferences per findall of three answers with
-%the host's shape, 17 with this one, bare SWI; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]. It is paid
-%only in a process that has bounded something: the first
-%call_with_inference_limit/3 of the process installs the two wrappers and
-%the exception hook above, and they stay, because unwrap_predicate/2
-%releases the closure blob another thread may be inside at that moment; a
-%process that never bounds runs the host's shape untouched. The limit
-%predicate is defined in '$syspreds' and only imported into system, and a
-%wrapper goes on the definition; the deferral on its call port survives,
-%because raiseInferenceLimitException compares definitions and wrapping
-%keeps the definition.
+%They are lifted because on the patched host they had stopped being redundant
+%and become WRONG. With them installed, a nested call_with_inference_limit
+%inside a live evaluation emptied the enclosing collection -- the very
+%short-answer-set symptom they exist to prevent, produced by the cure rather
+%than the defect. A bounded call that never came close to its budget did it
+%too, so this was the replacement bag discipline meeting the patched host's
+%deferral, not a budget being spent
+%[measured 2026-09-20: `!(test (grammar-parse (alt (integer) (lit "x")) "7") 7)`
+%answers () under METTA_VERIFY_SPECIALIZATIONS with the wrappers installed and
+%7 without them, unchanged at budgets from 100 to 20,000,000; and
+%tests/checks/host_workarounds/swi-findall-bag-push-window.pl answers absent on
+%this patched host and present on stock 10.1.13, so the patch is what closed it
+%and the host-workarounds lane is what keeps a stock host from being used].
 :- metta_host_wrap_once('$syspreds':call_with_inference_limit(_, _, _),
                         metta_host_first_bound,
                         Bounded,
@@ -257,19 +242,6 @@ metta_host_first_bound :-
 metta_host_first_bound_once :-
     (   metta_host_bound_seen
     ->  true
-    ;   metta_host_wrap_once('$bags':cleanup_bag(Goal, Cleanup),
-                             metta_host_bag_scope,
-                             _,
-                             ( '$new_findall_bag',
-                               catch(( Goal,
-                                       Cleanup ),
-                                     Ball,
-                                     ( Cleanup,
-                                       throw(Ball) )) )),
-        metta_host_wrap_once('$bags':findnsols2(Count, Template, Goal2, List, Tail),
-                             metta_host_bag_scope,
-                             Original,
-                             metta_host_findnsols2(Original, Count, Template, Goal2, List, Tail)),
         %The clause lands in `prolog`, which resolves no engine predicate, so
         %each body carries the module of the row that declared it:
         %strip_module/3 answers a row's own qualifier or, for an unqualified
@@ -277,56 +249,9 @@ metta_host_first_bound_once :-
         %than `assertz((prolog:Head :- Body))`, because the second wraps the
         %body in this module as well, and a row then reads as a clause of a
         %body nobody declared.
-        forall(( clause(seam:bound_hook(Frame, Goal), true),
+    ;   forall(( clause(seam:bound_hook(Frame, Goal), true),
                  strip_module(Goal, Owner, Plain) ),
                assertz(prolog:(prolog_exception_hook(inference_limit_exceeded, _, Frame, _, _) :-
                                    Owner:Plain))),
         assertz(metta_host_bound_seen)
-    ).
-
-%findnsols2/5 normalises its count before it pushes, and the count of zero
-%and the domain error never push, so only the pushing clause is replaced.
-metta_host_findnsols2(Original, Count, Template, Goal, List, Tail) :-
-    (   '$bags':nsols_count(Count, Wanted),
-        Wanted > 0
-    ->  copy_term(Template+Goal, Templ+Copied),
-        metta_host_recorded_bag('$bags':findnsols_loop(Count, Templ, Copied, List, Tail),
-                                '$destroy_findall_bag')
-    ;   call(Original)
-    ).
-
-metta_host_recorded_bag(Goal, Cleanup) :-
-    metta_host_bags(Below),
-    setup_call_cleanup(true,
-                       ( metta_host_bag_take(Below),
-                         Goal ),
-                       catch(metta_host_bag_drop(Below, Cleanup),
-                             Ball,
-                             ( metta_host_bag_drop(Below, Cleanup),
-                               throw(Ball) ))).
-
-metta_host_bags(Depth) :-
-    (   nb_current('$metta_host_bags', Depth)
-    ->  true
-    ;   Depth = 0
-    ).
-
-metta_host_bag_take(Below) :-
-    Above is Below + 1,
-    '$new_findall_bag',
-    catch(nb_setval('$metta_host_bags', Above),
-          Ball,
-          ( '$destroy_findall_bag',
-            throw(Ball) )).
-
-metta_host_bag_drop(Below, Cleanup) :-
-    metta_host_bags(Now),
-    (   Now > Below
-    ->  Down is Now - 1,
-        nb_setval('$metta_host_bags', Down),
-        catch(Cleanup,
-              Ball,
-              ( nb_setval('$metta_host_bags', Now),
-                throw(Ball) ))
-    ;   true
     ).
