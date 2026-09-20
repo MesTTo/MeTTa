@@ -84,6 +84,84 @@
 :- use_module(library(mavis)).
 :- use_module(library(apply), [maplist/3]).
 
+% The mode-line vocabulary is MeTTa's; `must_be/2`'s is SWI's. They share a
+% syntax and nothing joined them, so every `+Value:'Atom'` in the tree became a
+% `must_be('Atom', Value)` that no clause could satisfy. `library(error)`'s
+% `must_be/2` asks `has_type/2` and falls to `is_not/2` when it fails, and
+% `is_not/2` raises `type_error(Type, Value)` without asking whether the type
+% was ever defined -- so the tree reported a value as the wrong type when the
+% truth was that the TYPE was unknown. Read alone the message accuses the
+% value, which is why the backlog read as a pile of separate refusals rather
+% than one missing bridge.
+%
+% What these clauses do, and what they do NOT do. Both sides are the same loop
+% over the same 182 suites, the only difference being this block
+% [measured 2026-09-21; commit=WORKTREE]:
+%
+%                  passed   failed   type errors
+%     without        8615      363           150
+%     with           8776      202            12
+%
+% 17 suites improve and none regresses. Every one of the 150 was a MeTTa name;
+% not one of the 12 is (9 are `string' in suites/seams/lib_package.plt), so
+% what is left are ordinary SWI type errors of the kind a mode line is FOR --
+% findings this uncovered rather than residue it left.
+%
+% The twelve are ordinary SWI type errors of the kind a mode line is FOR, so
+% they are findings this uncovered rather than residue it left. What it does
+% not do is make the lane green: 202 failures remain over 182 suites, of a
+% different class -- wrong answers and assertion mismatches rather than refused
+% arguments.
+%
+% suites/libraries/lib_database.plt alone goes from 10 passed and 21 failed to
+% 29 passed and 2 failed -- more than its 16 type errors, because a test that
+% compares error TERMS also fails when the type error displaces the error the
+% code meant to raise, and lib_database.plt:120 is exactly that. The two left
+% there are typed-only and about variable sharing across a store-and-read round
+% trip, not about types.
+%
+% They do NOT make the lane green. Failures of a different class survive --
+% wrong answers and assertion mismatches rather than refused arguments -- and
+% nothing here addresses them. The two left in lib_database are typed-only and
+% are about variable sharing across a store-and-read round trip, not about
+% types at all.
+%
+% Five MeTTa names are used this way, and two of them the engine already
+% classifies, so those two ask it rather than restating its rules
+% [measured 2026-09-21 over every mode line in every .pl outside vendor/:
+% 'Atom' 84 uses, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4, 'Number' 1].
+% Counting lib/ and engine/ alone answered four and missed 'Number', which is
+% an OUTPUT argument in a fixture and so defers until it is bound -- a use no
+% suite currently reaches, and exactly the kind that would arrive later as
+% another unexplained refusal.
+:- multifile error:has_type/2.
+
+% MeTTa's top type: an unevaluated term, which every term representing one is.
+% The check is vacuous BY THE SEMANTICS rather than for convenience, and the
+% annotation still earns its place by saying the argument is held rather than
+% evaluated.
+error:has_type('Atom', _).
+
+% A symptom of the syntax, not of the running program: `metatype_of/2` answers
+% 'Grounded' for a name this engine holds a function for, so deriving from it
+% would refuse `car-atom` where a mode line saying 'Symbol' means to accept it.
+error:has_type('Symbol', Value) :- atom(Value).
+
+% The engine's own two, asked rather than restated. `'is-expr'/2` is
+% `list_shaped/1`, which accepts a partial list where `is_list/1` would not,
+% and `'is-space'/2` takes a prefixed name or a handle. Both are pure
+% semi-deterministic classifiers, so a type check pays nothing and changes
+% nothing.
+error:has_type('Expression', Value) :- metta_engine:'is-expr'(Value, true).
+error:has_type('SpaceType', Value) :- metta_engine:'is-space'(Value, true).
+
+% MeTTa's Number is Prolog's. Its one use is an OUTPUT argument, so it defers
+% until bound and no suite reaches it today; it is here because the set is
+% every MeTTa name a mode line uses, and leaving the unexercised one out is how
+% the next reader meets this same refusal with no clue what it means.
+error:has_type('Number', Value) :- number(Value).
+
+
 % The expansion only sees SOURCE. engine/qlf_boot.pl leaves .qlf beside every
 % engine unit, and an extensionless ensure_loaded resolves a fresh one
 % (boot/init.pl '$qlf_file'/5), which skips term_expansion and reports every

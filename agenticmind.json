@@ -12006,6 +12006,106 @@
       "supports": [
         "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite"
       ]
+    },
+    "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see": {
+      "title": "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see"
+    },
+    "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all": {
+      "title": "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all",
+      "supports": [
+        "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0": {
+      "title": "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0"
+    },
+    "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success": {
+      "title": "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success",
+      "supports": [
+        "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch": {
+      "title": "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch"
+    },
+    "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session": {
+      "title": "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session",
+      "supports": [
+        "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested": {
+      "title": "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state": {
+      "title": "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state",
+      "supports": [
+        "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+        {
+          "node": "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the pins are already correct; only the objects are missing from the remotes": {
+      "title": "the pins are already correct; only the objects are missing from the remotes",
+      "supports": [
+        {
+          "node": "push each component and then the superproject, so the pinned commits are fetchable",
+          "status": "untried"
+        },
+        {
+          "node": "push each component and then the superproject, so the pinned commits are fetchable",
+          "relation": "addresses",
+          "target": "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
+        }
+      ]
+    },
+    "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause": {
+      "title": "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause",
+      "supports": [
+        {
+          "node": "push each component and then the superproject, so the pinned commits are fetchable",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the pins are already correct; only the objects are missing from the remotes"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all": {
+      "title": "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence": {
+      "title": "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence",
+      "supports": [
+        "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -13678,6 +13778,14 @@
       "status": "failed",
       "addresses": [
         "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+      ]
+    },
+    "push each component and then the superproject, so the pinned commits are fetchable": {
+      "title": "push each component and then the superproject, so the pinned commits are fetchable",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
       ]
     }
   },
@@ -53800,6 +53908,266 @@
         ]
       ],
       "id": "548449d190b724c7"
+    },
+    {
+      "at": "2026-09-20T17:37:25.848222+00:00",
+      "after": "ca87d570fe82ffb415ab26f4b574ba940c63ba94",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all\", \"tags\": [\"measured\"], \"title\": \"the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success\", \"tags\": [\"measured\"], \"title\": \"a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session\", \"tags\": [\"measured\"], \"title\": \"the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state\", \"tags\": [\"measured\"], \"title\": \"the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the pins are already correct; only the objects are missing from the remotes\", \"tags\": [], \"title\": \"push each component and then the superproject, so the pinned commits are fetchable\", \"fields\": {\"effort\": 1, \"addresses\": [\"the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested\"]}}, {\"op\": \"status\", \"id\": \"push each component and then the superproject, so the pinned commits are fetchable\", \"because\": \"a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause\", \"tags\": [\"user\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all\", \"fields\": {}}]",
+      "parents": [
+        "548449d190b724c7"
+      ],
+      "assert": [
+        [
+          "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all",
+          "title",
+          "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all"
+        ],
+        [
+          "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause",
+          "sort",
+          "prop"
+        ],
+        [
+          "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause",
+          "supersedes",
+          "the pins are already correct; only the objects are missing from the remotes"
+        ],
+        [
+          "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause",
+          "supports",
+          {
+            "node": "push each component and then the superproject, so the pinned commits are fetchable",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause",
+          "tags",
+          "user"
+        ],
+        [
+          "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause",
+          "title",
+          "a push is a public action and this project's instructions say never to push without explicit permission, so it is the user's to make rather than mine; recorded here so the next session does not rediscover the worktree lane's cause"
+        ],
+        [
+          "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0",
+          "title",
+          "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0"
+        ],
+        [
+          "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all",
+          "supports",
+          "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see"
+        ],
+        [
+          "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all",
+          "tags",
+          "measured"
+        ],
+        [
+          "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all",
+          "title",
+          "an existence guard on a mktemp copy (test_engine_text_encoding.sh:75), a bare 'sh run.sh' inside a plunit suite (source_observation_artifacts.plt:38,40), and a script COPIED to a different depth than it expects (test_worktree_configuration.sh); the first two are paths into a runtime-built tree whose base the checker correctly refuses to guess, the third is not a reference at all"
+        ],
+        [
+          "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence",
+          "sort",
+          "prop"
+        ],
+        [
+          "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence",
+          "supports",
+          "a probe whose failure mode is an EMPTY answer will be misread as a positive result unless the empty case is separated, and this one accused a worktree of already carrying the backend when its engine had not loaded at all"
+        ],
+        [
+          "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence",
+          "tags",
+          "measured"
+        ],
+        [
+          "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence",
+          "title",
+          "before=$(probe_backend) with stderr discarded gives '' both when the backend is absent-and-broken and when the probe dies; the test compared against 'absent' and reported anything else as presence"
+        ],
+        [
+          "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success",
+          "supports",
+          "a script that derives its checkout from its own directory breaks silently when a caller copies it to a different depth, which is a hazard the tools/ move created for every script that moved: tools/components.sh computes $(dirname $0)/.. and answered the temporary directory HOLDING the probe worktree, populated nothing, and exited 0"
+        ],
+        [
+          "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success",
+          "title",
+          "measured 2026-09-21 by unmuting the call: it printed component tips and two update_ref fatals while returning success"
+        ],
+        [
+          "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session",
+          "supports",
+          "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch"
+        ],
+        [
+          "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session",
+          "title",
+          "measured 2026-09-21: extensions/python 32 ahead, lib 17, examples 12, ext 4, cmetta 6, node 6, mork 6, superproject 3; only four of those commits are from this session"
+        ],
+        [
+          "the pins are already correct; only the objects are missing from the remotes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pins are already correct; only the objects are missing from the remotes",
+          "supports",
+          {
+            "node": "push each component and then the superproject, so the pinned commits are fetchable",
+            "status": "untried"
+          }
+        ],
+        [
+          "the pins are already correct; only the objects are missing from the remotes",
+          "supports",
+          {
+            "node": "push each component and then the superproject, so the pinned commits are fetchable",
+            "relation": "addresses",
+            "target": "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
+          }
+        ],
+        [
+          "the pins are already correct; only the objects are missing from the remotes",
+          "title",
+          "the pins are already correct; only the objects are missing from the remotes"
+        ],
+        [
+          "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+          "sort",
+          "prop"
+        ],
+        [
+          "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+          "title",
+          "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
+        ],
+        [
+          "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see",
+          "title",
+          "the tools/ move had three more live casualties at HEAD after the reference checker was built, and none of the three is a shape that checker can see"
+        ],
+        [
+          "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state",
+          "supports",
+          "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
+        ],
+        [
+          "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state",
+          "supports",
+          {
+            "node": "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state",
+          "tags",
+          "measured"
+        ],
+        [
+          "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state",
+          "title",
+          "the worktree lane fails on exactly this, and the release story requires a clone to reach the pinned state"
+        ],
+        [
+          "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch",
+          "title",
+          "the worktree lane's remaining failure is not a defect in the tree: it clones each component from its configured URL and every component is ahead of its remote, so the superproject pins commits no clone can fetch"
+        ],
+        [
+          "push each component and then the superproject, so the pinned commits are fetchable",
+          "sort",
+          "approach"
+        ],
+        [
+          "push each component and then the superproject, so the pinned commits are fetchable",
+          "addresses",
+          "the superproject pins component commits that exist only in this checkout, so a fresh clone cannot reproduce the state being tested"
+        ],
+        [
+          "push each component and then the superproject, so the pinned commits are fetchable",
+          "effort",
+          1
+        ],
+        [
+          "push each component and then the superproject, so the pinned commits are fetchable",
+          "status",
+          "unwanted"
+        ],
+        [
+          "push each component and then the superproject, so the pinned commits are fetchable",
+          "title",
+          "push each component and then the superproject, so the pinned commits are fetchable"
+        ]
+      ],
+      "id": "6a9490d46f16b0de"
     }
   ]
 }
