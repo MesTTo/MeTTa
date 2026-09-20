@@ -5523,6 +5523,42 @@
       "supersedes": [
         "the MeTTa and engine half of law 13 is built and gated, and the record of the delegated job states plainly that the Python half is not: it names metta.boot and manifest.py, which were outside that job's assignment, so this is the one part of laws 6 to 13 with no behaviour behind it"
       ]
+    },
+    "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design": {
+      "title": "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design"
+    },
+    "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds": {
+      "title": "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds",
+      "supports": [
+        "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name": {
+      "title": "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name"
+    },
+    "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written": {
+      "title": "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written",
+      "supports": [
+        "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles": {
+      "title": "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles"
+    },
+    "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack": {
+      "title": "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack",
+      "supports": [
+        "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -27940,6 +27976,107 @@
         ]
       ],
       "id": "cee19412b0205934"
+    },
+    {
+      "at": "2026-09-20T01:14:35.216857+00:00",
+      "after": "dafa2bba40084f6de8be07b27cebec2729826475",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds\", \"tags\": [\"source\"], \"title\": \"the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \\\"rules.metta\\\")) row raised package_claim [load,\\\"rules.metta\\\"] does not exist, no perform equation claims this boot row, and no performed row was written\", \"tags\": [\"measured\"], \"title\": \"a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack\", \"tags\": [\"measured\"], \"title\": \"what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles\", \"fields\": {}}]",
+      "parents": [
+        "cee19412b0205934"
+      ],
+      "assert": [
+        [
+          "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name",
+          "sort",
+          "prop"
+        ],
+        [
+          "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name",
+          "title",
+          "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name"
+        ],
+        [
+          "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written",
+          "supports",
+          "a Python-initiated load DOES reach the package machinery, so law 13's Python half needs no new plumbing: loading a file whose only row is a package boot row through the Python surface ran law 8's validation and refused by name"
+        ],
+        [
+          "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written",
+          "title",
+          "measured 2026-09-20: m.self.load on a file containing one (= (package boot) (load \"rules.metta\")) row raised package_claim [load,\"rules.metta\"] does not exist, no perform equation claims this boot row, and no performed row was written"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds",
+          "supports",
+          "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds",
+          "title",
+          "read docs/journal/2026-09-09-packages-are-equations.md law 11 and lib/lib_package/lib_package.pl:285, metta_add_atom(Space, [performed, Row, Answer], _), reached from package_perform/4 for both kinds"
+        ],
+        [
+          "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design",
+          "title",
+          "the record shape for a performed boot row is settled by the design and already implemented: law 11 names one record kind, performed row result, and lib_package writes it at lib_package.pl:285 inside the procedure that performs boot rows and backing rows alike, so the manifest module's own boot atom is a third spelling that predates it rather than a competing design"
+        ],
+        [
+          "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack",
+          "sort",
+          "prop"
+        ],
+        [
+          "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack",
+          "supports",
+          "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles"
+        ],
+        [
+          "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack",
+          "tags",
+          "measured"
+        ],
+        [
+          "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack",
+          "title",
+          "the refusal names a missing claim rather than a missing call path, and law 5 makes a claim an equation a seat adds to the seam space, which is exactly what load, attach, bridge and serve lack"
+        ],
+        [
+          "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles",
+          "sort",
+          "prop"
+        ],
+        [
+          "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles",
+          "title",
+          "what law 13's Python half actually needs is for the Python seat to CLAIM its four boot directives in the seam space, after which the manifest module is the thin interpreter the law describes: the machinery then performs requires and boot rows in store order, checks each against the claim, writes the performed receipt and owns the handles"
+        ]
+      ],
+      "id": "73f166017ebf7721"
     }
   ]
 }
