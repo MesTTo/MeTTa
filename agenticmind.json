@@ -10414,6 +10414,95 @@
       "supports": [
         "I under-counted the moved-C references by piping the grep through head -10, which returned exactly ten lines and hid check_llms_names.py's two direct opens of engine/reader.c and engine/json_codec.c; that is the third truncation-hidden red today"
       ]
+    },
+    "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound": {
+      "title": "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound"
+    },
+    "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent": {
+      "title": "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent",
+      "supports": [
+        "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered": {
+      "title": "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered",
+      "supports": [
+        {
+          "node": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "status": "untried"
+        },
+        {
+          "node": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "relation": "addresses",
+          "target": "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+        }
+      ]
+    },
+    "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError": {
+      "title": "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError",
+      "supports": [
+        {
+          "node": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them": {
+      "title": "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them"
+    },
+    "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep": {
+      "title": "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep",
+      "supports": [
+        "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working": {
+      "title": "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working"
+    },
+    "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work": {
+      "title": "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work",
+      "supports": [
+        "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did": {
+      "title": "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did"
+    },
+    "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags": {
+      "title": "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags",
+      "supports": [
+        "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be": {
+      "title": "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components": {
+      "title": "the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components",
+      "supports": [
+        "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be"
+      ]
     }
   },
   "approaches": {
@@ -11907,6 +11996,14 @@
       "status": "unwanted",
       "addresses": [
         "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+      ]
+    },
+    "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find": {
+      "title": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
       ]
     }
   },
@@ -47530,6 +47627,278 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "3e8a9da7b0c02e59"
+    },
+    {
+      "at": "2026-09-20T13:17:36.324829+00:00",
+      "after": "0204214d3c54360007cb4734a4849528d1d1a7fb",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent\", \"tags\": [\"measured\"], \"title\": \"a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered\", \"tags\": [], \"title\": \"derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find\", \"fields\": {\"effort\": 1, \"addresses\": [\"moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause\"]}}, {\"op\": \"status\", \"id\": \"derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find\", \"because\": \"check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "3e8a9da7b0c02e59"
+      ],
+      "assert": [
+        [
+          "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound",
+          "sort",
+          "prop"
+        ],
+        [
+          "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound",
+          "title",
+          "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound"
+        ],
+        [
+          "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered",
+          "supports",
+          {
+            "node": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+            "status": "untried"
+          }
+        ],
+        [
+          "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered",
+          "supports",
+          {
+            "node": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+            "relation": "addresses",
+            "target": "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+          }
+        ],
+        [
+          "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered",
+          "title",
+          "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered"
+        ],
+        [
+          "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError",
+          "supersedes",
+          "check_process_bounds.py already received the gate-script list and re-derived root/check.sh beside it, which is a second representation nothing checked against the first; taking the driver from that list is right for the repository and the selftest fixture at once, and globbing tools/*.sh found twelve unbounded spawns a hand-written roster had never covered"
+        ],
+        [
+          "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError",
+          "supports",
+          {
+            "node": "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+            "status": "done"
+          }
+        ],
+        [
+          "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError",
+          "tags",
+          "tested"
+        ],
+        [
+          "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError",
+          "title",
+          "check_process_bounds.py reads 0 findings over 220 spawns in 6 gate scripts, its selftest reads 0 over 56 planted cases, and check_llms_names.py no longer raises FileNotFoundError"
+        ],
+        [
+          "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent",
+          "supports",
+          "a check that cannot find its subject passes rather than failing, so a file move silently disarms every checker that names a path: the engine/c move disarmed check_process_bounds.py's guard over 18 unbounded lanes, and the tools/ move disarmed the repository's one process bound"
+        ],
+        [
+          "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent",
+          "title",
+          "measured: check_process_bounds.py read 12 findings once its driver and script roster were derived rather than hard-coded, where it had read 0 while looking at nothing; check_llms_names.py printed that bounded.sh was absent"
+        ],
+        [
+          "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "sort",
+          "approach"
+        ],
+        [
+          "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "addresses",
+          "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+        ],
+        [
+          "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "effort",
+          1
+        ],
+        [
+          "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "status",
+          "done"
+        ],
+        [
+          "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find",
+          "title",
+          "derive a checker's subject from what it is already given or from a glob, rather than naming a path it can silently fail to find"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "63b85d93ce9e47e7"
+    },
+    {
+      "at": "2026-09-20T13:18:13.246775+00:00",
+      "after": "0204214d3c54360007cb4734a4849528d1d1a7fb",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep\", \"tags\": [\"measured\"], \"title\": \"of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work\", \"tags\": [\"user\"], \"title\": \"the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working\", \"fields\": {}}]",
+      "parents": [
+        "63b85d93ce9e47e7"
+      ],
+      "assert": [
+        [
+          "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep",
+          "supports",
+          "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them"
+        ],
+        [
+          "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep",
+          "title",
+          "measured: job_20260920T200930AEST_06ab3f3e ended worker_outcome_status=blocked, job_20260920T200930AEST_61375d4f reports last_activity_at within the minute and cwd ai-tmp/seat-node-tree/extensions/node, and extensions/cmetta's only uncommitted changes were my own tools/ rename sweep"
+        ],
+        [
+          "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them",
+          "sort",
+          "prop"
+        ],
+        [
+          "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them",
+          "title",
+          "of the two seat-parity codex agents, the cmetta one finished blocked after 2h37m on a memory gate no tree can pass, and the node one is still running after 3h08m with activity seconds ago; neither has delivered into the shipping tree, and the release went out without them"
+        ],
+        [
+          "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working",
+          "sort",
+          "prop"
+        ],
+        [
+          "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working",
+          "title",
+          "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working"
+        ],
+        [
+          "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work",
+          "sort",
+          "prop"
+        ],
+        [
+          "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work",
+          "supports",
+          "the seat-parity work was never on the release path: the release was cut, published and clone-verified from the superproject while both agents ran in their own trees, which is what the user asked for when they said to note the current commit so they could release even though codex keeps working"
+        ],
+        [
+          "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work",
+          "tags",
+          "user"
+        ],
+        [
+          "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work",
+          "title",
+          "user 2026-09-20 asked for exactly that separation, and the published main at 0204214d3 contains none of either agent's work"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "2342e50f11c85a86"
+    },
+    {
+      "at": "2026-09-20T13:19:02.699509+00:00",
+      "after": "0204214d3c54360007cb4734a4849528d1d1a7fb",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags\", \"tags\": [\"measured\"], \"title\": \"the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components\", \"tags\": [\"reasoning\"], \"title\": \"an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be\", \"fields\": {}}]",
+      "parents": [
+        "2342e50f11c85a86"
+      ],
+      "assert": [
+        [
+          "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be",
+          "sort",
+          "prop"
+        ],
+        [
+          "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be",
+          "title",
+          "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be"
+        ],
+        [
+          "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags",
+          "supports",
+          "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did"
+        ],
+        [
+          "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags",
+          "title",
+          "measured: ls */*.sh across the components; the unqualified-name sweep returned 42.9KB of hits of which almost all were component-owned or evidence tags"
+        ],
+        [
+          "the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components",
+          "supports",
+          "an evidence tag citing a command, [tested: sh check.sh lane; commit=...], must not be rewritten when the command moves, because it records what was run against that commit's tree; a live instruction to a reader must be"
+        ],
+        [
+          "the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components",
+          "title",
+          "the lib/ and engine/ hits were all tags of that shape, while examples/README.md's 'Run all of them' was an instruction and was the only live one outside the components"
+        ],
+        [
+          "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did",
+          "title",
+          "the same spelling 'sh check.sh' means a different file depending on where it sits, so a blanket rewrite after the tools/ move would have been wrong in most places: engine, extensions/python, extensions/node, extensions/cmetta, extensions/mork and ext each own a check.sh that did not move, and only the superproject's scripts did"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "f16b4957b3655ae4"
     }
   ]
 }
