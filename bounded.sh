@@ -17,7 +17,7 @@
 #                           `--owner $$`; without it only the arming window is
 #                           closed.
 #     METTA_CHILD_MEMORY    kilobytes of data segment the command may take, or
-#                           `none` for no bound (default: an eighth of the box)
+#                           `none` for no bound (default: a quarter of the box)
 #
 #   The ceiling and the grace are EXPORTED, so a command that bounds children
 #   of its own inherits them: `bounded --ceiling 290 sh run.sh f.metta` gives
@@ -41,7 +41,7 @@
 #   `swipl ... materialization.plt` run 7,540 seconds at 97.8% CPU on
 #   2026-09-05: it was outside every lane, so nothing bounded it at all.
 #
-#   The MEMORY BOUND is RLIMIT_DATA, an eighth of what the box has. Neither of
+#   The MEMORY BOUND is RLIMIT_DATA, a quarter of what the box has. Neither of
 #   the other two is a bound on size, so both were armed and neither helped
 #   when one pytest-xdist worker reached 29.7 GB RSS on 2026-09-20 and took 56
 #   of this box's 60 GB with 63 GB pushed into swap, leaving 672 MB free. The
@@ -193,17 +193,34 @@ metta_bounded_enforcer() {
 # MemoryMax=256M` succeeds, so the cgroup route does not bound a user scope
 # here and this one does].
 #
-# Derived from the box rather than frozen: an EIGHTH of what the machine has.
-# The gate runs four pytest workers at once and the box has to stay usable
-# while they do, so a single command may not take a quarter; the heaviest
-# legitimate worker measured 0.72 GB, so an eighth is an order of magnitude of
-# headroom above what any lane needs.
+# Derived from the box rather than frozen: a QUARTER of what the machine has.
+# The number has to sit above the largest demand this tree DECLARES and below
+# the runaway it exists to stop, and those two are what set it:
+#
+#   - declared: run.sh passes SWI `--stack_limit=8g`, and the MORK backend asks
+#     its allocator for a 4 GiB arena, so a single lane legitimately reaches
+#     about 12 GB;
+#   - runaway: one pytest-xdist worker reached 29.7 GB RSS on 2026-09-20 and
+#     took 56 of this box's 60 GB with 63 GB pushed into swap.
+#
+# An EIGHTH was the first choice and it is refuted: 7.56 GiB on this box, below
+# the declared 12 GB, so `01-mm2-operators.metta` aborted on `memory allocation
+# of 4294967296 bytes failed` and took the shell, examples and no-autoload
+# lanes with it. The reason given for an eighth was that the heaviest
+# legitimate worker measured 0.72 GB, which measured pytest workers and never
+# saw the MORK lane [measured 2026-09-20: the same example exits 0 under
+# `--memory none` and under a quarter, and aborts under an eighth].
+#
+# A quarter does not partition the box four ways: RLIMIT_DATA is a per-process
+# CEILING rather than a reservation, so four workers allowed 15 GiB each still
+# consume what they allocate, which was measured at 0.72 GB. What changes is
+# only where a runaway is caught, and 29.7 GB is still refused.
 metta_bounded_share() {
     metta_bounded_total=$(awk '/^MemTotal:/ { print $2; exit }' /proc/meminfo 2>/dev/null) ||
         metta_bounded_total=''
     case $metta_bounded_total in
         '' | *[!0-9]*) printf 'none\n' ;;
-        *) printf '%s\n' "$((metta_bounded_total / 8))" ;;
+        *) printf '%s\n' "$((metta_bounded_total / 4))" ;;
     esac
 }
 

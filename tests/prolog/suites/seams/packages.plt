@@ -187,10 +187,17 @@ test(a_backing_row_performs_only_for_the_file_that_carries_it) :-
     package_fixture(afterwards, '(= (package version) "0.0.2")\n', Afterwards),
     'import!'('&self', Afterwards, _).
 
-%A row NAMES the heads its artifact exports, and naming is not calling. The
-%body's head is `prolog`, which the translator compiles to a literal, so the
-%compiled clause holds the whole row as data and no arrival can turn a name
-%inside it into a call.
+%A row NAMES the heads its artifact exports, and naming is not calling. What
+%makes that true is the RESERVED HEAD it sits under: `package` is fixed by the
+%law, so its rows are declarations and hold their payload as data whatever
+%arrives later.
+%
+%It is NOT true of the row's own head being one the translator has nothing to
+%compile, which is how this was first written. That test reads a mutable
+%condition, "nothing defines this yet", as a permanent one, and applying it to
+%every body let an import change what an already-read definition meant
+%[measured 2026-09-20; the end-to-end case is
+%examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta].
 %
 %Recording one anyway made every `package` equation a dependent of every head
 %it backs, so performing a row recompiled the `package` head, which carries a

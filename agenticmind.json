@@ -6284,6 +6284,325 @@
       "tags": [
         "source"
       ]
+    },
+    "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data": {
+      "title": "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+    },
+    "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head": {
+      "title": "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head",
+      "supports": [
+        "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants": {
+      "title": "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants"
+    },
+    "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending": {
+      "title": "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending",
+      "supports": [
+        "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement": {
+      "title": "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement"
+    },
+    "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it": {
+      "title": "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it",
+      "supports": [
+        "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in": {
+      "title": "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in",
+      "supports": [
+        {
+          "node": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "status": "untried"
+        },
+        {
+          "node": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "relation": "addresses",
+          "target": "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+        }
+      ]
+    },
+    "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for": {
+      "title": "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for",
+      "supports": [
+        {
+          "node": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head": {
+      "title": "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head"
+    },
+    "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged": {
+      "title": "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged",
+      "supports": [
+        "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge": {
+      "title": "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge"
+    },
+    "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing": {
+      "title": "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing",
+      "supports": [
+        "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that": {
+      "title": "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that",
+      "supports": [
+        {
+          "node": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "status": "untried"
+        },
+        {
+          "node": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "relation": "addresses",
+          "target": "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+        }
+      ]
+    },
+    "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping": {
+      "title": "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping",
+      "supports": [
+        {
+          "node": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "status": "untried"
+        }
+      ],
+      "supersedes": [
+        "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that"
+      ]
+    },
+    "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess": {
+      "title": "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set": {
+      "title": "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set",
+      "supports": [
+        "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it": {
+      "title": "the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it",
+      "supports": [
+        {
+          "node": "i28",
+          "relation": "rests_on",
+          "target": "c106"
+        }
+      ]
+    },
+    "this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered": {
+      "title": "this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered",
+      "supports": [
+        {
+          "node": "i28",
+          "relation": "rests_on",
+          "target": "c107"
+        }
+      ]
+    },
+    "the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price": {
+      "title": "the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price",
+      "supports": [
+        {
+          "node": "i28",
+          "relation": "rests_on",
+          "target": "c108"
+        }
+      ]
+    },
+    "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk": {
+      "title": "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28": {
+      "title": "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28",
+      "supports": [
+        "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all": {
+      "title": "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all",
+      "supports": [
+        {
+          "node": "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "status": "untried"
+        },
+        {
+          "node": "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "relation": "addresses",
+          "target": "i28"
+        }
+      ]
+    },
+    "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts": {
+      "title": "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+    },
+    "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them": {
+      "title": "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them",
+      "supports": [
+        "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself": {
+      "title": "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself",
+      "supports": [
+        {
+          "node": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "status": "untried"
+        },
+        {
+          "node": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "relation": "addresses",
+          "target": "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+        }
+      ]
+    },
+    "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9": {
+      "title": "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9",
+      "supports": [
+        {
+          "node": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used": {
+      "title": "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used"
+    },
+    "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file": {
+      "title": "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file",
+      "supports": [
+        "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes": {
+      "title": "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes"
+    },
+    "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3": {
+      "title": "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3",
+      "supports": [
+        "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule": {
+      "title": "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been": {
+      "title": "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been",
+      "supports": [
+        "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it": {
+      "title": "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+    },
+    "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'": {
+      "title": "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'",
+      "supports": [
+        "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population": {
+      "title": "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population"
+    },
+    "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend": {
+      "title": "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend",
+      "supports": [
+        "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught": {
+      "title": "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught",
+      "supports": [
+        {
+          "node": "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "status": "untried"
+        },
+        {
+          "node": "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "relation": "addresses",
+          "target": "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+        }
+      ]
+    },
+    "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning": {
+      "title": "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning"
+    },
+    "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure": {
+      "title": "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure",
+      "supports": [
+        "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -7294,6 +7613,46 @@
       "status": "done",
       "addresses": [
         "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+      ]
+    },
+    "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile": {
+      "title": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+      ]
+    },
+    "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body": {
+      "title": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+      ]
+    },
+    "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did": {
+      "title": "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "i28"
+      ]
+    },
+    "hand interrogate the same pyproject.toml its sibling bandit lane is already handed": {
+      "title": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+      ]
+    },
+    "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop": {
+      "title": "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
       ]
     }
   },
@@ -31000,6 +31359,925 @@
         ]
       ],
       "id": "ea1e6c2e1f87d256"
+    },
+    {
+      "at": "2026-09-20T04:10:19.098871+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head\", \"tags\": [\"measured\"], \"title\": \"an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending\", \"tags\": [\"source\"], \"title\": \"the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it\", \"tags\": [\"measured\"], \"title\": \"this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement\", \"fields\": {}}]",
+      "parents": [
+        "ea1e6c2e1f87d256"
+      ],
+      "assert": [
+        [
+          "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data",
+          "sort",
+          "prop"
+        ],
+        [
+          "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data",
+          "title",
+          "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+        ],
+        [
+          "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head",
+          "supports",
+          "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+        ],
+        [
+          "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head",
+          "title",
+          "measured 2026-09-20 by bisecting the engine against a four-line probe: a base space whose equation body is (area-of (area $x)) answers (area-of 9) when its from-import precedes the equation and (area-of (area (Sq 3))) when it follows, and the first bad commit is c4876eac2, which replaced the whole-body walk with one that stops at a literal head"
+        ],
+        [
+          "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it",
+          "supports",
+          "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement"
+        ],
+        [
+          "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it",
+          "title",
+          "measured 2026-09-20: all three lanes name examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and the record already carries the parity verdict for it"
+        ],
+        [
+          "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending",
+          "supports",
+          "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants"
+        ],
+        [
+          "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending",
+          "title",
+          "read engine/filereader.pl: literal_head/1 answers any head that is not a fun, a builtin, a translated head or a support function, so area-of qualifies permanently, and called_symbol/2 answers only that head without descending"
+        ],
+        [
+          "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants",
+          "sort",
+          "prop"
+        ],
+        [
+          "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants",
+          "title",
+          "the narrowing rests on a guard that does not hold: its comment says a name reachable only through a literal head cannot be called before its head is, but a head with no equation stays literal forever while a name beneath it becomes callable through an import, which is exactly the case the probe plants"
+        ],
+        [
+          "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement",
+          "sort",
+          "prop"
+        ],
+        [
+          "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement",
+          "title",
+          "this one defect accounts for four red lanes, because shell, examples and no-autoload each stop at the first failing example and parity counts the same example as its single remaining disagreement"
+        ]
+      ],
+      "id": "8afa565f56dc0902"
+    },
+    {
+      "at": "2026-09-20T04:14:30.096976+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in\", \"tags\": [], \"title\": \"stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile\", \"fields\": {\"effort\": 2, \"addresses\": [\"an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data\"]}}, {\"op\": \"status\", \"id\": \"stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile\", \"because\": \"the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged\", \"tags\": [\"tested\"], \"title\": \"the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head\", \"fields\": {}}]",
+      "parents": [
+        "8afa565f56dc0902"
+      ],
+      "assert": [
+        [
+          "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged",
+          "supports",
+          "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head"
+        ],
+        [
+          "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged",
+          "tags",
+          "tested"
+        ],
+        [
+          "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged",
+          "title",
+          "read the replacement clause against called_symbol/2's behaviour on (prolog F (heads)), which answered prolog alone, and the packages suite's cost test passes unchanged"
+        ],
+        [
+          "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head",
+          "title",
+          "the cost the narrowing removed is kept exactly, because the reserved-head clause records the same single edge the narrowed walk produced for a package row: the row's own head"
+        ],
+        [
+          "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for",
+          "supersedes",
+          "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in"
+        ],
+        [
+          "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for",
+          "supports",
+          {
+            "node": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+            "status": "done"
+          }
+        ],
+        [
+          "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for",
+          "tags",
+          "tested"
+        ],
+        [
+          "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for",
+          "title",
+          "the probe answers (area-of 9) with its import written either side of the equation, the class-dispatch example passes all six assertions and exits 0 where it had failed, the filereader suite reports all 70 tests passing with the two that had pinned the unsound behaviour rewritten to pin the sound one, and the packages suite reports all 22 passing including the O(N squared) cost test the exemption exists for"
+        ],
+        [
+          "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in",
+          "sort",
+          "prop"
+        ],
+        [
+          "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in",
+          "supports",
+          {
+            "node": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+            "status": "untried"
+          }
+        ],
+        [
+          "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in",
+          "supports",
+          {
+            "node": "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+            "relation": "addresses",
+            "target": "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+          }
+        ],
+        [
+          "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in",
+          "title",
+          "the unsound step is reading a mutable condition as a permanent one; quote, noeval and Error are data by the language and can never become calls, while `package` is data by the law that reserves it, so both exemptions hold whatever arrives later, and every other body keeps the whole-body walk that makes a definition's dependencies independent of the order its rows were read in"
+        ],
+        [
+          "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "sort",
+          "approach"
+        ],
+        [
+          "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "addresses",
+          "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+        ],
+        [
+          "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "effort",
+          2
+        ],
+        [
+          "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "status",
+          "done"
+        ],
+        [
+          "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile",
+          "title",
+          "stop the dependency walk only at the three heads the LANGUAGE fixes as data, and key the package-row exemption on the reserved head instead of on the row's head being one the translator cannot compile"
+        ]
+      ],
+      "id": "484108fcd90769ba"
+    },
+    {
+      "at": "2026-09-20T04:15:19.185272+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing\", \"tags\": [\"source\"], \"title\": \"the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that\", \"tags\": [], \"title\": \"close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body\", \"fields\": {\"effort\": 3, \"addresses\": [\"an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data\"]}}, {\"op\": \"status\", \"id\": \"close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body\", \"because\": \"the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping\", \"tags\": [], \"status\": \"untried\"}]",
+      "parents": [
+        "484108fcd90769ba"
+      ],
+      "assert": [
+        [
+          "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing",
+          "supports",
+          "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge"
+        ],
+        [
+          "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing",
+          "tags",
+          "source"
+        ],
+        [
+          "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing",
+          "title",
+          "read the packages suite's a_computed_row_normalises_and_then_performs beside the exemption; this is the same residual the narrowed walk already carried for package rows, so nothing regresses, and it is narrow because every declaration row shipped today names heads and calls nothing"
+        ],
+        [
+          "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that",
+          "sort",
+          "prop"
+        ],
+        [
+          "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that",
+          "supports",
+          {
+            "node": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+            "status": "untried"
+          }
+        ],
+        [
+          "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that",
+          "supports",
+          {
+            "node": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+            "relation": "addresses",
+            "target": "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+          }
+        ],
+        [
+          "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that",
+          "title",
+          "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that"
+        ],
+        [
+          "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge",
+          "title",
+          "the reserved-head exemption is not blanket-sound and its limit is stated in the code: law 3 normalises a row no claim answers before performing it, so a COMPUTED row's body IS evaluated and a name inside one that a later import makes callable still records no edge"
+        ],
+        [
+          "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping",
+          "sort",
+          "prop"
+        ],
+        [
+          "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping",
+          "supersedes",
+          "the grammar is what actually decides whether a position is data or a call, and it is what lib_package already holds; the engine cannot state a tighter rule than the reserved head until it can ask that"
+        ],
+        [
+          "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping",
+          "supports",
+          {
+            "node": "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+            "status": "untried"
+          }
+        ],
+        [
+          "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping",
+          "title",
+          "the shipped rows are all declarations, so the residual is unreachable today, and the crossing it needs is a new engine-to-library question that law 13's Python half is already shaping"
+        ],
+        [
+          "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "sort",
+          "approach"
+        ],
+        [
+          "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "addresses",
+          "an equation whose body calls a name under a head the translator has nothing to compile records no dependency on that name, so a later import that makes the name callable never invalidates the clause and the body keeps evaluating the name as data"
+        ],
+        [
+          "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "effort",
+          3
+        ],
+        [
+          "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "status",
+          "untried"
+        ],
+        [
+          "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body",
+          "title",
+          "close the computed-row residual by asking the row grammar which payload positions a claim reads, rather than exempting a package row's whole body"
+        ]
+      ],
+      "id": "4d961ea5a441556a"
+    },
+    {
+      "at": "2026-09-20T04:15:46.555682+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set\", \"tags\": [\"source\", \"reasoning\"], \"title\": \"this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess\", \"fields\": {}}]",
+      "parents": [
+        "4d961ea5a441556a"
+      ],
+      "assert": [
+        [
+          "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set",
+          "sort",
+          "prop"
+        ],
+        [
+          "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set",
+          "supports",
+          "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess"
+        ],
+        [
+          "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set",
+          "tags",
+          "source"
+        ],
+        [
+          "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set",
+          "title",
+          "the narrowing that broke this was an attempt to make a static over-approximation precise, which is the one move that class of system treats as unsound; the mapping also says where a cost saving may go, which is anywhere that cannot change the edge set"
+        ],
+        [
+          "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess",
+          "title",
+          "this is incremental-computation dependency invalidation, where the standing rule is that a dependency edge set must OVER-approximate: Make and Ninja are stale-build-correct only because they never under-approximate, and the established answer to a static walk being too coarse is to record dependencies by observation during evaluation, as Salsa and rustc's query system, Adapton and Shake's monadic dependencies each do, rather than to narrow the walk by a static guess"
+        ]
+      ],
+      "id": "0c098d7053b77854"
+    },
+    {
+      "at": "2026-09-20T04:16:47.680153+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"link\", \"id\": \"i28\", \"because\": \"the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it\", \"tags\": [], \"target\": \"c106\", \"relation\": \"rests-on\"}, {\"op\": \"link\", \"id\": \"i28\", \"because\": \"this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered\", \"tags\": [], \"target\": \"c107\", \"relation\": \"rests-on\"}, {\"op\": \"link\", \"id\": \"i28\", \"because\": \"the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price\", \"tags\": [], \"target\": \"c108\", \"relation\": \"rests-on\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28\", \"tags\": [\"source\", \"reasoning\"], \"title\": \"the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all\", \"tags\": [], \"title\": \"register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did\", \"fields\": {\"effort\": 3, \"addresses\": [\"registering a Prolog-backed head costs more the more heads are already registered, so importing N such libraries into one space is quadratic: 702 inferences per already-loaded file, inside import_prolog_functions_from_file rather than in the loader\"]}}]",
+      "parents": [
+        "0c098d7053b77854"
+      ],
+      "assert": [
+        [
+          "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all",
+          "supports",
+          {
+            "node": "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+            "status": "untried"
+          }
+        ],
+        [
+          "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all",
+          "supports",
+          {
+            "node": "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+            "relation": "addresses",
+            "target": "i28"
+          }
+        ],
+        [
+          "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all",
+          "title",
+          "c107 measured that the older !(import_prolog_functions_from_file ...) spelling ran where active_source_load/1 succeeds and the package-row migration moved it out, so putting the registration back inside the load restores the batching the cheap clause of schedule_definition_repair/1 exists for, and it removes the reason to prune edges at all"
+        ],
+        [
+          "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28",
+          "sort",
+          "prop"
+        ],
+        [
+          "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28",
+          "supports",
+          "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk"
+        ],
+        [
+          "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28",
+          "tags",
+          "source"
+        ],
+        [
+          "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28",
+          "title",
+          "read c107 beside commit c4876eac2, which removed edges rather than restoring batching; the reserved-head exemption kept here preserves that price but the standing cause is unchanged, so restoring batching is what actually retires i28"
+        ],
+        [
+          "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk",
+          "sort",
+          "prop"
+        ],
+        [
+          "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk",
+          "title",
+          "the edge-set narrowing was a symptom patch for i28 rather than its fix: the record already names the cause as a backing row registering with no active source load, so repairs stop batching, and pruning dependency edges only hides that by giving the repair less to walk"
+        ],
+        [
+          "the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it",
+          "supports",
+          {
+            "node": "i28",
+            "relation": "rests_on",
+            "target": "c106"
+          }
+        ],
+        [
+          "the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it",
+          "title",
+          "the issue is a cost claim, so it stands or falls on where the growth actually is; this names the predicate and the per-import numbers that locate it"
+        ],
+        [
+          "the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price",
+          "sort",
+          "prop"
+        ],
+        [
+          "the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price",
+          "supports",
+          {
+            "node": "i28",
+            "relation": "rests_on",
+            "target": "c108"
+          }
+        ],
+        [
+          "the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price",
+          "title",
+          "the issue is stated as a COST issue, and this is what says nothing else was lost: the head stays callable under both spellings, so the migration withdrew no behaviour and the only thing to fix is the price"
+        ],
+        [
+          "this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered",
+          "supports",
+          {
+            "node": "i28",
+            "relation": "rests_on",
+            "target": "c107"
+          }
+        ],
+        [
+          "this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered",
+          "title",
+          "this is what makes the growth quadratic rather than merely present: a registration outside the active source load repairs immediately instead of batching into the load's repair set, so each import pays for every head already registered"
+        ],
+        [
+          "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "sort",
+          "approach"
+        ],
+        [
+          "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "addresses",
+          "i28"
+        ],
+        [
+          "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "effort",
+          3
+        ],
+        [
+          "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "status",
+          "untried"
+        ],
+        [
+          "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did",
+          "title",
+          "register a backing row inside the load that carries it, so its repair batches into that load's repair set the way the older import spelling did"
+        ]
+      ],
+      "id": "1be03eb6e5a5962d"
+    },
+    {
+      "at": "2026-09-20T04:18:23.370676+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them\", \"tags\": [\"measured\"], \"title\": \"the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself\", \"tags\": [], \"title\": \"hand interrogate the same pyproject.toml its sibling bandit lane is already handed\", \"fields\": {\"effort\": 1, \"addresses\": [\"the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts\"]}}, {\"op\": \"status\", \"id\": \"hand interrogate the same pyproject.toml its sibling bandit lane is already handed\", \"because\": \"interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file\", \"tags\": [\"source\"], \"title\": \"this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used\", \"fields\": {}}]",
+      "parents": [
+        "1be03eb6e5a5962d"
+      ],
+      "assert": [
+        [
+          "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9",
+          "sort",
+          "prop"
+        ],
+        [
+          "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9",
+          "supersedes",
+          "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself"
+        ],
+        [
+          "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9",
+          "supports",
+          {
+            "node": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+            "status": "done"
+          }
+        ],
+        [
+          "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9",
+          "tags",
+          "measured"
+        ],
+        [
+          "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9",
+          "title",
+          "interrogate -c pyproject.toml over ext/ reports PASSED at 84.0 percent against the unchanged minimum of 80, where the same command without the config reports FAILED at 64.9"
+        ],
+        [
+          "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them",
+          "supports",
+          "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+        ],
+        [
+          "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them",
+          "title",
+          "measured 2026-09-20: the same tree reads 64.9 percent without the config and 84.0 percent with it against an unchanged threshold of 80, and 333 of the items it called missing were concentrated in test files whose long declarative names are how this repository documents them"
+        ],
+        [
+          "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file",
+          "supports",
+          "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used"
+        ],
+        [
+          "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file",
+          "title",
+          "read extensions/python/pyproject.toml's [tool.interrogate] block, whose fail-under is 80 and whose exclude already names tests, and the root pyproject.toml is a symlink to that same file"
+        ],
+        [
+          "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself",
+          "sort",
+          "prop"
+        ],
+        [
+          "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself",
+          "supports",
+          {
+            "node": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+            "status": "untried"
+          }
+        ],
+        [
+          "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself",
+          "supports",
+          {
+            "node": "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+            "relation": "addresses",
+            "target": "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+          }
+        ],
+        [
+          "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself",
+          "title",
+          "ruff walks up for its configuration and bandit is given the file explicitly, so interrogate reading its own defaults was the odd one out rather than a decision; there is one house style and a component measured against a different one reports about the wrong rules rather than about itself"
+        ],
+        [
+          "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts",
+          "sort",
+          "prop"
+        ],
+        [
+          "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts",
+          "title",
+          "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+        ],
+        [
+          "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used",
+          "sort",
+          "prop"
+        ],
+        [
+          "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used",
+          "title",
+          "this was not a threshold lowered to fit: the minimum stays at 80 and what changed is the SCOPE, from interrogate's defaults to the house exemptions the seat's own lane has always used"
+        ],
+        [
+          "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "sort",
+          "approach"
+        ],
+        [
+          "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "addresses",
+          "the ext-interrogate lane measured the distributions against interrogate's own defaults rather than the house style, because it was the one lane of its three not handed the repository's pyproject.toml, so it counted test functions, magic methods, private names, nested functions and overloads that the house configuration exempts"
+        ],
+        [
+          "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "effort",
+          1
+        ],
+        [
+          "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "status",
+          "done"
+        ],
+        [
+          "hand interrogate the same pyproject.toml its sibling bandit lane is already handed",
+          "title",
+          "hand interrogate the same pyproject.toml its sibling bandit lane is already handed"
+        ]
+      ],
+      "id": "ccac2218b3609019"
+    },
+    {
+      "at": "2026-09-20T04:22:56.557293+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3\", \"tags\": [\"measured\"], \"title\": \"the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule\", \"fields\": {}}]",
+      "parents": [
+        "ccac2218b3609019"
+      ],
+      "assert": [
+        [
+          "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule",
+          "sort",
+          "prop"
+        ],
+        [
+          "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule",
+          "title",
+          "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule"
+        ],
+        [
+          "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3",
+          "supports",
+          "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes"
+        ],
+        [
+          "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3",
+          "title",
+          "measured 2026-09-20: battery 13 provisioned before the guard failed !(import! &self (library lib_file)) and !(import! &self (library lib_string)) in the mork operators example while the same example passed in the checkout, and the engine already states this rule for the same head at filereader/source_lifecycle.pl's package_row/3"
+        ],
+        [
+          "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been",
+          "sort",
+          "prop"
+        ],
+        [
+          "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been",
+          "supports",
+          "a fix's own first draft is where this repository's recorded rules pay: the engine had already learned to recognise a package row's constants rather than unify into them, in its own commit, and the draft written here reintroduced exactly that defect until the record named the predicate that states the rule"
+        ],
+        [
+          "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been",
+          "tags",
+          "measured"
+        ],
+        [
+          "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been",
+          "title",
+          "the guard was added after reading package_row/3's comment, which says a variable-headed row would be wrongly accepted, and the pre-guard battery run is the measurement that it would have been"
+        ],
+        [
+          "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes",
+          "title",
+          "the reserved-head clause must RECOGNISE its head rather than unify with it, and the difference is not cosmetic: written as a pattern on the literal, a form whose head is a VARIABLE unified with it and came out bound to package, which broke library imports and with them the shell, examples, no-autoload and plunit lanes"
+        ]
+      ],
+      "id": "2eeb2c2d79f40345"
+    },
+    {
+      "at": "2026-09-20T04:33:12.263070+00:00",
+      "after": "23932d5c04a5b86d676cb13424dda90335166d7d",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'\", \"tags\": [\"measured\"], \"title\": \"the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend\", \"tags\": [\"measured\"], \"title\": \"the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught\", \"tags\": [], \"title\": \"derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop\", \"fields\": {\"effort\": 1, \"addresses\": [\"the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure\", \"tags\": [\"measured\"], \"title\": \"this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning\", \"fields\": {}}]",
+      "parents": [
+        "2eeb2c2d79f40345"
+      ],
+      "assert": [
+        [
+          "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught",
+          "sort",
+          "prop"
+        ],
+        [
+          "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught",
+          "supports",
+          {
+            "node": "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+            "status": "untried"
+          }
+        ],
+        [
+          "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught",
+          "supports",
+          {
+            "node": "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+            "relation": "addresses",
+            "target": "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+          }
+        ],
+        [
+          "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught",
+          "title",
+          "a threshold has to admit the largest thing the tree declares and refuse the thing it was built against, and both are measured here: 12 GB declared against a 29.7 GB pytest worker, so a quarter at 15.1 GiB separates them; RLIMIT_DATA is a per-process ceiling rather than a reservation, so raising it does not partition the box, it only moves where a runaway is caught"
+        ],
+        [
+          "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure",
+          "supports",
+          "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning"
+        ],
+        [
+          "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure",
+          "tags",
+          "measured"
+        ],
+        [
+          "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure",
+          "title",
+          "battery 7's log already carries FAILURE in the mork operators example, and the lanes reported the class-dispatch one because each stops at its first failure"
+        ],
+        [
+          "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'",
+          "supports",
+          "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+        ],
+        [
+          "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'",
+          "title",
+          "measured 2026-09-20: run.sh passes SWI --stack_limit=8g and the MORK backend asks its allocator for a 4 GiB arena, about 12 GB together, against a bound of 7.56 GiB on this box; the same example exits 0 under --memory none and under a quarter and aborts under an eighth with 'memory allocation of 4294967296 bytes failed'"
+        ],
+        [
+          "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend",
+          "supports",
+          "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population"
+        ],
+        [
+          "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend",
+          "title",
+          "read the comment on metta_bounded_share beside the measurement above; a lane reaching 12 GB is a legitimate configuration the repository itself writes, in run.sh and in the MORK backend"
+        ],
+        [
+          "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it",
+          "title",
+          "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+        ],
+        [
+          "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population",
+          "title",
+          "the reason recorded for an eighth is refuted: it said the heaviest legitimate worker measured 0.72 GB, which measured pytest workers and never saw the MORK lane, so the claimed order-of-magnitude headroom was headroom over the wrong population"
+        ],
+        [
+          "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning",
+          "sort",
+          "prop"
+        ],
+        [
+          "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning",
+          "title",
+          "this failure was masked: the example lanes stopped at the class-dispatch example first, so the allocation abort behind it only became visible once that was fixed, and it had been failing in the whole-gate run of the same morning"
+        ],
+        [
+          "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "sort",
+          "approach"
+        ],
+        [
+          "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "addresses",
+          "the memory bound added earlier today defaulted to an eighth of the box, which is below the largest demand this tree declares, so the MORK operators example aborted on a failed 4 GiB allocation and took the shell, examples and no-autoload lanes with it"
+        ],
+        [
+          "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "effort",
+          1
+        ],
+        [
+          "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "status",
+          "untried"
+        ],
+        [
+          "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop",
+          "title",
+          "derive the default from the two quantities that actually bound it, a quarter of the box, which is above the largest declared demand and below the runaway it exists to stop"
+        ]
+      ],
+      "id": "9bd15f220623bb81"
     }
   ]
 }

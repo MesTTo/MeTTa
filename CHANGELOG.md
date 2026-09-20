@@ -86,6 +86,32 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `/etc/debuginfod/*.urls` whenever `[ -z ]` holds, so a rung that started a
   login shell would hand the server back.
 
+- An import can no longer change what an already-read definition means. A
+  definition's dependency walk stopped at any head the translator had nothing
+  to compile, treating the names beneath it as data. The guard for that was
+  that such a head would invalidate the clause when it became a function — but
+  a head with no equation anywhere never becomes one, while a name beneath it
+  becomes callable the moment an import lands. So `(= (Sh-describe $x)
+  (area-of (area $x)))` answered `(area-of 9)` with its `(from &Sq (only
+  (area)))` written above it and `(area-of (area (Sq 3)))` with the same row
+  written below, which is exactly the order-independence the whole-body walk
+  existed to protect. In MeTTa the arguments of a non-reducible head are
+  evaluated, so a name inside one is a call site whatever its head turns out
+  to be. The walk now stops only at `quote`, `noeval` and `Error`, the three
+  the language itself fixes as data.
+
+  The optimisation that narrowing bought is kept and made sound. It existed for
+  `(= (package backing) (prolog F (heads)))`, whose head list named every
+  exported head and made every `package` equation a dependent of every head any
+  library declares — importing N Prolog-backed libraries cost O(N²), 1,527
+  inferences at the second import and 8,358 at the twelfth. That exemption is
+  keyed on the reserved `package` head now, which the law fixes, rather than on
+  what happens to be defined yet, and it records the same single edge the
+  narrowed walk did. Verified: the class-dispatch example passes all six
+  assertions and exits 0; `filereader.plt` 70/70 with the two tests that pinned
+  the unsound behaviour rewritten to pin the sound one; `packages.plt` 22/22
+  including the cost test.
+
 - Four rows of the Node seat's benchmark baseline record that this box does not
   reproduce them, and their pins are unchanged. The `node-bench` lane appears
   as a new failure only because it had been passing without measuring;

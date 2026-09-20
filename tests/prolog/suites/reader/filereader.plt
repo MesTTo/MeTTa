@@ -1425,21 +1425,32 @@ test(repairing_late_callers_costs_nothing_that_grows_with_the_program) :-
 
 :- end_tests(filereader_late_definition_cost).
 
-% What a body can CALL is fewer names than it MENTIONS, and the difference is
-% what a definition depends on. A term whose head the translator compiles to a
-% literal is data all the way down, so reading the names inside it as calls
-% records a dependency the compiled clause does not have and makes every
-% arrival of one of those names recompile the definition for nothing. The head
-% itself is still answered and is the guard for its own subtree: if it becomes
-% a function the clause is invalidated through that edge and the walk runs
-% again, descending then.
+% What a body can CALL is what a definition depends on, and in MeTTa the
+% arguments of a non-reducible head ARE evaluated, so a name inside one is a
+% call site whatever its head turns out to be. Only the three heads the
+% LANGUAGE fixes as data stop the walk.
+%
+% This unit used to assert the opposite, that a head the translator has nothing
+% to compile hides the names inside it, on the argument that such a head is the
+% guard for its own subtree and would invalidate the clause when it became a
+% function. A head with no equation anywhere never becomes one, while a name
+% beneath it becomes callable the moment an import lands, so the guard never
+% fired and import order silently changed what a definition meant
+% [measured 2026-09-20: `(= (Sh-describe $x) (area-of (area $x)))` answered
+% `(area-of 9)` with its `from` import written first and `(area-of (area (Sq
+% 3)))` with it written second; the end-to-end case is
+% examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta, which the
+% shell, examples, no-autoload and parity lanes each run].
 :- begin_tests(filereader_called_symbols).
 
-test(a_literal_head_hides_the_names_inside_it) :-
+% The case that was wrong: a head the translator cannot compile TODAY is not
+% data, because it is only ever one import away from being a call.
+test(an_uncompilable_head_still_shows_the_names_inside_it) :-
     findall(S,
             filereader:called_symbol([zzz_unknown_head, [zzz_inner_name]], S),
-            Symbols),
-    assertion(Symbols == [zzz_unknown_head]).
+            Symbols0),
+    sort(Symbols0, Symbols),
+    assertion(Symbols == [zzz_inner_name, zzz_unknown_head]).
 
 % quote is a translator FORM, so the general test would descend into it. The
 % language fixes its payload as syntax, which is why the three named heads are
@@ -1464,18 +1475,20 @@ test(a_builtin_head_still_shows_the_names_inside_it) :-
     assertion(memberchk(zzz_inner_name, Symbols)),
     assertion(memberchk('size-atom', Symbols)).
 
-% A head that becomes a function stops hiding what is under it, which is the
-% whole of the soundness argument: the arrival that matters is the head's own,
-% and it is recorded either way.
-test(a_head_that_becomes_a_function_shows_them_again) :-
-    findall(S, filereader:called_symbol([zzz_late_head, [zzz_under_it]], S), Before),
+% The walk answers the same names whether or not the head is a function, which
+% is what makes the edge set independent of the order rows arrive in. The
+% previous version asserted a DIFFERENCE here and that difference was the
+% defect: it meant the dependency recorded for a body depended on what happened
+% to be defined when the body was read.
+test(a_head_becoming_a_function_does_not_change_what_is_under_it) :-
+    findall(S, filereader:called_symbol([zzz_late_head, [zzz_under_it]], S), Before0),
     setup_call_cleanup(
         assertz(metta_engine:fun(zzz_late_head)),
-        findall(S, filereader:called_symbol([zzz_late_head, [zzz_under_it]], S), After),
+        findall(S, filereader:called_symbol([zzz_late_head, [zzz_under_it]], S), After0),
         retractall(metta_engine:fun(zzz_late_head))),
-    assertion(Before == [zzz_late_head]),
-    sort(After, Sorted),
-    assertion(Sorted == [zzz_late_head, zzz_under_it]).
+    sort(Before0, Before), sort(After0, After),
+    assertion(Before == [zzz_late_head, zzz_under_it]),
+    assertion(After == Before).
 
 % A partial list matches [Head|Arguments] with its tail unbound, and member/2
 % over an unbound tail generates rather than enumerating. The walk tests for a
