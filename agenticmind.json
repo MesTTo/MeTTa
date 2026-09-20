@@ -5437,6 +5437,42 @@
       "tags": [
         "tested"
       ]
+    },
+    "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file": {
+      "title": "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file"
+    },
+    "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call": {
+      "title": "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call",
+      "supports": [
+        "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages": {
+      "title": "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages"
+    },
+    "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file": {
+      "title": "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file",
+      "supports": [
+        "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint": {
+      "title": "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint"
+    },
+    "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint": {
+      "title": "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint",
+      "supports": [
+        "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -27599,6 +27635,107 @@
         ]
       ],
       "id": "e07a745d54b1cccd"
+    },
+    {
+      "at": "2026-09-20T00:39:54.329448+00:00",
+      "after": "e9ddb6d3db23fca88350394a4b61d49bb0c4680c",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call\", \"tags\": [\"measured\"], \"title\": \"law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file\", \"tags\": [\"measured\"], \"title\": \"the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint\", \"tags\": [\"source\"], \"title\": \"accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint\", \"fields\": {}}]",
+      "parents": [
+        "e07a745d54b1cccd"
+      ],
+      "assert": [
+        [
+          "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint",
+          "sort",
+          "prop"
+        ],
+        [
+          "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint",
+          "title",
+          "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint"
+        ],
+        [
+          "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file",
+          "sort",
+          "prop"
+        ],
+        [
+          "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file",
+          "title",
+          "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file"
+        ],
+        [
+          "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file",
+          "supports",
+          "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages"
+        ],
+        [
+          "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file",
+          "title",
+          "measured 2026-09-20: a search for the form across .metta files answers zero, and the file search for metta.boot names only docs, the website and that one test file"
+        ],
+        [
+          "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call",
+          "supports",
+          "law 13's Python half is a FORMAT change rather than a missing feature: metta/manifest.py is 503 lines that already load, attach, bridge and serve, validate the whole vocabulary before running, store each performed form so the app answers its own topology, and close what they opened; what it does not do is read the package, with zero occurrences of the word in the file"
+        ],
+        [
+          "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call",
+          "title",
+          "measured 2026-09-20: grep -c package on extensions/python/metta/manifest.py answers 0, and boot/8's docstring describes a manifest of (boot ...) forms, four of them, each sugar for one existing call"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint",
+          "supports",
+          "accepting both spellings would be the wrong migration here: the design says the application manifest IS the app's own package, so a boot that read (boot X) forms beside (= (package boot) X) rows would be the two-descriptions shape the repository's own minimum-description-length ruling forbids, and this repository does not hold backwards compatibility as a constraint"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint",
+          "title",
+          "read docs/journal/2026-09-09-packages-are-equations.md law 13 and the workspace ruling that backwards compatibility against our own library is not a constraint"
+        ],
+        [
+          "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages",
+          "sort",
+          "prop"
+        ],
+        [
+          "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages",
+          "title",
+          "the blast radius of that change is one module, one test file and prose: no .metta file in the tree uses the (boot ...) manifest spelling, the tests are the 18 in extensions/python/tests/ch13_a_queryable_dataset/test_manifest.py, and the remaining mentions are journals, the CHANGELOG and three website pages"
+        ]
+      ],
+      "id": "ba279e15fd668d35"
     }
   ]
 }
