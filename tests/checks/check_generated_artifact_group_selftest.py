@@ -32,11 +32,17 @@ class ManifestTests(unittest.TestCase):
         command = ("@python", "@root/emitter.py")
         seed = model.Artifact("z-seed", ("input.txt",), command, (model.Output("seed.txt"),), command, (command,))
         self.rows = (replace(seed, name="a-use", outputs=(model.Output("use.txt"),), depends=("z-seed",)), seed)
-        (self.root / "check.sh").write_text(
+        # Planted at the path the module under test names, not at a second
+        # spelling of it. This fixture wrote `<root>/check.sh` while
+        # `projections()` opened `<root>/tools/check.sh`, so every test here
+        # died in setUp with FileNotFoundError once the drivers moved.
+        driver = self.root / model.CHECK_SH
+        driver.parent.mkdir(parents=True, exist_ok=True)
+        driver.write_text(
             f"authored before\n{model.BEGIN}\n{model.END}\n"
             f"{model.LANES_BEGIN}\n{model.LANES_END}\nauthored after\n", encoding="utf-8",
         )
-        (self.root / "DEVELOPING.md").write_text(
+        (self.root / model.GUIDE_MD).write_text(
             f"guide before\n{model.DOC_BEGIN}\n{model.DOC_END}\nguide after\n", encoding="utf-8",
         )
         self.render()
@@ -111,27 +117,27 @@ class ManifestTests(unittest.TestCase):
 
     def test_inverted_executable_order_is_drift(self) -> None:
         """A valid selection cannot hide reversed literal gate declarations."""
-        path = self.root / "check.sh"
+        path = self.root / model.CHECK_SH
         text = path.read_text(encoding="utf-8")
         text = text.replace("run GATE z-seed ", "run GATE ai-swap ")
         text = text.replace("run GATE a-use ", "run GATE z-seed ").replace("run GATE ai-swap ", "run GATE a-use ")
         path.write_text(text, encoding="utf-8")
-        self.assertIn("projection drift: check.sh", self.problems())
+        self.assertIn(f"projection drift: {model.CHECK_SH}", self.problems())
 
     def test_manifest_can_describe_its_own_region(self) -> None:
         """Printed region names cannot become extra regeneration delimiters."""
         use, seed = self.rows
-        self.rows = (replace(use, outputs=(model.Output("DEVELOPING.md", (model.DOC_BEGIN, model.DOC_END)),)), seed)
+        self.rows = (replace(use, outputs=(model.Output(model.GUIDE_MD, (model.DOC_BEGIN, model.DOC_END)),)), seed)
         self.render()
         self.assertEqual(self.problems(), "")
         self.render()
         self.assertEqual(self.problems(), "")
-        self.assertIn("&lt;!-- begin generated artifact manifest --&gt;", (self.root / "DEVELOPING.md").read_text(encoding="utf-8"))
+        self.assertIn("&lt;!-- begin generated artifact manifest --&gt;", (self.root / model.GUIDE_MD).read_text(encoding="utf-8"))
 
     def test_each_projection_detects_an_independent_edit(self) -> None:
         """Selection, execution and documentation each carry their own witness."""
-        for relative, old in (("check.sh", "GENERATED_ARTIFACT_LANES="), ("check.sh", "run GATE a-use "),
-                              ("DEVELOPING.md", "| `a-use` |")):
+        for relative, old in ((model.CHECK_SH, "GENERATED_ARTIFACT_LANES="), (model.CHECK_SH, "run GATE a-use "),
+                              (model.GUIDE_MD, "| `a-use` |")):
             with self.subTest(relative=relative, old=old):
                 self.render()
                 path = self.root / relative
@@ -143,12 +149,12 @@ class ManifestTests(unittest.TestCase):
         new = replace(self.rows[0], name="new-output", outputs=(model.Output("new.txt"),), depends=("a-use",))
         (self.root / "new.txt").write_text("fixture", encoding="utf-8")
         self.rows += (new,)
-        self.assertIn("projection drift: check.sh", self.problems())
+        self.assertIn(f"projection drift: {model.CHECK_SH}", self.problems())
         self.assertIn("projection drift: DEVELOPING.md", self.problems())
         self.render()
         self.assertEqual(self.problems(), "")
-        self.assertIn("run GATE new-output ", (self.root / "check.sh").read_text(encoding="utf-8"))
-        self.assertIn("| `new-output` |", (self.root / "DEVELOPING.md").read_text(encoding="utf-8"))
+        self.assertIn("run GATE new-output ", (self.root / model.CHECK_SH).read_text(encoding="utf-8"))
+        self.assertIn("| `new-output` |", (self.root / model.GUIDE_MD).read_text(encoding="utf-8"))
 
     def test_regions_allow_disjoint_ownership_and_preserve_prose(self) -> None:
         """Regions may share a file while keeping separate ownership intervals."""

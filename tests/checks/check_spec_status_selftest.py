@@ -62,6 +62,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
+from gate_layout import CHECK, TEST  # noqa: E402  -- the one statement of the driver layout
+from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
 
 #: The pytest collector's own anchor, READ from the collector rather than
 #: restated here. Two self-tests plant it into a fixture tree and both used to
@@ -224,7 +226,14 @@ def build(root: Path) -> None:
             path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-    (root / "check.sh").write_text(CHECK_SH, encoding="utf-8")
+    # Planted where `evidence_runners.gate_scripts()` looks, which REFUSES a
+    # named runner that is not in the tree rather than filtering it away. A
+    # fixture planting the pre-`tools/` layout therefore fails the whole
+    # checker with 'RUNNERS names a gate script that is not in the tree'
+    # before any planted case is read.
+    driver = root / CHECK
+    driver.parent.mkdir(parents=True, exist_ok=True)
+    driver.write_text(CHECK_SH, encoding="utf-8")
     for name, content in (
         ("extensions/python/check.sh", PYTHON_CHECK_SH),
         ("extensions/python/test.sh", PYTHON_TEST_SH),
@@ -234,7 +243,7 @@ def build(root: Path) -> None:
         component = root / name
         component.parent.mkdir(parents=True, exist_ok=True)
         component.write_text(content, encoding="utf-8")
-    (root / "test.sh").write_text(TEST_SH, encoding="utf-8")
+    (root / TEST).write_text(TEST_SH, encoding="utf-8")
     # A repository, not a marker directory: the checker's discovery reads the
     # tracked set (evidence_runners.tracked), so a tree git does not know owns
     # no test at all; run() stages what a case plants after this build.
@@ -246,7 +255,11 @@ def build(root: Path) -> None:
     # read <root>/.. as ROOT and look for the spec one level too far out.
     tools = root / "tools" / "checks"
     tools.mkdir(parents=True, exist_ok=True)
-    for module in ("check_spec_status.py", "evidence_runners.py", "check_evidence_tags.py"):
+    # Derived, not listed: `sibling_closure` reads the imports, so an import
+    # added to a copied checker is carried without an edit here. Three
+    # fixtures kept this answer by hand and one import to evidence_runners.py
+    # broke all three.
+    for module in sibling_closure(("check_spec_status.py",)):
         shutil.copy(HERE / module, tools / module)
 
 

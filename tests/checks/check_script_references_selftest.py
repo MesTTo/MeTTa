@@ -30,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_script_references as checked
+from gate_layout import BOUNDED  # noqa: E402  -- the directory above is installed first
 
 #: text, the file it stands for, the variable, and the directory it must name.
 BASES: tuple[tuple[str, str, str, str], ...] = (
@@ -54,7 +55,7 @@ def planted_tree() -> list[str]:
     with tempfile.TemporaryDirectory(prefix="script-refs-") as scratch:
         root = Path(scratch)
         (root / "tools").mkdir()
-        (root / "tools" / "bounded.sh").write_text("#!/bin/sh\n")
+        (root / BOUNDED).write_text("#!/bin/sh\n")
         head = 'HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)\n'
         (root / "tools" / "sound.sh").write_text(
             head + 'bounded() { sh "$HERE/tools/bounded.sh" "$@"; }\n')
@@ -90,7 +91,7 @@ def main() -> int:
         problems.append("a variable the file does not assign was resolved anyway")
     # The reference shape itself.
     pairs = checked.REFERENCE.findall('bounded() { sh "$HERE/tools/bounded.sh" "$@"; }')
-    if pairs != [("HERE", "tools/bounded.sh")]:
+    if pairs != [("HERE", BOUNDED)]:
         problems.append(f"the reference pattern read {pairs}")
     problems += planted_tree()
     for problem in problems:

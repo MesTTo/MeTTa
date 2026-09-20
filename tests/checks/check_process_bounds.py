@@ -513,7 +513,7 @@ def line_spawns(line: str) -> list[tuple[str, bool]]:
 
 def scripts() -> list[Path]:
     """The gate scripts, discovered the way check.sh discovers them."""
-    found = [REPO / "tools" / "check.sh", REPO / "engine" / "check.sh"]
+    found = [REPO / CHECK, REPO / "engine" / "check.sh"]
     found += sorted((REPO / "extensions").glob("*/check.sh"))
     return [p for p in found if p.is_file()]
 
@@ -526,7 +526,7 @@ def runners() -> list[Path]:
     select-python.sh and gate_scratch.sh because they are sourced and start
     nothing.
     """
-    excluded = {REPO / "tools" / "bounded.sh",
+    excluded = {REPO / BOUNDED,
                 REPO / "tools" / "select-python.sh",
                 REPO / "tests" / "checks" / "gate_scratch.sh"}
     found = [

@@ -81,6 +81,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from gate_layout import BOUNDED  # noqa: E402  -- installed above
 LEDGER = Path("docs/host-workarounds.md")
 KEY = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 MARKER = re.compile(r"^[\s%#;/*!]*Workaround:(.*)$")
@@ -241,7 +244,7 @@ def run_reproduction(root: Path, path: Path) -> tuple[str, str]:
     env = {**os.environ, "HOST_WORKAROUND_SCRATCH": scratch, "SWIPL": interpreter()}
     try:
         ran = subprocess.run(
-            ["sh", str(ROOT / "tools" / "bounded.sh"), "--ceiling", str(CEILING_SECONDS), *command],
+            ["sh", str(ROOT / BOUNDED), "--ceiling", str(CEILING_SECONDS), *command],
             cwd=root,
             env=env,
             capture_output=True,

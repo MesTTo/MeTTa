@@ -298,6 +298,37 @@ def main() -> int:
         )
         assert not any("no longer a workspace member" in line for line in found), found
 
+        # The SAME entry, against a root that spells its own name the way the
+        # shipped manifest does. PEP 503 makes `PyMeTTa` and `pymetta` one
+        # distribution, and uv, pip and importlib all compare them that way, so
+        # a rule holding the two apart reports a tree uv resolves. This case is
+        # the one the fixture above could not express: it declared the root
+        # already lowercase, which is the single spelling the defect cannot
+        # occur in, so the lane ran green here for as long as it ran red on the
+        # repository [measured 2026-09-21: `sh tools/check.sh layering` at
+        # 358c8dc15 reported one finding while `uv lock --offline --check`
+        # exited 0 on the same tree; commit=WORKTREE].
+        found = _reported(
+            scratch,
+            "pyproject.toml",
+            CORE_MANIFEST.replace('name = "pymetta"', 'name = "PyMeTTa"')
+            + 'pymetta = { workspace = true }\n',
+        )
+        assert not any("no longer a workspace member" in line for line in found), found
+
+        # The other direction of the one comparison: a MEMBER re-spelled. The
+        # source key and the member's own `[project] name` now differ in case,
+        # and neither "is not in [tool.uv.sources]" nor "no longer a workspace
+        # member" may fire, because they are one package.
+        found = _reported(
+            scratch,
+            "ext/metta-solars/pyproject.toml",
+            MEMBER_MANIFEST.replace('name = "metta-solars"', 'name = "Metta.Solars"'),
+        )
+        assert not any("metta-solars" in line and (
+            "is not in [tool.uv.sources]" in line or "no longer a workspace member" in line
+        ) for line in found), found
+
         # 5. A member missing its parts: no entry point, so nothing discovers it.
         found = _reported(
             scratch,

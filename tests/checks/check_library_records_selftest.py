@@ -23,7 +23,11 @@ class LibraryRecordTests(unittest.TestCase):
         self.assertIn("17 of the 30 programs here derive", wanted)
         self.assertIn("3 people wrote them", wanted)
         self.assertIn("The other\n13 examples were written", wanted)
-        self.assertIn("## How the numbers work", wanted)
+        # An AUTHORED heading beside the counts, which the projection must not
+        # clobber. It named "## How the numbers work" until that section was
+        # removed as maintainer-facing; "## Origins" carries the same contract,
+        # being the authored prose the four counts are embedded in.
+        self.assertIn("## Origins", wanted)
         self.assertEqual(readme_counts(wanted, derived_count=17, total=30, credited=3, runnable=28), wanted)
 
     def test_missing_or_repeated_count_anchors_refuse(self) -> None:

@@ -11016,6 +11016,526 @@
       "tags": [
         "tested"
       ]
+    },
+    "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red": {
+      "title": "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red"
+    },
+    "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored": {
+      "title": "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored",
+      "supports": [
+        "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes": {
+      "title": "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes"
+    },
+    "measured both anchors against the restored sentence: 1 match and ['360']": {
+      "title": "measured both anchors against the restored sentence: 1 match and ['360']",
+      "supports": [
+        "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example": {
+      "title": "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+    },
+    "measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions": {
+      "title": "measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions",
+      "supports": [
+        "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+      ]
+    },
+    "their content says they are Python programs, and that directory is where a Python example is both kept and run": {
+      "title": "their content says they are Python programs, and that directory is where a Python example is both kept and run",
+      "supports": [
+        {
+          "node": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "status": "untried"
+        },
+        {
+          "node": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "relation": "addresses",
+          "target": "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+        }
+      ]
+    },
+    "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.": {
+      "title": "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.",
+      "supports": [
+        {
+          "node": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "their content says they are Python programs, and that directory is where a Python example is both kept and run"
+      ]
+    },
+    "the full gate exits 0 on the tree that ships as the release": {
+      "title": "the full gate exits 0 on the tree that ships as the release",
+      "worth": 95,
+      "wanted": true
+    },
+    "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective": {
+      "title": "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective",
+      "supports": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree": {
+      "title": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD": {
+      "title": "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD",
+      "supports": [
+        "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+        {
+          "node": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ]
+    },
+    "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses": {
+      "title": "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses",
+      "supports": [
+        {
+          "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "status": "untried"
+        },
+        {
+          "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "relation": "addresses",
+          "target": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+        }
+      ]
+    },
+    "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead": {
+      "title": "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead",
+      "supports": [
+        {
+          "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it": {
+      "title": "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it"
+    },
+    "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/": {
+      "title": "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/",
+      "supports": [
+        "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta": {
+      "title": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'": {
+      "title": "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'",
+      "supports": [
+        "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+        {
+          "node": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically": {
+      "title": "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically",
+      "supports": [
+        {
+          "node": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "status": "untried"
+        },
+        {
+          "node": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "relation": "addresses",
+          "target": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+        }
+      ]
+    },
+    "the lane's own remedy text says remove the entry": {
+      "title": "the lane's own remedy text says remove the entry",
+      "supports": [
+        {
+          "node": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "status": "untried"
+        },
+        {
+          "node": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "relation": "addresses",
+          "target": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+        }
+      ]
+    },
+    "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong": {
+      "title": "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong",
+      "supports": [
+        {
+          "node": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the lane's own remedy text says remove the entry"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source": {
+      "title": "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source"
+    },
+    "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it": {
+      "title": "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it",
+      "supports": [
+        "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh": {
+      "title": "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors": {
+      "title": "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors",
+      "supports": [
+        "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+        {
+          "node": "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree": {
+      "title": "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree"
+    },
+    "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root": {
+      "title": "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root",
+      "supports": [
+        "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers": {
+      "title": "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers"
+    },
+    "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825": {
+      "title": "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825",
+      "supports": [
+        "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way": {
+      "title": "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way",
+      "supports": [
+        {
+          "node": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy": {
+      "title": "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy"
+    },
+    "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised": {
+      "title": "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised",
+      "supports": [
+        "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran": {
+      "title": "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran"
+    },
+    "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened": {
+      "title": "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened",
+      "supports": [
+        "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur": {
+      "title": "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur"
+    },
+    "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express": {
+      "title": "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express",
+      "supports": [
+        "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh": {
+      "title": "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling": {
+      "title": "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling",
+      "supports": [
+        "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+        {
+          "node": "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver": {
+      "title": "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver"
+    },
+    "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told": {
+      "title": "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told",
+      "supports": [
+        "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it": {
+      "title": "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it",
+      "supports": [
+        {
+          "node": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "status": "untried"
+        },
+        {
+          "node": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "relation": "addresses",
+          "target": "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh"
+        }
+      ]
+    },
+    "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK": {
+      "title": "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK",
+      "supports": [
+        {
+          "node": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated": {
+      "title": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError": {
+      "title": "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError",
+      "supports": [
+        "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+        {
+          "node": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list": {
+      "title": "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list",
+      "supports": [
+        {
+          "node": "add the missing module name to each of the three copy lists by hand",
+          "status": "untried"
+        },
+        {
+          "node": "add the missing module name to each of the three copy lists by hand",
+          "relation": "addresses",
+          "target": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+        }
+      ]
+    },
+    "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run": {
+      "title": "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run",
+      "supports": [
+        {
+          "node": "add the missing module name to each of the three copy lists by hand",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should": {
+      "title": "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should",
+      "supports": [
+        {
+          "node": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "status": "untried"
+        },
+        {
+          "node": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "relation": "addresses",
+          "target": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+        }
+      ]
+    },
+    "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module": {
+      "title": "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module",
+      "supports": [
+        {
+          "node": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session": {
+      "title": "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session"
+    },
+    "compared _usage_names() against _lane_names() at HEAD before reverting the comparison": {
+      "title": "compared _usage_names() against _lane_names() at HEAD before reverting the comparison",
+      "supports": [
+        "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh": {
+      "title": "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh",
+      "supports": [
+        {
+          "node": "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "status": "untried"
+        },
+        {
+          "node": "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "relation": "addresses",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ]
+    },
+    "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand": {
+      "title": "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand",
+      "supports": [
+        {
+          "node": "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about": {
+      "title": "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green": {
+      "title": "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green",
+      "supports": [
+        "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import": {
+      "title": "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import"
+    },
+    "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run": {
+      "title": "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run",
+      "supports": [
+        "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree": {
+      "title": "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree"
+    },
+    "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief": {
+      "title": "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief",
+      "supports": [
+        "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -12581,6 +13101,73 @@
       "status": "done",
       "addresses": [
         "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+      ]
+    },
+    "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins": {
+      "title": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+      ]
+    },
+    "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD": {
+      "title": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+      "effort": 2,
+      "tags": [
+        "reasoning"
+      ],
+      "status": "active",
+      "addresses": [
+        "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+      ]
+    },
+    "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions": {
+      "title": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+      ]
+    },
+    "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member": {
+      "title": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+      ]
+    },
+    "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest": {
+      "title": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh"
+      ]
+    },
+    "add the missing module name to each of the three copy lists by hand": {
+      "title": "add the missing module name to each of the three copy lists by hand",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+      ]
+    },
+    "derive the copy set from the modules' own imports with fixture_modules.sibling_closure": {
+      "title": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+      ]
+    },
+    "make check_closed_sets refuse a usage header that does not name every declared lane": {
+      "title": "make check_closed_sets refuse a usage header that does not name every declared lane",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "the full gate exits 0 on the tree that ships as the release"
       ]
     }
   },
@@ -49991,6 +50578,1406 @@
         ]
       ],
       "id": "3fedbd4774470e8e"
+    },
+    {
+      "at": "2026-09-20T16:03:48.850960+00:00",
+      "after": "358c8dc15ba430c20abd3137bcc70a1de5c58d74",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored\", \"tags\": [\"tested\"], \"title\": \"my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\\\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured both anchors against the restored sentence: 1 match and ['360']\", \"tags\": [\"measured\"], \"title\": \"one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions\", \"tags\": [], \"title\": \"the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"their content says they are Python programs, and that directory is where a Python example is both kept and run\", \"tags\": [], \"title\": \"move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins\", \"fields\": {\"effort\": 2, \"addresses\": [\"the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example\"]}}, {\"op\": \"status\", \"id\": \"move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins\", \"because\": \"it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.\", \"tags\": [], \"status\": \"unwanted\"}]",
+      "parents": [
+        "3fedbd4774470e8e"
+      ],
+      "assert": [
+        [
+          "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.",
+          "sort",
+          "prop"
+        ],
+        [
+          "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.",
+          "supersedes",
+          "their content says they are Python programs, and that directory is where a Python example is both kept and run"
+        ],
+        [
+          "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.",
+          "supports",
+          {
+            "node": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed.",
+          "title",
+          "it relocates content between two published repositories and would turn a file nothing currently executes into one the gate runs, which can fail for reasons that have nothing to do with the move. That is the user's call on their own corpus rather than mine. The finding is exact and recorded; the _fixtures half, which is a rule inconsistency rather than a content question, is fixed."
+        ],
+        [
+          "measured both anchors against the restored sentence: 1 match and ['360']",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured both anchors against the restored sentence: 1 match and ['360']",
+          "supports",
+          "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes"
+        ],
+        [
+          "measured both anchors against the restored sentence: 1 match and ['360']",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured both anchors against the restored sentence: 1 match and ['360']",
+          "title",
+          "measured both anchors against the restored sentence: 1 match and ['360']"
+        ],
+        [
+          "measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions",
+          "supports",
+          "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+        ],
+        [
+          "measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions",
+          "title",
+          "measured: 2 of 386, added 2026-08-27 in e27341b, no runner names them, and their own docstring calls them Python programs to execute with METTA_PATH rather than twin(m) definitions"
+        ],
+        [
+          "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored",
+          "supports",
+          "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red"
+        ],
+        [
+          "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored",
+          "tags",
+          "tested"
+        ],
+        [
+          "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored",
+          "title",
+          "measured: test_example_origins_rejects_orphan_and_duplicate_owner failed with 'README count anchor missing or repeated', and example_origins.py --write regenerates precisely the wording I restored"
+        ],
+        [
+          "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red",
+          "sort",
+          "prop"
+        ],
+        [
+          "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red",
+          "title",
+          "my rewrite of examples/README.md's count sentence made the tree match a defect that check_library_records_selftest plants as a negative control: example_origins.py generates that sentence against the anchor 'The merged corpus contains \\d+ examples', and the selftest plants exactly the substitution I made, 'The merged corpus contains' to 'The corpus contains', as the case that must go red"
+        ],
+        [
+          "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes",
+          "sort",
+          "prop"
+        ],
+        [
+          "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes",
+          "title",
+          "one sentence in examples/README.md is read by two tools with different regexes, example_origins wanting 'The merged corpus contains N examples' and the parity test wanting 'contains (N) examples that run', so satisfying one broke the other; the wording that satisfies both is the one the generator writes"
+        ],
+        [
+          "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example",
+          "sort",
+          "prop"
+        ],
+        [
+          "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example",
+          "title",
+          "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+        ],
+        [
+          "their content says they are Python programs, and that directory is where a Python example is both kept and run",
+          "sort",
+          "prop"
+        ],
+        [
+          "their content says they are Python programs, and that directory is where a Python example is both kept and run",
+          "supports",
+          {
+            "node": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+            "status": "untried"
+          }
+        ],
+        [
+          "their content says they are Python programs, and that directory is where a Python example is both kept and run",
+          "supports",
+          {
+            "node": "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+            "relation": "addresses",
+            "target": "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+          }
+        ],
+        [
+          "their content says they are Python programs, and that directory is where a Python example is both kept and run",
+          "title",
+          "their content says they are Python programs, and that directory is where a Python example is both kept and run"
+        ],
+        [
+          "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "sort",
+          "approach"
+        ],
+        [
+          "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "addresses",
+          "the MeTTa example corpus holds exactly two .py files outside _fixtures, ch18-performance/18-03-algebra-carriers, and parity.corpus() globs *.metta, so nothing runs them while the twin mirror carries twins for them that cover no MeTTa example"
+        ],
+        [
+          "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "effort",
+          2
+        ],
+        [
+          "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "status",
+          "unwanted"
+        ],
+        [
+          "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins",
+          "title",
+          "move those two Python examples to extensions/python/examples/, where test_examples.py runs every .py outside the twin tree, and drop their twins"
+        ]
+      ],
+      "id": "225f6153eb28b602"
+    },
+    {
+      "at": "2026-09-20T16:29:05.846559+00:00",
+      "after": "358c8dc15ba430c20abd3137bcc70a1de5c58d74",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective\", \"tags\": [\"user\"], \"title\": \"the full gate exits 0 on the tree that ships as the release\", \"fields\": {\"worth\": 95}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD\", \"tags\": [], \"title\": \"the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses\", \"tags\": [\"reasoning\"], \"title\": \"classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD\", \"fields\": {\"effort\": 2, \"addresses\": [\"the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree\"]}}, {\"op\": \"status\", \"id\": \"classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD\", \"because\": \"probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead\", \"tags\": [\"tested\"], \"status\": \"active\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/\", \"tags\": [\"measured\"], \"title\": \"a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'\", \"tags\": [\"measured\"], \"title\": \"check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically\", \"tags\": [], \"title\": \"normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions\", \"fields\": {\"effort\": 1, \"addresses\": [\"check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the lane's own remedy text says remove the entry\", \"tags\": [], \"title\": \"delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member\", \"fields\": {\"effort\": 1, \"addresses\": [\"check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta\"]}}, {\"op\": \"status\", \"id\": \"delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member\", \"because\": \"uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it\", \"tags\": [\"source\"], \"title\": \"I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors\", \"tags\": [\"source\"], \"title\": \"selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"its REFERENCE regex matches \\\"$VAR/name.sh\\\" inside shell files only, and every planter site is a Python Path join building a temporary root\", \"tags\": [\"source\"], \"title\": \"check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825\", \"tags\": [\"source\"], \"title\": \"check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers\", \"fields\": {}}]",
+      "parents": [
+        "225f6153eb28b602"
+      ],
+      "assert": [
+        [
+          "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source",
+          "sort",
+          "prop"
+        ],
+        [
+          "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source",
+          "title",
+          "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source"
+        ],
+        [
+          "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically",
+          "sort",
+          "prop"
+        ],
+        [
+          "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically",
+          "supports",
+          {
+            "node": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+            "status": "untried"
+          }
+        ],
+        [
+          "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically",
+          "supports",
+          {
+            "node": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+            "relation": "addresses",
+            "target": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+          }
+        ],
+        [
+          "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically",
+          "title",
+          "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically"
+        ],
+        [
+          "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it",
+          "sort",
+          "prop"
+        ],
+        [
+          "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it",
+          "title",
+          "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it"
+        ],
+        [
+          "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors",
+          "sort",
+          "prop"
+        ],
+        [
+          "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors",
+          "supports",
+          "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh"
+        ],
+        [
+          "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors",
+          "supports",
+          {
+            "node": "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors",
+          "tags",
+          "source"
+        ],
+        [
+          "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors",
+          "title",
+          "artifacts.projections() reads root/'tools'/'check.sh' at extensions/python/tools/artifacts.py:454 while check_generated_artifact_group_selftest.py:35 writes root/'check.sh', which is the FileNotFoundError behind artifact-sync-selftest's 14 errors"
+        ],
+        [
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+          "title",
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+        ],
+        [
+          "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers",
+          "title",
+          "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers"
+        ],
+        [
+          "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825",
+          "supports",
+          "check_process_bounds_selftest.py's root-level check.sh is NOT an instance of the planter drift, because it passes explicit paths and runner_paths into findings() rather than letting the checker discover the production drivers"
+        ],
+        [
+          "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825",
+          "tags",
+          "source"
+        ],
+        [
+          "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825",
+          "title",
+          "check_process_bounds_selftest.py:326-340 against check_process_bounds.py:809-825"
+        ],
+        [
+          "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree",
+          "title",
+          "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree"
+        ],
+        [
+          "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root",
+          "sort",
+          "prop"
+        ],
+        [
+          "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root",
+          "supports",
+          "check_script_references.py, built this session, structurally cannot catch the fixture-planter drift, because a planted tree is a construction rather than a reference into the real tree"
+        ],
+        [
+          "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root",
+          "tags",
+          "source"
+        ],
+        [
+          "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root",
+          "title",
+          "its REFERENCE regex matches \"$VAR/name.sh\" inside shell files only, and every planter site is a Python Path join building a temporary root"
+        ],
+        [
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead",
+          "sort",
+          "prop"
+        ],
+        [
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead",
+          "supersedes",
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses"
+        ],
+        [
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead",
+          "supports",
+          {
+            "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+            "status": "active"
+          }
+        ],
+        [
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead",
+          "tags",
+          "tested"
+        ],
+        [
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead",
+          "title",
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead"
+        ],
+        [
+          "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'",
+          "supports",
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+        ],
+        [
+          "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'",
+          "supports",
+          {
+            "node": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'",
+          "title",
+          "ran sh tools/check.sh layering at HEAD 358c8dc15: one finding, 'names pymetta, which is no longer a workspace member'"
+        ],
+        [
+          "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh",
+          "title",
+          "selftest fixture planters write a gate driver at <root>/check.sh while the production code they exercise reads <root>/tools/check.sh"
+        ],
+        [
+          "the full gate exits 0 on the tree that ships as the release",
+          "sort",
+          "prop"
+        ],
+        [
+          "the full gate exits 0 on the tree that ships as the release",
+          "title",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the full gate exits 0 on the tree that ships as the release",
+          "wanted",
+          true
+        ],
+        [
+          "the full gate exits 0 on the tree that ships as the release",
+          "worth",
+          95
+        ],
+        [
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+          "title",
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+        ],
+        [
+          "the lane's own remedy text says remove the entry",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane's own remedy text says remove the entry",
+          "supports",
+          {
+            "node": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+            "status": "untried"
+          }
+        ],
+        [
+          "the lane's own remedy text says remove the entry",
+          "supports",
+          {
+            "node": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+            "relation": "addresses",
+            "target": "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+          }
+        ],
+        [
+          "the lane's own remedy text says remove the entry",
+          "title",
+          "the lane's own remedy text says remove the entry"
+        ],
+        [
+          "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD",
+          "sort",
+          "prop"
+        ],
+        [
+          "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD",
+          "supports",
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+        ],
+        [
+          "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD",
+          "supports",
+          {
+            "node": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD",
+          "title",
+          "the log's first failures read 'cannot open test.sh' while tools/test.sh resolves at HEAD"
+        ],
+        [
+          "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective",
+          "sort",
+          "prop"
+        ],
+        [
+          "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective",
+          "supports",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective",
+          "tags",
+          "user"
+        ],
+        [
+          "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective",
+          "title",
+          "the one claim repeatedly stated as unmade this session is a full-gate pass, and release readiness is the standing objective"
+        ],
+        [
+          "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it",
+          "supports",
+          "I asserted the layering finding was a real manifest defect and marked that step strict before reading the checker; it was a checker defect, and the strict marking was unearned because I had read only the lane's message and not its source"
+        ],
+        [
+          "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it",
+          "tags",
+          "source"
+        ],
+        [
+          "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it",
+          "title",
+          "the rule at check_layering.py:286 already exempts the root via allowed = named | {project.name}, and a selftest at check_layering_selftest.py:297 plants exactly pymetta = { workspace = true }; both facts were available before I claimed it"
+        ],
+        [
+          "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong",
+          "sort",
+          "prop"
+        ],
+        [
+          "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong",
+          "supersedes",
+          "the lane's own remedy text says remove the entry"
+        ],
+        [
+          "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong",
+          "supports",
+          {
+            "node": "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong",
+          "tags",
+          "measured"
+        ],
+        [
+          "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong",
+          "title",
+          "uv refuses the workspace without it: removing the line and running uv lock --offline --check exits 2 with 'pymetta is included as a workspace member, but is missing an entry in tool.uv.sources'. uv counts the workspace ROOT as a member, so the manifest is right and the checker is wrong"
+        ],
+        [
+          "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/",
+          "sort",
+          "prop"
+        ],
+        [
+          "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/",
+          "supports",
+          "a gate lane count is not a defect count, because lanes share a filesystem and one moved file fails every lane that names it"
+        ],
+        [
+          "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/",
+          "tags",
+          "measured"
+        ],
+        [
+          "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/",
+          "title",
+          "13 of 30 lanes in the 2026-09-21 run reduced to one git mv into tools/"
+        ],
+        [
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses",
+          "sort",
+          "prop"
+        ],
+        [
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses",
+          "supports",
+          {
+            "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+            "status": "untried"
+          }
+        ],
+        [
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses",
+          "supports",
+          {
+            "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+            "relation": "addresses",
+            "target": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+          }
+        ],
+        [
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses",
+          "title",
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses"
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "sort",
+          "approach"
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "addresses",
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "effort",
+          2
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "status",
+          "active"
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "title",
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD"
+        ],
+        [
+          "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "sort",
+          "approach"
+        ],
+        [
+          "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "addresses",
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+        ],
+        [
+          "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "effort",
+          1
+        ],
+        [
+          "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "status",
+          "unwanted"
+        ],
+        [
+          "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member",
+          "title",
+          "delete pymetta = { workspace = true } from pyproject.toml because the layering lane says it names no member"
+        ],
+        [
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "sort",
+          "approach"
+        ],
+        [
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "addresses",
+          "check_layering.py compares distribution names as raw strings, so the workspace root's [project] name PyMeTTa never matches its own [tool.uv.sources] key pymetta"
+        ],
+        [
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "effort",
+          1
+        ],
+        [
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "status",
+          "untried"
+        ],
+        [
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "title",
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions"
+        ]
+      ],
+      "id": "d4184f0e465d1396"
+    },
+    {
+      "at": "2026-09-20T16:35:55.354708+00:00",
+      "after": "358c8dc15ba430c20abd3137bcc70a1de5c58d74",
+      "did": "[{\"op\": \"status\", \"id\": \"normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions\", \"because\": \"sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised\", \"tags\": [\"source\"], \"title\": \"the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened\", \"tags\": [\"source\"], \"title\": \"I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express\", \"tags\": [\"measured\"], \"title\": \"the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling\", \"tags\": [\"measured\"], \"title\": \"three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told\", \"tags\": [\"measured\"], \"title\": \"I read the planter drift as six files on a grep for (root / \\\"check.sh\\\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver\", \"fields\": {}}]",
+      "parents": [
+        "d4184f0e465d1396"
+      ],
+      "assert": [
+        [
+          "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran",
+          "title",
+          "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran"
+        ],
+        [
+          "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver",
+          "sort",
+          "prop"
+        ],
+        [
+          "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver",
+          "title",
+          "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver"
+        ],
+        [
+          "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised",
+          "sort",
+          "prop"
+        ],
+        [
+          "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised",
+          "supports",
+          "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy"
+        ],
+        [
+          "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised",
+          "tags",
+          "source"
+        ],
+        [
+          "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised",
+          "title",
+          "_workspace.py:118 _normalised() and an inline re.sub in tests/ch01_getting_started/test_packaging.py:105, against check_layering.py which compared raw; all three now call _workspace.normalised"
+        ],
+        [
+          "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told",
+          "sort",
+          "prop"
+        ],
+        [
+          "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told",
+          "supports",
+          "I read the planter drift as six files on a grep for (root / \"check.sh\"); running them split it three and three, because the green ones pass explicit paths rather than letting the checker discover the production driver"
+        ],
+        [
+          "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told",
+          "tags",
+          "measured"
+        ],
+        [
+          "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told",
+          "title",
+          "a grep found the spelling, not the defect; the defect needs the consumer, and only running each one says which consumer discovers and which is told"
+        ],
+        [
+          "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express",
+          "supports",
+          "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur"
+        ],
+        [
+          "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express",
+          "tags",
+          "measured"
+        ],
+        [
+          "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express",
+          "title",
+          "check_layering_selftest.py:39 against the shipped pyproject.toml's name = PyMeTTa; a fixture is a negative control only for defects it can express"
+        ],
+        [
+          "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling",
+          "supports",
+          "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh"
+        ],
+        [
+          "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling",
+          "supports",
+          {
+            "node": "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling",
+          "title",
+          "measured at HEAD 358c8dc15: check_generated_artifact_group_selftest, check_gate_scratch_selftest and check_spec_status_selftest exit 1, while check_pin_provenance_selftest, check_process_bounds_selftest and check_evidence_selftest exit 0 on the same spelling"
+        ],
+        [
+          "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way",
+          "sort",
+          "prop"
+        ],
+        [
+          "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way",
+          "supersedes",
+          "PEP 503 defines distribution names as equal under re.sub('[-_.]+','-',name).lower(); uv normalises and the checker does not, so the disagreement is about name identity rather than about membership, and the same defect sits in the members-minus-declared direction where a capitalised member name would false-positive identically"
+        ],
+        [
+          "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way",
+          "supports",
+          {
+            "node": "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+            "status": "done"
+          }
+        ],
+        [
+          "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way",
+          "tags",
+          "tested"
+        ],
+        [
+          "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way",
+          "title",
+          "sh tools/check.sh layering exits 0 and the selftest passes; blinding _canonical to the identity reproduces the exact production message 'names pymetta, which is no longer a workspace member' and turns the new selftest case at line 317 red, so the case tests the fix rather than passing either way"
+        ],
+        [
+          "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened",
+          "sort",
+          "prop"
+        ],
+        [
+          "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened",
+          "supports",
+          "I began writing a third copy of the PEP 503 regex into check_layering.py and a recall surfaced the existing _normalised() mid-edit; the near-copy was removed before it ran"
+        ],
+        [
+          "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened",
+          "tags",
+          "source"
+        ],
+        [
+          "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened",
+          "title",
+          "the MDL law gives every rule exactly one home and reads a near-copy as a signal it lives away from where it is used, which is exactly what had happened"
+        ],
+        [
+          "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur",
+          "sort",
+          "prop"
+        ],
+        [
+          "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur",
+          "title",
+          "the layering selftest was green while the lane was red because CORE_MANIFEST declared name = pymetta already lowercase, the single spelling in which the defect cannot occur"
+        ],
+        [
+          "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy",
+          "title",
+          "the repository already held PEP 503 normalisation in two places and the one component whose job is to keep the resolver's view and the directory in agreement held none, so the fix is one home rather than a third copy"
+        ],
+        [
+          "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh",
+          "title",
+          "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh"
+        ],
+        [
+          "normalise every distribution name to PEP 503 canonical form at the boundary in check_layering.py, in both comparison directions",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD"
+      },
+      "id": "252ea3c3ea522986"
+    },
+    {
+      "at": "2026-09-20T16:49:46.289043+00:00",
+      "after": "358c8dc15ba430c20abd3137bcc70a1de5c58d74",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it\", \"tags\": [], \"title\": \"state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest\", \"fields\": {\"effort\": 2, \"addresses\": [\"three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh\"]}}, {\"op\": \"status\", \"id\": \"state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest\", \"because\": \"all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError\", \"tags\": [\"measured\"], \"title\": \"three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list\", \"tags\": [], \"title\": \"add the missing module name to each of the three copy lists by hand\", \"fields\": {\"effort\": 1, \"addresses\": [\"three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated\"]}}, {\"op\": \"status\", \"id\": \"add the missing module name to each of the three copy lists by hand\", \"because\": \"there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should\", \"tags\": [], \"title\": \"derive the copy set from the modules' own imports with fixture_modules.sibling_closure\", \"fields\": {\"effort\": 1, \"addresses\": [\"three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated\"]}}, {\"op\": \"status\", \"id\": \"derive the copy set from the modules' own imports with fixture_modules.sibling_closure\", \"because\": \"all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"compared _usage_names() against _lane_names() at HEAD before reverting the comparison\", \"tags\": [\"measured\"], \"title\": \"the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh\", \"tags\": [], \"title\": \"make check_closed_sets refuse a usage header that does not name every declared lane\", \"fields\": {\"effort\": 2, \"addresses\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"status\", \"id\": \"make check_closed_sets refuse a usage header that does not name every declared lane\", \"because\": \"its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand\", \"tags\": [\"user\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run\", \"tags\": [\"measured\"], \"title\": \"I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief\", \"tags\": [\"source\"], \"title\": \"check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree\", \"fields\": {}}]",
+      "parents": [
+        "252ea3c3ea522986"
+      ],
+      "assert": [
+        [
+          "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import",
+          "sort",
+          "prop"
+        ],
+        [
+          "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import",
+          "title",
+          "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import"
+        ],
+        [
+          "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about",
+          "sort",
+          "prop"
+        ],
+        [
+          "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about",
+          "title",
+          "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about"
+        ],
+        [
+          "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list",
+          "sort",
+          "prop"
+        ],
+        [
+          "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list",
+          "supports",
+          {
+            "node": "add the missing module name to each of the three copy lists by hand",
+            "status": "untried"
+          }
+        ],
+        [
+          "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list",
+          "supports",
+          {
+            "node": "add the missing module name to each of the three copy lists by hand",
+            "relation": "addresses",
+            "target": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+          }
+        ],
+        [
+          "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list",
+          "title",
+          "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list"
+        ],
+        [
+          "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError",
+          "sort",
+          "prop"
+        ],
+        [
+          "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError",
+          "supports",
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+        ],
+        [
+          "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError",
+          "supports",
+          {
+            "node": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError",
+          "tags",
+          "measured"
+        ],
+        [
+          "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError",
+          "title",
+          "adding 'from gate_layout import CHECK, TEST' to evidence_runners.py broke check_evidence_selftest, check_spec_status_selftest and check_pin_provenance_selftest at once with ModuleNotFoundError"
+        ],
+        [
+          "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK",
+          "sort",
+          "prop"
+        ],
+        [
+          "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK",
+          "supersedes",
+          "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it"
+        ],
+        [
+          "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK",
+          "supports",
+          {
+            "node": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+            "status": "done"
+          }
+        ],
+        [
+          "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK",
+          "tags",
+          "tested"
+        ],
+        [
+          "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK",
+          "title",
+          "all three red selftests pass, eleven production and fixture sites now derive their path, and check_gate_layout_selftest reports 0 defects over 3 drivers and three planted cases including a planted disagreement between artifacts.CHECK_SH and gate_layout.CHECK"
+        ],
+        [
+          "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module",
+          "sort",
+          "prop"
+        ],
+        [
+          "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module",
+          "supersedes",
+          "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should"
+        ],
+        [
+          "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module",
+          "supports",
+          {
+            "node": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+            "status": "done"
+          }
+        ],
+        [
+          "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module",
+          "tags",
+          "tested"
+        ],
+        [
+          "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module",
+          "title",
+          "all three selftests pass and the closure answers gate_layout.py for every one of the three entries without it being named anywhere; check_fixture_modules_selftest reports 0 defects over 8 planted trees covering transitivity, cycles, stdlib imports, relative imports, a missing entry and an unparseable module"
+        ],
+        [
+          "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh",
+          "supports",
+          {
+            "node": "make check_closed_sets refuse a usage header that does not name every declared lane",
+            "status": "untried"
+          }
+        ],
+        [
+          "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh",
+          "supports",
+          {
+            "node": "make check_closed_sets refuse a usage header that does not name every declared lane",
+            "relation": "addresses",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh",
+          "title",
+          "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh"
+        ],
+        [
+          "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run",
+          "supports",
+          "I ran seven selftests and called the set exhaustive; running all 37 found four red, two of them NameErrors I had just introduced by rewriting a constant's use without adding its import"
+        ],
+        [
+          "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run",
+          "tags",
+          "measured"
+        ],
+        [
+          "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run",
+          "title",
+          "check_closed_sets.py and check_host_workarounds.py were patched with add_import=None, so _CHECK and BOUNDED were undefined until the next run"
+        ],
+        [
+          "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree",
+          "title",
+          "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree"
+        ],
+        [
+          "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green",
+          "supports",
+          "a fixture is a negative control only for the defects its own planting can express, so a green selftest beside a red lane means the fixture and the tree differ in the dimension the rule is about"
+        ],
+        [
+          "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green",
+          "tags",
+          "measured"
+        ],
+        [
+          "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green",
+          "title",
+          "check_layering_selftest planted a lowercase root name where the tree has PyMeTTa, and check_generated_artifact_group_selftest planted check.sh where the tree has tools/check.sh; both lanes were red while both selftests were green"
+        ],
+        [
+          "compared _usage_names() against _lane_names() at HEAD before reverting the comparison",
+          "sort",
+          "prop"
+        ],
+        [
+          "compared _usage_names() against _lane_names() at HEAD before reverting the comparison",
+          "supports",
+          "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session"
+        ],
+        [
+          "compared _usage_names() against _lane_names() at HEAD before reverting the comparison",
+          "tags",
+          "measured"
+        ],
+        [
+          "compared _usage_names() against _lane_names() at HEAD before reverting the comparison",
+          "title",
+          "compared _usage_names() against _lane_names() at HEAD before reverting the comparison"
+        ],
+        [
+          "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand",
+          "sort",
+          "prop"
+        ],
+        [
+          "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand",
+          "supersedes",
+          "check_closed_sets exists to compare two sets that must be equal and already extracts lane names from check.sh"
+        ],
+        [
+          "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand",
+          "supports",
+          {
+            "node": "make check_closed_sets refuse a usage header that does not name every declared lane",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand",
+          "tags",
+          "user"
+        ],
+        [
+          "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand",
+          "title",
+          "its premise was wrong: ruff, mypy and pytest are declared in the COMPONENT check.sh files the root sources, so one script's run lines are not the lane set. And the header is a pre-existing documentation gap noticed while fixing the driver-path duplication, not its producer; scope grows because the correct fix reaches further, never because something unrelated was seen on the way. Reverted; the two new lanes were documented by hand"
+        ],
+        [
+          "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief",
+          "supports",
+          "check_host_workarounds_selftest run bare reports every reproduction as present and janus_swi as missing, which is my harness using the wrong interpreter rather than evidence about the tree"
+        ],
+        [
+          "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief",
+          "tags",
+          "source"
+        ],
+        [
+          "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief",
+          "title",
+          "the gate sets CHECK_PY and the patched SWI host; a bare python invocation gets the stock 10.1.13 and no janus_swi, so the result is uncertainty rather than disbelief"
+        ],
+        [
+          "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it",
+          "supports",
+          {
+            "node": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+            "status": "untried"
+          }
+        ],
+        [
+          "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it",
+          "supports",
+          {
+            "node": "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+            "relation": "addresses",
+            "target": "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh"
+          }
+        ],
+        [
+          "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it",
+          "title",
+          "the layout cannot have one home: artifacts.py is seat tooling inside a submodule and the layering contract forbids it importing a superproject test module, so the duplication is unavoidable and the rule for unavoidable duplication is to make it checkable rather than to remove it"
+        ],
+        [
+          "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should",
+          "sort",
+          "prop"
+        ],
+        [
+          "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should",
+          "supports",
+          {
+            "node": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+            "status": "untried"
+          }
+        ],
+        [
+          "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should",
+          "supports",
+          {
+            "node": "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+            "relation": "addresses",
+            "target": "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+          }
+        ],
+        [
+          "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should",
+          "title",
+          "the set a fixture must carry is exactly the sibling .py files the entry module imports transitively, which is a function of the source; modulefinder computes a much larger graph including the standard library and would carry more than a fixture should"
+        ],
+        [
+          "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session",
+          "title",
+          "the usage header in tools/check.sh advertises 82 lane names while the root driver alone declares 116, and 80 declared lanes are undocumented, including readme-fences and script-refs which I added earlier this session"
+        ],
+        [
+          "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run",
+          "sort",
+          "prop"
+        ],
+        [
+          "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run",
+          "supersedes",
+          "a module-level import always runs, so a missing module is a ModuleNotFoundError naming itself rather than a silent gap, and at two sites an import closure costs more than the list"
+        ],
+        [
+          "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run",
+          "supports",
+          {
+            "node": "add the missing module name to each of the three copy lists by hand",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run",
+          "tags",
+          "measured"
+        ],
+        [
+          "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run",
+          "title",
+          "there are THREE sites, not two, and I edited two and missed the third; it was found by a search rather than by my own run, which is the failure mode the hand-list has. Loud failure only helps if the full set is run"
+        ],
+        [
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+          "sort",
+          "prop"
+        ],
+        [
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated",
+          "title",
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+        ],
+        [
+          "add the missing module name to each of the three copy lists by hand",
+          "sort",
+          "approach"
+        ],
+        [
+          "add the missing module name to each of the three copy lists by hand",
+          "addresses",
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+        ],
+        [
+          "add the missing module name to each of the three copy lists by hand",
+          "effort",
+          1
+        ],
+        [
+          "add the missing module name to each of the three copy lists by hand",
+          "status",
+          "unwanted"
+        ],
+        [
+          "add the missing module name to each of the three copy lists by hand",
+          "title",
+          "add the missing module name to each of the three copy lists by hand"
+        ],
+        [
+          "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "sort",
+          "approach"
+        ],
+        [
+          "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "addresses",
+          "three selftests copy a hand-listed set of checker modules into a planted tree, so an import added to any copied module breaks every fixture whose list nobody updated"
+        ],
+        [
+          "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "effort",
+          1
+        ],
+        [
+          "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "status",
+          "done"
+        ],
+        [
+          "derive the copy set from the modules' own imports with fixture_modules.sibling_closure",
+          "title",
+          "derive the copy set from the modules' own imports with fixture_modules.sibling_closure"
+        ],
+        [
+          "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "sort",
+          "approach"
+        ],
+        [
+          "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "addresses",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "effort",
+          2
+        ],
+        [
+          "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "status",
+          "unwanted"
+        ],
+        [
+          "make check_closed_sets refuse a usage header that does not name every declared lane",
+          "title",
+          "make check_closed_sets refuse a usage header that does not name every declared lane"
+        ],
+        [
+          "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "sort",
+          "approach"
+        ],
+        [
+          "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "addresses",
+          "three selftests plant a gate driver at <root>/check.sh while the production code they exercise discovers it at <root>/tools/check.sh"
+        ],
+        [
+          "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "effort",
+          2
+        ],
+        [
+          "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "status",
+          "done"
+        ],
+        [
+          "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest",
+          "title",
+          "state the gate driver layout once in tests/checks/gate_layout.py and once in artifacts.py, and make the two agree through a checked selftest"
+        ]
+      ],
+      "telemetry": {
+        "focus": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD"
+      },
+      "id": "d27b991c7d983413"
     }
   ]
 }

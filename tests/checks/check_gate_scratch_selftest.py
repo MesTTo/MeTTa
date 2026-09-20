@@ -22,6 +22,9 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from gate_layout import CHECK  # noqa: E402  -- the directory above is installed first
 HELPER = ROOT / "tests" / "checks" / "gate_scratch.sh"
 
 _HOLDER = r"""
@@ -51,7 +54,7 @@ metta_gate_scratch_close
 def contract_findings(root: Path = ROOT) -> list[str]:
     """Return every missing root-gate integration point."""
     helper = root / "tests" / "checks" / "gate_scratch.sh"
-    check = (root / "check.sh").read_text(encoding="utf-8")
+    check = (root / CHECK).read_text(encoding="utf-8")
     findings: list[str] = []
     if not helper.is_file():
         findings.append("tests/checks/gate_scratch.sh is absent")

@@ -67,6 +67,7 @@ sys.path.insert(0, str(HERE))
 
 from check_evidence_tags import PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
 from pin_provenance import sites  # noqa: E402
+from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
 
 WORD = f"commit={PLACEHOLDER}"
 TAG = "tested"
@@ -360,7 +361,11 @@ def build(root: Path) -> str:
     """The fixture tree, committed, with the pass beside its imports."""
     tools = root / "tools/checks"
     tools.mkdir(parents=True)
-    for module in ("check_evidence_tags.py", "evidence_runners.py", "pin_provenance.py"):
+    # Derived, not listed: `sibling_closure` reads the imports, so an import
+    # added to a copied checker is carried without an edit here. Three
+    # fixtures kept this answer by hand and one import to evidence_runners.py
+    # broke all three.
+    for module in sibling_closure(("pin_provenance.py",)):
         # The pass under test, with its OWN placeholders spent. These three
         # carry evidence tags like every other hand-written file, so while
         # their thread is in progress they hold the in-progress spelling, and a

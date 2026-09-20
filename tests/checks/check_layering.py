@@ -66,6 +66,7 @@ import runpy
 import subprocess
 import sys
 import tomllib
+from functools import cache
 from graphlib import CycleError
 from importlib import metadata
 from pathlib import Path
@@ -77,8 +78,15 @@ SEAT = ROOT / "extensions" / "python"
 CORE = SEAT / "metta"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(SEAT))
 
 import check_hardcoded_integrations as libraries  # noqa: E402  -- the path is installed above
+
+#: Name identity, from the module that already decides it for the import
+#: system. `_workspace.normalised` is what answers `import metta_live` against
+#: `importlib.metadata`'s `metta-live`, so a roster comparison reaching for a
+#: second copy of PEP 503 would be a second opinion on the same question.
+from _workspace import normalised as _canonical  # noqa: E402  -- SEAT is installed above
 
 #: The group a member advertises under, which is what makes discovery work at
 #: all; the seam reads this name and nothing else.
@@ -118,8 +126,9 @@ def _manifest(path: Path) -> dict:
 
 
 def _requirement_name(requirement: str) -> str:
+    """The distribution a requirement names, in PEP 503's one spelling."""
     match = REQUIREMENT.match(requirement.strip())
-    return match.group(1) if match else requirement.strip()
+    return _canonical(match.group(1) if match else requirement.strip())
 
 
 def members(root: Path = ROOT) -> list[Member]:
@@ -143,7 +152,9 @@ def members(root: Path = ROOT) -> list[Member]:
         found.append(
             Member(
                 directory,
-                project["name"],
+                # Canonical from the moment it is read, so no comparison below
+                # can see a name in a spelling another tool would not recognise.
+                _canonical(project["name"]),
                 modules[0] if modules else "",
                 project.get("version", ""),
                 frozenset(
@@ -154,6 +165,13 @@ def members(root: Path = ROOT) -> list[Member]:
                     )
                     for requirement in group
                 ),
+                # EXACT, not canonical. An entry-point name is not a
+                # distribution name: `_workspace.py` writes each one verbatim
+                # into `entry_points.txt` and `seam.py` reads it back through
+                # `metadata.entry_points`, which preserves it, so discovery
+                # matches the spelling the manifest wrote. Normalising here
+                # would accept a member that discovery cannot find, and would
+                # collapse `metta-a` and `metta_a` into one key on the way.
                 dict(project.get("entry-points", {}).get(GROUP, {})),
                 tuple(modules),
             )
@@ -224,6 +242,12 @@ def _members_reach_only_the_public_core(roster: list[Member]) -> list[Finding]:
     return findings
 
 
+# Pure in the installed environment, which does not change while the gate runs,
+# and called once per requirement of every member. Without this each call walks
+# every installed distribution and normalises each owner name it holds.
+# Time: one `packages_distributions()` walk per distinct name, D owners each,
+# where D is the installed distribution count. Space: one set per distinct name.
+@cache
 def _modules_of(distribution: str) -> set[str]:
     """Which top-level modules a distribution provides, as installed here.
 
@@ -236,7 +260,10 @@ def _modules_of(distribution: str) -> set[str]:
     provided = {
         module
         for module, owners in metadata.packages_distributions().items()
-        if distribution in owners
+        # `packages_distributions()` answers each owner in the spelling its own
+        # metadata uses, so a `Django` there and a `django` here are one
+        # distribution and only the normalisation says so.
+        if distribution in {_canonical(owner) for owner in owners}
     }
     return provided or {distribution, distribution.replace("-", "_")}
 
@@ -274,16 +301,25 @@ def _members_declare_what_they_name(roster: list[Member]) -> list[Finding]:
 def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list[Finding]:
     """Every member is a workspace source, and every source is a member."""
     manifest = _manifest(root / "pyproject.toml")
-    declared = manifest.get("tool", {}).get("uv", {}).get("sources", {})
+    #: Keyed canonically, because a TOML key is written by hand and uv reads it
+    #: as a distribution name rather than as the string it looks like.
+    declared = {
+        _canonical(name)
+        for name in manifest.get("tool", {}).get("uv", {}).get("sources", {})
+    }
     named = {member.distribution for member in roster}
     # The workspace ROOT's own distribution is PERMITTED here beside the members,
-    # never required. Every member depends on it exactly, and while the members sat
-    # inside its own directory uv resolved that implicitly; as siblings they are
-    # outside it and the entry is what keeps the resolution in this checkout rather
-    # than an index. It is not matched by the members glob, so the roster alone
-    # cannot know it, and it is not a member, so nothing may demand it be declared
+    # never required. `members()` builds the roster from the `ext/metta-*` glob,
+    # which cannot match the root, so the roster alone cannot know it. uv
+    # disagrees that it is not a member and REQUIRES the entry: deleting
+    # `pymetta = { workspace = true }` makes `uv lock --offline --check` exit 2
+    # with "`pymetta` is included as a workspace member, but is missing an entry
+    # in `tool.uv.sources`", so the earlier reading here -- that nothing may
+    # demand it be declared -- was right about this rule and wrong about uv
+    # [measured 2026-09-21: the removal probed in a battery worktree at
+    # 358c8dc15; commit=WORKTREE]
     # [tested: tests/checks/check_layering_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb].
-    allowed = named | {manifest.get("project", {}).get("name", "")}
+    allowed = named | {_canonical(manifest.get("project", {}).get("name", ""))}
     return [
         *(
             Finding(
@@ -292,7 +328,7 @@ def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list
                 f"[tool.uv.sources]; without it an extra that requires it "
                 f"resolves from an index instead of from this checkout",
             )
-            for distribution in sorted(named - set(declared))
+            for distribution in sorted(named - declared)
         ),
         *(
             Finding(
@@ -300,7 +336,7 @@ def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list
                 f"[tool.uv.sources] names {distribution}, which is no longer a "
                 f"workspace member; remove the entry",
             )
-            for distribution in sorted(set(declared) - allowed)
+            for distribution in sorted(declared - allowed)
         ),
     ]
 

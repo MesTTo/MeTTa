@@ -43,6 +43,8 @@
 #                                            refusal-sync-selftest
 #                                            door-sync door-coverage door-refusals
 #                                            closed-sets
+#                                            gate-layout-selftest
+#                                            fixture-modules-selftest
 #                                            closed-sets-selftest
 #                                            host-workarounds
 #                                            host-workarounds-selftest
@@ -562,6 +564,13 @@ run GATE readme-fences "$PY" "$HERE/tests/checks/check_readme_fences.py"
 run GATE readme-fences-selftest "$PY" "$HERE/tests/checks/check_readme_fences_selftest.py"
 run GATE script-refs "$PY" "$HERE/tests/checks/check_script_references.py"
 run GATE script-refs-selftest "$PY" "$HERE/tests/checks/check_script_references_selftest.py"
+# script-refs above checks a reference INTO this tree; these two check the other
+# half, a tree PLANTED to look like this one. Moving check.sh, test.sh and
+# bounded.sh into tools/ failed thirteen lanes through the first half and three
+# more through the second, because the layout was written out at every site
+# that needed it instead of once.
+run GATE gate-layout-selftest "$PY" "$HERE/tests/checks/check_gate_layout_selftest.py"
+run GATE fixture-modules-selftest "$PY" "$HERE/tests/checks/check_fixture_modules_selftest.py"
 run GATE llms-selftest "$PY" "$HERE/tests/checks/check_llms_selftest.py"
 
 # KERNEL.md's two rosters and six counts come from the running translator.

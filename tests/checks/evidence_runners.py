@@ -80,6 +80,8 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
+from gate_layout import CHECK, TEST
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -149,8 +151,8 @@ def _component_runners() -> tuple[str, ...]:
 # and, in ci.yml's case, three shell suites it does not; and each component's
 # own check.sh, which the gate SOURCES so its lanes share one summary.
 RUNNERS = (
-    "tools/check.sh",
-    "tools/test.sh",
+    CHECK,
+    TEST,
     ".github/workflows/checks.yml",
     ".github/workflows/ci.yml",
     *_component_runners(),
@@ -636,7 +638,7 @@ COLLECTORS = (
     # test.sh runs each example under run.sh and fails the lane on a nonzero
     # exit, which is what makes an example's own !(test ...) forms evidence.
     Collector(
-        runner="tools/test.sh",
+        runner=TEST,
         tier="GATE",
         lane="shell",
         anchor="find ./examples -type f -name '*.metta'",

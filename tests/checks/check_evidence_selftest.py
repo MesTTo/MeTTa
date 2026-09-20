@@ -75,6 +75,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from check_evidence_tags import PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
 from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
+from gate_layout import CHECK, TEST  # noqa: E402  -- HERE must be on the path first
+from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
 
 #: The pytest collector's own anchor, READ from the collector rather than
 #: restated here. Two self-tests plant it into a fixture tree and both used to
@@ -406,7 +408,7 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
     # theirs in place: a fixture that puts them at the root proves a shape the
     # tree no longer has.
     (root / "tools").mkdir(parents=True, exist_ok=True)
-    (root / "tools" / "check.sh").write_text(CHECK_SH)
+    (root / CHECK).write_text(CHECK_SH)
     # Three gate scripts, because the tree has three: the root, the Python
     # seat's, and the engine's. The pytest command lives in the seat's test.sh
     # and the plunit loop in the engine's check.sh, so the fixture builds each
@@ -425,7 +427,7 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         component = root / name
         component.parent.mkdir(parents=True, exist_ok=True)
         component.write_text(content)
-    (root / "tools" / "test.sh").write_text(TEST_SH)
+    (root / TEST).write_text(TEST_SH)
     # The checker reads the files git tracks or has staged and nothing else, so
     # every fixture tree is a repository; run() stages whatever a case planted
     # after this, and an ignored file stays unread on purpose.
@@ -438,7 +440,11 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
     # read as claims about the tree it is only inspecting.
     tools = root / "tools" / "checks"
     tools.mkdir(parents=True, exist_ok=True)
-    for module in ("check_evidence_tags.py", "evidence_runners.py"):
+    # Derived, not listed: `sibling_closure` reads the imports, so an import
+    # added to a copied checker is carried without an edit here. Three
+    # fixtures kept this answer by hand and one import to evidence_runners.py
+    # broke all three.
+    for module in sibling_closure(("check_evidence_tags.py",)):
         text = (HERE / module).read_text(encoding="utf-8")
         if MUTATION is not None and MUTATION["module"] == module:
             text = text.replace(MUTATION["old"], MUTATION["new"])
