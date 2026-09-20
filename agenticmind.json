@@ -9730,6 +9730,184 @@
       "tags": [
         "tested"
       ]
+    },
+    "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release": {
+      "title": "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release",
+      "worth": 75,
+      "wanted": true
+    },
+    "the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment": {
+      "title": "the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment",
+      "supports": [
+        "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+      ]
+    },
+    "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage": {
+      "title": "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage"
+    },
+    "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch": {
+      "title": "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch",
+      "supports": [
+        "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib": {
+      "title": "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib"
+    },
+    "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either": {
+      "title": "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either",
+      "supports": [
+        "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other": {
+      "title": "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other"
+    },
+    "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for": {
+      "title": "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for",
+      "supports": [
+        "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance": {
+      "title": "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance",
+      "supports": [
+        {
+          "node": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "status": "untried"
+        },
+        {
+          "node": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "relation": "addresses",
+          "target": "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+        }
+      ]
+    },
+    "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch": {
+      "title": "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch",
+      "supports": [
+        {
+          "node": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss": {
+      "title": "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+      "supports": [
+        {
+          "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "status": "untried"
+        },
+        {
+          "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "relation": "addresses",
+          "target": "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+        }
+      ]
+    },
+    "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta": {
+      "title": "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta",
+      "supports": [
+        {
+          "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss"
+      ]
+    },
+    "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read": {
+      "title": "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read"
+    },
+    "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against": {
+      "title": "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against",
+      "supports": [
+        "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile": {
+      "title": "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile"
+    },
+    "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named": {
+      "title": "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named",
+      "supports": [
+        "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens": {
+      "title": "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens",
+      "supports": [
+        {
+          "node": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "status": "untried"
+        },
+        {
+          "node": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "relation": "addresses",
+          "target": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        }
+      ]
+    },
+    "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all": {
+      "title": "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all"
+    },
+    "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19": {
+      "title": "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19",
+      "supports": [
+        "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open": {
+      "title": "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open"
+    },
+    "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it": {
+      "title": "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it",
+      "supports": [
+        "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here": {
+      "title": "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here",
+      "supports": [
+        {
+          "node": "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "status": "untried"
+        },
+        {
+          "node": "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "relation": "addresses",
+          "target": "i6"
+        }
+      ]
     }
   },
   "approaches": {
@@ -11116,6 +11294,41 @@
       "status": "untried",
       "addresses": [
         "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+      ]
+    },
+    "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories": {
+      "title": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+      ]
+    },
+    "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree": {
+      "title": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+      "effort": 5,
+      "status": "active",
+      "addresses": [
+        "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+      ]
+    },
+    "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once": {
+      "title": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+      "effort": 2,
+      "tags": [
+        "reasoning"
+      ],
+      "status": "untried",
+      "addresses": [
+        "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+      ]
+    },
+    "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix": {
+      "title": "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "i6"
       ]
     }
   },
@@ -44664,6 +44877,565 @@
         ]
       ],
       "id": "e2d937da26c69d7a"
+    },
+    {
+      "at": "2026-09-20T10:07:26.710747+00:00",
+      "after": "e9f68182a0fa31b1c667573e65ccb83da4239522",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment\", \"tags\": [], \"title\": \"metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release\", \"fields\": {\"worth\": 75}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch\", \"tags\": [\"source\"], \"title\": \"a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either\", \"tags\": [\"measured\"], \"title\": \"I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for\", \"tags\": [\"measured\"], \"title\": \"hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance\", \"tags\": [], \"title\": \"give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories\", \"fields\": {\"effort\": 2, \"addresses\": [\"metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release\"]}}, {\"op\": \"status\", \"id\": \"give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories\", \"because\": \"measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "e2d937da26c69d7a"
+      ],
+      "assert": [
+        [
+          "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib",
+          "sort",
+          "prop"
+        ],
+        [
+          "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib",
+          "title",
+          "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib"
+        ],
+        [
+          "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage",
+          "sort",
+          "prop"
+        ],
+        [
+          "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage",
+          "title",
+          "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage"
+        ],
+        [
+          "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other",
+          "sort",
+          "prop"
+        ],
+        [
+          "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other",
+          "title",
+          "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other"
+        ],
+        [
+          "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch",
+          "supersedes",
+          "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance"
+        ],
+        [
+          "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch",
+          "supports",
+          {
+            "node": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+            "status": "done"
+          }
+        ],
+        [
+          "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch",
+          "title",
+          "measured: the node seat in its copy reads 654 pass, 0 fail, 0 skipped, identical to the reference, where every worktree-shaped attempt read 652/2 or 632/2; cmetta's suite exits 0; each component repo answers its own toplevel and sits on its own seat/ branch"
+        ],
+        [
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release",
+          "sort",
+          "prop"
+        ],
+        [
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release",
+          "title",
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+        ],
+        [
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release",
+          "wanted",
+          true
+        ],
+        [
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release",
+          "worth",
+          75
+        ],
+        [
+          "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either",
+          "sort",
+          "prop"
+        ],
+        [
+          "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either",
+          "supports",
+          "I improvised submodule provisioning three times before reading what the tree already settled, and each attempt failed differently: absent .gitmodules URLs under repos/, then transport file not allowed, then a nested submodule with an unfetchable pin and an empty lib"
+        ],
+        [
+          "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either",
+          "tags",
+          "measured"
+        ],
+        [
+          "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either",
+          "title",
+          "the URLs name /home/user/Dev/PyPeTTa1/repos/*.git which hold only faiss_ffi, git refuses file-transport submodule clones since CVE-2022-39253, and components.sh clones from those same absent URLs so the sanctioned path cannot run on this machine either"
+        ],
+        [
+          "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for",
+          "supports",
+          "hardlinking derived output with cp -al is wrong and cost two phantom test failures: build/, dist/ and _runtime/ are functions of the source, and shared inodes mean a rebuild in one tree mutates the other"
+        ],
+        [
+          "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for",
+          "tags",
+          "measured"
+        ],
+        [
+          "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for",
+          "title",
+          "the seat read 652 pass and 2 fail where the reference read 654 and 0, and the failing subtests were the two that compare the seat against a BOOTED engine, which the seat had no bundle for"
+        ],
+        [
+          "the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment",
+          "supports",
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+        ],
+        [
+          "the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment",
+          "title",
+          "the user asked for both seats to be filled in against pymetta by Codex while they keep the option to release the current tree at any moment"
+        ],
+        [
+          "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch",
+          "sort",
+          "prop"
+        ],
+        [
+          "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch",
+          "supports",
+          "a git worktree of this superproject CANNOT produce a faithful tree, and the repository already measured the damage"
+        ],
+        [
+          "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch",
+          "tags",
+          "source"
+        ],
+        [
+          "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch",
+          "title",
+          "tools/battery.sh's header records it: git worktree add does not materialise a submodule's worktree and git stash create does not capture one, and before battery.sh existed wt-battery-6 ran the Python tree from one revision against an engine from another and reported 169 failures against a 4-failure baseline, every one an artifact of the mismatch"
+        ],
+        [
+          "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance",
+          "sort",
+          "prop"
+        ],
+        [
+          "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance",
+          "supports",
+          {
+            "node": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+            "status": "untried"
+          }
+        ],
+        [
+          "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance",
+          "supports",
+          {
+            "node": "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+            "relation": "addresses",
+            "target": "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+          }
+        ],
+        [
+          "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance",
+          "title",
+          "17 of the tree's 19GB is ai-tmp scratch, so the real tree is 1.7GB and a copy is cheap; a copy carries every submodule working tree, which is the thing a worktree cannot do, and the component .git directories come with it so commits there have ordinary provenance"
+        ],
+        [
+          "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "sort",
+          "approach"
+        ],
+        [
+          "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "addresses",
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+        ],
+        [
+          "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "effort",
+          2
+        ],
+        [
+          "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "status",
+          "done"
+        ],
+        [
+          "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories",
+          "title",
+          "give each agent a filesystem COPY of the verified tree with ai-tmp excluded and only the superproject's own .git excluded, so the component repos stay real git repositories"
+        ]
+      ],
+      "id": "60fa9ea3d987ae5f"
+    },
+    {
+      "at": "2026-09-20T10:09:42.705970+00:00",
+      "after": "e9f68182a0fa31b1c667573e65ccb83da4239522",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss\", \"tags\": [], \"title\": \"dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree\", \"fields\": {\"effort\": 5, \"addresses\": [\"metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release\"]}}, {\"op\": \"status\", \"id\": \"dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree\", \"because\": \"launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta\", \"tags\": [], \"status\": \"active\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against\", \"tags\": [\"measured\"], \"title\": \"the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read\", \"fields\": {}}]",
+      "parents": [
+        "60fa9ea3d987ae5f"
+      ],
+      "assert": [
+        [
+          "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against",
+          "sort",
+          "prop"
+        ],
+        [
+          "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against",
+          "supports",
+          "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read"
+        ],
+        [
+          "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against",
+          "tags",
+          "measured"
+        ],
+        [
+          "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against",
+          "title",
+          "grepped AGENTS.md for TRANSLITERATION, camelCase, hardcoded, minimum description, ideology and llms.txt and every one reads 0 hits, so an agent left to AGENTS.md alone would have transliterated Python into TypeScript, which is the one thing the user ruled against"
+        ],
+        [
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta",
+          "sort",
+          "prop"
+        ],
+        [
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta",
+          "supersedes",
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss"
+        ],
+        [
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta",
+          "supports",
+          {
+            "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+            "status": "active"
+          }
+        ],
+        [
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta",
+          "title",
+          "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta"
+        ],
+        [
+          "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read",
+          "sort",
+          "prop"
+        ],
+        [
+          "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read",
+          "title",
+          "the brief has to carry the naming ruling explicitly because Codex reads AGENTS.md and this project's rulings are in CLAUDE.md, which it does not read"
+        ],
+        [
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+          "sort",
+          "prop"
+        ],
+        [
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+          "supports",
+          {
+            "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+            "status": "untried"
+          }
+        ],
+        [
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+          "supports",
+          {
+            "node": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+            "relation": "addresses",
+            "target": "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+          }
+        ],
+        [
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
+          "title",
+          "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss"
+        ],
+        [
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "sort",
+          "approach"
+        ],
+        [
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "addresses",
+          "metta-node and cmetta each reach pymetta's capability through their own language's idioms, worked on in parallel without touching the commit the user can release"
+        ],
+        [
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "effort",
+          5
+        ],
+        [
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "status",
+          "active"
+        ],
+        [
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree",
+          "title",
+          "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+        ]
+      ],
+      "id": "29d4ce38ead7c8cd"
+    },
+    {
+      "at": "2026-09-20T10:12:34.172481+00:00",
+      "after": "e9f68182a0fa31b1c667573e65ccb83da4239522",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named\", \"tags\": [\"measured\"], \"title\": \"the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens\", \"tags\": [\"reasoning\"], \"title\": \"measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once\", \"fields\": {\"effort\": 2, \"addresses\": [\"the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4\"]}}]",
+      "parents": [
+        "29d4ce38ead7c8cd"
+      ],
+      "assert": [
+        [
+          "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile",
+          "sort",
+          "prop"
+        ],
+        [
+          "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile",
+          "title",
+          "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile"
+        ],
+        [
+          "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named",
+          "sort",
+          "prop"
+        ],
+        [
+          "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named",
+          "supports",
+          "the full gate is progressing rather than stuck: a pytest-xdist worker is at 97.7 percent CPU on test_door_rows.py, which the record already carries as the slowest file, with the other three workers idle under --dist loadfile"
+        ],
+        [
+          "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named",
+          "tags",
+          "measured"
+        ],
+        [
+          "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named",
+          "title",
+          "the log produced 0 new lines in 20 seconds, which alone proves nothing because pytest buffers, so I read the process table instead and found the running test named"
+        ],
+        [
+          "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens",
+          "sort",
+          "prop"
+        ],
+        [
+          "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens",
+          "supports",
+          {
+            "node": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+            "status": "untried"
+          }
+        ],
+        [
+          "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens",
+          "supports",
+          {
+            "node": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+            "relation": "addresses",
+            "target": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+          }
+        ],
+        [
+          "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens",
+          "title",
+          "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens"
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "sort",
+          "approach"
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "addresses",
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "effort",
+          2
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "status",
+          "untried"
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "title",
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "8693be20ad437a94"
+    },
+    {
+      "at": "2026-09-20T10:24:54.809921+00:00",
+      "after": "e9f68182a0fa31b1c667573e65ccb83da4239522",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19\", \"tags\": [\"source\"], \"title\": \"I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it\", \"tags\": [\"source\"], \"title\": \"approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here\", \"tags\": [], \"title\": \"measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix\", \"fields\": {\"effort\": 1, \"addresses\": [\"the analysis still scales badly: 158 modules take 15.6s and 171 take 460.7s, thirty times the cost for eight per cent more program\"]}}]",
+      "parents": [
+        "8693be20ad437a94"
+      ],
+      "assert": [
+        [
+          "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all",
+          "title",
+          "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all"
+        ],
+        [
+          "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open",
+          "sort",
+          "prop"
+        ],
+        [
+          "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open",
+          "title",
+          "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open"
+        ],
+        [
+          "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it",
+          "sort",
+          "prop"
+        ],
+        [
+          "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it",
+          "supports",
+          "approach a28, seeding a fresh solve from an already-solved core and scheduling only the new entries, LANDED; the record still shows it contested and goal g1 still shows stuck and at_risk, so the record's status is stale rather than the work being open"
+        ],
+        [
+          "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it",
+          "tags",
+          "source"
+        ],
+        [
+          "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it",
+          "title",
+          "doors/_order.py's live code routes a registration through _core and CallGraph.extended exactly as a28 describes, with the 97.73s to 2.57s measurement beside it"
+        ],
+        [
+          "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19",
+          "sort",
+          "prop"
+        ],
+        [
+          "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19",
+          "supports",
+          "I read r198 as describing the live state and it does not: the lru_cache(maxsize=2) in doors/_order.py is deliberate, carries its reason, and registrations no longer pass through it at all"
+        ],
+        [
+          "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19",
+          "tags",
+          "source"
+        ],
+        [
+          "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19",
+          "title",
+          "the comment above it says a door from outside the shipped table reaches _core and extended instead, because its entry set is one no other registration shares and so could never hit a cache of any size, and the docstring records the measurement, a full solve at 97.73s against 2.57s for an extension of it, dated 2026-09-19"
+        ],
+        [
+          "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here",
+          "sort",
+          "prop"
+        ],
+        [
+          "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here",
+          "supports",
+          {
+            "node": "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+            "status": "untried"
+          }
+        ],
+        [
+          "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here",
+          "supports",
+          {
+            "node": "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+            "relation": "addresses",
+            "target": "i6"
+          }
+        ],
+        [
+          "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here",
+          "title",
+          "the only claims in the record about this file's cost were written before a28 landed, so both the 460s and the at_risk status are measurements of a tree that no longer exists; one timed run settles whether anything is still owed here"
+        ],
+        [
+          "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "sort",
+          "approach"
+        ],
+        [
+          "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "addresses",
+          "i6"
+        ],
+        [
+          "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "effort",
+          1
+        ],
+        [
+          "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "status",
+          "untried"
+        ],
+        [
+          "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix",
+          "title",
+          "measure test_door_rows.py's current wall cost directly rather than infer it from r39's 460s, which predates the fix"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "569ed80757e9be06"
     }
   ]
 }
