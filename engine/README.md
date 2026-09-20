@@ -12,6 +12,9 @@ MeTTa, Hyperon's AGI language, implemented in SWI-Prolog with C where it pays.
 A host language reaches it through the wire codec rather than a port, so Python,
 TypeScript and C are surfaces over this, not forks of it.
 
+**If you are an LLM, read [llms.txt](../llms.txt)** for the language and every surface, with exact
+return shapes and no prose to guess at.
+
 ## Run it
 
 ```sh

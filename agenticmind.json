@@ -10566,6 +10566,42 @@
         "the seats are independent so the work is genuinely parallel; genius rather than worker because the brief is open-ended design rather than implementation of a settled plan; the brief goes in a file because the skill sanctions it and because a file in the agent's own tree survives the launch and can be re-read after a context loss",
         "launched job_20260920T200930AEST_61375d4f for node and job_20260920T200930AEST_06ab3f3e for cmetta"
       ]
+    },
+    "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent": {
+      "title": "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat": {
+      "title": "libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat",
+      "supports": [
+        "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent"
+      ]
+    },
+    "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal": {
+      "title": "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal"
+    },
+    "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed": {
+      "title": "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed",
+      "supports": [
+        "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file": {
+      "title": "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file"
+    },
+    "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them": {
+      "title": "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them",
+      "supports": [
+        "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -48161,6 +48197,110 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "0426935bf9ffbdd7"
+    },
+    {
+      "at": "2026-09-20T13:45:01.211608+00:00",
+      "after": "36cb7d99b740b268e73200ba6192ccb4b8081351",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat\", \"tags\": [\"reasoning\"], \"title\": \"lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed\", \"tags\": [\"measured\"], \"title\": \"a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them\", \"tags\": [\"measured\"], \"title\": \"contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file\", \"fields\": {}}]",
+      "parents": [
+        "0426935bf9ffbdd7"
+      ],
+      "assert": [
+        [
+          "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal",
+          "sort",
+          "prop"
+        ],
+        [
+          "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal",
+          "title",
+          "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal"
+        ],
+        [
+          "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file",
+          "sort",
+          "prop"
+        ],
+        [
+          "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file",
+          "title",
+          "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file"
+        ],
+        [
+          "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent",
+          "title",
+          "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent"
+        ],
+        [
+          "libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat",
+          "sort",
+          "prop"
+        ],
+        [
+          "libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat",
+          "supports",
+          "lib/README.md is hand-written rather than generated from libdoc.py, even though libdoc's own docstring invites a second template over the same rows, because lib/ is published as MeTTa-Library-Pack and generating its front page from a tool in extensions/python would couple a standalone distribution to another component's toolchain, which is what the component split exists to prevent"
+        ],
+        [
+          "libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat",
+          "title",
+          "libdoc.py writes website/reference/metta-libraries.md from metta.library.rows and is wired into artifacts.py:254; lib/ has its own repository and no dependency on the Python seat"
+        ],
+        [
+          "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed",
+          "supports",
+          "a SIGALRM raised inside a Prolog foreign call corrupts the heap: the in-process example sweep aborted with malloc(): unaligned tcache chunk detected and SIGABRT, exit 134, so per-item timeouts here need a process boundary rather than a signal"
+        ],
+        [
+          "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed",
+          "title",
+          "measured: the alarm version died that way after the no-timeout version hung on a blocking example; the subprocess version with timeout(1) completed"
+        ],
+        [
+          "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them",
+          "supports",
+          "contextlib.redirect_stdout does not catch the engine's output, because SWI writes at the C level rather than through sys.stdout, so 146 of 355 JSON result lines were corrupted by interleaved engine chatter until each worker wrote its result to its own file"
+        ],
+        [
+          "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them",
+          "title",
+          "measured: the jsonl parse recovered 209 of 355 lines; switching to one file per example recovered all of them"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "9c6952b8eb700838"
     }
   ]
 }

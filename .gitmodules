@@ -18,4 +18,4 @@
 	url = https://github.com/MesTTo/TSMeTTa.git
 [submodule "extensions/mork"]
 	path = extensions/mork
-	url = https://github.com/MesTTo/metta-mork.git
+	url = https://github.com/MesTTo/MeTTa-MORK.git

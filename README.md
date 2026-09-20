@@ -1,9 +1,10 @@
 <!--
-Purpose: show what MeTTa is and what each surface can do, through examples that run.
-Guarantees: every python fence executes in a namespace of its own and every metta
-fence runs on the engine [tested: python -m pytest
-extensions/python/tests/repository/test_readme.py -q]; the ts and c fences are the
-text of files their own gates build and run.
+Purpose: show what MeTTa is, how it is put together, and what each surface can
+  do, through examples that run.
+Guarantees: every python fence executes in a namespace of its own and every
+  metta fence runs on the engine [tested: python -m pytest
+  extensions/python/tests/repository/test_readme.py -q]; the ts and c fences are
+  the text of files their own gates build and run.
 -->
 
 # MeTTa
@@ -11,15 +12,71 @@ text of files their own gates build and run.
 MeTTa, Hyperon's AGI language, based on PeTTa semantics with significant
 extensions.
 
-One engine, written in Prolog and C. A host language reaches it through the wire
-codec rather than through a port, so Python, TypeScript and C are what exist
-today, not a limit. **If you are an LLM, read [llms.txt](llms.txt).**
+**If you are an LLM, read [llms.txt](llms.txt)** for the language and every
+surface, with exact return shapes and no prose to guess at.
 
 ```bash
 sudo apt install swi-prolog          # macOS: brew install swi-prolog
                                      # Windows: winget install SWI-Prolog.SWI-Prolog
 pip install 'PyMeTTa[engine]'        # Python
-npm install tsmetta                  # TypeScript; brings its own engine
+npm install tsmetta                  # TypeScript, brings its own engine
+```
+
+# Architecture
+
+One engine, in Prolog and C. Everything else reaches it through a declared
+seam, so each piece is built, versioned and published on its own.
+
+| Component | Repository | What it is |
+|---|---|---|
+| the engine | `engine/` | translator, matcher, spaces, catalog, extension points, the C half |
+| the libraries | [MeTTa-Library-Pack](https://github.com/MesTTo/MeTTa-Library-Pack) | 61 libraries, written in MeTTa over the primitives |
+| the examples | [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | 360 executable programs, the semantics documentation |
+| Python | [PyMeTTa](https://github.com/MesTTo/PyMeTTa) | 104 root exports over 20 modules |
+| integrations | [PyMeTTa-Extensions](https://github.com/MesTTo/PyMeTTa-Extensions) | 17 distributions, each registering one row |
+| TypeScript | [TSMeTTa](https://github.com/MesTTo/TSMeTTa) | on a WebAssembly SWI-Prolog, in your Node process |
+| C | [CMeTTa](https://github.com/MesTTo/CMeTTa) | a C program opens the engine in its own process |
+| a storage backend | [MeTTa-MORK](https://github.com/MesTTo/MeTTa-MORK) | spaces on MORK's Rust trie |
+
+## The four ways in
+
+| To add | You | So that |
+|---|---|---|
+| a surface | speak the wire codec | Python, TypeScript and C are three consumers of one engine, not three engines |
+| a backend | claim your space names and FAIL for the rest | the next provider's clause gets to answer |
+| an integration | register a row against a declared point | the core names no third-party library at all |
+| a library | write MeTTa over the primitives | it survives the engine being replaced |
+
+## Extension points
+
+`engine/ext_points.pl` declares every point in four kinds, and `clauses_from/2`
+fixes who may contribute each.
+
+```prolog
+clauses_from(event,       extension).
+clauses_from(ownership,   extension).
+clauses_from(declaration, extension).
+clauses_from(service,     engine).
+```
+
+A backend claims the names it owns and fails for the rest, which is the whole
+protocol:
+
+```prolog
+seam:foreign_space('&catalogs').
+seam:foreign_capability('&catalogs', match).
+seam:foreign_capability('&catalogs', enumerate).
+seam:foreign_atoms('&catalogs', Row) :- package_catalog_row(Row).
+```
+
+## The catalog
+
+Everything the engine knows about itself is atoms you can query, including what
+each library is and where it came from.
+
+```metta
+!(import! &self (library lib_package))
+!(test (size-atom (collapse (match &catalogs (package $name $path) $name))) 61)
 ```
 
 # The language
@@ -35,6 +92,555 @@ Four kinds, and that is the whole representation.
 !(test (get-metatype (Parent Tom Bob)) Expression)  ; atoms in order
 ```
 
+Terms read and print as themselves.
+
+```metta
+!(test (repr 42) "42")
+!(test (repr "42") "\"42\"")
+!(test (repr (A (B C))) "(A (B C))")
+!(test (repr (A (, B , C ,))) "(A (, B , C ,))")
+!(test (repr 2025_12_12) "2025_12_12")
+!(test (repr ()) "()")
+```
+
+## Spaces and matching
+
+A space is where a program lives, and `match` reads it.
+
+```metta
+(= (matchtrickery)
+   (let* (($t1 (add-atom &self (foo a)))
+          ($t2 (add-atom &self (foo b))))
+         (match &self (foo $1) (bar $1))))
+
+!(test (collapse (matchtrickery))
+       ((bar a) (bar b)))
+```
+
+A pattern's head can be a constant, so the head is just another position.
+
+```metta
+(= (h (justdata haha $B) $C)
+   (+ $B $C))
+
+!(test (h (justdata haha 30) 40) 70)
+```
+
+## Equations
+
+An equation is an atom, so partial application and composition fall out of the
+same rule.
+
+```metta
+(= (mp) (+))
+
+!(test (mp 1 1) 2)
+
+(= (.. $f1 $f2 $arg) ($f1 ($f2 $arg)))
+
+(= (plus1times2) (.. (* 2) (+ 1)))
+
+!(test (plus1times2 1) 4)
+```
+
+## Many answers
+
+Nondeterminism is the default, and `empty` is the answer with no answers.
+
+```metta
+(= (y) (empty))
+
+!(test (collapse (y))
+       ())
+```
+
+`once` commits to the first.
+
+```metta
+(foo 1)
+(foo 2)
+
+(= (match-single $space $pat $ret)
+   (once (match $space $pat $ret)))
+
+!(let $x (match-single &self (foo $1) $1) (add-atom &self (bar $x)))
+
+!(test (collapse (match &self (bar $1) (bar $1)))
+       ((bar 1)))
+```
+
+## Control flow
+
+`if` takes a boolean and two branches.
+
+```metta
+!(test (if True 42) 42)
+```
+
+`case` dispatches on shape.
+
+```metta
+(= (casetest $x)
+   (case $x ((4 42)
+             ($otherpattern 44)
+             ($otherother $45))))
+
+!(test (casetest 5) 44)
+```
+
+`chain` sequences.
+
+```metta
+!(test (chain (+ 2 4) $n (* 3 $n))
+       18)
+
+!(test (chain (+ 1 3) $n (chain (* 2 $n) $m (+ $n $m)))
+       12)
+```
+
+A cut commits to what has been found.
+
+```metta
+(foo 1)
+(foo 2)
+
+(= (match-single $space $pat $ret)
+   (let* (($x (match $space $pat $ret))
+          ($temp (cut)))
+         $x))
+
+!(let $x (match-single &self (foo $1) $1) (add-atom &self (bar $x)))
+
+!(test (collapse (match &self (bar $1) (bar $1)))
+       ((bar 1)))
+```
+
+Recursion under an explicit branch budget.
+
+```metta
+(= (fib $N)
+   (if (< $N 2)
+       $N
+       (+ (fib (- $N 1))
+          (fib (- $N 2)))))
+
+!(test (with-pragma! ((max-stack-depth 100000000)) (fib 30)) 832040)
+```
+
+## Data
+
+Multiset operations over atoms.
+
+```metta
+!(test (unique-atom (a b c d d)) (a b c d))
+!(test (union-atom (a b b c) (b c c d)) (a b b c b c c d))
+!(test (intersection-atom (a b c c) (b c c c d)) (b c c))
+!(test (subtraction-atom (a b b c) (b c c d)) (a b))
+!(test (intersection-atom (a b c c) (b c d)) (b c))
+!(test (intersection-atom (a a a) (a)) (a))
+!(test (subtraction-atom (a a a) (a)) (a a))
+!(test (intersection-atom (a b) ()) ())
+```
+
+## Sequence variables
+
+A pattern child that stands for a run of atoms.
+
+```metta
+!(test (collapse (let ((:seg $pre) SEP (:seg $post)) (a b SEP c SEP d)
+                      (pair $pre $post)))
+       ((pair (a b) (c SEP d)) (pair (a b SEP c) (d))))
+
+!(test (let (row (:seg $r)) (row) $r) ())
+!(test (let (row (:seg $r)) (row a b c) $r) (a b c))
+
+!(test (get-metatype (let (row (:seg $r)) (row a b) $r)) Expression)
+!(test (size-atom (let (row (:seg $r)) (row a b) $r)) 2)
+!(test (car-atom (let (row (:seg $r)) (row a b) $r)) a)
+
+!(test (let (f (:seg $x) g (:seg $x)) (f a b g a b) $x) (a b))
+!(test (collapse (let (f (:seg $x) g (:seg $x)) (f a b g c) $x)) ())
+!(test (let (f (:seg $x) g (:seg $x)) (f 1 g 1.0) took) took)
+
+!(test (collapse (let (f ... g ...) (f a g b c) done)) (done))
+
+!(test (let (f (g ...) b) (f (g 1 2) b) nested) nested)
+!(test (collapse (let (A ... D) (A b c E) never)) ())
+
+!(add-atom &self (edge a b))
+!(add-atom &self (edge b c d))
+!(add-atom &self (tag b hot))
+!(test (collapse (match &self (edge a ... $last) $last)) (b))
+!(test (collapse (match &self (, (edge ... $mid) (tag $mid $heat)) ($mid $heat)))
+       ((b hot)))
+```
+
+## Numbers
+
+```metta
+!(test (exp-math 0) 1.0)
+!(test (exp-math 1.0) 2.718281828459045)
+!(test (< (abs-math (- (exp-math 2.0) (* 2.718281828459045 2.718281828459045))) 1.0e-12) true)
+!(test (< (abs-math (- (log-math 2.718281828459045 (exp-math 3.0)) 3.0)) 1.0e-12) true)
+
+(= (in-range $lo $hi $x) (and (<= $lo $x) (<= $x $hi)))
+!(test (in-range 1 6 (random-int 1 6)) true)
+!(test (in-range 0.0 1.0 (random-float 0.0 1.0)) true)
+!(test (in-range 5 5 (random-int 5 5)) true)
+```
+
+## Python as a notation
+
+```metta
+!(test (repr (py-call (str true))) "True")
+!(test (repr (py-call (str false))) "False")
+!(test (py-call (sorted (true false))) (false true))
+!(test (py-call (len (true false true))) 3)
+!(test (py-call (isinstance true (py-call (type false)))) true)
+!(test (py-call (bool 1)) true)
+!(test (py-call (bool 0)) false)
+!(test (py-call (.bit_length true)) 1)
+!(test (repr (py-call (.upper abc))) "ABC")
+```
+
+## Types
+
+Optional, and parametric.
+
+```metta
+(: apply (-> (-> $tx $ty) $tx $ty))
+(= (apply $f $x) ($f $x))
+!(apply not False) ; True
+!(get-type (apply not False))
+!(test (let (get-type apply) (-> (-> Bool Bool) Bool $result) $result)
+       Bool)
+```
+
+## Errors and refusals
+
+A refusal names what went wrong rather than failing silently.
+
+```metta
+!(test (throw (my-ball 1)) (Error (throw (my-ball 1)) (my-ball 1)))
+!(test (throw "text") (Error (throw "text") "text"))
+
+!(test (if-error (throw oops) caught fine) caught)
+!(test (if-error 42 caught fine) fine)
+!(test (return-on-error (throw oops) carried-on) (Error (throw oops) oops))
+!(test (return-on-error 42 carried-on) carried-on)
+
+!(test (throw (Error (inner 1) because)) (Error (inner 1) because))
+!(test (throw (throw first)) (Error (throw first) first))
+
+(= (half $n) (if (== (% $n 2) 0) (/ $n 2) (throw (odd $n))))
+!(test (half 10) 5)
+!(test (half 7) (Error (throw (odd 7)) (odd 7)))
+!(test (if-error (half 7) refused (half 7)) refused)
+
+!(test (trace! "the answer" 42) 42)
+!(test (+ 1 (trace! "adding one to" 41)) 42)
+!(test (trace! (half 10) (half 10)) 5)
+
+!(test (trace! (checking (odd 7)) ok) ok)
+```
+
+## Testing
+
+Every example checks itself, using the same forms you would.
+
+```metta
+!(import! &self (library lib_he))
+
+(= (add 1 2) 3)
+
+!(test (id 5) 5)
+
+!(test (=alpha (Father $X) (Father $Y)) True)
+
+!(test (=alpha (Father $X) (Son $X)) False)
+
+!(test (if-equal 1 1 "Equal" "Not Equal") "Equal")
+```
+
+## Seeing your program
+
+```metta
+!(import! &self (library lib_string))
+
+!(test (> (current-time) 1700000000.0) True)
+
+!(test (<= (current-time) (current-time)) True)
+
+!(test (format-time "abc") abc)
+!(test (== (format-time "abc") "abc") False)
+!(test (string-length (format-time "a literal")) 9)
+!(test (string-length (format-time "")) 0)
+!(test (string-length (format-time "%%")) 1)
+
+!(test (string-length (format-time "%Y")) 4)
+!(test (string-length (format-time "%Y-%m-%d")) 10)
+!(test (string-length (format-time "%H:%M:%S")) 8)
+
+!(test (collapse (argv 999)) ())
+!(test (collapse (argv -1)) ())
+
+!(test (== (argv 0) (argv 0)) True)
+
+(= (argument-or $index $default)
+   (let $found (collapse (argv $index))
+        (if (== $found ()) $default (car-atom $found))))
+!(test (argument-or 999 no-such-argument) no-such-argument)
+!(test (== (argument-or 0 no-such-argument) no-such-argument) False)
+```
+
+## Events and standing queries
+
+```metta
+!(test (match &metta (vocabulary delivery $a $b $c) ($a $b $c))
+       (at-most-once at-least-once per-write-exactly))
+!(test (match &metta (vocabulary event-order $a $b) ($a $b))
+       (ordered unordered))
+!(test (match &metta (kind events $ctx $delivery $order) $delivery)
+       (one-of delivery))
+
+!(test (if-error (catch (add-atom &metta (events &feed eventually)))
+                 refused admitted)
+       refused)
+
+!(add-atom &native-events (reading 1))
+!(test (collapse (match &metta (events &native-events $d $o) declared)) ())
+
+!(test (match &metta (vocabulary agenda-policy $a $b $c $d $e) ($a $b $c $d $e))
+       (declaration recency specificity priority user))
+!(test (match &metta (policy reaction-order $knob $default) ($knob $default))
+       (agenda declaration))
+!(test (match &metta (kind agenda $ctx $policy $fn) $policy)
+       (one-of agenda-policy))
+
+!(test (match &metta (kind on $ctx $pattern $op $priority) $priority)
+       (optional integer))
+```
+
+## Concurrency
+
+```metta
+!(add-atom &Point (: Point (-> Number Number Point)))
+!(add-atom &Point (= (Point-x (Point $x $y)) $x))
+!(add-atom &Point (= (Point-y (Point $x $y)) $y))
+
+!(add-atom &Point
+  (= (Point-norm (Point $x $y)) (sqrt-math (+ (* $x $x) (* $y $y)))))
+
+!(add-atom &Point
+  (= (Point-add (Point $x1 $y1) (Point $x2 $y2)) (Point (+ $x1 $x2) (+ $y1 $y2))))
+
+!(add-atom &Point
+  (= (Point-quadrant $p)
+     (case $p (((Point 0 0) origin) ((Point 0 $y) axis) ((Point $x $y) plane)))))
+
+!(add-atom &self (from &Point))
+
+!(test (Point-norm (Point 3 4)) 5.0)
+!(test (Point-add (Point 1 2) (Point 3 4)) (Point 4 6))
+!(test (Point-quadrant (Point 0 0)) origin)
+!(test (Point-quadrant (Point 0 4)) axis)
+!(test (Point-quadrant (Point 3 4)) plane)
+!(test (== (Point-add (Point 1 2) (Point 3 4)) (Point 4 6)) True)
+```
+
+## Worlds and state
+
+```metta
+!(bind! state (new-state rest))
+!(test (get-state state) rest)
+
+!(test (change-state! state active) true)
+!(test (get-state state) active)
+
+!(test (get-type (new-state 5)) (StateMonad Number))
+!(test (get-type (new-state "hi")) (StateMonad String))
+
+!(test (let $cell (new-state 1)
+            (let $_ (change-state! $cell 2) (get-state $cell)))
+       2)
+```
+
+## Performance
+
+Memoisation is a library, not a keyword.
+
+```metta
+!(import! &self (library lib_memo))
+
+!(memoize sq)
+(= (sq $x) (* $x $x))
+
+!(test (sq 9) 81)
+!(test (sq 9) 81)
+!(test (sq 9) 81)
+```
+
+## Spaces backed by anything
+
+A space of your own, inheriting what it does not answer.
+
+```metta
+!(add-atom &family-parent (edge a b))
+!(add-atom &family-parent (parent-only kept))
+!(add-atom &family-parent (layer parent))
+!(new-space &family-child (inherits &family-parent))
+!(add-atom &family-child (edge b c))
+!(add-atom &family-child (child-only local))
+!(add-atom &family-child (layer child))
+
+!(test (collapse (match &family-child
+                         (, (edge $x $y) (edge $y $z))
+                         ($x $z)))
+       ((a c)))
+
+!(test (collapse (match &family-child (layer $x) $x)) (child parent))
+!(test (space-atom-count &family-child) 3)
+
+!(test (collapse (match &family-parent (parent-only $x) $x)) (kept))
+!(test (collapse (match &family-child (parent-only $x) $x)) (kept))
+!(test (collapse (match &family-parent (child-only $x) $x)) ())
+```
+
+Rows in a CSV file, queried as atoms.
+
+```metta
+!(import! &self (library lib_csv))
+!(import! &self (library lib_file))
+
+!(bind! &csv-path (temp-path! "metta-csv-example"))
+!(write-file! &csv-path "id,amount\n001,12.50\n002,9\n002,9\n")
+!(bind! &sales (csv-space &csv-path))
+
+!(test (collapse (match &sales (row $id $amount) ($id $amount)))
+       (("id" "amount") ("001" "12.50") ("002" "9") ("002" "9")))
+!(test (match &sales (row "001" $amount) (parse-number $amount)) 12.5)
+
+!(write-file! &csv-path "003,42\n")
+!(test (collapse (match &sales (row $id $amount) ($id $amount)))
+       (("003" "42")))
+!(delete-file! &csv-path)
+```
+
+## A reasoner
+
+```metta
+(= (myf $M)
+   (and (and (member a $M)
+             (member b $M))
+        (== (size-atom $M) 2)))
+
+!(test (if (once (myf $M)) $M)
+       (a b))
+```
+
+## Weighted answers
+
+```metta
+!(import! &self (library lib_pln))
+
+(= (STV A) (stv 0.5 0.9))
+(= (STV B) (stv 0.25 0.9))
+(= (STV C) (stv 0.25 0.9))
+(= (STV D) (stv 0.5 0.9))
+
+(= (kb)
+   ((Sentence ((Inheritance A B) (stv 0.25 0.9)) (1))
+    (Sentence ((Inheritance A C) (stv 0.25 0.9)) (2))
+    (Sentence ((Inheritance B D) (stv 0.5 0.9)) (3))
+    (Sentence ((Inheritance C D) (stv 0.5 0.9)) (4))
+   ))
+
+!(test (with-pragma! ((max-stack-depth 100000000))
+                     (PLN.Query (kb) (Inheritance A D)))
+       ((stv 0.5 0.9473684210526316) (1 2 3 4)))
+```
+
+## Search
+
+```metta
+!(add-atom &self (= (fib $N)
+                    (if (< $N 2)
+                        $N
+                        (+ (fib (- $N 1))
+                           (fib (- $N 2))))))
+
+!(test (with-pragma! ((max-stack-depth 100000000)) (fib 30)) 832040)
+```
+
+## Extending the engine
+
+A translator rule changes what a form compiles to.
+
+```metta
+(= (runtime42 $arg)
+   (cons 42 $arg))
+
+(= (compileeval42 $arg)
+   (cons 42 $arg))
+
+(= (compile42 $arg)
+   (noeval (cons 42 $arg)))
+
+!(add-translator-rule! compileeval42)
+!(add-translator-rule! compile42)
+
+!(test (runtime42 (43)) (42 43))
+!(test (compileeval42 (43)) (42 43))
+!(test (compile42 (43)) (42 43))
+```
+
+Prolog underneath, when you want it.
+
+```metta
+!(test (progn (translatePredicate (is $x 2))
+              (translatePredicate (+ $x 40 $z)) $z)
+       42)
+```
+
+MeTTa's own evaluator, written in MeTTa.
+
+```metta
+(: myinterpreter (-> Atom %Undefined%))
+(= (myinterpreter $code)
+   (let $temp (println! ("Runtime-interpreting code" $code))
+        (eval $code)))
+
+(= (w) 42)
+(= (v) 43)
+
+!(test (myinterpreter (if (== 1 1) (w) (v))) 42)
+!(test (myinterpreter (if (== 1 2) (w) (v))) 43)
+```
+
+`git-import!` fetches and builds a library from source; see
+[the example](examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/06-git_import.metta).
+# PyMeTTa
+
+`pip install PyMeTTa`. 104 root exports over 20 public modules.
+[Repository](https://github.com/MesTTo/PyMeTTa) ·
+[llms.txt](extensions/python/llms.txt)
+
+| Feature | Doors |
+|---|---|
+| Terms | `S`, `V`, `G`, operators on variables, the bracket door for heads outside identifier grammar |
+| Spaces | `space`, `add`, `del`, `match`, `eval`, `atoms`, `len`, nested spaces, views |
+| Querying | conjunctions as joins, `where=`, prepared `solve` with `given=`, `to_dicts`, `to_df` |
+| Defining | `@m.define`, `@m.pure`, `@m.reads`, `equation(...).to(...)`, `lower`, `trace` |
+| Types | `metta.typing`, arrow types, `cast`, bounds, `-> Type` annotations |
+| Algebras | `counting`, `prov`, `prob`, `tropical`, and the rest of `Semiring` |
+| Concurrency | `EnginePool`, `ProcessPool`, `Scope`, `Channel`, `par_map`, `race`, `spawn` |
+| Reactivity | `subscribe`, `Event`, `Subscription`, `Live`, `Changes`, `Delta` |
+| Remote | `serve`, `connect`, `RemoteSpace`, `Gateway`, Bearer tokens, `authorize` |
+| Foreign spaces | `SpaceProvider` and 20 capability protocols |
+| Integrations | `metta.integrate` over the `metta.extensions` entry-point group |
+| Observability | `m.stats()`, `m.trace()`, `m.debug()`, `m.record()` |
+| Testing | Hypothesis strategies, `SpaceComplianceSuite`, `GatewayComplianceSuite`, `Laws` |
+
 Atoms are built, never parsed.
 
 ```python
@@ -46,8 +652,6 @@ assert str(S.f(V.x) & S.g(V.x)) == "(and (f $x) (g $x))"
 assert str(V.age.ge(18)) == "(>= $age 18)"     # an operator by its own name
 assert str(S["prime?"](V.n)) == "(prime? $n)"  # brackets for a head with no name
 ```
-
-## Spaces and matching
 
 A space is a store you query, and a conjunction is a join.
 
@@ -81,21 +685,7 @@ assert grand.solve().to_dicts() == [{"x": "Tom", "y": "Bob", "z": "Ann"}]
 assert len(grand.solve(given=[S.Parent(S.Ann, S.Zoe)])) == 2
 ```
 
-`match` reads the space a program lives in.
-
-```metta
-(= (matchtrickery)
-   (let* (($t1 (add-atom &self (foo a)))
-          ($t2 (add-atom &self (foo b))))
-         (match &self (foo $1) (bar $1))))
-
-!(test (collapse (matchtrickery))
-       ((bar a) (bar b)))
-```
-
-## Equations
-
-An equation is an atom, so a definition is something you add.
+Equations are atoms, so a definition is something you add.
 
 ```python
 from metta import S, V, equation, space
@@ -111,21 +701,7 @@ heads = {str(row.head) for row in m.match(equation(V.head).to(V.body))}
 assert "(price apple)" in heads           # the program can read itself
 ```
 
-Partial application and composition fall out of the same rule.
-
-```metta
-(= (mp) (+))
-
-!(test (mp 1 1) 2)
-
-(= (.. $f1 $f2 $arg) ($f1 ($f2 $arg)))
-
-(= (plus1times2) (.. (* 2) (+ 1)))
-
-!(test (plus1times2 1) 4)
-```
-
-Python functions become equations the engine holds.
+Python functions become equations the engine holds, and they run backwards.
 
 ```python
 from metta import space
@@ -151,8 +727,6 @@ assert fib(10) == [55]           # callable from Python, answers a list
 assert fib.py(10) == 55          # and the Python twin stays callable
 ```
 
-They run backwards, with no second definition.
-
 ```python
 from metta import S, V, space
 
@@ -168,137 +742,19 @@ assert m.solve(5, V.p + 2).p == 3         # every operator solves for its slot
 assert m.solve(12, V.q * 4).q == 3
 ```
 
-## Many answers
-
-Nondeterminism is the default, and one call returns all of it.
-
-```python
-from metta import S, space
-
-m = space()
-assert sorted(a.value for a in m.eval(S.superpose((1, 2, 3)))) == [1, 2, 3]
-```
-
-`once` commits to the first answer.
-
-```metta
-(foo 1)
-(foo 2)
-
-(= (match-single $space $pat $ret)
-   (once (match $space $pat $ret)))
-
-!(let $x (match-single &self (foo $1) $1) (add-atom &self (bar $x)))
-
-!(test (collapse (match &self (bar $1) (bar $1)))
-       ((bar 1)))
-```
-
-## Control flow
-
-`case` dispatches on shape.
-
-```metta
-(= (casetest $x)
-   (case $x ((4 42)
-             ($otherpattern 44)
-             ($otherother $45))))
-
-!(test (casetest 5) 44)
-```
-
-Recursion under an explicit branch budget.
-
-```metta
-(= (fib $N)
-   (if (< $N 2)
-       $N
-       (+ (fib (- $N 1))
-          (fib (- $N 2)))))
-
-!(test (with-pragma! ((max-stack-depth 100000000)) (fib 30)) 832040)
-```
-
-## Data
-
-Multiset operations over atoms.
-
-```metta
-!(test (unique-atom (a b c d d)) (a b c d))
-!(test (union-atom (a b b c) (b c c d)) (a b b c b c c d))
-!(test (intersection-atom (a b c c) (b c c c d)) (b c c))
-!(test (subtraction-atom (a b b c) (b c c d)) (a b))
-!(test (intersection-atom (a b c c) (b c d)) (b c))
-!(test (intersection-atom (a a a) (a)) (a))
-!(test (subtraction-atom (a a a) (a)) (a a))
-!(test (intersection-atom (a b) ()) ())
-```
-
-A Python object is a grounded atom, and a dataclass needs no wrapper.
-
-```python
-from dataclasses import dataclass
-
-from metta import S, space
-
-m = space()
-
-@m.define
-@dataclass(frozen=True)
-class Vector:
-    x: int
-    y: int
-
-    def __add__(self, other: "Vector") -> "Vector":   # -> (= (Vector-add (Vector $x $y) (Vector $x2 $y2)) ...)
-        return Vector(self.x + other.x, self.y + other.y)
-
-@m.define
-def doubled(v: Vector) -> Vector:                     # -> (Vector:dispatch:add $v $v), the method's own entry
-    return v + v
-
-assert Vector(1, 2) + Vector(3, 4) == Vector(4, 6)
-assert m.eval(S.doubled(Vector(1, 2))) == [S.Vector(2, 4)]
-```
-
-## Types
-
-Types are optional atoms, and parametric.
-
-```metta
-(: apply (-> (-> $tx $ty) $tx $ty))
-(= (apply $f $x) ($f $x))
-!(apply not False) ; True
-!(get-type (apply not False))
-!(test (let (get-type apply) (-> (-> Bool Bool) Bool $result) $result)
-       Bool)
-```
-
-Declared in Python, read back from the engine.
+Rows are dicts, dataframes or Arrow.
 
 ```python
 from metta import S, V, space
 
 m = space()
-m.run("(: Ann Person)")
-m.run("(: age (-> Person Number))")
-assert str(m.eval(S["get-type"](S.Ann))[0]) == "Person"
+m.add(S.user(1, "Ada"), S.user(2, "Bob"))
+rows = m.match(S.user(V.id, V.name))
+assert rows.to_dicts() == [{"id": 1, "name": "Ada"}, {"id": 2, "name": "Bob"}]
+assert len(rows) == 2
 ```
 
-A typed mismatch is refused by name.
-
-```python
-from metta import space
-
-m = space()
-m.run("(: twice (-> Number Number))")
-m.run("(= (twice $x) (* 2 $x))")
-answers = m.run('!(twice "not a number")')
-assert "BadArgType" in str(answers[0][0])     # refused by name, not silently
-```
-
-## Transactions
-
-All of it, or none of it.
+Transactions roll back.
 
 ```python
 from metta import S, space
@@ -316,39 +772,7 @@ except RuntimeError:
 assert len(m) == 0                # the add was rolled back
 ```
 
-## State
-
-A cell you can change, with the change visible to matching.
-
-```python
-from metta import space
-
-m = space()
-m.run("!(bind! &counter (new-state 0))")
-m.run("!(change-state! &counter 1)")
-assert str(m.run("!(get-state &counter)")[0][0]) == "1"
-```
-
-## Events and standing queries
-
-A query that stays open and tells you what changed.
-
-```python
-from metta import S, V, space
-
-m = space()
-seen = []
-m.subscribe(S.Alarm(V.what), seen.append)
-m.add(S.Alarm(S.fire))
-
-assert [str(event.atom) for event in seen] == ["(Alarm fire)"]
-assert str(seen[0].bindings["what"]) == "fire"
-```
-
-## Multithreading and concurrency
-
-Branches run on real threads over one shared space and answer in completion
-order.
+Real threads over one shared space, answering in completion order.
 
 ```python
 import metta
@@ -369,90 +793,19 @@ assert sorted(a.value for a in m.parallel(S.above(10), S.above(20))) == [1, 2]
 assert str(m.eval(metta.par_map(S.above, (10, 20)))[0]) == "(2 1)"
 ```
 
-Each pool worker gets its own attached engine, so the calls are genuinely
-concurrent.
+Standing queries.
 
 ```python
-from metta import space
+from metta import S, V, space
 
 m = space()
-with m.pool(2) as pool:
-    assert sorted(pool.map(lambda n: n * 2, [1, 2, 3])) == [2, 4, 6]
+seen = []
+m.subscribe(S.Alarm(V.what), seen.append)
+m.add(S.Alarm(S.fire))
+
+assert [str(event.atom) for event in seen] == ["(Alarm fire)"]
+assert str(seen[0].bindings["what"]) == "fire"
 ```
-
-Every blocking door has an `await` form.
-
-```python
-import asyncio
-import metta
-from metta import S, V
-
-async def main():
-    async with await metta.aio.connect() as m:
-        await m.add(S.edge(S.a, S.b))
-        rows = await m.match(S.edge(V.x, V.y))
-        return rows.to_dicts()
-
-assert asyncio.run(main()) == [{"x": "a", "y": "b"}]
-```
-
-## Performance
-
-Memoisation is a library, not a keyword.
-
-```python
-from metta import space
-
-m = space()
-m.run("""
-!(import! &self (library lib_memo))
-(= (sq $x) (* $x $x))
-!(memoize sq)
-""")
-assert str(m.run("!(sq 9)")[0][0]) == "81"
-```
-
-```metta
-!(import! &self (library lib_memo))
-
-!(memoize sq)
-(= (sq $x) (* $x $x))
-
-!(test (sq 9) 81)
-!(test (sq 9) 81)
-!(test (sq 9) 81)
-```
-
-Counters are deterministic, so they gate where wall clock cannot.
-
-```python
-from metta import space
-
-m = space()
-with m.stats() as s:
-    m.run("!(+ 1 2)")
-assert s.inferences > 0
-```
-
-## Seeing your program
-
-Every reduction, with its port.
-
-```python
-from metta import S, space
-
-m = space()
-
-@m.define
-def twice(x: int) -> int:
-    return 2 * x
-
-events = m.trace(S.twice(4))
-assert [e.kind for e in events].count("call") >= 1
-assert events.stopped is None      # the run finished; no bound cut it
-```
-
-## Spaces backed by anything
 
 Implement one method and the engine queries your data as atoms.
 
@@ -473,8 +826,6 @@ rows = metta.space("&catalogue").match(S.user(V.id, V.name))
 assert rows.to_dicts() == [{"id": 1, "name": "Ada"}, {"id": 2, "name": "Bob"}]
 ```
 
-## Serving and auth
-
 Serve a space over HTTP.
 
 ```python
@@ -487,25 +838,6 @@ with remote.serve(m, spaces=[m.name]) as server:
     server.url          # another process attaches to this
 ```
 
-Attach to one, in-process through a Gateway.
-
-```python
-import metta
-from metta import S, V, space, remote
-
-server_space = space()
-server_space.add(S.edge(S.a, S.b), S.edge(S.b, S.c))
-
-# In ONE process the transport is a Gateway: janus holds the GIL across a
-# Prolog call, so an HTTP attach here is refused with this remedy named.
-metta.attach("&warehouse", remote.RemoteSpace(
-    remote.Gateway(server_space, [server_space.name]), str(server_space.name)))
-edges = metta.space("&warehouse").match(S.edge(V.x, V.y))
-assert edges.to_dicts() == [{"x": "a", "y": "b"}, {"x": "b", "y": "c"}]
-```
-
-## Integrating a library
-
 No wrapper, no registry entry, no hardcoded name.
 
 ```python
@@ -517,142 +849,6 @@ m = space()
 module_ops(m, math, ["sqrt", "gcd"], effect="pureStructural")
 assert list(m.fn.sqrt(16.0)) == [4.0]
 ```
-
-## Extending the engine
-
-MeTTa's own evaluator, written in MeTTa.
-
-```metta
-(: myinterpreter (-> Atom %Undefined%))
-(= (myinterpreter $code)
-   (let $temp (println! ("Runtime-interpreting code" $code))
-        (eval $code)))
-
-(= (w) 42)
-(= (v) 43)
-
-!(test (myinterpreter (if (== 1 1) (w) (v))) 42)
-!(test (myinterpreter (if (== 1 2) (w) (v))) 43)
-```
-
-`git-import!` fetches and builds a library from source; see
-[the example](examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/06-git_import.metta).
-
-# PyMeTTa
-
-`pip install PyMeTTa`. 104 root exports over 20 public modules, and the 61
-libraries of the Library Pack. Repository:
-[MesTTo/PyMeTTa](https://github.com/MesTTo/PyMeTTa).
-
-Rows are dicts, dataframes or Arrow, whichever you ask for.
-
-```python
-from metta import S, V, space
-
-m = space()
-m.add(S.user(1, "Ada"), S.user(2, "Bob"))
-rows = m.match(S.user(V.id, V.name))
-assert rows.to_dicts() == [{"id": 1, "name": "Ada"}, {"id": 2, "name": "Bob"}]
-assert len(rows) == 2
-```
-
-The Library Pack is discoverable, not documentation.
-
-```python
-from metta.library import roster
-
-libraries = roster()
-assert len(libraries) == 61          # the Library Pack, derived not counted
-assert "lib_memo" in libraries
-```
-
-Hypothesis strategies over atoms, plus compliance suites for a space or a
-gateway.
-
-```python
-from metta import testing
-
-# Hypothesis strategies over atoms, plus a corpus every codec must round-trip.
-assert len(testing.codec_corpus()) == 11
-assert testing.symbols() is not None and testing.expressions() is not None
-```
-
-A linter over a space.
-
-```python
-from metta import lint, space
-
-m = space()
-assert isinstance(lint.lint(m), list)
-```
-
-Called or lowered: the body stays Python and the engine calls it, or the body
-*becomes* equations and no Python runs.
-
-```python
-import statistics
-
-from metta import space
-
-m = space()
-
-# CALLED: the body stays Python and the engine calls it, so a Python library
-# is simply in scope. The decorator says what it may observe, the one thing
-# the engine cannot see for itself; transport="raw" hands it Python values.
-@m.pure(transport="raw")
-def spread(values) -> float:
-    return statistics.pstdev(values)
-
-# LOWERED: the body BECOMES equations. No Python at run time and no effect to
-# declare, because now the engine can read the code -- a comprehension is
-# MeTTa's own filter-atom and map-atom, written the way Python writes them.
-@m.define
-def loud(readings, limit: int):
-    return [value for value in readings if value > limit]
-
-assert list(m.fn.spread([1, 2, 3, 4]))[0].value == statistics.pstdev([1, 2, 3, 4])
-assert str(loud((7, 12, 30), 10)[0]) == "(12 30)"
-assert loud.effect == "pureStructural"         # derived, not declared
-```
-
-```python
-import metta
-from metta import S, V, space
-
-m = space()
-
-@m.pure
-def upto(n: int):
-    yield from range(1, n + 1)
-
-assert sorted(a.value for a in m.fn.upto(3)) == [1, 2, 3]
-
-lifted = metta.reflection.match(S.effect(S.upto, V.e))
-assert [str(row.e) for row in lifted] == ["nondeterministicReadOnly"]
-```
-
-**Also in the box.** `metta.vocabularies` names 49 closed value sets
-(`Semiring`, `EffectClass`, `Determinism`, `CachePolicy`, `Volatility`,
-`Delivery`); `metta.foreign` has 20 capability protocols (`Matcher`,
-`BulkAdder`, `Transactional`, `Snapshotter`, `Planner`, `WorldCommitter`);
-`metta.seam` exposes `arrow`, `arrow_stream`, `ipc`, `sql`, `sql_function`,
-`array`, `frame`, `graphql`, `image`; `metta.remote` carries Bearer tokens,
-arbitrary headers and an `authorize` hook; namespace doors mount an HTTP or
-GraphQL endpoint as a space; `metta.parallel` adds `Channel`, `Scope`, `race`,
-`spawn`, `every` and `move_on_after`; and there is a packaged CLI, a pytest
-plugin and an IPython extension with a Pygments lexer.
-
-Integrations are separate distributions the seam discovers, never names:
-
-```bash
-pip install 'PyMeTTa[dataframes]'    # metta-pandas, metta-polars
-pip install 'PyMeTTa[arrays]'        # metta-arrays, metta-numpy, metta-faiss
-pip install 'PyMeTTa[arrow]'         # metta-nanoarrow, metta-pyarrow
-pip install 'PyMeTTa[sql]'           # metta-duckdb, metta-sqlite
-```
-
-See [MesTTo/PyMeTTa-Extensions](https://github.com/MesTTo/PyMeTTa-Extensions);
-[EXTENDING.md](EXTENDING.md) shows how to write your own, in about thirty lines.
 
 ## Example
 
@@ -726,19 +922,21 @@ assert all(name in found.why().render() for name in ("abc", "p1", "p2", "p4", "p
 
 `npm install tsmetta`. The engine is a WebAssembly SWI-Prolog inside your Node
 process, so there is nothing to install, and the same code runs in a browser.
-Repository: [MesTTo/TSMeTTa](https://github.com/MesTTo/TSMeTTa).
+[Repository](https://github.com/MesTTo/TSMeTTa) ·
+[llms.txt](extensions/node/llms.txt)
 
-**The surface.** `S` and `V` proxies with camelCase reaching MeTTa's hyphens
-(`fn.carAtom` is `car-atom`); `space`, `spaces`, `view`, `State`, `ScopeHandle`,
-`World`, `Limits`, `Stats`; `answers`, `matching`, `derivation`, `strategies`,
-`schema`; `define` with `trace` and `lower`; `algebra` with the same semirings
-as Python; `parallel` for `race`, `merge` and `parMap`; `events` with
-`EventStream`, `Fold`, `publish` and `stream`; `subscribe`; `remote` and `saga`;
-`seam`, `provider`, `integrate`, `library`, `convert`, `factories`; `cli`,
-`lint`, `manifest`, `present`, `config`, `random`, `paths`, `naming`; and one
-`platform` module with a Node and a browser implementation.
-
-## Example
+| Feature | Surface |
+|---|---|
+| Terms | `S`, `V`, `fn`, camelCase reaching MeTTa's hyphens, `Term` |
+| Spaces | `space`, `spaces`, `view`, `State`, `ScopeHandle`, `World`, `Limits`, `Stats` |
+| Answers | `answers`, `matching`, `derivation`, `strategies`, `schema` |
+| Defining | `define`, `trace`, `lower` |
+| Algebras | `algebra` |
+| Concurrency | `parallel`: `race`, `merge`, `parMap` |
+| Reactivity | `events`: `EventStream`, `Fold`, `publish`, `stream`; `subscribe` |
+| Remote | `remote`, `saga` |
+| Extending | `seam`, `provider`, `integrate`, `library`, `convert`, `factories` |
+| Tooling | `cli`, `lint`, `manifest`, `present`, `config`, `random`, `paths`, `naming` |
 
 ```ts
 import { metta, S, type Term, V } from "tsmetta";
@@ -779,25 +977,21 @@ m.dispose();
 # CMeTTa
 
 A C program opens the engine in its own process, builds terms and asks.
-Repository: [MesTTo/CMeTTa](https://github.com/MesTTo/CMeTTa).
+[Repository](https://github.com/MesTTo/CMeTTa) ·
+[llms.txt](extensions/cmetta/llms.txt)
 
-**The surface.** `mt_open`, `mt_close`, `mt_verbose`, `mt_thread_attach`;
-constructors `mt_sym`, `mt_var`, `mt_text`, `mt_num`, `mt_real`, `mt_bool`,
-`mt_unit`, `mt_bigint`, `mt_rational`, `mt_spaceref`, `mt_exprv`, every one
-`MT_MUST_USE`; explicit refcounting through `mt_keep` and `mt_drop`, so
-ownership is in the signature; `mt_kind_of`, `mt_name`, `mt_int`, `mt_float`,
-`mt_truth`, `mt_ratio_of`, `mt_len`, `mt_at`, `mt_eq`, `mt_hash`; `mt_unify`,
-`mt_bindings_*` and `mt_substitute` exposed directly; `mt_self`, `mt_catalog`,
-`mt_space_open` and the add/del/match/eval/atoms/count/wipe set; `mt_run`,
-`mt_load`, `mt_do`, then `mt_next` or `mt_row_next` and `mt_bound`; `mt_parse`,
-`mt_show`, `mt_write_dup`; and no exceptions: `mt_error`, `mt_errmsg`,
-`mt_remedy` and `mt_ground` mean a refusal names its own fix.
-
-`mt_def` installs a C function as a MeTTa head with its effect class declared.
-`mt_lower` installs equations from C tokens the compiler already checked, so an
-unbalanced parenthesis is a compile error rather than a runtime one.
-
-## Example
+| Feature | Doors |
+|---|---|
+| Runtime | `mt_open`, `mt_close`, `mt_verbose`, `mt_thread_attach`, `mt_thread_detach` |
+| Constructors | `mt_sym`, `mt_var`, `mt_text`, `mt_num`, `mt_real`, `mt_bool`, `mt_unit`, `mt_bigint`, `mt_rational`, `mt_spaceref`, `mt_exprv` |
+| References | `mt_keep`, `mt_drop` |
+| Inspection | `mt_kind_of`, `mt_name`, `mt_int`, `mt_float`, `mt_truth`, `mt_len`, `mt_at`, `mt_eq`, `mt_hash` |
+| Unification | `mt_unify`, `mt_unifyv`, `mt_bindings_*`, `mt_substitute` |
+| Spaces | `mt_self`, `mt_catalog`, `mt_space_open`, add/del/match/eval/atoms/count/wipe |
+| Answers | `mt_run`, `mt_load`, `mt_do`, `mt_next`, `mt_row_next`, `mt_bound` |
+| Text | `mt_parse`, `mt_show`, `mt_write_dup`, `mt_free` |
+| Errors | `mt_error`, `mt_errmsg`, `mt_remedy`, `mt_ground`, `mt_ok`, `mt_clear` |
+| Defining | `mt_def` for a C function, `mt_lower` for equations from C tokens |
 
 ```c
 #define MT_SHORTHAND
@@ -884,30 +1078,15 @@ int main(void)
 }
 ```
 
-# The repositories
-
-| Repository | What it is |
-|---|---|
-| [MeTTa](https://github.com/MesTTo/MeTTa) | this one: the engine, the libraries and all three surfaces, mounted together |
-| [MeTTa-Library-Pack](https://github.com/MesTTo/MeTTa-Library-Pack) | the 61 standard libraries, written in MeTTa |
-| [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | the example corpus this page draws from, counted in llms.txt |
-| [PyMeTTa](https://github.com/MesTTo/PyMeTTa) | the Python surface |
-| [PyMeTTa-Extensions](https://github.com/MesTTo/PyMeTTa-Extensions) | integrations, each a separate distribution |
-| [TSMeTTa](https://github.com/MesTTo/TSMeTTa) | the TypeScript surface |
-| [CMeTTa](https://github.com/MesTTo/CMeTTa) | the C surface |
-| [MeTTa-MORK](https://github.com/MesTTo/MeTTa-MORK) | spaces backed by MORK's Rust trie |
-
 # Documentation
 
-- [llms.txt](llms.txt): the language and every surface, with exact return
-  shapes. A gate checks its names against the live engine.
-- [extensions/python/llms.txt](extensions/python/llms.txt): the Python library
-  alone.
-- [examples/](examples/): 360 examples in 22 chapters, every one run by the
-  gate, so none of it is stale.
-- [EXTENDING.md](EXTENDING.md): writing an integration.
-- [CONTRIBUTING.md](CONTRIBUTING.md): working on this repository.
-- [SECURITY.md](SECURITY.md): reporting a vulnerability.
+| Read | For |
+|---|---|
+| [llms.txt](llms.txt) | the language and every surface, exact return shapes, gate-checked names |
+| [examples/](examples/) | 360 programs in 22 chapters, every one run by the gate |
+| [EXTENDING.md](EXTENDING.md) | writing an integration |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | working on this repository |
+| [SECURITY.md](SECURITY.md) | reporting a vulnerability |
 
 ## Citing
 
@@ -921,7 +1100,7 @@ int main(void)
 
 @software{metta_kernel,
   author  = {MesTTo},
-  title   = {MeTTa},
+  title   = {MeTTa Kernel},
   url     = {https://github.com/MesTTo/MeTTa},
   version = {0.8.0}
 }

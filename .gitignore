@@ -70,3 +70,6 @@ pypi.txt
 
 # Lock directory the record tool uses at runtime; the record itself is agenticmind.json.
 .agenticmind/
+
+# Notes about the tools and environment this repository uses but does not own.
+ai-notes/
