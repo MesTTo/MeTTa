@@ -62,6 +62,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The package-law mutation harness is run. `tests/data/lib_package/mutations.pl`
+  disables one package policy at a time and reruns the witnesses assigned to it
+  in a child process each, requiring the unmutated control to exit 0 and the
+  mutant to exit 1, and it has been complete and unexecuted. The evidence lane
+  is what found it: `lib_package.plt` cited the harness as the backing for its
+  guarantees while no runner ran it. The new `package-mutations` GATE reads 78
+  witnesses, every one caught, in 32s.
+- `memray_plant.py`'s two halves share one mark object instead of two identical
+  spellings of it. The pair is only a comparison while both halves measure the
+  same quantity, and two spellings is an invariant somebody has to hold.
+
 - The names this tree reaches without defining are one table. They were written
   three times in three notations: a shell regex in `engine/check.sh`, an
   `allowed/2` table in `tests/prolog/library_autoload.pl`, and nothing at all in

@@ -6945,6 +6945,123 @@
       "tags": [
         "measured"
       ]
+    },
+    "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table": {
+      "title": "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+      "supports": [
+        {
+          "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations",
+        "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the evidence lane exits zero": {
+      "title": "the evidence lane exits zero",
+      "worth": 50,
+      "wanted": true
+    },
+    "it is one of the lanes red beyond the recorded baseline and the release bar is no new red": {
+      "title": "it is one of the lanes red beyond the recorded baseline and the release bar is no new red",
+      "supports": [
+        "the evidence lane exits zero"
+      ]
+    },
+    "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run": {
+      "title": "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+      "blocks": [
+        "the evidence lane exits zero"
+      ]
+    },
+    "the evidence lane reported it by name: tested: names a file no runner executes": {
+      "title": "the evidence lane reported it by name: tested: names a file no runner executes",
+      "supports": [
+        "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+        {
+          "node": "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+          "relation": "blocks",
+          "target": "the evidence lane exits zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism": {
+      "title": "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism",
+      "supports": [
+        {
+          "node": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "status": "untried"
+        },
+        {
+          "node": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "relation": "addresses",
+          "target": "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run"
+        }
+      ]
+    },
+    "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0": {
+      "title": "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0",
+      "supports": [
+        {
+          "node": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it would clear the lane": {
+      "title": "it would clear the lane",
+      "supports": [
+        {
+          "node": "delete the unbacked guarantee tag rather than back it",
+          "status": "untried"
+        },
+        {
+          "node": "delete the unbacked guarantee tag rather than back it",
+          "relation": "addresses",
+          "target": "the evidence lane exits zero"
+        }
+      ]
+    },
+    "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green": {
+      "title": "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green",
+      "supports": [
+        {
+          "node": "delete the unbacked guarantee tag rather than back it",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "it would clear the lane"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand": {
+      "title": "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand"
+    },
+    "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted": {
+      "title": "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted",
+      "supports": [
+        "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -8036,10 +8153,26 @@
     "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded": {
       "title": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
       "effort": 3,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the same deferred-reference fact is hand-written in three notations: a shell regex in engine/check.sh, allowed/2 in tests/prolog/library_autoload.pl, and nothing yet in static_checks.pl",
         "lib_file:metta_staged_publish/2 is reached by lib_package with lib_file unloaded, so list_undefined reports it"
+      ]
+    },
+    "wire the package mutation harness into engine/check.sh as a GATE beside plunit": {
+      "title": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run"
+      ]
+    },
+    "delete the unbacked guarantee tag rather than back it": {
+      "title": "delete the unbacked guarantee tag rather than back it",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "the evidence lane exits zero"
       ]
     }
   },
@@ -33617,6 +33750,324 @@
         ]
       ],
       "id": "1795a873e176bfbc"
+    },
+    {
+      "at": "2026-09-20T05:39:29.752901+00:00",
+      "after": "378c071f338d03d4c61e9559e435c5558a6b3b65",
+      "did": "[{\"op\": \"status\", \"id\": \"put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded\", \"because\": \"prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-goal\", \"id\": null, \"because\": \"it is one of the lanes red beyond the recorded baseline and the release bar is no new red\", \"tags\": [], \"title\": \"the evidence lane exits zero\", \"fields\": {\"worth\": 50}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the evidence lane reported it by name: tested: names a file no runner executes\", \"tags\": [\"measured\"], \"title\": \"tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run\", \"fields\": {\"blocks\": [\"the evidence lane exits zero\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism\", \"tags\": [], \"title\": \"wire the package mutation harness into engine/check.sh as a GATE beside plunit\", \"fields\": {\"effort\": 1, \"addresses\": [\"tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run\"]}}, {\"op\": \"status\", \"id\": \"wire the package mutation harness into engine/check.sh as a GATE beside plunit\", \"because\": \"MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it would clear the lane\", \"tags\": [], \"title\": \"delete the unbacked guarantee tag rather than back it\", \"fields\": {\"effort\": 1, \"addresses\": [\"the evidence lane exits zero\"]}}, {\"op\": \"status\", \"id\": \"delete the unbacked guarantee tag rather than back it\", \"because\": \"the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green\", \"tags\": [\"user\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted\", \"tags\": [\"source\"], \"title\": \"memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand\", \"fields\": {}}]",
+      "parents": [
+        "1795a873e176bfbc"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0",
+          "supersedes",
+          "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism"
+        ],
+        [
+          "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0",
+          "supports",
+          {
+            "node": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+            "status": "done"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0",
+          "title",
+          "MEASURED 2026-09-20: 78 witnesses, every one control=0 and mutant=1, 156 child processes in 32s; the evidence lane now exits 0"
+        ],
+        [
+          "it is one of the lanes red beyond the recorded baseline and the release bar is no new red",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is one of the lanes red beyond the recorded baseline and the release bar is no new red",
+          "supports",
+          "the evidence lane exits zero"
+        ],
+        [
+          "it is one of the lanes red beyond the recorded baseline and the release bar is no new red",
+          "title",
+          "it is one of the lanes red beyond the recorded baseline and the release bar is no new red"
+        ],
+        [
+          "it would clear the lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "it would clear the lane",
+          "supports",
+          {
+            "node": "delete the unbacked guarantee tag rather than back it",
+            "status": "untried"
+          }
+        ],
+        [
+          "it would clear the lane",
+          "supports",
+          {
+            "node": "delete the unbacked guarantee tag rather than back it",
+            "relation": "addresses",
+            "target": "the evidence lane exits zero"
+          }
+        ],
+        [
+          "it would clear the lane",
+          "title",
+          "it would clear the lane"
+        ],
+        [
+          "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand",
+          "sort",
+          "prop"
+        ],
+        [
+          "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand",
+          "title",
+          "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand"
+        ],
+        [
+          "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted",
+          "sort",
+          "prop"
+        ],
+        [
+          "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted",
+          "supports",
+          "memray_plant.py's two halves carried two identical spellings of one limit_leaks mark, which is an invariant held by hand"
+        ],
+        [
+          "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted",
+          "tags",
+          "source"
+        ],
+        [
+          "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted",
+          "title",
+          "one mark OBJECT applied to both halves cannot differ, so the guarantee became structural instead of asserted"
+        ],
+        [
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+          "sort",
+          "prop"
+        ],
+        [
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+          "supersedes",
+          "list_undefined/1 is a thin wrapper over prolog_walk_code and reports through print_message, and this tree already takes that report as data through message_hook/3 in library_autoload.pl, so one module can hold the table, the walk, and both verdicts, and the three lanes stop being three notations"
+        ],
+        [
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+          "supersedes",
+          "tests/prolog/deferred_references.pl is written and its six-test suite at tests/prolog/suites/seams/deferred_references.plt passes, covering both directions plus the eyesight refusal"
+        ],
+        [
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+          "supports",
+          {
+            "node": "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+            "status": "done"
+          }
+        ],
+        [
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+          "tags",
+          "tested"
+        ],
+        [
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table",
+          "title",
+          "prolog ok 1s, prolog-static ok 121s, lib-autoload ok 1s, and the six-test suite passes; the stale mettafunc row is gone and the three notations are one table"
+        ],
+        [
+          "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+          "blocks",
+          "the evidence lane exits zero"
+        ],
+        [
+          "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+          "title",
+          "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run"
+        ],
+        [
+          "the evidence lane exits zero",
+          "sort",
+          "prop"
+        ],
+        [
+          "the evidence lane exits zero",
+          "title",
+          "the evidence lane exits zero"
+        ],
+        [
+          "the evidence lane exits zero",
+          "wanted",
+          true
+        ],
+        [
+          "the evidence lane exits zero",
+          "worth",
+          50
+        ],
+        [
+          "the evidence lane reported it by name: tested: names a file no runner executes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the evidence lane reported it by name: tested: names a file no runner executes",
+          "supports",
+          "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run"
+        ],
+        [
+          "the evidence lane reported it by name: tested: names a file no runner executes",
+          "supports",
+          {
+            "node": "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run",
+            "relation": "blocks",
+            "target": "the evidence lane exits zero"
+          }
+        ],
+        [
+          "the evidence lane reported it by name: tested: names a file no runner executes",
+          "tags",
+          "measured"
+        ],
+        [
+          "the evidence lane reported it by name: tested: names a file no runner executes",
+          "title",
+          "the evidence lane reported it by name: tested: names a file no runner executes"
+        ],
+        [
+          "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green",
+          "sort",
+          "prop"
+        ],
+        [
+          "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green",
+          "supersedes",
+          "it would clear the lane"
+        ],
+        [
+          "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green",
+          "supports",
+          {
+            "node": "delete the unbacked guarantee tag rather than back it",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green",
+          "tags",
+          "user"
+        ],
+        [
+          "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green",
+          "title",
+          "the harness is complete and passing, so the claim was true and only unrun; deleting the citation would have thrown away a working 78-witness gate to make a lane green"
+        ],
+        [
+          "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism",
+          "supports",
+          {
+            "node": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+            "status": "untried"
+          }
+        ],
+        [
+          "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism",
+          "supports",
+          {
+            "node": "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+            "relation": "addresses",
+            "target": "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run"
+          }
+        ],
+        [
+          "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism",
+          "title",
+          "the repository already runs evidence-mutations as a GATE in exactly this shape, one mutant per rule plus an unmutated control, so the package laws get the same treatment rather than a new mechanism"
+        ],
+        [
+          "delete the unbacked guarantee tag rather than back it",
+          "sort",
+          "approach"
+        ],
+        [
+          "delete the unbacked guarantee tag rather than back it",
+          "addresses",
+          "the evidence lane exits zero"
+        ],
+        [
+          "delete the unbacked guarantee tag rather than back it",
+          "effort",
+          1
+        ],
+        [
+          "delete the unbacked guarantee tag rather than back it",
+          "status",
+          "unwanted"
+        ],
+        [
+          "delete the unbacked guarantee tag rather than back it",
+          "title",
+          "delete the unbacked guarantee tag rather than back it"
+        ],
+        [
+          "put the deferred-reference table and the undefined walk in one Prolog module every lane loads, with the row's scope derived from whether its name is defined and its caller loaded",
+          "status",
+          "done"
+        ],
+        [
+          "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "sort",
+          "approach"
+        ],
+        [
+          "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "addresses",
+          "tests/data/lib_package/mutations.pl is a complete 78-witness mutation harness that no runner executes, so lib_package.plt cites it for guarantees nothing has run"
+        ],
+        [
+          "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "effort",
+          1
+        ],
+        [
+          "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "status",
+          "done"
+        ],
+        [
+          "wire the package mutation harness into engine/check.sh as a GATE beside plunit",
+          "title",
+          "wire the package mutation harness into engine/check.sh as a GATE beside plunit"
+        ]
+      ],
+      "id": "ea6884686576e65a"
     }
   ]
 }

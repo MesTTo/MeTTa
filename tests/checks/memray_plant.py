@@ -46,7 +46,10 @@ Guarantees:
   - the kept half exceeds the bound and the dropped half stays under it
     [tested: sh check.sh memray]
   - both halves measure the same quantity, so the comparison between them means
-    something: the same filter is on both marks
+    something. One mark OBJECT carries the bound and the filter to both, so
+    there is no second spelling that could drift from the first
+    [source: LEAK_MARK, the only `limit_leaks` mark in this file, applied at
+    both halves; commit=WORKTREE]
 Owns resources: the module list below deliberately outlives the leaking test,
   which is the leak; the process ends with the lane
 Open Obligations:
@@ -122,7 +125,14 @@ def _cursor(space):
     return cursor
 
 
-@pytest.mark.limit_leaks(BOUND, filter_fn=outside_the_engine_arena)
+# One mark object rather than two identical spellings of it. The pair is only a
+# comparison while both halves measure the same quantity, and two spellings is an
+# invariant somebody has to hold; one object says the same thing with nothing to
+# hold, because there is no second mark to drift from.
+LEAK_MARK = pytest.mark.limit_leaks(BOUND, filter_fn=outside_the_engine_arena)
+
+
+@LEAK_MARK
 def test_two_hundred_dropped_cursors_stay_under_the_bound():
     """The control. It has to PASS, or the bound is too tight to be a lane."""
     space = _stocked()
@@ -134,7 +144,7 @@ def test_two_hundred_dropped_cursors_stay_under_the_bound():
         space.drop()
 
 
-@pytest.mark.limit_leaks(BOUND, filter_fn=outside_the_engine_arena)
+@LEAK_MARK
 def test_two_hundred_kept_cursors_are_reported():
     """The plant. It has to FAIL, or the lane has stopped being able to see."""
     space = _stocked()
