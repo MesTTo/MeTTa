@@ -12294,6 +12294,30 @@
       "tags": [
         "measured"
       ]
+    },
+    "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second": {
+      "title": "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second"
+    },
+    "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten": {
+      "title": "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten",
+      "supports": [
+        "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68": {
+      "title": "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68"
+    },
+    "its output file was written a minute before the check; adding further load would slow both rather than finish either": {
+      "title": "its output file was written a minute before the check; adding further load would slow both rather than finish either",
+      "supports": [
+        "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -54895,6 +54919,80 @@
         "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
       },
       "id": "a60322c3b1c5c1c5"
+    },
+    {
+      "at": "2026-09-20T18:01:22.683834+00:00",
+      "after": "fb5dad6c293b5e5a5ea58a464ec5a822cfc607ca",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten\", \"tags\": [\"measured\"], \"title\": \"the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"its output file was written a minute before the check; adding further load would slow both rather than finish either\", \"tags\": [\"measured\"], \"title\": \"the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68\", \"fields\": {}}]",
+      "parents": [
+        "a60322c3b1c5c1c5"
+      ],
+      "assert": [
+        [
+          "its output file was written a minute before the check; adding further load would slow both rather than finish either",
+          "sort",
+          "prop"
+        ],
+        [
+          "its output file was written a minute before the check; adding further load would slow both rather than finish either",
+          "supports",
+          "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68"
+        ],
+        [
+          "its output file was written a minute before the check; adding further load would slow both rather than finish either",
+          "tags",
+          "measured"
+        ],
+        [
+          "its output file was written a minute before the check; adding further load would slow both rather than finish either",
+          "title",
+          "its output file was written a minute before the check; adding further load would slow both rather than finish either"
+        ],
+        [
+          "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten",
+          "supports",
+          "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second"
+        ],
+        [
+          "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten",
+          "title",
+          "measured 2026-09-21 04:00: the approach that runs it stays active on purpose because the run is in flight, not because it was forgotten"
+        ],
+        [
+          "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second",
+          "sort",
+          "prop"
+        ],
+        [
+          "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second",
+          "title",
+          "the battery-4 gate is still running and is the one obligation this session cannot discharge itself: 69 lanes in, on twins, 68 live processes under the battery and its log written within the last second"
+        ],
+        [
+          "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68",
+          "sort",
+          "prop"
+        ],
+        [
+          "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68",
+          "title",
+          "the untyped transparency sweep is advancing but starved: 48 of 182 rows with 6 swipl processes, against a loadavg of 31.55 driven by the gate's 68"
+        ]
+      ],
+      "telemetry": {
+        "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+      },
+      "id": "c1055c3281650da8"
     }
   ]
 }
