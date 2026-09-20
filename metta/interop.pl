@@ -11,7 +11,7 @@
 %   same space
 %   [tested: packages:a_backing_row_reaches_its_claimant_as_data,
 %   packages:a_backing_row_performs_only_for_the_file_that_carries_it;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their
@@ -1938,13 +1938,13 @@ importer_helper_impl(Space, File) :-
 % to its prelude interpreter. Catalogs and every lifecycle policy belong to it.
 % [source: docs/journal/2026-09-09-packages-are-equations.md,
 % "the package is an argument record and the engine knows four things";
-% commit=WORKTREE].
+% commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 :- use_module('../../lib/lib_package/lib_package').
 
 % The prelude uses the engine's bounded evaluator, seam dispatch, source
 % locators and load policy. Publish these through the ordinary service seam;
 % the source reader also calls the package activation and replacement doors.
-% [tested: metta_published_surface, engine_layering; commit=WORKTREE].
+% [tested: metta_published_surface, engine_layering; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 :- multifile seam:kind/2.
 seam:kind(metta_package_normalise/3, service).
 seam:kind(metta_package_perform/3, service).
@@ -1980,7 +1980,7 @@ metta_perform_package_requires(CanonPath, Space, Rows) :-
 
 % Compilation chooses the seam's equation; execution carries the caller's
 % home. evalc alone would replace both contexts and lose native ownership.
-% [tested: lib_package:backing_lives_and_retires_in_its_home; commit=WORKTREE].
+% [tested: lib_package:backing_lives_and_retires_in_its_home; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 metta_package_perform(Home, Expression, Result) :-
     space_module('&metta', Seam), space_module(Home, Module),
     with_metta_module(Seam,
@@ -2061,7 +2061,7 @@ metta_package_claimed(Row) :-
 % Admit nondeterministic reads and the conservatively classified read forms.
 % Inspect every operation in a computed body, so a write nested in match is
 % still refused. Host calls retain the effect declared by their own seat.
-% [tested: lib_package:space_read_bodies_cannot_hide_state_writes; commit=WORKTREE].
+% [tested: lib_package:space_read_bodies_cannot_hide_state_writes; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 metta_package_ceiling(nondeterministicReadOnly).
 
 metta_package_reads_runtime('get-property').

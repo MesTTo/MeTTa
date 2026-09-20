@@ -29,7 +29,7 @@
 %   raises
 %   [tested: host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase,
 %   host_transactions:try_erase_still_raises_on_an_argument_that_is_not_a_clause_reference;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 
 :- module(host_transactions,
           [ host_transaction_on_exit/1, host_transaction_on_exit/2, try_erase/1 ]).
@@ -57,14 +57,14 @@
 %   only moves the mismatch, because a rolled-back installer would then leave
 %   rows naming clauses the rollback removed
 %   [tested: host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 %   ignore/1 rather than catch/3: every stale path FAILS and none throws, so
 %   ignore tolerates the lost race while a real type_error from a non-clause
 %   blob still reaches the caller
 %   [measured 2026-09-20: double erase, erase after retractall, erase after
 %   abolish and erase after garbage_collect_clauses each failed and none
-%   raised; commit=WORKTREE].
+%   raised; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 %   That measurement covers STALENESS and nothing else, so try_erase/1 is not
 %   the right call at an erase whose clause carries a prolog_listen/2 callback:
@@ -74,7 +74,7 @@
 %   remembered: source_retirement.plt compares filereader:retire_source_artifacts/1
 %   against an oracle written as that exact spelling, and it refuses the
 %   substitution [tested: source_retirement:callbacks_and_failure_prefixes_match;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 %   Time: one erase attempt. Space: none.
 try_erase(Ref) :- ignore(erase(Ref)).

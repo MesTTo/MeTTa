@@ -14,7 +14,7 @@
 % Guarantees: source_package_row/4 answers only the package rows the named load
 %   stored, so a later load into the same space re-performs none of them
 %   [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: every source retirement restores surviving function registrations
@@ -1350,7 +1350,7 @@ metta_source_changed(CanonPath) :-
 %imported answered normally. A failed activation restores the preceding source;
 %lib_package compensates external acquisitions outside Prolog's transaction.
 %[tested: lib_package:failed_replacement_preserves_the_previous_source_and_handles;
-%commit=WORKTREE].
+%commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 %The PATH travels with the space, because the rows performed are this file's
 %and law 14 performs them at once, when the file carrying them loads.

@@ -264,12 +264,12 @@
 %   makes callable already has its edge and the clause is retranslated
 %   [tested: filereader_called_symbols:an_uncompilable_head_still_shows_the_names_inside_it,
 %   filereader_called_symbols:a_head_becoming_a_function_does_not_change_what_is_under_it;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %   The reserved `package` head is the one body exempt, because its rows are
 %   declarations and naming a head is not calling it; that exemption is keyed
 %   on the law's own head rather than on what happens to be defined yet
 %   [tested: packages:importing_a_backed_library_leaves_the_package_head_alone;
-%   commit=WORKTREE].
+%   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

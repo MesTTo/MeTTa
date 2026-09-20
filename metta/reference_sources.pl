@@ -144,7 +144,7 @@ metta_reference_source_replace(Space, Clauses) :-
 %[measured 2026-09-20: eight runs of a 6,000-iteration suspended-background load
 %raised the template error in eight, and in none with this filter; the property
 %separates them under both a source consult and the shipped .qlf boot;
-%commit=WORKTREE].
+%commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 metta_reference_source_clauses(Space, Clauses) :-
     findall(reader(rewrite, metta_engine, (Head :- !, Projected)),
             ( Head = rewrite_parsed_form(Space, Origin, _, _, Out),
