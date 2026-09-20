@@ -10182,6 +10182,97 @@
       "tags": [
         "measured"
       ]
+    },
+    "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here": {
+      "title": "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here",
+      "worth": 65,
+      "wanted": true
+    },
+    "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'": {
+      "title": "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'",
+      "supports": [
+        "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly": {
+      "title": "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly",
+      "supports": [
+        {
+          "node": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "status": "untried"
+        },
+        {
+          "node": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "relation": "creates",
+          "target": "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+        }
+      ]
+    },
+    "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean": {
+      "title": "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean",
+      "supports": [
+        {
+          "node": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed": {
+      "title": "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed"
+    },
+    "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first": {
+      "title": "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first",
+      "supports": [
+        "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it": {
+      "title": "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it"
+    },
+    "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed": {
+      "title": "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed",
+      "supports": [
+        "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present": {
+      "title": "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present"
+    },
+    "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries": {
+      "title": "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries",
+      "supports": [
+        "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker": {
+      "title": "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT": {
+      "title": "the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT",
+      "supports": [
+        "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker"
+      ]
     }
   },
   "approaches": {
@@ -11643,6 +11734,14 @@
       "status": "done",
       "addresses": [
         "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+      ]
+    },
+    "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent": {
+      "title": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+      "effort": 2,
+      "status": "done",
+      "creates": [
+        "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
       ]
     }
   },
@@ -46576,6 +46675,274 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "bef32af4ec6bf14b"
+    },
+    {
+      "at": "2026-09-20T13:05:06.014097+00:00",
+      "after": "276b22a3755f6ae6f0560b8a83840b5ab0c3ac18",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'\", \"tags\": [\"user\"], \"title\": \"the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here\", \"fields\": {\"worth\": 65}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly\", \"tags\": [], \"title\": \"absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent\", \"fields\": {\"effort\": 2, \"consequences\": [\"the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here\"]}}, {\"op\": \"status\", \"id\": \"absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent\", \"because\": \"commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first\", \"tags\": [\"tested\"], \"title\": \"git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed\", \"tags\": [\"measured\"], \"title\": \"a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it\", \"fields\": {}}]",
+      "parents": [
+        "bef32af4ec6bf14b"
+      ],
+      "assert": [
+        [
+          "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly",
+          "sort",
+          "prop"
+        ],
+        [
+          "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly",
+          "supports",
+          {
+            "node": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+            "status": "untried"
+          }
+        ],
+        [
+          "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly",
+          "supports",
+          {
+            "node": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+            "relation": "creates",
+            "target": "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+          }
+        ],
+        [
+          "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly",
+          "title",
+          "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly"
+        ],
+        [
+          "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it",
+          "sort",
+          "prop"
+        ],
+        [
+          "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it",
+          "title",
+          "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it"
+        ],
+        [
+          "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean",
+          "sort",
+          "prop"
+        ],
+        [
+          "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean",
+          "supersedes",
+          "a second parent makes all 1,860 engine commits reachable from this branch, so archiving MeTTa-Kernel cannot take the history with it, and it needs no merge strategy that a dirty tree would refuse: git commit-tree takes the parents directly"
+        ],
+        [
+          "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean",
+          "supports",
+          {
+            "node": "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+            "status": "done"
+          }
+        ],
+        [
+          "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean",
+          "tags",
+          "tested"
+        ],
+        [
+          "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean",
+          "title",
+          "commit 276b22a37 has parents 293fae789 and b694f3457, git merge-base --is-ancestor confirms the engine history is in the branch, the staged file set went 91 to 92 with README.md the only addition and nothing lost under LC_ALL=C comm, and the tree is clean"
+        ],
+        [
+          "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed",
+          "sort",
+          "prop"
+        ],
+        [
+          "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed",
+          "title",
+          "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed"
+        ],
+        [
+          "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first",
+          "sort",
+          "prop"
+        ],
+        [
+          "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first",
+          "supports",
+          "git rm --cached on a submodule refuses while .gitmodules has unstaged edits, and set -e does not stop a failing command that is the left side of an &&, so the removal failed while the two following steps ran and left engine/.git deleted with the gitlink still indexed"
+        ],
+        [
+          "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first",
+          "tags",
+          "tested"
+        ],
+        [
+          "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first",
+          "title",
+          "observed: 'fatal: please stage your changes to .gitmodules or stash them to proceed' after an earlier index.lock failure had already let steps 2 and 3 run; recovered by staging .gitmodules first"
+        ],
+        [
+          "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed",
+          "sort",
+          "prop"
+        ],
+        [
+          "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed",
+          "supports",
+          "a stale zero-byte index.lock was left in the superproject at the time the three codex workers were running, with no git process alive to own it"
+        ],
+        [
+          "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed",
+          "tags",
+          "measured"
+        ],
+        [
+          "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed",
+          "title",
+          "ps -eo showed no git process and the lock was zero bytes dated 22:52, the minute the workers started; removing it let the index proceed"
+        ],
+        [
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here",
+          "title",
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+        ],
+        [
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here",
+          "wanted",
+          true
+        ],
+        [
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here",
+          "worth",
+          65
+        ],
+        [
+          "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'",
+          "sort",
+          "prop"
+        ],
+        [
+          "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'",
+          "supports",
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+        ],
+        [
+          "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'",
+          "tags",
+          "user"
+        ],
+        [
+          "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'",
+          "title",
+          "user 2026-09-20, asked whether MeTTa-Kernel should be retired now that MeTTa exists and answered their own question: 'yes that is the whole point, dropping he submodule'"
+        ],
+        [
+          "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "sort",
+          "approach"
+        ],
+        [
+          "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "creates",
+          "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+        ],
+        [
+          "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "effort",
+          2
+        ],
+        [
+          "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "status",
+          "done"
+        ],
+        [
+          "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent",
+          "title",
+          "absorb engine/ by dropping the gitlink and committing the files, with the recorded engine commit as the absorption commit's second parent"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "588b14a04a198ccb"
+    },
+    {
+      "at": "2026-09-20T13:07:21.506882+00:00",
+      "after": "276b22a3755f6ae6f0560b8a83840b5ab0c3ac18",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries\", \"tags\": [\"measured\"], \"title\": \"a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT\", \"tags\": [\"reasoning\"], \"title\": \"I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker\", \"fields\": {}}]",
+      "parents": [
+        "588b14a04a198ccb"
+      ],
+      "assert": [
+        [
+          "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker",
+          "sort",
+          "prop"
+        ],
+        [
+          "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker",
+          "title",
+          "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker"
+        ],
+        [
+          "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present",
+          "sort",
+          "prop"
+        ],
+        [
+          "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present",
+          "title",
+          "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present"
+        ],
+        [
+          "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries",
+          "supports",
+          "a fresh --recurse-submodules clone of the published MeTTa repository populates all eight paths, engine/ arrives as plain files with no .git, and the new engine, lib and ext READMEs are all present"
+        ],
+        [
+          "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries",
+          "title",
+          "measured: git clone --recurse-submodules --depth 1 into ai-tmp/clone-verify exited 0 with engine 49, lib 66, examples 23, ext 21, extensions/python 21, extensions/cmetta 17, extensions/node 21 and extensions/mork 11 entries"
+        ],
+        [
+          "the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT",
+          "sort",
+          "prop"
+        ],
+        [
+          "the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT",
+          "supports",
+          "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker"
+        ],
+        [
+          "the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT",
+          "title",
+          "the ls answered 0 entries for every submodule while the log's tail still read 'Cloning into ... lib'; the same trap cost a false reading earlier today when a stale clone-proof.log matched an old CLONE_EXIT"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "571925dd6eeba444"
     }
   ]
 }

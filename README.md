@@ -889,7 +889,6 @@ int main(void)
 | Repository | What it is |
 |---|---|
 | [MeTTa](https://github.com/MesTTo/MeTTa) | this one: the engine, the libraries and all three surfaces, mounted together |
-| [MeTTa-Kernel](https://github.com/MesTTo/MeTTa-Kernel) | the engine: translator, matcher, spaces, C extensions |
 | [MeTTa-Library-Pack](https://github.com/MesTTo/MeTTa-Library-Pack) | the 61 standard libraries, written in MeTTa |
 | [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | the 386 executable examples this page draws from |
 | [PyMeTTa](https://github.com/MesTTo/PyMeTTa) | the Python surface |
