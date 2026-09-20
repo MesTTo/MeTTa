@@ -6231,6 +6231,59 @@
       "tags": [
         "measured"
       ]
+    },
+    "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output": {
+      "title": "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+    },
+    "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml": {
+      "title": "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml",
+      "supports": [
+        "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once": {
+      "title": "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once",
+      "supports": [
+        {
+          "node": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "status": "untried"
+        },
+        {
+          "node": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "relation": "addresses",
+          "target": "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+        }
+      ]
+    },
+    "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green": {
+      "title": "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green",
+      "supports": [
+        {
+          "node": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error": {
+      "title": "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error"
+    },
+    "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran": {
+      "title": "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran",
+      "supports": [
+        "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -7233,6 +7286,14 @@
       "status": "done",
       "addresses": [
         "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+      ]
+    },
+    "run each generator the failing lanes name and verify the whole generated-artifact group together": {
+      "title": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
       ]
     }
   },
@@ -30788,6 +30849,157 @@
         ]
       ],
       "id": "1c3352b6d1c7dc41"
+    },
+    {
+      "at": "2026-09-20T03:50:39.564357+00:00",
+      "after": "29e418db99be90ff1b8054080a3ddcb0d1abed03",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml\", \"tags\": [\"measured\"], \"title\": \"thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once\", \"tags\": [], \"title\": \"run each generator the failing lanes name and verify the whole generated-artifact group together\", \"fields\": {\"effort\": 2, \"addresses\": [\"thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output\"]}}, {\"op\": \"status\", \"id\": \"run each generator the failing lanes name and verify the whole generated-artifact group together\", \"because\": \"battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran\", \"tags\": [\"source\"], \"title\": \"the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error\", \"fields\": {}}]",
+      "parents": [
+        "1c3352b6d1c7dc41"
+      ],
+      "assert": [
+        [
+          "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green",
+          "supersedes",
+          "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once"
+        ],
+        [
+          "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green",
+          "supports",
+          {
+            "node": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+            "status": "done"
+          }
+        ],
+        [
+          "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green",
+          "tags",
+          "tested"
+        ],
+        [
+          "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green",
+          "title",
+          "battery 10 exits 0 with all 34 lanes ok, turning artifact-sync, codespell, door-sync, door-sync-selftest, fn-sync, fn-sync-selftest, imports, imports-selftest, layer-sync, layer-sync-selftest, ledger-selftest, libdoc and reference green"
+        ],
+        [
+          "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml",
+          "supports",
+          "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+        ],
+        [
+          "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml",
+          "title",
+          "measured 2026-09-20 by reading every failing lane's tail out of the whole-gate log: door-sync, fn-sync, libdoc, layer-sync and artifact-sync each printed the write command that repairs them, and imports was refusing metta._roots because the contract that declares it is generated into pyproject.toml"
+        ],
+        [
+          "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran",
+          "supports",
+          "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error"
+        ],
+        [
+          "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran",
+          "title",
+          "read extensions/mork/check.sh: check_mork_rust runs cargo test unconditionally, and its own file header says nothing here builds anything and a tree without the backend says which half it ran"
+        ],
+        [
+          "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error",
+          "sort",
+          "prop"
+        ],
+        [
+          "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error",
+          "title",
+          "the mork-rust lane had no prerequisite guard at all while every other lane in its file names and skips its prerequisites, so an unreachable sibling checkout read as a gate failure carrying a cargo manifest error"
+        ],
+        [
+          "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once",
+          "supports",
+          {
+            "node": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+            "status": "untried"
+          }
+        ],
+        [
+          "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once",
+          "supports",
+          {
+            "node": "run each generator the failing lanes name and verify the whole generated-artifact group together",
+            "relation": "addresses",
+            "target": "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+          }
+        ],
+        [
+          "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once",
+          "title",
+          "the repository's rule is derived over hand-written, so a stale projection is repaired by regenerating rather than by editing the output, and the gate carries a generated-artifacts selector that runs all twenty-one of them at once"
+        ],
+        [
+          "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output",
+          "sort",
+          "prop"
+        ],
+        [
+          "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output",
+          "title",
+          "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+        ],
+        [
+          "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "sort",
+          "approach"
+        ],
+        [
+          "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "addresses",
+          "thirty-two lanes were red beyond this box's recorded eleven-lane baseline, and the triage shows most of them are not defects in the code but derived artifacts that had drifted from their sources, each lane naming its own generator in its own output"
+        ],
+        [
+          "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "effort",
+          2
+        ],
+        [
+          "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "status",
+          "done"
+        ],
+        [
+          "run each generator the failing lanes name and verify the whole generated-artifact group together",
+          "title",
+          "run each generator the failing lanes name and verify the whole generated-artifact group together"
+        ]
+      ],
+      "id": "ea1e6c2e1f87d256"
     }
   ]
 }
