@@ -2091,13 +2091,20 @@ metta_package_budget(Budget) :-
 %move. Law 3 spells that remedy out and it is the same for every operation
 %above the ceiling: the work belongs in a claimant, which runs when the row is
 %performed rather than while it is being read.
-metta_package_refuse_above_ceiling(Space, Written) :-
-    %FAIL-CLOSED, and loudly. Either of the two goals below can fail -- an
-    %unknown space has no module, and a planner that cannot read a term says so
-    %by failing -- and a bare conjunction would then fail this predicate, fail
-    %the forall that calls it, and fail the whole load with no message at all.
-    %A row nothing could plan is a row nothing can certify, so it is refused
-    %rather than allowed.
+%The plan, or a refusal, with both answers in this HEAD rather than in an
+%if-then-else condition. FAIL-CLOSED, and loudly: either goal below can fail --
+%an unknown space has no module, and a planner that cannot read a term says so
+%by failing -- and a bare conjunction would fail the caller, fail the forall
+%that calls IT, and fail the whole load with no message at all. A row nothing
+%could plan is a row nothing can certify, so it is refused rather than allowed.
+%
+%Split out because the caller reads `Operations` and `Effect` after the choice:
+%bound only in a condition, SWI reads them as introduced in one branch and not
+%the other and warns, and prolog-static halts on a warning rather than reading
+%past it. Binding them in the head says the same thing with nothing conditional
+%about the bindings, where a dummy binding in the throwing branch would only
+%silence the analyser.
+metta_package_plan(Space, Written, Operations, Effect) :-
     (   metta_module_space(Module, Space),
         metta_host_source_effect_plan(Module, Written, Operations, Effect)
     ->  true
@@ -2105,7 +2112,10 @@ metta_package_refuse_above_ceiling(Space, Written) :-
                     context('package normalisation',
                             'the row could not be planned, so nothing can say \c
                              whether it stays under the reads ceiling')))
-    ),
+    ).
+
+metta_package_refuse_above_ceiling(Space, Written) :-
+    metta_package_plan(Space, Written, Operations, Effect),
     metta_package_ceiling(Ceiling),
     (   metta_effect_covered(Effect, Ceiling)
     ->  true
