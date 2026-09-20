@@ -58,6 +58,8 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
+    _unreachable,
+    dotted_findings,
     REPO,
     closed_value_findings,
     closed_value_source_findings,
@@ -189,6 +191,68 @@ def main() -> int:
         cases += 1
         if not condition:
             failures.append(message)
+
+    # DOTTED: a package path deeper than the one segment method_findings reads.
+    expect(
+        dotted_findings(SHEET, "the repair is `metta._errors.errors.Remedy`") == [],
+        "a resolving dotted package path was reported",
+    )
+    expect(
+        len(dotted_findings(SHEET, "the repair is `metta._errors.errors.NoSuchName`")) == 1,
+        "a dotted path whose LAST segment names nothing was NOT reported",
+    )
+    expect(
+        len(dotted_findings(SHEET, "the repair is `metta._nonexistent.module.Thing`")) == 1,
+        "a dotted path whose MIDDLE segment names nothing was NOT reported",
+    )
+    # The span a claim sits in can cross a line break, and the span pattern
+    # PATHS uses is line-bounded so an unclosed backtick cannot swallow the
+    # file. Anchoring on the opening backtick is what reaches this one; the
+    # first version of the check read the span and missed it.
+    expect(
+        len(dotted_findings(SHEET, "`metta._errors.errors.NoSuchName(title,\nkind)`")) == 1,
+        "a dotted path in a span that wraps a line was NOT reported",
+    )
+    # One segment is method_findings' claim, not this one, and reading it here
+    # would report every `metta.algebra` twice.
+    expect(
+        dotted_findings(SHEET, "declare it with `metta.algebra`") == [],
+        "a one-segment path was read as a dotted package path",
+    )
+    # Another language's sheet may spell `metta.` meaning its own namespace.
+    expect(
+        dotted_findings(NODE_SHEET, "`metta._nonexistent.module.Thing`") == [],
+        "a dotted path was read off a sheet that does not teach Python",
+    )
+    # A module that EXISTS and breaks while importing is a different fact from
+    # one that is absent, and the difference is subtle: both arrive as
+    # ModuleNotFoundError and only the `name` on it tells them apart. Reporting
+    # a breakage as a stale sheet claim would send a reader to edit the
+    # documentation over a broken module. The walk derives its root from the
+    # package it is handed, so a planted package exercises the taxonomy without
+    # writing anything into metta/.
+    planted = Path(tempfile.mkdtemp(prefix="llms-selftest-import-", dir=REPO / "ai-tmp"))
+    try:
+        package = planted / "plantedpkg"
+        package.mkdir()
+        (package / "__init__.py").write_text("", encoding="utf-8")
+        (package / "broken.py").write_text(
+            "import definitely_not_a_real_module\n", encoding="utf-8")
+        sys.path.insert(0, str(planted))
+        import plantedpkg  # noqa: PLC0415  -- planted for this case alone
+        expect(
+            _unreachable(plantedpkg, ["absent"]) == "plantedpkg.absent",
+            "an absent submodule was not reported absent",
+        )
+        broke = False
+        try:
+            _unreachable(plantedpkg, ["broken"])
+        except ModuleNotFoundError:
+            broke = True
+        expect(broke, "a submodule that BREAKS while importing was called absent")
+    finally:
+        sys.path.remove(str(planted))
+        shutil.rmtree(planted, ignore_errors=True)
 
     # PATHS: a claim that resolves, and one that does not.
     expect(

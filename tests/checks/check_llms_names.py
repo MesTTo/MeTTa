@@ -612,6 +612,88 @@ def _receivers(sheet: Path) -> tuple[dict[str, tuple[object, str]], list[str]]:
     }, []
 
 
+#: A DOTTED PACKAGE PATH: `metta.` followed by two or more segments.
+#: method_findings above reads ONE segment off the live package and stops, so
+#: `metta._errors.errors.Remedy` passed on `_errors` alone and the last two
+#: segments were resolved by nothing [measured 2026-09-20: planting
+#: `metta._nonexistent.module.NoSuchThing(` in llms.txt left the lane at exit 0
+#: with 0 findings, and the sheets spell twelve such paths across _errors,
+#: _atoms, _spaces, _declare and _binding].
+#:
+#: Walking deeper is safe HERE and nowhere else in these sheets: the package is
+#: a module tree whose attributes are modules and classes, so it resolves
+#: statically, while a receiver chain like `m.space.atoms` runs through the
+#: instances this lane deliberately never builds. That is also why the walk
+#: reads prose rather than only Python blocks: a private path is named where the
+#: shape is explained, not in an example.
+#:
+#: Anchored on the OPENING backtick and reading the path itself rather than the
+#: whole span, because a span can cross a line break and the span pattern
+#: path_findings uses is line-bounded on purpose, so an unclosed backtick cannot
+#: swallow the file. `metta._errors.errors.Remedy(title, kind, applicability,
+#: edit=,` wraps mid-argument-list and was invisible to the span reading; a
+#: dotted path holds no whitespace, so the name alone is a safe anchor
+#: [measured 2026-09-20: the span form caught one planted path of two].
+_DOTTED = re.compile(r"`(metta(?:\.\w+){2,})")
+
+
+def _unreachable(package: object, segments: list[str]) -> str | None:
+    """The first segment of a dotted path that is ABSENT, or None if it resolves.
+
+    A ModuleNotFoundError naming the very path asked for is absence. Any other
+    import failure means the module IS there and broke while loading, which is a
+    different fact about a different file: reporting it as a stale documentation
+    claim would send a reader to edit the sheet over a broken module. It
+    propagates and becomes its own finding instead.
+    """
+    # Imported here, not at the top, for the reason _receivers gives: the lane
+    # costs nothing until it runs.
+    import importlib
+
+    here = package
+    walked = getattr(package, "__name__", "metta")
+    for segment in segments:
+        step = getattr(here, segment, None)
+        if step is None:
+            path = f"{walked}.{segment}"
+            try:
+                step = importlib.import_module(path)
+            except ModuleNotFoundError as absent:
+                if absent.name == path:
+                    return path
+                raise
+        here = step
+        walked = f"{walked}.{segment}"
+    return None
+
+
+def dotted_findings(sheet: Path, text: str) -> list[str]:
+    """Every dotted package path a sheet spells that no longer resolves."""
+    if sheet not in _PYTHON_DOCUMENTS:
+        return []
+    receivers, failure = _receivers(sheet)
+    if failure:
+        return failure
+    package, _label = receivers["metta"]
+    findings: list[str] = []
+    for match in _DOTTED.finditer(text):
+        token = match.group(1)
+        try:
+            missing = _unreachable(package, token.split(".")[1:])
+        except ImportError as broken:
+            findings.append(
+                f"{sheet.relative_to(REPO)}:{_line_of(text, match.start())}: "
+                f"`{token}` could not be resolved: importing it raised {broken!r}"
+            )
+            continue
+        if missing is not None:
+            findings.append(
+                f"{sheet.relative_to(REPO)}:{_line_of(text, match.start())}: "
+                f"`{token}` names nothing: the package has no `{missing}`"
+            )
+    return findings
+
+
 def method_findings(sheet: Path, text: str) -> list[str]:
     """Every taught Python method absent from its documented receiver."""
     receivers, failure = _receivers(sheet)
@@ -1515,6 +1597,7 @@ def main(argv: list[str] | None = None) -> int:
         findings.extend(operator_word_findings(sheet, text))
         findings.extend(near_miss_findings(sheet, text, known))
         findings.extend(method_findings(sheet, text))
+        findings.extend(dotted_findings(sheet, text))
         findings.extend(return_findings(sheet, text))
         if closed_values is not None:
             findings.extend(closed_value_findings(sheet, text, closed_values))

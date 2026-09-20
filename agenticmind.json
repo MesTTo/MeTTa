@@ -9299,6 +9299,253 @@
       "tags": [
         "source"
       ]
+    },
+    "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance": {
+      "title": "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance"
+    },
+    "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name": {
+      "title": "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name",
+      "supports": [
+        "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped": {
+      "title": "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped"
+    },
+    "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards": {
+      "title": "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards",
+      "supports": [
+        "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call": {
+      "title": "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call"
+    },
+    "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals": {
+      "title": "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals",
+      "supports": [
+        "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding": {
+      "title": "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding"
+    },
+    "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically": {
+      "title": "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically",
+      "supports": [
+        "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet": {
+      "title": "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+      "blocks": [
+        "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+      ]
+    },
+    "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings": {
+      "title": "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings",
+      "supports": [
+        "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+        {
+          "node": "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+          "relation": "blocks",
+          "target": "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+        }
+      ]
+    },
+    "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction": {
+      "title": "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction",
+      "supports": [
+        {
+          "node": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "status": "untried"
+        },
+        {
+          "node": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "relation": "addresses",
+          "target": "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet"
+        }
+      ]
+    },
+    "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4": {
+      "title": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+      "blocks": [
+        "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+      ]
+    },
+    "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise": {
+      "title": "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise",
+      "supports": [
+        "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+        {
+          "node": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+          "relation": "blocks",
+          "target": "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+        }
+      ]
+    },
+    "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path": {
+      "title": "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path"
+    },
+    "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run": {
+      "title": "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run",
+      "supports": [
+        "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it": {
+      "title": "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it",
+      "supports": [
+        {
+          "node": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "status": "untried"
+        },
+        {
+          "node": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "relation": "addresses",
+          "target": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        }
+      ]
+    },
+    "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase": {
+      "title": "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase"
+    },
+    "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00": {
+      "title": "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00",
+      "supports": [
+        "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one": {
+      "title": "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one",
+      "supports": [
+        {
+          "node": "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "status": "untried"
+        },
+        {
+          "node": "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "relation": "addresses",
+          "target": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        }
+      ]
+    },
+    "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact": {
+      "title": "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact"
+    },
+    "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled": {
+      "title": "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled",
+      "supports": [
+        "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically": {
+      "title": "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically"
+    },
+    "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape": {
+      "title": "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape",
+      "supports": [
+        "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source": {
+      "title": "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source"
+    },
+    "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's": {
+      "title": "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's",
+      "supports": [
+        "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely": {
+      "title": "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely"
+    },
+    "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger": {
+      "title": "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger",
+      "supports": [
+        "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user": {
+      "title": "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user"
+    },
+    "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user": {
+      "title": "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user",
+      "supports": [
+        "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone": {
+      "title": "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone"
+    },
+    "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader": {
+      "title": "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader",
+      "supports": [
+        "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file": {
+      "title": "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file"
+    },
+    "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both": {
+      "title": "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both",
+      "supports": [
+        "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives": {
+      "title": "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives",
+      "supports": [
+        {
+          "node": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -10661,6 +10908,30 @@
       "status": "done",
       "addresses": [
         "pin_provenance.py rewrote agenticmind.json, which is hash-chained, and destroyed the record: every later read failed on the hash of a transaction the pass had not touched"
+      ]
+    },
+    "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package": {
+      "title": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+      "effort": 3,
+      "status": "done",
+      "addresses": [
+        "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet"
+      ]
+    },
+    "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta": {
+      "title": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+      ]
+    },
+    "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame": {
+      "title": "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
       ]
     }
   },
@@ -42986,6 +43257,740 @@
         ]
       ],
       "id": "3268b44a9ee8c671"
+    },
+    {
+      "at": "2026-09-20T09:22:50.203244+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name\", \"tags\": [\"source\"], \"title\": \"keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards\", \"tags\": [\"measured\"], \"title\": \"the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped\", \"fields\": {}}]",
+      "parents": [
+        "3268b44a9ee8c671"
+      ],
+      "assert": [
+        [
+          "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards",
+          "sort",
+          "prop"
+        ],
+        [
+          "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards",
+          "supports",
+          "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped"
+        ],
+        [
+          "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards",
+          "tags",
+          "measured"
+        ],
+        [
+          "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards",
+          "title",
+          "git -C extensions/python diff and git -C lib diff showed only commit=WORKTREE becoming 561cfeaa2, four files between them, and the superproject tree is clean afterwards"
+        ],
+        [
+          "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance",
+          "sort",
+          "prop"
+        ],
+        [
+          "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance",
+          "title",
+          "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance"
+        ],
+        [
+          "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped",
+          "sort",
+          "prop"
+        ],
+        [
+          "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped",
+          "title",
+          "the provenance pass had also written pins into extensions/python and lib, whose pointers the pin commit never bumped because their commits did not exist yet; both are now committed and bumped"
+        ],
+        [
+          "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name",
+          "supports",
+          "keying the guard on the record's SHAPE rather than its filename answers a real objection rather than a stylistic one: this tree has submodules and each can carry its own record, and the repository already rejected basename identity once for provenance"
+        ],
+        [
+          "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name",
+          "tags",
+          "source"
+        ],
+        [
+          "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name",
+          "title",
+          "the record is a JSON object whose log entries carry `after`, the id of the entry before, which is exactly what a rewrite invalidates; dispatching on that catches a record at any path and does not catch a file that merely shares the name"
+        ]
+      ],
+      "id": "0d86befa14460026"
+    },
+    {
+      "at": "2026-09-20T09:25:23.468407+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals\", \"tags\": [\"measured\"], \"title\": \"no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grep -ohE 'metta\\\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically\", \"tags\": [\"measured\"], \"title\": \"the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings\", \"tags\": [], \"title\": \"twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet\", \"fields\": {\"blocks\": [\"every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction\", \"tags\": [], \"title\": \"add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package\", \"fields\": {\"effort\": 3, \"addresses\": [\"twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet\"]}}]",
+      "parents": [
+        "0d86befa14460026"
+      ],
+      "assert": [
+        [
+          "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically",
+          "supports",
+          "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding"
+        ],
+        [
+          "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically",
+          "tags",
+          "measured"
+        ],
+        [
+          "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically",
+          "title",
+          "grep -ohE 'metta\\._[A-Za-z_.]+' llms.txt returns twelve distinct paths, so naming where a thing actually lives is what the sheet does systematically"
+        ],
+        [
+          "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals",
+          "supports",
+          "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call"
+        ],
+        [
+          "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals",
+          "tags",
+          "measured"
+        ],
+        [
+          "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals",
+          "title",
+          "grep for class or def definitions found RemoteSpace, SpaceMachine, Remedy, MettaOperationError, HeadCard, Request and Origin in metta/remote, metta/testing, metta/_errors, metta/library and metta/_binding, and the CLP lines read broadcast-shape is a CLP(FD) relation and lib_constraints CLP(Q) over rationals"
+        ],
+        [
+          "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction",
+          "supports",
+          {
+            "node": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+            "status": "untried"
+          }
+        ],
+        [
+          "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction",
+          "supports",
+          {
+            "node": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+            "relation": "addresses",
+            "target": "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet"
+          }
+        ],
+        [
+          "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction",
+          "title",
+          "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction"
+        ],
+        [
+          "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings",
+          "supports",
+          "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet"
+        ],
+        [
+          "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings",
+          "supports",
+          {
+            "node": "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+            "relation": "blocks",
+            "target": "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+          }
+        ],
+        [
+          "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings",
+          "title",
+          "measured 2026-09-20: _is_path_claim only accepts a token ending in / or a file suffix, so a dotted module path is not a path claim; planting metta._nonexistent.module.NoSuchThing( in llms.txt left the lane at exit 0 with 0 findings"
+        ],
+        [
+          "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call",
+          "sort",
+          "prop"
+        ],
+        [
+          "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call",
+          "title",
+          "no constructor llms.txt names is missing: the eight not in __init__.pyi are seven real submodule classes and CLP, which is CLP(FD)/CLP(Q)/CLP(B), Constraint Logic Programming domains my regex caught as a Python call"
+        ],
+        [
+          "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding",
+          "sort",
+          "prop"
+        ],
+        [
+          "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding",
+          "title",
+          "the sheet spelling Remedy through a private path is house style rather than a defect: it spells twelve private dotted paths across _errors, _atoms, _spaces, _declare and _binding"
+        ],
+        [
+          "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+          "sort",
+          "prop"
+        ],
+        [
+          "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+          "blocks",
+          "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+        ],
+        [
+          "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet",
+          "title",
+          "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet"
+        ],
+        [
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "sort",
+          "approach"
+        ],
+        [
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "addresses",
+          "twelve dotted Python paths in llms.txt are checked by nothing, so renaming a private module silently stales the sheet"
+        ],
+        [
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "effort",
+          3
+        ],
+        [
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "status",
+          "untried"
+        ],
+        [
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "title",
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package"
+        ]
+      ],
+      "id": "212d353671b682c5"
+    },
+    {
+      "at": "2026-09-20T09:26:48.584943+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise\", \"tags\": [], \"title\": \"the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4\", \"fields\": {\"blocks\": [\"every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run\", \"tags\": [\"assumed\"], \"title\": \"the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it\", \"tags\": [], \"title\": \"attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta\", \"fields\": {\"effort\": 2, \"addresses\": [\"the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4\"]}}]",
+      "parents": [
+        "212d353671b682c5"
+      ],
+      "assert": [
+        [
+          "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it",
+          "sort",
+          "prop"
+        ],
+        [
+          "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it",
+          "supports",
+          {
+            "node": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+            "status": "untried"
+          }
+        ],
+        [
+          "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it",
+          "supports",
+          {
+            "node": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+            "relation": "addresses",
+            "target": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+          }
+        ],
+        [
+          "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it",
+          "title",
+          "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it"
+        ],
+        [
+          "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise",
+          "sort",
+          "prop"
+        ],
+        [
+          "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise",
+          "supports",
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        ],
+        [
+          "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise",
+          "supports",
+          {
+            "node": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+            "relation": "blocks",
+            "target": "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+          }
+        ],
+        [
+          "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise",
+          "title",
+          "read ai-tmp/gate-full.log at the engine-bench section; the deltas are deterministic, three identical samples each, so they are real rather than noise"
+        ],
+        [
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+          "blocks",
+          "every erase over a recorded clause-reference table tolerates a reference another thread already erased, by one named operation rather than by twelve independent decisions"
+        ],
+        [
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4",
+          "title",
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        ],
+        [
+          "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path",
+          "sort",
+          "prop"
+        ],
+        [
+          "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path",
+          "title",
+          "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path"
+        ],
+        [
+          "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run",
+          "sort",
+          "prop"
+        ],
+        [
+          "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run",
+          "supports",
+          "the likely cause is my own routing: host_transactions:try_erase(Ref) adds a call frame and ignore/1 where a bare erase(Ref) stood, and translator:self_tier_forget/1 and uninstall_idle_translation_cache_hooks/0 are both in the translate cleanup path"
+        ],
+        [
+          "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run",
+          "tags",
+          "assumed"
+        ],
+        [
+          "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run",
+          "title",
+          "two inferences per reference times about a thousand references is the shape of a +2,000 delta, and constructor-control and constructor-plain each report exactly +1 inference in the same run"
+        ],
+        [
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "sort",
+          "approach"
+        ],
+        [
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "addresses",
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        ],
+        [
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "effort",
+          2
+        ],
+        [
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "status",
+          "untried"
+        ],
+        [
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "title",
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta"
+        ]
+      ],
+      "id": "add5ea6c803a1155"
+    },
+    {
+      "at": "2026-09-20T09:27:33.218554+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00\", \"tags\": [\"measured\"], \"title\": \"routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one\", \"tags\": [], \"title\": \"give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame\", \"fields\": {\"effort\": 2, \"addresses\": [\"the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4\"]}}]",
+      "parents": [
+        "add5ea6c803a1155"
+      ],
+      "assert": [
+        [
+          "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00",
+          "supports",
+          "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase"
+        ],
+        [
+          "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00",
+          "title",
+          "measured in ai-tmp/erase-probe/erase_cost.pl over 2,000 references each: erase 3.51, ignore(erase) 4.00, try_erase 5.00, inlined 3.00"
+        ],
+        [
+          "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase",
+          "sort",
+          "prop"
+        ],
+        [
+          "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase",
+          "title",
+          "routing through host_transactions:try_erase/1 costs 1.49 inferences per reference more than a bare erase, and an inlined ( erase(Ref) -> true ; true ) costs 0.51 LESS than the bare erase"
+        ],
+        [
+          "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one",
+          "supports",
+          {
+            "node": "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+            "status": "untried"
+          }
+        ],
+        [
+          "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one",
+          "supports",
+          {
+            "node": "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+            "relation": "addresses",
+            "target": "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+          }
+        ],
+        [
+          "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one",
+          "title",
+          "the measurement says the inlined form is cheaper than the bare erase it replaced, so the correctness fix stops costing inferences and starts saving them; goal_expansion/2 is already the tree's mechanism, declared in source_positions.pl, tracer.pl, scc.pl, specializer.pl and kernel.pl, so this is not a new one"
+        ],
+        [
+          "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "sort",
+          "approach"
+        ],
+        [
+          "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "addresses",
+          "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
+        ],
+        [
+          "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "effort",
+          2
+        ],
+        [
+          "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "status",
+          "untried"
+        ],
+        [
+          "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame",
+          "title",
+          "give try_erase/1 a goal_expansion/2 so a call site compiles to ( erase(Ref) -> true ; true ) with no call frame"
+        ]
+      ],
+      "id": "5731ddd6ca42857d"
+    },
+    {
+      "at": "2026-09-20T09:28:42.040000+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled\", \"tags\": [\"measured\"], \"title\": \"the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape\", \"tags\": [\"measured\"], \"title\": \"constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's\", \"tags\": [\"source\"], \"title\": \"the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source\", \"fields\": {}}]",
+      "parents": [
+        "5731ddd6ca42857d"
+      ],
+      "assert": [
+        [
+          "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically",
+          "sort",
+          "prop"
+        ],
+        [
+          "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically",
+          "title",
+          "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically"
+        ],
+        [
+          "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled",
+          "supports",
+          "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact"
+        ],
+        [
+          "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled",
+          "tags",
+          "measured"
+        ],
+        [
+          "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled",
+          "title",
+          "engine/host_transactions.qlf and the others are stamped 19:24:02 against sources at 19:16:14 and 18:46:23, so every edited file was recompiled"
+        ],
+        [
+          "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape",
+          "sort",
+          "prop"
+        ],
+        [
+          "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape",
+          "supports",
+          "constructor-sorted's failure is INSTRUCTIONS ONLY with no inference regression, which is the signature of a recompiled artifact rather than of extra Prolog goals, so my attribution to try_erase's call frame is doubtful for that pin specifically"
+        ],
+        [
+          "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape",
+          "tags",
+          "measured"
+        ],
+        [
+          "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape",
+          "title",
+          "extra goals move inferences first and instructions with them; constructor-sorted moved 372,192 instructions, 1.175 percent, while the evaluate and translate pins moved inferences by 130 and 2,000, which is the opposite shape"
+        ],
+        [
+          "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source",
+          "sort",
+          "prop"
+        ],
+        [
+          "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source",
+          "title",
+          "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source"
+        ],
+        [
+          "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact",
+          "title",
+          "the gate rebuilt the .qlf artifacts before benchmarking, so the engine-bench numbers measured my source rather than a stale artifact"
+        ],
+        [
+          "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's",
+          "supports",
+          "the A/B has to rebuild the .qlf on BOTH arms or it measures artifact age rather than source"
+        ],
+        [
+          "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's",
+          "tags",
+          "source"
+        ],
+        [
+          "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's",
+          "title",
+          "the repository's own rule is that stale QLF or changed workload artifacts invalidate per-file attribution, and the baselines were pinned against an artifact built at a different time from this run's"
+        ]
+      ],
+      "id": "8feca8c3a3c8ab23"
+    },
+    {
+      "at": "2026-09-20T09:29:15.643956+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger\", \"tags\": [\"measured\"], \"title\": \"55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user\", \"tags\": [\"source\"], \"title\": \"a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user\", \"fields\": {}}]",
+      "parents": [
+        "8feca8c3a3c8ab23"
+      ],
+      "assert": [
+        [
+          "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user",
+          "sort",
+          "prop"
+        ],
+        [
+          "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user",
+          "title",
+          "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user"
+        ],
+        [
+          "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user",
+          "supports",
+          "a user:goal_expansion/2 would violate this tree's architecture: engine-owned expansions belong to metta_engine, and only designated SWI protocol hooks belong in user"
+        ],
+        [
+          "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user",
+          "tags",
+          "source"
+        ],
+        [
+          "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user",
+          "title",
+          "engine/materialize.pl and engine/spaces.pl take set_module(base(metta_engine)) the way scc.pl does, so a metta_engine-owned expansion is already visible to them without reaching into user"
+        ],
+        [
+          "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger",
+          "sort",
+          "prop"
+        ],
+        [
+          "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger",
+          "supports",
+          "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely"
+        ],
+        [
+          "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger",
+          "tags",
+          "measured"
+        ],
+        [
+          "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger",
+          "title",
+          "git -C engine rev-list --count between the last commit touching bench-baseline.json and HEAD reads 55, and the pin commit is 9c1b521 of 2026-09-19 titled re-pin every benchmark ledger"
+        ],
+        [
+          "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely",
+          "sort",
+          "prop"
+        ],
+        [
+          "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely",
+          "title",
+          "55 engine commits post-date the last re-pin of bench-baseline.json, so the three failing pins may have been red long before my change and my attribution to try_erase is weak rather than likely"
+        ]
+      ],
+      "id": "ba7eb76535e2505f"
+    },
+    {
+      "at": "2026-09-20T09:31:49.198246+00:00",
+      "after": "470faf755e4af5ed65aaf90ef1bae95a294269fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader\", \"tags\": [\"source\"], \"title\": \"the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both\", \"tags\": [\"measured\"], \"title\": \"my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package\", \"because\": \"both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "ba7eb76535e2505f"
+      ],
+      "assert": [
+        [
+          "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives",
+          "sort",
+          "prop"
+        ],
+        [
+          "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives",
+          "supersedes",
+          "it is the same class as the four the audit ledger records and its own ruling is fix the class not the instances, which is how ROSTERS and the operator-word check came to exist; the claim is universal over a finite set so exhaustion discharges it, and the planted bogus name is already the failing direction"
+        ],
+        [
+          "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives",
+          "supports",
+          {
+            "node": "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+            "status": "done"
+          }
+        ],
+        [
+          "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives",
+          "tags",
+          "tested"
+        ],
+        [
+          "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives",
+          "title",
+          "both directions measured: with two unresolvable paths planted the lane exits 1 naming metta._atoms.factoriez and metta._nonexistent, and on the real sheets it exits 0, so the twelve genuine private paths are not false positives"
+        ],
+        [
+          "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file",
+          "title",
+          "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file"
+        ],
+        [
+          "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both",
+          "sort",
+          "prop"
+        ],
+        [
+          "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both",
+          "supports",
+          "my first version of the check had a gap my own plant found: a backticked span that crosses a line break was invisible, because the span pattern is line-bounded so an unclosed backtick cannot swallow the file"
+        ],
+        [
+          "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both",
+          "tags",
+          "measured"
+        ],
+        [
+          "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both",
+          "title",
+          "planting two bad paths caught one; metta._errors.errors.Remedy(title, kind, applicability, edit=, wraps mid-argument-list at llms.txt:3751, and anchoring on the opening backtick and reading the path itself, which holds no whitespace, catches both"
+        ],
+        [
+          "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader",
+          "sort",
+          "prop"
+        ],
+        [
+          "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader",
+          "supports",
+          "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone"
+        ],
+        [
+          "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader",
+          "tags",
+          "source"
+        ],
+        [
+          "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader",
+          "title",
+          "read _METHOD, which matches receiver dot method with no further segments, and _receivers already binds metta to the live package, so the gap was depth rather than a missing reader"
+        ],
+        [
+          "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone",
+          "title",
+          "the dotted-path check is an EXTENSION of method_findings rather than a parallel mechanism: that check reads one segment off the live package and stops, which is why metta._errors.errors.Remedy passed on _errors alone"
+        ],
+        [
+          "add a lane check resolving every dotted metta.<module>.<Name> a sheet spells against the live package",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "809d4a68e92c42b6"
     }
   ]
 }
