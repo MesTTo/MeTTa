@@ -12689,6 +12689,508 @@
       "tags": [
         "measured"
       ]
+    },
+    "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta": {
+      "title": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta",
+      "worth": 70,
+      "wanted": true
+    },
+    "it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift": {
+      "title": "it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift",
+      "supports": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]": {
+      "title": "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong": {
+      "title": "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong",
+      "supports": [
+        "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+        {
+          "node": "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes": {
+      "title": "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "a diagnosis attacked with construction machinery is the first of the two standing failures": {
+      "title": "a diagnosis attacked with construction machinery is the first of the two standing failures",
+      "supports": [
+        "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes"
+      ]
+    },
+    "the runtime already computes the arity set, so the throw can be made conditional on its own premise": {
+      "title": "the runtime already computes the arity set, so the throw can be made conditional on its own premise",
+      "supports": [
+        {
+          "node": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "status": "untried"
+        },
+        {
+          "node": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "relation": "addresses",
+          "target": "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]"
+        }
+      ]
+    },
+    "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site": {
+      "title": "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site",
+      "supports": [
+        {
+          "node": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the runtime already computes the arity set, so the throw can be made conditional on its own premise"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs": {
+      "title": "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference": {
+      "title": "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference",
+      "supports": [
+        "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+        {
+          "node": "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative": {
+      "title": "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative",
+      "supports": [
+        {
+          "node": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "status": "untried"
+        },
+        {
+          "node": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "relation": "addresses",
+          "target": "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs"
+        }
+      ]
+    },
+    "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way": {
+      "title": "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way",
+      "supports": [
+        {
+          "node": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces": {
+      "title": "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces"
+    },
+    "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))": {
+      "title": "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))",
+      "supports": [
+        "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes": {
+      "title": "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes"
+    },
+    "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)": {
+      "title": "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)",
+      "supports": [
+        "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only": {
+      "title": "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only"
+    },
+    "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell": {
+      "title": "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell",
+      "supports": [
+        "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation": {
+      "title": "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)": {
+      "title": "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)",
+      "supports": [
+        "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+        {
+          "node": "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause": {
+      "title": "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause"
+    },
+    "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]": {
+      "title": "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]",
+      "supports": [
+        "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing": {
+      "title": "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing"
+    },
+    "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments": {
+      "title": "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments",
+      "supports": [
+        "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry": {
+      "title": "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry"
+    },
+    "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled": {
+      "title": "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled",
+      "supports": [
+        "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification": {
+      "title": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal": {
+      "title": "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal",
+      "supports": [
+        "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+        {
+          "node": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG": {
+      "title": "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG"
+    },
+    "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility": {
+      "title": "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility",
+      "supports": [
+        "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure": {
+      "title": "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure"
+    },
+    "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error": {
+      "title": "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error",
+      "supports": [
+        "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape": {
+      "title": "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape"
+    },
+    "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads": {
+      "title": "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads",
+      "supports": [
+        "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause": {
+      "title": "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause"
+    },
+    "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred": {
+      "title": "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred",
+      "supports": [
+        "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first": {
+      "title": "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first"
+    },
+    "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first": {
+      "title": "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first",
+      "supports": [
+        "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed": {
+      "title": "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed"
+    },
+    "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log": {
+      "title": "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log",
+      "supports": [
+        "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates": {
+      "title": "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3": {
+      "title": "the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3",
+      "supports": [
+        "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates"
+      ]
+    },
+    "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck": {
+      "title": "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck",
+      "supports": [
+        {
+          "node": "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "status": "untried"
+        },
+        {
+          "node": "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "relation": "addresses",
+          "target": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+        }
+      ]
+    },
+    "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first": {
+      "title": "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first",
+      "supports": [
+        {
+          "node": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "status": "untried"
+        },
+        {
+          "node": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "relation": "addresses",
+          "target": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+        }
+      ]
+    },
+    "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed": {
+      "title": "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed",
+      "supports": [
+        {
+          "node": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture": {
+      "title": "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture"
+    },
+    "measured by removing the guard, running that one test, and restoring it": {
+      "title": "measured by removing the guard, running that one test, and restoring it",
+      "supports": [
+        "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape": {
+      "title": "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name": {
+      "title": "writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name",
+      "supports": [
+        "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape"
+      ]
+    },
+    "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees": {
+      "title": "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees"
+    },
+    "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5": {
+      "title": "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5",
+      "supports": [
+        "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe": {
+      "title": "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe"
+    },
+    "the same A/B: 58848 against 58577, and 32169 against 32169": {
+      "title": "the same A/B: 58848 against 58577, and 32169 against 32169",
+      "supports": [
+        "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane": {
+      "title": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288": {
+      "title": "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288",
+      "supports": [
+        "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+        {
+          "node": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane": {
+      "title": "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane"
+    },
+    "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to": {
+      "title": "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to",
+      "supports": [
+        "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order": {
+      "title": "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order"
+    },
+    "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too": {
+      "title": "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too",
+      "supports": [
+        "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example": {
+      "title": "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example"
+    },
+    "computed from the lane log by ai-tmp/ai-overrun-shape.py": {
+      "title": "computed from the lane log by ai-tmp/ai-overrun-shape.py",
+      "supports": [
+        "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071": {
+      "title": "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071"
+    },
+    "measured by restoring that one file from f883970^ and rerunning the example": {
+      "title": "measured by restoring that one file from f883970^ and rerunning the example",
+      "supports": [
+        "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071": {
+      "title": "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071"
+    },
+    "A/B with lib at a88a892 and at df90ba5": {
+      "title": "A/B with lib at a88a892 and at df90ba5",
+      "supports": [
+        "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone": {
+      "title": "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone",
+      "supports": [
+        {
+          "node": "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "status": "untried"
+        },
+        {
+          "node": "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "relation": "addresses",
+          "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        }
+      ]
     }
   },
   "approaches": {
@@ -14393,6 +14895,46 @@
       "status": "failed",
       "addresses": [
         "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known": {
+      "title": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]"
+      ]
+    },
+    "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory": {
+      "title": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs"
+      ]
+    },
+    "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name": {
+      "title": "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+      ]
+    },
+    "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites": {
+      "title": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+      ]
+    },
+    "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism": {
+      "title": "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
       ]
     }
   },
@@ -56421,6 +56963,1399 @@
         ]
       ],
       "id": "58572bc616744656"
+    },
+    {
+      "at": "2026-09-20T19:39:40.599618+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift\", \"tags\": [], \"title\": \"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\", \"fields\": {\"worth\": 70}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong\", \"tags\": [\"measured\"], \"title\": \"a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a diagnosis attacked with construction machinery is the first of the two standing failures\", \"tags\": [\"reasoning\"], \"title\": \"the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the runtime already computes the arity set, so the throw can be made conditional on its own premise\", \"tags\": [], \"title\": \"recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known\", \"fields\": {\"effort\": 2, \"addresses\": [\"a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]\"]}}, {\"op\": \"status\", \"id\": \"recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known\", \"because\": \"function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site\", \"tags\": [\"user\"], \"status\": \"unwanted\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference\", \"tags\": [\"measured\"], \"title\": \"no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative\", \"tags\": [], \"title\": \"ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory\", \"fields\": {\"effort\": 1, \"addresses\": [\"no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs\"]}}]",
+      "parents": [
+        "58572bc616744656"
+      ],
+      "assert": [
+        [
+          "a diagnosis attacked with construction machinery is the first of the two standing failures",
+          "sort",
+          "prop"
+        ],
+        [
+          "a diagnosis attacked with construction machinery is the first of the two standing failures",
+          "supports",
+          "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes"
+        ],
+        [
+          "a diagnosis attacked with construction machinery is the first of the two standing failures",
+          "title",
+          "a diagnosis attacked with construction machinery is the first of the two standing failures"
+        ],
+        [
+          "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+          "sort",
+          "prop"
+        ],
+        [
+          "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+          "title",
+          "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]"
+        ],
+        [
+          "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site",
+          "sort",
+          "prop"
+        ],
+        [
+          "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site",
+          "supersedes",
+          "the runtime already computes the arity set, so the throw can be made conditional on its own premise"
+        ],
+        [
+          "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site",
+          "supports",
+          {
+            "node": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site",
+          "tags",
+          "user"
+        ],
+        [
+          "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site",
+          "title",
+          "function_overapplication/3 is only ever reached because typing.pl:128 decided at COMPILE time to emit it; making the thrower silent leaves the compile-time misclassification in place, so the same bug returns wherever a later registration follows an earlier call site"
+        ],
+        [
+          "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative",
+          "sort",
+          "prop"
+        ],
+        [
+          "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative",
+          "supports",
+          {
+            "node": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+            "status": "untried"
+          }
+        ],
+        [
+          "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative",
+          "supports",
+          {
+            "node": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+            "relation": "addresses",
+            "target": "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs"
+          }
+        ],
+        [
+          "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative",
+          "title",
+          "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative"
+        ],
+        [
+          "it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift",
+          "supports",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift",
+          "title",
+          "it is one of the two lanes the Stop hook named as unresolved, and it is a correctness failure rather than a pin drift"
+        ],
+        [
+          "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+          "sort",
+          "prop"
+        ],
+        [
+          "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+          "title",
+          "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs"
+        ],
+        [
+          "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference",
+          "sort",
+          "prop"
+        ],
+        [
+          "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference",
+          "supports",
+          "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs"
+        ],
+        [
+          "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference",
+          "supports",
+          {
+            "node": "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference",
+          "tags",
+          "measured"
+        ],
+        [
+          "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference",
+          "title",
+          "sh tools/run.sh on the same example exits 0 against the same lib_math.metta, so file content alone cannot carry the difference"
+        ],
+        [
+          "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong",
+          "sort",
+          "prop"
+        ],
+        [
+          "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong",
+          "supports",
+          "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]"
+        ],
+        [
+          "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong",
+          "supports",
+          {
+            "node": "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong",
+          "tags",
+          "measured"
+        ],
+        [
+          "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong",
+          "title",
+          "the refusal's premise is false at the moment it is raised, so the two moments disagree rather than the call being wrong"
+        ],
+        [
+          "the runtime already computes the arity set, so the throw can be made conditional on its own premise",
+          "sort",
+          "prop"
+        ],
+        [
+          "the runtime already computes the arity set, so the throw can be made conditional on its own premise",
+          "supports",
+          {
+            "node": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+            "status": "untried"
+          }
+        ],
+        [
+          "the runtime already computes the arity set, so the throw can be made conditional on its own premise",
+          "supports",
+          {
+            "node": "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+            "relation": "addresses",
+            "target": "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]"
+          }
+        ],
+        [
+          "the runtime already computes the arity set, so the throw can be made conditional on its own premise",
+          "title",
+          "the runtime already computes the arity set, so the throw can be made conditional on its own premise"
+        ],
+        [
+          "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes",
+          "title",
+          "the strategy for this is abduction over explanations, not construction: the observation is a counterexample in hand, so the question is which step of the standing proof it refutes"
+        ],
+        [
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta",
+          "title",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta",
+          "wanted",
+          true
+        ],
+        [
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta",
+          "worth",
+          70
+        ],
+        [
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "sort",
+          "approach"
+        ],
+        [
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "addresses",
+          "no check has yet distinguished a registry that DIFFERS between the twin process and a direct run from a registry that is the same while the call site differs"
+        ],
+        [
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "effort",
+          1
+        ],
+        [
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "status",
+          "untried"
+        ],
+        [
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "title",
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory"
+        ],
+        [
+          "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "sort",
+          "approach"
+        ],
+        [
+          "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "addresses",
+          "a two-argument math-rational call is refused by a domain error whose own message lists 2 among the known input arities [1,2]"
+        ],
+        [
+          "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "effort",
+          2
+        ],
+        [
+          "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "status",
+          "unwanted"
+        ],
+        [
+          "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known",
+          "title",
+          "recheck the arity inside function_overapplication/3 and dispatch through reduce/2 when the asked arity is in fact known"
+        ]
+      ],
+      "id": "d0476b0b43851773"
+    },
+    {
+      "at": "2026-09-20T19:42:19.219288+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"status\", \"id\": \"ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory\", \"because\": \"answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "d0476b0b43851773"
+      ],
+      "assert": [
+        [
+          "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way",
+          "sort",
+          "prop"
+        ],
+        [
+          "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way",
+          "supersedes",
+          "if the arity-2 form is a Prolog builtin rather than a MeTTa equation then every compile-order explanation is aimed at the wrong mechanism, and this check can come back negative"
+        ],
+        [
+          "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way",
+          "supports",
+          {
+            "node": "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+            "status": "done"
+          }
+        ],
+        [
+          "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way",
+          "tags",
+          "measured"
+        ],
+        [
+          "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way",
+          "title",
+          "answered: the Prolog half exists and BOTH load paths register math-rational/3, which refuted the load-path explanation rather than confirming it. A check worth running precisely because it could come back either way"
+        ],
+        [
+          "ask whether lib_math ships a Prolog half that registers math-rational arity 2, before any compile-order theory",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "d5cbc522ba7aaa4b"
+    },
+    {
+      "at": "2026-09-20T19:44:02.657865+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))\", \"tags\": [\"measured\"], \"title\": \"the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)\", \"tags\": [\"measured\"], \"title\": \"the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell\", \"tags\": [\"measured\"], \"title\": \"my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)\", \"tags\": [\"source\"], \"title\": \"incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}]",
+      "parents": [
+        "d5cbc522ba7aaa4b"
+      ],
+      "assert": [
+        [
+          "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))",
+          "supports",
+          "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces"
+        ],
+        [
+          "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))",
+          "title",
+          "ai-tmp/ai-min-rational.metta through tools/run.sh printed the expected pair and exited 0; ai-tmp/ai-probe-loadarity.py raised for both m += lib.math and !(import! &self (library lib_math))"
+        ],
+        [
+          "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)",
+          "supports",
+          "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation"
+        ],
+        [
+          "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)",
+          "supports",
+          {
+            "node": "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)",
+          "tags",
+          "source"
+        ],
+        [
+          "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)",
+          "title",
+          "engine/translator/lowering.pl:726-730 has incomplete_application_kind(Fun, Arity, partial) :- ... followed by incomplete_application_kind(_, _, overapplied)"
+        ],
+        [
+          "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+          "sort",
+          "prop"
+        ],
+        [
+          "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation",
+          "title",
+          "incomplete_application_kind/3 answers overapplied as a CATCH-ALL fallback clause, so any condition that makes the partial clause fail silently becomes an overapplication accusation"
+        ],
+        [
+          "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only",
+          "sort",
+          "prop"
+        ],
+        [
+          "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only",
+          "title",
+          "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only"
+        ],
+        [
+          "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces",
+          "sort",
+          "prop"
+        ],
+        [
+          "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces",
+          "title",
+          "the discriminating axis is the DRIVER: unary math-rational evaluates under tools/run.sh (swipl) and raises under MeTTa() (janus), and it does so under BOTH load paths and BOTH call surfaces"
+        ],
+        [
+          "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell",
+          "sort",
+          "prop"
+        ],
+        [
+          "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell",
+          "supports",
+          "my ai-probe-axes.py labelled its second surface 'metta' while both cases still went through the Python MeTTa object, so that probe could not have seen the driver axis at all and its 'surface does not matter' reading was about the call text only"
+        ],
+        [
+          "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell",
+          "tags",
+          "measured"
+        ],
+        [
+          "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell",
+          "title",
+          "the example through tools/run.sh exits 0 while the same text through m.run raises, which the probe reported as one cell"
+        ],
+        [
+          "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes",
+          "title",
+          "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes"
+        ],
+        [
+          "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)",
+          "supports",
+          "the failing call is the INNER two-argument call inside math-rational/1's own body at lib_math.metta:29-31, not any call the example or twin writes"
+        ],
+        [
+          "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)",
+          "tags",
+          "measured"
+        ],
+        [
+          "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)",
+          "title",
+          "the twin's traceback names line 43, S.math_rational(0.1), which is the unary form; the unary equation's body is (math-rational $numerator $denominator)"
+        ]
+      ],
+      "id": "1aa7a050aa2cdbf1"
+    },
+    {
+      "at": "2026-09-20T19:47:46.870275+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]\", \"tags\": [\"measured\"], \"title\": \"ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments\", \"tags\": [\"measured\"], \"title\": \"the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled\", \"tags\": [\"measured\"], \"title\": \"the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal\", \"tags\": [\"measured\"], \"title\": \"nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility\", \"tags\": [\"measured\"], \"title\": \"my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG\", \"fields\": {}}]",
+      "parents": [
+        "1aa7a050aa2cdbf1"
+      ],
+      "assert": [
+        [
+          "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause",
+          "sort",
+          "prop"
+        ],
+        [
+          "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause",
+          "title",
+          "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause"
+        ],
+        [
+          "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal",
+          "sort",
+          "prop"
+        ],
+        [
+          "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal",
+          "supports",
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+        ],
+        [
+          "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal",
+          "supports",
+          {
+            "node": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal",
+          "tags",
+          "measured"
+        ],
+        [
+          "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal",
+          "title",
+          "after load arity/2 reads [2,3] while the clause compiled against [2] still holds the overapplication goal"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]",
+          "supports",
+          "ROOT CAUSE, measured: math-rational's unary equation is translated DURING the library load, at a moment when lib_math.pl is not yet loaded, so arity/2 answers only [2]; the two-argument inner call asks for arity 3, the partial clause fails, and the catch-all bakes function_overapplication into the compiled clause. The Prolog half then loads and arity/2 becomes [2,3], but nothing re-translates the clause"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]",
+          "title",
+          "ai-tmp/ai-probe-when.py interleaved markers with the instrumented classifier: all three PROBE lines fall between 'before load' (arity=[]) and 'after load' (arity=[2,3]), and the first carries mods=[] while the later ones carry mods=[lib_math-3]"
+        ],
+        [
+          "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments",
+          "supports",
+          "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing"
+        ],
+        [
+          "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments",
+          "tags",
+          "measured"
+        ],
+        [
+          "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments",
+          "title",
+          "engine/translator/lowering.pl:762-768 runs findall over arity/2 inside the thrower, and the measured trace shows arity/2 grows between the two moments"
+        ],
+        [
+          "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG",
+          "sort",
+          "prop"
+        ],
+        [
+          "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG",
+          "title",
+          "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG"
+        ],
+        [
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+          "sort",
+          "prop"
+        ],
+        [
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification",
+          "title",
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+        ],
+        [
+          "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing",
+          "title",
+          "the error message refutes itself because the DECISION and the MESSAGE are rendered at different times: typing.pl:123 decides from arity/2 at translation time, when it reads [2], while function_overapplication/3 computes KnownInputArities by findall at THROW time, when it reads [2,3] and so prints a set containing the very arity it is refusing"
+        ],
+        [
+          "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility",
+          "sort",
+          "prop"
+        ],
+        [
+          "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility",
+          "supports",
+          "my module-mismatch hypothesis, that arity/2 inside lowering.pl resolved to a different predicate than metta_engine:arity/2, was WRONG"
+        ],
+        [
+          "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility",
+          "tags",
+          "measured"
+        ],
+        [
+          "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility",
+          "title",
+          "the instrumented probe printed known=[2] and engine=[2] on the same line, so both readings agree and the discrepancy was timing, not visibility"
+        ],
+        [
+          "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled",
+          "sort",
+          "prop"
+        ],
+        [
+          "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled",
+          "supports",
+          "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry"
+        ],
+        [
+          "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled",
+          "tags",
+          "measured"
+        ],
+        [
+          "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled",
+          "title",
+          "the instrumented run shows the classification never fires during m.run; it fires during m += lib.math, and the call merely executes what was already compiled"
+        ],
+        [
+          "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry",
+          "sort",
+          "prop"
+        ],
+        [
+          "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry",
+          "title",
+          "the visible failure is a BAKED goal, not a live decision, so any guard added inside function_overapplication/3 would suppress a symptom whose cause is a clause compiled against an incomplete registry"
+        ]
+      ],
+      "id": "0499fc7a58f205a7"
+    },
+    {
+      "at": "2026-09-20T19:50:10.815707+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error\", \"tags\": [\"measured\"], \"title\": \"CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads\", \"tags\": [\"measured\"], \"title\": \"the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred\", \"tags\": [\"measured\"], \"title\": \"under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first\", \"tags\": [\"measured\"], \"title\": \"the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first\", \"fields\": {}}]",
+      "parents": [
+        "0499fc7a58f205a7"
+      ],
+      "assert": [
+        [
+          "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure",
+          "sort",
+          "prop"
+        ],
+        [
+          "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure",
+          "title",
+          "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure"
+        ],
+        [
+          "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads",
+          "sort",
+          "prop"
+        ],
+        [
+          "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads",
+          "supports",
+          "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape"
+        ],
+        [
+          "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads",
+          "tags",
+          "measured"
+        ],
+        [
+          "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads",
+          "title",
+          "a scan of lib/*/*.metta matched each file's backing-row head list against its own equation heads"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error",
+          "supports",
+          "CAUSATION, measured by differential: reverting lib_math.metta to f883970^ (the eager !(import_prolog_functions_from_file ...) instruction) makes the janus path succeed and produces ZERO classifier catch-all lines; restoring the f883970 row form reproduces the failure"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error",
+          "title",
+          "ai-tmp/ai-probe-when.py against git -C lib show f883970^:lib_math/lib_math.metta printed 'MARKER call OK' with no PROBE lines, then the same probe against the shipped face printed three PROBE lines and the domain error"
+        ],
+        [
+          "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape",
+          "sort",
+          "prop"
+        ],
+        [
+          "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape",
+          "title",
+          "the hazard is a CLASS, not one library: lib_math (1 equation), lib_tabling (2) and lib_thread (12) each carry MeTTa equations whose heads are supplied by their own Prolog backing row, so a narrow lib_math fix would leave fourteen equations of the same shape"
+        ],
+        [
+          "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred",
+          "sort",
+          "prop"
+        ],
+        [
+          "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred",
+          "supports",
+          "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause"
+        ],
+        [
+          "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred",
+          "tags",
+          "measured"
+        ],
+        [
+          "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred",
+          "title",
+          "the instrumented tools/run.sh run printed exactly two PROBE lines, both compiling=none not_deferred mods=[], against janus's three of which the first is compiling='math-rational' deferred"
+        ],
+        [
+          "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first",
+          "sort",
+          "prop"
+        ],
+        [
+          "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first",
+          "title",
+          "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first"
+        ],
+        [
+          "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first",
+          "sort",
+          "prop"
+        ],
+        [
+          "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first",
+          "supports",
+          "the invariant currently held by hand is: the live compiled clause for a MeTTa equation must be translated against a registry already containing every arity its own file's backing row supplies. Nothing enforces it; it holds only by which of two events happens to run first"
+        ],
+        [
+          "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first",
+          "tags",
+          "measured"
+        ],
+        [
+          "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first",
+          "title",
+          "translate_owned_equations at engine/spaces/foreign.pl:1074 closes the source load, and metta_perform_package_rows at engine/metta/interop.pl:1968 performs the backing row, and the measured order under janus is translation first"
+        ],
+        [
+          "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause",
+          "sort",
+          "prop"
+        ],
+        [
+          "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause",
+          "title",
+          "under tools/run.sh the classifier ALSO reaches the catch-all twice for math-rational at arity 3 with known=[2], yet the call succeeds, and the swipl trace carries no 'deferred' line where the janus trace does; so reaching the catch-all is NOT sufficient for the failure and the driver difference is which pass produces the LIVE clause"
+        ]
+      ],
+      "id": "c788ca9cd43f8c71"
+    },
+    {
+      "at": "2026-09-20T19:51:13.423043+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log\", \"tags\": [\"measured\"], \"title\": \"THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3\", \"tags\": [\"reasoning\"], \"title\": \"the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck\", \"tags\": [], \"title\": \"make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name\", \"fields\": {\"effort\": 2, \"addresses\": [\"nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification\"]}}]",
+      "parents": [
+        "c788ca9cd43f8c71"
+      ],
+      "assert": [
+        [
+          "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed",
+          "sort",
+          "prop"
+        ],
+        [
+          "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed",
+          "title",
+          "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed"
+        ],
+        [
+          "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log",
+          "sort",
+          "prop"
+        ],
+        [
+          "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log",
+          "supports",
+          "THE CYCLE, read from the backtrace bottom-up: performing the backing row asks predicate_property(SpaceModule:'math-rational'(_,_,_), file('.../lib_math.pl')) while lib_math.pl is still loading; SWI's property_predicate/2 resolves the undefined predicate, which fires '$undefined_procedure'(..., 'math-rational', 3, retry); the engine's hook answers it with metta_ensure_compiled('math-rational'), which translates the unary equation against a registry that the interrupted registration had not yet completed"
+        ],
+        [
+          "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log",
+          "tags",
+          "measured"
+        ],
+        [
+          "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log",
+          "title",
+          "frames [66] property_predicate, [72] $undefined_procedure, [74] metta_ensure_compiled and [93] translate_owned_equations are one stack in ai-tmp/ai-bt.log"
+        ],
+        [
+          "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck",
+          "supports",
+          {
+            "node": "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+            "status": "untried"
+          }
+        ],
+        [
+          "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck",
+          "supports",
+          {
+            "node": "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+            "relation": "addresses",
+            "target": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+          }
+        ],
+        [
+          "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck",
+          "title",
+          "the cycle is entered through one question that SWI answers by resolving the predicate; asked in a form that cannot resolve, the registration completes before anything translates, which makes the hand-held ordering invariant true by construction rather than by luck"
+        ],
+        [
+          "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates",
+          "sort",
+          "prop"
+        ],
+        [
+          "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates",
+          "title",
+          "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates"
+        ],
+        [
+          "the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3",
+          "sort",
+          "prop"
+        ],
+        [
+          "the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3",
+          "supports",
+          "the general class is a cyclic initialisation: a relocation that triggers a lazy bind of the symbol being relocated, the same shape as a Java class-initialisation cycle. The engine has the shape without the cycle detection, so instead of refusing it compiles against a half-built symbol table and bakes the result into a clause nothing later invalidates"
+        ],
+        [
+          "the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3",
+          "title",
+          "the registration that would have supplied arity 3 is the same stack frame that forced the translation which needed arity 3"
+        ],
+        [
+          "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "sort",
+          "approach"
+        ],
+        [
+          "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "addresses",
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+        ],
+        [
+          "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "effort",
+          2
+        ],
+        [
+          "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "status",
+          "untried"
+        ],
+        [
+          "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name",
+          "title",
+          "make the existence question asked while performing a backing row unable to fire the undefined-procedure hook, so registering a name cannot re-enter the translation of that same name"
+        ]
+      ],
+      "id": "4920a5ef47123f92"
+    },
+    {
+      "at": "2026-09-20T19:55:20.238208+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first\", \"tags\": [], \"title\": \"guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites\", \"fields\": {\"effort\": 2, \"addresses\": [\"nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification\"]}}, {\"op\": \"status\", \"id\": \"guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites\", \"because\": \"the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by removing the guard, running that one test, and restoring it\", \"tags\": [\"tested\"], \"title\": \"the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name\", \"tags\": [\"reasoning\"], \"title\": \"the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape\", \"fields\": {}}]",
+      "parents": [
+        "4920a5ef47123f92"
+      ],
+      "assert": [
+        [
+          "measured by removing the guard, running that one test, and restoring it",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by removing the guard, running that one test, and restoring it",
+          "supports",
+          "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture"
+        ],
+        [
+          "measured by removing the guard, running that one test, and restoring it",
+          "tags",
+          "tested"
+        ],
+        [
+          "measured by removing the guard, running that one test, and restoring it",
+          "title",
+          "measured by removing the guard, running that one test, and restoring it"
+        ],
+        [
+          "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first",
+          "sort",
+          "prop"
+        ],
+        [
+          "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first",
+          "supports",
+          {
+            "node": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+            "status": "untried"
+          }
+        ],
+        [
+          "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first",
+          "supports",
+          {
+            "node": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+            "relation": "addresses",
+            "target": "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+          }
+        ],
+        [
+          "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first",
+          "title",
+          "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first"
+        ],
+        [
+          "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape",
+          "title",
+          "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape"
+        ],
+        [
+          "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed",
+          "supersedes",
+          "predicate_property/2 resolves its head and resolution is the only entry to the cycle; current_predicate/2 answers the same database question, cannot resolve, and still answers for an imported head, so the ordering invariant becomes true by shape instead of by which half of the load runs first"
+        ],
+        [
+          "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed",
+          "supports",
+          {
+            "node": "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+            "status": "done"
+          }
+        ],
+        [
+          "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed",
+          "tags",
+          "measured"
+        ],
+        [
+          "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed",
+          "title",
+          "the janus probe now prints MARKER call OK with zero classifier lines, the shipped twin prints 'twin passed', the lib_package suite is 70/70, and the new regression FAILS with the identical error shape when the guard alone is removed"
+        ],
+        [
+          "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture",
+          "sort",
+          "prop"
+        ],
+        [
+          "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture",
+          "title",
+          "the regression test is a true negative control: with package_head_source/3's current_predicate/2 guard removed and nothing else changed, it fails with Domain error: function_input_arities(lp-native-pair,[1,2]) expected, found 2, the same shape as the real defect on a synthetic fixture"
+        ],
+        [
+          "writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name",
+          "sort",
+          "prop"
+        ],
+        [
+          "writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name",
+          "supports",
+          "the fixture states the LAW rather than the instance: a unary equation whose body calls the binary form, the binary supplied only by the package's own Prolog backing row, and the binary type declared after the row as the generated faces place it. lib_math, lib_tabling and lib_thread are three instances of that one shape"
+        ],
+        [
+          "writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name",
+          "title",
+          "writing three library-specific tests would enumerate a cross-product whose only varying dimension is the library name"
+        ],
+        [
+          "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "sort",
+          "approach"
+        ],
+        [
+          "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "addresses",
+          "nothing invalidates or re-translates a compiled clause when arity/2 later gains an arity that would have changed its compile-time classification"
+        ],
+        [
+          "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "effort",
+          2
+        ],
+        [
+          "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "status",
+          "done"
+        ],
+        [
+          "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites",
+          "title",
+          "guard the loader's is-this-head-already-loaded question with current_predicate/2 so asking cannot resolve, giving the question ONE home in package_head_source/3 used by both call sites"
+        ]
+      ],
+      "id": "c373556f230d47ba"
+    },
+    {
+      "at": "2026-09-20T20:00:25.855087+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5\", \"tags\": [\"measured\"], \"title\": \"the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the same A/B: 58848 against 58577, and 32169 against 32169\", \"tags\": [\"measured\"], \"title\": \"the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288\", \"tags\": [\"measured\"], \"title\": \"the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to\", \"tags\": [\"measured\"], \"title\": \"I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane\", \"fields\": {}}]",
+      "parents": [
+        "c373556f230d47ba"
+      ],
+      "assert": [
+        [
+          "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane",
+          "title",
+          "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane"
+        ],
+        [
+          "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5",
+          "supports",
+          "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees"
+        ],
+        [
+          "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5",
+          "title",
+          "measured by running twin_coverage.py on the two examples with lib at a88a892 and again with lib checked out to its pre-fix commit df90ba5"
+        ],
+        [
+          "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288",
+          "sort",
+          "prop"
+        ],
+        [
+          "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288",
+          "supports",
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        ],
+        [
+          "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288",
+          "supports",
+          {
+            "node": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288",
+          "tags",
+          "measured"
+        ],
+        [
+          "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288",
+          "title",
+          "the full lane had not been run this session; the earlier figure came from a partial gate, and running it named 288"
+        ],
+        [
+          "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to",
+          "supports",
+          "I assumed the twins lane's open failures were 36-random_lib, 37-statistics_lib and two orphan twins, and that assumption came from a partial gate rather than a run of the lane"
+        ],
+        [
+          "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to",
+          "title",
+          "the lane's own output names 288 findings, so the number I was carrying was about a different measurement than the one I attributed it to"
+        ],
+        [
+          "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe",
+          "sort",
+          "prop"
+        ],
+        [
+          "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe",
+          "title",
+          "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe"
+        ],
+        [
+          "the same A/B: 58848 against 58577, and 32169 against 32169",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same A/B: 58848 against 58577, and 32169 against 32169",
+          "supports",
+          "the loader fix does add a small deterministic cost: +271 inferences on 15-independent_supports and +0 on 05-fibadd, which is one current_predicate/2 per backed head the example's libraries probe"
+        ],
+        [
+          "the same A/B: 58848 against 58577, and 32169 against 32169",
+          "tags",
+          "measured"
+        ],
+        [
+          "the same A/B: 58848 against 58577, and 32169 against 32169",
+          "title",
+          "the same A/B: 58848 against 58577, and 32169 against 32169"
+        ],
+        [
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane",
+          "title",
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        ],
+        [
+          "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees",
+          "title",
+          "the twins lane's 288 findings over 323 twinned examples are NOT caused by the loader fix: 05-fibadd measures 32169 inferences identically with and without it and is over its pin of 32077 either way, and 15-independent_supports is 3.3x over its pin of 17858 in both trees"
+        ]
+      ],
+      "id": "1b08045f20c011b4"
+    },
+    {
+      "at": "2026-09-20T20:05:34.072848+00:00",
+      "after": "2a7660cc8331582b1e0689baf02429b7979936fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too\", \"tags\": [\"measured\"], \"title\": \"the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"computed from the lane log by ai-tmp/ai-overrun-shape.py\", \"tags\": [\"measured\"], \"title\": \"the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by restoring that one file from f883970^ and rerunning the example\", \"tags\": [\"measured\"], \"title\": \"f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"A/B with lib at a88a892 and at df90ba5\", \"tags\": [\"measured\"], \"title\": \"the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone\", \"tags\": [], \"title\": \"settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism\", \"fields\": {\"effort\": 3, \"addresses\": [\"the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane\"]}}]",
+      "parents": [
+        "1b08045f20c011b4"
+      ],
+      "assert": [
+        [
+          "A/B with lib at a88a892 and at df90ba5",
+          "sort",
+          "prop"
+        ],
+        [
+          "A/B with lib at a88a892 and at df90ba5",
+          "supports",
+          "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071"
+        ],
+        [
+          "A/B with lib at a88a892 and at df90ba5",
+          "tags",
+          "measured"
+        ],
+        [
+          "A/B with lib at a88a892 and at df90ba5",
+          "title",
+          "A/B with lib at a88a892 and at df90ba5"
+        ],
+        [
+          "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too",
+          "sort",
+          "prop"
+        ],
+        [
+          "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too",
+          "supports",
+          "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order"
+        ],
+        [
+          "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too",
+          "tags",
+          "measured"
+        ],
+        [
+          "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too",
+          "title",
+          "a MeTTa derivation costs more than the Prolog body it replaces, which the project ruling of 2026-09-14 accepts explicitly, and the same merge grew the twinned corpus from 294 to 323 so the full-lane protocol envelope changed too"
+        ],
+        [
+          "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone",
+          "supports",
+          {
+            "node": "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+            "status": "untried"
+          }
+        ],
+        [
+          "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone",
+          "supports",
+          {
+            "node": "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+            "relation": "addresses",
+            "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+          }
+        ],
+        [
+          "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone",
+          "title",
+          "a re-pin records whatever the tree currently costs, so it must follow every other fix or it bakes in a defect; the tool's --reason exists so the mechanism is recorded rather than the number alone"
+        ],
+        [
+          "computed from the lane log by ai-tmp/ai-overrun-shape.py",
+          "sort",
+          "prop"
+        ],
+        [
+          "computed from the lane log by ai-tmp/ai-overrun-shape.py",
+          "supports",
+          "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example"
+        ],
+        [
+          "computed from the lane log by ai-tmp/ai-overrun-shape.py",
+          "tags",
+          "measured"
+        ],
+        [
+          "computed from the lane log by ai-tmp/ai-overrun-shape.py",
+          "title",
+          "computed from the lane log by ai-tmp/ai-overrun-shape.py"
+        ],
+        [
+          "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071",
+          "sort",
+          "prop"
+        ],
+        [
+          "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071",
+          "title",
+          "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071"
+        ],
+        [
+          "measured by restoring that one file from f883970^ and rerunning the example",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by restoring that one file from f883970^ and rerunning the example",
+          "supports",
+          "f883970's face change is NOT the cause of the large overruns: reverting lib_crypto's face to the eager import form measures 412680 against 442590 with the row form, about 7 percent, where the pin is 17071"
+        ],
+        [
+          "measured by restoring that one file from f883970^ and rerunning the example",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured by restoring that one file from f883970^ and rerunning the example",
+          "title",
+          "measured by restoring that one file from f883970^ and rerunning the example"
+        ],
+        [
+          "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071",
+          "sort",
+          "prop"
+        ],
+        [
+          "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071",
+          "title",
+          "the loader fix is cleared on the worst case too: 06-crypto_lib measures 445869 with it and 442868 without, 0.68 percent, against a pin of 17071"
+        ],
+        [
+          "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example",
+          "sort",
+          "prop"
+        ],
+        [
+          "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example",
+          "title",
+          "the overrun distribution is bimodal and the two modes have different causes: 169 of 249 are under 1.01x, which is envelope-level drift, while 21 are at or above 3x and top out at 26x, and every one of those is a library or engine-extension example"
+        ],
+        [
+          "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order",
+          "title",
+          "the twins lane's 249 budget overruns are stale pins, not a regression: the pins were set by commit 55d451b67 at 2026-09-19 00:39 and the merge 97763e7fa, which derived sixty libraries in MeTTa, landed at 08:56 the same day, eight hours later, with git merge-base --is-ancestor confirming the order"
+        ],
+        [
+          "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "sort",
+          "approach"
+        ],
+        [
+          "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "addresses",
+          "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+        ],
+        [
+          "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "effort",
+          3
+        ],
+        [
+          "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "status",
+          "untried"
+        ],
+        [
+          "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism",
+          "title",
+          "settle the engine state first and re-pin the twins corpus LAST, naming the sixty-library MeTTa derivation and the 294-to-323 corpus growth as the mechanism"
+        ]
+      ],
+      "id": "ada62d6e59f03954"
     }
   ]
 }

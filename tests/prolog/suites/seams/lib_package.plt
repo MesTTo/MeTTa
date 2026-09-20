@@ -632,4 +632,31 @@ test(package_lifetime_sweeps_lengths_and_failure_positions) :-
               lp_answers(Policy,['package-fixture-reverse',Kept,[]],[Reverse]),
               findall(release(Id),member(Id,Reverse),Released), append(Acquired,Released,Expected), lp_events(Expected) ))).
 
+% Performing a backing row must not translate the MeTTa equations of a name
+% that row is registering. The loader asks whether a head is already loaded
+% from this artifact; asked with predicate_property/2 that question RESOLVES
+% the head, and resolving an undefined one fires SWI's undefined-procedure
+% hook, which this engine answers by translating the name. The translation
+% then runs inside the registration that has not yet recorded the arity the
+% equation's own body calls, so the body compiles to a function_overapplication
+% goal whose message, rendered later from the completed registry, names the
+% very arity it refuses.
+%
+% The fixture is the shape rather than one library: a unary equation whose body
+% calls the binary form, the binary form supplied only by this package's own
+% Prolog backing, and the binary type declared AFTER the row exactly as the
+% generated faces place it. lib_math, lib_tabling and lib_thread are three
+% instances of it [measured 2026-09-21: (math-ratio (math-rational 0.1))
+% raised `function_input_arities(math-rational,[1,2])' expected, found `2'].
+test(a_backing_row_registers_before_the_equations_calling_it_translate) :-
+    lp_package(reentrant,
+        "(: lp-native-pair (-> Number Number))\n\c
+         (= (lp-native-pair $v) (lp-native-pair $v 1))\n\c
+         (= (package backing) (prolog \"native.pl\" (lp-native-pair)))\n\c
+         (: lp-native-pair (-> Number Number Number))\n",
+        Path, Home),
+    lp_adjacent(Path, 'native.pl', "'lp-native-pair'(X, Y, Z) :- Z is X + Y.", _),
+    lp_import(Path, Home),
+    lp_answers(Home, ['lp-native-pair', 41], [42]).
+
 :- end_tests(lib_package).

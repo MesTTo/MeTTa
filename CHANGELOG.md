@@ -62,6 +62,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library whose MeTTa half defines a name its own Prolog backing also
+  supplies no longer refuses that name's calls with a domain error naming the
+  arity it is refusing. Performing a `(= (package backing) (prolog ...))` row
+  asked whether each head was already loaded with `predicate_property/2`, which
+  resolves the head; resolving an undefined one fires SWI's
+  undefined-procedure hook, which the engine answers by translating the name's
+  equations. That translation ran inside the registration that had not yet
+  recorded the Prolog arity, so an equation whose body called the backed arity
+  compiled to a refusal, and the refusal's message, rendered later from the
+  completed registry, listed the very arity it rejected. The loader now asks
+  through `current_predicate/2`, which answers the same question about the
+  database and cannot define anything. `math-rational`, `lib_tabling` and
+  `lib_thread` carry equations of this shape; `(math-rational 0.1)` raised
+  before and evaluates now.
+
 - Loading a source that declares `(from "<file>" ...)` no longer fails
   intermittently while a background or suspended query runs in another thread.
   Two steps of reference publication asked a per-thread transaction snapshot a
