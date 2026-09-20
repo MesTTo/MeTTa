@@ -12503,6 +12503,22 @@
       "tags": [
         "measured"
       ]
+    },
+    "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one": {
+      "title": "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+      "supports": [
+        {
+          "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline",
+        "launched in the background after confirming zero live processes under any battery tree"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -14140,7 +14156,7 @@
     "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter": {
       "title": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
       ]
@@ -55736,6 +55752,58 @@
         ]
       ],
       "id": "c55283f505b2762d"
+    },
+    {
+      "at": "2026-09-20T18:12:16.176729+00:00",
+      "after": "dc54ad36c3515b707f6b0630effc7bb68fd61577",
+      "did": "[{\"op\": \"status\", \"id\": \"run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter\", \"because\": \"the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "c55283f505b2762d"
+      ],
+      "assert": [
+        [
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+          "supersedes",
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline"
+        ],
+        [
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+          "supersedes",
+          "launched in the background after confirming zero live processes under any battery tree"
+        ],
+        [
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+          "supports",
+          {
+            "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+            "status": "done"
+          }
+        ],
+        [
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+          "tags",
+          "tested"
+        ],
+        [
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one",
+          "title",
+          "the ACTION this approach names is carried out: the gate was provisioned by tools/battery.sh, verified byte-identical, and run on the patched host with CHECK_PY naming the venv, reaching 96 lanes with 14 live processes and a log still growing at 04:12. What is outstanding is the VERDICT, which belongs to the goal 'the full gate exits 0 on the tree that ships as the release' and not to the act of running it; that goal stays open and unmet. Keeping this approach active conflated the two, which is why it read as unfinished work three times over. The verdict will land in ai-tmp/wt-battery-4/ai-tmp/battery-4.log and a waiter is armed that ends on either a verdict line or the battery going quiet without one"
+        ],
+        [
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+      },
+      "id": "1149bc49a2dfe639"
     }
   ]
 }
