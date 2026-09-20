@@ -972,8 +972,11 @@ docs_prerequisite_missing() {
             "$1" >&2
         return 1
     fi
+    # 125 rather than 0, the same word every other prerequisite guard in this
+    # tree now uses: run() reports it as `skipped` and names the lane under
+    # MEASURED NOTHING, where 0 reported `ok` for a site that was never built.
     printf 'note: %s; the documentation site will not be built\n' "$1" >&2
-    return 0
+    return 125
 }
 
 check_docs_site() {

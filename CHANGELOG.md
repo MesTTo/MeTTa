@@ -86,6 +86,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `/etc/debuginfod/*.urls` whenever `[ -z ]` holds, so a rung that started a
   login shell would hand the server back.
 
+- A lane that could not run says so. Twenty-two prerequisite guards across six
+  runners printed a note and exited or returned `0`, so the gate reported `ok`
+  for a lane that compiled nothing, ran no test, or compared not one row. They
+  return `125` now, which is this tree's existing word for a run that says
+  nothing about it: `check.sh`'s `run()` reports it as `skipped` and names the
+  lane under `MEASURED NOTHING`, and a skip neither passes nor fails the gate,
+  so no CI outcome changes and only the reporting stops overstating. Measured
+  2026-09-20: `node-bench` answered `GATE node-bench ok` in a battery whose
+  `node_modules` had never been installed, while printing `run 'npm ci --prefix
+  extensions/node', the Node benchmarks will not run without swipl-wasm`; the
+  same lane on a battery carrying the install ran and found six cases outside
+  the band. The guards touched are in `check.sh`, `extensions/cmetta/check.sh`,
+  `extensions/mork/bench.sh`, `extensions/node/bench.sh`,
+  `extensions/node/check.sh` and `extensions/node/test.sh`; each was read
+  rather than replaced in bulk, because a guard that reports a legitimately
+  inapplicable case must keep exiting `0`.
+
 - The `memray` lane discriminates again. Both halves of its plant now exclude
   SWI's own stack growth, which is the engine's arena rather than anything the
   caller retains: Prolog stacks grow to hold a term and are never returned to

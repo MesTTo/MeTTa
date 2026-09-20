@@ -5775,6 +5775,148 @@
       "tags": [
         "measured"
       ]
+    },
+    "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering": {
+      "title": "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering"
+    },
+    "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too": {
+      "title": "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too",
+      "supports": [
+        "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes": {
+      "title": "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes"
+    },
+    "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane": {
+      "title": "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane",
+      "supports": [
+        "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are": {
+      "title": "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+    },
+    "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s": {
+      "title": "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s",
+      "supports": [
+        "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes": {
+      "title": "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes"
+    },
+    "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers": {
+      "title": "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers",
+      "supports": [
+        "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it": {
+      "title": "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it",
+      "supports": [
+        {
+          "node": "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "status": "untried"
+        },
+        {
+          "node": "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "relation": "addresses",
+          "target": "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+        }
+      ]
+    },
+    "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching": {
+      "title": "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching"
+    },
+    "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count": {
+      "title": "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count",
+      "supports": [
+        "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves": {
+      "title": "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves"
+    },
+    "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit": {
+      "title": "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit",
+      "supports": [
+        "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree": {
+      "title": "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+    },
+    "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band": {
+      "title": "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band",
+      "supports": [
+        "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk": {
+      "title": "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk",
+      "supports": [
+        {
+          "node": "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "status": "untried"
+        },
+        {
+          "node": "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "relation": "addresses",
+          "target": "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+        }
+      ]
+    },
+    "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided": {
+      "title": "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided"
+    },
+    "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'": {
+      "title": "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'",
+      "supports": [
+        "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes": {
+      "title": "it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes",
+      "attacks": [
+        "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering"
+      ]
+    },
+    "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown": {
+      "title": "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown"
+    },
+    "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module": {
+      "title": "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module",
+      "supports": [
+        "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -6729,6 +6871,22 @@
       "status": "unwanted",
       "addresses": [
         "the memray clean control now retains 8.1 MiB at one location where 924.6 KiB was measured on 2026-09-07, so the 8 MB bound can no longer separate a leak from the engine's own retention and the lane reports findings instead of discriminating"
+      ]
+    },
+    "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste": {
+      "title": "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+      ]
+    },
+    "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing": {
+      "title": "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
       ]
     }
   },
@@ -28953,6 +29111,450 @@
         ]
       ],
       "id": "3357d3e67f9efd9a"
+    },
+    {
+      "at": "2026-09-20T02:32:23.405035+00:00",
+      "after": "cfcb32b5afd45248d888effae9df987c6b0433cb",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too\", \"tags\": [\"measured\"], \"title\": \"the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane\", \"tags\": [\"measured\"], \"title\": \"the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes\", \"fields\": {}}]",
+      "parents": [
+        "3357d3e67f9efd9a"
+      ],
+      "assert": [
+        [
+          "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane",
+          "supports",
+          "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes"
+        ],
+        [
+          "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane",
+          "tags",
+          "measured"
+        ],
+        [
+          "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane",
+          "title",
+          "battery 6 named door-sync and door-sync-selftest among its 38 failures and its provenance stamp to log mtime is 09:14:11 to 10:33:27, which leaves no room for a 3600 second lane"
+        ],
+        [
+          "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too",
+          "supports",
+          "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering"
+        ],
+        [
+          "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too",
+          "title",
+          "measured 2026-09-20 in battery 7 at 12:23 and reproduced in battery 8: the controller and all four xdist workers sit at 0 percent CPU in futex_do_wait, and the same files run serially reach test_door_rows and stop there too"
+        ],
+        [
+          "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering",
+          "title",
+          "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering"
+        ],
+        [
+          "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes",
+          "title",
+          "the hang is newly EXPOSED rather than newly introduced: the same lane failed fast in the 09:14 run, before the battery could answer git about itself, and a whole gate that had this hang in it could not have finished 206 lanes in 79 minutes"
+        ]
+      ],
+      "id": "0561684710cbf603"
+    },
+    {
+      "at": "2026-09-20T02:38:05.102386+00:00",
+      "after": "cfcb32b5afd45248d888effae9df987c6b0433cb",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s\", \"tags\": [\"measured\"], \"title\": \"each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers\", \"tags\": [\"source\"], \"title\": \"the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it\", \"tags\": [], \"title\": \"measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste\", \"fields\": {\"effort\": 2, \"addresses\": [\"each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are\"]}}]",
+      "parents": [
+        "0561684710cbf603"
+      ],
+      "assert": [
+        [
+          "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are",
+          "sort",
+          "prop"
+        ],
+        [
+          "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are",
+          "title",
+          "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+        ],
+        [
+          "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s",
+          "supports",
+          "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+        ],
+        [
+          "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s",
+          "tags",
+          "measured"
+        ],
+        [
+          "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s",
+          "title",
+          "recorded in the 2026-09-19 journal entry: the finishing configuration does 20,843 evaluations over 2,358 scopes in 13.80s and the non-finishing one 13,557 over 2,532 scopes in 200s"
+        ],
+        [
+          "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers",
+          "sort",
+          "prop"
+        ],
+        [
+          "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers",
+          "supports",
+          "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes"
+        ],
+        [
+          "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers",
+          "tags",
+          "source"
+        ],
+        [
+          "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers",
+          "title",
+          "the store's own comment records _put as the largest self time at 24.8s over 10.6M calls with both its operations linear in the slot, and the journal names metta._atoms.model.encode's return slot at 3,104 references with 427 readers"
+        ],
+        [
+          "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it",
+          "supports",
+          {
+            "node": "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it",
+          "supports",
+          {
+            "node": "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+            "relation": "addresses",
+            "target": "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+          }
+        ],
+        [
+          "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it",
+          "title",
+          "the two candidate fixes attack different quantities: a union memo pays only if identical interned pairs recur, and a bitset representation pays whatever the recurrence because it changes the per-element constant from a hash insertion to a machine word, so one measurement separates them and neither should be built before it"
+        ],
+        [
+          "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes",
+          "title",
+          "the work inside one evaluation is proportional to the cardinality of the value sets it unions, and one slot has grown to 3,104 references read by 427 scopes"
+        ],
+        [
+          "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "sort",
+          "approach"
+        ],
+        [
+          "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "addresses",
+          "each call-graph evaluation in the door analysis is about twenty-two times dearer than in the configuration that finishes, 14.8ms against 0.66ms, while doing FEWER evaluations, so the cost is the work inside one evaluation rather than how many there are"
+        ],
+        [
+          "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "effort",
+          2
+        ],
+        [
+          "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "status",
+          "untried"
+        ],
+        [
+          "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste",
+          "title",
+          "measure, over one whole doororder run, how many elements the analysis moves through set unions and how often the same pair of interned sets is unioned again, so the choice between memoising the union and changing the set representation is made on the hit rate rather than on taste"
+        ]
+      ],
+      "id": "6445d6296c9fb822"
+    },
+    {
+      "at": "2026-09-20T02:41:30.282090+00:00",
+      "after": "cfcb32b5afd45248d888effae9df987c6b0433cb",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count\", \"tags\": [\"measured\"], \"title\": \"profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit\", \"tags\": [\"measured\"], \"title\": \"the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves\", \"fields\": {}}]",
+      "parents": [
+        "6445d6296c9fb822"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count",
+          "supports",
+          "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count",
+          "title",
+          "measured 2026-09-20 in battery 9, py-spy sampling the committed analyser at 60Hz for 150 seconds over doororder derived, folded stacks aggregated by leaf frame; a sampling profiler was used rather than wrapping a method because the record already measured that instrumenting _put biases the result toward changes that cut its call count"
+        ],
+        [
+          "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching",
+          "sort",
+          "prop"
+        ],
+        [
+          "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching",
+          "title",
+          "profiling the COMMITTED analyser, which was step 1 of the recorded plan, shows no leader left to remove: the store's own two operations carry about a quarter of the run, _put's subset test at 11.5 percent and _get's reader registration and lookups at 9.7 percent, while _container_call has fallen to about 5 percent from the 152.3 seconds of a 262 second profile it carried before the batching"
+        ],
+        [
+          "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit",
+          "supports",
+          "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves"
+        ],
+        [
+          "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit",
+          "tags",
+          "measured"
+        ],
+        [
+          "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit",
+          "title",
+          "the 2026-09-19 journal derives the equation from a module sweep and records the three caching failures with their measurements, and the profile above shows the time spread across per-reference store operations rather than concentrated anywhere a cache could sit"
+        ],
+        [
+          "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves",
+          "sort",
+          "prop"
+        ],
+        [
+          "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves",
+          "title",
+          "the remaining cost is therefore the store's size rather than any hot spot, which selects the precision question over the work-sharing one: the recorded equation is T equals c times P with c flat at 41 to 48 microseconds across a tenfold range, and the three work-sharing arrangements already measured all lose because a cache's bookkeeping here is proportional to the work it saves"
+        ]
+      ],
+      "id": "c78c905c00f8c8c2"
+    },
+    {
+      "at": "2026-09-20T02:47:24.328727+00:00",
+      "after": "cfcb32b5afd45248d888effae9df987c6b0433cb",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band\", \"tags\": [\"measured\"], \"title\": \"twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk\", \"tags\": [], \"title\": \"give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing\", \"fields\": {\"effort\": 2, \"addresses\": [\"twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'\", \"tags\": [\"source\"], \"title\": \"the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided\", \"fields\": {}}]",
+      "parents": [
+        "c78c905c00f8c8c2"
+      ],
+      "assert": [
+        [
+          "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'",
+          "sort",
+          "prop"
+        ],
+        [
+          "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'",
+          "supports",
+          "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided"
+        ],
+        [
+          "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'",
+          "tags",
+          "source"
+        ],
+        [
+          "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'",
+          "title",
+          "its words are 'It is the same shape and it deserves the same word, but each of those lanes decides its own skip condition in its own script ... Revisit as a lane-by-lane pass rather than as part of this one'"
+        ],
+        [
+          "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band",
+          "supports",
+          "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+        ],
+        [
+          "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band",
+          "title",
+          "measured 2026-09-20: node-bench answered GATE node-bench ok in battery 6 while printing 'run npm ci --prefix extensions/node, the Node benchmarks will not run without swipl-wasm', and the same lane in battery 7, on a battery carrying the install links, ran and reported six cases outside the band"
+        ],
+        [
+          "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided",
+          "title",
+          "the 2026-09-07 rejection of this change was about the scope of that commit rather than about the change, so doing it now defeats nothing it decided"
+        ],
+        [
+          "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk",
+          "sort",
+          "prop"
+        ],
+        [
+          "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk",
+          "supports",
+          {
+            "node": "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+            "status": "untried"
+          }
+        ],
+        [
+          "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk",
+          "supports",
+          {
+            "node": "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+            "relation": "addresses",
+            "target": "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+          }
+        ],
+        [
+          "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk",
+          "title",
+          "the mechanism exists and is already wired: run() maps 125 to skipped, adds the lane to SKIPPED and prints the MEASURED NOTHING line, and a skip does not fail the run, so nothing about CI behaviour changes and only the reporting stops lying; the 2026-09-07 entry that deferred this said the shape deserves the same word and asked for exactly a lane-by-lane pass, which this is, each site read rather than replaced in bulk"
+        ],
+        [
+          "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree",
+          "title",
+          "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+        ],
+        [
+          "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "sort",
+          "approach"
+        ],
+        [
+          "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "addresses",
+          "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+        ],
+        [
+          "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "effort",
+          2
+        ],
+        [
+          "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "status",
+          "untried"
+        ],
+        [
+          "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing",
+          "title",
+          "give every prerequisite guard the gate's own word for an unmeasured run, 125, so a lane that could not run is reported as skipped and named under MEASURED NOTHING instead of passing"
+        ]
+      ],
+      "id": "edb457e3243d2a21"
+    },
+    {
+      "at": "2026-09-20T02:48:41.849872+00:00",
+      "after": "cfcb32b5afd45248d888effae9df987c6b0433cb",
+      "did": "[{\"op\": \"attack\", \"id\": \"the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering\", \"because\": \"it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes\", \"tags\": []}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module\", \"tags\": [\"measured\"], \"title\": \"the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown\", \"fields\": {}}]",
+      "parents": [
+        "edb457e3243d2a21"
+      ],
+      "assert": [
+        [
+          "it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes",
+          "attacks",
+          "the door-sync-selftest lane hangs: its pytest over test_door_rows and test_door_marks stops after about 23 results with every process in futex_do_wait and under two seconds of CPU between them, so the lane burns its whole hour ceiling instead of answering"
+        ],
+        [
+          "it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes",
+          "title",
+          "it is not a hang: both reproductions produced a pytest-timeout stack dump inside the door analysis module, the serial one under three frames of the value walker and the xdist one in the memo, and a correctly-sampled reading of the serial run showed 803 CPU ticks in 8 wall seconds, which is one core saturated; the two low-CPU samples the hang claim rested on were taken on the xdist controller and its execnet bootstraps, neither of which computes"
+        ],
+        [
+          "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module",
+          "supports",
+          "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown"
+        ],
+        [
+          "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module",
+          "title",
+          "measured 2026-09-20: the lane took 518s of the battery 7 run against three seconds for a typical workspace lane, the row test file holds 17 call sites naming the face emitter or the core row reader, and both reproductions timed out inside the analysis module"
+        ],
+        [
+          "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown",
+          "title",
+          "the door-sync-selftest lane costs 518 seconds because its row tests reach the whole-program door analysis from seventeen call sites, and that analysis is the one whose time is linear in a store that has grown"
+        ]
+      ],
+      "id": "1742661c97e4027d"
     }
   ]
 }
