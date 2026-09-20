@@ -12383,6 +12383,62 @@
       "tags": [
         "tested"
       ]
+    },
+    "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures": {
+      "title": "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures"
+    },
+    "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it": {
+      "title": "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it",
+      "supports": [
+        "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape": {
+      "title": "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape",
+      "supports": [
+        {
+          "node": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "status": "untried"
+        },
+        {
+          "node": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "relation": "addresses",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ]
+    },
+    "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute": {
+      "title": "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute",
+      "supports": [
+        {
+          "node": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question": {
+      "title": "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere": {
+      "title": "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere",
+      "supports": [
+        "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -14077,6 +14133,14 @@
       "title": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
       "effort": 1,
       "status": "active",
+      "addresses": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too": {
+      "title": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+      "effort": 2,
+      "status": "failed",
       "addresses": [
         "the plunit and dev-typed lanes exit zero"
       ]
@@ -55250,6 +55314,173 @@
         "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
       },
       "id": "2f41fcec06d62834"
+    },
+    {
+      "at": "2026-09-20T18:06:45.609015+00:00",
+      "after": "0830af490c0fe7b025a45dfe75e38c2eba7b49f7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it\", \"tags\": [\"measured\"], \"title\": \"PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures\", \"fields\": {}}]",
+      "parents": [
+        "2f41fcec06d62834"
+      ],
+      "assert": [
+        [
+          "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures",
+          "sort",
+          "prop"
+        ],
+        [
+          "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures",
+          "title",
+          "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures"
+        ],
+        [
+          "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it",
+          "supports",
+          "PARTIAL at 9 of 38 debt suites: exporting VIRTUAL_ENV takes shim.plt from 18 failures to 0 and lib_database from 2 to 0, while metta, prelude, prelude_spec, prolog_interface, lib_cli, lib_combinatorics_surface and lib_crypto_surface are unchanged, so those seven are genuine typed-build failures"
+        ],
+        [
+          "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it",
+          "title",
+          "measured 2026-09-21 over the first 9 rows of the re-measure; lib_database's 2 were already fixed by the mode-line change, which the earlier sweep predated. This is explicitly a partial and the total cannot be quoted from it"
+        ]
+      ],
+      "id": "dacbbd6b509c2d3b"
+    },
+    {
+      "at": "2026-09-20T18:07:53.051580+00:00",
+      "after": "0830af490c0fe7b025a45dfe75e38c2eba7b49f7",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape\", \"tags\": [], \"title\": \"apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too\", \"fields\": {\"effort\": 2, \"addresses\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"status\", \"id\": \"apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too\", \"because\": \"measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question\", \"fields\": {}}]",
+      "parents": [
+        "dacbbd6b509c2d3b"
+      ],
+      "assert": [
+        [
+          "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere",
+          "supports",
+          "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question"
+        ],
+        [
+          "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere",
+          "title",
+          "each was probed separately and the three probes disagree; a systematic fix was hypothesised and refuted on lib_cli before being applied anywhere"
+        ],
+        [
+          "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape",
+          "supports",
+          {
+            "node": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+            "status": "untried"
+          }
+        ],
+        [
+          "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape",
+          "supports",
+          {
+            "node": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+            "relation": "addresses",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape",
+          "title",
+          "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape"
+        ],
+        [
+          "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute",
+          "supersedes",
+          "lib_database's 21 failures were exactly that, and lib_cli declares +Specification:'Atom', +Arguments:'Expression', +Duplicates:'Symbol' and -Parsed:list on one predicate, which is the same shape"
+        ],
+        [
+          "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute",
+          "supports",
+          {
+            "node": "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+            "status": "failed"
+          }
+        ],
+        [
+          "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute",
+          "title",
+          "measured on lib_cli: removing the types from both its MeTTa-typed mode lines leaves the suite at 8 failures, unchanged. Its errors are `Type error: cli_value(string) expected` from lib_cli's OWN must_be at lib_cli.pl:221, a parameterised type of its own, not the when/2 attribute"
+        ],
+        [
+          "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question",
+          "title",
+          "the typed build's remaining debt is heterogeneous and has no single lever: lib_database was the when/2 attribute and is fixed, shim.plt was my missing VIRTUAL_ENV and is not real, lib_cli is its own cli_value validation, and lib_package is a door-boundary string question"
+        ],
+        [
+          "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "sort",
+          "approach"
+        ],
+        [
+          "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "addresses",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "effort",
+          2
+        ],
+        [
+          "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "status",
+          "failed"
+        ],
+        [
+          "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too",
+          "title",
+          "apply the lib_database mode-line rule across the other typed-debt suites, on the hypothesis that a mode line type on a variable-carrying argument explains them too"
+        ]
+      ],
+      "id": "b31b6ae5d81420a0"
     }
   ]
 }
