@@ -349,6 +349,18 @@ CLAIM_SOURCES = (
     # The first two are fixed in the checker below and in evidence_runners;
     # the third was fixed in check.sh itself.
     "*.sh",
+    # And `tools/`, which is where the gate's own runners now live. The line
+    # above says "every shell script the repository ships" and it meant the
+    # ROOT, so moving check.sh, test.sh, bounded.sh, build.sh, run.sh,
+    # components.sh, worktree.sh and battery.sh one directory down took 23
+    # tags out of this lane's view, 15 of them in check.sh itself. Nothing
+    # went red: the lane read fewer files and reported on the ones it still
+    # read, which is the failure this glob was written to end [measured
+    # 2026-09-21: pin_provenance reported tools/battery.sh as "OUTSIDE the
+    # evidence gate's globs, so nothing reads this file's claims and nothing
+    # would ever resolve them", the same way metta_py.py was found;
+    # commit=WORKTREE].
+    "tools/*.sh",
     "engine/*.sh",
     "extensions/*/*.sh",
     "extensions/*/tests/*.sh",
@@ -469,6 +481,8 @@ PROVENANCE_SOURCES = (
     # lives once, on pin_provenance.UNPINNABLE.
     "agenticmind.json",
     "*.sh",
+    # The gate's own runners, for the reason given on CLAIM_SOURCES above.
+    "tools/*.sh",
     "engine/*.sh",
     "extensions/*/*.sh",
     # Three more the out-of-glob net named on 2026-09-05, each carrying pins

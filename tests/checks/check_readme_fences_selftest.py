@@ -9,10 +9,14 @@ to name it.
 Assumes: a python that can import `metta`, and `tools/bounded.sh`.
 Guarantees:
   - a fence calling a head that does not exist is reported
+    [tested: tests/checks/check_readme_fences_selftest.py; commit=WORKTREE]
   - a fence relying on an import an EARLIER fence performed is reported, which
     is the defect five fences in the MORK page actually had
+    [tested: tests/checks/check_readme_fences_selftest.py; commit=WORKTREE]
   - a fence naming a network URL is reported WITHOUT being run
+    [tested: tests/checks/check_readme_fences_selftest.py; commit=WORKTREE]
   - a fence that runs is not reported
+    [tested: tests/checks/check_readme_fences_selftest.py; commit=WORKTREE]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
   To Do: None
