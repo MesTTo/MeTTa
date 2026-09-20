@@ -26,11 +26,11 @@
 %       the walk stopped reporting it
 %       [measured 2026-09-20: the raw walk over engine/main.pl with autoload
 %       off reports lib_file:metta_staged_publish/2 and nothing else;
-%       commit=WORKTREE].
+%       commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %     - undefined_findings/2 throws rather than answering clean when the walk
 %       failed to report a call this file planted, so "no findings" is a claim
 %       the same pass has just tested
-%       [tested: tests/prolog/deferred_references_selftest.pl; commit=WORKTREE].
+%       [tested: tests/prolog/deferred_references_selftest.pl; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %     - undefined_verdict/0 prints both kinds and halts 0 or 1. It halts rather
 %       than returning for the reason library_autoload.pl records: engine/main.pl
 %       carries initialization(main, main) and would otherwise run its demo over
@@ -145,7 +145,7 @@ user:message_hook(check(undefined_procedures, Rows), _Kind, _Lines) :-
 %   walk after it, keeps the cost at one traversal
 %   [measured 2026-09-20: the walk over the 137 source files of a tokenless
 %   engine boot costs about 4s, so a second pass would double it in all three
-%   lanes; commit=WORKTREE].
+%   lanes; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 
 undefined_findings(Unexpected, Stale) :-
     walk_proving_eyesight(Rows),
@@ -158,7 +158,7 @@ undefined_findings(Unexpected, Stale) :-
 %   The two decisions, as functions of the walk's output and the database. They
 %   are separate from the walk so each can be put a synthetic Rows and checked
 %   in both directions without a four-second traversal or a second table
-%   [tested: tests/prolog/deferred_references_selftest.pl; commit=WORKTREE].
+%   [tested: tests/prolog/deferred_references_selftest.pl; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 
 unexpected_sites(Rows, Unexpected) :-
     probe(Probe),

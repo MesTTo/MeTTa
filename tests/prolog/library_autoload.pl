@@ -21,7 +21,7 @@
 %       This file used to pick from five real library exports and move between
 %       them for exactly that reason
 %       [tested: deferred_references:the_walk_refuses_to_answer_when_blinded;
-%       commit=WORKTREE]
+%       commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 %     - allows exactly the names in deferred_reference/3, each with its reason
 %       and the files allowed to reach it, and nothing else; a row this lane's
 %       configuration has made unnecessary fails the lane rather than sitting

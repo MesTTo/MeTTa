@@ -11,7 +11,7 @@
 % wrong module, because engine/main.pl is module metta_main while its generated
 % mettafunc/2 is resolved through the &self execution module
 % [measured 2026-09-20: the raw walk over a tokenless engine boot reports
-% lib_file:metta_staged_publish/2 and nothing else; commit=WORKTREE].
+% lib_file:metta_staged_publish/2 and nothing else; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 % Guarantees:
 %   - a name no row licenses is reported
@@ -54,7 +54,7 @@
 % Through predicate_property/2 rather than source_file/2, because the engine
 % loads from .qlf and that leaves the predicate-to-file attribution almost
 % empty: 6 pairs over the 118 loaded files, and none of them the engine's
-% [measured 2026-09-20; commit=WORKTREE]. nth_clause/3 also raises on a
+% [measured 2026-09-20; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]. nth_clause/3 also raises on a
 % predicate with no clauses, and one throw inside a catch would end the search
 % rather than move to the next candidate, so the guard is per candidate.
 a_clause_in(Relative, Ref) :-

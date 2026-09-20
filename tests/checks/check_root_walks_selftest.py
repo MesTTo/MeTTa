@@ -10,17 +10,17 @@ test builds and throws away.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - a walk reaching the seat, and one reaching above it, are both reported with
-    their lines [tested: this file; commit=WORKTREE]
-  - a walk landing inside the seat is NOT reported [tested: this file; commit=WORKTREE]
+    their lines [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
+  - a walk landing inside the seat is NOT reported [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the derivation, which names the marker instead of a depth, is NOT reported
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - `metta/_roots.py` is exempt, being where the derivation is written down
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a derivation using a CORRECT marker for the wrong root is reported through the
     path it then fails to name, which no check on the spelling could see
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a correct derivation, and one naming scratch the program writes, are NOT
-    reported [tested: this file; commit=WORKTREE]
+    reported [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

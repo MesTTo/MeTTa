@@ -456,7 +456,7 @@ PROVENANCE_SOURCES = (
     # reported all three of lib_package's].
     "tests/data/**/*.pl",
     # The RECORD. agenticmind.json quotes evidence tags inside the reasons it
-    # carries, because "MEASURED ...; commit=WORKTREE" is the reason a status
+    # carries, because "MEASURED ...; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f" is the reason a status
     # was given, so it spells the placeholder in a commentless format exactly
     # as the baselines above do. It joins the PIN half only and never the
     # claim half: a record's reasons are an account of what was believed and

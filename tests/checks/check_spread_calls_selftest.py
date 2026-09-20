@@ -15,14 +15,14 @@ hatch cannot become a silent one.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - a `Values` method called with a one-element set inside a loop is reported with
-    its line [tested: this file; commit=WORKTREE]
+    its line [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the same call outside a loop is NOT reported, because one reference is then
-    all there is [tested: this file; commit=WORKTREE]
+    all there is [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a method whose first parameter is not annotated `Values` is NOT reported, which
     is what derives the method set from the source instead of a list
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - `# per-reference:` with a reason spares the site and the bare marker does not
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

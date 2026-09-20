@@ -1,7 +1,7 @@
 % Purpose: prove every package-law test detects removal of its policy.
 % Guarantees: each witness first passes in a fresh process, then fails with
 % one installed mutation; unassigned or nonexistent tests refuse the run.
-% [tested: main/0; commit=WORKTREE].
+% [tested: main/0; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: child processes are joined; their separate logs stay under
 % this battery's ai-tmp/package-mutations. No source file is edited.
 

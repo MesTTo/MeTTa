@@ -49,7 +49,7 @@ Guarantees:
     something. One mark OBJECT carries the bound and the filter to both, so
     there is no second spelling that could drift from the first
     [source: LEAK_MARK, the only `limit_leaks` mark in this file, applied at
-    both halves; commit=WORKTREE]
+    both halves; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Owns resources: the module list below deliberately outlives the leaking test,
   which is the leak; the process ends with the lane
 Open Obligations:

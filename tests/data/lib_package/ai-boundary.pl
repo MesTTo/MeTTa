@@ -2,7 +2,7 @@
 % Assumes: run in a provisioned battery; source fixtures and
 %   generated artifacts belong to that battery's ai-tmp directory.
 % Guarantees: each observation reports the result, including named refusals.
-%   [tested: lib_package; commit=WORKTREE].
+%   [tested: lib_package; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: fixture streams close on every exit. Each probe runs in this
 %   diagnostic process; its claims and native spaces disappear on process exit.
 

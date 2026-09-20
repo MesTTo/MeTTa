@@ -42513,7 +42513,7 @@
     {
       "at": "2026-09-20T09:09:16.580019+00:00",
       "after": "f93e31a3d19a6d72ea7cacb60d7e4ac75a2cdb8e",
-      "did": "[{\"op\": \"status\", \"id\": \"add host_transactions:try_erase/1 as the single named tolerant release and route every vulnerable site through it, module-qualified the way this codebase already calls across modules\", \"because\": \"the twelve bare-erase sites plus four textually identical ignore/1 sites now call it; the seven error-absorbing catch sites were reverted after source_retirement.plt's oracle refused one; layering passes with four new reaches/3 lines each carrying its reason; the full Prolog battery is 173 passed and 9 failed, exactly the 9 that fail pre-change; prolog, prolog-static, evidence, host-workarounds, lib-autoload and lib-surface are green; and the race reproduction is clean over 78,000 iterations\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/prolog/probes/reference_load_race.pl declared two Guarantees with no evidence tag; after tagging one measured and one source the lane reads 0 unbacked tags in 8,803 claims\", \"tags\": [\"tested\"], \"title\": \"the evidence lane caught two unbacked guarantees in my own probe file, which is the lane doing its job on work written this session rather than on inherited debt\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the evidence lane reports them in its informational line and still exits 0\", \"tags\": [\"measured\"], \"title\": \"87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step\", \"fields\": {}}]",
+      "did": "[{\"op\": \"status\", \"id\": \"add host_transactions:try_erase/1 as the single named tolerant release and route every vulnerable site through it, module-qualified the way this codebase already calls across modules\", \"because\": \"the twelve bare-erase sites plus four textually identical ignore/1 sites now call it; the seven error-absorbing catch sites were reverted after source_retirement.plt's oracle refused one; layering passes with four new reaches/3 lines each carrying its reason; the full Prolog battery is 173 passed and 9 failed, exactly the 9 that fail pre-change; prolog, prolog-static, evidence, host-workarounds, lib-autoload and lib-surface are green; and the race reproduction is clean over 78,000 iterations\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/prolog/probes/reference_load_race.pl declared two Guarantees with no evidence tag; after tagging one measured and one source the lane reads 0 unbacked tags in 8,803 claims\", \"tags\": [\"tested\"], \"title\": \"the evidence lane caught two unbacked guarantees in my own probe file, which is the lane doing its job on work written this session rather than on inherited debt\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the evidence lane reports them in its informational line and still exits 0\", \"tags\": [\"measured\"], \"title\": \"87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step\", \"fields\": {}}]",
       "parents": [
         "f41ab63d192d7c72"
       ],
@@ -42556,7 +42556,7 @@
         [
           "the evidence lane reports them in its informational line and still exits 0",
           "supports",
-          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
+          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
         ],
         [
           "the evidence lane reports them in its informational line and still exits 0",
@@ -42602,14 +42602,14 @@
           "the twelve bare-erase sites plus four textually identical ignore/1 sites now call it; the seven error-absorbing catch sites were reverted after source_retirement.plt's oracle refused one; layering passes with four new reaches/3 lines each carrying its reason; the full Prolog battery is 173 passed and 9 failed, exactly the 9 that fail pre-change; prolog, prolog-static, evidence, host-workarounds, lib-autoload and lib-surface are green; and the race reproduction is clean over 78,000 iterations"
         ],
         [
-          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
+          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
           "sort",
           "prop"
         ],
         [
-          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
+          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step",
           "title",
-          "87 commit=WORKTREE placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
+          "87 commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f placeholders remain and are not a lane failure: they are pinned by pin_provenance.py --commit <A> in a provenance-only follow-up commit, which is the tree's established release step"
         ],
         [
           "add host_transactions:try_erase/1 as the single named tolerant release and route every vulnerable site through it, module-qualified the way this codebase already calls across modules",

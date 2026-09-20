@@ -22,14 +22,14 @@
 %     [tested: packages:a_file_with_no_backing_row_installs_nothing]
 %   - an uncovered backing without a claimant refuses by its named head
 %     [tested: packages:an_uncovered_backing_without_a_claimant_refuses;
-%     commit=WORKTREE]
+%     commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 %   - `package` is internal in every space, so one library's package rows are
 %     never read as its importer's own
 %     [tested: packages:the_package_head_is_internal_in_every_space]
 %   - a requirement publishes into its importing space even when the native
 %     artifact is already loaded elsewhere
 %     [tested: packages:a_requirement_loads_before_the_file_that_declares_it;
-%     commit=WORKTREE].
+%     commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %   - a row reaches its claimant as DATA, so a one-name list is a list and not
 %     a nullary call to the name in it
 %     [tested: packages:a_backing_row_reaches_its_claimant_as_data]

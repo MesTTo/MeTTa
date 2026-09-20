@@ -9,14 +9,14 @@ be judged by running it without them.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - a script whose module body cannot import is reported, with its own error
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a library module with the same broken import is NOT reported
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a script whose `main` would refuse without arguments is NOT reported,
     because the probe runs the body and not `main`
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - an empty roster is refused rather than passed
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run against a directory it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

@@ -1,7 +1,7 @@
 % Purpose: prove package laws 6-13 through the ordinary load and setup doors.
 % Guarantees: effects, callable results, files and source retirement are the
 % observations; mutations.pl disables each subject and reruns its witnesses.
-% [tested: tests/data/lib_package/mutations.pl; commit=WORKTREE].
+% [tested: tests/data/lib_package/mutations.pl; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: fixtures stay under this battery's ai-tmp; each home and its
 % source lifetime are independent of the other test cases.
 

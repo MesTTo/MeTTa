@@ -29,17 +29,17 @@ form begins and ends, so a mention inside a larger form cannot be read as one.
 Assumes: the shipped libraries are at `lib/*/*.metta`.
 Guarantees:
   - a library making the call is reported with its line
-    [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the same text inside a comment or a string is NOT reported
-    [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - `lib_import` is exempt, being where the operation is defined
-    [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - an empty roster is refused, because a pass that found nothing to check
     reads exactly like a pass that checked everything
-    [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the reserved head is named on both sides of the engine boundary or the
     disagreement is reported, since neither side can derive it from the other
-    [tested: tests/checks/check_package_backings_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run outside a checkout with a lib/ directory, which it reports.
 Open Obligations:
   To Do: None

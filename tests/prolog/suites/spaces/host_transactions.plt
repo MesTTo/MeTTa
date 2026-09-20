@@ -9,7 +9,7 @@
 % Guarantees: a clause reference held in a transactional table outlives its
 %   clause whenever another thread commits the erase first, and try_erase/1 is
 %   what releases it without failing the cleanup around it
-%   [tested: host_transactions; commit=WORKTREE].
+%   [tested: host_transactions; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: each test removes its private rows; worker threads are joined.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/host_transactions', []).

@@ -12,7 +12,7 @@ Guarantees:
     The EFFECTFUL control's second assertion counts the writes rather than the
     arithmetic, which reads 22 either way
     [tested: tests/checks/check_specialization_differential_selftest.py;
-    commit=WORKTREE]
+    commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a clean specialized call reports an agreed count and a one-inference
     budget reports the same attempted check as unverified
     [tested: tests/checks/check_specialization_differential_selftest.py;

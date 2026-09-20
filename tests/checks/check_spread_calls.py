@@ -12,7 +12,7 @@ rebuilt per reference, in `_protocol`'s `__iter__` expansion and in `_assign`'s
 destructuring. The third time `_protocol` was reaching 31,779,766 calls against
 2,494,402 evaluations of an expression, and removing eight such sites took the
 analysis from 392.4s to 128.6s with every published verdict unchanged
-[measured 2026-09-19; commit=WORKTREE].
+[measured 2026-09-19; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 
 The methods are DERIVED from the file rather than listed here: any method whose
 first parameter after `self` is annotated `Values` is one, so a new transfer
@@ -27,12 +27,12 @@ Assumes: the analyser parses, which every other lane already requires.
 Guarantees:
   - a `Values` method called with a one-element set inside a loop fails the run and
     is named with its line [tested: tests/checks/check_spread_calls_selftest.py;
-    commit=WORKTREE]
+    commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a site carrying `# per-reference:` with a reason, on its own line or the one
     above, passes, and one carrying the marker with no reason does not [tested:
-    tests/checks/check_spread_calls_selftest.py; commit=WORKTREE]
+    tests/checks/check_spread_calls_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the same call OUTSIDE a loop passes, because one reference is then all there is
-    [tested: tests/checks/check_spread_calls_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_spread_calls_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: the analysed file is absent, which it reports rather than passing on an
   empty finding list.
 Open Obligations:

@@ -38,17 +38,17 @@ output].
 Assumes: the Python seat is at `extensions/python`.
 Guarantees:
   - a `parents[N]` walk in the seat fails the run and is named with its line
-    [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_root_walks_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the derivation is NOT a finding, because it names the marker rather than a depth
-    [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_root_walks_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - `metta/_roots.py` itself is exempt, being where the derivation is written
-    [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_root_walks_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a derivation whose root is wrong is named through the path it goes on to miss,
     which is what a marker check cannot see
-    [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_root_walks_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a derivation asking for `.git` ALONE is named, because that marker is absent
     in a tree copied without its history and every gate here runs in one
-    [tested: tests/checks/check_root_walks_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_root_walks_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run outside a checkout with a Python seat, which it reports.
 Open Obligations:
   To Do: None

@@ -19,15 +19,15 @@ Assumes: the seat's tools are at `extensions/python/tools/*.py`.
 Guarantees:
   - an empty roster is refused, because a pass that found nothing to check
     reads exactly like a pass that checked everything
-    [tested: tests/checks/check_tool_startup_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_tool_startup_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - only a file that guards a block on `__main__` is probed, because a library
     module its siblings import is not run as a script
-    [tested: tests/checks/check_tool_startup_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_tool_startup_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a tool whose module body raises is reported with its own error
-    [tested: tests/checks/check_tool_startup_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_tool_startup_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the module body runs, so an import failure is caught, while `main` does not,
     so a tool needing arguments is not run without them
-    [tested: tests/checks/check_tool_startup_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_tool_startup_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run outside a checkout with a Python seat, which it reports.
 Open Obligations:
   To Do: None

@@ -9,13 +9,13 @@ making it.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - a library making the call is reported with its line
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - the same text in a comment, and in a string, is NOT reported
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a library carrying the backing row is NOT reported
-    [tested: this file; commit=WORKTREE]
-  - `lib_import` is exempt [tested: this file; commit=WORKTREE]
-  - an empty roster is refused [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
+  - `lib_import` is exempt [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
+  - an empty roster is refused [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run against a directory it did not write. It asserts on its fixture.
 Open Obligations:
   To Do: None
