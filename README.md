@@ -890,7 +890,7 @@ int main(void)
 |---|---|
 | [MeTTa](https://github.com/MesTTo/MeTTa) | this one: the engine, the libraries and all three surfaces, mounted together |
 | [MeTTa-Library-Pack](https://github.com/MesTTo/MeTTa-Library-Pack) | the 61 standard libraries, written in MeTTa |
-| [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | the 386 executable examples this page draws from |
+| [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | the example corpus this page draws from, counted in llms.txt |
 | [PyMeTTa](https://github.com/MesTTo/PyMeTTa) | the Python surface |
 | [PyMeTTa-Extensions](https://github.com/MesTTo/PyMeTTa-Extensions) | integrations, each a separate distribution |
 | [TSMeTTa](https://github.com/MesTTo/TSMeTTa) | the TypeScript surface |
@@ -903,7 +903,7 @@ int main(void)
   shapes. A gate checks its names against the live engine.
 - [extensions/python/llms.txt](extensions/python/llms.txt): the Python library
   alone.
-- [examples/](examples/): 386 examples in 22 chapters, every one run by the
+- [examples/](examples/): 360 examples in 22 chapters, every one run by the
   gate, so none of it is stale.
 - [EXTENDING.md](EXTENDING.md): writing an integration.
 - [CONTRIBUTING.md](CONTRIBUTING.md): working on this repository.

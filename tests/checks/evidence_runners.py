@@ -149,8 +149,8 @@ def _component_runners() -> tuple[str, ...]:
 # and, in ci.yml's case, three shell suites it does not; and each component's
 # own check.sh, which the gate SOURCES so its lanes share one summary.
 RUNNERS = (
-    "check.sh",
-    "test.sh",
+    "tools/check.sh",
+    "tools/test.sh",
     ".github/workflows/checks.yml",
     ".github/workflows/ci.yml",
     *_component_runners(),
@@ -170,11 +170,17 @@ def gate_scripts() -> tuple[Path, ...]:
     those components took their own lanes first [measured 2026-08-28: 52 lanes
     visible reading check.sh alone, against the gate's 82].
     """
-    return tuple(
-        ROOT / runner
-        for runner in RUNNERS
-        if runner.endswith("check.sh") and (ROOT / runner).is_file()
-    )
+    named = [ROOT / runner for runner in RUNNERS if runner.endswith("check.sh")]
+    # REFUSED, not filtered. Skipping one that is not there is how the root
+    # driver silently left this tuple when it moved into tools/, and a reader
+    # that loses the gate's own lanes reports on the components alone while
+    # looking exactly as green as before.
+    missing = [path for path in named if not path.is_file()]
+    if missing:
+        listed = ", ".join(str(path.relative_to(ROOT)) for path in missing)
+        message = f"RUNNERS names a gate script that is not in the tree: {listed}"
+        raise SystemExit(message)
+    return tuple(named)
 
 
 # `run TIER NAME COMMAND...`, check.sh's own lane declaration, and the shell
