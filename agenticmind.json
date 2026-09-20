@@ -10683,6 +10683,68 @@
       "tags": [
         "tested"
       ]
+    },
+    "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there": {
+      "title": "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+    },
+    "measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space": {
+      "title": "measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space",
+      "supports": [
+        "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+      ]
+    },
+    "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces": {
+      "title": "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces",
+      "supports": [
+        {
+          "node": "gate every component README's metta fences by running each in its own process and its own directory",
+          "status": "untried"
+        },
+        {
+          "node": "gate every component README's metta fences by running each in its own process and its own directory",
+          "relation": "addresses",
+          "target": "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+        }
+      ]
+    },
+    "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh": {
+      "title": "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh",
+      "supports": [
+        {
+          "node": "gate every component README's metta fences by running each in its own process and its own directory",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root": {
+      "title": "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root"
+    },
+    "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked": {
+      "title": "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked",
+      "supports": [
+        "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs": {
+      "title": "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs"
+    },
+    "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change": {
+      "title": "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change",
+      "supports": [
+        "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -12208,6 +12270,14 @@
       "status": "done",
       "addresses": [
         "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+      ]
+    },
+    "gate every component README's metta fences by running each in its own process and its own directory": {
+      "title": "gate every component README's metta fences by running each in its own process and its own directory",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
       ]
     }
   },
@@ -48637,6 +48707,185 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "20f9d62686f9b8bd"
+    },
+    {
+      "at": "2026-09-20T14:24:16.276896+00:00",
+      "after": "0388b2236aa6d48853d81563dca87eecf564d70e",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space\", \"tags\": [], \"title\": \"97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces\", \"tags\": [], \"title\": \"gate every component README's metta fences by running each in its own process and its own directory\", \"fields\": {\"effort\": 2, \"addresses\": [\"97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there\"]}}, {\"op\": \"status\", \"id\": \"gate every component README's metta fences by running each in its own process and its own directory\", \"because\": \"tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked\", \"tags\": [\"measured\"], \"title\": \"an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change\", \"tags\": [\"tested\"], \"title\": \"ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs\", \"fields\": {}}]",
+      "parents": [
+        "20f9d62686f9b8bd"
+      ],
+      "assert": [
+        [
+          "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root",
+          "sort",
+          "prop"
+        ],
+        [
+          "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root",
+          "title",
+          "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root"
+        ],
+        [
+          "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces",
+          "sort",
+          "prop"
+        ],
+        [
+          "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces",
+          "supports",
+          {
+            "node": "gate every component README's metta fences by running each in its own process and its own directory",
+            "status": "untried"
+          }
+        ],
+        [
+          "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces",
+          "supports",
+          {
+            "node": "gate every component README's metta fences by running each in its own process and its own directory",
+            "relation": "addresses",
+            "target": "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+          }
+        ],
+        [
+          "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces",
+          "title",
+          "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces"
+        ],
+        [
+          "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs",
+          "sort",
+          "prop"
+        ],
+        [
+          "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs",
+          "title",
+          "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs"
+        ],
+        [
+          "measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space",
+          "supports",
+          "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+        ],
+        [
+          "measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space",
+          "title",
+          "measured: test_readme.py binds only the root README and the website run-fence rule covers only website/ pages; a sweep of every tracked component README found 10 of 130 fences failing on a fresh space"
+        ],
+        [
+          "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked",
+          "supports",
+          "an in-process parametrised version of that check was wrong twice over and the counterexamples said so: five fences failed on state another fence had left, and four files were written into the repository root"
+        ],
+        [
+          "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked",
+          "title",
+          "measured: the pytest version read 5 failed 93 passed where the subprocess version read 130 of 130, and git status afterwards showed blob.bin, prices.csv, report.txt and sales.csv untracked"
+        ],
+        [
+          "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh",
+          "supersedes",
+          "both isolations are load-bearing and neither is available in one engine: shared, fences collided on bind! names and inherited each other's spaces, and one read [a,c] four times where it asserts once; run in the checkout they left report.txt, blob.bin, sales.csv and prices.csv behind. A reader pastes one block into a fresh session in their own project, which is what a process each reproduces"
+        ],
+        [
+          "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh",
+          "supports",
+          {
+            "node": "gate every component README's metta fences by running each in its own process and its own directory",
+            "status": "done"
+          }
+        ],
+        [
+          "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh",
+          "tags",
+          "tested"
+        ],
+        [
+          "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh",
+          "title",
+          "tests/checks/check_readme_fences.py reads 0 findings over 97 fences in 19 READMEs and exits 0; a fence calling a head that does not exist makes it exit 1 and name the file and index; check_process_bounds stays at 0 findings because the spawns go through tools/bounded.sh"
+        ],
+        [
+          "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change",
+          "sort",
+          "prop"
+        ],
+        [
+          "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change",
+          "supports",
+          "ignoring catalog/ would have concealed the artifact rather than removing it, so test_readme.py now runs each metta fence in a temporary directory; the ignore stays because any program importing lib_package writes that journal where it runs"
+        ],
+        [
+          "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change",
+          "tags",
+          "tested"
+        ],
+        [
+          "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change",
+          "title",
+          "the catalog fence imports lib_package, which opens a catalog journal in the working directory, and the README test ran it in the checkout until this change"
+        ],
+        [
+          "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there",
+          "sort",
+          "prop"
+        ],
+        [
+          "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there",
+          "title",
+          "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+        ],
+        [
+          "gate every component README's metta fences by running each in its own process and its own directory",
+          "sort",
+          "approach"
+        ],
+        [
+          "gate every component README's metta fences by running each in its own process and its own directory",
+          "addresses",
+          "97 metta fences across 19 component READMEs were ungated, and running them found ten that do not work: five of mine in the MORK page and three in lib_reflect relied on an import an earlier fence performed, and two globbed a path that was not there"
+        ],
+        [
+          "gate every component README's metta fences by running each in its own process and its own directory",
+          "effort",
+          2
+        ],
+        [
+          "gate every component README's metta fences by running each in its own process and its own directory",
+          "status",
+          "done"
+        ],
+        [
+          "gate every component README's metta fences by running each in its own process and its own directory",
+          "title",
+          "gate every component README's metta fences by running each in its own process and its own directory"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "c7b1fc286c178688"
     }
   ]
 }

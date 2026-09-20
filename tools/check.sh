@@ -559,6 +559,7 @@ run GATE   parity-fuzz-selftest "$PY" "$HERE/tests/checks/check_upstream_fuzz_se
 # 2026-09-01: the library roster drifted to 33 of 34 names behind the claim.
 run GATE llms       "$PY" "$HERE/tests/checks/check_llms_names.py"
 run GATE readme-fences "$PY" "$HERE/tests/checks/check_readme_fences.py"
+run GATE readme-fences-selftest "$PY" "$HERE/tests/checks/check_readme_fences_selftest.py"
 run GATE llms-selftest "$PY" "$HERE/tests/checks/check_llms_selftest.py"
 
 # KERNEL.md's two rosters and six counts come from the running translator.

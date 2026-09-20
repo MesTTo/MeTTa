@@ -636,7 +636,7 @@ COLLECTORS = (
     # test.sh runs each example under run.sh and fails the lane on a nonzero
     # exit, which is what makes an example's own !(test ...) forms evidence.
     Collector(
-        runner="test.sh",
+        runner="tools/test.sh",
         tier="GATE",
         lane="shell",
         anchor="find ./examples -type f -name '*.metta'",

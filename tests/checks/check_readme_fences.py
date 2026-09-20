@@ -32,6 +32,7 @@ Guarantees:
   - a fence naming a network URL or `git-import!` fails without being run, for
     the reason test_readme.py gives: documentation that clones a repository is
     remote code execution inside a test
+    [tested: tests/checks/check_readme_fences_selftest.py; commit=0388b2236aa6d48853d81563dca87eecf564d70e]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
   To Do: None

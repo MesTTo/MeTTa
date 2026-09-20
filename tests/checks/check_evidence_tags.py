@@ -1311,7 +1311,13 @@ def _unread(token: str, *, quoted: bool) -> list[Target] | str:
 #: what proves it is running the lane. Reading the command as a list of test
 #: names reported `sh` and `llms` as missing tests, which is the checker
 #: failing to know its own scheme.
-GATE_COMMAND = re.compile(r"\b(?:GATE_ONLY=1\s+)?sh\s+check\.sh\s+([a-z0-9-]+)")
+GATE_COMMAND = re.compile(
+    # tools/ is where the driver lives; the bare spelling stays because a
+    # citation written before the move still names the same command, and
+    # without the prefix this fell through to the path rule and ACCEPTED a
+    # lane the gate does not run, because tools/check.sh is a file.
+    r"\b(?:GATE_ONLY=1\s+)?sh\s+(?:tools/)?check\.sh\s+([a-z0-9-]+)"
+)
 
 #: The other shape an exact gate command takes: an interpreter, the script it
 #: runs, and that script's own flags, as in

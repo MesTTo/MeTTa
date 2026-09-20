@@ -401,7 +401,12 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
-    (root / "check.sh").write_text(CHECK_SH)
+    # The root driver and the corpus runner live in tools/, which is where the
+    # collectors look for them, for the same reason the components below build
+    # theirs in place: a fixture that puts them at the root proves a shape the
+    # tree no longer has.
+    (root / "tools").mkdir(parents=True, exist_ok=True)
+    (root / "tools" / "check.sh").write_text(CHECK_SH)
     # Three gate scripts, because the tree has three: the root, the Python
     # seat's, and the engine's. The pytest command lives in the seat's test.sh
     # and the plunit loop in the engine's check.sh, so the fixture builds each
@@ -420,7 +425,7 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         component = root / name
         component.parent.mkdir(parents=True, exist_ok=True)
         component.write_text(content)
-    (root / "test.sh").write_text(TEST_SH)
+    (root / "tools" / "test.sh").write_text(TEST_SH)
     # The checker reads the files git tracks or has staged and nothing else, so
     # every fixture tree is a repository; run() stages whatever a case planted
     # after this, and an ignored file stays unread on purpose.
