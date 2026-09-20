@@ -7890,6 +7890,311 @@
       "tags": [
         "measured"
       ]
+    },
+    "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path": {
+      "title": "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path"
+    },
+    "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent": {
+      "title": "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent",
+      "supports": [
+        "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file": {
+      "title": "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file"
+    },
+    "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence": {
+      "title": "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence",
+      "supports": [
+        "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them": {
+      "title": "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them",
+      "supports": [
+        {
+          "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "status": "untried"
+        },
+        {
+          "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit": {
+      "title": "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+      "supports": [
+        {
+          "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them"
+      ]
+    },
+    "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts": {
+      "title": "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts"
+    },
+    "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape": {
+      "title": "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape",
+      "supports": [
+        "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe": {
+      "title": "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe"
+    },
+    "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE": {
+      "title": "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE",
+      "supports": [
+        "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later": {
+      "title": "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later",
+      "supports": [
+        {
+          "node": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "status": "untried"
+        },
+        {
+          "node": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "the fix costs one reader installation per empty-plan publication and changes no complexity class": {
+      "title": "the fix costs one reader installation per empty-plan publication and changes no complexity class"
+    },
+    "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation": {
+      "title": "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation",
+      "supports": [
+        "the fix costs one reader installation per empty-plan publication and changes no complexity class"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the hypothesis is not yet established, only well-motivated": {
+      "title": "the hypothesis is not yet established, only well-motivated"
+    },
+    "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it": {
+      "title": "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it",
+      "supports": [
+        "the hypothesis is not yet established, only well-motivated"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well": {
+      "title": "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well",
+      "supports": [
+        {
+          "node": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one": {
+      "title": "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one"
+    },
+    "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer": {
+      "title": "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer",
+      "supports": [
+        "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails": {
+      "title": "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails"
+    },
+    "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader": {
+      "title": "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader",
+      "supports": [
+        "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus": {
+      "title": "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus",
+      "supports": [
+        {
+          "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "status": "untried"
+        },
+        {
+          "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit": {
+      "title": "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit",
+      "supports": [
+        {
+          "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus"
+      ]
+    },
+    "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words": {
+      "title": "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+      "supports": [
+        {
+          "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus",
+        "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test": {
+      "title": "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test"
+    },
+    "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause": {
+      "title": "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause",
+      "supports": [
+        "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all": {
+      "title": "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all"
+    },
+    "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says": {
+      "title": "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says",
+      "supports": [
+        "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw": {
+      "title": "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw"
+    },
+    "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3": {
+      "title": "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3",
+      "supports": [
+        "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the race window is small enough that instrumenting the path closes it": {
+      "title": "the race window is small enough that instrumenting the path closes it"
+    },
+    "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals": {
+      "title": "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals",
+      "supports": [
+        "the race window is small enough that instrumenting the path closes it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race": {
+      "title": "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race",
+      "supports": [
+        {
+          "node": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "status": "untried"
+        },
+        {
+          "node": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip": {
+      "title": "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip"
+    },
+    "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw": {
+      "title": "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw",
+      "supports": [
+        "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the fix cannot be named yet, because the failing goal inside that chain is not identified": {
+      "title": "the fix cannot be named yet, because the failing goal inside that chain is not identified"
+    },
+    "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race": {
+      "title": "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race",
+      "supports": [
+        "the fix cannot be named yet, because the failing goal inside that chain is not identified"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level": {
+      "title": "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level",
+      "supports": [
+        {
+          "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "status": "untried"
+        },
+        {
+          "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit": {
+      "title": "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit",
+      "supports": [
+        {
+          "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level"
+      ]
     }
   },
   "approaches": {
@@ -9085,6 +9390,46 @@
     },
     "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared": {
       "title": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+      "effort": 1,
+      "status": "active",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace": {
+      "title": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+      "effort": 1,
+      "status": "active",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none": {
+      "title": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+      "effort": 2,
+      "status": "failed",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed": {
+      "title": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all": {
+      "title": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint": {
+      "title": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
       "effort": 1,
       "status": "active",
       "addresses": [
@@ -37359,6 +37704,936 @@
         ]
       ],
       "id": "09cdf1448f74ec94"
+    },
+    {
+      "at": "2026-09-20T06:40:59.190996+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent\", \"tags\": [\"measured\"], \"title\": \"neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence\", \"tags\": [\"measured\"], \"title\": \"my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them\", \"tags\": [], \"title\": \"mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace\", \"fields\": {\"effort\": 1, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"status\", \"id\": \"mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace\", \"because\": \"running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "09cdf1448f74ec94"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent",
+          "supports",
+          "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path"
+        ],
+        [
+          "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent",
+          "title",
+          "MEASURED 2026-09-20: marking metta_reference_publish_source/2's empty_assoc branch and metta_reference_source_clear/1 produced no output across three full-file runs, while the replace log captured 0-length replaces on the run that failed; three runs at a 10 to 15 per cent rate miss the failure about two thirds of the time, which is why the earlier single-run probes were silent"
+        ],
+        [
+          "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file",
+          "sort",
+          "prop"
+        ],
+        [
+          "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file",
+          "title",
+          "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file"
+        ],
+        [
+          "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path",
+          "sort",
+          "prop"
+        ],
+        [
+          "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path",
+          "title",
+          "neither of the two obvious clearing branches fires on a passing run, so the readers are emptied only on the failing path"
+        ],
+        [
+          "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "sort",
+          "prop"
+        ],
+        [
+          "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "supersedes",
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them"
+        ],
+        [
+          "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "supports",
+          {
+            "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+            "status": "active"
+          }
+        ],
+        [
+          "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "title",
+          "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit"
+        ],
+        [
+          "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence",
+          "sort",
+          "prop"
+        ],
+        [
+          "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence",
+          "supports",
+          "my probes were repeatedly silent because they ran run_tests(reference_loading) while the reproducing invocation is run_tests over the whole file"
+        ],
+        [
+          "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence",
+          "tags",
+          "measured"
+        ],
+        [
+          "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence",
+          "title",
+          "the successful history hunt used the no-argument form and hit on run 13; two probe rounds used the single-unit form and could not see clears raised by the other units' tests. A probe that cannot observe the failure is not evidence of absence"
+        ],
+        [
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them",
+          "supports",
+          {
+            "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them",
+          "supports",
+          {
+            "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them",
+          "title",
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them"
+        ],
+        [
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "sort",
+          "approach"
+        ],
+        [
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "effort",
+          1
+        ],
+        [
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "status",
+          "active"
+        ],
+        [
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "title",
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace"
+        ]
+      ],
+      "id": "56f0f3f9f44dd323"
+    },
+    {
+      "at": "2026-09-20T06:41:51.831280+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape\", \"tags\": [\"measured\"], \"title\": \"dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE\", \"tags\": [\"measured\"], \"title\": \"the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe\", \"fields\": {}}]",
+      "parents": [
+        "56f0f3f9f44dd323"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape",
+          "supports",
+          "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts"
+        ],
+        [
+          "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape",
+          "title",
+          "MEASURED 2026-09-20 over battery 2's dev-typed section: grouping the failure kinds gives 158 'received error', 55+38+25+14 assertion variants and 15 'wrong error', and grouping the errors themselves gives Type error: `Symbol' expected found `local' 16 times, `SpaceType' expected 10, `string' expected 9, `Symbol' expected found `gzip' 7, `Atom' expected found 'hex-decode' 6, and so on -- every one the same shape"
+        ],
+        [
+          "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts",
+          "title",
+          "dev-typed's failures are one systematic backlog rather than nineteen separate defects: 158 of them are the typed build refusing a value the untyped build accepts"
+        ],
+        [
+          "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE",
+          "supports",
+          "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe"
+        ],
+        [
+          "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE",
+          "tags",
+          "measured"
+        ],
+        [
+          "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE",
+          "title",
+          "dev-typed, pytest, the four bench lanes, benchmarks, instructions, memory-scale-gate, twins, extcost and door-order are the recorded baseline, and this session took prolog-static, parity-fuzz-selftest, evidence and spec-differential out of the red beyond it while adding the package-mutations GATE"
+        ],
+        [
+          "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe",
+          "title",
+          "the release bar this session can meet is no NEW red against the recorded baseline, and several baseline reds removed; all open issues at the scale of dev-typed's 158 type refusals and door-order's 182 unordered doors is the multi-session programme the project's own instructions describe"
+        ]
+      ],
+      "id": "b8af1dc967fb5e33"
+    },
+    {
+      "at": "2026-09-20T06:43:55.868153+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later\", \"tags\": [], \"title\": \"delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none\", \"fields\": {\"effort\": 2, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation\", \"tags\": [\"source\"], \"title\": \"the fix costs one reader installation per empty-plan publication and changes no complexity class\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it\", \"tags\": [\"assumed\"], \"title\": \"the hypothesis is not yet established, only well-motivated\", \"fields\": {}}]",
+      "parents": [
+        "b8af1dc967fb5e33"
+      ],
+      "assert": [
+        [
+          "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation",
+          "sort",
+          "prop"
+        ],
+        [
+          "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation",
+          "supports",
+          "the fix costs one reader installation per empty-plan publication and changes no complexity class"
+        ],
+        [
+          "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation",
+          "tags",
+          "source"
+        ],
+        [
+          "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation",
+          "title",
+          "it replaces a zero-clause replace with a one-clause replace at the same call site, which is O(1) either way; the point is that a space always has a reader, not speed, and claiming otherwise would dress up a correctness fix as an optimisation"
+        ],
+        [
+          "the fix costs one reader installation per empty-plan publication and changes no complexity class",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fix costs one reader installation per empty-plan publication and changes no complexity class",
+          "title",
+          "the fix costs one reader installation per empty-plan publication and changes no complexity class"
+        ],
+        [
+          "the hypothesis is not yet established, only well-motivated",
+          "sort",
+          "prop"
+        ],
+        [
+          "the hypothesis is not yet established, only well-motivated",
+          "title",
+          "the hypothesis is not yet established, only well-motivated"
+        ],
+        [
+          "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later",
+          "sort",
+          "prop"
+        ],
+        [
+          "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later",
+          "supports",
+          {
+            "node": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+            "status": "untried"
+          }
+        ],
+        [
+          "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later",
+          "supports",
+          {
+            "node": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later",
+          "title",
+          "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later"
+        ],
+        [
+          "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it",
+          "supports",
+          "the hypothesis is not yet established, only well-motivated"
+        ],
+        [
+          "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it",
+          "tags",
+          "assumed"
+        ],
+        [
+          "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it",
+          "title",
+          "the two named clearing branches never fired in a run I marked, and I never caught a FAILING run with the branch markers in place, so the link from the empty-plan branch to the observed zero-length replaces is inferred rather than traced; the 40-run rate measurement now running is what would establish or refute it"
+        ],
+        [
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "sort",
+          "approach"
+        ],
+        [
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "effort",
+          2
+        ],
+        [
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "status",
+          "untried"
+        ],
+        [
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "title",
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none"
+        ]
+      ],
+      "id": "4d82622bfe0ab4cc"
+    },
+    {
+      "at": "2026-09-20T06:45:26.068434+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"status\", \"id\": \"delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none\", \"because\": \"REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\\\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer\", \"tags\": [\"source\"], \"title\": \"the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one\", \"fields\": {}}]",
+      "parents": [
+        "4d82622bfe0ab4cc"
+      ],
+      "assert": [
+        [
+          "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well",
+          "sort",
+          "prop"
+        ],
+        [
+          "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well",
+          "supersedes",
+          "the refusal fires exactly when a space has NO reader, and that branch is the one publish path that leaves a space in that state; source_bound_names/5 walks its map and rewrites only what the map names, so an empty map is the identity and the ordinary reader says the same thing without the state that has no reader. This is absence represented as a special case rather than as the identity element of the operation, the same shape as an empty collection optimised into a null, and removing it makes the illegal state unrepresentable rather than caught later"
+        ],
+        [
+          "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well",
+          "supports",
+          {
+            "node": "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+            "status": "failed"
+          }
+        ],
+        [
+          "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well",
+          "tags",
+          "measured"
+        ],
+        [
+          "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well",
+          "title",
+          "REFUTED twice on 2026-09-20. tests/prolog/suites/spaces/reference_source_origins.plt:214 asserts \\+ metta_reference_source_reader(Target,_,_), so a space with NO reader is the intended state, and docs/journal/2026-09-15-from-source-origins.md records the decision and its reason: refresh publishes ready readers or none for an empty map, so a home without declaration origins keeps the BULK paths. The rate measurement gave it no support either, 16 failures in 40 against 1 to 3 in 10 before, though at load 23.2 against 7 to 8 so that arm is confounded as well"
+        ],
+        [
+          "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one",
+          "title",
+          "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one"
+        ],
+        [
+          "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer",
+          "sort",
+          "prop"
+        ],
+        [
+          "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer",
+          "supports",
+          "the defect is the LOADER refusing a space that legitimately has no reader, not publication failing to install one"
+        ],
+        [
+          "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer",
+          "tags",
+          "source"
+        ],
+        [
+          "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer",
+          "title",
+          "the source-origin contract permits ready readers or none, so a space with no reader means use the bulk path; filereader:process_loader_form/3's last clause turns that state into `could not translate MeTTa form` instead, which is a contract mismatch at the consumer"
+        ],
+        [
+          "delete the empty_assoc special case in metta_reference_publish_source/2 so an empty plan installs the ordinary reader instead of none",
+          "status",
+          "failed"
+        ]
+      ],
+      "id": "0e607f6cca255cd5"
+    },
+    {
+      "at": "2026-09-20T06:46:29.261446+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader\", \"tags\": [\"source\"], \"title\": \"the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus\", \"tags\": [], \"title\": \"mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed\", \"fields\": {\"effort\": 1, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"status\", \"id\": \"mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed\", \"because\": \"running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "0e607f6cca255cd5"
+      ],
+      "assert": [
+        [
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus",
+          "sort",
+          "prop"
+        ],
+        [
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus",
+          "supports",
+          {
+            "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+            "status": "untried"
+          }
+        ],
+        [
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus",
+          "supports",
+          {
+            "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus",
+          "title",
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus"
+        ],
+        [
+          "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader",
+          "sort",
+          "prop"
+        ],
+        [
+          "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader",
+          "supports",
+          "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails"
+        ],
+        [
+          "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader",
+          "tags",
+          "source"
+        ],
+        [
+          "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader",
+          "title",
+          "filereader.pl has four process_loader_form/3 clauses, and the expression one matches the reported term shape, so reaching the catch-all means one of evict_prelude_declaration/2, metta_add_atom/3 or print_expression_form/1 failed; the message `could not translate MeTTa form` therefore conflates an untranslatable form with a goal that failed, which is why the first trace read as a missing reader"
+        ],
+        [
+          "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit",
+          "sort",
+          "prop"
+        ],
+        [
+          "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit",
+          "supersedes",
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus"
+        ],
+        [
+          "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit",
+          "supports",
+          {
+            "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+            "status": "active"
+          }
+        ],
+        [
+          "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit",
+          "title",
+          "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit"
+        ],
+        [
+          "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails",
+          "sort",
+          "prop"
+        ],
+        [
+          "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails",
+          "title",
+          "the refusal is a fall-through, not a missing clause: parsed(expression,_,Term) matches a from row and its BODY fails"
+        ],
+        [
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "sort",
+          "approach"
+        ],
+        [
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "effort",
+          1
+        ],
+        [
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "status",
+          "active"
+        ],
+        [
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "title",
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed"
+        ]
+      ],
+      "id": "3eaa2f1f2f455b47"
+    },
+    {
+      "at": "2026-09-20T06:46:53.324437+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"status\", \"id\": \"mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed\", \"because\": \"MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause\", \"tags\": [\"measured\"], \"title\": \"the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test\", \"fields\": {}}]",
+      "parents": [
+        "3eaa2f1f2f455b47"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+          "supersedes",
+          "det format/2 calls between the goals preserve the clause's determinism exactly, where wrapping each goal in an if-then-else would commit to a first solution and could change behaviour; the guard keeps the output to from rows instead of every expression in the corpus"
+        ],
+        [
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+          "supersedes",
+          "running over 40 runs in the background; engine/filereader.pl is instrumented and ai-tmp/spec-repro/fr.keep MUST be restored before any commit"
+        ],
+        [
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+          "supports",
+          {
+            "node": "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+            "status": "done"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words",
+          "title",
+          "MEASURED 2026-09-20, hit on run 9: the trace prints PAST evict and never PAST add, so metta_add_atom/3 on the (from FILE (qualified q)) row is the goal that fails, and the catch-all's `could not translate MeTTa form` is that failure wearing a translation error's words"
+        ],
+        [
+          "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause",
+          "supports",
+          "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test"
+        ],
+        [
+          "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause",
+          "title",
+          "MEASURED 2026-09-20: the run that hit named non_eager_rows_accept_each_map_and_follow_nested_references at its 11th forall generator, member(background,[lazy,background]) with loading_pure_map, where earlier hits named a_suspended_background_qualified_query_survives_release; both are non-eager loads of a from row and both fail through the same clause"
+        ],
+        [
+          "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test",
+          "sort",
+          "prop"
+        ],
+        [
+          "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test",
+          "title",
+          "the intermittent is metta_add_atom/3 failing on a from row during a non-eager load, and it is not confined to one test"
+        ],
+        [
+          "mark the expression clause between its three goals, guarded to from rows, and hunt until the refusal so the last marker names the goal that failed",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "1af0243c6528304e"
+    },
+    {
+      "at": "2026-09-20T06:47:46.746324+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says\", \"tags\": [\"source\"], \"title\": \"the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all\", \"fields\": {}}]",
+      "parents": [
+        "1af0243c6528304e"
+      ],
+      "assert": [
+        [
+          "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says",
+          "sort",
+          "prop"
+        ],
+        [
+          "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says",
+          "supports",
+          "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all"
+        ],
+        [
+          "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says",
+          "tags",
+          "source"
+        ],
+        [
+          "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says",
+          "title",
+          "metta_reference_source_clauses/2 projects each loader clause as (Head :- !, Resolve, Body) and asserta's it before the ordinary ones, so a guard that commits and then fails makes process_loader_form/3 FAIL rather than fall through; the catch-all firing therefore means no guard matched, the ordinary expression clause ran, and its body failed -- which is exactly what PAST evict with no PAST add says"
+        ],
+        [
+          "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all",
+          "sort",
+          "prop"
+        ],
+        [
+          "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all",
+          "title",
+          "the trace is structurally coherent: a projected FROM reader is a guard with a CUT, so one that matched and failed could never reach the catch-all"
+        ]
+      ],
+      "id": "22fe6e0a6a4cd5e7"
+    },
+    {
+      "at": "2026-09-20T06:48:49.549635+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\\\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3\", \"tags\": [\"source\"], \"title\": \"the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals\", \"tags\": [\"measured\"], \"title\": \"the race window is small enough that instrumenting the path closes it\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race\", \"tags\": [], \"title\": \"read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all\", \"fields\": {\"effort\": 3, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}]",
+      "parents": [
+        "22fe6e0a6a4cd5e7"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals",
+          "supports",
+          "the race window is small enough that instrumenting the path closes it"
+        ],
+        [
+          "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals",
+          "title",
+          "MEASURED 2026-09-20 across four hunts: markers on the catch-all hit at runs 13 and 28 of 40, markers between the expression clause's three goals hit at run 9, and markers between metta_reference_declare/3's goals produced no hit in 40 and one core dump; each added format/2 on the hot path lowers the rate, which is consistent with a narrow window and is why the next step should read state rather than add goals"
+        ],
+        [
+          "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race",
+          "sort",
+          "prop"
+        ],
+        [
+          "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race",
+          "supports",
+          {
+            "node": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+            "status": "untried"
+          }
+        ],
+        [
+          "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race",
+          "supports",
+          {
+            "node": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race",
+          "title",
+          "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race"
+        ],
+        [
+          "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3",
+          "supports",
+          "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw"
+        ],
+        [
+          "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3",
+          "title",
+          "read engine/spaces/tokens.pl and engine/metta/effects.pl: must_be/2 throws, the foreign branches throw, and metta_source_guard/1's first clause succeeds on \\+ metta_ctx_declared/1 while its second either throws metta_source_discipline or succeeds, so neither can FAIL and the failing goal is metta_reference_source/3, metta_reference_validate_selection/2 or the transaction/1 in metta_reference_declare/3"
+        ],
+        [
+          "the race window is small enough that instrumenting the path closes it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the race window is small enough that instrumenting the path closes it",
+          "title",
+          "the race window is small enough that instrumenting the path closes it"
+        ],
+        [
+          "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw",
+          "sort",
+          "prop"
+        ],
+        [
+          "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw",
+          "title",
+          "the token guards cannot be the failing goal: metta_require_token_read/2 and metta_require_token_mutation/2 either succeed or throw"
+        ],
+        [
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "sort",
+          "approach"
+        ],
+        [
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "effort",
+          3
+        ],
+        [
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "status",
+          "untried"
+        ],
+        [
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "title",
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all"
+        ]
+      ],
+      "id": "116284355a33678a"
+    },
+    {
+      "at": "2026-09-20T06:50:57.685654+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw\", \"tags\": [\"source\"], \"title\": \"the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race\", \"tags\": [\"source\"], \"title\": \"the fix cannot be named yet, because the failing goal inside that chain is not identified\", \"fields\": {}}]",
+      "parents": [
+        "116284355a33678a"
+      ],
+      "assert": [
+        [
+          "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw",
+          "sort",
+          "prop"
+        ],
+        [
+          "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw",
+          "supports",
+          "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip"
+        ],
+        [
+          "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw",
+          "tags",
+          "source"
+        ],
+        [
+          "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw",
+          "title",
+          "metta_reference_source/3 runs metta_reference_read_manifest/3 only when the load policy is not eager, and every captured failure is non-eager: the suspended-background test is background, and the other hit was at member(background,[lazy,background]). The chain is metta_add_atom/3 -> metta_reference_declare/3 -> metta_reference_source/3 -> metta_reference_read_manifest/3 -> metta_reference_check_manifest/5 -> metta_reference_check_form/6, whose from branch runs metta_reference_row_map/4, metta_reference_map_effect/3 and metta_reference_require_effect/4, each of which can fail rather than throw"
+        ],
+        [
+          "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip",
+          "sort",
+          "prop"
+        ],
+        [
+          "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip",
+          "title",
+          "the failing goal is inside the NON-EAGER-only manifest read, which is the one step the failing paths execute and the passing ones skip"
+        ],
+        [
+          "the fix cannot be named yet, because the failing goal inside that chain is not identified",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fix cannot be named yet, because the failing goal inside that chain is not identified",
+          "title",
+          "the fix cannot be named yet, because the failing goal inside that chain is not identified"
+        ],
+        [
+          "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race",
+          "sort",
+          "prop"
+        ],
+        [
+          "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race",
+          "supports",
+          "the fix cannot be named yet, because the failing goal inside that chain is not identified"
+        ],
+        [
+          "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race",
+          "tags",
+          "source"
+        ],
+        [
+          "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race",
+          "title",
+          "the token guards, validate_selection and the retirement transaction are excluded by reading their contracts, which leaves the manifest read; naming a fix for a goal I have not watched fail would be the confounded-attribution mistake this session already made once with the snapshot. The next step is recorded as an approach: record state with nb_setval inside goals that already run and read it at the refusal, so nothing is added between the goals that race"
+        ]
+      ],
+      "id": "a55b019ec26b6aef"
+    },
+    {
+      "at": "2026-09-20T06:51:37.135854+00:00",
+      "after": "3c80b38abad45ba339aa560e77670a8351c5117b",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level\", \"tags\": [], \"title\": \"instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint\", \"fields\": {\"effort\": 1, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"status\", \"id\": \"instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint\", \"because\": \"hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "a55b019ec26b6aef"
+      ],
+      "assert": [
+        [
+          "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit",
+          "sort",
+          "prop"
+        ],
+        [
+          "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit",
+          "supersedes",
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level"
+        ],
+        [
+          "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit",
+          "supports",
+          {
+            "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+            "status": "active"
+          }
+        ],
+        [
+          "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit",
+          "title",
+          "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit"
+        ],
+        [
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level",
+          "sort",
+          "prop"
+        ],
+        [
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level",
+          "supports",
+          {
+            "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+            "status": "untried"
+          }
+        ],
+        [
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level",
+          "supports",
+          {
+            "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level",
+          "title",
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level"
+        ],
+        [
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "sort",
+          "approach"
+        ],
+        [
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "effort",
+          1
+        ],
+        [
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "status",
+          "active"
+        ],
+        [
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "title",
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint"
+        ]
+      ],
+      "id": "0d22b4a0c5c4246b"
     }
   ]
 }
