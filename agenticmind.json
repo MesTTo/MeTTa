@@ -12439,6 +12439,18 @@
       "tags": [
         "measured"
       ]
+    },
+    "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes": {
+      "title": "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes"
+    },
+    "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running": {
+      "title": "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running",
+      "supports": [
+        "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -55481,6 +55493,47 @@
         ]
       ],
       "id": "b31b6ae5d81420a0"
+    },
+    {
+      "at": "2026-09-20T18:09:17.535208+00:00",
+      "after": "fcbe30c1e745e7e12e8b4fd9e8ace78ae89fbe75",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running\", \"tags\": [\"measured\"], \"title\": \"the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes\", \"fields\": {}}]",
+      "parents": [
+        "b31b6ae5d81420a0"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running",
+          "supports",
+          "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes"
+        ],
+        [
+          "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running",
+          "title",
+          "measured 2026-09-21 04:08; the waiter covers both outcomes deliberately, because a filter matching only success is silent through a crash and silence is indistinguishable from still running"
+        ],
+        [
+          "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes",
+          "title",
+          "the battery-4 gate approach is active BY DESIGN and not forgotten: the run is in flight at 96 lanes with 14 live processes, every independent piece of work has been closed, and a waiter is armed that ends on either a verdict line or the battery going quiet without one, so the loop closes whichever way the run goes"
+        ]
+      ],
+      "id": "6a5c20e99c397aba"
     }
   ]
 }
