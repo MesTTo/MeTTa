@@ -12519,6 +12519,45 @@
       "tags": [
         "tested"
       ]
+    },
+    "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there": {
+      "title": "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there"
+    },
+    "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok": {
+      "title": "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok",
+      "supports": [
+        "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough": {
+      "title": "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough"
+    },
+    "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked": {
+      "title": "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked",
+      "supports": [
+        "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings": {
+      "title": "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran": {
+      "title": "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran",
+      "supports": [
+        "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -55804,6 +55843,112 @@
         "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
       },
       "id": "1149bc49a2dfe639"
+    },
+    {
+      "at": "2026-09-20T18:59:47.011175+00:00",
+      "after": "8fbca56df2f4ea8aa8db822792dd8757014998eb",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok\", \"tags\": [\"measured\"], \"title\": \"the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"its reference pattern required the quote immediately before the $, and the line is WRAPPER=\\\"sh $ROOT/bounded.sh\\\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked\", \"tags\": [\"measured\"], \"title\": \"check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings\", \"fields\": {}}]",
+      "parents": [
+        "1149bc49a2dfe639"
+      ],
+      "assert": [
+        [
+          "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough",
+          "title",
+          "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough"
+        ],
+        [
+          "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked",
+          "sort",
+          "prop"
+        ],
+        [
+          "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked",
+          "supports",
+          "check_script_references.py, which I built this session for exactly this class, could not see it for TWO independent reasons, and each alone was enough"
+        ],
+        [
+          "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked",
+          "tags",
+          "measured"
+        ],
+        [
+          "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked",
+          "title",
+          "its reference pattern required the quote immediately before the $, and the line is WRAPPER=\"sh $ROOT/bounded.sh\" with sh between them; and its assignment pattern disallowed an environment prefix inside the substitution, and the line is ROOT=$(CDPATH= cd -- ...), so the variable had no base and every reference through it was SKIPPED rather than checked"
+        ],
+        [
+          "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok",
+          "supports",
+          "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there"
+        ],
+        [
+          "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok",
+          "title",
+          "measured 2026-09-21: the lane printed 'wrapper under test: sh <root>/bounded.sh' and every case reported 'never started'; after the repair it exits 0 with all thirteen ok"
+        ],
+        [
+          "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there",
+          "title",
+          "the reaping lane was a FIFTH tools/ casualty and the clearest one: tests/shell/test_bounded_reaping.sh:67 named $ROOT/bounded.sh while line 382 of the same file already said $ROOT/tools/bounded.sh, so twelve of its thirteen cases failed on a wrapper that was not there"
+        ],
+        [
+          "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings",
+          "sort",
+          "prop"
+        ],
+        [
+          "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings",
+          "title",
+          "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings"
+        ],
+        [
+          "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran",
+          "supports",
+          "the second gap is the more dangerous shape: a checker that cannot compute a base skips the reference, and skipping leaves the same trace as passing, so a whole file's references went unchecked while the lane reported 0 findings"
+        ],
+        [
+          "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran",
+          "tags",
+          "measured"
+        ],
+        [
+          "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran",
+          "title",
+          "the tree had one real defect in that file throughout and script-refs answered 0 findings every time it ran"
+        ]
+      ],
+      "id": "65979e42bea07fbb"
     }
   ]
 }
