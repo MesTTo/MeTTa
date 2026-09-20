@@ -258,13 +258,17 @@
 %     test_no_binding_carries_its_own_verbosity_setter in
 %     extensions/python/tests/ch10_errors_and_refusals/test_engine_diagnostics.py,
 %     test_the_host_service_scoreboard_matches_the_tree; commit=562800cdac5d152f39fbd3b3c14c2d035ed18dea].
-% Guarantees: a definition depends on the symbols its body can CALL, not on
-%   every symbol it mentions: called_symbol/2 answers a literal head without
-%   descending into it, so a name reachable only through such a head records
-%   no edge and its arrival recompiles nothing
-%   [tested: filereader_called_symbols:a_literal_head_hides_the_names_inside_it,
-%   filereader_called_symbols:a_head_that_becomes_a_function_shows_them_again,
-%   packages:importing_a_backed_library_leaves_the_package_head_alone;
+% Guarantees: a definition's dependencies do not depend on the ORDER its
+%   space's rows were read in. The walk descends a whole body, stopping only at
+%   the three heads the language fixes as data, so a name that a later import
+%   makes callable already has its edge and the clause is retranslated
+%   [tested: filereader_called_symbols:an_uncompilable_head_still_shows_the_names_inside_it,
+%   filereader_called_symbols:a_head_becoming_a_function_does_not_change_what_is_under_it;
+%   commit=WORKTREE].
+%   The reserved `package` head is the one body exempt, because its rows are
+%   declarations and naming a head is not calling it; that exemption is keyed
+%   on the law's own head rather than on what happens to be defined yet
+%   [tested: packages:importing_a_backed_library_leaves_the_package_head_alone;
 %   commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
@@ -1754,6 +1758,47 @@ stored_equation_source(Space, Original, Resolved, StoredRef) :-
 % its edges without replacing the supports of its siblings.
 :- dynamic record_translated_supports/3, type_alias_support_scope_ref/2.
 
+% The reserved head's rows are DECLARATIONS, and declaring a head is not
+% calling it. `(= (package backing) (prolog F (heads)))` names every head its
+% artifact exports, so an edge per name made every `package` equation a
+% dependent of every head any library declares, and importing N Prolog-backed
+% libraries cost O(N^2) [measured 2026-09-19: 1,527 inferences at the second
+% import, 8,358 at the twelfth; tested:
+% packages:importing_a_backed_library_leaves_the_package_head_alone].
+%
+% Keyed on the RESERVED HEAD, not on the row's own head being one the
+% translator has nothing to compile. That second test is what called_symbol/2
+% used to apply to every body, and it is unsound: it reads a mutable condition,
+% "nothing defines this yet", as a permanent one, "this is data". `package` is
+% fixed by the law, being one of the four things the engine knows, so a row
+% under it is data whatever arrives later, while every other body keeps the
+% whole-body walk that makes a definition's dependencies independent of the
+% order its space's rows were read in.
+%
+% The row's own head is still recorded, which is exactly the edge set the
+% narrowed walk produced here, so the cost this removes is unchanged.
+%
+% Its LIMIT, stated rather than glossed: a package row is not inert. Law 3
+% normalises a row no claim answers before performing it, so a COMPUTED row's
+% body is evaluated, and a name inside one that a later import makes callable
+% has no edge here either. That is the same residual the narrowed walk carried
+% for these rows, so nothing regresses, and it is narrow: a declaration row --
+% every `prolog`, `git` and `library` row shipped today -- names heads and
+% calls nothing. Closing it wants the row GRAMMAR, which lives in lib_package
+% rather than here; until the engine can ask which payload positions a claim
+% reads, this exemption is as tight as the engine can state.
+% Recognised rather than unified into, which is the rule package_row/3 in
+% filereader/source_lifecycle.pl already states for the same head: a form whose
+% head is a VARIABLE unifies with the literal `package` and comes out bound to
+% it, so the pattern alone would both misread that form and mutate it.
+record_translated_supports(Module, Ref, [=, [Reserved|_], Body]) :-
+    Reserved == package,
+    !,
+    (   Body = [RowHead|_], atom(RowHead), RowHead \== package
+    ->  Supports = [function_view(Module, RowHead)]
+    ;   Supports = []
+    ),
+    support_publish_compiled_form(Module, package, Ref, Supports, Body).
 record_translated_supports(Module, Ref, [=, [G|_], Body]) :-
     atom(G),
     !,
@@ -2072,15 +2117,40 @@ called_symbol(Term, Symbol) :-
 literal_head(Head) :- var(Head), !, fail.
 % policy-inventory-exempt: arbiter-owned-language-law; reason=quote, noeval and Error payloads are syntax or data rather than executable calls; evidence=engine/support_graph.pl:support_memo_call_head/2
 literal_head(Head) :- memberchk(Head, [quote, noeval, 'Error']), !.
-%And a head the translator has nothing to compile: none of its own forms, no
-%function here or anywhere, no builtin. The order is by how often a check
-%succeeds, since one success ends the conjunction and a real call site is the
-%common case.
-literal_head(Head) :-
-    \+ fun(Head),
-    \+ builtin_fun(Head),
-    \+ metta_translated_head(Head),
-    \+ support_function_module(Head, _).
+%A head the translator has nothing to compile used to reach here too, and that
+%is UNSOUND: it is a mutable condition read as a permanent one. The guard the
+%narrowing rested on was that "a name reachable only through a literal head
+%cannot be called before its head is", so the head's own edge would invalidate
+%the clause in time. A head with no equation anywhere never acquires one, and a
+%name BENEATH it acquires one whenever an import lands, so that edge never
+%fires while the meaning underneath it changes.
+%
+%Measured 2026-09-20: a base space holding `(= (Sh-describe $x) (area-of (area
+%$x)))` answers `(area-of 9)` when `(from &Sq (only (area)))` precedes the
+%equation and `(area-of (area (Sq 3)))` when it follows, because `area-of` is
+%permanently uncompilable and hid `area` from the dependency walk. That is
+%import order changing what a definition means, which is the one thing the
+%whole-body walk existed to prevent. It failed
+%examples/ch17-concurrency-and-the-loop/11-class_dispatch.metta and with it the
+%shell, examples, no-autoload and parity lanes.
+%
+%In MeTTa the arguments of a non-reducible head are evaluated, so a name in one
+%IS a call site; `(prolog F (heads))` is no more data-all-the-way-down than
+%`(area-of (area $x))` is. The O(N^2) that narrowing removed has a sound
+%remedy the same commit already named -- the recompile it avoided is a no-op,
+%the clause bodies being identical under =@= either side of it -- so the cost
+%belongs at the retranslation rather than in the edge set.
+%
+%That is the standing rule for this class rather than a local judgement. An
+%incremental system's edge set must OVER-approximate what a computation reads:
+%Make and Ninja are stale-build-correct only because they never record fewer
+%edges than exist, and where a static walk is too coarse the answer is to
+%record dependencies BY OBSERVATION as the computation runs -- Salsa and
+%rustc's query system, Adapton, and Shake's monadic dependencies (Mitchell,
+%"Shake Before Building", ICFP 2012, `10.1145/2364527.2364538`) all exist for
+%exactly that. Narrowing a static over-approximation by a guess about what
+%cannot become a call is the one move each of them treats as unsound, and it is
+%the move that was made here.
 
 % First pass converts MeTTa to Prolog terms without mutating registration state.
 parse_form(Form, Parsed) :-
