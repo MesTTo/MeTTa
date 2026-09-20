@@ -6175,6 +6175,62 @@
       "tags": [
         "measured"
       ]
+    },
+    "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran": {
+      "title": "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+    },
+    "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/": {
+      "title": "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/",
+      "supports": [
+        "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k": {
+      "title": "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k",
+      "supports": [
+        {
+          "node": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "status": "untried"
+        },
+        {
+          "node": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "relation": "addresses",
+          "target": "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+        }
+      ]
+    },
+    "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing": {
+      "title": "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing",
+      "supports": [
+        {
+          "node": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn": {
+      "title": "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so": {
+      "title": "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so",
+      "supports": [
+        "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -7169,6 +7225,14 @@
       "status": "done",
       "addresses": [
         "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+      ]
+    },
+    "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction": {
+      "title": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
       ]
     }
   },
@@ -30568,6 +30632,162 @@
         ]
       ],
       "id": "410f9343e1cb3bd8"
+    },
+    {
+      "at": "2026-09-20T03:15:22.519751+00:00",
+      "after": "899428489d6c9991240b8ddc49832753149f63a1",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/\", \"tags\": [\"measured\"], \"title\": \"the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k\", \"tags\": [], \"title\": \"root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction\", \"fields\": {\"effort\": 1, \"addresses\": [\"the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran\"]}}, {\"op\": \"status\", \"id\": \"root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction\", \"because\": \"regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn\", \"fields\": {}}]",
+      "parents": [
+        "410f9343e1cb3bd8"
+      ],
+      "assert": [
+        [
+          "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn",
+          "sort",
+          "prop"
+        ],
+        [
+          "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn",
+          "title",
+          "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn"
+        ],
+        [
+          "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/",
+          "supports",
+          "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+        ],
+        [
+          "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/",
+          "title",
+          "measured 2026-09-20: face-sync-selftest passed 32 cases with its second target rooted and ran zero with it bare, and reading extensions/python/tools/artifacts.py shows the helper prefixed only targets beginning tests/"
+        ],
+        [
+          "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so",
+          "supports",
+          "a hand edit to a generated block survives only until the next generator run, so a fix applied there is a fix that will be silently withdrawn"
+        ],
+        [
+          "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so",
+          "title",
+          "measured 2026-09-20: running artifacts.py --write reverted commit b43809b71's absolute paths and deleted the comment explaining them, which is how the defect would have returned with nothing saying so"
+        ],
+        [
+          "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing",
+          "sort",
+          "prop"
+        ],
+        [
+          "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing",
+          "supersedes",
+          "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k"
+        ],
+        [
+          "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing",
+          "supports",
+          {
+            "node": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+            "status": "done"
+          }
+        ],
+        [
+          "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing",
+          "tags",
+          "tested"
+        ],
+        [
+          "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing",
+          "title",
+          "regenerating writes both face-sync-selftest targets as $HERE-rooted paths, no flag is rooted, and the manifest reports 21 artifacts, dependencies, outputs and generated checks agreeing"
+        ],
+        [
+          "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran",
+          "title",
+          "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+        ],
+        [
+          "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k",
+          "sort",
+          "prop"
+        ],
+        [
+          "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k",
+          "supports",
+          {
+            "node": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+            "status": "untried"
+          }
+        ],
+        [
+          "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k",
+          "supports",
+          {
+            "node": "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+            "relation": "addresses",
+            "target": "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+          }
+        ],
+        [
+          "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k",
+          "title",
+          "the earlier fix edited the GENERATED block in the gate driver and was reverted the next time the generator ran, which is what says the rooting belongs in the generator; a target carrying a separator names a file and a bare word is a flag or a flag's value, and the manifest's own missing-command-path check refuses the wrong choice, as it did when the first attempt rooted -k"
+        ],
+        [
+          "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "sort",
+          "approach"
+        ],
+        [
+          "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "addresses",
+          "the artifact manifest's suite helper rooted only the seat's own test paths, so a target naming a sibling distribution stayed relative and resolved under the seat, where it does not exist, and pytest given one good path and one bad one collects nothing while reporting no tests ran"
+        ],
+        [
+          "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "effort",
+          1
+        ],
+        [
+          "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "status",
+          "done"
+        ],
+        [
+          "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction",
+          "title",
+          "root every target that names a file in the manifest's suite helper, leaving a pytest flag and its value untouched, so the generated block carries absolute paths by construction"
+        ]
+      ],
+      "id": "1c3352b6d1c7dc41"
     }
   ]
 }

@@ -391,6 +391,15 @@ def guard(function: F) -> F:
 > guard is numbered by what it calls, which is what it actually does. The
 > mark returns the function unchanged, as `door` does, so a `property`
 > wrapping it and its descriptor binding are untouched.
+>
+> The NAME is the whole mechanism, and that is why this body does nothing.
+> The order analysis reads source rather than a live object, and asks
+> `"guard" in scope.decorators`, so
+> what marks a body is the spelling of the decorator above it. This used to
+> also set a `__metta_guard__` attribute; nothing ever read it, in Python or
+> out of it, and the vulture lane refused it. Do not read this as a
+> decorator that can be deleted for doing nothing: deleting it changes what
+> the analysis charges the callers of whatever it wraps.
 
 ## `door`
 

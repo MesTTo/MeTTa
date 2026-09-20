@@ -780,16 +780,8 @@ artifact_example_origins_witnesses() {
 run GATE example-origins-selftest artifact_example_origins_witnesses
 
 run GATE face-sync "$PY" "$HERE/extensions/python/tools/facegen.py"
-# BOTH paths absolute: extensions/python/test.sh does `cd "$HERE"` into the
-# seat before running pytest, so a path relative to the repository root lands
-# in extensions/python/ and is not there. pytest handed one good path and one
-# bad one collects NOTHING and reports "no tests ran", so this lane ran zero of
-# its 32 cases while reading as a lane [measured 2026-09-20: the absolute path
-# alone passes 32, the pair runs none].
 artifact_face_sync_witnesses() {
-    bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" \
-        "$HERE/extensions/python/tests/ch11_python_as_a_notation/test_face.py" \
-        "$HERE/ext/metta-arrays/tests/test_library_face.py" || return $?
+    bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/ch11_python_as_a_notation/test_face.py" "$HERE/ext/metta-arrays/tests/test_library_face.py" || return $?
 }
 run GATE face-sync-selftest artifact_face_sync_witnesses
 

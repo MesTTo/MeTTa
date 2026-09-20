@@ -40,6 +40,7 @@ beside its definitions.
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
+| lib_package | 3 | 3 |
 | lib_pairs | 9 | 9 |
 | lib_parsing | 5 | 5 |
 | lib_patrick | 4 | 0 |
@@ -3772,6 +3773,41 @@ Run source with coverage and error diagnostics. Source coordinates are one-based
 3. MeTTa source text
 
 Returns: a queryable space of observation-status, observation-answer, observation-exception, source-coverage, source-coverage-unavailable, source-function-unavailable, source-error, source-frame, and source-frame-unavailable atoms
+
+## lib_package
+
+### `setup!`
+
+*lib_package.metta:7*
+
+Prepare a package and its requirements explicitly. Reuse setup only while its performed rows and backing artifacts remain current; publish performed.metta and the transitive lock.metta under an OS directory lock.
+
+1. Package path or (library Name)
+
+Returns: Bool
+
+### `package-load`
+
+*lib_package.metta:12*
+
+A required packaging library can define this equation to replace the default interpreter. Arguments are the canonical source path, home space and the source's own package rows. Requires have already loaded under the engine's ceiling and budget.
+
+1. Canonical path
+2. Home space
+3. Package argument rows
+
+Returns: Any successful result
+
+### `get-property`
+
+*lib_package.metta:17*
+
+The two-argument package surface answers (get-property perform claims), package keys at a loaded home, and available alternative backing rows. The one-argument head reflection surface remains available.
+
+1. perform, a home space, or a loaded package path
+2. claims, available, or a package key
+
+Returns: One property value per answer
 
 ## lib_pairs
 

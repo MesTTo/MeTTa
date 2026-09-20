@@ -44,17 +44,18 @@ foundations; deferred body imports reach strictly higher orders. Run
 |---:|---|---|
 | 0 | `_layers` |  |
 | 0 | `_lazy` |  |
+| 0 | `_roots` |  |
 | 0 | `_version` |  |
 | 1 | `seam` | `_lazy` |
 | 2 | `_errors` | `seam` |
 | 3 | `_atoms` | `_errors`, `seam` |
 | 4 | `vocabularies` | `_atoms` |
 | 5 | `_catalog` | `vocabularies`, `_atoms`, `_errors`, `seam` |
-| 6 | `_binding` | `_catalog`, `_atoms`, `_errors`, `seam` |
+| 6 | `_binding` | `_roots`, `_catalog`, `_atoms`, `_errors`, `seam` |
 | 6 | `_compile` | `_catalog`, `_atoms`, `_errors`, `vocabularies` |
 | 6 | `doors` | `_catalog`, `vocabularies`, `_atoms`, `_layers` |
 | 7 | `_spaces` | `_binding`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam`, `_version` |
-| 8 | `_declare` | `_spaces`, `_compile`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam` |
+| 8 | `_declare` | `_roots`, `_spaces`, `_compile`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam` |
 | 9 | `_observe` | `_declare`, `_spaces`, `_binding`, `_catalog`, `_atoms`, `_errors`, `seam` |
 | 10 | `_faces` | `_declare`, `_observe`, `_spaces`, `doors`, `_atoms` |
 | 11 | `_pygments` | `_faces` |
@@ -80,7 +81,7 @@ foundations; deferred body imports reach strictly higher orders. Run
 | 13 | `importing` | `_faces`, `integrate` |
 | 13 | `manifest` | `_faces`, `remote`, `tables` |
 | 13 | `subscribe` | `_faces`, `events`, `foreign` |
-| 13 | `testing` | `_faces`, `algebra`, `convert`, `foreign`, `remote` |
+| 13 | `testing` | `_roots`, `_faces`, `algebra`, `convert`, `foreign`, `remote` |
 | 14 | `__main__` | `_faces`, `importing`, `library`, `lint`, `manifest`, `remote` |
 | 14 | `aio` | `_faces`, `subscribe`, `lint` |
 | 15 | `_history` | `aio`, `importing`, `manifest`, `subscribe`, `testing`, `parallel`, `spaces` |
