@@ -96,7 +96,7 @@ processes. The complete original Python cohort passes 1072 tests with
 command and exit status zero. The earlier unguarded implementation also passed
 that cohort, which is why the separate reflective-consumer control is retained.
 
-Verified: `sh check.sh prolog lib-autoload evidence layering host-workarounds
+Verified: `sh tools/check.sh prolog lib-autoload evidence layering host-workarounds
 policy-inventory` passes. Evidence has zero unbacked claims and three pending
 pins among 7819 claims. All 15 host reproductions answer `present`, covering
 35 workaround sites. Log: `ai-tmp/ai-classes-c55d-checks.log`.

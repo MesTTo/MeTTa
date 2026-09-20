@@ -5,12 +5,12 @@
 #   SWIPL names the host interpreter. No repository engine source is loaded.
 # Guarantees: a segfault of the joining process answers present, a clean join
 #   answers absent, and every other failure remains an error
-#   [tested: sh check.sh host-workarounds; commit=32335687084e4d8ad43cf8800f2dedce707fa137].
+#   [tested: sh tools/check.sh host-workarounds; commit=32335687084e4d8ad43cf8800f2dedce707fa137].
 # Owns resources: bounded.sh joins the child; the lane removes the scratch files.
 # [measured 2026-09-18: present on SWI-Prolog 10.1.14 built with the ledger's
 #  earlier patches, absent on the same tree built with
 #  tests/checks/host_workarounds/swi-thread-join-detach-window.patch;
-#  command=sh check.sh host-workarounds;
+#  command=sh tools/check.sh host-workarounds;
 #  fixture=SWI-Prolog 10.1.14 with the patch; commit=32335687084e4d8ad43cf8800f2dedce707fa137]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}

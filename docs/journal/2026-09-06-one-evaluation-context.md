@@ -4,7 +4,7 @@ query guards, held cursors and retained-answer reinterpretation.
 
 ## 2026-09-06
 
-Tried: `METTA_PATH="$PWD" PYTHONPATH="$PWD/extensions/python" sh bounded.sh
+Tried: `METTA_PATH="$PWD" PYTHONPATH="$PWD/extensions/python" sh tools/bounded.sh
 --ceiling 300 "$CHECK_PY"
 ai-tmp/ai-carrier-probe.py` on `749f5864a9cd84863fb177e0c1e985b14ab3772e`.
 Both tagged queries returned annotation `[1]`. Their four extend calls, one
@@ -129,7 +129,7 @@ suite receipts reporting 2178 tests and 1436 subtests. The combined Python
 carrier, binding, existing algebra and shim-surface selection returned
 113 passed in 4.44 seconds.
 
-Tried: `sh check.sh llms llms-selftest layering lib-surface aio-mirror reference`
+Tried: `sh tools/check.sh llms llms-selftest layering lib-surface aio-mirror reference`
 returned exit zero on the completed implementation. All six named lanes are
 green: 943 cross-subsystem calls covered by 81 contract lines, 470 library
 equations checked, zero cheat-sheet findings, 61 planted cheat-sheet cases

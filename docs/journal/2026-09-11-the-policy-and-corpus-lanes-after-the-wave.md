@@ -6,7 +6,7 @@ Constraint: preserve other workers' files and provisional cost pins.
 
 ## 2026-09-11
 
-Tried: `sh check.sh deptry process-bounds codespell cumulative-syntax
+Tried: `sh tools/check.sh deptry process-bounds codespell cumulative-syntax
 corpus-coverage` at 96ece1056 reports 21, 1, 1, 1 and 3 findings respectively.
 
 Tried: the read-only c66cf0c10 control's `check_cumulative_syntax.py` reports
@@ -36,7 +36,7 @@ DEP002/DEP003 findings; the final configuration preserves those rules.
 Decided: wrap only the parity artifact producer's argv with `bounded`, keeping
 its cwd, environment, captured output and checked status. The producer runs
 outside measured processes. Fix the thread completion comment's spelling.
-Tried: `sh check.sh deptry process-bounds codespell cumulative-syntax
+Tried: `sh tools/check.sh deptry process-bounds codespell cumulative-syntax
 parity-perf-selftest` passes all five lanes, including two shipping artifact
 generations and their restoration.
 
@@ -64,7 +64,7 @@ the complete gate remain to be verified.
 
 ### Focused verification
 
-Tried: ch17/07 through `sh test.sh` executes eight passing assertions. Each
+Tried: ch17/07 through `sh tools/test.sh` executes eight passing assertions. Each
 assigned lane run alone exits 0: deptry 21 to 0, process-bounds 1 to 0 over
 184 spawns, codespell 1 to 0, cumulative-syntax 1 to 0 over 324 examples
 and 284 constructs, corpus-coverage 3 to 0 over 251 engine callables and
@@ -89,7 +89,7 @@ Open: twins, provenance and the complete gate.
 
 ### Twin comparison and evidence
 
-Tried: `sh check.sh twins` reports 279 findings over 282 twins, the same
+Tried: `sh tools/check.sh twins` reports 279 findings over 282 twins, the same
 finding count and path multiset as the a850f1641 wave gate. Three diagnostics
 differ only in observed cost: ch20-02/04 188039 to 188031, ch20-02/13
 394700 to 394692, ch20-04/12 227365 to 227364. Those twin sources are
@@ -97,7 +97,7 @@ unchanged from a850f1641; the mechanism of the small count variation was
 not established. Their existing budget failures and all pins stay with the
 integration cost work. No new twin was added or removed.
 
-Tried: `sh check.sh evidence provenance-pin-selftest` passes: zero unbacked
+Tried: `sh tools/check.sh evidence provenance-pin-selftest` passes: zero unbacked
 tags in 7,387 claims, three placeholders awaiting the functional commit,
 zero provenance defects across 39 planted placeholders in 17 files.
 
@@ -105,7 +105,7 @@ Open: the complete gate and final provenance pins.
 
 ### Full-gate correction
 
-Tried: `GATE_ONLY=1 sh check.sh` completes with 147 passing and 21 failing
+Tried: `GATE_ONLY=1 sh tools/check.sh` completes with 147 passing and 21 failing
 lane entries. All five assigned lanes pass, as do corpus parity and the
 scope library's eleven native tests. Two failures belong to this change:
 `llms` reports its source table's 323 programs against 324, and
@@ -130,8 +130,8 @@ tools findings and the two additional Python failures belong to integration.
 
 ### Corrected full-gate verification
 
-Tried: `sh check.sh llms llms-selftest` passes with zero findings and zero
-failures across 64 planted cases. The repeated `GATE_ONLY=1 sh check.sh`,
+Tried: `sh tools/check.sh llms llms-selftest` passes with zero findings and zero
+failures across 64 planted cases. The repeated `GATE_ONLY=1 sh tools/check.sh`,
 with `RELEASE` unset, completes with 149 passing and 19 failing lane entries,
 none skipped. All five assigned lanes and all corpus records pass. The
 remaining red lanes are engine-bench, dev-typed, c-bench, mork-bench,

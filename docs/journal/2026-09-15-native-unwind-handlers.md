@@ -63,7 +63,7 @@ native/Python process pairs retain identical atom multisets and digests, with
 aa1ed1fff8765a8176b966f1cb2bcc1f0721154c6ee6ffa218e5c3801f066e69.
 Every process starts after deleting engine/lib `.qlf` artifacts. The full
 observations are `ai-tmp/ai-on-unwind-root-twin-observe-parameter.jsonl`;
-the native check is `sh test.sh examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/10-unwind_cleanup.metta`,
+the native check is `sh tools/test.sh examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/10-unwind_cleanup.metta`,
 logged in `ai-tmp/ai-on-unwind-root-example-parameter.log`.
 
 The introduction scanner interprets `(first second)` as a use of the existing

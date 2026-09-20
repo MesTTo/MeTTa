@@ -81,7 +81,7 @@ mentions(Message, Text) :-
 
 %Written MeTTa source, run the way the corpus runs it: the file reader's own
 %string door translates each directive and evaluates it, so a test written this
-%way asks exactly what `sh run.sh` asks and reaches the doors a program reaches
+%way asks exactly what `sh tools/run.sh` asks and reaches the doors a program reaches
 %[source: engine/filereader.pl, process_metta_string/2]. The engine prints its
 %compilation unless started with the quiet flag, which a test run is not.
 written_all(Source, Results) :-
@@ -446,7 +446,7 @@ test(root_gaps_absorb_each_others_settled_children_through_the_door) :-
 %one role on both sides and the pair is admitted. This is the one row where the
 %repair moves this engine INTO agreement with the arbiter, which has no reading
 %of a gap at all and so unifies two identical expressions
-%[measured 2026-09-07: `sh run.sh` on `!(collapse (unify (f (:seg $u))
+%[measured 2026-09-07: `sh tools/run.sh` on `!(collapse (unify (f (:seg $u))
 %(f (:seg $u)) yes no))` after `!(import! &self ../lib/lib_he)` in the upstream
 %PeTTa checkout at ae66fa8e41dcd5539d614706bd4e5cfb34f9608d answers `(yes)`;
 %this engine answered a mixed_roles refusal before the repair and `(yes)` after

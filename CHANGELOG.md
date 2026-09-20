@@ -1197,7 +1197,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   order and `sort-by` is stable. The control forms hold their body and their
   condition, which is what lets a loop decide whether to run the body at all.
   Neither flatten takes the bare name `flatten`, which is the host's own
-  every-level one, and `sh check.sh lib-autoload` now refuses a published
+  every-level one, and `sh tools/check.sh lib-autoload` now refuses a published
   library head that a module above `lib/` answers instead of the library.
   `lib_patrick` keeps its four idioms and stays a separate import.
 - `lib_distribution` adds `ws-variance`, `ws-deviation`, `ws-central-moment`,
@@ -3277,7 +3277,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `list_to_set/2` sorts in C and the engine's inference counter reads them
   linear where retired instructions read them linearithmic.
 
-  `sh check.sh cost-rows` runs `benchmarks/costs.py`: one fresh process per
+  `sh tools/check.sh cost-rows` runs `benchmarks/costs.py`: one fresh process per
   row, one fresh space per size, the ladder fitted against the declared class
   in BOTH directions, with `benchmarks/cost-baseline.json` as its ledger and
   five permanent planted controls, one per gate direction. About 23 to 31
@@ -3306,7 +3306,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
   The page runs the bytes the gate runs, and that is checked twice: the site
   build refuses a `::: run` fence that does not name an example
-  `sh test.sh` runs or whose text has drifted from that file, and
+  `sh tools/test.sh` runs or whose text has drifted from that file, and
   `test_every_run_fence_runs_the_corpus_file_it_names` asks the same from
   Python on a machine with no node.
 
@@ -3430,7 +3430,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `analyze=True` adds `(inferences N)`, `(answers N)` and `(cputime S)`,
   measured by running the query inside `stats()`, and REFUSES a query whose
   named operations write unless `allow_writes=True`.
-- `sh check.sh memo-advisor` proposes `(cache <head> force|refuse)` rows from a
+- `sh tools/check.sh memo-advisor` proposes `(cache <head> force|refuse)` rows from a
   workload's own call counts and prices each one by re-running the whole
   workload in a fresh process with the row declared, reporting the inference
   count before and after, the hit ratio and a verdict. It never writes a row.
@@ -3882,7 +3882,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `(: ...)` row and a docstring IS an `(@doc ...)` row and the two spaces are
   not obliged to be equal, only to differ exactly as declared; `OVERRUN`, what
   a twin's own program costs beyond its example's 10% band; and the existing
-  `ALLOWANCE`. `sh check.sh twins-selftest` plants one failure of each and
+  `ALLOWANCE`. `sh tools/check.sh twins-selftest` plants one failure of each and
   requires the lane to catch it. The lane's stored-content diagnostic now
   names the whole atom multiset each side holds beyond the other, bounded at
   50,000 atoms because enumerating the 1,572,864 that
@@ -4640,7 +4640,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   27, seven times the harness's four-inference allowance. `check.sh` allocates
   a repository-local scratch directory and exports `TMP`, `TMPDIR` and `TEMP`
   into every lane, so one tree read 268,417 from `sh engine/bench.sh` and
-  268,390 from `sh check.sh engine-bench` on the same afternoon, and the row
+  268,390 from `sh tools/check.sh engine-bench` on the same afternoon, and the row
   could not be green both ways whichever number was pinned. `engine/bench.py` drops the three names from every sample, and
   `tests/shell/test_boot_inference_determinism.sh` reads the row both ways and
   fails if they disagree. The sensitivity itself is measured rather than
@@ -5447,7 +5447,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   schema migration. Users no longer need to import the private provider class
   to rename journal heads.
 
-- `sh run.sh --verbose program.metta` exposes informational compiler and
+- `sh tools/run.sh --verbose program.metta` exposes informational compiler and
   source-reload reports at the standalone user's invocation point. The default
   remains quiet.
 
@@ -5550,7 +5550,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `prctl(PR_SET_PDEATHSIG)`, so a killed session reaps its children in
   milliseconds instead of leaving them to the deadline. Every runner calls it,
   the harness scripts reach it through `tests/checks/bounded_spawn.py`, and
-  `sh bounded.sh swipl ...` is the form to type by hand. `sh engine/test.sh
+  `sh tools/bounded.sh swipl ...` is the form to type by hand. `sh engine/test.sh
   suites/<group>/<suite>.plt` runs one PlUnit suite through it, with the
   working directory, the janus environment and the load-error scan a bare
   `swipl` call does not carry.
@@ -6163,7 +6163,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   a `for` body or a `case` arm; it spared
   `RUSTFLAGS="-C target-cpu=native" ... cargo build`, because the prefix
   pattern stopped at the space inside the quotes; and it reported
-  `sed 's|sh run.sh ...|'`, whose expression names a command and is not one.
+  `sed 's|sh tools/run.sh ...|'`, whose expression names a command and is not one.
   Over nine planted command positions, each written bounded and unbounded, the
   pattern answered 6 findings across 8 spawns and got seven of the nine
   shapes wrong, five of them by sparing the unbounded half; the grammar
@@ -7119,7 +7119,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `benchmarks/baseline.json`; it reads `$CHECK_PY` now, which is what every
   other `command=` in that file uses.
 
-- The C seat's sanitizer matrix finishes, so `GATE_ONLY=1 sh check.sh` can
+- The C seat's sanitizer matrix finishes, so `GATE_ONLY=1 sh tools/check.sh` can
   reach its end on this class of machine. `make -C extensions/cmetta sanitize`
   did not terminate: every sanitizer diagnostic is symbolized by
   `llvm-symbolizer`, `/etc/debuginfod/elfutils.urls` points it at
@@ -7142,7 +7142,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   pure rename with no changed line to review. The directive then failed, the
   loader turned that into a warning and carried on, and `swipl` exited 0 having
   defined nothing. `engine/check.sh`'s `no-autoload` GATE, whose command is
-  `NO_AUTOLOAD=1 sh test.sh`, reported 233 examples OK while executing zero
+  `NO_AUTOLOAD=1 sh tools/test.sh`, reported 233 examples OK while executing zero
   checks, and with stdin open the same boot blocked at the interactive toplevel
   instead of exiting. The path is corrected and the fixture now halts with
   status 2, naming itself and what to fix, so the next move of the file is a
@@ -8080,7 +8080,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   and holds each to a committed pin in `extensions/node/benchmarks/
   baseline.json` through the shared `BenchmarkBaseline`, so one baseline format
   and one regression protocol cover every component
-  [tested: sh check.sh node-binding node-bench].
+  [tested: sh tools/check.sh node-binding node-bench].
 
   Which counter decides is a property of the case. Inferences decide wherever
   the engine does the work, read back through the bridge: those four rows read
@@ -8660,7 +8660,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   CLASS rather than to a constant, closing a hole every other pin in the tree
   shares: they are single numbers at single input sizes, so a cost that turns
   linear into quadratic stays invisible until it reaches the one pinned size.
-  `sh check.sh scaling` measures each family across a ladder, fits `y = a*x^b`
+  `sh tools/check.sh scaling` measures each family across a ladder, fits `y = a*x^b`
   on the log of size against the log of inferences, and reports the exponent
   with R-squared beside google/benchmark's model selection. Four independent
   ways to fail keep the number honest: the exponent against the declared class,
@@ -9573,7 +9573,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   called from all four component scripts and `in_py` from the Python one.
   Nothing a lane does changes: what the root keeps and the four regions the
   component gains reassemble the previous `check.sh` line for line, the 86 lane
-  names and their tiers are identical, and `sh check.sh <lane>` still selects
+  names and their tiers are identical, and `sh tools/check.sh <lane>` still selects
   any of them, which is the door `.github/workflows/checks.yml` uses.
 
   What stays at the root is what the root is the subject of: the conformance
@@ -9591,7 +9591,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   49 `.plt` suites, the eight shipped libraries their bodies consult and nine
   `tests/prolog` providers. Both selftest fixtures build an `engine/check.sh` of
   their own now, so the split is the shape they prove against
-  [tested: sh check.sh evidence evidence-selftest spec-status-selftest].
+  [tested: sh tools/check.sh evidence evidence-selftest spec-status-selftest].
 
 - **The Python component owns its own gate lanes, in
   `extensions/python/check.sh`.** The root `check.sh` carried 80 lanes and the
@@ -9609,7 +9609,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   temporaries stay with the root driver, whose EXIT trap is what removes them.
   Nothing a lane does changes: the two files reassemble the previous
   `check.sh` line for line, the 80 names and their tiers are identical, and
-  `sh check.sh <lane>` still selects any of them, which is the door
+  `sh tools/check.sh <lane>` still selects any of them, which is the door
   `.github/workflows/checks.yml` uses.
 
 - **The repository is MeTTa Kernel, and no name it owns is spelled `petta` any
@@ -9765,7 +9765,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   The prefix is now written into the seam's own declaration and into
   `EXTENDING.md`, because `seam:foreign_space/1` is an open ownership seam: a
   provider naming an atom without the prefix would be answered "no space" by
-  every one of those nine paths, quietly. `sh check.sh prolog-static` refuses
+  every one of those nine paths, quietly. `sh tools/check.sh prolog-static` refuses
   such a name by name, reading both the live database with every library,
   backend and host binding loaded and every hook file's clause heads as text,
   and proves itself against a planted provider before accepting a clean result.
@@ -11374,7 +11374,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   the executed model and turned 1,080 backed evidence claims unbacked in a
   single step: 575 executed files before, 373 with the field stale.
   `check_evidence_tags.gate_lanes` read the root file alone, so the
-  `sh check.sh mypy ty` citation in `metta/_rules.py` was reported as naming a
+  `sh tools/check.sh mypy ty` citation in `metta/_rules.py` was reported as naming a
   lane the gate does not run. `check_imports_selftest` asserted its command
   appears in `check.sh`, which reads a lane RELOCATION as command drift. And
   `test_packaging`'s `python -m` entry-point scan fell from 18 targets to 1
@@ -11447,7 +11447,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   gained both this session and the Python seat, which owns 206 test files and
   every committed counter baseline, had neither: its parallel configuration
   lived in the lane alone, so a developer typing `pytest` by hand got different
-  settings from the ones that make the run correct, and `sh bench.sh` reached
+  settings from the ones that make the run correct, and `sh tools/bench.sh` reached
   every suite except the largest. A new check names that class of gap rather
   than leaving it to be noticed: a component owning a test directory must ship
   the script that runs it, and one shipping a benchmark suite must ship the
@@ -11486,7 +11486,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   and holds all eleven now. `tests/checks/check_evidence_tags.py` reads every
   seat's benchmark baseline for commit pins rather than only the Python seat's,
   so a seat that grows its own benchmarks does not grow unchecked provenance
-  [tested: sh check.sh evidence].
+  [tested: sh tools/check.sh evidence].
 
 - **`extensions/mork/extension.pl` declares BOTH shared objects, so a
   half-built tree stops reporting a backend that is not there.**
@@ -11581,7 +11581,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   `backends/` tree, so a built checkout can boot it.** `boot()` copied every
   directory in `ENGINE_DIRS` into the WebAssembly image recursively, and
   `backends/` holds the MORK crate, whose Rust `target/` is 10,808 files and
-  3.2 GiB once `sh build.sh` has run. The image cannot hold that: the suite
+  3.2 GiB once `sh tools/build.sh` has run. The image cannot hold that: the suite
   reported 70 tests with 8 test files aborting on `FATAL ERROR: ... JavaScript
   heap out of memory`, against 203 tests all passing with `target/` moved
   aside, same commit both ways (measured 2026-08-28 at e80fd4c3). So the lane
@@ -11957,7 +11957,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   no lane writes that shape today, so nothing had been lost yet.
 - The evidence gate reads an interpreter-led gate command as a command. Its
   own scheme says a `tested` tag carries either a test name or an exact gate
-  command, and it knew one spelling of the second, `sh check.sh <lane>`.
+  command, and it knew one spelling of the second, `sh tools/check.sh <lane>`.
   `python bindings/python/tools/phrasebook.py --gate` was split into words
   instead, and the leading `python` was looked up as a test NAME. It resolved,
   because `python` was the stem of a shipped example, so two phrasebook claims
@@ -13530,7 +13530,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   `run.sh NO_AUTOLOAD=1` boots with the flag already set (a `-g` goal on
   the command line cannot: it runs only after every `-s`/`-l` file has
   already finished loading, in either order, and `engine/metta.pl` needs the
-  flag set before its own first directive), so `NO_AUTOLOAD=1 sh test.sh`
+  flag set before its own first directive), so `NO_AUTOLOAD=1 sh tools/test.sh`
   runs the property over the full corpus [measured 2026-08-18: 200/200
   examples/, both configurations otherwise identical]. `check.sh` does not
   gate it yet, since editing that file is outside this change; the line
@@ -14411,11 +14411,11 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
 - Released PeTTa v1.0 with smart dispatch, two-stage compilation, function
   specialization, modular libraries, and MORK, MM2, and FAISS integration.
 
-[Unreleased]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.8.0...HEAD
-[0.8.0]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.3...v0.8.0
-[0.7.3]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.2...v0.7.3
-[0.7.2]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.1...v0.7.2
-[0.7.1]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.0...v0.7.1
-[0.7.0]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/MesTTo/MeTTa-Kernel/releases/tag/v0.6.0
+[Unreleased]: https://github.com/MesTTo/MeTTa/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/MesTTo/MeTTa/compare/v0.7.3...v0.8.0
+[0.7.3]: https://github.com/MesTTo/MeTTa/compare/v0.7.2...v0.7.3
+[0.7.2]: https://github.com/MesTTo/MeTTa/compare/v0.7.1...v0.7.2
+[0.7.1]: https://github.com/MesTTo/MeTTa/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/MesTTo/MeTTa/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/MesTTo/MeTTa/releases/tag/v0.6.0
 [1.0.5]: https://github.com/trueagi-io/PeTTa/releases/tag/v1.0.5

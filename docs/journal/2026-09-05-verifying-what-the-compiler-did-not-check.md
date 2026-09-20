@@ -76,7 +76,7 @@ Found while wiring the coverage: the tally had no reader. It was a shipped
 capability with no visible door, which is exactly the class the llms.txt
 editorial rule names as the one a gate cannot catch the way it catches roster
 and count drift. Turning the mode off now reports the three counts. The first
-version reported through `print_message/2` at `informational`, which `sh run.sh`
+version reported through `print_message/2` at `informational`, which `sh tools/run.sh`
 suppresses with -q, so the door existed and was still invisible; it writes to
 user_error now, because this is the deliberate output of a mode someone opted
 into rather than a log line a quiet run is right to drop.

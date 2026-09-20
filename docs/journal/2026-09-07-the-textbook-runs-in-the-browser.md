@@ -4,7 +4,7 @@ Goal: a reader presses Run on any example in the documentation site and it runs,
 in the page, from the site's own static assets, with no server beyond the static
 host the site already needs.
 Constraint: the page runs the bytes the gate runs. An example is a corpus file
-`sh test.sh` runs, and a fence that has drifted from its file is a lie the site
+`sh tools/test.sh` runs, and a fence that has drifted from its file is a lie the site
 build has to refuse.
 
 ## 2026-09-07

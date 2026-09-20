@@ -1,7 +1,7 @@
 % Purpose: detect an HTTP shutdown acknowledgement left in the caller mailbox.
 % Guarantees: a real server stops before the verdict; the fixture forces the
 % first native acknowledgement wait to take its timeout branch.
-% [tested: sh check.sh host-workarounds; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
+% [tested: sh tools/check.sh host-workarounds; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
 % Owns resources: one native HTTP server and a temporary receive wrapper.
 
 :- use_module(library(http/thread_httpd), [http_server/2,http_stop_server/2]).

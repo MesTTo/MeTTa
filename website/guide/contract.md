@@ -97,7 +97,7 @@ access-pattern check, done at plan time.
   anything else.
 - `(cost (nrev $n) quadratic)` declares how a call's cost GROWS with the
   size of one argument. This one is not about a backend, and it is the
-  only declaration here that a gate can prove wrong: `sh check.sh
+  only declaration here that a gate can prove wrong: `sh tools/check.sh
   cost-rows` substitutes a ladder of sizes for `$n`, counts inferences
   at each, fits the curve, and fails the row when the measurement
   disagrees with the class in either direction. A row that overstates

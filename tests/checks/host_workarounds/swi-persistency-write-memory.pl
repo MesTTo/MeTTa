@@ -1,6 +1,6 @@
 % Purpose: detect an in-memory mutation surviving a failed journal append.
 % Guarantees: a normal write/reopen control passes; only the retained failed
-% value counts as present. [tested: sh check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
+% value counts as present. [tested: sh tools/check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 % Owns resources: detach the probe schema and remove its directory on every exit.
 
 :- use_module(library(persistency)).

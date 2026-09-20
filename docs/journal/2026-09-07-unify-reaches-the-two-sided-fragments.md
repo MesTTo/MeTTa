@@ -71,10 +71,10 @@ that `attribute_goals//1` makes for an attributed variable: an internal store is
 projected onto the query's own terms at the answer boundary, never published
 raw. The one-sided solver was the one boundary that had no projection.
 
-Tried: the arbiter, on the same eight programs, `sh run.sh <file>` in the
+Tried: the arbiter, on the same eight programs, `sh tools/run.sh <file>` in the
 upstream PeTTa checkout at `ae66fa8e41dcd5539d614706bd4e5cfb34f9608d` with
 `!(import! &self ../lib/lib_he)` first, because `unify` is a library equation
-there. Ours are `sh run.sh` on this branch.
+there. Ours are `sh tools/run.sh` on this branch.
 
 | program | before | after | upstream PeTTa |
 |---|---|---|---|

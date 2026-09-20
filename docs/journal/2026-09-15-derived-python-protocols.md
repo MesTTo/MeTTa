@@ -46,13 +46,13 @@ Existing compiler and fold assertions now inspect the same frame contract.
 Verified: the focused command above, also selecting
 `extensions/python/tests/ch08_data/test_reduce_lowering.py`, passes five tests
 after the ABI migration. Log: `ai-tmp/ai-classes-c59-frames-after.log`.
-`sh check.sh layering ruff mypy ty evidence policy-inventory` passes all
+`sh tools/check.sh layering ruff mypy ty evidence policy-inventory` passes all
 selected checks, with 7,851 evidence claims and zero unbacked references.
 Log: `ai-tmp/ai-classes-c59-checks.log`. The five-file clone scan in
 `ai-tmp/ai-classes-c59-verify.sh` reports 4,652 lines, 40,351 tokens and zero
 clones. Log: `ai-tmp/ai-classes-c59-clones.log`.
 
-Verified: `GATE_ONLY=1 sh check.sh door-sync reference` passes the 227-contract
+Verified: `GATE_ONLY=1 sh tools/check.sh door-sync reference` passes the 227-contract
 projection checks, 69 door controls, 58 refusal controls and four reference
 controls. After deleting engine and library QLF files, `sh engine/test.sh`
 with `libraries/lib_reflect.plt`, `host/python_surface.plt` and
@@ -118,7 +118,7 @@ python extensions/python/tools/protocol_source.py check ai-tmp/ai-classes-c60-in
 python3.12 extensions/python/tools/protocol_source.py check ai-tmp/ai-protocol-source-inventory.json
 python ai-tmp/ai-verify-protocol-source-refresh.py extensions/python/tools/protocol_source.py
 python3.12 ai-tmp/ai-verify-protocol-source-refresh.py extensions/python/tools/protocol_source.py
-sh check.sh ruff deptry layering evidence policy-inventory
+sh tools/check.sh ruff deptry layering evidence policy-inventory
 jscpd --reporters console,json --format python --min-lines 5 --min-tokens 50 --noTips --output ai-tmp/ai-classes-c60-clones extensions/python/tools/protocol_source.py extensions/python/tests/repository/test_protocol_source.py
 ```
 

@@ -153,7 +153,7 @@ they recompute at the boundary and it is not optional for them.
 ### What the seam costs the benchmarks
 
 Tried: the committed benchmark ledger against a pristine control at the same
-base (`git worktree add --detach ... 70ac99da`, `sh check.sh benchmarks` in
+base (`git worktree add --detach ... 70ac99da`, `sh tools/check.sh benchmarks` in
 each) -> twenty benchmarks fail on BOTH, with the same overruns, so the ledger
 is stale at this base and not something this branch did. Joining the two runs
 by benchmark name, eighteen of the twenty observe the same inference count to

@@ -49,7 +49,7 @@ then raising `ValueError` restores the copy. These cases are retained as
 generated histories in
 `extensions/python/tests/ch04_spaces_and_matching/test_subtraction.py`.
 The focused command with `HYPOTHESIS_PROFILE=ci` passes five tests. The example
-command `sh test.sh
+command `sh tools/test.sh
 examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/10-subtract_atom.metta`
 passes all sixteen assertions, including transactional absence and rollback.
 

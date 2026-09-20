@@ -192,7 +192,7 @@ fail identically in the control and are not this change's.
 Tried: deleting `:- catch(use_module(library(shlib)), _, true).` on the grounds
 that `engine/translator/runtime.pl` already imports shlib -> under
 `set_prolog_flag(autoload, false)`, which is a shipped lane
-(`NO_AUTOLOAD=1 sh test.sh` over the whole example corpus),
+(`NO_AUTOLOAD=1 sh tools/test.sh` over the whole example corpus),
 `metta_c_empty_prune_active` and `predicate_property(foreign)` both go false
 while the prune keeps answering `[a,b]`. The import is into THIS module and
 `use_module` in `translator` does not reach `spaces`, so without it the engine

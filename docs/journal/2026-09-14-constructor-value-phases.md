@@ -44,6 +44,6 @@ Log: `ai-classes-c37-class-arguments-after.log`.
 The ordering witness records argument, factory and post-init effects through
 all three entries and grains. The expanded fixture passes 171 cases;
 layering, Ruff, mypy and evidence checks pass. Commands: the fixture command
-above, then `sh check.sh layering ruff mypy evidence`. Logs:
+above, then `sh tools/check.sh layering ruff mypy evidence`. Logs:
 `ai-classes-c37-class-arguments-order.log` and
 `ai-classes-c37-class-arguments-shape.log`.

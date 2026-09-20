@@ -12,7 +12,7 @@
 #   says so. This test is the thing that says so.
 # Guarantees:
 #   - a fresh worktree does NOT load the MORK backend, and after
-#     `sh worktree.sh` it DOES, so the difference is demonstrated in both
+#     `sh tools/worktree.sh` it DOES, so the difference is demonstrated in both
 #     directions rather than assumed.
 # Fails when:
 #   - the main checkout has not been built, which it reports and skips,

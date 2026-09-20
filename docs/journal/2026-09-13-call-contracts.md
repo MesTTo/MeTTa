@@ -41,7 +41,7 @@ Verified on the isolated prerequisite tree: that file plus
 the same pytest command. `sh engine/test.sh
 tests/prolog/suites/host/python_surface.plt
 tests/prolog/suites/libraries/lib_reflect.plt` passes 44 tests plus ten
-subtests, then twenty tests. `sh check.sh ruff mypy evidence` passes. Logs:
+subtests, then twenty tests. `sh tools/check.sh ruff mypy evidence` passes. Logs:
 `ai-classes-c28-contract-A-python.log`,
 `ai-classes-c28-contract-A-native-harness.log` and
 `ai-classes-c28-contract-A-checks.log`.

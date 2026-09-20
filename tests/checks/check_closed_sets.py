@@ -85,7 +85,7 @@ sys.path.insert(0, str(ROOT / "extensions/python/tools"))
 from artifacts import ARTIFACTS  # noqa: E402 -- a checkout tool, imported once the root is known
 
 PACKAGE = Path("extensions/python/metta")
-CHECK = ROOT / "check.sh"
+CHECK = ROOT / "tools" / "check.sh"
 SEAM = ROOT / PACKAGE / "seam.py"
 
 #: The ledger's own census threshold.

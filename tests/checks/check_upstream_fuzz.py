@@ -32,17 +32,17 @@ Assumes:
 Guarantees:
   - a program the arbiter leaves unreduced, raises on, or does not finish is
     recorded and skipped, never reported as a divergence
-    [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
+    [tested: sh tools/check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - a real disagreement is shrunk before it is written down, so the report
     carries the smallest program of the strategy's own language that still
-    shows it [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
+    shows it [tested: sh tools/check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - one run finds more than one KIND of disagreement: a divergence's signature
     is suppressed and the search re-entered, and the memo makes the programs
     already run free, so the whole run still costs N programs per engine
-    [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
+    [tested: sh tools/check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - every engine run is a fresh bounded process in a session of its own, so a
     program that hangs cannot poison the next one and cannot outlive this
-    script [tested: sh check.sh process-bounds; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
+    script [tested: sh tools/check.sh process-bounds; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
 Fails when:
   - the upstream checkout is absent: a refusal where CI=true and a printed skip
     elsewhere, the rule the parity lane draws and this one calls.
@@ -102,7 +102,7 @@ CENSUS = REPO / "tests" / "conformance" / "petta" / "HEADS.json"
 
 #: A program's ceiling on ONE engine. Upstream answers a generated program in
 #: 0.08 s and this engine in 0.20 s [measured 2026-09-07, min of three on a box
-#: at load 52; command=/usr/bin/time -f %e sh bounded.sh swipl ... silent;
+#: at load 52; command=/usr/bin/time -f %e sh tools/bounded.sh swipl ... silent;
 #: fixture=a ten-query program; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce], so twenty seconds is two
 #: orders of magnitude of headroom and reaching it means a program does not
 #: terminate rather than that the box is slow.
@@ -429,7 +429,7 @@ def survey(strategy, *, number: int, seed: int, timeout: int, work: Path,
         # adding @reproduce_failure(...)" to __notes__ when print_blob is set,
         # so `hypothesis.reporting.with_reporter` captures nothing and the
         # notes are where to read
-        # [tested: sh check.sh parity-fuzz-selftest, which requires the written
+        # [tested: sh tools/check.sh parity-fuzz-selftest, which requires the written
         # report to carry a blob; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
         printed = BLOB.search("\n".join(getattr(found, "__notes__", [])))
         found.blob = printed.group(0) if printed else ""
@@ -455,7 +455,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     refusal = parity.upstream_prerequisite(
-        remedy="`sh check.sh parity-fuzz` runs the comparison once it is there."
+        remedy="`sh tools/check.sh parity-fuzz` runs the comparison once it is there."
     )
     if refusal is not None:
         return refusal

@@ -3,7 +3,7 @@
 Goal: a process this repository starts cannot outlive both its deadline and the
 process that started it, whether a gate lane, a runner script or a person
 started it.
-Constraint: `GATE_ONLY=1 sh check.sh` measured 286s against a 300s ceiling on a
+Constraint: `GATE_ONLY=1 sh tools/check.sh` measured 286s against a 300s ceiling on a
 quiet box, so the mechanism has to be cheap enough to sit on every spawn.
 
 ## 2026-09-05
@@ -115,7 +115,7 @@ and adding nothing of its own. It execs all the way down, so it costs no
 process, leaves the command's own argv in `ps`, and returns the command's exit
 status:
 
-    setpriv --pdeathsig SIGTERM -- sh bounded.sh   (re-entry, then)
+    setpriv --pdeathsig SIGTERM -- sh tools/bounded.sh   (re-entry, then)
       timeout --preserve-status -k GRACE CEILING
         setpriv --pdeathsig SIGKILL -- COMMAND
 
@@ -148,7 +148,7 @@ Decided: the gate reads the RUNNERS, not only the lane functions. 35 of them,
 found by discovery rather than by a list, plus the six check scripts: 107 spawn
 sites against 41 before. Seven mutations, each removing one bound from a real
 file in the tree, are each caught; the seventh needed `exec` added to the
-command-position pattern, because `exec sh bounded.sh "$PY" -m pytest` with the
+command-position pattern, because `exec sh tools/bounded.sh "$PY" -m pytest` with the
 wrapper deleted leaves `exec "$PY" -m pytest` and that read as clean.
 `command -v` is deliberately not a command position: it asks PATH a question.
 
@@ -193,7 +193,7 @@ bound on a hung swipl there. Measured over the two runs before today, per job:
 gate 18 and 19 minutes, versions 10 to 14, wheel 1 to 2, report 1, platforms 0
 to 2. The values are two and a half to three times the observed cost.
 
-Measured, gate cost: `GATE_ONLY=1 sh check.sh`, same worktree, same
+Measured, gate cost: `GATE_ONLY=1 sh tools/check.sh`, same worktree, same
 provisioning, on a box carrying five other agents' gates.
 
     before   at 5ec49f07  1281s  exit 1  loadavg 23.21 -> 28.75  seat unbuilt

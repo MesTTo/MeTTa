@@ -78,7 +78,7 @@ extensions/python/metta/_declare/call_syntax.py` reports zero clones across
 `ai-tmp/ai-classes-c47-ports-clones-final.log`.
 
 Verified: the flattened condition passes the same four-file focused command
-with 100 cases, including the two keyword-effect witnesses. `sh check.sh
+with 100 cases, including the two keyword-effect witnesses. `sh tools/check.sh
 layering ruff mypy evidence refusal-grounds` passes every lane. Logs:
 `ai-tmp/ai-classes-c47-ports-final-focused.log` and
 `ai-tmp/ai-classes-c47-ports-final-checks.log`. The clone command above with

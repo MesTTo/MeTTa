@@ -19,13 +19,13 @@
 # runner that spelled its own `timeout` reached only its own children and left
 # them to whatever wrapper happened to be on PATH.
 #
-# Resolved against the WORKING DIRECTORY, like the `sh run.sh` below and like
+# Resolved against the WORKING DIRECTORY, like the `sh tools/run.sh` below and like
 # every other path in this file, rather than against this script's own
 # location. tests/shell/test_example_runner_surfaces_failures.sh copies this
 # file into a scratch directory and runs the copy from the repository root, to
 # have a variant with one redirection removed; a self-relative path would look
-# for bounded.sh beside the copy and find nothing.
-bounded() { sh bounded.sh "$@"; }
+# for tools/bounded.sh beside the copy and find nothing.
+bounded() { sh tools/bounded.sh "$@"; }
 
 run_test() {
     f="$1"
@@ -55,7 +55,7 @@ run_test() {
     # Through `bounded` rather than a bare `timeout`, so the example is also
     # reaped when THIS script is killed: 200 runners are started here at once
     # and a killed session used to leave every one of them spinning.
-    output=$(bounded --ceiling 290 --grace 5 sh run.sh "$f" 2>&1)
+    output=$(bounded --ceiling 290 --grace 5 sh tools/run.sh "$f" 2>&1)
     error=$?
     if [ "$error" -ne 0 ]; then
         echo "FAILURE in $f:"

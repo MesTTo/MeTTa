@@ -7,18 +7,18 @@
 %   predicate declared ahead of its clause is called under the debugger, whose
 %   call port resolves every definition it calls, the tabling closure included;
 %   and the final line reports present or absent [tested:
-%   sh check.sh host-workarounds; commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee]
+%   sh tools/check.sh host-workarounds; commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee]
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch;
-%   command=sh check.sh host-workarounds;
+%   command=sh tools/check.sh host-workarounds;
 %   fixture=SWI-Prolog 10.1.14 with the patch; commit=9d54ed2129cea9859779419d6120636486eb6585]
 %   [measured 2026-09-17: the closure sample answers [ok] on 10.1.14 as shipped
 %   and [] on 10.1.14 built with the patch's first shape, whose clause-count
 %   test read a closure's copied count of 0 and resolved the closure through
 %   its procedure, so the retained sample read absent while every tabled call
 %   made with the debugger on or a signal pending lost its answers; [ok] again
-%   with closures excluded from the count test; command=sh check.sh
+%   with closures excluded from the count test; command=sh tools/check.sh
 %   host-workarounds; fixture=SWI-Prolog 10.1.14 with the patch; commit=4c5039f5af47837646e1ab6ae3d61553cccf8056].
 
 :- dynamic ready/1, loaded/1.

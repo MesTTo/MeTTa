@@ -375,7 +375,7 @@ The first run also populated bytecode caches. The recorded load averages were
 added 24 modules in 0.074244303 seconds. The complete measurement is retained
 in `ai-tmp/ai-layout-logs/before-imports.json`.
 
-Tried: `sh check.sh instructions` on the untouched cut exited one. Nine cases
+Tried: `sh tools/check.sh instructions` on the untouched cut exited one. Nine cases
 were outside their bands: alpha-unique, let-heavy, py-method-call,
 save-load-fast, save-load-metta, source-load, space-digest, space-name and
 subscription-dispatch. The runner also reported C example linker errors,
@@ -384,7 +384,7 @@ The exact errors and samples are in
 `ai-tmp/ai-layout-logs/before-instructions.log`; the build failure needs
 separate attribution.
 
-Tried: `sh check.sh twins` on the untouched cut exited one with six findings
+Tried: `sh tools/check.sh twins` on the untouched cut exited one with six findings
 over 277 examples: mutex_and_transaction, thread_lib, thread_linda twice,
 git_import and measure. The original budgets remain unchanged. Full results
 are in `ai-tmp/ai-layout-logs/before-twins.log`.
@@ -599,10 +599,10 @@ https://setuptools.pypa.io/en/latest/userguide/datafiles.html and
 https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html.
 The installed-wheel and engine-only witnesses remain to be run.
 
-Tried: `sh check.sh mypy` progressed from 75 errors to 13, then three obsolete
+Tried: `sh tools/check.sh mypy` progressed from 75 errors to 13, then three obsolete
 async targets (`_one`, `_first`, `live`). Moving the worker and its views and
 emitting the async mirror from the common emitter resolved all three.
-`CHECK_PY=$CHECK_PY sh check.sh mypy` exited 0:
+`CHECK_PY=$CHECK_PY sh tools/check.sh mypy` exited 0:
 166 source files. The async smoke returned `[Grounded(5)]` for `(+ 2 3)`,
 `7` from `one('(+ 3 4)')`, and closed its worker. These are focused checks;
 the full integration gates remain open.
@@ -627,7 +627,7 @@ reported 98 wildcard exports and no loaded Space facade; arithmetic, forms,
 current-space lookup, notebook rendering and both builtin-named algebra
 carriers succeeded.
 
-Tried: `sh check.sh mypy mypy-root-impl mypy-algebra-surface` exited 0 after
+Tried: `sh tools/check.sh mypy mypy-root-impl mypy-algebra-surface` exited 0 after
 root generation, checking 167 package files and each separate consumer. The
 new checkable ambient body exposed its former broad name and string-sync
 annotations; they now state the context factory's existing accepted types.
@@ -989,7 +989,7 @@ change actual lexer tokens. The three door document plants remove a refusal,
 change a longhand and falsify a count. The initial run had 51 passes and one
 incorrect diagnostic assertion; the checker had correctly refused the plant.
 
-Tried: `sh check.sh generated-artifacts` ran all 36 derived lanes. Four failed:
+Tried: `sh tools/check.sh generated-artifacts` ran all 36 derived lanes. Four failed:
 `face-sync` and `libdoc` exposed the same import cycle; `phrasebook` and its
 selftest exposed a removed terminal blank line. All executable phrasebook
 answers still agreed. Website token comparisons reported missing Shiki, and
@@ -1038,7 +1038,7 @@ would change the host namespace and crossing contracts during a layout change.
 
 ## 2026-09-09: artifact and caller integration results
 
-Tried: `METTA_UPSTREAM=$METTA_UPSTREAM sh check.sh generated-artifacts` with CHECK_PY selecting Python 3.14.4. All 36 manifest-selected lanes passed, including 313 fresh-process import cases and the example lineage check against upstream 43705f5d9ff8958ffe7f0aa6777fb8477f2401f2.
+Tried: `METTA_UPSTREAM=$METTA_UPSTREAM sh tools/check.sh generated-artifacts` with CHECK_PY selecting Python 3.14.4. All 36 manifest-selected lanes passed, including 313 fresh-process import cases and the example lineage check against upstream 43705f5d9ff8958ffe7f0aa6777fb8477f2401f2.
 
 Tried: artifact, size and lint tests first reported `1 failed, 53 passed`; a synchronous generated frame hid an async caller even after the package path was corrected. `external_caller` now walks the package namespace, the same criterion `_creation_site` already uses, beginning at an explicitly supplied frame. The same selection passes: 54 tests in 15.34 seconds. A direct user helper remains the caller, so a synchronous helper invoked by async code is not misclassified as an async body.
 
@@ -1106,7 +1106,7 @@ Decided: the refusal walk's non-vacuity roster follows the defining symbols at t
 
 Tried: the integrated annotation/API/import selection -> 416 passed and two generator fixture failures (27.30s, seed 2178470578). An empty door roster emitted an empty TYPE_CHECKING suite. The separate root implementation check lacked typed declarations for named public exports, so imported bodies could see those exports as Any. Derived those declarations from the root export table, kept the implementation annotations and the stub in agreement, and retained the overlap witnesses.
 Tried: the architecture checker found seven generated imports: three root imports emitted directly and four annotation imports under an aliased _TYPE_CHECKING name that grimp does not exclude. The emitter now treats the root as a metta package unit, chooses its lazy binding from the lattice, and spells the standard TYPE_CHECKING guard directly. No layer exception was added. The lazy-target checker now applies the same strict-above rule to the root itself; its self-import mutation is refused.
-Tried: `sh check.sh mypy layering layering-selftest` -> exit 0, both layering checks and all four mypy invocations pass. `sh extensions/python/test.sh tests/repository/test_artifact_projections.py` -> 16 passed in 20.26s. The added root-lazy mutation selftest also exits 0. Generated faces, lazy helper, root/face emitters, aio package and artifact tests pass focused Ruff. `git diff --check` passes after removing four spaces introduced by the private-call relocation.
+Tried: `sh tools/check.sh mypy layering layering-selftest` -> exit 0, both layering checks and all four mypy invocations pass. `sh extensions/python/test.sh tests/repository/test_artifact_projections.py` -> 16 passed in 20.26s. The added root-lazy mutation selftest also exits 0. Generated faces, lazy helper, root/face emitters, aio package and artifact tests pass focused Ruff. `git diff --check` passes after removing four spaces introduced by the private-call relocation.
 
 ## 2026-09-09: named child modules and shared bindings
 
@@ -1163,7 +1163,7 @@ compatibility; the release tag resolves to
 8aabf8435357eaffceca7237f371e293b8168e54.
 The suppression ceilings record only the measured representation changes;
 no rule, file, range or import edge is excluded.
-Tried: `sh check.sh mypy layering layering-selftest` after shared bindings
+Tried: `sh tools/check.sh mypy layering layering-selftest` after shared bindings
 passed all four mypy invocations and both architecture checks. A new run also
 checks the positional callback protocol.
 
@@ -1516,7 +1516,7 @@ with zero unbacked tags. Website prose joins the existing provenance-only
 guide scope so its relocated source citation is pinned too; the pre-fold
 scan reports 182 pins and zero files outside the globs.
 
-Measured: `sh check.sh instructions twins`, after the three authorized
+Measured: `sh tools/check.sh instructions twins`, after the three authorized
 forwarding pins, exits 1 at load 13.53 11.49 13.09. Seven instruction rows
 remain outside their unchanged bands: alpha-unique 2956148868, let-heavy
 8706498002, save-load-fast 6382297586, save-load-metta 3489114623,

@@ -241,7 +241,7 @@ def run_reproduction(root: Path, path: Path) -> tuple[str, str]:
     env = {**os.environ, "HOST_WORKAROUND_SCRATCH": scratch, "SWIPL": interpreter()}
     try:
         ran = subprocess.run(
-            ["sh", str(ROOT / "bounded.sh"), "--ceiling", str(CEILING_SECONDS), *command],
+            ["sh", str(ROOT / "tools" / "bounded.sh"), "--ceiling", str(CEILING_SECONDS), *command],
             cwd=root,
             env=env,
             capture_output=True,

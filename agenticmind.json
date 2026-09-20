@@ -9956,6 +9956,232 @@
       "tags": [
         "measured"
       ]
+    },
+    "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta": {
+      "title": "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+    },
+    "measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/": {
+      "title": "measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/",
+      "supports": [
+        "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+      ]
+    },
+    "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted": {
+      "title": "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted",
+      "supports": [
+        {
+          "node": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "status": "untried"
+        },
+        {
+          "node": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "relation": "addresses",
+          "target": "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+        }
+      ]
+    },
+    "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing": {
+      "title": "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing",
+      "supports": [
+        {
+          "node": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory": {
+      "title": "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+    },
+    "measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected": {
+      "title": "measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected",
+      "supports": [
+        "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+      ]
+    },
+    "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong": {
+      "title": "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong",
+      "supports": [
+        {
+          "node": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "status": "untried"
+        },
+        {
+          "node": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "relation": "addresses",
+          "target": "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+        }
+      ]
+    },
+    "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames": {
+      "title": "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames",
+      "supports": [
+        {
+          "node": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted": {
+      "title": "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep": {
+      "title": "this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep",
+      "supports": [
+        "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted"
+      ]
+    },
+    "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite": {
+      "title": "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+    },
+    "measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time": {
+      "title": "measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time",
+      "supports": [
+        "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+      ]
+    },
+    "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture": {
+      "title": "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture",
+      "supports": [
+        {
+          "node": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "status": "untried"
+        },
+        {
+          "node": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "relation": "addresses",
+          "target": "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+        }
+      ]
+    },
+    "battery 1, exit 0, 51 passed with the ten hermeticity checks added": {
+      "title": "battery 1, exit 0, 51 passed with the ten hermeticity checks added",
+      "supports": [
+        {
+          "node": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it": {
+      "title": "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it"
+    },
+    "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head": {
+      "title": "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head",
+      "supports": [
+        "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios": {
+      "title": "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+    },
+    "reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish": {
+      "title": "reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish",
+      "supports": [
+        "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+      ]
+    },
+    "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green": {
+      "title": "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green",
+      "supports": [
+        {
+          "node": "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "status": "untried"
+        },
+        {
+          "node": "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "relation": "addresses",
+          "target": "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+        }
+      ]
+    },
+    "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'": {
+      "title": "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'"
+    },
+    "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport": {
+      "title": "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport",
+      "supports": [
+        "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door": {
+      "title": "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+    },
+    "measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone": {
+      "title": "measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone",
+      "supports": [
+        "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+      ]
+    },
+    "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it": {
+      "title": "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it",
+      "supports": [
+        {
+          "node": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "status": "untried"
+        },
+        {
+          "node": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "relation": "addresses",
+          "target": "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+        }
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines": {
+      "title": "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines",
+      "supports": [
+        {
+          "node": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2": {
+      "title": "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2"
+    },
+    "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout": {
+      "title": "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout",
+      "supports": [
+        "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -11377,6 +11603,46 @@
       "status": "untried",
       "addresses": [
         "i6"
+      ]
+    },
+    "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta": {
+      "title": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+      ]
+    },
+    "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames": {
+      "title": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+      ]
+    },
+    "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL": {
+      "title": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+      ]
+    },
+    "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes": {
+      "title": "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+      ]
+    },
+    "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally": {
+      "title": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
       ]
     }
   },
@@ -45618,6 +45884,698 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "b56fc9fc959c94df"
+    },
+    {
+      "at": "2026-09-20T12:43:41.994454+00:00",
+      "after": "293fae789d15e86f9ed15795579e80ab03967954",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/\", \"tags\": [], \"title\": \"the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted\", \"tags\": [], \"title\": \"repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta\", \"fields\": {\"effort\": 1, \"addresses\": [\"the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta\"]}}, {\"op\": \"status\", \"id\": \"repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta\", \"because\": \"config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "b56fc9fc959c94df"
+      ],
+      "assert": [
+        [
+          "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted",
+          "sort",
+          "prop"
+        ],
+        [
+          "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted",
+          "supports",
+          {
+            "node": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+            "status": "untried"
+          }
+        ],
+        [
+          "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted",
+          "supports",
+          {
+            "node": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+            "relation": "addresses",
+            "target": "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+          }
+        ],
+        [
+          "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted",
+          "title",
+          "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted"
+        ],
+        [
+          "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing",
+          "supersedes",
+          "a project page's base is fixed by the repository name, so the repository is the source and the config is the copy that drifted"
+        ],
+        [
+          "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing",
+          "supports",
+          {
+            "node": "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+            "status": "done"
+          }
+        ],
+        [
+          "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing",
+          "tags",
+          "tested"
+        ],
+        [
+          "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing",
+          "title",
+          "config.ts reads base /MeTTa/ and the favicon with it, the workflow comment agrees, and grep for metta-node or MeTTa-node across website/ now returns nothing"
+        ],
+        [
+          "measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/",
+          "supports",
+          "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+        ],
+        [
+          "measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/",
+          "title",
+          "measured: website/.vitepress/config.ts:41,43 and .github/workflows/pages.yml:5 disagreed with the repository name, so every asset URL on the published site was wrong by one path segment; my earlier 47-specifier sweep missed README.md:626 and all of website/"
+        ],
+        [
+          "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta",
+          "title",
+          "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+        ],
+        [
+          "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "sort",
+          "approach"
+        ],
+        [
+          "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "addresses",
+          "the repository rename left the published site broken: VitePress base was /MeTTa-Kernel/ while Pages publishes to /MeTTa/, and eight website files still named metta-node after the package became tsmetta"
+        ],
+        [
+          "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "effort",
+          1
+        ],
+        [
+          "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "status",
+          "done"
+        ],
+        [
+          "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta",
+          "title",
+          "repoint the VitePress base and favicon at /MeTTa/ and rename every metta-node reference in website/ to tsmetta"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "776871999c34e689"
+    },
+    {
+      "at": "2026-09-20T12:45:06.169886+00:00",
+      "after": "293fae789d15e86f9ed15795579e80ab03967954",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected\", \"tags\": [], \"title\": \"my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong\", \"tags\": [], \"title\": \"restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames\", \"fields\": {\"effort\": 1, \"addresses\": [\"my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory\"]}}, {\"op\": \"status\", \"id\": \"restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames\", \"because\": \"git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep\", \"tags\": [\"reasoning\"], \"title\": \"a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted\", \"fields\": {}}]",
+      "parents": [
+        "776871999c34e689"
+      ],
+      "assert": [
+        [
+          "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted",
+          "sort",
+          "prop"
+        ],
+        [
+          "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted",
+          "title",
+          "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted"
+        ],
+        [
+          "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames",
+          "sort",
+          "prop"
+        ],
+        [
+          "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames",
+          "supersedes",
+          "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong"
+        ],
+        [
+          "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames",
+          "supports",
+          {
+            "node": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+            "status": "done"
+          }
+        ],
+        [
+          "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames",
+          "tags",
+          "tested"
+        ],
+        [
+          "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames",
+          "title",
+          "git config -f .gitmodules --get submodule.engine.url now answers MeTTa-Kernel.git and the diff shows only the two intended renames"
+        ],
+        [
+          "measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected",
+          "supports",
+          "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+        ],
+        [
+          "measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected",
+          "title",
+          "measured: git diff .gitmodules showed three url changes, two correct (metta-lib to MeTTa-Library-Pack, metta-extensions to PyMeTTa-Extensions) and one wrong; HEAD and the published repo still carry the correct URL, so the defect was uncommitted and the release is unaffected"
+        ],
+        [
+          "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory",
+          "sort",
+          "prop"
+        ],
+        [
+          "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory",
+          "title",
+          "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+        ],
+        [
+          "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong",
+          "supports",
+          {
+            "node": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+            "status": "untried"
+          }
+        ],
+        [
+          "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong",
+          "supports",
+          {
+            "node": "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+            "relation": "addresses",
+            "target": "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+          }
+        ],
+        [
+          "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong",
+          "title",
+          "the engine lives in MeTTa-Kernel and the superproject mounts it; the other two names really did change, so only the third substitution was wrong"
+        ],
+        [
+          "this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep",
+          "sort",
+          "prop"
+        ],
+        [
+          "this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep",
+          "supports",
+          "a mechanical rename is right in most places and wrong in a few, and the wrong ones read as fluent, so every site a substitution touched must be read individually rather than the pass being trusted"
+        ],
+        [
+          "this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep",
+          "title",
+          "this sed was correct on two of three submodule URLs; the same failure took four noqa directives earlier in this session and missed README.md:626 and eight website files in the metta-node sweep"
+        ],
+        [
+          "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "sort",
+          "approach"
+        ],
+        [
+          "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "addresses",
+          "my rename sweep rewrote .gitmodules submodule.engine.url from MeTTa-Kernel.git to MeTTa.git, so a fresh --recurse-submodules clone would have cloned the superproject into its own engine/ directory"
+        ],
+        [
+          "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "effort",
+          1
+        ],
+        [
+          "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "status",
+          "done"
+        ],
+        [
+          "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames",
+          "title",
+          "restore submodule.engine.url to MeTTa-Kernel.git and keep the two correct renames"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "a53def117f77de82"
+    },
+    {
+      "at": "2026-09-20T12:52:52.079236+00:00",
+      "after": "293fae789d15e86f9ed15795579e80ab03967954",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time\", \"tags\": [], \"title\": \"the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture\", \"tags\": [], \"title\": \"replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL\", \"fields\": {\"effort\": 1, \"addresses\": [\"the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite\"]}}, {\"op\": \"status\", \"id\": \"replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL\", \"because\": \"battery 1, exit 0, 51 passed with the ten hermeticity checks added\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head\", \"tags\": [\"measured\"], \"title\": \"the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it\", \"fields\": {}}]",
+      "parents": [
+        "a53def117f77de82"
+      ],
+      "assert": [
+        [
+          "battery 1, exit 0, 51 passed with the ten hermeticity checks added",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 1, exit 0, 51 passed with the ten hermeticity checks added",
+          "supersedes",
+          "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture"
+        ],
+        [
+          "battery 1, exit 0, 51 passed with the ten hermeticity checks added",
+          "supports",
+          {
+            "node": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+            "status": "done"
+          }
+        ],
+        [
+          "battery 1, exit 0, 51 passed with the ten hermeticity checks added",
+          "tags",
+          "tested"
+        ],
+        [
+          "battery 1, exit 0, 51 passed with the ten hermeticity checks added",
+          "title",
+          "battery 1, exit 0, 51 passed with the ten hermeticity checks added"
+        ],
+        [
+          "measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time",
+          "supports",
+          "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+        ],
+        [
+          "measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time",
+          "title",
+          "measured: ai-tmp/wt-battery-1/repos/faiss_ffi exists after the run; the corpus had already settled this, building a throwaway local repository in _fixtures/git_fixture.pl whose header says the suite ran on every push and cloned github each time"
+        ],
+        [
+          "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head",
+          "supports",
+          "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it"
+        ],
+        [
+          "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head",
+          "title",
+          "measured: git merge-base --is-ancestor b694f3457 engine-src/main answered no, engine-src/main tips at 0a83c6bca, and git ls-tree HEAD engine records b694f3457; the commit is now pinned in the superproject as refs/engine-absorb/head"
+        ],
+        [
+          "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite",
+          "sort",
+          "prop"
+        ],
+        [
+          "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite",
+          "title",
+          "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+        ],
+        [
+          "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it",
+          "title",
+          "the engine submodule's checked-out commit b694f3457, which is also the gitlink the superproject records, is on no branch of the engine repository, so absorbing engine-src/main would have silently dropped it"
+        ],
+        [
+          "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture",
+          "sort",
+          "prop"
+        ],
+        [
+          "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture",
+          "supports",
+          {
+            "node": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+            "status": "untried"
+          }
+        ],
+        [
+          "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture",
+          "supports",
+          {
+            "node": "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+            "relation": "addresses",
+            "target": "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+          }
+        ],
+        [
+          "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture",
+          "title",
+          "the replacement is hermetic, is a better showcase of extending the engine than a clone, and the guard makes the constraint hold by shape instead of by my remembering it; the network example stays reachable as a link to the corpus file that runs it with a local fixture"
+        ],
+        [
+          "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "sort",
+          "approach"
+        ],
+        [
+          "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "addresses",
+          "the README's git-import fence reached GitHub when the new metta-fence test ran it, cloning patham9/faiss_ffi and executing that repository's build.sh inside the documentation suite"
+        ],
+        [
+          "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "effort",
+          1
+        ],
+        [
+          "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "status",
+          "done"
+        ],
+        [
+          "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL",
+          "title",
+          "replace the git-import fence with the MeTTa-written-in-MeTTa interpreter example and refuse any metta fence naming git-import! or a URL"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "d98d04a7dcdbfd7a"
+    },
+    {
+      "at": "2026-09-20T12:55:31.227639+00:00",
+      "after": "293fae789d15e86f9ed15795579e80ab03967954",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish\", \"tags\": [], \"title\": \"the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green\", \"tags\": [], \"title\": \"baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes\", \"fields\": {\"effort\": 2, \"addresses\": [\"the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport\", \"tags\": [\"measured\"], \"title\": \"codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'\", \"fields\": {}}]",
+      "parents": [
+        "d98d04a7dcdbfd7a"
+      ],
+      "assert": [
+        [
+          "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'",
+          "sort",
+          "prop"
+        ],
+        [
+          "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'",
+          "title",
+          "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'"
+        ],
+        [
+          "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport",
+          "sort",
+          "prop"
+        ],
+        [
+          "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport",
+          "supports",
+          "codex job 56585666 was hung rather than working: its last activity was 13 hours 52 minutes before it was cancelled, and two of its four steering messages came back delivery_unknown with 'Codex app-server transport is closed'"
+        ],
+        [
+          "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport",
+          "tags",
+          "measured"
+        ],
+        [
+          "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport",
+          "title",
+          "job_status detail=full read last_activity_at 2026-09-20T09:03:23 against a 22:55 clock, and the steering history showed the closed transport"
+        ],
+        [
+          "reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish",
+          "sort",
+          "prop"
+        ],
+        [
+          "reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish",
+          "supports",
+          "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+        ],
+        [
+          "reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish",
+          "title",
+          "reported by job_20260920T200930AEST_06ab3f3e with the reproduction described; the leak is in the host runtime rather than in the seat, so the brief asked for a property the seat cannot establish"
+        ],
+        [
+          "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios",
+          "title",
+          "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+        ],
+        [
+          "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green",
+          "supports",
+          {
+            "node": "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+            "status": "untried"
+          }
+        ],
+        [
+          "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green",
+          "supports",
+          {
+            "node": "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+            "relation": "addresses",
+            "target": "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+          }
+        ],
+        [
+          "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green",
+          "title",
+          "the gate's real question is whether the seat leaks, and the answer is the difference between a run that loads it and one that does not; requiring zero measures the host instead and can never go green"
+        ],
+        [
+          "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "sort",
+          "approach"
+        ],
+        [
+          "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "addresses",
+          "the cmetta parity job finished blocked on a memory gate that no tree can pass: a SWI-only executable loading neither cmetta nor PeTTa leaks 32,872 definitely-lost bytes at initialisation, plus GMP and Unicode conversion leaks, so make runtime-memory exits 99 on all three scenarios"
+        ],
+        [
+          "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "effort",
+          2
+        ],
+        [
+          "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "status",
+          "untried"
+        ],
+        [
+          "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes",
+          "title",
+          "baseline-subtract the host runtime's own leaks in the cmetta memory gate rather than requiring zero definitely-lost bytes"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "03fe2d37ef912e44"
+    },
+    {
+      "at": "2026-09-20T13:01:59.202312+00:00",
+      "after": "293fae789d15e86f9ed15795579e80ab03967954",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone\", \"tags\": [], \"title\": \"lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it\", \"tags\": [\"user\"], \"title\": \"write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally\", \"fields\": {\"effort\": 2, \"addresses\": [\"lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door\"]}}, {\"op\": \"status\", \"id\": \"write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally\", \"because\": \"lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout\", \"tags\": [\"measured\"], \"title\": \"my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2\", \"fields\": {}}]",
+      "parents": [
+        "03fe2d37ef912e44"
+      ],
+      "assert": [
+        [
+          "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door",
+          "title",
+          "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+        ],
+        [
+          "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines",
+          "supersedes",
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it"
+        ],
+        [
+          "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines",
+          "supports",
+          {
+            "node": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+            "status": "done"
+          }
+        ],
+        [
+          "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines",
+          "tags",
+          "tested"
+        ],
+        [
+          "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines",
+          "title",
+          "lib/README.md 1034 lines naming 61 libraries against 61 directories, ext/README.md 402 lines naming 17 integrations against 17 pyproject directories, engine/README.md 100 lines with all 43 named units confirmed present, cmetta README 521 to 463 lines with prose words 2391 to 1057 and its 24 fences byte-identical, MORK README 184 to 113 lines"
+        ],
+        [
+          "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout",
+          "supports",
+          "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2"
+        ],
+        [
+          "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout",
+          "title",
+          "measured: find named only tests/prolog/static_checks.pl, and ext_points.pl:367-370 reads clauses_from(event|ownership|declaration, extension) and clauses_from(service, engine); I had carried the claim from the project notes, which name the file under the old src/ layout"
+        ],
+        [
+          "measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone",
+          "supports",
+          "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+        ],
+        [
+          "measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone",
+          "title",
+          "measured: ls lib/*.md ext/*.md engine/*.md returned nothing, and the engine commit b694f3457 whose subject says 'add the Apache-2.0 licence, and a README that shows rather than explains' has a diffstat of LICENSE alone"
+        ],
+        [
+          "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2",
+          "sort",
+          "prop"
+        ],
+        [
+          "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2",
+          "title",
+          "my engine README first asserted engine/static_checks.pl and 'the four text services', neither of which is true: static_checks.pl lives at tests/prolog/static_checks.pl in the superproject, and ext_points.pl declares extension points in four KINDS whose contributor is fixed by clauses_from/2"
+        ],
+        [
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it",
+          "sort",
+          "prop"
+        ],
+        [
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it",
+          "supports",
+          {
+            "node": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+            "status": "untried"
+          }
+        ],
+        [
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it",
+          "supports",
+          {
+            "node": "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+            "relation": "addresses",
+            "target": "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+          }
+        ],
+        [
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it",
+          "tags",
+          "user"
+        ],
+        [
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it",
+          "title",
+          "they touch disjoint files so they parallelise, and each one's roster is derivable from source, which is what lets a worker verify its own output instead of asserting it"
+        ],
+        [
+          "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "sort",
+          "approach"
+        ],
+        [
+          "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "addresses",
+          "lib/, ext/ and engine/ shipped with no README at all, so the Library Pack, the integrations and the engine each published a repository with nothing at its front door"
+        ],
+        [
+          "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "effort",
+          2
+        ],
+        [
+          "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "status",
+          "done"
+        ],
+        [
+          "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally",
+          "title",
+          "write the three missing READMEs and cut the two over-long ones to single-sentence prose, dispatching the three independent ones to codex workers and writing the engine one locally"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "bef32af4ec6bf14b"
     }
   ]
 }

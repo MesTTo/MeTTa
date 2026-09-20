@@ -59,13 +59,13 @@ Found while measuring: the one unbounded spawn in the tree,
 mork_ffi --release` in `extensions/mork/mork_ffi/build.sh`. It carries
 `bounded` now, in front of the assignments rather than behind them: a variable
 assigned in front of a shell FUNCTION is exported for the whole of that
-function's execution, so it reaches the `sh bounded.sh` the function starts
+function's execution, so it reaches the `sh tools/bounded.sh` the function starts
 [measured 2026-09-06: dash, /bin/sh and bash each print the assigned value
 from a grandchild and leave the calling shell's own variable unset afterwards;
 fixture=ai-tmp/env_through_function.sh].
 
 Found: `tests/shell/test_example_runner_surfaces_failures.sh` carried a
-`# unbounded:` opt-out over `sed 's|sh run.sh "$f" 2>&1|...|'`, whose reason
+`# unbounded:` opt-out over `sed 's|sh tools/run.sh "$f" 2>&1|...|'`, whose reason
 was that the expression names a command and is not one. That was a workaround
 for the same pass. The opt-out is gone and the line is a negative in the
 selftest instead, because an opt-out that excuses nothing is a door left open

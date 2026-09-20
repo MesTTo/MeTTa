@@ -43,7 +43,7 @@ Measured: upstream PeTTa at the pinned commit is silent on the question by const
 
 Decided: the reading at every compile path. `stored_equation_source/4` resolves `&self` for an occurrence with no binding row, `mark_or_translate_equation/5` resolves an arriving batch term, and `remove_equation/6` probes with the equation as the space compiled it; the root is the identity case at each and pays no walk. A binding row now records what arrival-time rewriting did BEYOND resolving `&self`, a bound token or a form rewriter, gated on the batch door's own test that either exists. A row that only said `&self` was derivable, and it was written by the doors carrying a stored reference and not by the one-equation door, so whether an occurrence had one was a fact about the door. The image format is unchanged and its rows are sparser; an unrowed occurrence relocates by compiling against the restoring space.
 
-Measured: the walk priced. With the walk unconditional on the new doors, `sh check.sh twins` moved 79 budgets up by 12 to 5731 inferences, the named-space doors paying the term's size per equation. `metta_substitute_self/3` now probes the term with `term_string/2` and `sub_string/5` before walking, two inferences whatever the size, the shortcut `rewrite_parsed_form/4` already takes on the source text it holds; the two guarded branches there call the walk directly so a form pays one probe. With the probe, 214 budgets drop by 5 to 2012 (median 70), because the twins-lane merge had walked every natively added equation and those counts were pinned; two rise by 5 and 20 (the probe on removals of equations that never say `&self`); the fingertree band moves by one (`OVERRUN` 1300 to 1301, both sides dropped by the same mechanism, the twin one less; floor 216991 inside the ceiling 234502); the mutex, thread_linda and measure envelopes read below their floors and are re-observed. All re-pinned with the mechanism (`ai-tmp/integrator-849a9e/law3-repin-reason.txt`).
+Measured: the walk priced. With the walk unconditional on the new doors, `sh tools/check.sh twins` moved 79 budgets up by 12 to 5731 inferences, the named-space doors paying the term's size per equation. `metta_substitute_self/3` now probes the term with `term_string/2` and `sub_string/5` before walking, two inferences whatever the size, the shortcut `rewrite_parsed_form/4` already takes on the source text it holds; the two guarded branches there call the walk directly so a form pays one probe. With the probe, 214 budgets drop by 5 to 2012 (median 70), because the twins-lane merge had walked every natively added equation and those counts were pinned; two rise by 5 and 20 (the probe on removals of equations that never say `&self`); the fingertree band moves by one (`OVERRUN` 1300 to 1301, both sides dropped by the same mechanism, the twin one less; floor 216991 inside the ceiling 234502); the mutex, thread_linda and measure envelopes read below their floors and are re-observed. All re-pinned with the mechanism (`ai-tmp/integrator-849a9e/law3-repin-reason.txt`).
 
 Rejected: recording a row at the one-equation door as well. It answers nothing the fallback does not, and it prices every `@m.define` body that says `&self` by a stored-reference lookup and an assert on a lane that gates two-sided budgets at four inferences.
 
@@ -53,7 +53,7 @@ Superseded: this thread's 2026-09-05 rejection of "applying the reader's `&self`
 
 Found while there: `restored.save(path)` over a path `restored` had loaded, then `source.load(path)`, refreshed `restored` with the new file's atoms. That is `replacing_previous_load/4`'s documented rule, a space holding a stale copy of a changed file is refreshed, and not a defect; the removal test writes its second image to its own file. Reproduced on `249389cb`, before the twins-lane merge.
 
-Verified so far: `sh engine/test.sh` green three times on the edited tree (before and after the probe); `sh extensions/python/test.sh` 4544 passed with two reds, `test_builtin_discovery_is_cached` (passes alone, the intermittent the every-intermittent branch closes) and the pydocstyle ceiling (a `noqa` on the new removal test, replaced by a docstring); `sh check.sh layering mypy` green; `ruff` green once the torch twin's stale `PLC0415` suppression went; `an_unbound_deferred_equation_reads_the_space_it_is_stored_in` and `test_removing_an_equation_that_names_its_own_space_retires_its_clause` fail on `039974720f` and pass here.
+Verified so far: `sh engine/test.sh` green three times on the edited tree (before and after the probe); `sh extensions/python/test.sh` 4544 passed with two reds, `test_builtin_discovery_is_cached` (passes alone, the intermittent the every-intermittent branch closes) and the pydocstyle ceiling (a `noqa` on the new removal test, replaced by a docstring); `sh tools/check.sh layering mypy` green; `ruff` green once the torch twin's stale `PLC0415` suppression went; `an_unbound_deferred_equation_reads_the_space_it_is_stored_in` and `test_removing_an_equation_that_names_its_own_space_retires_its_clause` fail on `039974720f` and pass here.
 
 Found: thread_linda read 427720 in all 25 re-observation rounds, and the lane refused the envelope it wrote, `minimum < maximum`. Decided: an envelope may have zero spread. Every observation agreeing is the claim, keyed to its protocol and re-observed rather than re-pinned; Google Benchmark's max statistic equals its min when repetitions agree. The parser refuses only an inverted pair now (`test_an_empirical_envelope_may_have_zero_spread`). Rejected: converting the twin to a point budget, because one day's agreement is not evidence the scheduler stopped mattering, and the allowance a point budget carries is not the claim.
 
@@ -132,7 +132,7 @@ exit zero, peak RSS 81900 KiB, in `ai-tmp/ai-equation-binding-root-prolog.log`.
 This covers source rollback and reload, deferred compilation, token ownership,
 provider equation occurrences, reference loading and loader concurrency.
 
-Verified: `GATE_ONLY=1 sh check.sh ruff mypy ty closed-sets policy-inventory
+Verified: `GATE_ONLY=1 sh tools/check.sh ruff mypy ty closed-sets policy-inventory
 evidence` passes all selected lanes in
 `ai-tmp/ai-equation-binding-root-static.log`. A clone scan of the two code
 files finds only the same pre-existing 97-token direct/loader runnable clone
@@ -140,7 +140,7 @@ as the unchanged baseline; no changed line intersects it. Its exact command
 and baseline comparison are in `ai-tmp/ai-equation-binding-receipt.md`, and
 the integrated report is `ai-tmp/ai-equation-binding-root-clones/jscpd-report.json`.
 
-Verified: `GATE_ONLY=1 sh check.sh layering evidence` passes both engine and
+Verified: `GATE_ONLY=1 sh tools/check.sh layering evidence` passes both engine and
 Python layering checks and reports zero unbacked evidence claims in
 `ai-tmp/ai-equation-binding-root-layering.log`.
 
@@ -185,8 +185,8 @@ The complete counter audit is `ai-tmp/ai-equation-binding-admission-cost-audit.l
 source and per-process receipts are under
 `ai-tmp/ai-equation-binding-admission-cost-n100-w32/`.
 
-Verified: `GATE_ONLY=1 sh check.sh ruff evidence` and
-`GATE_ONLY=1 sh check.sh layering` pass in
+Verified: `GATE_ONLY=1 sh tools/check.sh ruff evidence` and
+`GATE_ONLY=1 sh tools/check.sh layering` pass in
 `ai-tmp/ai-equation-binding-admission-static.log` and
 `ai-tmp/ai-equation-binding-admission-layering.log`. The clone command recorded
 above again finds only the unchanged 97-token runnable clone, in

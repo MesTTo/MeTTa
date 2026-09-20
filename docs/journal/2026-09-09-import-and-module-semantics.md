@@ -13,7 +13,7 @@ decision, never this thread's.
 ### Measured: the trouble is one line long
 
 Two libraries with a private helper each, imported into `&self`
-(`ai-tmp/libaudit/imp/{liba,libb,main}.metta`, `sh run.sh main.metta silent`
+(`ai-tmp/libaudit/imp/{liba,libb,main}.metta`, `sh tools/run.sh main.metta silent`
 here and `sh PeTTa-base/run.sh main.metta silent` upstream):
 
 ```metta
@@ -1337,7 +1337,7 @@ The unchanged sealed, fibsmart and superpose-primes declarations already
 cover their measured costs. Historical observations stay in their dated
 chains; the literal control establishes its own encoding's cost only.
 
-Verified: the priced checkpoint's `sh check.sh prolog prolog-static
+Verified: the priced checkpoint's `sh tools/check.sh prolog prolog-static
 no-autoload layering evidence provenance-pin-selftest llms llms-selftest
 examples parity petta door-sync generated-artifacts` exits 0,
 `ai-structural-priced-final.log`. All requested lanes and their generated
@@ -1512,7 +1512,7 @@ result. The final probe uses the wrapper's selected enforcer with its default
 expiry status 124, retaining the wrapper's owner link. A child SIGTERM or
 SIGKILL is not an expiry verdict. GNU coreutils v9.7 `src/timeout.c` and
 `gnutimeout --help` state that distinction. The repaired
-`sh check.sh host-workarounds host-workarounds-selftest` exits 0: four
+`sh tools/check.sh host-workarounds host-workarounds-selftest` exits 0: four
 entries, four sites, every reproduction present, ten planted gate cases.
 The source path is `add_event_hook` in pinned `pl-event.c:145-159`: line155
 returns before line159 releases the recursive list mutex.
@@ -1538,7 +1538,7 @@ binding functional commit as provenance through this package's final pin.
 453.06s (`ai-python-delivery-final.log`). Both full twin entrypoints complete
 all 280 examples with no answer, stored-content or claim mismatch:
 `python extensions/python/tools/twin_coverage.py` exits 1 with 47 findings;
-`sh check.sh twins` exits 1 with 14 (`ai-twins-delivery-final.log` and
+`sh tools/check.sh twins` exits 1 with 14 (`ai-twins-delivery-final.log` and
 `ai-twins-gate-delivery-final.log`). Each includes the seven unchanged
 empirical declarations naming `full-lane/277/workers=32` instead of the new
 `full-lane/280/workers=32`. Those envelopes remain the merged-tree observation
@@ -1549,7 +1549,7 @@ The isolated full-lane control fixes only `file_search_cache_time` to
 9223372036854775807 before the child preamble constructs any MeTTa engine.
 `python ai-tmp/ai-twins-normalized.py` changes no source, budget, allowance,
 counter or scheduler. Governed QLF artifacts were cleared in each checkout;
-`sh check.sh prolog-static` passes on both before either lane starts.
+`sh tools/check.sh prolog-static` passes on both before either lane starts.
 Current: 7 findings over 280, all seven old empirical protocols, with every
 semantic and deterministic-cost check passing. Cut: 2 findings over 277,
 the known ch17/06 pool-stat assertion (running1/free1 instead of
@@ -1565,7 +1565,7 @@ the pristine full lane. The normalized current lane confirms no remaining
 deterministic-budget or answer mismatch. The eager Janus dependency and
 lane clock repairs remain with their assigned owners, not this branch.
 
-`sh check.sh host-workarounds host-workarounds-selftest evidence` exits0:
+`sh tools/check.sh host-workarounds host-workarounds-selftest evidence` exits0:
 five entries, five sites, all reproductions present, ten planted gate cases,
 zero unbacked tags in7235 claims against12821 test names, with416 functional
 WORKTREE placeholders before landing. The frame reproduction remains pinned
@@ -1608,12 +1608,12 @@ test and a nonexistent test. A private omitted-glob control reports exactly
 `examples/ch-plant/_fixtures/nested/library.metta: accepted a nonexistent
 test; its claims went unread`. No source, counter or example behavior changes.
 
-`sh check.sh evidence evidence-selftest provenance-pin-selftest` exits0:
+`sh tools/check.sh evidence evidence-selftest provenance-pin-selftest` exits0:
 zero unbacked tags in7242 claims, 36 planted citations, and37 planted
 placeholders in16 files with zero defects. The 422 functional placeholders
 include the three formerly invisible fixture pins and the new guard claims.
 
-`sh check.sh evidence-mutations ruff-drivers` also exits0: all ten mutations
+`sh tools/check.sh evidence-mutations ruff-drivers` also exits0: all ten mutations
 and the unmutated control are accounted for, and the component Python
 drivers pass the configured lint checks. The fixture omission is repaired
 before producing the replacement functional snapshot and its final pin.

@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Not for a security vulnerability. Report those privately by email, as
-        [SECURITY.md](https://github.com/MesTTo/MeTTa-Kernel/blob/main/SECURITY.md)
+        [SECURITY.md](https://github.com/MesTTo/MeTTa/blob/main/SECURITY.md)
         describes, because everything filed here is public from the moment it
         is filed.
 
@@ -63,7 +63,7 @@ body:
         The CLI and the Python library are held to identical answers by a
         differential suite, so a disagreement between them is itself the bug.
       options:
-        - sh run.sh, the CLI
+        - sh tools/run.sh, the CLI
         - the metta Python library
         - both, and they agreed
         - both, and they disagreed

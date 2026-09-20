@@ -11,7 +11,7 @@ Rejected: infer source coverage from function call events, because untaken branc
 
 Decided: push named-function selection into the tracer before event copies and recording budgets. Keep excluded function wrappers so selected descendants retain their actual nesting depth. Expose those records as ordinary atoms through `trace-source`, with a `trace-stopped` atom carrying the exhausted bound or `False` on completion. The operation is `oracleIO` because it executes arbitrary supplied source, including host effects.
 
-Tried: the first example used the nonexistent name `size-space`; its last assertion failed with `MeTTa test failed: ['size-space','&metta-space-1'] does not match 3`. Replaced that call with the existing `space-atom-count`. `sh run.sh examples/ch20-extending-the-engine/20-05-observing-execution/01-filtered-trace.metta` then passed, as did both tests in `lib_observe.plt`.
+Tried: the first example used the nonexistent name `size-space`; its last assertion failed with `MeTTa test failed: ['size-space','&metta-space-1'] does not match 3`. Replaced that call with the existing `space-atom-count`. `sh tools/run.sh examples/ch20-extending-the-engine/20-05-observing-execution/01-filtered-trace.metta` then passed, as did both tests in `lib_observe.plt`.
 
 Open: exact subterm coverage and runtime spans require a compiler position hook at expression lowering. Whole-function wrappers do not supply that information.
 
@@ -117,9 +117,9 @@ existing history records compiled-image and artifact-layout sensitivity in
 this small define-and-call workload. A paired control is required before
 attributing the decrease to this change.
 
-Verification: `sh check.sh ruff artifact-paths llms llms-selftest` passed all
+Verification: `sh tools/check.sh ruff artifact-paths llms llms-selftest` passed all
 four requested lanes, with zero llms and artifact-path findings and 47 passing
-self-test controls. `sh test.sh
+self-test controls. `sh tools/test.sh
 examples/ch20-extending-the-engine/20-05-observing-execution/*.metta` passed all
 three examples and twelve assertions. The two new examples account for eight
 of those assertions. The corpus records 262 total programs and 243 runnable
@@ -336,7 +336,7 @@ Revisit if a process is ever measured observing often enough for it to matter.
 
 Found while checking the move: `observe-source` never worked with autoload
 off. `with_source/4` calls `pairs_keys_values/3` and the module declares no
-`library(pairs)`, so `NO_AUTOLOAD=1 sh run.sh
+`library(pairs)`, so `NO_AUTOLOAD=1 sh tools/run.sh
 examples/ch20-extending-the-engine/20-05-observing-execution/02-source-coverage.metta`
 returned `observation-status exception` carrying
 `existence_error(procedure, source_observation:pairs_keys_values/3)` and the

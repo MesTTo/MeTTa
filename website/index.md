@@ -1,17 +1,17 @@
 <!--
-Purpose: state what MeTTa Kernel is, show it working, and route to the four things a reader can want.
+Purpose: state what MeTTa is, show it working, and route to the four things a reader can want.
 Guarantees: the Python block runs as written against the shipped surface.
 [tested: npm run docs:build; commit=34c48b5b6f2e9515a1410a937d5784d6420e1d23]
 -->
 
-# MeTTa Kernel
+# MeTTa
 
-MeTTa, implemented in Prolog and C. You write Python; it becomes rules the
-engine can run, query, and reason over.
+MeTTa, Hyperon's AGI language, based on PeTTa semantics with significant
+extensions.
 
 ```sh
 sudo apt install swi-prolog     # or: brew install swi-prolog
-pip install 'pymetta[engine]'
+pip install 'PyMeTTa[engine]'
 ```
 
 ## What it looks like
@@ -65,7 +65,7 @@ nothing.
 
 **[Reference](./reference/)** for exact signatures.
 
-**[Engine](./engine/)** to work on MeTTa Kernel itself, or to put a fourth
+**[Engine](./engine/)** to work on the engine itself, or to put a fourth
 language on top of it. Python, TypeScript and C are the three surfaces built so
 far, each reaching the engine through a documented wire format rather than a
 hand-written port.

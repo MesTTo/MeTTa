@@ -1,0 +1,868 @@
+% Guarantees: refresh, force and frame-finish guards use metta_with_trailed/3
+%   and treat an absent root as inactive
+%   [source: engine/metta/references.pl:metta_reference_refresh/0; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
+% Purpose: derive live definition references and occurrence visibility from rows.
+% Guarantees: data writes update only their occurrence grades; unchanged
+%   callable bindings keep their compiled clauses
+%   [tested: references:data_mutations_keep_compiled_clauses_and_retire_only_removed_grades;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: declaration-only faces carry sorts, constructor arrows and
+%   subsorts without making their subjects callable
+%   [tested: references:constructor_declarations_travel_without_callable_heads;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a provider face is computed once per home and blocked path set
+%   while the rows stand, and a clean node answers its retained face [tested:
+%   references, reference_publication, reference_patterns,
+%   reference_source_origins, reference_scopes, reference_providers;
+%   commit=a8b3ad6e372c077945b36da93ed631f0a45d11fb].
+% Guarantees: a kept importing space retains its scoped FROM providers
+%   [tested: lib_thread_scope_deferred:a_kept_cleanup_retains_its_captured_space_and_reference_provider;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Assumes: spaces:metta_space_pair/4 retains each stored occurrence's token;
+%   foreign receivers declare tokens, add-token and remove-token.
+% Guarantees: reference paths identify defining predicates, while their clauses
+%   retain their original multiplicity and execution module
+%   [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: a mapper's call pattern constrains the alias's inputs while
+%   retaining its provider's body and declarations; equal patterns share a
+%   source root, and each invocation receives fresh variables
+%   [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
+% Guarantees: suspended reference queries can be destroyed: transaction discovery
+%   leaves their outer query frame unwatched [tested:
+%   reference_loading:a_suspended_background_qualified_query_survives_release;
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: a release's physical effects on bindings, the imports and
+%   wrappers on the space's module and on its receivers', wait for the
+%   retirement's completion, so an aborted release leaves them as they were
+%   and a committed one retires every binding drawn from the space before the
+%   module's predicates are abolished [tested:
+%   space_retirement:an_aborted_release_keeps_the_receivers_imported_binding_callable,
+%   space_retirement:a_committed_release_retires_the_receivers_binding_at_completion,
+%   release_preparation:preliminary_clear_retires_the_provider_once_before_removing_rows;
+%   commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+% Owns resources: observed spaces own mutation observers, projected metadata and
+%   native bindings; space release withdraws all three. Transaction completion
+%   reconciles native bindings with the rows surviving commit or rollback.
+%   Completion excludes its finishing frame only until its cleanup;
+%   inner rollback retains one outer watch and outer completion retires it
+%   [tested: references:inner_failure_transfers_one_watch_and_outer_completion_retires_it;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Owns resources: metta_reference_slot/3 reserves native binding ownership before
+%   mutation and retires it after cleanup; interrupted publication can reconcile
+%   every intermediate state [tested:
+%   references:an_inference_cut_cannot_abandon_reference_completion;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: declaration discovery reads matching rows rather than the class
+%   population [tested:
+%   reference_publication:declaration_discovery_does_not_enumerate_a_providers_population;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: metta_host_reference_names/2 reads written definitions and
+%   explicit references, including private local names, independently of
+%   globally resident functions [tested:
+%   test_constructor_dependencies_survive_a_previous_global_import_leaving;
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarded by: with_typing_policy_stable/1 serializes binding publication. Maps
+%   run before publication, outside the typing and support-graph mutexes.
+% Decides: INTERNAL is visibility's zero and PUBLIC its one. A visited-space
+%   traversal bounds cycles, including cycles whose maps change names.
+
+:- use_module(library(varnumbers), [varnumbers/2]).
+:- use_module(library(ordsets), [ord_intersection/3]).
+
+:- dynamic metta_reference_row/4, metta_reference_map/3.
+:- dynamic metta_occurrence_grade/4, metta_reference_projection/4.
+:- dynamic metta_reference_roots/4, metta_reference_seen_space/2.
+%The roots the LAST bind of a head realised, as a variant hash in a flag,
+%which is the one store a transaction does not roll back: an import or a
+%wrapper is not transactional where a clause and a dynamic fact are, so a
+%rebind made inside a rolled-back transaction leaves the predicate as the
+%rebind left it while any asserted record of it reverts. The flag keeps
+%pointing at the rolled-back binding, the recomputed face differs from it,
+%and the rebind runs. Zero is "not recorded": a bind made while a lazy home
+%was still loading, or its function still deferred, registered no arity and
+%must be redone once the home settles, so it records nothing
+%[tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,
+%references:an_inference_cut_cannot_abandon_reference_completion,
+%extensions/python/tests/ch20_extending_the_engine/test_reference_patterns.py::test_patterned_references_load_lazily_and_report_their_source].
+metta_reference_bound_hash(Module, Name, Arity, Hash) :-
+    flag(metta_reference_bound(Module, Name, Arity), Hash, Hash).
+
+%A bind inside a transaction is provisional: the frame it runs in may be cut
+%or rolled back, and the completion refresh that follows the frame is what
+%makes the binding final, so it records nothing and that refresh rebinds once.
+metta_reference_bound_record(Module, Name, Arity, Roots) :-
+    (   Roots \== [],
+        \+ current_transaction(_),
+        forall(member(root(Home, Original, _, _), Roots),
+               \+ metta_reference_unsettled(Home, Original))
+    ->  variant_hash(Roots, Hash)
+    ;   Hash = 0
+    ),
+    flag(metta_reference_bound(Module, Name, Arity), _, Hash).
+
+metta_reference_bound_forget(Module, Name, Arity) :-
+    flag(metta_reference_bound(Module, Name, Arity), _, 0).
+
+%A root whose home is one of the spaces this drain is refreshing may have new
+%definitions behind the same roots, and its importers' callers recompile
+%through the announcement the rebind makes [tested:
+%references:one_face_publication_recompiles_a_shared_caller_once].
+metta_reference_root_home_changed(Space, Roots) :-
+    ( nb_current('$metta_reference_draining', Changed) -> true ; Changed = [] ),
+    member(root(Home, _, _, _), Roots),
+    Home \== Space,
+    memberchk(Home, Changed),
+    !.
+:- dynamic metta_reference_slot/3, metta_reference_observed/1.
+:- volatile metta_reference_seen_space/2, metta_reference_slot/3.
+:- '$notransact'(metta_reference_seen_space/2).
+%A release takes the space out of sight before the outcome, and sight is not
+%journaled: this row remembers the module and the receivers a transaction
+%deferred until the completion, which re-seats the space on a restored
+%outcome and republishes the receivers on a retired one. Not journaled
+%either, for the same reason.
+:- dynamic metta_reference_release_unseen/3.
+:- '$notransact'(metta_reference_release_unseen/3).
+:- '$notransact'(metta_reference_slot/3).
+:- seam:context_reader(metta_reference_refreshing, '$metta_reference_refreshing', value(true)).
+:- seam:context_reader(metta_reference_finishing(Frame), '$metta_reference_finishing', stack(Frame)).
+:- dynamic metta_reference_hooks/0.
+:- dynamic metta_reference_demand/1.
+:- volatile metta_reference_demand/1.
+:- seam:context_reader(metta_reference_forcing(Name), '$metta_reference_forcing', stack(Name)).
+:- multifile seam:space_dependency/2.
+
+seam:space_dependency(Space, Home) :- metta_reference_row(Space, _, Home, _).
+
+% The declaring space is the mutation root. Its change queues exactly the
+% spaces whose faces the support graph derives from it; the transaction frame
+% retains that root so rollback republishes the same set (reference_refresh.pl).
+metta_reference_declare(Space, Term, Token) :-
+    spaces:metta_require_token_mutation(Space, from),
+    metta_reference_watch(Space),
+    (   Term = [from, Source|Maps],
+        metta_reference_row_map(Space, Maps, Term, Map)
+    ->  metta_reference_source(Space, Source, Home),
+        metta_reference_watch(Home),
+        metta_reference_validate_selection(Home, Map),
+        transaction(( spaces:metta_store_occurrence(Space, Term, Token, _),
+                      assertz(metta_reference_row(Space, Token, Home, Map)),
+                      metta_reference_changed(Space) ))
+    ;   Term = [internal|Names]
+    ->  maplist(must_be(atom), Names),
+        transaction(( spaces:metta_store_occurrence(Space, Term, Token, _),
+                      metta_reference_changed(Space) ))
+    ;   domain_error(reference_declaration, Term)
+    ).
+
+metta_reference_row_map(_, [Map], _, Map) :- !.
+metta_reference_row_map(Space, [], _, Map) :- !,
+    metta_reference_option(Space, 'from-map', Map).
+metta_reference_row_map(_, _, Original, _) :- domain_error(from_row, Original).
+
+% A space seen for the first time owes one publication: its grades and its
+% face node. A provider already watched stays clean when another importer
+% appears, which is what keeps allocation of the Nth prototype independent of
+% the N-1 before it.
+metta_reference_watch(Space) :-
+    spaces:metta_require_token_read(Space, from),
+    metta_reference_install_hooks,
+    space_module(Space, Module),
+    ( metta_reference_seen_space(Space, Module) -> true
+    ; assertz(metta_reference_seen_space(Space, Module)),
+      metta_reference_queue(Space) ),
+    ( metta_reference_observed(Space) -> true
+    ; spaces:metta_reference_mutation_scope(Space, enabled),
+      assertz(metta_reference_observed(Space)) ),
+    metta_reference_track_transaction.
+
+% A map's explicit domain can name an absent or private head. Arbitrary maps
+% are filtered imports: they receive each public head the source actually has.
+% https://github.com/racket/racket/blob/v8.18/racket/collects/racket/require.rkt
+metta_reference_validate_selection(Home, Map) :-
+    findall(Name, metta_reference_selected(Map, Name), Names0),
+    sort(Names0, Names),
+    ( Names == [] -> Face = [] ; metta_reference_face(Home, [], Face) ),
+    forall(member(Name, Names),
+           ( must_be(atom, Name),
+             ( metta_reference_internal(Home, Name)
+             -> throw(error(metta_internal_reference(Home, Name), none))
+             ; memberchk(Name/_-_, Face) -> true
+             ; space_module(Home, Module),
+               metta_reference_note(Module, Name, reference_missing(Home))
+             ) )).
+
+metta_reference_selected(partial(Head, Args), Name) :- !,
+    metta_reference_selected([Head|Args], Name).
+metta_reference_selected([only, Names], Name) :- member(Name, Names).
+metta_reference_selected([rename, Pairs], Name) :- member([Name, _], Pairs).
+
+%`package` is the one head the engine reserves, and it is internal in every
+%space without anybody declaring it so. A package file describes ITSELF:
+%`(= (package version) "0.1.0")` and `(= (package backing) ...)` say what this
+%library is and what backs its heads, and none of that is an export. Merging
+%them would put one library's version and backing rows in its importer, where
+%the next importer would read them as its own. Written as a clause rather than
+%as an `(internal package)` row every library would have to carry, because a
+%row each of them repeats is a second representation of one rule
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 1].
+metta_reference_internal(_, package).
+metta_reference_internal(Space, Name) :-
+    spaces:metta_space_pair(Space, [internal|Names], _, _), memberchk(Name, Names), !.
+metta_reference_internal(Space, Name) :-
+    metta_reference_manifest_row(Space, [internal|Names]),
+    memberchk(Name, Names), !.
+
+metta_reference_row_head([=, [Name|_], _], Name) :- atom(Name), !.
+metta_reference_row_head([=, Name, _], Name) :- atom(Name), !.
+metta_reference_row_head([':', Name, _], Name) :- atom(Name), !.
+metta_reference_row_head(['@doc', Name|_], Name) :- atom(Name), !.
+metta_reference_row_head([Name|_], Name) :- atom(Name), !.
+metta_reference_row_head(Name, Name) :- atom(Name).
+
+metta_reference_refresh_grades(Space) :-
+    retractall(metta_occurrence_grade(Space, _, visibility, _)),
+    forall(( spaces:metta_space_pair(Space, Row, Token, _),
+             metta_reference_row_head(Row, Name),
+             metta_reference_internal(Space, Name) ),
+           assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))).
+
+% Data changes a population, not its exported definitions. Retain the ordinary
+% occurrence grade and reserve binding publication for the rows that define it.
+metta_reference_interface_row([=, _, _]).
+metta_reference_interface_row([from|_]).
+metta_reference_interface_row([internal|_]).
+metta_reference_interface_row(Row) :- metta_reference_metadata_row(Row, _, _, _).
+
+metta_reference_added(Space, Row, Token) :-
+    (   \+ \+ metta_reference_interface_row(Row)
+    ->  metta_reference_changed(Space)
+    ;   metta_reference_row_head(Row, Name), metta_reference_internal(Space, Name)
+    ->  assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))
+    ;   true
+    ).
+
+metta_reference_removing(Space, Pattern, Selected) :-
+    findall(Token-Pattern, spaces:metta_space_pair(Space, Pattern, Token, _), Selected).
+
+metta_reference_removed(Space, Selected) :-
+    foldl(metta_reference_retire_grade(Space), Selected, false, Changed),
+    ( Changed == true -> metta_reference_changed(Space) ; true ).
+
+metta_reference_retire_grade(Space, Token-Row, Before, After) :-
+    (   spaces:metta_space_pair(Space, Row, Token, _)
+    ->  After = Before
+    ;   retractall(metta_occurrence_grade(Space, Token, visibility, _)),
+        ( \+ \+ metta_reference_interface_row(Row) -> After = true ; After = Before )
+    ).
+
+% The same dynamically scoped algebra used by under determines a row's grade.
+% Absence of an annotation is the selected algebra's one, not a stored row.
+metta_graded_pair(Space, Row, Token, Ref, Grade) :-
+    spaces:metta_space_pair(Space, Row, Token, Ref),
+    metta_effective_algebra(Space, Algebra),
+    ( metta_occurrence_grade(Space, Token, Algebra, Held) -> Grade = Held
+    ; metta_algebra_one(Space, Grade) ),
+    b_setval('$metta_answer_k', Grade).
+
+metta_reference_own_head(Space, Name, Arity) :-
+    metta_with_under(visibility,
+        ( metta_graded_pair(Space, [=, [Name|Args], _], Token, _, 'PUBLIC'),
+          atom(Name), metta_reference_equation_arity(Space, Name, Token, Args, Arity) )).
+metta_reference_own_head(Space, Name, Arity) :-
+    metta_reference_prolog_head(Space, Name, Arity),
+    \+ metta_reference_internal(Space, Name).
+metta_reference_own_head(Space, Name, Arity) :-
+    metta_reference_manifest_head(Space, Name, Arity),
+    \+ metta_reference_internal(Space, Name).
+metta_reference_own_head(Space, Name, declaration) :-
+    metta_reference_declared_head(Space, Name),
+    \+ metta_reference_internal(Space, Name).
+
+metta_reference_face(Space, Visited, Face) :-
+    metta_with_under(visibility,
+        ( metta_reference_local_face(Space, Visited, Local),
+          include(metta_reference_public_entry(Space), Local, Face) )).
+
+metta_host_reference_names(Space, Names) :-
+    metta_with_under(visibility, metta_reference_local_face(Space, [], Face)),
+    findall(Name, member(Name/_-_, Face), Heads),
+    sort(Heads, Names).
+
+metta_reference_public_entry(Space, Name/Arity-root(Home, Original, _, Patterns)) :-
+    ( Space == Home, Name == Original, Patterns == []
+    -> once(metta_reference_own_head(Space, Name, Arity))
+    ; \+ metta_reference_internal(Space, Name) ).
+
+metta_reference_local_face(Space, Visited, Face) :-
+    (   memberchk(Space, Visited)
+    ->  Face = []
+    ;   findall(Name/Arity-root(Space, Name, Arity, []),
+                metta_reference_local_head(Space, Name, Arity), Own),
+        findall(Name/Arity-Root,
+                ( metta_reference_row(Space, Token, Home, Map),
+                  metta_reference_source_face(Space, Home, Visited, Source),
+                  member(Original/Arity-SourceRoot, Source),
+                  metta_reference_names(Space, Token, Map, Original, Names),
+                  member(Target, Names),
+                  metta_reference_target(Target, Arity, SourceRoot, Name, Root) ), Imported),
+        append(Own, Imported, All), sort(All, Face)
+    ).
+
+% A self reference aliases the space's own definitions once. Following its
+% imported face would repeatedly apply the same map to its previous aliases.
+metta_reference_source_face(Space, Space, _, Face) :- !,
+    findall(Name/Arity-root(Space, Name, Arity, []),
+            metta_reference_own_head(Space, Name, Arity), Face).
+metta_reference_source_face(Space, Home, Visited, Face) :-
+    metta_with_under(visibility,
+        ( metta_reference_provider_face(Home, [Space|Visited], Local),
+          include(metta_reference_public_entry(Home), Local, Face) )).
+
+% A provider's face depends on the path that reached it only through the
+% spaces of that path it can reach again: a from row back into the path is cut
+% there, so two paths with the same blocked set compute the same face. Faces
+% are remembered by home and blocked set while the rows stand (the reference
+% epoch, which every row change advances, and the two row retirements below
+% forget them), and a clean node's retained face serves when nothing it
+% reaches is blocked, which is what its publication computed.
+:- thread_local metta_reference_face_memo/3, metta_reference_reach_memo/2,
+                metta_reference_memo_epoch/1.
+
+metta_reference_provider_face(Home, Visited, Local) :-
+    (   memberchk(Home, Visited)
+    ->  Local = []
+    ;   metta_reference_memo_current,
+        metta_reference_reach(Home, Reach),
+        sort(Visited, Path), ord_intersection(Path, Reach, Blocked),
+        (   metta_reference_face_memo(Home, Blocked, Local)
+        ->  true
+        ;   Blocked == [], metta_reference_retained_face(Home, Local)
+        ->  true
+        ;   metta_reference_local_face(Home, Visited, Local),
+            assertz(metta_reference_face_memo(Home, Blocked, Local))
+        )
+    ).
+
+metta_reference_retained_face(Home, Local) :-
+    space_module(Home, Module),
+    support_graph:support_retained(derived(Module, reference_face), Local).
+
+metta_reference_memo_current :-
+    flag('$metta_reference_epoch', Epoch, Epoch),
+    (   metta_reference_memo_epoch(Epoch)
+    ->  true
+    ;   metta_reference_forget_faces,
+        assertz(metta_reference_memo_epoch(Epoch))
+    ).
+
+metta_reference_forget_faces :-
+    retractall(metta_reference_memo_epoch(_)),
+    retractall(metta_reference_face_memo(_, _, _)),
+    retractall(metta_reference_reach_memo(_, _)).
+
+% The spaces a face can reach through from rows, by breadth-first walk; a
+% space that a cycle returns to is among them.
+metta_reference_reach(Space, Reach) :-
+    (   metta_reference_reach_memo(Space, Reach)
+    ->  true
+    ;   metta_reference_reach_walk([Space], [], Reached),
+        sort(Reached, Reach),
+        assertz(metta_reference_reach_memo(Space, Reach))
+    ).
+
+metta_reference_reach_walk([], Seen, Seen).
+metta_reference_reach_walk([Space|Queue], Seen, Reach) :-
+    findall(Home, ( metta_reference_row(Space, _, Home, _), Home \== Space,
+                    \+ memberchk(Home, Seen), \+ memberchk(Home, Queue) ), Homes0),
+    sort(Homes0, Homes),
+    append(Queue, Homes, Queue1),
+    append(Homes, Seen, Seen1),
+    metta_reference_reach_walk(Queue1, Seen1, Reach).
+
+% A symbol retains every arity. A full head selects its input arity and adds
+% a structural constraint. Numbered variables make the path key independent
+% of a mapper invocation; publication restores fresh variables for each guard.
+metta_reference_target(Name, _, Root, Name, Root) :- atom(Name), !.
+metta_reference_target([Name|Arguments], Arity,
+                       root(Home, Original, Arity, Before), Name,
+                       root(Home, Original, Arity, Patterns)) :-
+    integer(Arity),
+    length(Arguments, Inputs), Arity =:= Inputs+1,
+    sort([Arguments|Before], Patterns).
+
+metta_reference_local_head(Space, Name, Arity) :-
+    spaces:metta_space_pair(Space, [=, [Name|Args], _], Token, _),
+    atom(Name), metta_reference_equation_arity(Space, Name, Token, Args, Arity).
+metta_reference_local_head(Space, Name, Arity) :-
+    metta_reference_prolog_head(Space, Name, Arity).
+metta_reference_local_head(Space, Name, Arity) :-
+    metta_reference_manifest_head(Space, Name, Arity).
+metta_reference_local_head(Space, Name, declaration) :-
+    metta_reference_declared_head(Space, Name).
+
+% A projected declaration retains its original source. Treating that copy as
+% a new local root would make diamonds duplicate it and cycles retain it.
+metta_reference_declared_head(Space, Name) :-
+    metta_reference_type_subject(Row, Name),
+    spaces:metta_space_pair(Space, Row, Token, _),
+    atom(Name),
+    \+ metta_reference_projection(Space, _, Token, _).
+
+metta_reference_type_subject([':', Name, _], Name).
+metta_reference_type_subject([':<', Name, _], Name).
+
+% Eta expansion can add inputs. The occurrence-to-clause registry gives the
+% actual arity after translation; before it, the source head is a manifest.
+metta_reference_equation_arity(Space, Name, Token, Args, Arity) :-
+    space_module(Space, Module),
+    ( filereader:'$metta_equation_token'(Module, Name, Ref, Token),
+      clause_property(Ref, predicate(Module:_/CompiledArity))
+    -> Arity = CompiledArity
+    ; length(Args, Inputs), Arity is Inputs+1 ).
+
+metta_reference_names(_, Token, _, Head, Names) :-
+    metta_reference_map(Token, Head, Names), !.
+metta_reference_names(Space, Token, Map, Head, Names) :-
+    metta_source_singleflight(reference_map(Token, Head),
+        metta_reference_map_once(Space, Token, Map, Head, Names)).
+
+metta_reference_map_once(_, Token, _, Head, Names) :-
+    metta_reference_map(Token, Head, Names), !.
+metta_reference_map_once(Space, Token, Map, Head, Names) :-
+    space_module(Space, Module),
+    findall(Name,
+            with_metta_module(Module,
+                eval([let, Mapper, Map, [Mapper, Head]], Name)), Results),
+    maplist(metta_reference_map_target(Map, Head), Results, Targets),
+    sort(Targets, Names),
+    assertz(metta_reference_map(Token, Head, Names)).
+
+metta_reference_map_target(_, _, Name, Name) :- atom(Name), !.
+metta_reference_map_target(_, _, Target, Canonical) :-
+    is_list(Target), Target = [Name|_], atom(Name),
+    acyclic_term(Target), term_attvars(Target, []), !,
+    copy_term(Target, Canonical), numbervars(Canonical, 0, _).
+metta_reference_map_target(Map, Head, Result, _) :-
+    throw(error(metta_reference_map_result(Map, Head, Result), none)).
+
+% Change notification, the pending publication queue, its drain and the
+% transaction frame roots live in engine/metta/reference_refresh.pl. This unit
+% keeps what a face IS and how a binding is installed.
+
+metta_reference_unsettled(Home, _) :- metta_reference_loading(Home), !.
+metta_reference_unsettled(Home, Name) :-
+    spaces:deferred_metta_function(Name, _, Home, _, _, _).
+
+metta_reference_force(Name) :-
+    (   metta_reference_forcing(Name)
+    ->  true
+    ;   metta_with_trailed_push('$metta_reference_forcing', Name,
+            forall(( metta_reference_roots(_, Name, _, Roots),
+                     member(root(Home, Original, _, _), Roots) ),
+                   ( metta_reference_wait(Home),
+                     ( Original == Name -> true
+                     ; spaces:metta_ensure_compiled(Original) ) )))
+    ).
+
+:- multifile user:exception/3.
+user:exception(undefined_predicate, Module:Predicate/Arity, retry) :-
+    metta_reference_demand(Name), compiled_function_name(Name, Predicate),
+    metta_reference_roots(Module, Name, _, _),
+    spaces:metta_ensure_compiled(Name),
+    current_predicate(Module:Predicate/Arity), !.
+
+metta_reference_retire_rows(Space) :-
+    space_module(Space, Module),
+    findall(Token,
+            ( metta_reference_row(Space, Token, _, _),
+              \+ spaces:metta_space_pair(Space, [from|_], Token, _) ), Tokens),
+    (   Tokens == []
+    ->  true
+    ;   forall(member(Token, Tokens),
+               ( retractall(metta_reference_row(Space, Token, _, _)),
+                 retractall(metta_reference_map(Token, _, _)),
+                 support_graph:support_forget(derived(Module, reference_row(Token))) )),
+        metta_reference_forget_faces
+    ).
+
+metta_reference_publish_face(Space, Module, Face, Faces) :-
+    findall(derived(Module, reference_row(Token)),
+            ( metta_reference_row(Space, Token, Home, _),
+              space_module(Home, HomeModule),
+              support_graph:support_publish(derived(Module, reference_row(Token)),
+                  [derived(HomeModule, reference_face)], []) ), Supports0),
+    sort(Supports0, Supports),
+    support_graph:support_publish(derived(Module, reference_face), Supports, []),
+    support_graph:support_stabilize(derived(Module, reference_face),
+                                   =(Face), _),
+    findall(Name/Arity,
+            ( member(Name/Arity-_, Face), integer(Arity)
+            ; metta_reference_slot(Module, Name, Arity) ), Keys0),
+    sort(Keys0, Keys),
+    forall(member(Name/Arity, Keys),
+           ( findall(Root, member(Name/Arity-Root, Face), Roots),
+             %A binding whose roots are the ones already recorded stands: the
+             %wrapper is the same wrapper, and rebinding it announced the head
+             %as changed, which abolished every declared table and forgot every
+             %specialization in the process on a refresh that changed nothing.
+             %Such a refresh runs whenever a deferred library function first
+             %compiles, so a space holding one `from` row lost its tables the
+             %first time it asked table-stats [tested:
+             %test_a_reference_refresh_that_changes_nothing_keeps_the_table;
+             %commit=689745c3bb9ef9a36b5427bb3e7289a69da9b71b]. A change in a HOME's definition reaches this
+             %module through its own announcement and the support graph, not
+             %through the refresh, so nothing is lost by standing still.
+             ( metta_reference_roots(Module, Name, Arity, Previous) -> true
+             ; Previous = none ),
+             (   Roots \== [], Previous =@= Roots,
+                 variant_hash(Roots, Hash),
+                 metta_reference_bound_hash(Module, Name, Arity, Hash),
+                 \+ metta_reference_root_home_changed(Space, Roots)
+             ->  true
+             ;   %Forgotten before the rebind, so a cut or an abort anywhere
+                 %inside it leaves no record claiming the binding stands, and
+                 %the completion refresh that follows rebinds it.
+                 metta_reference_bound_forget(Module, Name, Arity),
+                 metta_reference_bind(Space, Module, Name, Arity, Roots, Faces),
+                 metta_reference_bound_record(Module, Name, Arity, Roots)
+             ),
+             ( Roots == []
+             -> support_graph:support_forget(derived(Module, reference(Name, Arity)))
+             ; support_graph:support_publish(derived(Module, reference(Name, Arity)),
+                   [derived(Module, reference_face)],
+                   [edge(derived(Module, reference(Name, Arity)), function(Module, Name))]) ),
+             retractall(metta_reference_roots(Module, Name, Arity, _)),
+             ( Roots == [] -> true
+             ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) ) )).
+
+metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
+    (   Roots = [root(Space, Name, Arity, [])],
+        \+ metta_reference_slot(Module, Name, Arity)
+    ->  true
+    ;   Roots == [], \+ metta_reference_slot(Module, Name, Arity)
+    ->  true
+    ;   metta_reference_binding(Space, Module, Name, Arity, Roots, Faces),
+        (   Roots == []
+        ->  ( metta_reference_roots(Module, Name, OtherArity, Other),
+              OtherArity =\= Arity, Other \== []
+            -> true ; unregister_fun_in(Module, Name) )
+        ;   ( member(root(Home, Original, _, _), Roots),
+              \+ metta_reference_unsettled(Home, Original)
+            -> register_arity(Name, Arity) ; true ),
+            register_fun_in(Module, Name),
+            metta_reference_announce_union(Module, Name, Roots)
+        ),
+        spaces:announce_function_changed(Module, Name)
+    ).
+
+% Native imports share SWI's definition, with no forwarding clause. A source
+% with a wider public union must instead contribute its retained own closure.
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-modul.c
+%
+% A binding is a claim on the name in this module, as a local clause is, so a
+% repaired weak import of the name (spaces:metta_restore_inherited_predicate/3,
+% the explicit import the shadow repair re-states when a local definition is
+% removed) comes off first through the same door a local clause uses; SWI
+% refuses to import a name a module already imports from another source
+% (`No permission to import after/3 into ... (already imported from
+% '$metta_exec:&self')`), and a wrapper cannot be declared dynamic over one.
+% The repair row stays dormant under the binding and re-arms inheritance when
+% the binding is retired, as it does after a local clause leaves
+% [tested: test_a_library_origin_binds_a_name_whose_local_definition_was_removed;
+% commit=8f524d6df196ba4046fa6043c0a6a1b84c26b952].
+metta_reference_binding(_, Module, Name, Arity, [], _) :-
+    \+ current_transaction(_), !,
+    metta_reference_retire_binding(Module, Name, Arity, discard).
+metta_reference_binding(Space, Module, Name, Arity,
+                        [root(Space, Name, Arity, [])], _) :- !,
+    metta_reference_retire_binding(Module, Name, Arity, preserve).
+metta_reference_binding(Space, Module, Name, Arity,
+                        [root(Home, Name, Arity, [])], Faces) :-
+    Home \== Space,
+    memberchk(Home-HomeModule-Face, Faces),
+    findall(R, member(Name/Arity-R, Face), [root(Home, Name, Arity, [])]),
+    compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
+    % Existence once: the wrapper check must not backtrack into the ancestor
+    % enumeration.
+    \+ ( once(current_transaction(_)),
+         current_predicate_wrapper(Module:Head, metta_reference_union, _, _) ),
+    !,
+    metta_reference_retire_binding(Module, Name, Arity, discard),
+    spaces:metta_prepare_local_predicate(Module, Head),
+    metta_reference_reserve_binding(Module, Name, Arity),
+    HomeModule:export(Predicate/Arity), Module:import(HomeModule:Predicate/Arity).
+metta_reference_binding(Space, Module, Name, Arity, Roots, Faces) :-
+    metta_reference_reserve_binding(Module, Name, Arity),
+    metta_reference_detach_import(Module, Name, Arity),
+    compiled_function_name(Name, Predicate),
+    functor(Head, Predicate, Arity),
+    spaces:metta_prepare_local_predicate(Module, Head),
+    Module:dynamic(Predicate/Arity),
+    Head =.. [_|Args],
+    metta_reference_goal_list(Roots, Space, Name, Args, Original, Faces, Goals),
+    metta_reference_disjunction(Goals, Body),
+    wrap_predicate(Module:Head, metta_reference_union, Original, Body).
+
+metta_reference_reserve_binding(Module, Name, Arity) :-
+    ( metta_reference_slot(Module, Name, Arity) -> true
+    ; assertz(metta_reference_slot(Module, Name, Arity)) ).
+
+metta_reference_goal_list([], _, _, _, _, _, []).
+metta_reference_goal_list([root(Home, OriginalName, Arity, Patterns)|Roots],
+                          Space, Name, Args, Own, Faces, [Goal|Goals]) :-
+    (   Home == Space, OriginalName == Name
+    ->  Call = call(Own)
+    ;   memberchk(Home-HomeModule-Face, Faces),
+        Root = root(Home, OriginalName, Arity, []),
+        findall(R, member(OriginalName/Arity-R, Face), HomeRoots),
+        compiled_function_name(OriginalName, HomePredicate),
+        HomeHead =.. [HomePredicate|Args],
+        (   HomeRoots == [Root]
+        ->  Call = HomeModule:HomeHead
+        ;   metta_reference_own_closure(HomeModule, HomeHead, Closure),
+            Call = call(Closure)
+        )
+    ),
+    ( metta_reference_loading(Home)
+    -> Ready = (metta_reference_wait(Home), Call)
+    ; Ready = Call ),
+    metta_reference_pattern_goal(Patterns, Args, Ready, Goal),
+    metta_reference_goal_list(Roots, Space, Name, Args, Own, Faces, Goals).
+
+% These unifications become native clause instructions. A rejected receiver
+% never enters the provider, and its body sees the same input term.
+metta_reference_pattern_goal([], _, Call, Call).
+metta_reference_pattern_goal([Pattern|Patterns], Args, Call, Goal) :-
+    varnumbers(Pattern, Values), append(Inputs, [_], Args),
+    metta_reference_argument_guards(Inputs, Values, Rest, Goal),
+    metta_reference_pattern_goal(Patterns, Args, Call, Rest).
+
+metta_reference_argument_guards([], [], Rest, Rest).
+metta_reference_argument_guards([Input|Inputs], [Value|Values], Rest,
+                                (Input = Value, Goal)) :-
+    metta_reference_argument_guards(Inputs, Values, Rest, Goal).
+
+% Reinstalling the unchanged native body returns its original definition,
+% including when the body never called that definition; the public round
+% trip keeps every other retained closure's identity (host ledger,
+% swi-wrapper-roundtrip-merges-closures).
+metta_reference_own_closure(Module, Head, Closure) :-
+    (   current_predicate_wrapper(Module:Head, metta_reference_union, Closure, Body)
+    ->  wrap_predicate(Module:Head, metta_reference_union, Closure, Body)
+    ;   % The capture wrapper exists only to hand out the closure: Setup
+        % installs it and the cleanup removes it again.
+        setup_call_cleanup(
+            wrap_predicate(Module:Head, metta_reference_capture, Closure,
+                           call(Closure)),
+            true,
+            ignore(unwrap_predicate(Module:Head, metta_reference_capture)))
+    ).
+
+metta_reference_disjunction([], fail).
+metta_reference_disjunction([Goal], Goal) :- !.
+metta_reference_disjunction([Goal|Goals], (Goal;Rest)) :-
+    metta_reference_disjunction(Goals, Rest).
+
+metta_reference_detach_import(Module, Name, Arity) :-
+    compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
+    (   metta_reference_slot(Module, Name, Arity),
+        spaces:metta_existing_import(Module, Head, _)
+    ->  abolish(Module:Predicate/Arity)
+    ;   true
+    ).
+
+% A cut after unwrapping or abolishing still leaves the key owned. The next
+% reconciliation repeats those idempotent effects before releasing ownership.
+metta_reference_retire_binding(Module, Name, Arity, Own) :-
+    (   metta_reference_slot(Module, Name, Arity)
+    ->  compiled_function_name(Name, Predicate),
+        functor(Head, Predicate, Arity),
+        ignore(unwrap_predicate(Module:Head, metta_reference_union)),
+        ( ( Own == discard ; spaces:metta_existing_import(Module, Head, _) )
+        -> abolish(Module:Predicate/Arity)
+        ; true ),
+        retractall(metta_reference_slot(Module, Name, Arity))
+    ;   true
+    ).
+
+metta_reference_prepare(Module, Name, Arity) :-
+    metta_reference_detach_import(Module, Name, Arity).
+
+metta_reference_announce_union(Module, Name, Roots) :-
+    ( Roots = [_,_|_] -> metta_reference_note(Module, Name, reference_union(Roots))
+    ; true ).
+
+metta_reference_note(Module, Name, Reason) :-
+    ( head_pattern_note(Module, Name, [], Name, Reason) -> true
+    ; assertz(translator:head_pattern_note(Module, Name, [], Name, Reason), Ref),
+      record_source_assertion(Ref),
+      print_message(informational, metta_head_pattern_note(Name, [], Name, Reason)) ).
+
+% The declaration pattern is fixed before the store is asked, so the query is
+% the indexed lookup of that head and subject rather than a walk over the
+% provider's whole population (a class space holds its instances' facts).
+metta_reference_metadata(Space, Face, Key, Row) :-
+    member(Name/_-root(Home, Original, _, _), Face),
+    \+ ( Home == Space, Name == Original ),
+    metta_reference_metadata_origin(Home, Original, Name, Key, Row).
+
+metta_reference_metadata_origin(Home, Original, Name, Key, Row) :-
+    metta_reference_metadata_row(OriginalRow, Original, Name, Row),
+    spaces:metta_space_pair(Home, OriginalRow, Token, _),
+    \+ metta_reference_projection(Home, _, Token, _),
+    Key = origin(Home, Token, Name).
+metta_reference_metadata_origin(Home, Original, Name, Key, Row) :-
+    metta_reference_manifest_row(Home, OriginalRow),
+    metta_reference_metadata_row(OriginalRow, Original, Name, Row),
+    \+ spaces:metta_space_pair(Home, OriginalRow, _, _),
+    copy_term(Row, KeyRow), numbervars(KeyRow, 0, _),
+    Key = manifest(Home, Name, KeyRow).
+
+metta_reference_metadata_row([':', Original, Type], Original, Name,
+                             [':', Name, Type]).
+metta_reference_metadata_row([':<', Original, Type], Original, Name,
+                             [':<', Name, Type]).
+metta_reference_metadata_row(['@doc', Original|Fields], Original, Name,
+                             ['@doc', Name|Fields]).
+
+metta_reference_publish_metadata(Space, Face) :-
+    findall(Key-Row, metta_reference_metadata(Space, Face, Key, Row), Rows0),
+    sort(Rows0, Rows),
+    forall(( metta_reference_projection(Space, Key, Token, Ref),
+             \+ memberchk(Key-_, Rows) ),
+           ( spaces:metta_remove_occurrence(Space, Token, _),
+             retractall(metta_reference_projection(Space, Key, _, Ref)) )),
+    forall(member(Key-Row, Rows),
+           ( metta_reference_projection(Space, Key, _, _) -> true
+           ; metta_add_atom(Space, Row, Token, _),
+             ( nonvar(Token), spaces:metta_space_pair(Space, Row, Token, Ref)
+             -> assertz(metta_reference_projection(Space, Key, Token, Ref))
+             ; true ) )).
+
+% The released space is the mutation root of its own disappearance: its
+% dependents are queued through the graph BEFORE the edges that reach them
+% are forgotten. This half runs when the release begins (seam:space_releasing/1).
+% Every row it takes out is journaled, so an abort puts the space back as it
+% was, and the space is no longer seen, so no drain publishes a dying face
+% into a module the clear is taking apart. Sight is not journaled, so the
+% completion re-seats it on a restored outcome (metta_reference_restored/2).
+% Outside a transaction the receivers are republished here, without the space,
+% as the preliminary clear's contract wants. Inside one they wait for the
+% outcome (metta_reference_retired/2): a receiver republished inside the
+% transaction receives a placeholder wrapper for each name the space gave it,
+% installed under the transaction, and unwrapping that wrapper after the
+% commit crashed the process; the completion runs outside any transaction,
+% where retiring the binding is a plain import removal. The space's own
+% bindings are imports and wrappers on its module's predicates, physical
+% state no journal restores: they too go at the completion, before the
+% module's predicates are abolished. Retiring them at the start left an
+% aborted release with its slots restored and its import of scope-defer/4
+% gone, so a class home's mint answered Unknown procedure
+% [tested: space_retirement:an_aborted_release_keeps_the_receivers_imported_binding_callable,
+% space_retirement:a_committed_release_retires_the_receivers_binding_at_completion,
+% release_preparation:preliminary_clear_retires_the_provider_once_before_removing_rows,
+% extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows,
+% extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_live_borrower_keeps_its_class_out_of_the_withdrawal
+% run before extensions/python/tests/ch09_types/test_class_construction.py in one process;
+% commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+metta_reference_release(Space) :-
+    retractall(metta_reference_space_option(Space, _, _)),
+    (   metta_reference_seen_space(Space, Module)
+    ->  ( current_transaction(_) -> true ; metta_reference_invalidate([Space]) ),
+        metta_reference_source_clear(Space),
+        retract(metta_reference_seen_space(Space, Module)),
+        metta_reference_release_loader(Space),
+        spaces:metta_reference_mutation_scope(Space, disabled),
+        retractall(metta_reference_observed(Space)),
+        forall(retract(metta_reference_row(Space, Token, _, _)),
+               retractall(metta_reference_map(Token, _, _))),
+        retractall(metta_occurrence_grade(Space, _, _, _)),
+        retractall(metta_reference_projection(Space, _, _, _)),
+        findall(Receiver, metta_reference_row(Receiver, _, Space, _), Receivers0),
+        sort(Receivers0, Receivers),
+        forall(retract(metta_reference_row(Receiver, Token, Space, _)),
+               ( retractall(metta_reference_map(Token, _, _)),
+                 space_module(Receiver, ReceiverModule),
+                 support_graph:support_forget(derived(ReceiverModule, reference_row(Token))) )),
+        metta_reference_forget_faces,
+        (   current_transaction(_)
+        ->  Deferred = Receivers
+        ;   metta_reference_refresh, Deferred = []
+        ),
+        assertz(metta_reference_release_unseen(Space, Module, Deferred))
+    ;   true
+    ).
+
+% The restored outcome: the space is in sight again. Its rows came back with
+% the abort, its bindings and its receivers' were never touched, so nothing is
+% republished. A space the release never took out of sight needs nothing.
+metta_reference_restored(Space, _) :-
+    (   retract(metta_reference_release_unseen(Space, Module, _))
+    ->  ( metta_reference_seen_space(Space, Module) -> true
+        ; assertz(metta_reference_seen_space(Space, Module)) )
+    ;   true
+    ).
+
+% The physical half, once the retirement is durable and while the module still
+% stands: the bindings drawn from the space anywhere, the module's own, the
+% names it alone demanded, and the receivers a transaction deferred.
+metta_reference_retired(Space, Module) :-
+    (   retract(metta_reference_release_unseen(Space, _, Deferred))
+    ->  metta_reference_retired_module(Space, Module),
+        (   Deferred == []
+        ->  true
+        ;   metta_reference_invalidate(Deferred), metta_reference_refresh
+        )
+    ;   true
+    ).
+
+metta_reference_retired_module(_, none) :- !.
+metta_reference_retired_module(Space, Module) :-
+    metta_reference_demand_names([Space-Module], Demanded),
+    %A receiver retiring in the same group was already out of sight when this
+    %space's release republished its receivers, so its bindings drawn from this
+    %space still stand: the roots rows are the reverse index that names them.
+    %They go before the module's predicates are abolished, because a wrapper
+    %or import left standing on an abolished predicate is a dangling
+    %definition, and the receiver's own retirement crashed the process on it
+    %[tested: extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_live_borrower_keeps_its_class_out_of_the_withdrawal
+    %run before extensions/python/tests/ch09_types/test_class_construction.py in one process;
+    %commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+    forall(( metta_reference_roots(Other, Name, Arity, Roots), Other \== Module,
+             memberchk(root(Space, _, _, _), Roots) ),
+           ( metta_reference_retire_binding(Other, Name, Arity, discard),
+             retractall(metta_reference_roots(Other, Name, Arity, _)),
+             metta_reference_bound_forget(Other, Name, Arity) )),
+    forall(metta_reference_slot(Module, Name, Arity),
+           metta_reference_retire_binding(Module, Name, Arity, preserve)),
+    forall(metta_reference_roots(Module, Name, Arity, _),
+           metta_reference_bound_forget(Module, Name, Arity)),
+    retractall(metta_reference_roots(Module, _, _, _)),
+    support_graph:support_forget(derived(Module, reference_face)),
+    forall(( member(Name, Demanded), \+ metta_reference_demanded_elsewhere(Name) ),
+           retractall(metta_reference_demand(Name))),
+    with_typing_policy_stable(metta_reference_demand_wrapper).
+
+:- dynamic seam:space_releasing/1, seam:deferred_translation_settled/0.
+metta_reference_install_hooks :-
+    ( metta_reference_hooks -> true
+    ; assertz(metta_reference_hooks),
+      assertz((seam:source_program_compiled :- metta_reference_refresh)),
+      assertz((seam:deferred_translation_settled :- metta_reference_refresh)),
+      assertz((seam:space_releasing(Space) :- metta_reference_release(Space))) ).
+
+:- multifile prolog:message//1, prolog:error_message//1.
+prolog:message(metta_head_pattern_note(Name, [], _, reference_union(Origins))) -->
+    [ '~w is the union of definitions from ~q; use except to select a source'-
+      [Name, Origins] ].
+prolog:message(metta_head_pattern_note(Name, [], _, reference_missing(Home))) -->
+    [ '~w does not currently define ~w; the standing from row will follow it'-
+      [Home, Name] ].
+prolog:error_message(metta_internal_reference(Home, Name)) -->
+    [ '~w is internal in ~w; call (evalc (~w ...) ~w) to use its defining space'-
+      [Name, Home, Name, Home] ].
+prolog:error_message(metta_reference_map_result(Map, Head, Result)) -->
+    [ 'from map ~q returned ~q for ~w; each answer must be a symbol or a finite call pattern with a symbol head and ordinary variables'-
+      [Map, Result, Head] ].

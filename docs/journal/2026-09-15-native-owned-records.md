@@ -96,7 +96,7 @@ Tried: `sh engine/test.sh suites/spaces/owned_records.plt` on the installed host
 eight failing cases of `retirement_and_writes_conflict_in_both_commit_orders`
 (prototype-remove, prototype-drop; `ai-tmp/ai-owned-record-root-before.log`); after, all
 28 tests and 74 sub-tests pass (`ai-tmp/ai-owned-record-root-after.log`).
-`sh check.sh host-workarounds host-workarounds-selftest` -> ok, 18 entries, 39 sites, every
+`sh tools/check.sh host-workarounds host-workarounds-selftest` -> ok, 18 entries, 39 sites, every
 reproduction present (`ai-tmp/ai-owned-record-root-workaround-lanes.log`).
 Measured: 1000 add-atoms into a fresh space plus one full enumeration, three identical
 samples each (`ai-tmp/ai-owned-record-cost-probe.py`): 43,157 inferences on the control
@@ -197,7 +197,7 @@ is to be run alone and compared with pristine c75181adc before the commit-order 
 chosen. This unit changes no generated `retire-Class`, prototype `drop`, Scope state,
 SpaceHandle flag or release callback, and does not claim retirement rollback fixed.
 Tried: ruff over the four changed Python files -> clean; jscpd over them at 10 lines / 80
-tokens -> 0 clones in 4 files (`ai-tmp/ai-owned-record-consumer-root-clones/`); `sh check.sh
+tokens -> 0 clones in 4 files (`ai-tmp/ai-owned-record-consumer-root-clones/`); `sh tools/check.sh
 binding binding-selftest layer-sync layer-sync-selftest closed-sets policy-inventory` -> ok,
 so the patched host-user projection is byte-equal to the generator's
 (`ai-tmp/ai-owned-record-consumer-root-binding-lanes.log`).

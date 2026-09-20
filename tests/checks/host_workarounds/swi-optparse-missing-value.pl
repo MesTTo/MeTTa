@@ -1,5 +1,5 @@
 % Purpose: detect conflation of a missing option value with an empty argument.
-% [tested: sh check.sh host-workarounds; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
+% [tested: sh tools/check.sh host-workarounds; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
 :- use_module(library(optparse), [opt_parse/5]).
 main :-
     Spec=[[opt(text),type(atom),longflags([text])]],

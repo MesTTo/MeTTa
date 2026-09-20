@@ -248,7 +248,7 @@ answer, which is also where Z4's `annotation` column comes from.
 
 ### What the suite said about the four, and what it said about itself
 
-Verified: `sh check.sh ruff mypy stubtest deptry llms llms-selftest evidence
+Verified: `sh tools/check.sh ruff mypy stubtest deptry llms llms-selftest evidence
 provenance-pin-selftest aio-mirror init-stub reference` and `uv lock --check`
 are all 0 on the finished tree, and the four packages' own scenarios pass: 15
 for the type table, 10 for the OpenAPI document, 15 for the GraphQL schema, 15
@@ -260,7 +260,7 @@ holds two producers now, the root has one more satellite, the ruff `A`
 burn-down gains the block door's `filter` keyword, and the stubtest allowlist's
 satellite roster gains `telemetry`.
 
-Tried: reading the full `GATE_ONLY=1 sh check.sh` as a verdict. It reports
+Tried: reading the full `GATE_ONLY=1 sh tools/check.sh` as a verdict. It reports
 twenty red lanes, and a pristine control worktree cut from the same base commit
 reports the same twenty minus one. Every benchmark and static-analysis lane in
 that list -- `engine-bench`, `c-bench`, `mork-bench`, `node-bench`,

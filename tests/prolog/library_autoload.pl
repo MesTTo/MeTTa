@@ -71,7 +71,7 @@
 :- set_prolog_flag(autoload, false).
 :- ensure_loaded(deferred_references).
 % The checker runs in user, which imports only the engine's public interface.
-% [tested: sh check.sh lib-autoload; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+% [tested: sh tools/check.sh lib-autoload; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- use_module(library(lists), [member/2, memberchk/2]).
 :- use_module(library(apply), [exclude/3]).
 :- use_module(library(readutil), [read_file_to_string/3]).

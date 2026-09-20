@@ -32,7 +32,9 @@
 #   Future Enhancements: None
 set -eu
 
-HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+# The repository root, which is this script's PARENT: these drivers live in
+# tools/ so the root stays short enough to read at a glance.
+HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)
 status=0
 
 component() {

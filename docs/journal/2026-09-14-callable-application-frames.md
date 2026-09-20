@@ -44,7 +44,7 @@ rewrites, partial captures, duplicate refusal and scoped streams.
 Verified: that command with `test_callable_values.py` and
 `../ch11_python_as_a_notation/test_expanded_call_values.py` added passes all
 71 cases. The paths are relative to `extensions/python/tests/ch03_atoms_and_expressions/`.
-Log: `ai-classes-c35-application-after.log`. `sh check.sh ruff mypy` passes,
+Log: `ai-classes-c35-application-after.log`. `sh tools/check.sh ruff mypy` passes,
 in `ai-classes-c35-application-shape.log`.
 
 The keyword-name matrix initially fails `self` with

@@ -97,7 +97,7 @@ main([Mode]) :-
     % of `alarm(2, true, _), sleep(3)` sat until a 30 second ceiling, against
     % 0 of 15 for a plain sleep, 0 of 15 for the same alarm with
     % remove_alarm/1, and 0 of 15 for call_with_time_limit/2, which removes
-    % its own [measured 2026-09-06; command=sh bounded.sh --ceiling 30 swipl
+    % its own [measured 2026-09-06; command=sh tools/bounded.sh --ceiling 30 swipl
     % -g GOAL -t halt; fixture=swipl 10.1.13;
     % commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
     thread_create(( sleep(2), thread_send_message(release, go) ), _,

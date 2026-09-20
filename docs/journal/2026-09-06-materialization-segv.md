@@ -123,7 +123,7 @@ out of 10 here, both at loadavg 104; twenty consecutive
 exit 0 with no signal in any of them.
 
 Re-verified after two more trunk moves, on base `26cf523f`, which is the tree
-this branch finally sits on. `GATE_ONLY=1 sh check.sh` fails
+this branch finally sits on. `GATE_ONLY=1 sh tools/check.sh` fails
 `engine-bench c-bench mork-bench pytest benchmarks instructions extcost` here
 and fails EXACTLY those seven on `26cf523f` itself in the same worktree, so
 this branch adds no gate failure; all seven are measurement lanes and a

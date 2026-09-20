@@ -141,7 +141,7 @@ jobs:
 
       - name: Run shell tests
         run: |
-          sh test.sh
+          sh tools/test.sh
           sh tests/shell/test_git_import.sh
           sh tests/shell/test_git_dependency.sh
           sh tests/shell/test_loader_concurrency.sh

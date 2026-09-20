@@ -12,7 +12,7 @@
    Guarantees: the claim remains an artifact claim when dev_typed loads the
    engine and this suite with source=true: source=false is scoped to the
    tests' runtime loads, then restored along with library cleanup
-   [tested: sh check.sh dev-typed
+   [tested: sh tools/check.sh dev-typed
    dev-typed-selftest prolog; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]. The governance follows
    the boot's pattern table and the claim follows the stamped encoding
    [tested: the_boot_governs_the_sources_its_patterns_name,

@@ -3,7 +3,7 @@ Goal: expose directory creation, file copy, queryable metadata, lexical paths, s
 Constraint: retain the existing library import shape and classify each operation by the five-rank effect lattice.
 
 ## 2026-09-05
-Tried: `sh run.sh ai-tmp/ai-library-baseline.metta` returned each requested operation as unevaluated data, including `(exit! 17)`, and exited zero. The file library already handles text and line spaces.
+Tried: `sh tools/run.sh ai-tmp/ai-library-baseline.metta` returned each requested operation as unevaluated data, including `(exit! 17)`, and exited zero. The file library already handles text and line spaces.
 Tried: a subprocess running `catch(halt(17),_,writeln(caught))` printed `caught` but still exited 17 under SWI 10.1.13. Catching the unwind does not cancel process termination.
 Decided: extend `lib_file`; lexical path operations follow SWI `directory_file_path/3`, `file_directory_name/2`, `file_base_name/2` and `file_name_extension/3`. They inspect only arguments and are `pureStructural`. Directory enumeration and existence tests are deterministic state reads and are `readOnlyLookup`.
 Decided: `make-dir!` creates missing parents, `delete-dir!` removes an empty directory, and `copy-file!` copies bytes to a staging file beside the destination before renaming. Copy follows the stream ownership pattern in SWI `library(filesex)` and the staged publication pattern of atomic file replacement. Staging in a directory acquired by `make_directory/1` avoids opening an attacker-created temporary filename and keeps rename on the destination filesystem. A failed copy keeps an existing destination intact; cleanup removes the staging directory.

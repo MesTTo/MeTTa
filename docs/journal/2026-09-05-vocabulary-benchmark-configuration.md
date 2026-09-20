@@ -20,7 +20,7 @@ therefore did not cause this reduction. Adding the main checkout's two MORK
 shared libraries to that baseline made the unchanged benchmark pass.
 
 Decided: restore the worktree's configuration through the repository's
-existing `sh worktree.sh`, which links the two ignored MORK artifacts and
+existing `sh tools/worktree.sh`, which links the two ignored MORK artifacts and
 builds this worktree's C code. It completed with exit 0. With that
 configuration, the vocabulary branch's handle benchmark measured
 `[1506915, 1506859, 1506859]` and passed the existing pin.
@@ -88,7 +88,7 @@ missing-backend failure.
 Tried: the artifact-path gate in the original nested worktree resolved the
 sibling conformance checkout and Cargo dependency at the wrong directory depth.
 Moved this worktree beside the primary checkout and repaired its three nested
-worktree registrations. Rebuilt engine artifacts through `sh worktree.sh`;
+worktree registrations. Rebuilt engine artifacts through `sh tools/worktree.sh`;
 the artifact-path checker then reported zero findings.
 
 The first Python gate after the move reported `230 failed, 2843 passed,

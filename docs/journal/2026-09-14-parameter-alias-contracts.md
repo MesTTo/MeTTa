@@ -60,7 +60,7 @@ extensions/python/tests/ch14_seeing_your_program/test_features.py::test_every_pu
 extensions/python/tests/repository/test_layout_projections.py
 extensions/python/tests/ch19_spaces_backed_by_anything/test_restricted_space.py`.
 
-`sh check.sh layering ruff mypy evidence` passes in
+`sh tools/check.sh layering ruff mypy evidence` passes in
 `ai-classes-c42-alias-checks.log`. `jscpd --format prolog --formats-exts
 prolog:pl,plt --min-lines 8 --min-tokens 80 --max-lines 10000 --max-size 1mb
 --no-gitignore --noTips --reporters console,json --output

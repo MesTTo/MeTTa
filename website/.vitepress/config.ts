@@ -36,11 +36,11 @@ const mettaLanguage = {
 };
 
 export default defineConfig({
-  title: "MeTTa Kernel",
+  title: "MeTTa",
   description: "MeTTa, implemented in Prolog and C, with Python, TypeScript and C surfaces over one engine.",
-  base: "/MeTTa-Kernel/",
+  base: "/MeTTa/",
   head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/MeTTa-Kernel/visuals/favicon.svg" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/MeTTa/visuals/favicon.svg" }],
   ],
   // localhost examples in docstrings are unreachable at build time by nature
   ignoreDeadLinks: [/^https?:\/\/localhost/],
@@ -78,7 +78,7 @@ export default defineConfig({
       { text: "Recipes", link: "/integrations/" },
       { text: "Reference", link: "/reference/" },
       { text: "Engine", link: "/engine/" },
-      { text: "GitHub", link: "https://github.com/MesTTo/MeTTa-Kernel" },
+      { text: "GitHub", link: "https://github.com/MesTTo/MeTTa" },
     ],
     sidebar: [
       {
@@ -237,8 +237,8 @@ export default defineConfig({
               { text: "Adding one", link: "/extensions/adding" },
               { text: "PyMeTTa (Python)", link: "/extensions/python/" },
               { text: "PyMeTTa tutorial", link: "/extensions/python/tutorial" },
-              { text: "MeTTa-node (TypeScript)", link: "/extensions/node/" },
-              { text: "MeTTa-node tutorial", link: "/extensions/node/tutorial" },
+              { text: "TSMeTTa (TypeScript)", link: "/extensions/node/" },
+              { text: "TSMeTTa tutorial", link: "/extensions/node/tutorial" },
               { text: "CMeTTa (C)", link: "/extensions/cmetta/" },
               { text: "CMeTTa tutorial", link: "/extensions/cmetta/tutorial" },
               { text: "MORK (storage backend)", link: "/extensions/mork/" },
@@ -248,7 +248,7 @@ export default defineConfig({
       },
     ],
     search: { provider: "local" },
-    socialLinks: [{ icon: "github", link: "https://github.com/MesTTo/MeTTa-Kernel" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/MesTTo/MeTTa" }],
     footer: {
       message: "Released under the MIT License.",
       copyright: "MesTTo",

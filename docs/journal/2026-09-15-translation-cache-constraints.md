@@ -61,7 +61,7 @@ reservation absence and binding-time exceptions.
 
 Verified: `HYPOTHESIS_PROFILE=ci python -m pytest extensions/python/tests/ch05_equations_and_evaluation extensions/python/tests/ch18_performance/test_fast_io.py -q -n 0`
 passes 152 tests, exit zero, peak RSS 280,540 KiB, in
-`ai-tmp/ai-cache-attributes-root-python.log`. `GATE_ONLY=1 sh check.sh layering evidence`
+`ai-tmp/ai-cache-attributes-root-python.log`. `GATE_ONLY=1 sh tools/check.sh layering evidence`
 passes both layering checks and reports zero unbacked evidence claims in
 `ai-tmp/ai-cache-attributes-root-gates.log`. The two changed Prolog files have
 zero clones under jscpd at five lines and 50 tokens; its report is

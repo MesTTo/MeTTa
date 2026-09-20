@@ -124,13 +124,13 @@ requirement as a database foreign key or a stable handle in an object store;
 position and value equality do not identify an occurrence.
 
 ### Integration checks
-Tried: the existing soft example through `sh test.sh
+Tried: the existing soft example through `sh tools/test.sh
 examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/02-soft.metta`.
 Exit 0, every assertion passed. The new plunit suite passes all four tests,
 including a host-owned textual atom and misleading similarity rows on grounded
 values. The incremental reproduction now keeps 0.95 after defining warm.
 
-Tried: initial `sh check.sh llms llms-selftest lib-surface layering libdoc`.
+Tried: initial `sh tools/check.sh llms llms-selftest lib-surface layering libdoc`.
 The library surface and generated library documentation passed. Layering named
 two unpublished cross-module calls, `filereader:withdraw_source_load/3` and
 `spaces:metta_remove_atom_reference/1`; their owning modules must export the
@@ -192,9 +192,9 @@ Tried: the repaired full engine suite exited 0: 2,198 tests and 1,436 subtests
 in 76 suite summaries, with no load errors.
 
 Tried: final `sh extensions/python/test.sh` exited 0 with 3,507 passed,
-48 skipped and 5 warnings. Final `sh test.sh` exited 0 with 253 executed
+48 skipped and 5 warnings. Final `sh tools/test.sh` exited 0 with 253 executed
 examples and no failures; the runner retained its five declared skips.
-Final `sh check.sh llms llms-selftest lib-surface layering libdoc` exited 0:
+Final `sh tools/check.sh llms llms-selftest lib-surface layering libdoc` exited 0:
 all five lanes passed, including 61 planted llms cases and the layering
 check's four planted routes. The scan covered 946 cross-subsystem calls and
 470 library equations. No other check.sh lanes were requested or run.

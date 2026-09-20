@@ -138,7 +138,9 @@
 
 set -u
 
-HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+# The repository root, which is this script's PARENT: these drivers live in
+# tools/ so the root stays short enough to read at a glance.
+HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)
 . "$HERE/tests/checks/gate_scratch.sh"
 metta_gate_scratch_open "$HERE" || exit $?
 trap 'metta_gate_scratch_close' EXIT
@@ -152,7 +154,7 @@ trap 'metta_gate_scratch_close' EXIT
 # VIRTUAL_ENV with CHECK_PY auto-selected;
 # commit=d90a3c9620e56e42d3a2f5982b4353da8423e873].
 METTA_ROOT="$HERE"
-. "$HERE/select-python.sh"
+. "$HERE/tools/select-python.sh"
 [ -n "$PY" ] || { echo "check.sh: no python found (set CHECK_PY)" >&2; exit 2; }
 
 PYDIR="$HERE/extensions/python"
@@ -215,13 +217,13 @@ trap check_cleanup EXIT
 # Still a prefix rather than the script spelled out 25 times, so the ceiling has
 # ONE definition and `tests/checks/check_process_bounds.py` can name the spawn
 # that forgot it.
-bounded() { sh "$HERE/bounded.sh" "$@"; }
+bounded() { sh "$HERE/tools/bounded.sh" "$@"; }
 
 # Which program holds the deadline, resolved ONCE for the whole run rather than
 # per spawn: bounded.sh prefers a GNU `timeout` over the uutils reimplementation
 # Ubuntu 25.10 installs over /usr/bin/timeout, and asking costs a `--version`
 # exec that a gate making hundreds of spawns should not repeat.
-METTA_TIMEOUT=${METTA_TIMEOUT:-$(sh "$HERE/bounded.sh" --enforcer)} || {
+METTA_TIMEOUT=${METTA_TIMEOUT:-$(sh "$HERE/tools/bounded.sh" --enforcer)} || {
     echo "check.sh: no \`timeout\` on PATH; see bounded.sh" >&2
     exit 2
 }

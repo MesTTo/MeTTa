@@ -7,7 +7,7 @@ attributed C boot inventory. Performance remeasurement belongs to integration.
 
 ## 2026-09-11
 
-Tried: `sh check.sh packaged` failed on the installed runtime's missing
+Tried: `sh tools/check.sh packaged` failed on the installed runtime's missing
 `provides_engine_user.pl`, then SWI died with signal 11. GDB located the fault
 inside `loadPredicate` in SWI 10.1.13 `src/pl-qlf.c`, immediately after
 `lookupProcedureToDefine` returned null. The stripped library labels that address
@@ -39,7 +39,7 @@ collect errors and failed-directive warnings for every active load on the same
 thread. Ordinary style warnings remain warnings. Keep this host repair paired
 with its plain-SWI reproduction and workaround ledger entry.
 
-Tried: `sh check.sh dev-typed dev-typed-selftest` on this branch and a private
+Tried: `sh tools/check.sh dev-typed dev-typed-selftest` on this branch and a private
 `c66cf0c10` control produced the same five failures. `source=true` makes all
 four artifact cases read source instead of QLF; the first case measured 2454
 and 2415 inferences against a 2414 source compile. PlDoc's per-module `$mode/2`
@@ -83,7 +83,7 @@ enabled case crashes. Loading the plain source instead printed an imported
 procedure refusal and an undefined export, rather than crashing. The loader
 restoration protects source loads as well as artifact replay.
 
-Result: `sh check.sh packaged` passes after building the source archive and its
+Result: `sh tools/check.sh packaged` passes after building the source archive and its
 wheel. Both standalone and embedded boot return exit 1 with a named refusal
 for a missing entry, a missing included file and a failed directive. The
 directory fixture carries both new nested includes; its enumeration control
@@ -91,7 +91,7 @@ omits them. The first regression assertion expected the internal
 `metta_load_failed` functor in printed output; the existing renderer correctly
 prints `the Prolog source did not load cleanly`, which the test now checks.
 
-Result: `sh check.sh dev-typed dev-typed-selftest` passes with all artifact and
+Result: `sh tools/check.sh dev-typed dev-typed-selftest` passes with all artifact and
 cost assertions retained, and leaves no `lib_datetime.qlf`. The shared-loader
 unit passes 12 cases. The focused Python run passes 25 tests, including the
 five corpus comparisons with byte and mtime preservation, the source-archive
@@ -114,7 +114,7 @@ calls even when no load scope exists. Use the hook's required backtracking to
 enumerate `clause(watching, true, Ref)` and record each scope once. This keeps
 the idle path at one clause lookup and needs no second active-state flag.
 
-Result: C error-ball returns to exactly 634015 inferences; `sh check.sh c-bench`
+Result: C error-ball returns to exactly 634015 inferences; `sh tools/check.sh c-bench`
 passes, with the two documented boot counter comparisons declined by checkout
 shape. Prolog, prolog-static, no-autoload, both QLF lanes, boot-determinism and
 packaged pass together. The evidence check found a missing tag on the private
@@ -127,7 +127,7 @@ status only with both the original signal report and the exact secondary
 assertion; unrelated aborts remain broken reproductions. The source-loading
 unit and installed-wheel negative checks continue to exercise the repair.
 
-Result: `GATE_ONLY=1 sh check.sh` reported 145 passing lanes, 23 failing lanes
+Result: `GATE_ONLY=1 sh tools/check.sh` reported 145 passing lanes, 23 failing lanes
 and no skipped lanes. All 142 tracked engine and library inputs retained
 their bytes, sizes and modification times. Boot-determinism passed after its
 exact prefix at 319090. Packaged boot passed all six damaged-wheel checks;
@@ -175,7 +175,7 @@ leave optional library caches, alongside the tracked-source before/after
 comparison. Keep the first complete run's failures as evidence of the defects
 that its integration checks found.
 
-Result: the final `GATE_ONLY=1 sh check.sh` reports 147 passing lanes and 21
+Result: the final `GATE_ONLY=1 sh tools/check.sh` reports 147 passing lanes and 21
 failing lanes, with no skipped lanes. All assigned engine and packaging lanes
 pass. Pytest reports 5588 passed, 99 skipped and the one provisional identity
 twin failure, 2586 inferences against 2478 plus 20. Boot-determinism passes
@@ -209,11 +209,11 @@ the citation now also names the existing branch at line 104.
 Decided: follow the existing claim/provenance scope split, adding root Python
 build hooks and component shell tests to CLAIM_SOURCES. Reuse the tracked
 source and comment-versus-code plants for both file classes. Before the globs,
-`sh check.sh evidence-selftest provenance-pin-selftest` reports two unread
+`sh tools/check.sh evidence-selftest provenance-pin-selftest` reports two unread
 claims and seven pinning defects, including both unreported file paths.
 The existing unrelated out-of-scope plant remains a required refusal.
 
-Result: `sh check.sh evidence evidence-selftest evidence-mutations
+Result: `sh tools/check.sh evidence evidence-selftest evidence-mutations
 provenance-pin-selftest ruff-drivers` passes. The scanner reads 7414 claims
 with zero unbacked tags. The evidence selftest reports zero defects across
 36 citation plants and its path controls; all ten rule mutations and the

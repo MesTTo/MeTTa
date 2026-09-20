@@ -1,7 +1,7 @@
 % Purpose: test whether libarchive verifies a gzip member's CRC trailer.
 % Guarantees: present requires a valid control and the corrupted member's
 % unchanged payload; absent requires refusal of only the corrupt member.
-% [tested: sh check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
+% [tested: sh tools/check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 % Owns resources: each input, archive and entry stream closes on every exit.
 
 :- use_module(support/gzip_fixture, [gzip_fixture/3]).

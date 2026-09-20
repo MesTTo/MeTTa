@@ -86,7 +86,7 @@ by line index at all splits one finding across every query that follows it: the
 first run reported the same `and` three times because our extra answer moved
 each of the arbiter's answers down one.
 
-The run of record, `sh check.sh parity-fuzz` at its defaults (200 programs,
+The run of record, `sh tools/check.sh parity-fuzz` at its defaults (200 programs,
 seed 0, four rounds): 130 agree, 47 the arbiter raises on, 7 error-on-one, 16
 answer-mismatch, no surface misses and nothing over the 20-second ceiling. Four
 distinct divergences, each shrunk and written to

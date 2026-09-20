@@ -19,7 +19,9 @@
 #   To Do: None
 #   Hacks: None
 #   Future Enhancements: None
-SCRIPT_DIR=$(cd -- "$(dirname -- "$0")" && pwd)
+# The repository root, which is this script's PARENT: the drivers live in
+# tools/ so the root stays short enough to read at a glance.
+SCRIPT_DIR=$(cd -- "$(dirname -- "$0")/.." && pwd)
 QUIET=-q
 for argument do
     if [ "$argument" = --verbose ]; then
@@ -36,5 +38,5 @@ fi
 # equation spins at 100% with nothing watching it, and a session killed while
 # it runs used to leave it running. The ceiling is bounded.sh's hour unless the
 # caller says otherwise; test.sh sets 290 for the corpus.
-bounded() { sh "$SCRIPT_DIR/bounded.sh" "$@"; }
+bounded() { sh "$SCRIPT_DIR/tools/bounded.sh" "$@"; }
 bounded swipl --stack_limit=8g $QUIET -s "$BOOT" -- "$@" extensions

@@ -87,7 +87,7 @@ check("the answers still arrive beside it", groups[1], [3])
 After the block, `s.inferences`, `s.cputime`, `s.walltime`, `s.gc_count`,
 `s.gc_freed`, and `s.gc_time` carry what the block spent. The full runnable
 example is
-[`operations/engine_controls.py`](https://github.com/MesTTo/MeTTa-Kernel/blob/main/extensions/python/examples/operations/engine_controls.py).
+[`operations/engine_controls.py`](https://github.com/MesTTo/MeTTa/blob/main/extensions/python/examples/operations/engine_controls.py).
 
 Control signals hold everywhere, by engine design: a bound, a Ctrl-C, or an
 `interrupt()` cannot be eaten by the evaluation it is stopping, not even by
@@ -900,7 +900,7 @@ acknowledgement is retained as data in `&metta`, not discarded as a comment:
 ```metta
 (lint-intent &space operation-crossing-in-loop
              "module.py" 12 4 13 13
-             "L9Z1-06; https://github.com/MesTTo/MeTTa-Kernel/blob/7de3d32d25a7166b12f7c68c179e9cbb931ac044/website/guide/run-query.md#lint-a-space")
+             "L9Z1-06; https://github.com/MesTTo/MeTTa/blob/7de3d32d25a7166b12f7c68c179e9cbb931ac044/website/guide/run-query.md#lint-a-space")
 ```
 
 Source-observed events likewise appear as `(lint-evidence Space Kind Subject Path Line Column Authority)`. `clear()` retires both records with the owning

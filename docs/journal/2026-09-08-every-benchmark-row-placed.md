@@ -35,7 +35,7 @@ ladder runs, because a ladder over a lane that cannot execute measures nothing.
 
 ### Three GATE lanes had been dead since the extension-package merge
 
-Tried: `sh check.sh c-bench mork-bench node-bench` on the cut. All three die on
+Tried: `sh tools/check.sh c-bench mork-bench node-bench` on the cut. All three die on
 an `ImportError` before measuring one row.
 
 Found: `4e0feaf6b` moved the benchmark harness out of `metta.testing` into the

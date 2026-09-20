@@ -160,7 +160,7 @@ RUNNERS = (
 def gate_scripts() -> tuple[Path, ...]:
     """Every check.sh the gate runs: the root driver and each component's.
 
-    `sh check.sh <lane>` names any of their lanes, because the root driver
+    `sh tools/check.sh <lane>` names any of their lanes, because the root driver
     sources the components and its `run` filters on the argument list, so which
     file a lane sits in is not a property a caller can observe. Three readers
     asked the root file alone and each read a lane living in a component as a

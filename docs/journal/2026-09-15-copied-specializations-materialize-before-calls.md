@@ -80,7 +80,7 @@ Python passes all 1072 cases. Peak RSS is 820104 KiB and 2533852 KiB respectivel
 QLF files are removed before each runtime phase, and the phases run serially.
 Logs: `ai-tmp/ai-classes-c55e-{verification,native,python}.log`.
 
-Verified: `sh check.sh prolog lib-autoload evidence layering host-workarounds
+Verified: `sh tools/check.sh prolog lib-autoload evidence layering host-workarounds
 policy-inventory` passes. All 16 host entries and 37 sites have reproductions
 answering present. Evidence reports 7822 claims, zero unbacked and three
 placeholders awaiting the provenance commit. Log:

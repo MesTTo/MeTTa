@@ -8,7 +8,7 @@
 # Guarantees:
 #   - an empty driver sample includes the command's exit status and full
 #     output, so a refused configuration keeps its diagnostic
-#     [tested: sh check.sh boot-determinism; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
+#     [tested: sh tools/check.sh boot-determinism; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 #   - clause garbage collection costs a booted engine no Prolog work that grows
 #     with the number of clauses it reclaims. That is the mechanism half and it
 #     is deterministic: it runs the collector on this thread and compares the

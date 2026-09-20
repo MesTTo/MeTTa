@@ -1,6 +1,6 @@
 % Purpose: check calendar round trips, normalization and native refusals.
 % Guarantees: the public face covers each head in the shipped datetime example
-% [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta; commit=9b22993447a5ddba93643895e3025661ba9f693e].
+% [tested: sh tools/test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta; commit=9b22993447a5ddba93643895e3025661ba9f693e].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

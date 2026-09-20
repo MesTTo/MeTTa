@@ -115,7 +115,7 @@ lanes: the `mypy` gate was red at the base commit, `5621c456`, with two
 as `str | None` and `int | None`. Each field is now checked against the
 declared type, which changes nothing for the shape lib_tabling throws and
 fills a field with absence rather than with something else for any other.
-Measured: `sh check.sh mypy` answers 2 errors at `5621c456` and 0 here.
+Measured: `sh tools/check.sh mypy` answers 2 errors at `5621c456` and 0 here.
 
 The same reading fixed a second thing in the same file, because the JSON door
 needed it: `_reserved_message` handled the `syntax` kind and let `value` and

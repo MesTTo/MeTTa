@@ -121,7 +121,7 @@ assigns both the tag and test to MesTTo. Decided: correct the suite qualifier to
 `discharge_audit` so the evidence lane resolves the test it already intended to
 name.
 
-Tried: `GATE_ONLY=1 sh check.sh` under the shared gate lock on the functional
+Tried: `GATE_ONLY=1 sh tools/check.sh` under the shared gate lock on the functional
 snapshot. It ran for 989.13 seconds and passed the distribution example,
 engine/Python example parity, `lib-surface`, `layering`, `plunit`, `llms`,
 `evidence`, `libdoc`, and the other functional lanes, but exited 1 with eight
@@ -129,7 +129,7 @@ red lanes: `engine-bench`, `prolog-static`, `c-bench`, `mork-bench`, `pytest`,
 `benchmarks`, `policy-inventory`, and `parity-perf`. The MORK lane included
 `perf stat failed with exit 2: Events disabled` and a second-session PMU
 ownership error, so that measurement cannot support a performance conclusion
-[tested: GATE_ONLY=1 sh check.sh; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
+[tested: GATE_ONLY=1 sh tools/check.sh; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Tried: the same focused failure checks in a detached `e8356642` control. Its
 Python suite already had three failures: the unpublished
@@ -217,7 +217,7 @@ the end of the branch replaces them. A rebase changes every object ID, so a pin
 written against a pre-rebase commit names a tree this lineage does not carry,
 and every measurement behind those pins was re-run here.
 
-Superseded: the `GATE_ONLY=1 sh check.sh` record and the `bench.py
+Superseded: the `GATE_ONLY=1 sh tools/check.sh` record and the `bench.py
 --counter-only` A/B above describe the pre-rebase snapshot, whose base was
 `e8356642`. Their engine numbers are not true of this tree: `boot` alone reads
 265,430 inferences here against the 531,984 that snapshot compared against.
@@ -229,7 +229,7 @@ Measured on the rebased tree, with `libmork_ffi.so`, `morklib.so`, the five
 `cbump.so` and `handle.so` all built, `extensions/node/build` compiled against
 the main checkout's `node_modules`, and `engine/*.qlf` cleared and warmed:
 `sh engine/test.sh` exits 0 over 74 units, 2,157 tests and 1,436 sub-tests with
-no choicepoint and no load-time error; `sh test.sh` exits 0 with 253 of 253
+no choicepoint and no load-time error; `sh tools/test.sh` exits 0 with 253 of 253
 examples OK and no cross; `sh extensions/python/test.sh` exits 0 with 3,405
 passed and 48 skipped, the eight `test_node_binding.py` items among the passes
 rather than skipped for a missing seat; `sh extensions/cmetta/test.sh` exits 0.

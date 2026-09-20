@@ -33,7 +33,7 @@ answer the symbol `Tensor`, so it looked reachable.
 Tried: a face declaring every result type its annotations name, then the 08
 example's own first case -> `is (), should ((58.0 64.0) (139.0 154.0))`. The
 compiled goal carries `check_argument_type_under_live_policy(..., list,
-ordinary)` and the value fails it [command=sh run.sh
+ordinary)` and the value fails it [command=sh tools/run.sh
 ai-tmp/ai-face-probe-typed.metta; fixture=torch 2.13.0+cpu].
 
 Bisected, because the first reading of that failure was wrong. `Tensor` is NOT
@@ -45,7 +45,7 @@ chain. What refuses is `list` over `.tolist`, and the same declaration over
 over `(py-call (sorted $xs))` answers `(a b)` for `("b" "a")` and answers
 NOTHING for `(3 1 2)`, because a crossed expression of numbers carries an
 element-wise type the word `list` does not fit while an expression of symbols
-does [command=sh run.sh ai-tmp/ai-face-probe-typed5.metta, and the same three
+does [command=sh tools/run.sh ai-tmp/ai-face-probe-typed5.metta, and the same three
 runs through the library engine].
 
 So a declared type is checked against the CROSSED VALUE, and which of a
@@ -108,7 +108,7 @@ The hand-written face reads `(= (torch-shape $a) (py-call (list (py-call
 (getattr $a shape)))))` and the `list` looked redundant: both spellings print
 `(3 2)`. They do not compare equal. `!(== (py-call (divmod 7 2)) (3 1))` is
 False and `!(== (py-call (list (py-call (divmod 7 2)))) (3 1))` is True; the
-same holds for `Tensor.shape` [command=sh run.sh
+same holds for `Tensor.shape` [command=sh tools/run.sh
 ai-tmp/ai-face-probe-tuple.metta]. The generated face dropped the wrapper on
 the first pass and `08-torch_lib.metta` failed its third case with `is (3 2),
 should (3 2)`, which is what a printed answer that unifies with nothing looks
@@ -124,7 +124,7 @@ two-element list, so a module of any depth misses it: `(py-call (os.path.join
 `((py-atom os.path.join) "a" "b")` answers `"a/b"` and compares equal to it;
 `(py-call (.join (py-atom os.path) "a" "b"))` answers the SYMBOL `a/b`, which
 compares False against the string, because py-call converts by janus's
-defaults [command=sh run.sh ai-tmp/ai-face-probe-dotted2.metta]. Decided: the
+defaults [command=sh tools/run.sh ai-tmp/ai-face-probe-dotted2.metta]. Decided: the
 `mod.fun` spelling where it reaches, which is what the shipped face uses and
 what keeps its answers, and the `py-atom` application where it does not.
 
@@ -144,7 +144,7 @@ Measured while deciding whether a wrong review is dangerous: a declared
 `pureStructural` on a py-call head does NOT enable memoisation here.
 `!(== (prnd 1) (prnd 1))` over `(= (prnd $a) (py-call (random.random)))` is
 False with `pureStructural`, `readOnlyLookup` and no declaration alike
-[command=sh run.sh ai-tmp/ai-face-probe-cache.metta]. The class is a promise
+[command=sh tools/run.sh ai-tmp/ai-face-probe-cache.metta]. The class is a promise
 reflection and worlds read, not a silent optimiser trigger, which is why the
 review demands its reason in writing.
 
@@ -158,8 +158,8 @@ head gained an arrow with its effect class, and 19 of 20 gained the `(@doc ...)`
 atom torch's own docstring carries; `torch.relu` has no docstring, so it has no
 documentation, which is the module's own gap rather than a hidden one.
 
-Verification: `sh run.sh` on both torch examples, answer lines diffed against
-the same runs before the change, identical. `sh check.sh face-sync llms
+Verification: `sh tools/run.sh` on both torch examples, answer lines diffed against
+the same runs before the change, identical. `sh tools/check.sh face-sync llms
 llms-selftest ruff mypy examples evidence provenance-pin-selftest`, and the
 chapter suite.
 

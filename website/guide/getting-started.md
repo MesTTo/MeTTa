@@ -28,7 +28,7 @@ own idiom, and it is why every example here checks itself.
 
 The program is not a sample of that file. It IS that file, byte for byte:
 `examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta`
-is what `sh test.sh` runs in the gate, and the site build refuses a `::: run`
+is what `sh tools/test.sh` runs in the gate, and the site build refuses a `::: run`
 fence whose text has drifted from the file it names. Here is the first program in
 the corpus, which prints a number rather than checking one:
 
@@ -38,7 +38,7 @@ the corpus, which prints a number rather than checking one:
 ;is a list of forms, and a form prefixed with ! is RUN when the reader
 ;reaches it. The engine prints what it answers.
 ;
-;    sh run.sh examples/ch01-getting-started/01-hello.metta
+;    sh tools/run.sh examples/ch01-getting-started/01-hello.metta
 ;
 ;prints 42.
 !(+ 40 2)

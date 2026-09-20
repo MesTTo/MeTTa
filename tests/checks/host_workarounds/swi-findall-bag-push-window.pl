@@ -15,7 +15,7 @@
 %   - `present` iff the enclosing findall collects fewer than 200 answers
 %     [measured 2026-09-11: 13 of 200 are collected, while a thrown ball
 %     through the same nesting collects 200 and a depth limit collects 200;
-%     command=sh check.sh host-workarounds; fixture=SWI-Prolog 10.1.13;
+%     command=sh tools/check.sh host-workarounds; fixture=SWI-Prolog 10.1.13;
 %     commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 % Open Obligations:
 %   To Do: None

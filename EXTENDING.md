@@ -1879,7 +1879,7 @@ So give the head a name of its own. The shipped libraries' hyphenated,
 domain-qualified spellings (`vector-add`, `csv-parse`, `map-insert`,
 `flatten-once`) are what keeps them clear of that chain, and the MeTTa name is
 what has to be free: `flatten-once` is reached as `'flatten-once'/2`, which no
-host library defines. `sh check.sh lib-autoload` refuses a published head a tier
+host library defines. `sh tools/check.sh lib-autoload` refuses a published head a tier
 above `lib/` answers, naming the module that answers it, so this is a red rather
 than a wrong answer.
 
@@ -2127,7 +2127,7 @@ that creates a space refuses any other spelling, `new-space` refuses it,
 carry it. `metta_space_operand/1` reads the prefix before it asks either
 registry, so a provider that skips it is answered "no space" by the matcher,
 the type-candidate resolvers, the translator and the codec, without an error
-anywhere. `sh check.sh prolog-static` scans the loaded database
+anywhere. `sh tools/check.sh prolog-static` scans the loaded database
 and refuses such a name by name. A **parametric** space is named by a ground
 expression rather than an atom and carries no prefix.
 
@@ -2641,7 +2641,7 @@ own `library(arithmetic)` does exactly this, and the engine repairs that one at
 boot and re-repairs it whenever it is installed again
 (`guard_arithmetic_goal_expansion/0` in `engine/metta.pl`, with a
 `prolog_listen/2` watcher). A benign rewriting expansion is fine; scope anything
-sharper inside your own module. `sh check.sh prolog-static` holds the canary,
+sharper inside your own module. `sh tools/check.sh prolog-static` holds the canary,
 `_ is foo + 1` must expand to itself without an exception, and the plunit lane
 fails any suite that prints ERROR while it loads.
 

@@ -39,7 +39,7 @@ Guarantees:
   - a census head is drawable only where the ARBITER reduced it, decided by
     running it rather than by a list, and a head whose two runs disagree is
     recorded as nondeterministic instead
-    [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
+    [tested: sh tools/check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
 Fails when:
   - asked to capture from a dirty or unresolvable checkout, or from one whose
     corpus holds an untracked file.

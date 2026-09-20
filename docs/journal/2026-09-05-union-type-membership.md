@@ -339,7 +339,7 @@ once first.
 | `run_tests suites/typecheck/union_types.plt -- extensions` | 35/35, exit 0 |
 | `run_tests suites/typecheck/structural_aliases.plt -- extensions` | 28/28, exit 0 |
 | `sh engine/test.sh` | exit 0, 66 files, 298 units, no FAILED |
-| `sh test.sh` | exit 0, 248 examples OK |
+| `sh tools/test.sh` | exit 0, 248 examples OK |
 | `CHECK_PY=$PY sh extensions/python/test.sh` | 3,191 passed, 52 skipped, 0 failed on one run; a repeat read 3,190 passed with `test_a_transaction_commits_async_launch_before_its_landing` failing on `assert [launch] == [launch, landing]`, the flake the alias thread already recorded reproducing on a clean base, and it passes alone |
 | `tests/checks/check_evidence_tags.py` | 0 unbacked tags in 4,898 claims |
 | `tests/checks/check_llms_names.py` | 0 findings |

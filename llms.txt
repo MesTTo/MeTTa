@@ -51,7 +51,7 @@ re-runs them.
 | `EXTENDING.md`, `DEVELOPING.md` | writing an extension; working on the engine | |
 | `KERNEL.md` | every head the translator gives meaning to, core or derived, with the reason and the numbers | the `kernel-ledger` and `kernel-ledger-selftest` gate lanes |
 | `website/guide/getting-started.md`, and any page writing `::: run <example>` | the site RUNS its examples. A `::: run` container around a `metta` fence renders a Run button; the first press boots one engine in a Web Worker from the site's own static assets and every press after it evaluates the fence's exact text in a space of its own. No server beyond the static host. What it cannot run: a program needing a host seat (`py-atom` and its family are refused by name before they run, because a call to one otherwise ANSWERS ITSELF), a platform library this WebAssembly build has not got (`hyperpose`, `timeout`, `git-import!`, `lib_thread`, refused by the engine's own capability census with what the absence costs), a file beside itself (only the fence's own bytes cross), or more than the fence's inference budget, 1,000,000 by default. 225 of the 258 runnable examples run in it [measured 2026-09-07] | the `docs` gate lane refuses a fence that does not name an example the corpus runner runs or whose text has drifted from that file; `test_every_run_fence_runs_the_corpus_file_it_names` asks the same without node |
-| `check.sh` | the gate. `GATE_ONLY=1 sh check.sh` is what CI blocks on | |
+| `check.sh` | the gate. `GATE_ONLY=1 sh tools/check.sh` is what CI blocks on | |
 | `extensions/python/metta/*.py` | the library. `extensions/python/metta/_spaces/handle.py` is the `MeTTa` context and the `Space` handle; a leading `_` means internal | |
 
 Seam and library counts re-measured 2026-09-14; other counts re-measured 2026-09-07. The `llms` lane derives every explicit count in
@@ -89,7 +89,7 @@ raises naming it. `pip install .` from a
 checkout is the same thing, and `METTA_PATH` points an installed `metta` at a
 clone's engine tree instead of the bundled one.
 
-Run one MeTTa file with `sh run.sh path/to/program.metta`. Add `--verbose`
+Run one MeTTa file with `sh tools/run.sh path/to/program.metta`. Add `--verbose`
 before the path when the program's authoring diagnostics matter, including
 equation-head interpretation and source-reload reports; the default suppresses
 informational messages. Python callers make the same choice with
@@ -4953,7 +4953,7 @@ not `max-inferences`, which bounds a runnable the program wrote, because a row
 is normalised while its file is still being read and no runnable is in flight. `verify-specializations` compares the first use of each
 generated higher-order call with its generic form; turning the pragma off, or
 leaving a process started with `METTA_VERIFY_SPECIALIZATIONS=1`, reports the
-agreed and inference-bounded counts even under `sh run.sh`'s quiet launch.
+agreed and inference-bounded counts even under `sh tools/run.sh`'s quiet launch.
 `METTA_VERIFY_BUDGET` replaces the default 200000-inference comparison bound
 with a positive integer. `verify-discharges` similarly audits type checks the
 compiler omitted and reports its coverage when disabled, and
@@ -5413,7 +5413,7 @@ Evaluation axes belong to `doors.EvaluationOptions`; each door's
 `Binding.evaluation` selects its fixed record. `metta_py_evaluate/4` is the
 shared entry. `interface.py` and `provides/<kind>.pl` own the service and
 supplied-clause declarations; `bindinggen.py` generates their projections.
-Run `sh check.sh binding` after changing a crossing. Every wire-tag row is
+Run `sh tools/check.sh binding` after changing a crossing. Every wire-tag row is
 held by codec and frame tests, and `door-order` fails on unresolved boundaries.
 Tagged query guards spend the same cumulative budget as their derivation.
 
@@ -5532,7 +5532,7 @@ where the engine does nothing, use `perf stat -e instructions:u`. Instruction
 counts move with code LAYOUT, so perturb with inert clauses before believing a
 regression. Check `/proc/loadavg` before trusting any timing.
 
-A declared cost class is a claim the gate can fail. `sh check.sh cost-rows`
+A declared cost class is a claim the gate can fail. `sh tools/check.sh cost-rows`
 runs `benchmarks/costs.py` over every `(cost ...)` row the engine holds: one
 fresh process per row, one fresh space per size, inferences per size fitted
 against the declared class in BOTH directions, so a row that overstates its cost
@@ -5548,7 +5548,7 @@ work gate while passing the class one. About 23 to 31 seconds, and load-immune,
 because the counter is inferences. `--paired` adds the retired-instruction
 curve for the heads whose work crosses into C; it is advisory, never a gate, and
 it is why `unique-atom` has no row.
-`sh check.sh memo-advisor` reads a workload's own call counts and proposes
+`sh tools/check.sh memo-advisor` reads a workload's own call counts and proposes
 `(cache <head> force|refuse)` rows, pricing each one by re-running the whole
 workload in a fresh process with the row declared and reporting the inference
 count before and after. It NEVER writes a row: a proposal is a line in the

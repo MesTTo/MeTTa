@@ -22,7 +22,7 @@ under the same edits, byte for byte", `translate` included. That reads as
 set and sensitive to the ENGINE's, which is a different statement and the one
 that matters when the change under test is an engine change.
 
-Measured, `sh check.sh engine-bench`, three identical samples every run:
+Measured, `sh tools/check.sh engine-bench`, three identical samples every run:
 
     dca33c9f, pristine                    translate 380634   evaluate 559327   = baseline
     9dc6355f, pristine (two predicates)   translate 380994   evaluate 559343   +360 / +16

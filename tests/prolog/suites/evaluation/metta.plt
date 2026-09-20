@@ -405,7 +405,7 @@ test(the_pragma_turns_verification_on) :-
 %it. That the line is actually VISIBLE is proved end to end by
 %examples/ch09-types/17-verify-discharges.metta, which turns the mode off and
 %prints "verify-discharges checked 6 discharge(s): 6 agreed ..." under the
-%corpus lane's own `sh run.sh`. Capturing user_error here instead would have
+%corpus lane's own `sh tools/run.sh`. Capturing user_error here instead would have
 %meant reshaping the engine's output for a test to watch it, and the corpus
 %already watches it from outside.
 test(a_run_that_audited_has_a_tally_for_the_reporter) :-
@@ -451,7 +451,7 @@ test(every_runtime_term_has_a_metatype,
 % both engines by putting one `!(get-metatype <name>)` per line in a file and
 % running
 %
-%     sh run.sh <file>
+%     sh tools/run.sh <file>
 %     sh ../PeTTa-base/run.sh <the same file, absolute path>
 %
 % Over the 268 names in the union of both engines' fun/1 and that table, the

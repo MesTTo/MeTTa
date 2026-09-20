@@ -114,7 +114,7 @@ these two tokenise the corpus and the probes identically -- and not more.
 
 ### The result
 
-    sh check.sh pygments-sync tokenisation tokenisation-selftest   -> 0
+    sh tools/check.sh pygments-sync tokenisation tokenisation-selftest   -> 0
     521 sources, 874333 characters, 0 disagreement(s)
 
 521 sources is every `.metta` file `git ls-files` reports plus the eleven named
@@ -201,10 +201,10 @@ the kernel's: `metta/cli.py` resolves an upstream `src/main.pl` tree as well as
 this one, and the lane checks it with no network at all -- `METTA_PATH=<upstream>
 metta program.metta` answered 3.
 
-    sh check.sh kernel   -> 0, about 23 seconds, 0 problem(s)
+    sh tools/check.sh kernel   -> 0, about 23 seconds, 0 problem(s)
 
 Open: the lane is REPORT because it fetches from github.com and a gate that
 reaches the network fails for reasons that are not the tree. The `kernel` job
 in `.github/workflows/checks.yml` runs the script DIRECTLY rather than through
-`sh check.sh kernel`, because a REPORT failure is forgiven by the driver and
+`sh tools/check.sh kernel`, because a REPORT failure is forgiven by the driver and
 would report a dead kernel as a green job.

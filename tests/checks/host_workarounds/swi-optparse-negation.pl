@@ -1,5 +1,5 @@
 % Purpose: detect duplicated values from one negated Boolean option.
-% [tested: sh check.sh host-workarounds; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
+% [tested: sh tools/check.sh host-workarounds; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
 :- use_module(library(optparse), [opt_parse/5]).
 main :-
     Spec=[[opt(verbose),type(boolean),longflags([verbose])]],

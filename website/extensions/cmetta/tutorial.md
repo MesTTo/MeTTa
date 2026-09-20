@@ -104,7 +104,7 @@ environment; `METTA_PATH` still overrides it at run time.
 ## There is no boundary to cross
 
 This is what makes the extension worth having. PyMeTTa reaches the engine through
-janus and MeTTa-node reaches it through a WebAssembly build, so both cross a
+janus and TSMeTTa reaches it through a WebAssembly build, so both cross a
 language boundary and both encode every term into the tagged arrays
 [the wire codec](../../engine/codec) describes. C is already inside. It
 reads `term_t` directly with the `PL_get_*` family, and there is no wire codec

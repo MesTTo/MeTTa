@@ -3,11 +3,11 @@
 % Owns resources: this process owns both probe modules and their clauses.
 % Guarantees: a fresh-call control validates the loader before the last line
 %   reports whether the cached call bypasses it
-%   [tested: sh check.sh host-workarounds; commit=2d1289dafba121b7582a5cfcd49915d780745e4b]
+%   [tested: sh tools/check.sh host-workarounds; commit=2d1289dafba121b7582a5cfcd49915d780745e4b]
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-cached-undefined-supervisor.patch;
-%   command=sh check.sh host-workarounds;
+%   command=sh tools/check.sh host-workarounds;
 %   fixture=SWI-Prolog 10.1.14 with the patch; commit=7e0b0ea3255455bb7db337cab55190c974ec64e1].
 
 :- dynamic ready/1, loaded/1.

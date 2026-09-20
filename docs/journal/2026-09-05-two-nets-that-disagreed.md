@@ -80,7 +80,7 @@ the real repair.
 
 ## 2026-09-05, after the gate: one predicate, two ownership rules
 
-Ran `GATE_ONLY=1 sh check.sh` once the box quietened. 8 of 100 lanes red, five
+Ran `GATE_ONLY=1 sh tools/check.sh` once the box quietened. 8 of 100 lanes red, five
 of them benchmark lanes at loadavg 7 to 10. Of the three that are not timing,
 two were already recorded elsewhere; `policy-inventory` was not, and it named
 `engine/metta/types.pl:65` and `:79`:
@@ -289,7 +289,7 @@ oracle through LEATTA_PATH`. Replaced the interpreter's workstation path with
 the repository's selected `$PY` spelling. No runtime code changed for either
 Python failure.
 
-Verified: from the repository root, `METTA_ROOT=$PWD`, `. ./select-python.sh`,
+Verified: from the repository root, `METTA_ROOT=$PWD`, `. ./tools/select-python.sh`,
 then `CHECK_PY=$PY sh extensions/python/test.sh` returns exit 0 with 2990
 passed, 48 skipped, one expected failure and five warnings. The earlier
 load-budget failure remains an observed baseline failure; this green run does

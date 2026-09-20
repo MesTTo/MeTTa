@@ -35,7 +35,7 @@ a row whose red side is inside the window names the window, not the baseline.
 
 Tried: finding 3's reproduction, `(= (if-equal $a $b) SHADOWED)` then
 `!(if-equal 1 1)`, on trunk. It still reproduces, exactly as filed:
-`SHADOWED` through `sh run.sh`, and
+`SHADOWED` through `sh tools/run.sh`, and
 `(Error (if-equal 1 1) IncorrectNumberOfArguments)` through `MeTTa().run`.
 The ledger predicted it would close with finding 2 and it did not: finding 2's
 repair widened the prelude TRANSLATOR-RULE eviction to every module, and this
@@ -92,11 +92,11 @@ The second live one is the argument for the lane. `lib_crypto`'s
 `crypto_random_hex/2` calls `hex_bytes/2`, which is `library(crypto)`'s and
 which its `metta_platform_load/2` import list did not name. No example calls
 it, so the corpus lane could never have found it. Measured:
-`NO_AUTOLOAD=1 sh run.sh` over `!(println! (crypto-random-hex 4))` exits 2
+`NO_AUTOLOAD=1 sh tools/run.sh` over `!(println! (crypto-random-hex 4))` exits 2
 with `Unknown procedure: hex_bytes/2` on a platform that HAS crypto, and 0
 answering `"0e2530a2"` with the name on the list.
 
-Tried: `sh check.sh prolog` on a pristine `761fd85b`. Already red, third
+Tried: `sh tools/check.sh prolog` on a pristine `761fd85b`. Already red, third
 instance of the same class: `engine/spaces/catalog.pl:763` calls
 `pairs_keys_values/3` and the `spaces` module imports no `library(pairs)`.
 `engine/source_observation.pl:30-37` carries a comment recording the same name

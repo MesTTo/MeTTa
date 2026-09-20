@@ -102,7 +102,7 @@ two-query atom-reclamation and failed-drop recovery controls.
 The static phase passes prolog, lib-autoload, layering, host-workarounds and
 policy-inventory. Evidence first reports two unknown release_preparation tags
 because its runner census reads tracked files. Staging the new test makes
-`sh check.sh evidence` pass with zero unbacked claims and four pending pins.
+`sh tools/check.sh evidence` pass with zero unbacked claims and four pending pins.
 Logs are `ai-tmp/ai-classes-c55b-{checks,evidence-staged}.log`.
 
 Clone scan: `jscpd --min-lines 8 --min-tokens 50 --max-lines 100000 --max-size

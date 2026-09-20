@@ -548,7 +548,7 @@ unexportable(metta_engine, exists_file/1,
 
 % Every module with a source under engine/, including the core, has an export
 % contract. The two system-name exceptions above apply only to the core.
-% [tested: sh check.sh layering; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+% [tested: sh tools/check.sh layering; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 subsystem_module(Module) :-
     module_property(Module, file(File)),
     engine_directory(Directory),

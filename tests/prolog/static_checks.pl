@@ -1,6 +1,6 @@
 % Guarantees: no_mutating_scope_setup/0 applies only while docs/host-workarounds.md's
 %   swi-cleanup-window entry carries no Patch: field, a patched host having no
-%   window to guard [tested: sh check.sh prolog-static; commit=f97c4b0a3997b3628179170d502bcd35f517c80f], and
+%   window to guard [tested: sh tools/check.sh prolog-static; commit=f97c4b0a3997b3628179170d502bcd35f517c80f], and
 %   then refuses writes in either cleanup Setup
 %   and setup_mutation_selftest/0 checks the declared fixture exception
 %   [tested: setup_mutation_selftest; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
@@ -45,7 +45,7 @@
 %     discovers rather than only in `user`
 %     [measured 2026-08-19: 0 offenders in 19 source clauses and 71 live
 %     ones].
-%     [tested: `sh check.sh prolog-static` retains the pre-cut hook-clause
+%     [tested: `sh tools/check.sh prolog-static` retains the pre-cut hook-clause
 %     scoreboard after source-unit extraction; commit=9a116762fb4372d55675e2ef64b7657092bc136d].
 %   - No backend calls an engine predicate that is not published surface: a
 %     declared service, a declared seam, or a MeTTa builtin. The walk is SWI's
@@ -77,7 +77,7 @@
 %     '&' prefix that metta_space_operand/1 refuses an atom without. The seam
 %     it reads is open, so a provider can name a space every door that CREATES
 %     one would have refused, and the result would be a quiet no rather than an
-%     error [tested: `sh check.sh prolog-static` against
+%     error [tested: `sh tools/check.sh prolog-static` against
 %     tests/prolog/unprefixed_space_provider.pl].
 %   - Seven of the eight checks prove themselves non-vacuous against a planted
 %     offender before a clean result is accepted, and report WHICH plant

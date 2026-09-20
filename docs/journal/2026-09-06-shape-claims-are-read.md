@@ -44,7 +44,7 @@ Tried: final full Python gate with the held-operand correction -> 3,534 passed, 
 
 Tried: final `sh engine/test.sh` -> exit 0, 2,188 tests and 1,438 sub-tests across 77 suite receipts, with no ERROR lines. The count includes the single-test receipt spelled `% test passed`.
 
-Tried: `sh check.sh llms llms-selftest layering kernel-ledger policy-inventory` -> exit 0; all five requested lanes passed. The final receipt has no build errors; the earlier optional rebuild failure is recorded above.
+Tried: `sh tools/check.sh llms llms-selftest layering kernel-ledger policy-inventory` -> exit 0; all five requested lanes passed. The final receipt has no build errors; the earlier optional rebuild failure is recorded above.
 Tried: `"$CHECK_PY" extensions/python/tools/twin_coverage.py --measure --rounds 3 examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta` after the held-operand correction -> exit 0, engine 2,356, twin 3,442, ratio 1.4610. The final full Python gate also includes both end-to-end twin checks.
 Tried: changed-Python Ruff checks, reference generator `--check`, and `git diff --check` -> exit 0. `jscpd --noTips --silent --max-lines 10000 --max-size 2mb extensions/python/metta/arrays.py extensions/python/tests/ch08_data/test_arrays.py` -> zero clones across both files; the raised line limit includes the full array module.
 
@@ -61,7 +61,7 @@ Tried: full `sh extensions/python/test.sh` on the rebased implementation -> exit
 Tried: independent composed-source review and `ai-tmp/ai-shape-context-composition-probe.py` in the selected Python environment -> no integration defect. A tagged guard over a scoped `(2 3)` array runs once under ranked algebra, limit two and descending order. A `(4 1)` array produces no guard answer and never enters the body. Both outcomes hold with inference accounting disabled and with a 1,000,000-inference allowance; the outer algebra restores to None. The probe unregisters its operation between fixtures.
 Tried: full `sh engine/test.sh` after the rebase -> exit 0, 2,194 tests and 1,438 sub-tests across 77 suite receipts; no ERROR lines.
 
-Tried: `sh engine/test.sh suites/typecheck/tensor_shapes.plt` -> all 15 passed. `sh check.sh llms llms-selftest layering kernel-ledger policy-inventory` -> exit 0, all five requested lanes passed. Reference generator `--check` and diff whitespace checks also pass.
+Tried: `sh engine/test.sh suites/typecheck/tensor_shapes.plt` -> all 15 passed. `sh tools/check.sh llms llms-selftest layering kernel-ledger policy-inventory` -> exit 0, all five requested lanes passed. Reference generator `--check` and diff whitespace checks also pass.
 Decided: amend the replayed functional commit with these integration receipts, then replace only its 17 WORKTREE evidence pins in a fresh provenance-only commit. All inherited evidence snapshots remain on the rebased ancestry.
 
 ## Unification

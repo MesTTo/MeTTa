@@ -375,7 +375,7 @@ re-export, and is reached as `import * as seam from "metta-node/seam"`.
 packages it does not have.
 
 Measured, and NOT this package's: `engine-bench` and `benchmarks` are red on
-the base. A control worktree cut at `31d54e19` and built with `sh build.sh`
+the base. A control worktree cut at `31d54e19` and built with `sh tools/build.sh`
 reads boot 250270 against a pinned 248968, parse 126,111,592 instructions
 against 111,718,052, and the same 23 benchmark cases failing in the same
 order, `annotated-relation` at 830,767 inferences against a pinned 315,385

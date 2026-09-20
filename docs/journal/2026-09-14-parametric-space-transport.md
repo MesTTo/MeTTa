@@ -77,7 +77,7 @@ Logs are `ai-classes-c49b-verified-{python,spaces,native}.log`.
 The static phase initially rejected the fixture with `I001` for its import
 block and five `ARG001` unused fixture arguments. After removing those
 arguments and sorting the imports, `sh ai-tmp/ai-classes-c49b-spaces.command`
-again passes 594 cases, and `sh check.sh layering ruff mypy evidence
+again passes 594 cases, and `sh tools/check.sh layering ruff mypy evidence
 refusal-grounds` passes all checks. Logs are
 `ai-classes-c49b-final-spaces.log` and `ai-classes-c49b-final-checks.log`.
 

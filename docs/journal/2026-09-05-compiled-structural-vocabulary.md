@@ -130,7 +130,7 @@ Verified: `PYTHONPATH=extensions/python $VENV/bin/python -m pytest -q -p no:benc
 
 Verified: `CHECK_PY=$VENV/bin/python sh extensions/python/test.sh` reports
 3,084 passed, 48 skipped and zero failures, exit 0. `sh engine/test.sh` passes
-all 294 units, exit 0. `sh check.sh ruff artifact-paths benchmarks` passes
+all 294 units, exit 0. `sh tools/check.sh ruff artifact-paths benchmarks` passes
 all three gates, including all 35 counter benchmarks and zero artifact-path
 findings, exit 0. Logs and separate statuses are under `ai-tmp/` with the
 `ai-compiled-vocabulary-3d96d263-` prefix. The final source/twin comparisons

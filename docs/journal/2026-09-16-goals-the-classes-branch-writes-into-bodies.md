@@ -3,7 +3,7 @@ Goal: every goal the engine emits or constructs for a body it does not call itse
 Constraint: `seam:engine_emitted/1` is the one protection list, and `tests/prolog/static_checks.pl` recompiles the corpus and reads what the engine constructs; a red there blocks the gate.
 
 ## 2026-09-16
-Tried: `env -u DISPLAY -u WAYLAND_DISPLAY sh check.sh prolog-static` on `feat/classes-on-metta` ->
+Tried: `env -u DISPLAY -u WAYLAND_DISPLAY sh tools/check.sh prolog-static` on `feat/classes-on-metta` ->
 `the engine emits metta_transaction/2 into compiled bodies and a MeTTa equation can take it`.
 6a27885bf made the transaction form emit `metta_transaction(Conj, Out)` and left the list naming
 `metta_transaction/1`; the corpus half sees it through

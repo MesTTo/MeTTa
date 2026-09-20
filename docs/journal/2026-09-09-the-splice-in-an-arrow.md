@@ -13,7 +13,7 @@ Read: LeaTTaRevised `docs/journal/2026-09-05-segments-derived.md`, `ai-notes/ai-
 
 Read: [Wolfram BlankNullSequence](https://reference.wolfram.com/language/ref/BlankNullSequence.html) and [Mathics BlankNullSequence.match](https://github.com/Mathics3/mathics-core/blob/40b9d54d2394c71ea9288a070c12dc510177b5be/mathics/builtin/patterns/basic.py). Both distinguish zero-or-more cardinality from the per-element restriction. Existing local expansion already implements that separation; no dependency is added.
 
-Tried: `sh run.sh ../libaudit/rest_refusal2.metta` at `c0ad1038f36227f05029c6607d7066881b8b4b99`, exit 0. The run resolved that main-checkout probe to its absolute path. Wrong rest element answers `()`, empty sum `(0)`, three-element sum `(6)`, fixed wrong element `((Error (fixed2 1 vflag) (BadArgType 2 Number Bool)))`.
+Tried: `sh tools/run.sh ../libaudit/rest_refusal2.metta` at `c0ad1038f36227f05029c6607d7066881b8b4b99`, exit 0. The run resolved that main-checkout probe to its absolute path. Wrong rest element answers `()`, empty sum `(0)`, three-element sum `(6)`, fixed wrong element `((Error (fixed2 1 vflag) (BadArgType 2 Number Bool)))`.
 Found: `metta_operation_parameters/6` compares the unexpanded parameter count to the argument count after translation has expanded it. The refusal therefore has no parameter list. `data_head_masks/3` and `builtin_argument_mask/4` likewise assume a fixed list. Zero-argument observers and the prelude arrow constructor also retain the old spelling.
 
 Decided before implementation:
@@ -190,7 +190,7 @@ Explicit qualification inside an asserted clause did not settle the static const
 
 ## 2026-09-09: final admission and lane controls
 
-The full engine suite passes 98 suite runs, 2595 tests and 1518 subtests. The full shell corpus passes. `sh check.sh llms llms-selftest examples parity petta docs` exits 0; parity compares 315/315 examples. The static check also exits 0, retaining its planted unreachable-emitter control. `jscpd` reports zero clones in the changed compiler units and variadic suite; the Python benchmark and property suite pass Ruff.
+The full engine suite passes 98 suite runs, 2595 tests and 1518 subtests. The full shell corpus passes. `sh tools/check.sh llms llms-selftest examples parity petta docs` exits 0; parity compares 315/315 examples. The static check also exits 0, retaining its planted unreachable-emitter control. `jscpd` reports zero clones in the changed compiler units and variadic suite; the Python benchmark and property suite pass Ruff.
 
 The original 208 point findings were 187 increases and 21 decreases, median +77, minimum -586 and maximum +181596 against their pins. Regressing those deltas on actual fixed-declaration admissions D and compiled call sites C gives intercept 596.271, D coefficient 76.326, C coefficient 15.699, R-squared 0.01187. Including fixed-arrow presentation visits P gives intercept -95.317, D 4.479, P 32.585, C 1.069, R-squared 0.99493. The extra presentation walk was a real cost, so the fixed diagnostic and mask repairs replace it; these numbers did not authorize a uniform repin.
 

@@ -2,7 +2,7 @@
 Goal: make a CSV file directly queryable from a MeTTa program.
 
 ## 2026-09-05
-Tried: `sh run.sh ai-tmp/ai-csv-probe.metta` on the starting tip printed
+Tried: `sh tools/run.sh ai-tmp/ai-csv-probe.metta` on the starting tip printed
 `(csv-space "missing.csv")` unchanged. The operation was absent.
 Tried: direct `csv_read_row/3` probes raised `domain_error(row_arity(2),1)`
 for a short second row, but an unterminated quote failed silently.
@@ -43,5 +43,5 @@ the native match seam. A malformed-tail fixture proves a cut stops parsing
 before later records; stream inspection confirms cleanup on both cut and error.
 The executable example passes three assertions. The final effect reflection
 is exactly `readOnlyLookup`. `jscpd` reports zero clones in the new CSV files.
-Verified: `sh test.sh examples/ch20-extending-the-engine/20-08-csv-row-spaces/01-csv-space.metta`
+Verified: `sh tools/test.sh examples/ch20-extending-the-engine/20-08-csv-row-spaces/01-csv-space.metta`
 passes the example through the shell suite with all three assertions.

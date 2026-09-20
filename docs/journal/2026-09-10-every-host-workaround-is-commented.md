@@ -272,7 +272,7 @@ Tried: the four prescribed commands on
 2b820c2afa0962522651e19936979de8b44ad669, whose executable content is
 cdcb23421809ec3a493059a381e0245cf08a1984:
 sh engine/test.sh exits 1; sh extensions/python/test.sh exits 1;
-sh test.sh exits 0; sh check.sh prolog prolog-static evidence
+sh tools/test.sh exits 0; sh tools/check.sh prolog prolog-static evidence
 provenance-pin-selftest host-workarounds host-workarounds-selftest
 engine-bench twins exits 1. Each complete output and captured status is
 retained in the landing receipt. No extra shell deadline was added.

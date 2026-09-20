@@ -32,10 +32,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-#: `sh components.sh` rather than `git submodule update --init --recursive`, which
+#: `sh tools/components.sh` rather than `git submodule update --init --recursive`, which
 #: refuses a component directory that already holds the files and is therefore the
 #: wrong advice for every checkout that predates the mount.
-REMEDY = "sh components.sh"
+REMEDY = "sh tools/components.sh"
 
 
 def gitlinks(root: Path) -> list[str]:

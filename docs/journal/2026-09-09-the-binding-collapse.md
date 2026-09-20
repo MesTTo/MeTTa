@@ -2048,7 +2048,7 @@ or allowance changes. The direct controls are
 
 ## 2026-09-10: identify the binding's closed-set policies
 
-The cut's `sh check.sh closed-sets` returns one with ten unanswered sets.
+The cut's `sh tools/check.sh closed-sets` returns one with ten unanswered sets.
 Three are `_BINARY_NUMERIC_OPERATORS`, `_ARRAY_NUMERIC_OPERATORS` and
 `_UNARY_NUMERIC_OPERATORS` in `_binding/host.py`. The changed
 `_spaces/execution.py` also owns `_DEFERRED_EXECUTION_OPENERS`. The other six
@@ -2110,7 +2110,7 @@ the existing contracts and checker. `NATIVE_FORWARDS` continues to name
 callable changes.
 
 Verification: `python extensions/python/tools/bindinggen.py --write` returns
-zero. `sh check.sh closed-sets closed-sets-selftest binding binding-selftest
+zero. `sh tools/check.sh closed-sets closed-sets-selftest binding binding-selftest
 ruff` passes binding, all 78 binding mutation tests in 74.94 seconds, and
 Ruff. The closed-set scan now reports 55 sets and exactly the six remaining
 cut findings in the four unchanged files. The full closed-set selftest runs

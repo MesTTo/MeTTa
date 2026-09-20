@@ -185,7 +185,7 @@ spells its own audit events at their sites the same way.
 
 Verified: `sh extensions/python/test.sh -n 0 tests/ch14_seeing_your_program
 tests/ch10_errors_and_refusals tests/ch11_python_as_a_notation
-tests/repository` and the new suites; `sh check.sh ruff mypy slotscheck`;
-`sh check.sh llms llms-selftest reference evidence`; `sh engine/test.sh
+tests/repository` and the new suites; `sh tools/check.sh ruff mypy slotscheck`;
+`sh tools/check.sh llms llms-selftest reference evidence`; `sh engine/test.sh
 suites/host/shim.plt`. Commands and exit codes are recorded in
 `ai-tmp/ai-observation-doors.md`.

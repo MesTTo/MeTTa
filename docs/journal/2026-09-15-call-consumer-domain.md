@@ -37,13 +37,13 @@ extensions/python/tests/ch11_python_as_a_notation/test_compiled_generator_joins.
 zero clones across the four source files in
 `ai-tmp/ai-call-consumer-root-clones/jscpd-report.json`.
 
-Tried: `GATE_ONLY=1 sh check.sh closed-sets policy-inventory ruff mypy ty layering
+Tried: `GATE_ONLY=1 sh tools/check.sh closed-sets policy-inventory ruff mypy ty layering
 evidence` passes both layering lanes, Ruff, all four mypy checks, ty, evidence
 and closed-sets. Policy-inventory reports the new Literal's missing mechanism
 declaration. The alias now identifies its result-consumption mechanism and
 native binder, as the existing transport alias does. The original gate result
 is `ai-tmp/ai-call-consumer-root-gates.log`.
 
-Tried: `GATE_ONLY=1 sh check.sh policy-inventory ruff evidence` then passes,
+Tried: `GATE_ONLY=1 sh tools/check.sh policy-inventory ruff evidence` then passes,
 with 20 policy rows, zero findings and zero unbacked evidence claims, in
 `ai-tmp/ai-call-consumer-root-gates-final.log`.

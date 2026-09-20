@@ -4,11 +4,11 @@
 %   optimise is set before the samples load, so `is/2` compiles to A_ADD_FC.
 % Owns resources: the trace and frame-finished listener end with the probe.
 % Guarantees: a lost value in any sample answers present; otherwise absent
-%   [tested: sh check.sh host-workarounds;
+%   [tested: sh tools/check.sh host-workarounds;
 %   commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-gc-in-frame-finished-listener-clears-a-live-slot.patch;
-%   command=sh check.sh host-workarounds;
+%   command=sh tools/check.sh host-workarounds;
 %   fixture=SWI-Prolog 10.1.14 with the patch; commit=0c878d61a57754db5bc292e6f5baa2a2c48a8778]
 :- set_prolog_flag(optimise, true).
 :- use_module(library(lists), [append/3]).

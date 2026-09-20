@@ -7,7 +7,7 @@ committed number.
 
 ## 2026-09-07
 
-Tried: `sh check.sh vulture pylint refurb policy-inventory` on the merged tree
+Tried: `sh tools/check.sh vulture pylint refurb policy-inventory` on the merged tree
 -> four lanes red with more findings than the brief enumerated. vulture 5,
 refurb 1, but **pylint 10 rather than 1** and **policy-inventory 6 rather than
 2**; a wider run added **ty 3** and **codespell 14**, neither of which the
@@ -108,7 +108,7 @@ names rather than a closed value set"). The lane's orphan check reported it as
 soon as the list stopped being a candidate, so the annotation is removed and
 the rule carries it.
 
-Decided: `sh check.sh policy-inventory policy-inventory-selftest` -> both 0,
+Decided: `sh tools/check.sh policy-inventory policy-inventory-selftest` -> both 0,
 9 planted cases, 0 failures. With the desk-versus-CI split planted the other
 way round the selftest goes red by name, so the plant can fail.
 
@@ -491,7 +491,7 @@ brief's list. Two are not in it. `node-dist` fails on
 which is a worktree that never ran `npm install` for that seat rather than
 anything in the tree. `no-autoload` is a real defect.
 
-Measured: `NO_AUTOLOAD=1 sh test.sh` stops on
+Measured: `NO_AUTOLOAD=1 sh tools/test.sh` stops on
 `examples/ch18-performance/18-02-memoisation-and-tabling/16-cache_policy_restraints.metta`
 with `Unknown procedure: call_delays/2`. `lib/lib_tabling/lib_tabling.pl`
 reads a restrained table's delay condition through `call_delays/2` and
@@ -719,7 +719,7 @@ second mode.
 ## 2026-09-07, the gate's own scratch directory was moving the boot row
 
 Found while re-running `engine-bench` after the re-pin: `sh engine/bench.sh`
-reads the boot row at 268,417 and `sh check.sh engine-bench` reads it at
+reads the boot row at 268,417 and `sh tools/check.sh engine-bench` reads it at
 268,390, on the same tree, in the same worktree, seconds apart. Twenty-seven
 is nearly seven times the harness's four-inference allowance, so the row could
 not be green both ways whichever number was pinned. The lane had been reporting
@@ -967,7 +967,7 @@ which has taken a per-row band since it was written; a row that declares
 nothing keeps the four, a declaration survives a re-pin, and a move past the
 declaration still fails.
 
-Decided: `sh check.sh c-bench` exits 0, six cases within band, with four rows
+Decided: `sh tools/check.sh c-bench` exits 0, six cases within band, with four rows
 printed as not measured and the reason on its own line naming both the load and
 the path.
 
@@ -1036,7 +1036,7 @@ pin of 1,028,951,994. It did not move; the pin was already 1.2% above the tree
 before the wave began, and the improvement side of the band is what finally
 said so.
 
-Decided: `sh check.sh instructions` exits 0, sixteen cases within band.
+Decided: `sh tools/check.sh instructions` exits 0, sixteen cases within band.
 
 ## 2026-09-07, the parity lane's last red was a line, not a tree
 
@@ -1075,7 +1075,7 @@ waiver in the file's own form, with the measurement and the open part named:
 closing it means the per-form loading path, which is the same open work its two
 neighbours carry.
 
-Decided: `sh check.sh parity-perf` exits 0, 149 examples checked, 17 waived.
+Decided: `sh tools/check.sh parity-perf` exits 0, 149 examples checked, 17 waived.
 
 ## 2026-09-07, the fourth order-dependent test is load, and it says so twice
 
@@ -1130,7 +1130,7 @@ here, including the gate's own.
 
 ## 2026-09-07, the gate's own run found two more, and one of them was this branch's
 
-`GATE_ONLY=1 sh check.sh` on the pinned tree came back with 106 of 108 lanes
+`GATE_ONLY=1 sh tools/check.sh` on the pinned tree came back with 106 of 108 lanes
 green and two red. Both are this branch's own, and neither had shown up in any
 lane run on its own.
 
@@ -1187,7 +1187,7 @@ JUSTIFICATION can leak a path just as a command can.
 
 ## 2026-09-07, the full gate on the branch tip, and the leak that was a quotation
 
-`GATE_ONLY=1 sh check.sh` on `3255c206`, loadavg 51.33 at the start and 61.82
+`GATE_ONLY=1 sh tools/check.sh` on `3255c206`, loadavg 51.33 at the start and 61.82
 at the end: **107 of 108 lanes green, one red**, and the red was this file.
 The passage above explaining that the C seat's `checkout_path_length_note` had
 been respelled QUOTED the literal it was reporting as removed, so the scanner
@@ -1574,7 +1574,7 @@ with `MEASURED NOTHING, so nothing here says the tree moved: <lanes>` above the
 verdict. A skip does not decide the run: the exit status is unchanged, because
 a lane that could not measure neither proves nor disproves the tree.
 
-Verified on the lane that produced the finding: `GATE_ONLY=1 sh check.sh
+Verified on the lane that produced the finding: `GATE_ONLY=1 sh tools/check.sh
 mork-bench` on a contended PMU prints `GATE mork-bench skipped`, the
 MEASURED NOTHING line, `all gate checks passed`, and exits 0.
 

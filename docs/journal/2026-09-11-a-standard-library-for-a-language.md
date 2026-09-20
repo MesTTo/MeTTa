@@ -13,18 +13,18 @@ integrations in separate distributions; one complete library per commit.
 Tried: `metta.library.roster()` and `metta.library.rows(name)` on
 `c75181adc999adf0028616ee69565e2bbfbf739f` -> 38 libraries, 680 carried rows,
 660 distinct heads. The initial estimate of 39 libraries is not the live roster.
-`sh check.sh corpus-coverage cumulative-syntax example-origins llms
+`sh tools/check.sh corpus-coverage cumulative-syntax example-origins llms
 llms-selftest reference docs lib-autoload` -> coverage 251 engine callables,
 660 library heads, four allowed constructors/types and zero findings;
 cumulative syntax 324 examples, 284 constructs and zero findings; library
 autoload 22 files and zero findings. The llms lane initially reports five Node
 asset-path claims before assets have been built. Origins and docs initially
 skip their missing inputs. With METTA_UPSTREAM naming PeTTa-base and the existing
-website dependencies provisioned, `sh check.sh example-origins docs` -> 143
+website dependencies provisioned, `sh tools/check.sh example-origins docs` -> 143
 derived examples, 202 original examples, ten passing origin selftests and a
 successful VitePress build.
 
-Tried: `sh check.sh llms` after the asset build -> five sheets, 319 live
+Tried: `sh tools/check.sh llms` after the asset build -> five sheets, 319 live
 engine names, 223 corpus-used callable names covered and zero findings. The
 five initial path findings were missing build artifacts, not source defects.
 
@@ -180,7 +180,7 @@ tests reports zero duplicate lines. Logs: ai-tmp/ai-libraries-face-selftest.log.
 
 ## 2026-09-11: datetime
 
-Tried: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta`
+Tried: `sh tools/test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta`
 before changes -> five passing assertions. Read library(date) and the native
 date conversion documentation. SWI accepts UTC, local time and integer offsets
 west of Greenwich; date_time_stamp/2 normalizes overflowing calendar fields.
@@ -213,7 +213,7 @@ parse-date's call forms. HeadCard now stores types as a tuple; its text, Rich
 and HTML renderers share that representation. The regression checks both
 arrows in the reference, the card data and all three displays.
 
-Tried: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta`
+Tried: `sh tools/test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta`
 after implementation -> 25 passing assertions; `sh engine/test.sh
 suites/libraries/lib_datetime.plt` -> 15 passing tests. The card census reports
 16 heads and 17 types, every head documented and called in the same example.
@@ -238,9 +238,9 @@ heads with zero findings; cumulative syntax remains 324 examples and 284
 constructs; lineage remains 143 derived and 202 original files. llms, reference
 and docs pass. The first gate invocation exposed a fixture assumption that
 the working directory was the repository root. The test now uses a relative
-path that can include parent components; `sh check.sh prolog-face reference`
+path that can include parent components; `sh tools/check.sh prolog-face reference`
 passes both lanes and their witnesses from the gate's tests/prolog directory.
-`sh check.sh artifact-sync face-sync no-autoload lib-autoload` also passes,
+`sh tools/check.sh artifact-sync face-sync no-autoload lib-autoload` also passes,
 including the full corpus with autoload disabled and the wheel witness.
 
 Tried: `pin_provenance.py --check` -> the installed distribution's nested module
@@ -1643,7 +1643,7 @@ Tried: the owned Ruff check reports PERF401 on the generated case loop and
 TRY003/EM102 on an inline exception message. Use a generator passed to extend
 and a named diagnostic message, preserving the test cases and refusal text.
 
-Verified: `sh check.sh provenance-pin-selftest evidence evidence-selftest
+Verified: `sh tools/check.sh provenance-pin-selftest evidence evidence-selftest
 ruff-drivers` passes all four gates. Evidence reads 7481 claims with zero
 unbacked tags. The final duplicate check of the writer and its selftest finds
 zero clones in two Python files. Logs: ai-string-provenance-gates.log and
@@ -1753,7 +1753,7 @@ and membership calls and 7376385 arithmetic evaluations. All sampled tick
 counts are zero, so only the call counts are evidence. Keep the fused native
 loop; a new floating-only provider would not satisfy the chosen Number model.
 
-Baseline: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta`
+Baseline: `sh tools/test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta`
 passes all 17 existing claims. The full twin passes the same claims and equal
 stores at 30798/32104 MeTTa/Python inferences but reports the Python budget
 31537 exceeded beyond its allowance of 4. This cut already differs by 567;
@@ -2185,7 +2185,7 @@ alone; the six that call the library pay its compiled call sites as well. The
 twin owner re-pinned all ten with that mechanism and reported zero
 stored-content divergences. Log: ai-tmp/ai-lib3-file-importers-repin.log.
 
-Verified: `sh check.sh prolog-face prolog-face-selftest libdoc libdoc-selftest
+Verified: `sh tools/check.sh prolog-face prolog-face-selftest libdoc libdoc-selftest
 corpus-coverage cumulative-syntax example-origins llms llms-selftest reference
 reference-selftest lib-autoload no-autoload host-workarounds evidence
 provenance-pin-selftest ruff mypy` passes every lane. Coverage reads 744 carried
@@ -2235,7 +2235,7 @@ Tried: the spaces twin passing `ledger.name` to succeedsPredicate ->
 passes the HANDLE, which the door converts; a name written as text is the thing
 the seat's rules refuse anyway.
 
-Verified: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/20-spaces_lib.metta`
+Verified: `sh tools/test.sh examples/ch08-data/08-03-the-shipped-libraries/20-spaces_lib.metta`
 passes 27 claims over all nine lib_spaces heads, and the extended
 12-dict_lib.metta passes 25 over all eleven lib_dict heads. Both twins prove the
 same claims with equal stored content: spaces 45,668 MeTTa against 43,720
@@ -2626,7 +2626,7 @@ ugraphs:append/2)` on the topological-order claim. `ugraphs.pl` declares
 same fix as lib_constraints' and lib_memo's own reach into that library:
 `:- ugraphs:use_module(library(lists), [append/2])`, injected into the host
 module's namespace, idempotent whichever library loads it first. With it,
-`NO_AUTOLOAD=1 sh test.sh` over the example passes all 34 claims.
+`NO_AUTOLOAD=1 sh tools/test.sh` over the example passes all 34 claims.
 
 Measured: the example proves 34 claims and its twin the same 34, 81,614 MeTTa
 against 92,465 Python inferences, minimum of three fresh processes, a first pin.
@@ -2649,7 +2649,7 @@ ext/utf8proc pack, absent from swipl-wasm, so the library declares a new
 for exactly this, and the platform_capabilities suite's 45 tests pass with the
 row present.
 
-Tried: `unicode-is` over `code_type/2` -> every claim passed under `sh test.sh`
+Tried: `unicode-is` over `code_type/2` -> every claim passed under `sh tools/test.sh`
 and `(unicode-is "é" alpha)` answered False under the twins lane, which runs its
 children under `LC_ALL=C`; `code_type(233, alpha)` is false there and true under
 a UTF-8 locale. A classification that moves with the locale is not a Unicode
@@ -3102,7 +3102,7 @@ restores Order=[a,b]. Scratch reproduction: ai-tmp/ai-lib4-graph-probe.log.
 Decided: track the two-arm reproduction and ledger entry. The existing import
 and all library code remain unchanged, so no library twin cost changes.
 
-Verified: `sh check.sh host-workarounds host-workarounds-selftest evidence`
+Verified: `sh tools/check.sh host-workarounds host-workarounds-selftest evidence`
 passes. All 19 reproductions answer present, 25 sites resolve, all 10 planted
 negative controls are reported, and evidence has zero unbacked tags.
 Log: ai-tmp/ai-lib4-graph-evidence.log.
@@ -4566,7 +4566,7 @@ operations. The general library's native algorithms and other rows are reviewed
 separately; this decision does not assert that their native implementations are
 all necessary.
 
-Tried: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta`
+Tried: `sh tools/test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta`
 passes 37 top-level assertions plus the assertions inside ordinary traversals.
 `sh engine/test.sh tests/prolog/suites/libraries/lib_testing.plt` passes 14 tests;
 `python -m pytest extensions/python/tests/ch08_data/test_testing_lib.py -q`
@@ -4590,7 +4590,7 @@ three fresh processes price it at 74003 inferences against 76856.
 Receipts: ai-lib4-testing-composition-{lanes,twins,twin-idioms-final,
 measure-idioms}.log.
 
-Verified: `sh check.sh ruff twins twins-selftest` confirms all 37 recorded
+Verified: `sh tools/check.sh ruff twins twins-selftest` confirms all 37 recorded
 Testing claims, equal stored contents and the exact 74003 pin. Ruff and
 twins-selftest pass; full twins returns to the same 263 older findings over
 310 twins, with 54/347 passing files and 3596 proved claims.

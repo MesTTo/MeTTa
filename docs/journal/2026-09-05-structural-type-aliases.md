@@ -275,7 +275,7 @@ The final website build, `npm run docs:build` from `website`, and the source-loa
 
 The `llms` lane initially reported `llms.txt:40: the sources table says 10 engine metta units, the tree has 11`. The new `type_aliases.pl` unit is now included in the source roster and its total.
 
-After the roster correction, `CHECK_PY=$PY sh check.sh llms` passes: five sheets, 311 live engine names, all 155 corpus-used names covered and zero findings. The final focused command, `PYTHONPATH=. $PY -m pytest tests/repository/test_workspace_paths.py tests/ch09_types -q -p no:benchmark` from `extensions/python`, passes all 101 cases.
+After the roster correction, `CHECK_PY=$PY sh tools/check.sh llms` passes: five sheets, 311 live engine names, all 155 corpus-used names covered and zero findings. The final focused command, `PYTHONPATH=. $PY -m pytest tests/repository/test_workspace_paths.py tests/ch09_types -q -p no:benchmark` from `extensions/python`, passes all 101 cases.
 
 ## 2026-09-05: the withdrawal door was not gated
 

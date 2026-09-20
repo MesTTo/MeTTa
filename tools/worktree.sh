@@ -55,14 +55,16 @@
 #   Future Enhancements: None
 set -eu
 
-HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+# The repository root, which is this script's PARENT: these drivers live in
+# tools/ so the root stays short enough to read at a glance.
+HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)
 
 # The main checkout is the first line of `git worktree list`, which git
 # guarantees is the primary one. Deriving it beats naming a path, so this
 # keeps working wherever the repository lives.
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$HERE/bounded.sh" "$@"; }
+bounded() { sh "$HERE/tools/bounded.sh" "$@"; }
 
 MAIN=$(cd "$HERE" && git worktree list | head -1 | awk '{print $1}')
 
@@ -78,7 +80,7 @@ fi
 # adopting the mount, and it needs no relaxation of git's transport policy
 # because it clones and fetches directly rather than through the submodule
 # machinery CVE-2022-39253 restricted.
-bounded sh "$HERE/components.sh" ||
+bounded sh "$HERE/tools/components.sh" ||
     { echo "worktree.sh: the components could not be checked out; this worktree has no engine to run" >&2
       exit 1; }
 

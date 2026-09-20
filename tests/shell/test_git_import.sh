@@ -86,7 +86,7 @@ metta_base="$fixture/metta-imports"
 metta_program="$fixture/pinned-import.metta"
 printf '!(git-import! "%s" "" "%s" "%s")\n!(import! &self (library fixture module))\n!(test (fixture-core-result) core-git-ok)\n' \
     "$remote" "$metta_base" "$first" > "$metta_program"
-metta_output=$(cd "$project_dir" && bounded sh run.sh "$metta_program")
+metta_output=$(cd "$project_dir" && bounded sh tools/run.sh "$metta_program")
 printf '%s\n' "$metta_output"
 printf '%s\n' "$metta_output" | grep -q '✅'
 test "$(git -C "$metta_base/fixture" rev-parse HEAD)" = "$first"

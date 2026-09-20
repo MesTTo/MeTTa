@@ -1,5 +1,5 @@
 <!--
-Purpose: teach the MeTTa-node extension itself: the install that needs no
+Purpose: teach the TSMeTTa extension itself: the install that needs no
   SWI-Prolog, how a program starts, and what running the engine on WebAssembly
   costs and buys. The eight numbered tutorials teach the language in Python;
   this teaches the extension.
@@ -18,13 +18,13 @@ Guarantees:
     npm run docs:build; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709]
 -->
 
-# The MeTTa-node tutorial
+# The TSMeTTa tutorial
 
 Here is a whole program. It stores two facts, walks the answers to a pattern,
 and reduces a term.
 
 ```ts
-import { metta, S, V, fn } from "metta-node";
+import { metta, S, V, fn } from "tsmetta";
 
 const m = await metta();
 
@@ -51,12 +51,12 @@ directory with nothing else in it:
 
 ```sh
 npm init -y
-npm install /path/to/MeTTa-Kernel/extensions/node/metta-node-0.0.1-alpha.0.tgz
+npm install /path/to/MeTTa/extensions/node/tsmetta-0.0.1-alpha.0.tgz
 ```
 
 That second line takes the packed tarball, which is what `npm pack` inside
 `extensions/node/` writes. The package is not on the public registry yet; when
-it is, `npm install metta-node` is the same thing, and the name you import does
+it is, `npm install tsmetta` is the same thing, and the name you import does
 not change either way.
 
 Node 22.18 or newer, which is what `package.json` declares.
@@ -166,7 +166,7 @@ JavaScript, and it declares an effect class because the engine cannot see
 inside it:
 
 ```ts
-import { hostValue } from "metta-node";
+import { hostValue } from "tsmetta";
 
 const shout = m.op(function shout(text: string): string {
   return text.toUpperCase();
@@ -202,7 +202,7 @@ fast-cache          true    [library(fastrw),library(memfile)]
 ```
 
 Each absent one has a host answer, because the platform already had the
-concept. Concurrency is `metta-node/parallel`: `race`, `merge`, `parMap`,
+concept. Concurrency is `tsmetta/parallel`: `race`, `merge`, `parMap`,
 `every`, `Channel` and `spawn`, each taking an `AbortSignal`. Deadlines are
 `AbortSignal` as well:
 
@@ -217,7 +217,7 @@ That is `fetch`'s own contract, said plainly.
 
 ## Where to go next
 
-[The MeTTa-node extension page](./) is the full surface with worked examples: spaces
+[The TSMeTTa extension page](./) is the full surface with worked examples: spaces
 implemented in TypeScript, proofs as data, standing queries, the saga journal,
 and the 27 subpaths that cost nothing unimported. `examples/gallery.ts` in the
 installed package is five programs that use most of it and print what they got.

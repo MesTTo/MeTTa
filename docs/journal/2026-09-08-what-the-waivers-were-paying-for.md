@@ -509,7 +509,7 @@ Tried: the same-path boot control after preparing the native type-subject index 
 
 Tried: the final point re-pin exits 0, moves 164 of 277 twins and changes no stored-content divergence. The Python 3.14 AST audit finds only BUDGET assignments changed. The four empirical envelopes remain untouched. An attempted audit under system Python 3.11 failed with SyntaxError: expected '(' on def mid[T]; the Python 3.14 audit passes.
 
-Tried: sh check.sh parity-perf petta parity examples exits 1. examples, parity and petta pass; parity-perf retains four cut-reproduced cost failures and five frozen inference drifts. The publication-index failures in caseempty and types_dependent are gone. The complete retained logs are ai-resume-required-gates.log and ai-cut-parity-reds.log.
+Tried: sh tools/check.sh parity-perf petta parity examples exits 1. examples, parity and petta pass; parity-perf retains four cut-reproduced cost failures and five frozen inference drifts. The publication-index failures in caseempty and types_dependent are gone. The complete retained logs are ai-resume-required-gates.log and ai-cut-parity-reds.log.
 
 
 ### Final prices and open verification obligations

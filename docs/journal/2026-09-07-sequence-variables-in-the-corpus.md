@@ -29,7 +29,7 @@ parses its LEFT argument alone (`engine/spaces/segment_matching.pl:440`), and
 right side, finds no gap there, and answers `one_sided(left)` for every pair a
 program can write. Every door that is not `unify` faces a value, so those were
 one-sided by construction already. Measured on `petta` at fd188ef0, one form
-per file through `sh run.sh`:
+per file through `sh tools/run.sh`:
 
     !(collapse (unify (f a b) (f a b (:seg $v)) $v none))          -> (none)
     !(collapse (unify (f (g (:seg $x)) (h (:seg $x)))
@@ -63,7 +63,7 @@ Tried: the arbiter measurement the unit's header carried as an assumption.
 Thirteen programs through this engine and through upstream PeTTa at
 `ae66fa8e41dcd5539d614706bd4e5cfb34f9608d`
 (the `PeTTa-upstream` checkout beside the repository that
-`tests/checks/check_upstream_parity.py` pins), each `sh run.sh <file>` in its
+`tests/checks/check_upstream_parity.py` pins), each `sh tools/run.sh <file>` in its
 own checkout, upstream's `unify` reached by importing `lib_he` because it is a
 library equation there:
 

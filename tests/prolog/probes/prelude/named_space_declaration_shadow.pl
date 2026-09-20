@@ -5,7 +5,7 @@
 %   SHADOWED)` kept the prelude's four-input arrow and `!(if-equal 1 1)`
 %   compiled to an arity refusal there, while &self, which EVICTS the prelude
 %   row outright, answered SHADOWED; the same file therefore answered
-%   differently through `sh run.sh` (&self) and through a host that mints a
+%   differently through `sh tools/run.sh` (&self) and through a host that mints a
 %   named space. prelude_declaration_governs_in/2 in engine/metta/types.pl is
 %   the repair; the plunit case is
 %   prelude:a_named_space_shadows_a_prelude_name_at_another_arity.

@@ -242,7 +242,7 @@ warnings, and jscpd reports zero clones. The complete result is
 Whole-gate results from batteries without their own Git identity are invalid.
 An earlier control also retained a stale detached HEAD and an empty
 `lib_package` directory after an orphan QLF prevented removal; it cannot
-supply the required comparison. Batteries 11 and 12 run plain `sh check.sh`
+supply the required comparison. Batteries 11 and 12 run plain `sh tools/check.sh`
 from an earlier frozen candidate/control pair; they are diagnostic runs, not
 the final comparison for the consolidated implementation. Both detached HEADs and all eight
 component identities were aligned to the source revisions without changing

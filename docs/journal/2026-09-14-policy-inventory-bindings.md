@@ -5,7 +5,7 @@ annotations and the classes package's host mechanisms.
 
 ## 2026-09-14
 
-Tried: `sh check.sh policy-inventory` reports five findings in
+Tried: `sh tools/check.sh policy-inventory` reports five findings in
 `ai-classes-c50-verified-checks.log`. Pristine c75181adc reports none in
 `ai-classes-c50-policy-control.log`; its checker, selftest and runner match
 the cut's Git blobs. The affected branch lines are authored by MesTTo.

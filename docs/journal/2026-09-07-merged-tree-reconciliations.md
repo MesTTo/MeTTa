@@ -304,7 +304,7 @@ re-pinned with that mechanism in the commit that follows.
 Tried: the twin re-pin on the merged tree -> 259 of 277 up, none down, no
 stored-content divergence, one twin unmeasured. The unmeasured one,
 `ch17/05-channels_pools_and_the_machine`, fails its claim on both sides:
-`sh test.sh examples/ch17-concurrency-and-the-loop/05-channels_pools_and_the_machine.metta`
+`sh tools/test.sh examples/ch17-concurrency-and-the-loop/05-channels_pools_and_the_machine.metta`
 -> `is no-error, should metta_channel`. The branch rewrote `channel_close/2`
 as `( metta_channel(Id, _) -> metta_release_space(Id) ; true )`, so a second
 close answers True where the example, and the library before the merge,
@@ -537,7 +537,7 @@ nothing beyond its one known name.
 
 ### The full gate on the trunk that carries every merge
 
-Tried: `GATE_ONLY=1 sh check.sh` on 73311b727 -> 115 lanes ok, 24 red.
+Tried: `GATE_ONLY=1 sh tools/check.sh` on 73311b727 -> 115 lanes ok, 24 red.
 Five were defects the merges left and are repaired here: the git shell
 tests called `'git-import!'/5`, `acquire_git_dependency/4`,
 `git_pinned_dependency/2` and `git_library_path/2` unqualified from `-g`
@@ -1434,7 +1434,7 @@ layout in `ai-tmp/ai-c-close-interrupt-before.log`; that callback does not
 place an interrupt in the gap. The cell verifies signal cleanup, while SWI's
 documented Setup guarantee justifies making the ownership transfer atomic.
 
-`sh check.sh c-binding` passes with all four Prolog cells and the existing C
+`sh tools/check.sh c-binding` passes with all four Prolog cells and the existing C
 suite. At 2,000/10,000/20,000 closes, the final regression retains zero
 records and zero predicate bytes; the atom count is 13,509 at every size,
 below the initial 13,553. The final unchanged driver reads instruction
@@ -1968,7 +1968,7 @@ timing enters the C runtime or its operation benchmark.
 
 `ai-tmp/ai-host-reproduction-controls.json` retains all four positive/negative
 commands and their exit-0 results; `ai-tmp/ai-host-index-linear.json` retains
-the three sizes. `sh check.sh host-workarounds host-workarounds-selftest
+the three sizes. `sh tools/check.sh host-workarounds host-workarounds-selftest
 evidence provenance-pin-selftest ruff ruff-drivers` exits 0 in
 `ai-tmp/ai-host-convention-first.log`: six entries, seven sites, every
 reproduction present, ten planted selftests, 7,210 claims with zero unbacked
@@ -2085,7 +2085,7 @@ The repeated-generation selftest passes both generations, the planted foreign
 artifact, the executable-byte digest control, and live/frozen setup ordering.
 The first quality run reports eight TRY003/EM101/EM102 message-style findings;
 the second reports I001 import order and one unqualified test evidence name.
-After those repairs, `sh check.sh evidence ruff-drivers` exits 0 in
+After those repairs, `sh tools/check.sh evidence ruff-drivers` exits 0 in
 `ai-tmp/ai-parity-fixture-quality.log`. The standalone selftest receipts are
 `ai-parity-fixture-selftest-first.log` and `ai-parity-fixture-selftest.log`.
 
@@ -2759,7 +2759,7 @@ The complete cost gate passes at
 load 5.165/10.635/10.260. Its command is:
 
 ```sh
-sh check.sh engine-bench c-bench mork-bench node-bench extcost scaling memory-scale memory-scale-gate benchmarks instructions twins parity-perf
+sh tools/check.sh engine-bench c-bench mork-bench node-bench extcost scaling memory-scale memory-scale-gate benchmarks instructions twins parity-perf
 ```
 
 All twelve lane statuses pass. The 277 twins report zero findings, and all 38

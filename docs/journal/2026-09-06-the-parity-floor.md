@@ -326,7 +326,7 @@ happen.
 Found while checking the page's own claims rather than its numbers. The
 opening sentence read "the measurement runs in CI, so this page can be checked
 rather than believed", and `.github/workflows/checks.yml` runs
-`GATE_ONLY=1 sh check.sh`, which does include `parity-perf`. But nothing in
+`GATE_ONLY=1 sh tools/check.sh`, which does include `parity-perf`. But nothing in
 `.github/` mentions `trueagi` or `PeTTa-upstream`, so the sibling checkout the
 lane needs is never there: the guard at the top of `main/0` prints
 `upstream checkout not found at ...; nothing to compare` and returns 0. The
@@ -460,7 +460,7 @@ docstring. It was one function at 56 branches against a mccabe ceiling of 35,
 and the ceiling is the right complaint: the plants share nothing but three
 constants, which are now `FIXED`, `WORK` and `EXCURSION` at module scope.
 
-Measured: the split changes nothing the lane says. `sh check.sh
+Measured: the split changes nothing the lane says. `sh tools/check.sh
 parity-perf-selftest` before and after produces byte-identical output, `diff`
 reporting no difference, both exiting 0. The burn-down families the file
 touched read ARG 152 (ceiling 152), D 2232 (2233), C90 2 (26) and PERF 0 (0),

@@ -1,7 +1,7 @@
 % Purpose: detect double rounding at the host's rational-to-subnormal boundary.
 % Guarantees: exact normal and subnormal controls distinguish an active defect,
 % a repaired conversion and an unexpected arithmetic result.
-% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
+% [tested: sh tools/check.sh host-workarounds host-workarounds-selftest; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
 
 main :-
     Normal is float(3 rdiv 2), Smallest is 2.0** -1074,

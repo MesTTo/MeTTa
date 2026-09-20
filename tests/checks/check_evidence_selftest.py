@@ -161,10 +161,10 @@ CITATIONS = (
      "for a BARE word took off and turned into a citation of nothing"),
     (False, "skipped", "an example holding a test form that the skip list drops"),
     (False, "no_such_thing_at_all", "a name the tree does not define"),
-    (True, "GATE_ONLY=1 sh check.sh plunit",
+    (True, "GATE_ONLY=1 sh tools/check.sh plunit",
      "an exact gate command naming a lane check.sh runs, which the "
      "obligation-header scheme accepts beside a test name"),
-    (False, "GATE_ONLY=1 sh check.sh no-such-lane",
+    (False, "GATE_ONLY=1 sh tools/check.sh no-such-lane",
      "a gate command naming a lane check.sh does not run"),
     (True, "python tests/checked.py --gate",
      "the interpreter-led shape of the same thing: a script a GATE lane runs, "
@@ -193,7 +193,7 @@ CHECK_SH = """\
 run() { :; }
 in_py() { ( cd "$PYDIR" && "$@" ); }
 
-run GATE shell sh -c "cd '$HERE' && sh test.sh"
+run GATE shell sh -c "cd '$HERE' && sh tools/test.sh"
 run GATE gate-script sh -c "cd '$HERE/tests/prolog' && swipl gate_script.pl"
 run GATE checked sh -c "cd '$HERE' && '$PY' tests/checked.py"
 run GATE printer sh -c "cd '$HERE' && '$PY' tests/printer.py"
@@ -292,7 +292,7 @@ $SKIPS
 $rel
 "*) continue ;;
     esac
-    sh run.sh "$f" || exit 1
+    sh tools/run.sh "$f" || exit 1
 done < "$filelist"
 """
 
@@ -302,9 +302,9 @@ FILES = {
     # takes for the browser suite: `npm run <script> --prefix <package>`, with
     # npm's own flag AFTER the name it selects.
     ".github/workflows/checks.yml": (
-        "run: sh check.sh\nrun: npm run test:tools --prefix extensions/node\n"
+        "run: sh tools/check.sh\nrun: npm run test:tools --prefix extensions/node\n"
     ),
-    ".github/workflows/ci.yml": "run: sh test.sh\n",
+    ".github/workflows/ci.yml": "run: sh tools/test.sh\n",
     "extensions/python/tests/test_collected.py": "def test_collected():\n    assert True\n",
     "extensions/python/tests/helpers.py": "def test_uncollected():\n    assert True\n",
     "tests/checked.py": (

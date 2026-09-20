@@ -82,7 +82,7 @@ run GATE deep-test sh -c "cd \\"$HERE\\" && sh tests/nested/deep_test.sh"
 run GATE promoted-lane echo promoted
 run REPORT unpromoted-lane echo unpromoted
 run GATE preexisting-lane echo preexisting
-run GATE shell sh -c "cd \\"$HERE\\" && sh test.sh"
+run GATE shell sh -c "cd \\"$HERE\\" && sh tools/test.sh"
 
 for component_check in "$HERE"/engine/check.sh "$HERE"/extensions/*/check.sh; do
     [ -f "$component_check" ] || continue
@@ -125,12 +125,12 @@ for suite in "$@"; do bounded swipl -g run_tests -t halt "$suite"; done
 TEST_SH = """\
 find ./examples -type f -name '*.metta' ! -path '*/_fixtures/*' -print > /tmp/fixture_filelist
 SKIPS=$(grep -v '^#' tests/data/example_skips.txt | awk 'NF {print $1}')
-while IFS= read -r f; do sh run.sh "$f" || exit 1; done < /tmp/fixture_filelist
+while IFS= read -r f; do sh tools/run.sh "$f" || exit 1; done < /tmp/fixture_filelist
 """
 
 FILES = {
-    ".github/workflows/checks.yml": "run: sh check.sh\n",
-    ".github/workflows/ci.yml": "run: sh test.sh\n",
+    ".github/workflows/checks.yml": "run: sh tools/check.sh\n",
+    ".github/workflows/ci.yml": "run: sh tools/test.sh\n",
     "extensions/python/pyproject.toml": '[tool.pytest.ini_options]\npythonpath = ["."]\n',
     "tests/known_good.sh": "#!/bin/sh\nexit 0\n",
     "tests/nested/deep_test.sh": "#!/bin/sh\nexit 0\n",

@@ -63,7 +63,7 @@ suites/evaluation/builtin_facets.plt suites/evaluation/metatype_mask.plt
 suites/evaluation/on_unwind.plt` passes all 124 expanded checks in
 `ai-tmp/ai-eval-one-root-surrounding.log`.
 
-Tried: `sh test.sh examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/11-single_answer.metta`
+Tried: `sh tools/test.sh examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/11-single_answer.metta`
 -> all five assertions pass (`ai-tmp/ai-eval-one-root-example.log`). Five fresh twin
 runs -> equal stores, 8991 native and 9060 Python inferences every time
 (`ai-tmp/ai-eval-one-root-twin-observe.jsonl`); the twin declares BUDGET=9060 with no
@@ -87,7 +87,7 @@ Tried: `example_origins.py --write` -> 143 derived, 206 original, one count line
 moved; `check_cumulative_syntax.py --write` -> 286 constructs, the one new row
 `eval-one 05-01-11` (`ai-tmp/ai-eval-one-resume-{origins,syntax}.log`).
 
-Tried: `sh check.sh fn-sync phrasebook corpus-coverage cumulative-syntax example-origins
+Tried: `sh tools/check.sh fn-sync phrasebook corpus-coverage cumulative-syntax example-origins
 llms llms-selftest layering closed-sets policy-inventory evidence`, display unset ->
 all 15 lane results ok (`ai-tmp/ai-eval-one-resume-gates.log`).
 

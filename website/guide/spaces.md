@@ -155,7 +155,7 @@ patterns can each produce an answer. Actual duplicate source equations retain
 their multiplicity. A reference to the receiving space itself aliases its own
 public definitions once, without repeatedly mapping its imported aliases.
 
-The [reference maps example](https://github.com/MesTTo/MeTTa-Kernel/blob/petta/examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta)
+The [reference maps example](https://github.com/MesTTo/MeTTa/blob/petta/examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta)
 and its Python twin exercise name maps, call patterns and the default map.
 
 ## A space is a Python container
@@ -198,7 +198,7 @@ after storing `(job ready)` twice, `(transaction (subtract-atom &self
 (job ready)))` answers `True` and leaves one copy. A subsequent
 `(transaction (subtract-atom &self (job missing)))` answers `False` and
 leaves that copy alone. The executable
-[transactional subtraction example](https://github.com/MesTTo/MeTTa-Kernel/blob/petta/examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta)
+[transactional subtraction example](https://github.com/MesTTo/MeTTa/blob/petta/examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta)
 also checks rollback.
 
 Subtraction uses the existing storage lookup and removal paths and installs
@@ -316,7 +316,7 @@ measurements set the honest expectations: below roughly ten million atoms
 the predicate store is faster, and from one hundred to four hundred million
 atoms MORK kept answering where the predicate store ran out of memory.
 
-To enable it, run `sh build.sh` at the repository root: `mork_ffi` ships in
+To enable it, run `sh tools/build.sh` at the repository root: `mork_ffi` ships in
 the tree, and the script builds it on nightly Rust against `MORK` and
 `PathMap` checkouts beside the repository, cloned at the validated revisions
 when absent. Once `extensions/mork/mork_ffi/target/release/libmork_ffi.so`

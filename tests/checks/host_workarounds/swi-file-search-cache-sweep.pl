@@ -3,10 +3,10 @@
 %   be forced without waiting or changing the lookup being measured.
 % Guarantees: compares the next lookup after the aged load with two warm
 %   lookups; an unequal warm control or a reversed difference is a broken
-%   reproduction [tested: sh check.sh host-workarounds; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+%   reproduction [tested: sh tools/check.sh host-workarounds; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-file-search-cache-sweep.patch;
-%   command=sh check.sh host-workarounds;
+%   command=sh tools/check.sh host-workarounds;
 %   fixture=SWI-Prolog 10.1.14 with the patch; commit=c01a874d38c31236c22dbe2f30fab689ec5bc510].
 % Owns resources: this fresh process's cache timestamps and loaded libraries;
 %   neither survives process exit.

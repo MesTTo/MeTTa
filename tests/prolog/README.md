@@ -6,7 +6,7 @@ build step:
     swipl --stack_limit=8g -q -s engine/main.pl -- examples/ch07-control-flow/07-05-recursion/02-fib.metta silent
 
 The command above is the pure kernel: with no `extensions` token in argv the
-engine reads no seat at all. `sh run.sh` adds the token, which asks the engine
+engine reads no seat at all. `sh tools/run.sh` adds the token, which asks the engine
 to read every seat's control file and load what each declares. There is no mode
 and no seat is named: the engine globs `extensions/*/extension.pl`, and each of
 those files declares what its own seat needs. A seat whose needs are unmet
@@ -15,7 +15,7 @@ particular one loaded. Check the one you care about by using it, which for MORK
 means adding an atom to `m.space("&mork")` and querying it back, or by reading
 `metta_extension_loaded/1` and `metta_extension_unmet/2` off the live process.
 
-Run `sh build.sh` to build the optional MORK native backend. That script clones
+Run `sh tools/build.sh` to build the optional MORK native backend. That script clones
 the pinned MORK and PathMap sources beside this repository, so it needs network
 access, Git, Rust, and a C toolchain. FAISS is a MeTTa library the engine
 fetches through `git-import!`, not a backend this script builds.
@@ -24,7 +24,7 @@ The Python library and differential tests need a Python interpreter with
 `janus_swi` linked to the installed SWI version. Select it explicitly when the
 default environment does not provide that module:
 
-    CHECK_PY=/path/to/python GATE_ONLY=1 sh check.sh
+    CHECK_PY=/path/to/python GATE_ONLY=1 sh tools/check.sh
 
 On the project workstation, the matching interpreter is:
 
@@ -34,11 +34,11 @@ On the project workstation, the matching interpreter is:
 
 Run every blocking check from the repository root:
 
-    GATE_ONLY=1 sh check.sh
+    GATE_ONLY=1 sh tools/check.sh
 
 Run selected Prolog checks by name:
 
-    sh check.sh prolog prolog-static prolog-determinism prolog-reach plunit
+    sh tools/check.sh prolog prolog-static prolog-determinism prolog-reach plunit
 
 The Prolog checks have separate jobs for undefined predicates, SWI source
 checks, translation determinism, reachability, and PlUnit.
@@ -47,7 +47,7 @@ running `list_trivial_fails/0`, `list_redefined/0`, `list_void_declarations/0`,
 `list_autoload/0`, and `check/0`. The determinism driver parses every MeTTa
 example in a fresh process and rejects a form with two translations.
 
-`sh check.sh ciao-grade` loads the unchanged engine and the external
+`sh tools/check.sh ciao-grade` loads the unchanged engine and the external
 `tests/prolog/ciao_grade.pl` side file, applies packaged runtime checks to the
 four removal and translation funnels, and requires its valid smoke to collect
 zero `assrchk/1` findings. It uses three external development packs:
@@ -189,7 +189,7 @@ The full Python oracle runs from the repository root, not from `python/`:
 
     /path/to/python -m pytest extensions/python/tests/ -q --rootdir=python -c extensions/python/pyproject.toml
 
-`sh test.sh` runs the self-checking MeTTa examples (the corpus size is pinned in `examples/README.md`). It uses each process
+`sh tools/test.sh` runs the self-checking MeTTa examples (the corpus size is pinned in `examples/README.md`). It uses each process
 exit status as the verdict and prints the existing assertion lines unchanged.
 
 ## Measure engine changes
@@ -224,7 +224,7 @@ base-only warning before treating it as whole-corpus evidence. The topical
 examples tree keeps selected root compatibility aliases, so its root-glob does
 not cover every canonical example.
 
-`sh bench.sh` is the other one, and it answers a different question: it
+`sh tools/bench.sh` is the other one, and it answers a different question: it
 discovers every component's own `bench.sh` and runs each suite against its
 committed baselines, so a regression is named against a pin rather than against
 another revision. `metta bench` is that script.
@@ -255,5 +255,5 @@ a proof walk still reaches one answer.
 A correctness fix carries a reproducer in the matching PlUnit, shell, or
 differential tier. A performance fix also carries the counter workload and its
 before-and-after result. Run the focused test during development, then run
-`GATE_ONLY=1 sh check.sh` before committing. Keep failures loud. Do not catch an
+`GATE_ONLY=1 sh tools/check.sh` before committing. Keep failures loud. Do not catch an
 error only to return partial state or an empty answer.

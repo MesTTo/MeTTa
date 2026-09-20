@@ -1,15 +1,12 @@
-[submodule "engine"]
-	path = engine
-	url = https://github.com/MesTTo/MeTTa-Kernel.git
 [submodule "lib"]
 	path = lib
-	url = https://github.com/MesTTo/metta-lib.git
+	url = https://github.com/MesTTo/MeTTa-Library-Pack.git
 [submodule "examples"]
 	path = examples
 	url = https://github.com/MesTTo/MeTTa-Examples.git
 [submodule "ext"]
 	path = ext
-	url = https://github.com/MesTTo/metta-extensions.git
+	url = https://github.com/MesTTo/PyMeTTa-Extensions.git
 [submodule "extensions/python"]
 	path = extensions/python
 	url = https://github.com/MesTTo/PyMeTTa.git

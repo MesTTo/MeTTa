@@ -1386,12 +1386,12 @@ CHECK_LANE = re.compile(r"^run\s+(?:GATE|REPORT)\s+([a-z0-9-]+)", re.MULTILINE)
 def gate_lanes() -> frozenset[str]:
     """Every lane name the gate runs, the root driver's and each component's.
 
-    `sh check.sh <lane>` still names all of them, because the root driver
+    `sh tools/check.sh <lane>` still names all of them, because the root driver
     SOURCES every component's check.sh and its `run` filters on the argument
     list, so a lane's file says nothing about whether the command works.
     Reading the root file alone said otherwise the moment a lane moved into a
     component, and it said it about a lane the gate runs [measured 2026-08-28:
-    `sh check.sh mypy ty` in extensions/python/metta/_declare/rules.py:13 read as
+    `sh tools/check.sh mypy ty` in extensions/python/metta/_declare/rules.py:13 read as
     naming a lane check.sh does not run, one commit after mypy moved into
     extensions/python/check.sh].
     """

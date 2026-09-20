@@ -2,7 +2,7 @@
 # Corpus and conformance-gate hygiene
 Goal: the gate reads every claim the tree writes, refuses an input it cannot
 reproduce, and decides equality by a relation someone can state.
-Constraint: `GATE_ONLY=1 sh check.sh` measured 286 seconds against a 300 second
+Constraint: `GATE_ONLY=1 sh tools/check.sh` measured 286 seconds against a 300 second
 ceiling, so nothing added may cost meaningfully; and a check that cannot be
 shown failing is evidence of nothing.
 
@@ -192,7 +192,7 @@ the widened one.
 
 ## 2026-09-05, the gate, and four differences that are not this work
 
-`GATE_ONLY=1 sh check.sh` twice: on the unmodified parent and on the pinned
+`GATE_ONLY=1 sh tools/check.sh` twice: on the unmodified parent and on the pinned
 tree. Both exit 1, because the parent does, so the comparison is which lanes
 fail rather than whether any do.
 

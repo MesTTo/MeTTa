@@ -1,0 +1,2392 @@
+% Guarantees: metta_with_trailed/3 is published as a host_service
+%   [source: engine/ext_points.pl:kind/2; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+% Guarantees: a `:- seam:context_reader(Head, Key, Shape)` declaration defines
+%   the reader and compiles every resolving call to its nb_current/2 read, at
+%   the inferences of the dynamic fact the reader replaced; a malformed shape
+%   or key refuses at load [tested: trailed_scopes:every_declared_reader_is_compiled_to_its_read,
+%   trailed_scopes:a_call_site_carries_the_read_rather_than_a_call,
+%   trailed_scopes:an_inactive_reader_costs_what_the_asserted_guard_cost,
+%   trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%
+% Purpose: declare each engine extension seam, its direction and its cut
+%   semantics, and publish the predicates extensions and host bindings may call.
+% Guarantees: namespace registration is a published host service distinct
+%   from value species [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
+% Guarantees: context_reader/4 defines a scoped reader and compiles resolving
+%   calls directly to its read; malformed declarations refuse at load
+%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: metta_transaction/2 publishes the result-aware transaction service
+%   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: grounded_length/2 lets the value's owner answer a length query
+%   independently of its structural view [tested:
+%   refinements:a_length_provider_does_not_read_structure; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: allocation, release and held-goal context hooks let lib_thread
+%   own scope lifetimes across host engines [tested: lib_thread_scope;
+%   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
+% Assumes: space_releasing/1 owners tolerate repeated preparation across the
+%   preliminary clear, final release and retries [tested: release_preparation,
+%   lib_thread_cancellation; commit=0891c522503ca9856fb654f306364f4ae9736b22].
+% Guarantees:
+%   - extensions share the engine's console rendering and IEEE exception
+%     recovery [tested: engine_modules:every_declared_service_is_exported_to_the_host,
+%     lib_string_surface:template_uses_engine_rendering_and_host_grammar,
+%     lib_vector_surface:nonfinite_reductions; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
+%   - metta_apply_algebra_operation/5 exposes the native carrier operation
+%     semantics to host bindings [tested:
+%     test_visibility_operations_share_the_native_carrier; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+%   - evaluation context and ordered-match demand are published engine
+%     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
+%   - metta_import_record/2 and metta_unimport/2 expose one source lifecycle
+%     to libraries [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
+%   - libraries can distinguish an author's annotated effect from inferred
+%     operation metadata [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+%   - host query carriers enter the engine-owned algebra scope, read its
+%     effective or explicitly selected carrier and identity, and compose
+%     operation-answer weights only through declared host services
+%     [tested: a_host_binding_calls_only_published_surface,
+%     test_the_host_service_scoreboard_matches_the_tree,
+%     test_two_annotated_operation_calls_multiply_all_four_joint_weights;
+%     commit=2e627a593413191cda3170f2eb716835f7f62543].
+%   - atom events raised inside an observation frame are retained in write
+%     order, merged into an enclosing frame on nested commit, published only
+%     after the outer commit, and discarded on rollback [tested:
+%     test_events_publish_only_after_transaction_commit,
+%     test_rollback_and_outer_rollback_discard_every_buffered_event,
+%     test_speculative_execution_discards_its_event_segment; commit=39092863ae34184a9f955f185ff57c1ff177ec40].
+%   - a committed segment announces its boundary once, after every one of its
+%     atom events has been dispatched, carrying the sorted space names it
+%     touched; an unscoped write is a segment of one and a discarded frame
+%     announces nothing [tested:
+%     test_a_transaction_delivers_one_progress_after_its_deltas,
+%     test_a_discarded_segment_announces_no_boundary; commit=0de0dc08d2fc77bee9dd132c41f1de23cda1e6c2].
+%   - deferred commit callbacks run after earlier committed events even when a
+%     subscriber fails, while rollback runs every paired discard callback even
+%     when an earlier discard raises [tested:
+%     test_a_failed_launch_watcher_does_not_strand_committed_async_work,
+%     test_a_rolled_back_async_launch_never_starts_or_lands,
+%     every_deferred_discard_runs_before_the_first_error_is_rethrown;
+%     commit=39092863ae34184a9f955f185ff57c1ff177ec40].
+%   - reader-token registration is an engine-owned host service, while token
+%     construction is claimed by the host that owns the registered callable;
+%     mapping introspection is an ordinary extension service [tested:
+%     test_a_registered_token_class_parses_like_a_shipped_one,
+%     every_seam_declares_one_kind,
+%     every_seam_kind_matches_its_direction; commit=2c741dda928a30d0ce1c7e1fcf0b263b4d1bb97b].
+%   - every handler seam lives in THIS module, so an extension writes
+%     seam:atom_added/2 and the module carries the namespace the metta_on_
+%     prefix used to carry [tested: test_every_seam_is_reached_under_its_module;
+%     commit=dd407a40f623b16eda0bb51a74458f7dd3760e21].
+%   - automatic-cache graph, source-boundary, policy, explanation and support
+%     seams each declare their event/declaration/service direction explicitly
+%     [tested: every_seam_kind_matches_its_direction,
+%     test_a_doubly_branching_recursion_is_tabled_automatically_and_a_tail_recursion_is_not;
+%     commit=9e7d5dc2cad810940e5386d52636ac6946df279d].
+%   - host repeatability asks one engine-owned effect-classification service
+%     rather than reaching the walk's private queue predicates [tested:
+%     a_host_binding_calls_only_published_surface,
+%     test_the_host_service_scoreboard_matches_the_tree; commit=6917bef7ca902671999eafcae3a7a86db8f69723].
+%   - declaring a seam is priced the same whether or not its defining file has
+%     loaded, so the boot sweep costs the size of the table rather than a
+%     library-index search per row [tested:
+%     a_missing_definition_is_priced_like_a_present_one]
+%     [measured 2026-09-06: engine/bench.pl bench_run(boot) 543,929 to
+%     240,641, and thirty added kind/2 rows 124,185 to 1,755;
+%     commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
+%   - finite algebra equality is a host-owned decision with an explicit false answer
+%     [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+%   - a consumer that MIRRORS a catalog row hears every write to its head,
+%     including a removal whose head was left unbound, and hears nothing for a
+%     head it did not ask about [tested: run_tests(catalog_watch);
+%     commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
+%   - watching one head costs 1 inference on a '&metta' write and nothing on a
+%     write to any other space [measured 2026-09-08: 36.02 to 37.02 inferences
+%     per '&metta' write, 27.02 either way per '&self' write and 375.07 either
+%     way per equation;
+%     command=python extensions/python/benchmarks/probes/bound_row_cost.py --write;
+%     fixture=300 writes per arm against a control checkout at
+%     9006528e04dfcc6bf3c7f43cd77a7816ad0223d7; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
+% Open Obligations:
+%   To Do: None
+%   Hacks: None
+%   Future Enhancements: None
+
+%The module IS the namespace, which is why the names below are short. Every
+%handler seam used to wear a prefix that did a module's job: metta_on_ for the
+%events, metta_foreign_ for the space-provider protocol, metta_grounded_ for
+%the grounded-value protocol, metta_host_ for the host's. The prefix was the
+%only namespace there was, and being a convention it could not refuse
+%anything: two libraries could declare the same seam name and corrupt each
+%other by import order, and nothing said which module a handler belonged to.
+%
+%Now an extension writes
+%
+%    :- multifile seam:atom_added/2.
+%    seam:atom_added(Space, Atom) :- ...
+%
+%which is SWI's own hook shape, the one prolog:message//1 has always used
+%[source: SWI-Prolog 10.1 Reference Manual, section 4.10 and library(error)'s
+%error:has_type/2]. The old spellings are GONE rather than aliased: an alias
+%tier would be a second name for one thing, which the tree's ladder refuses,
+%and compatibility against our own Prolog surface is not a constraint.
+%
+%Nothing here is imported into the engine's module. engine/metta.pl loads this
+%file with an empty import list, so `seam:` is not optional and cannot decay
+%back into a bare name that happens to resolve. The export list below is
+%therefore the DECLARED surface rather than what anyone can reach, which is
+%what the layering lane and the published-surface walk both ask for.
+:- module(seam,
+          [ % The extension-point table itself, and what it decides.
+            kind/2,
+            clauses_from/2,
+            every_clause_runs/1,
+            publish/1,
+            publish_declared/0,
+            seam_home/2,
+
+            % Events: the engine tells, every handler runs.
+            atom_added/2,
+            atom_removed/2,
+            space_created/1,
+            space_releasing/1,
+            space_released/1,
+            space_access/1,
+            space_dependency/2,
+            host_engine_created/1,
+            host_engine_released/1,
+            catalog_row_changed/2,
+            segment_committed/1,
+            cache_policy_changed/1,
+            forget_derived/0,
+            function_call_graph_changed/2,
+            function_changed/1,
+            function_clauses_changed/1,
+            function_removed/1,
+            source_program_compiled/0,
+            backend_selftest/0,
+
+            % The atom-write wrappers those events ride on.
+            enable_atom_hook/1,
+            disable_atom_hook/1,
+            atom_hook_clause/2,
+            atom_hook_changed/3,
+            sync_atom_hook/1,
+            write_door_module/2,
+
+            % Post-commit observation frames and provider publication.
+            observation_begin/0,
+            observation_commit/0,
+            observation_discard/0,
+            observation_defer/2,
+            observation_frames/1,
+            observe/3,
+
+            % Declarations: fact tables the engine reads as data.
+            transaction_constraint/1,
+            extension_builtin/2,
+            builtin_type_declaration/2,
+            context_reader/4,
+            context_events/3,
+            engine_context/1,
+            engine_emitted/1,
+            foreign_capability/2,
+            grounded_extra_type/2,
+            automatic_cache_explanation/3,
+            interposed_dispatch/4,
+            pure_operation/1,
+            seeded_operation/1,
+            route_cap/4,
+
+            % Ownership: the first handler that succeeds claims the request.
+            custom_match/2,
+            dispatch_call/4,
+            effect_operation_name/3,
+            form_rewriter/1,
+            matchable_value/1,
+            pattern_modifier/3,
+
+            % The foreign-space provider protocol.
+            foreign_add/2,
+            foreign_add_many/2,
+            foreign_atoms/2,
+            foreign_token/3,
+            foreign_add_token/3,
+            foreign_remove_token/3,
+            foreign_clear/1,
+            foreign_erring/5,
+            foreign_match/3,
+            foreign_plan/5,
+            foreign_participant/3,
+            foreign_pushdown/3,
+            foreign_refuse/2,
+            foreign_remove/3,
+            foreign_space/1,
+
+            % The grounded-value protocol.
+            grounded_applicable/1,
+            grounded_apply/4,
+            grounded_algebra_equal/3,
+            grounded_algebra_type/3,
+            grounded_class_type/2,
+            grounded_length/2,
+            grounded_numeric/1,
+            grounded_numeric_operation/3,
+            grounded_structure/2,
+            grounded_text/2,
+            grounded_type_names/2,
+
+            % The host protocol's handler half; its service half is the
+            % engine's own predicates, reached under the subsystem that
+            % defines them.
+            host_add_hooks_idle/2,
+            atom_hook_ref_idle/2,
+            host_transport_failure/1,
+            host_error_reason/2,
+            compiled_source/1,
+            host_import/1,
+            host_object/1,
+            host_reader_token_construct/3,
+            host_remove_hooks_idle/2
+          ]).
+
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
+
+% Every listener this file registers goes through the engine's one door, which
+% registers once, takes no name and holds no mutex while SWI takes the
+% channel's event-list lock (engine/host_listeners.pl).
+:- use_module(host_listeners, [metta_listen/2]).
+
+%%%% What kind of seam each extension point is %%%%
+%
+%Every seam below is declared multifile and then given a KIND on the line
+%after it. The kind is the load-bearing fact about a seam, because a cut means
+%opposite things in the three of them, and it lived in this comment until a
+%checker had to restate it by hand. A restated list drifts, and this one had:
+%the prose named five event hooks, omitting backend_selftest/0 and
+%wrongly including dispatch_call/4, and both were contradicted by their
+%own call sites. So it is data now, and the prose derives from it.
+%
+%EVENT: run for an effect and the answer discarded, forall(Hook, true). Every
+%handler runs.
+%
+%OWNERSHIP: consulted for an answer, and the first handler that succeeds
+%CLAIMS the request; the caller takes it with ->/2 or once/1, and a provider
+%declines by failing.
+%
+%DECLARATION: a fact table the engine reads as data rather than calls for an
+%effect. Every clause has to stay readable for the same reason an event
+%handler has to stay reachable.
+%
+%SERVICE: the other direction. The three kinds above are all HANDLER seams,
+%where an extension writes the clauses and the engine calls them; a service is
+%a predicate the ENGINE defines and an extension is allowed to CALL. A foreign
+%space backend needs one: it speaks text over a wire, so it has to turn a term
+%into text and back, and before this kind existed it reached into
+%engine/parser.pl to do it. SQLite publishes the same half of its own contract
+%and for the same reason, handing an extension an sqlite3_api_routines table
+%of the host functions it may call so that an extension never links against
+%internals [source: https://www.sqlite.org/vtab.html and loadext.html]. Naming
+%the surface is what makes "reaches past the seam" a question a checker can
+%answer, and two extensions had already answered it wrongly: morkspaces.pl and
+%extensions/python/metta/_binding/shim.pl each wrapped metta_unwritable_symbol/2 under a private
+%name of its own, which is what an undeclared dependency looks like from the
+%outside [measured 2026-08-17].
+%
+%The cut rule follows from the kind rather than being a second list to keep.
+%In an OWNERSHIP seam a clause guarded by a test that establishes "this
+%request is mine" may cut freely, and lib/lib_redis/lib_redis.pl does:
+%redis_space_conn(Space, _) fails for a space redis does not own, so a later
+%provider's clauses are untouched, and the cut is a real optimisation there.
+%In an EVENT or DECLARATION seam every clause must stay reachable, so a cut
+%prunes that predicate's remaining clauses and silently disables every handler
+%loaded after it. lib/lib_tabling/lib_tabling.pl cut after metta_tabling_declared, a
+%GLOBAL CONDITION rather than an ownership test: nothing about it says this
+%handler is the one that should answer. With tabling declared, duals.pl's
+%invalidation handler (asserted last, so ordered last) never ran and
+%(not-provable (pq 2)) answered True and False at once.
+%
+%Write ( Condition -> Action ; true ) in an event handler, which keeps the
+%guard's cost and prunes nothing. A cut is transparent through ,/2, ;/2 and
+%the THEN branch of ->/2 and *->/2, and opaque everywhere else, including the
+%CONDITION of ->/2, where the manual's own worked example is
+%`t3 :- (a, !, b -> c ; d)` pruning a/0 and not t3/0
+%[source: SWI-Prolog manual, !/0, scope-of-the-cut table]. So a checker that
+%flags a cut in a condition is flagging correct code.
+%
+%Two checks enforce it and neither subsumes the other. A source scan reads
+%every clause in the tree, including one a directive asserts, and a runtime
+%scan reads clause/3 after the libraries have loaded, which is the only way to
+%see a handler that Python installs or one whose body is built at run time
+%[tested: tests/prolog/static_checks.pl, no_cut_in_an_event_hook and
+%no_cut_in_a_live_hook_clause].
+%
+%kind/2 is itself multifile, so a library that introduces a seam of
+%its own declares its kind beside it and gets the same gate. Every seam has
+%exactly one kind and that is checked rather than trusted
+%[tested: every_seam_declares_one_kind], so a seam added without one fails the
+%gate instead of going quietly unchecked.
+:- multifile kind/2.
+%It is a seam itself, so it carries its own kind, and being a declaration it
+%is covered by the cut check like any other.
+kind(kind/2, declaration).
+
+%The names the engine writes into compiled bodies and therefore binds into
+%every space's module. Declared here because it is a seam in both directions:
+%an extension that teaches the engine to emit a goal of its own names it, and
+%the engine reads the whole table when it protects a space's module. Its
+%clauses live in engine/translator.pl, beside the translation rules that emit
+%them.
+:- multifile engine_emitted/1.
+kind(engine_emitted/1, declaration).
+
+%Libraries contribute builtin arrows without replacing the engine's table.
+%It is a declaration seam, so every contributed clause remains reachable
+%[tested: test_a_library_types_its_own_blob_without_destroying_the_table;
+%commit=65d5fff90323fb92e2415f9fe93c477d5c67f10e].
+:- multifile builtin_type_declaration/2.
+kind(builtin_type_declaration/2, declaration).
+
+%Pattern modifiers are expression lists claimed by shape. The engine replaces
+%the modifier position with a fresh variable and runs the owner's guard after
+%matching, so an extension can add a structural view without teaching the
+%store a new term kind. The lifting walk is a host service because a binding
+%that constructs patterns must apply the same semantics as compiled match.
+%[tested: test_a_path_reaches_into_a_handle_without_converting_it;
+%commit=b54ecaaa1224eabb90f808275003cd9abeef8065].
+:- multifile pattern_modifier/3.
+kind(pattern_modifier/3, ownership).
+
+%Who writes a seam's clauses. This is the primitive the cut rule derives from,
+%rather than the cut rule naming kinds directly: that rule is about a handler
+%an extension contributed staying reachable, so it can only bite where an
+%extension contributes the clauses. A service's clauses are the engine's own
+%and cut freely, as swrite/2 does; reading the rule off the kind list alone
+%would have called every one of them an offender.
+clauses_from(event,       extension).
+clauses_from(ownership,   extension).
+clauses_from(declaration, extension).
+clauses_from(service,     engine).
+clauses_from(host_service, engine).
+
+%A seam whose clauses must all stay reachable: contributed by an extension,
+%and not an ownership seam where the first success is meant to claim the
+%request. Derived, so adding a kind does not mean editing a second list.
+every_clause_runs(Seam) :-
+    kind(Seam, Kind),
+    clauses_from(Kind, extension),
+    Kind \== ownership.
+
+%A handler seam is multifile because an extension adds clauses to it. A
+%service is not, because an extension calling it must not be able to redefine
+%it, and multifile is exactly the permission to try. The two directions are
+%checked apart for that reason [tested: every_seam_kind_matches_its_direction].
+
+%CALL DISPATCH: a handler is offered every compiled call site and either
+%CLAIMS it, by binding Goal to something the engine runs instead, or fails and
+%the ordinary call proceeds. Failing is the shipped default and the whole of
+%what a handler must do to opt out.
+%
+%It was named metta_memoized_dispatch_call/4, for the first library that used
+%it, and the name was the problem: nothing suggested it was the general
+%dispatch seam, so nothing reached for it to do anything else. lib_memo binds
+%Goal to a cache lookup, and it is still the only handler in the tree. This is
+%Trino's applyX / Optional.empty() shape, and it was here before that reading.
+%
+%A function name alone does not identify a function, because a named space
+%compiles its equations into a module of its own, so a handler that keeps
+%state per function reads current_metta_module/1 to learn which module the
+%call site is in. It reads it rather than being passed it because this hook is
+%consulted on every compiled call site.
+:- multifile dispatch_call/4.
+kind(dispatch_call/4, ownership).
+%Function-change hooks, run once per compiled equation. Dynamic for the same
+%reason the atom hooks below are: a handler needed only once a feature is used
+%should cost nothing until then, so it is installed when that feature first
+%runs rather than when its file loads. A resident handler clause costs four
+%inferences on EVERY compiled equation [measured 2026-08-15: engine/duals.pl's
+%invalidation handler, 4001 on source-load's thousand equations].
+:- multifile function_changed/1.
+kind(function_changed/1, event).
+%DROP every answer a library derived earlier and would serve again.
+%
+%   forget_derived
+%
+%A library that answers a call from something it computed before -- a memo, a
+%table, a materialised view -- holds state no digest can see, and until this
+%seam a caller had no way to ask for it back. Replaying a recorded run is that
+%caller: a recording pins the atoms with a digest and the draws with a seed,
+%and this is the third thing the re-run has to start from. Without it a replay
+%of a memoised head is a different execution with the same answers -- measured
+%2026-09-07, `!(fib 6)` recording 22 events and replaying 2 in the engine that
+%recorded it, every call after the first answered from the cache.
+%
+%An EVENT, so every handler runs: the derived answers of one program can be
+%held by several libraries and dropping one library's is not dropping the
+%state. It is total rather than per space or per function, which is the same
+%argument the tracer's teardown makes: a reset that is sometimes partial is a
+%silent divergence, and the caller asking for it wants the engine as cold as
+%it can be made.
+:- multifile forget_derived/0.
+kind(forget_derived/0, event).
+%The compiled half of the change story, run once per compiled equation AFTER
+%its clause and provenance are in place. function_changed above is the
+%DEFINITION event: it fires when an equation arrives whether or not the engine
+%has translated it yet, which under deferred translation can be well before
+%any clause exists. A handler that acts on the compiled predicate, wrapping it
+%the way the tracer does, listens here instead, because at definition time
+%there may be nothing to wrap and at materialisation time nothing else fires.
+:- multifile function_clauses_changed/1.
+kind(function_clauses_changed/1, event).
+:- multifile function_call_graph_changed/2.
+kind(function_call_graph_changed/2, event).
+:- multifile function_removed/1.
+kind(function_removed/1, event).
+:- multifile cache_policy_changed/1.
+kind(cache_policy_changed/1, event).
+:- multifile source_program_compiled/0.
+kind(source_program_compiled/0, event).
+%A deferred function's clauses now stand AND nothing is mid-translation.
+%function_call_graph_changed/2 above fires while the function is still inside
+%its own compilation guard, so a handler that RECOMPILES on the news cannot
+%act on it there: it would recompile the predicate its caller is in the middle
+%of building. This is the settle point after that, fired once per
+%materialisation rather than once per equation, and it is where the automatic
+%cache decides -- early enough to reach the first call, which is the whole
+%reason the decision cannot wait for the source's flush.
+:- multifile deferred_translation_settled/0.
+kind(deferred_translation_settled/0, event).
+:- dynamic function_changed/1.
+:- dynamic function_clauses_changed/1.
+:- dynamic function_call_graph_changed/2.
+:- dynamic function_removed/1.
+:- dynamic cache_policy_changed/1.
+:- dynamic source_program_compiled/0.
+:- dynamic deferred_translation_settled/0.
+
+%Automatic caching decisions are extension-owned declarations. The core's
+%explain door enumerates them, while lib_memo owns the state and reasons.
+:- multifile automatic_cache_explanation/3.
+kind(automatic_cache_explanation/3, declaration).
+
+%Space writes: every 'add-atom'/3, 'remove-atom'/3 and 'subtract-atom'/3 runs
+%these hooks with the space and the term, after the write. A standing query, a subscription,
+%an index or a mirror hangs off them; with no handlers nothing changes.
+%A removal hook fires only when something was actually removed, once PER
+%OCCURRENCE, and it carries the occurrence that left rather than the term the
+%caller asked about. `(remove-atom &s (p $x))` drains every atom matching
+%`(p $x)` (engine/spaces/foreign.pl, remove_matching_atoms/2), and it drains
+%them by reading them first and then removing each by name, so what reaches
+%the hook is a ground atom the space held and a handler no longer has to
+%re-read the space to find out which. It carried the caller's pattern and
+%fired once until 2026-08-30, when removal stopped being multiset
+%subtraction, which 'subtract-atom'/3 carries as its own head now: it fires
+%this hook exactly once, for the single occurrence it took.
+%extensions/python/metta/structures.py's LiveView is the worked
+%instance [tested: test_liveview_mirrors_the_space].
+:- multifile atom_added/2.
+kind(atom_added/2, event).
+:- multifile atom_removed/2.
+kind(atom_removed/2, event).
+% Lifetime events are independent of atom writes and transaction observation.
+% Creation fires once at allocation. Release preparation joins dependants
+% before either clearing phase and may repeat on retry. Its owners must be
+% idempotent. Final retirement follows successful storage teardown; inside a
+% transaction it waits for the outer native outcome and the captured foreign
+% participants, and an aborted retirement never fires it.
+:- multifile space_created/1, space_releasing/1, space_released/1, space_access/1.
+kind(space_created/1, event).
+kind(space_releasing/1, event).
+kind(space_released/1, event).
+kind(space_access/1, event).
+
+% A closure captured on the caller and applied around a held engine's goal.
+% Every declared context composes; no host duplicates the context stack.
+:- multifile engine_context/1.
+kind(engine_context/1, declaration).
+
+:- multifile host_engine_created/1, host_engine_released/1.
+kind(host_engine_created/1, event).
+kind(host_engine_released/1, event).
+
+% Spaces that must remain live while a dependent space is returned from a scope.
+:- multifile space_dependency/2.
+kind(space_dependency/2, declaration).
+:- dynamic atom_added/2.
+:- dynamic atom_removed/2.
+
+%One catalog head's rows landing or leaving '&metta', for a consumer that
+%MIRRORS a row it reads on a hot path. Event is added or removed and Row is
+%the row as a list; a removal by pattern leaves positions unbound and is
+%announced once per watched head, because over-announcing refreshes a mirror
+%for nothing while under-announcing leaves one wrong.
+%
+%It exists beside the two hooks above rather than inside them because their
+%price is the wrong shape for this. A single atom_added/2 clause wraps the
+%write door for EVERY space, which cost 16 inferences on every '&self' write
+%and 33 on every '&metta' one, measured against the same tree with no handler
+%[measured 2026-09-08: 43.02 against 27.02 and 70.03 against 37.02;
+%command=python extensions/python/benchmarks/probes/bound_row_cost.py --subscription;
+%fixture=200 writes per arm, both arms in one process]. This one is
+%read off the catalog's own note funnel, which only '&metta' writes reach,
+%and it is guarded by watch_catalog_rows/1, so a head nobody watches costs one
+%indexed lookup that fails.
+%
+%The shape is PostgreSQL's: the catalog is authoritative, pg_settings is a
+%view of it, and an assign hook updates the fast copy at the write rather than
+%making every reader consult the catalog [source: PostgreSQL documentation,
+%20.1 Setting Parameters, and src/backend/utils/misc/guc.c's assign_hook].
+%extensions/python/metta/_catalog/bounds.py is the worked instance: it mirrors the
+%`(limit <name> <value>)` bounds it reads once per cursor, where reading them
+%through a crossing cost 21 inferences and 3.2 microseconds per cursor
+%[tested: test_a_bound_read_after_the_first_costs_no_crossing].
+:- multifile catalog_row_changed/2.
+kind(catalog_row_changed/2, event).
+:- dynamic catalog_row_changed/2.
+
+%The END of one committed segment, with the sorted list of space names its
+%events touched. The two hooks above say WHAT changed, one call per atom; this
+%one says THAT IS ALL, once per commit, after every one of those calls has
+%returned. An unscoped write is a segment of one; a transaction is a segment of
+%its whole ordered diff; a rolled-back or speculative one has no segment at all,
+%because it has no committed events.
+%
+%A consumer that maintains a derived answer needs the boundary and not only the
+%events. The diff of a transaction is already applied and committed when its
+%FIRST event is delivered, so a handler that recomputes per event recomputes N
+%times over one unchanging state and keeps the first answer; recomputing at the
+%boundary is the same answer for one recomputation. This is Materialize's
+%SUBSCRIBE progress row, which carries a timestamp and no data and whose whole
+%content is "there are no more updates for either timestamp 2 or 3"
+%[source: https://materialize.com/docs/sql/subscribe/, the PROGRESS option].
+%extensions/python/metta/structures.py's Live is the worked instance: its
+%`heads` and `tabled` strategies mark themselves stale per event and re-answer
+%here, and its `progress` delta is this hook crossing
+%[tested: test_a_transaction_delivers_one_progress_after_its_deltas].
+%
+%The list is computed only when a handler exists, so a tree with none pays one
+%clause lookup per commit.
+:- multifile segment_committed/1.
+kind(segment_committed/1, event).
+:- dynamic segment_committed/1.
+
+%Foreign spaces: a host runtime may declare a space whose atoms live outside
+%the Prolog database, in a database, a dataframe, a service. match/4,
+%'add-atom'/3, 'remove-atom'/3 and 'get-atoms'/2 consult these hooks first
+%for a declared name; with no declarations nothing changes.
+%
+%THE NAME AN ATOMIC SPACE CARRIES BEGINS WITH '&'. That is the engine's rule
+%and not this seam's invention: metta_space_name/1 refuses any other spelling
+%at the door that CREATES a space, metta_require_space_name/2 refuses it at
+%new-space and inherits, the Python seat's register_provider refuses it before
+%it reaches here, and neither wire codec can decode a space name without it.
+%metta_space_operand/1 therefore tests the prefix before probing either
+%registry, which is what makes it cheap on the matcher, get-metatype, the
+%three type-candidate resolvers, operation admission, the translator and the
+%codec. A clause here naming an atom without the prefix is answered NO by all
+%of them, quietly, so tests/prolog/static_checks.pl scans the live database
+%and refuses one by name. A PARAMETRIC space is named by a nonempty ground
+%list instead and carries no prefix; the guard is on the atom case alone.
+:- multifile foreign_space/1.
+kind(foreign_space/1, ownership).
+
+%THE OWNERSHIP-GUARD PROTOCOL, which every clause of the five capability
+%hooks below obeys and which the conformance kit now depends on: a hook
+%clause takes the space as its FIRST argument and its body's LEADING goal is
+%the ownership test that decides whether this provider serves that space
+%(mork_owns_space/1, redis_space_conn/7, metta_py_foreign/1 are the three
+%shipped spellings). The guard is a pure lookup, so anything may call it to
+%ask "does this provider serve this space" without performing the operation.
+%
+%What made this worth writing down: a check that asked whether the hook
+%PREDICATE had clauses answered yes for every provider as soon as ANY
+%provider implemented it, so a declaration with nothing behind it stopped
+%being caught the day MORK gained its own clear hook. The predicate having
+%clauses is a receipt; a clause whose guard admits THIS space is the payload.
+%Both tests below run with a rival provider present, which is what makes
+%them able to tell the two questions apart
+%[tested: conformance_catches_a_capability_with_no_hook,
+%readying_refuses_a_declared_capability_with_no_hook_clauses;
+%commit=938744d2c4d718ea78358825b3079df7c20c9b16].
+:- multifile foreign_match/3.
+%A declared error mode's stream: like foreign_match/3, with the
+%mode enforced on the provider's own host, where its exceptions are
+%native. Item is `answer` (the pattern is bound), kept(ErrorAtom), or
+%`end` from an adapter that must mark exhaustion. Only adapters whose
+%host exceptions cannot cross as Prolog exceptions implement this; a
+%Prolog-hosted provider needs none, the engine's catch handles it.
+:- multifile foreign_erring/5.
+% A pure ownership lookup returns the selected registration's ground Identity
+% and a module-qualified Capture closure. Calling Capture with one additional
+% argument binds transaction(Begin, Commit, Rollback), three qualified goals
+% retaining that provider. Capture runs once, outside locks, before Begin at
+% the first write for Space/Identity. Completion never resolves Space again.
+% A replacement registration has another identity, even under the same name.
+% [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f]
+:- multifile foreign_participant/3.
+kind(foreign_match/3, ownership).
+kind(foreign_erring/5, ownership).
+kind(foreign_participant/3, ownership).
+%Custom matching for grounded values, Hyperon's CustomMatch: a host value
+%may carry its own matching logic, consulted by metta_match_atoms/2 when
+%that value meets a non-variable operand inside `unify`. The hook
+%enumerates one solution per binding set, binding the other operand's
+%variables; failure means no match. Variables always bind the value
+%whole without consulting it, and values with no owner fall through to
+%ground equality, so with no declarations nothing changes.
+:- multifile matchable_value/1.
+:- multifile custom_match/2.
+kind(matchable_value/1, ownership).
+kind(custom_match/2, ownership).
+:- multifile foreign_add/2.
+kind(foreign_add/2, ownership).
+%A provider's own BATCH crossing, optional. The atoms arrive as a list and the
+%provider stores them however it likes; one without this clause gets a
+%foreign_add/2 per atom, which is what every provider written before it
+%gets. The hooks are the provider's, exactly as they are for its per-atom add.
+%
+%A batch is a TRANSPORT optimisation and never a semantic one, so the engine
+%routes only atoms whose add is a store and nothing more through here. That is
+%not advice to the provider, it is enforced upstream: an equation or a type
+%declaration in the list drops the whole batch to 'add-atom'/3 per atom.
+:- multifile foreign_add_many/2.
+kind(foreign_add_many/2, ownership).
+:- multifile foreign_remove/3.
+kind(foreign_remove/3, ownership).
+:- multifile foreign_atoms/2.
+kind(foreign_atoms/2, ownership).
+% One stable occurrence identity and its candidate atom. A provider may return
+% extra candidates; the seat unifies each against the offered pattern.
+:- multifile foreign_token/3.
+kind(foreign_token/3, ownership).
+% Optional exact mutation. add-token stores one Atom and returns its fresh
+% portable token. remove-token consumes only Token and returns true iff it
+% existed. Both follow the provider's existing transaction and hook contract.
+% [tested: reference_providers; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+:- multifile foreign_add_token/3, foreign_remove_token/3.
+kind(foreign_add_token/3, ownership).
+kind(foreign_remove_token/3, ownership).
+%Clear was the sixth of these all along and was declared nowhere: it lived in
+%extensions/python/metta/_binding/shim.pl, so a Prolog provider that implemented clear, as
+%lib/lib_redis/lib_redis.pl does, was reachable only when Python was in the process.
+:- multifile foreign_clear/1.
+kind(foreign_clear/1, ownership).
+
+%What the caller will do with a match. Options is a list; the only option
+%today is limit(N), meaning the caller stops after N answers. It is `[]` when
+%there is nothing to say, which is most calls.
+%
+%It is ADVISORY, and that is what makes it sound. A provider may
+%over-approximate, so N candidates are not N answers, and a provider that
+%truncated at N without knowing which of its candidates unify would
+%under-answer, which is the one thing the contract forbids. So honour it only
+%when you can tell an exact match from a candidate, and ignore it otherwise:
+%the engine bounds the answers itself either way, and this changes only how
+%much work the BACKEND does before the first one.
+%
+%Two levers a reader might expect here are already in place and need no
+%option. The bound parts of a pattern reach a provider as ground atoms,
+%including the bindings an enclosing join has made, so the second pattern of
+%a join arrives as (other a0 $_) rather than (other $_ $_). And the engine
+%stops pulling as soon as it has enough: a limit of 3 over a provider holding
+%a thousand atoms pulls four [measured 2026-08-16].
+%
+%ONE hook, with the options always passed. There was a /2 beside this and the
+%engine chose between them with `clause(foreign_match(_,_,_), _)`, which
+%asks whether ANY provider anywhere declared the bounded form. The Python shim
+%declares it unconditionally, so with Python in the process that guard was true
+%for every space, and a Prolog-only provider writing /2 had the /3 form called
+%instead: the shim's clause failed on its own ownership check and the whole
+%match answered nothing. Reproduced as `unbounded: 3, bounded: 0`
+%[measured 2026-08-16]. A provider that has nothing to do with the options
+%ignores the argument, which costs it one underscore and cannot go wrong.
+
+%How much a provider's own filtering is worth, per PATTERN. Class is exact or
+%inexact, and a space with no clause is inexact, which is the answer every
+%provider written before this gets for free.
+%
+%  exact    every candidate you yield for this pattern unifies with it, so N
+%           candidates are N answers and limit(N) is a requirement you may
+%           truncate to
+%  inexact  you reduce what you produce, and some of it may not match; the
+%           engine re-unifies and limit(N) stays advice you must not truncate to
+%
+%This is Apache DataFusion's TableProviderFilterPushDown, whose Exact rung
+%says it in the same words: "Your source guarantees that no output rows will
+%have a false value for this predicate. Because the filter is fully evaluated
+%at the source, DataFusion will not add a FilterExec for it", against Inexact,
+%"Your source has the ability to reduce the data produced, but the output may
+%still include rows that do not satisfy the predicate"
+%[source: Apache DataFusion, Custom Table Providers].
+%
+%PER PATTERN, not per provider, which is the part worth copying. A backend is
+%usually exact on equality against an indexed column and inexact on everything
+%else, and one flag for the whole provider would force it to claim the weaker
+%answer everywhere. The clause takes the pattern, so it can say which is which.
+%
+%DataFusion's third rung, Unsupported, is deliberately absent. It exists there
+%because the planner decides whether to SEND a filter at all; here the pattern
+%is the only thing a provider is given, so there is nothing to withhold, and a
+%provider that ignores it is inexact in the only sense the engine acts on.
+%
+%What the engine does with exact: it stops pulling at N instead of at N+1,
+%since it no longer needs the extra candidate to learn the bound is met. What
+%it does NOT do is skip unification, which is not a filter here but the step
+%that binds the pattern's variables, so an exact claim cannot make an answer
+%wrong. It can only make a wrong claim cost answers, which is why
+%check_space_provider tests it against the provider's own output
+%[tested: a_bounded_match_carries_its_options,
+%a_bound_is_withheld_from_an_unclaimed_pattern,
+%test_a_false_exact_claim_is_caught].
+:- multifile foreign_pushdown/3.
+kind(foreign_pushdown/3, ownership).
+
+%The routing voice of a third-party declaration kind. Consulted after the
+%declared fidelity or the provider's own method proposes a route class,
+%and every loaded advisor may only DEMOTE: the effective class is the most
+%conservative voice, refuse below inexact below exact, so advisors compose
+%order-independently and none can widen a claim its author never made.
+%route_cap(Space, Pattern, Cap, Why): Cap is exact (no objection),
+%inexact (candidates must be re-unified, the pushdown of the caller's
+%bound is withheld) or refuse (this route must not serve now, loud at the
+%match and naming Why). An advisor typically reads its own kind's atoms
+%from '&metta', often through metta_shape_route/5, which is what lets a
+%freshness or cost kind change routing with no kernel edit
+%[tested: a_route_cap_demotes_and_refuses_through_the_published_seam].
+%Declared metadata steering the router is the oldest optimizer discipline
+%there is: semantic query optimization transforms evaluation by declared
+%integrity constraints [source: Chakravarthy, Grant and Minker, ACM TODS
+%1990], and a FRESHNESS vocabulary gating routes runs in production as
+%Oracle's QUERY_REWRITE_INTEGRITY, whose stale_tolerated mode alone lets
+%a stale materialized view keep serving rewrites [source:
+%https://docs.oracle.com/en/database/oracle/oracle-database/23/dwhsg/basic-query-rewrite-materialized-views.html].
+:- multifile route_cap/4.
+:- dynamic route_cap/4.
+kind(route_cap/4, declaration).
+
+%A conjunction, offered WHOLE before the engine splits it. Succeed to claim
+%some of it, binding Goal to a goal that enumerates bindings for Claimed; fail
+%to decline, and the engine plans it exactly as it does today.
+%
+%   foreign_plan(Space, Patterns, Claimed, Rest, Goal)
+%
+%This is the seam that makes a backend's own join reachable. Without it every
+%conjunction is split one pattern at a time and re-dispatched per outer row,
+%which is a nested-loop plan, and a nested-loop plan cannot reach the AGM bound
+%however fast the provider is: for the triangle R(x,y), S(y,z), T(z,x) with each
+%relation of size N the bound is N^1.5 and "it is not possible to achieve a
+%running time of O(N^3/2) using only join plans" [source: Ngo/Re/Rudra and the
+%worst-case-optimal join literature]. So this is not a tuning knob; it is the
+%difference between a provider being allowed to be asymptotically better and
+%not being allowed to.
+%
+%Four properties, each with a precedent elsewhere in this file:
+%
+%  - DECLINING IS THE DEFAULT. A provider with no clause gets today's behaviour
+%    exactly, the same safe default the capability vocabulary has.
+%  - A PARTIAL CLAIM IS LEGAL. Claimed plus Rest lets a backend take the two
+%    patterns it owns and leave the third, so the seam is not all-or-nothing.
+%    They must PARTITION Patterns: dropping a conjunct answers more rows than
+%    the query asks for and the engine refuses it, because nothing downstream
+%    would catch it.
+%  - THE STRATEGY IS INVISIBLE. Leapfrog, a hash join, a SQL SELECT, a vector
+%    index: the engine sees a goal. It supports none of them and therefore all.
+%  - THE CLAIM IS EXACT, and this one is the exception to the seam's usual rule.
+%    Elsewhere a provider may over-approximate because the engine re-unifies
+%    each candidate, which is cheap. There is no cheap re-check for a join: the
+%    only way to verify a row is to run the join. So claiming means answering
+%    exactly, a provider that cannot must decline, and check_space_provider
+%    verifies the claim against the engine's own split rather than trusting it.
+%
+%The caller's options are not passed. The engine still bounds the answers, so
+%this costs work in the backend and never an answer, and a limit could not be
+%honoured usefully anyway while a provider answers a whole batch at a time.
+:- multifile foreign_plan/5.
+kind(foreign_plan/5, ownership).
+
+%What a provider answers. Failure alone cannot say: foreign_match/3 is a
+%legitimate enumerator, so "no clause" and "no atoms match" look identical
+%from the engine, and clause/2 cannot stand in either, because every provider
+%in this tree writes ONE clause with a variable space and an ownership guard
+%in the body, which unifies with any space at all.
+%
+%So it is declared, the way extensions/python/metta/foreign/__init__.py derives it from the narrow
+%protocols a provider implements. The capabilities are add, remove, match,
+%enumerate, clear, PLAN and RULES.
+%
+%`rules` is the odd one and it is the one that matters most. It says the
+%space's atoms include EQUATIONS, which in MeTTa is the difference between a
+%data source and a place a program lives. The provider stores one the way it
+%stores any atom and the ENGINE compiles it, so a foreign rule is the same
+%compiled clause a native one is; nothing in the provider knows what an
+%equation is. A space without the declaration is refused an equation at
+%add-atom rather than storing one that can never fire. A space that declares
+%NOTHING is taken to provide everything, which is what every provider written
+%before this assumed.
+%
+%Two things follow from a declaration, and the first is the one that matters:
+%a space that enumerates but does not match now has its enumeration FILTERED
+%here for a bound pattern, instead of answering nothing. The Python half has
+%always said enumeration is enough ("An Enumerable provider need not implement
+%Matcher"), and the Prolog half quietly required both. The second is that an
+%operation a space does not provide raises with the space and the operation
+%named, rather than failing into "there is nothing there".
+:- multifile foreign_capability/2.
+kind(foreign_capability/2, declaration).
+
+%What a context's change events promise, for a provider that owns a FAMILY
+%of space names rather than one name it could write an atom about.
+%
+%   context_events(Space, Delivery, Order)
+%
+%Delivery is at-most-once, at-least-once or per-write-exactly and Order is
+%ordered or unordered, the catalog's own `delivery` and `event-order`
+%vocabularies. The per-space door is the ordinary declaration atom,
+%(events <ctx> <delivery> <order>) in '&metta', which is what
+%Space.events(delivery, order) and a Python provider's registration write; this is
+%the same answer for a provider like MORK, whose spaces are every name
+%beginning &mork, so there is no one name to write the atom about. The two
+%doors are read by one question, metta_event_capability/3, exactly as a
+%Prolog provider's foreign_capability/2 clauses and the Python
+%bridge's registered facts are read by one foreign_provides/2.
+%
+%Declaring nothing means no events, which is the safe answer and the one
+%every provider written before this gets: a subscription on the space is
+%refused naming the missing capability rather than served and silently
+%missing writes [P12.14].
+:- multifile context_events/3.
+kind(context_events/3, declaration).
+
+%Why a space says no, in the provider's own words. The engine refuses a
+%capability a space does not declare, and "does not implement add" reads
+%differently from "declines this add request"; a provider with a reason raises
+%it here and the engine's generic permission_error is what a provider without
+%one gets. It is expected to THROW rather than answer
+%[tested: test_a_provider_states_its_own_refusal].
+:- multifile foreign_refuse/2.
+kind(foreign_refuse/2, ownership).
+
+%An exception that must never be recovered from. A caught abort, limit, alarm
+%or interrupt is a stopped program pretending it succeeded, and the engine's
+%recovery catches all consult this: control_exception(Ball) true means the
+%ball is rethrown rather than handled.
+%
+%A library that introduces its own cancellation or budget signal adds a
+%clause and every recovery site in the engine respects it, which is the only
+%way it could: a signal the engine has never heard of is swallowed by the
+%first recovery catch it meets, and the failure is silent. This is
+%KeyboardInterrupt living outside Exception, given a seam.
+%
+%library(exceptions) says the same thing more directly, and was measured
+%rather than assumed. Written its way a recovery site is
+%catch(Goal, \+ metta_control_signal, _, Recover), the negated type its
+%is_exception/3 already supports, and it is behaviour-identical: ten balls,
+%errors and non-errors, control and ordinary, recovered or escaped the same
+%way both ways. It costs too much. catch/4 puts a freeze/2 on the ball at
+%CALL time, so the price is paid whether or not anything throws: 20,000
+%quiet calls went 140,002 to 240,002 inferences, 1.71x, and 20,000 throwing
+%ones 240,003 to 1,340,002, 5.58x [measured 2026-08-16]. The recovery catch
+%wraps every candidate the translator tries, so the quiet number is the one
+%that decides it [source: ai-swi-library-review.md, entry 2].
+%The multifile declaration for it is in engine/metta.pl, not here, because
+%control_exception/1 is also an engine_emitted/1 name: the translator writes it
+%into compiled bodies and protect_engine_emitted/1 imports it into every
+%space's module from the ENGINE's module, which it can only do if that is
+%where it lives. It is the one seam whose home is the engine core rather than
+%this module, and seam_home/2 below is what lets the publication machinery say
+%so instead of assuming.
+kind(control_exception/1, declaration).
+
+%Whether a HOST's own atom hooks are idle for a space, the host's clause of
+%it: the shim answers for the Python side, and with no host loaded the seam
+%has no clause and the engine's own no-handlers test already answered. The
+%engine hands the host the full handler CENSUS as clause references, so a
+%host clause matches the census against the one reference it installed and
+%never consults engine internals to answer: a host is asked about ITS hooks,
+%with the facts it needs in the question. engine/spaces.pl asks them; they are
+%declared here because every seam is.
+:- multifile host_add_hooks_idle/2.
+kind(host_add_hooks_idle/2, ownership).
+
+%Whether ONE added-atom hook is idle for ONE space, answered by whoever
+%installed that hook. The census seam above asks a host about the whole
+%reference list at once, which works while every hook belongs to a host and
+%breaks the moment the ENGINE installs one of its own: the bridge hook is a
+%single clause with an unbound Space, because any space might carry a
+%reaction, so its head cannot say which spaces it watches and no host can
+%speak for it either. The census then had two references where the host
+%clause matches one, answered "not idle" for EVERY space, and the batched
+%program-atom door fell back to the per-atom one -- 30,274 inferences to
+%4,496,299 for a forty-equation fast-cache restore, 149x, from one reaction
+%on an unrelated space [measured 2026-09-04].
+%
+%A hook that knows its own table answers from it. Refs nobody claims idle
+%are what the host census is asked about, so the existing clause keeps
+%matching the list it was written for.
+:- multifile atom_hook_ref_idle/2.
+kind(atom_hook_ref_idle/2, ownership).
+
+%Whether an error term is a host's transport dying, and how a host's own
+%error renders as a MeTTa (Error ...) reason. Both are the host's to answer
+%for its own exception shapes, so both are ownership. They used to be
+%user-module hooks spelled metta_host_transport_failure/1 and
+%metta_host_error_reason/2, declared multifile only by the Python bridge, so
+%every seatless process -- the WebAssembly host, the pure kernel -- paid an
+%existence_error where "no" was the answer; and the spelling carried the
+%metta_host_ namespace this module exists to replace. The engine declares
+%them HERE now, the module carries the namespace, and a hook with no clauses
+%is a question every host declined, which fails cleanly into the
+%message-system rendering at the call site (engine/metta/space_hooks.pl).
+:- multifile host_transport_failure/1.
+kind(host_transport_failure/1, ownership).
+:- multifile host_error_reason/2.
+kind(host_error_reason/2, ownership).
+:- multifile host_remove_hooks_idle/2.
+kind(host_remove_hooks_idle/2, ownership).
+
+%An APPLICABLE GROUNDED ATOM. MeTTa's own definition of a Grounded atom is
+%that it "may contain any binary object, for example operation (including deep
+%neural networks), collection or value" [source: metta-lang.dev/docs/learn,
+%Atom kinds and types], and an operation is a thing you call. The engine leaves
+%a grounded head unevaluated unless a handler claims it, so `((py-atom
+%numpy.absolute) -5)` answered itself and a callable held in a MeTTa variable
+%was not a callable at all.
+%
+%   grounded_apply(Value, Args, Out)
+%
+%Value is the grounded atom in head position and Args are the arguments as the
+%engine has them. Succeed to claim it and bind Out; fail and the expression
+%stays unreduced, which is what every value that is not an operation should do.
+%
+%Nothing in the engine knows what makes a value applicable, which is the point:
+%a Python bridge claims Python callables, and a bridge for something else
+%claims its own. It is consulted only for a head that is neither a function
+%name nor a partial application, so an ordinary call never reaches it.
+%
+%grounded_apply(Obj, Positional, KeywordPairs, Out): Positional are the
+%finished argument values, KeywordPairs the `(name value)` pairs of a
+%`(Kwargs ...)` written LAST at the call site, `[]` when none was written.
+%The translator decides that from the source, so a `(Kwargs ...)` that
+%arrives in a value is the data it is and never becomes control
+%[tested: test_grounded_applications_read_keywords_only_where_written].
+:- multifile grounded_apply/4.
+kind(grounded_apply/4, ownership).
+
+%Whether a value is an operation at all, asked WITHOUT applying it. `bind!`
+%needs to know before there are any arguments: a name bound to a callable is
+%callable by that name, and a name bound to 5 is not.
+:- multifile grounded_applicable/1.
+kind(grounded_applicable/1, ownership).
+
+% A grounded provider decides exact value equality for finite algebra carriers.
+% Succeed with true or false to claim the pair; failure leaves native equality.
+% False must not fall through to blob identity or structural matching [tested:
+% test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+:- multifile grounded_algebra_equal/3.
+kind(grounded_algebra_equal/3, ownership).
+
+% A host carrier predicate receives the value in its own faithful atom reading.
+% The first owner returns true or false; a refusal cannot fall through into a
+% different host representation [tested: test_carrier_preserves_text_and_symbol_types;
+% commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+:- multifile grounded_algebra_type/3.
+kind(grounded_algebra_type/3, ownership).
+
+%A grounded host value may participate in the language's numeric operations
+%without becoming a Prolog number. Admission and execution stay one provider
+%protocol: the owner recognizes its numeric objects, then evaluates with that
+%host's operator dispatch so reflected methods and result types are retained
+%[tested: test_numpy_numeric_family_keeps_python_result_types and
+%test_user_numeric_subclass_uses_its_own_operator; commit=a0f1cc5f15a15e5ca6958fe02a20be8832c7237f].
+:- multifile grounded_numeric/1.
+kind(grounded_numeric/1, ownership).
+:- multifile grounded_numeric_operation/3.
+kind(grounded_numeric_operation/3, ownership).
+
+%An operation with NO effect a cache could hide.
+%
+%   pure_operation(Name)
+%
+%Declared by whoever knows: the engine ships its own core list and a library
+%adds its own. It is an ALLOW-list on purpose, and the asymmetry is the whole
+%argument: a missing entry in a deny-list is a silent wrong answer, and a
+%missing entry here is a loud refusal that someone fixes.
+%
+%What reads it is anything that may CACHE a result and hand the cached one back
+%later: tabling and memoization both do. A goal that is not known pure is not
+%known inert either, and treating unknown as inert cached a random draw, threw
+%away a space write, and suppressed a println!.
+:- multifile pure_operation/1.
+kind(pure_operation/1, declaration).
+
+% Qualified goals prepared after the complete outer transaction body and before
+% its commit mutex, then validated in the refreshed native commit view.
+% A provider enumerates its finite pending checks; every check must succeed. Failure
+% or exception aborts the transaction before any commit notification. Nested
+% savepoints leave their checks for the outer owner, and rolled-back writes
+% must leave no surviving check that could reject unrelated later work. Checks
+% run under '$metta_materialization' and must not evaluate MeTTa, call a host,
+% yield, or invoke arbitrary user goals. Preparation may inspect native deltas.
+% [source: engine/metta/space_hooks.pl:metta_native_transaction/3;
+% commit=37d417bd059b4636f3fe603863a2e738e1f9aeda].
+:- multifile transaction_constraint/1.
+kind(transaction_constraint/1, declaration).
+
+%An operation whose only unrepeatable input is the random generator.
+%
+%   seeded_operation(Name)
+%
+%A companion to the effect class rather than one of its own. `random-int` is
+%oracleIO and stays oracleIO: a cache may not hide a draw and a reified world
+%may not admit one. What this says is that a scope which PINS the generator
+%makes it repeat, which is what a recorded run needs to know before it promises
+%a replay -- `(with-seed 42 (random-int 1 6))` answers 44 twice where
+%`(current-time)` never answers the same thing twice.
+%
+%An ALLOW-list, for pure_operation/1's reason: a name missing here costs a
+%recording that says it cannot be replayed when it could, and a name wrongly
+%present costs a replay that silently differs from what it claims to reproduce.
+%Declared by whoever knows, so a library shipping its own draw declares it
+%beside the operation.
+:- multifile seeded_operation/1.
+kind(seeded_operation/1, declaration).
+
+%The MeTTa name behind a bridge's dispatch goal.
+%
+%   effect_operation_name(Goal, Name, Arity)
+%
+%A bridge compiles a MeTTa operation into a call on its OWN dispatcher, so a
+%purity refusal that reads the goal's functor names the bridge rather than the
+%program: `(tabled (uses-size $k))` refused `metta_py_dispatch_det/3` and
+%advised declaring THAT pure, which is neither something an author wrote nor
+%something that would help, since the refusal never reaches the operation's
+%name. A bridge that can recover the name answers here, and the refusal then
+%names what the program wrote and what pure_operation/1 matches.
+%
+%It is the engine's only way to ask, and it has to be, because the engine
+%knows no bridge by name: the Python one answers for its four dispatch kinds,
+%and a bridge for something else answers for its own
+%[tested: test_a_pure_python_operation_can_be_declared_and_cached].
+:- multifile effect_operation_name/3.
+kind(effect_operation_name/3, ownership).
+
+%A predicate a library puts BETWEEN a compiled call site and the function it
+%stands for, and how to read one of its calls.
+%
+%   interposed_dispatch(Module:Head, Fun, InArgs, Out)
+%
+%The other half of dispatch_call/4 above. That seam lets a library bind a call
+%site to a goal of its own; this one says what that goal MEANS, so an observer
+%watching function calls still sees them. lib_memo binds `(fib 8)` to
+%`cache_call(fib, ..., [8], Out)`, and the tracer wrapped `fib/2`, which the
+%cache answers without calling: a memoised head's trace was EMPTY, 0 events
+%against 23,050 inferences, while the same head with `(cache fib refuse)`
+%recorded 134 [measured 2026-09-07].
+%
+%The head is a TEMPLATE with the function's name, its input arguments and its
+%output in the positions the dispatcher put them, so one clause answers both
+%questions an observer has: enumerate it with everything unbound to learn which
+%predicates to wrap, and unify it with a live head to read that call. The
+%tracer needs no second call at run time because wrap_predicate/4 binds the
+%template's own variables at the wrapper's head
+%[source: /usr/lib/swi-prolog/library/prolog_trace.pl, wrapper/4, which builds
+%its port calls over the same shared head].
+%
+%A declaration rather than an ownership seam: every library that interposes is
+%read, not just the first, because two of them interpose on different
+%functions and an observer wants both.
+:- multifile interposed_dispatch/4.
+kind(interposed_dispatch/4, declaration).
+
+%The STRUCTURE a grounded value also has, when it has one.
+%
+%   grounded_structure(Value, Expression)
+%
+%The language names three things a grounded value may define for itself:
+%"Grounded value type creators can define custom type, execution and matching
+%logic for the value" [source: the language's Main concepts]. The two above are
+%type and execution. This is matching, and it is what lets one atom answer to
+%two readings without being two answers: a Python tuple stays the tuple when it
+%is passed back to Python or read with py-dot, and reads as `(1 2)` when a
+%program takes it apart.
+%
+%The disambiguation is the language's own, taken from how a space atom nested
+%in another space already behaves: a query "just a variable, e.g. $x" matches
+%the atom ITSELF, and a structured query is delegated inward
+%[source: the language's Working with spaces]. So the handle is what a variable
+%binds and what a space stores, and the structure is what an expression pattern
+%and the atom-taking-apart operations see.
+%
+%Nothing here is Python's. A foreign space handle, a MORK record or an array
+%answers it the same way, and no caller learns who did.
+:- multifile grounded_structure/2.
+kind(grounded_structure/2, ownership).
+
+% The length of a grounded value, independently of whether it supports
+% expression matching. Its owner returns a nonnegative integer or declines.
+% A length constraint asks this door before grounded_structure/2, so a sized
+% value need not enumerate its contents or offer a sequence pattern.
+:- multifile grounded_length/2.
+kind(grounded_length/2, ownership).
+
+%How a grounded value RENDERS, for a writer that has no other way to know.
+%
+%   grounded_text(Value, Text)
+%
+%Without a provider the display renderer falls back to the term's own text, so
+%this is never required and never fails a display. The round-trip writer does
+%not consult it. A Python object answers with repr(), which is what the
+%language's own tutorials show: `(np-array (py-atom "[1, 2, 3]"))` displays
+%`array([1, 2, 3])`
+%[source: metta-lang-docs/learn__tutorials__python_use__py_atom.md].
+:- multifile grounded_text/2.
+kind(grounded_text/2, ownership).
+
+%%%% Native backends %%%%
+%
+%A backend is a space provider whose implementation is a shared library. It
+%reaches the engine through the foreign-space seam above like any other
+%provider; these two are the only things it needs that a Prolog provider does
+%not, and both exist so the ENGINE never has to know a backend by name.
+%
+%The builtins a backend's bridge provides, each WITH ITS EFFECT CLASS.
+%Declared by the file that DEFINES them, so they exist exactly when the
+%predicates behind them do: registering a name whose predicate is absent
+%records no arity, and every call to it then compiles to a partial
+%application. engine/metta.pl registers whatever is declared here, and names
+%nothing.
+%
+%The effect argument is not optional, because the alternative was measured and
+%it fails silently. A registered builtin joins builtin_fun/1, and every
+%builtin_fun/1 name needs a reviewed effect class before a world can decide
+%whether to admit it. The ENGINE cannot supply one: reviewing a predicate
+%means naming it, and naming a backend's predicate here is the one thing this
+%page promises a backend never forces. So the classification travels with the
+%registration, and a builtin that is not classified cannot be registered at
+%all [tested: effects_lattice:every_native_builtin_has_exactly_one_reviewed_effect_profile,
+%effects_lattice:a_backend_declares_the_effect_of_the_builtin_it_registers;
+%commit=16ffc0beff1dff8e6d42cb6c50ff010a22cfa0c0]. Saying it beside the registration rather than in a second
+%optional seam is deliberate: with arity 1 and a separate classification door,
+%MORK's three builtins registered and went unclassified, the fail-closed
+%oracleIO default hid it from every program, and only the plunit lane's
+%extensions configuration ever said so.
+%
+%Effect is one of the five ranked classes (pureStructural, readOnlyLookup,
+%nondeterministicReadOnly, writesState, oracleIO). Declare the WEAKEST class
+%that is honestly true of the predicate: it is what a world's coverage
+%declaration is checked against, so overstating it refuses programs that
+%should run and understating it admits ones that should not. A builtin whose
+%behaviour is decided by data at run time, or by a foreign library the engine
+%cannot bound, is oracleIO.
+%This is the seam for a HOST bridge's builtins too, and used to be two: a
+%backend declared seam:backend_builtin/2 carrying its effect class, and a host
+%declared seam:host_builtin/1 carrying only a name. One concept in two names
+%with two arities, and the arity was the damage. metta_builtin_effect/2 reads
+%the class from this seam, so a host had nowhere to put one, and the seven
+%py-* builtins were classified by a list of their NAMES inside
+%engine/metta/effects.pl instead -- the exact thing the paragraph above and
+%host_builtin/1's own comment ("no list inside the engine names a host")
+%promised an extension author never has to force, and the thing MORK stopped
+%doing when backend_builtin/2 was introduced. Extensions of both kinds declare
+%here now, so the review lives with the code it reviews and a new seat needs no
+%engine edit.
+:- multifile extension_builtin/2.
+kind(extension_builtin/2, declaration).
+
+%A backend's smoke test, run by engine/main.pl's demo. Every handler runs, so a
+%process with two backends tests both, and one with none tests nothing and says
+%so by being silent.
+:- multifile backend_selftest/0.
+kind(backend_selftest/0, event).
+
+%%%% Services the engine publishes %%%%
+%
+%The seams above are all things the engine calls. These are the other
+%direction: engine predicates an extension is allowed to call. An extension
+%that reaches past them is depending on an internal that can be renamed under
+%it, which for a backend is a gate failure rather than a style note
+%[tested: a_backend_calls_only_published_surface].
+%
+%The MeTTa builtins are published too and are not repeated here: an extension
+%calls 'add-atom'/3 or match/4 as the LANGUAGE, and builtin_fun/1 already says
+%which names those are.
+%
+%TEXT. What being a shared library costs. A backend's atoms live on the far
+%side of an FFI boundary that carries bytes, so every atom it stores is written
+%and every atom it returns is read, and before these were declared MORK reached
+%into engine/parser.pl for all four, wrapping one under a private name.
+%
+%swrite/2 and sread/2 are one rule about spelling rather than two conveniences.
+%swrite/2 refuses a value that sread/2 would not read back as itself. MeTTa has
+%no quoted-symbol syntax, its reader has no literal for some numbers, and a
+%Janus tuple or another host compound is not a MeTTa term at all. A backend
+%cannot decide any of these for itself because the grammar owns the answer;
+%the other two services let it preflight a name or whole term before writing.
+%metta_symbol_writable/1 answers the first question about one name;
+%metta_unwritable_symbol/2 answers both about a whole term, and its name is
+%narrower than what it reports because names were the only class known to fail
+%when this surface was declared.
+%HOST SERVICE: a service again, engine-defined and engine-owned, but for
+%the other caller: the HOST BINDING's transport (extensions/python/metta's shim today,
+%any future binding's transport tomorrow). The backend direction has
+%a_backend_calls_only_published_surface; this kind is what the host
+%direction's twin reads, so the binding can no longer grow a dependency on
+%an engine internal silently. The list is measured, not aspirational: it is
+%exactly the engine predicates the shipped shim calls, and shrinking it is
+%the shim-thinning work's scoreboard.
+kind(catch_recover/2, host_service).
+kind(translate_expr/3, host_service).
+kind(translate_cached_expr/3, host_service).
+kind(lift_pattern_modifiers/4, host_service).
+kind(metta_seq_query_plan/2, host_service).
+%The callable doors' deprecation reads: the per-name row lookup, and the
+%emptiness probe the shim answers through the cheap apply seam so an empty
+%catalog costs one crossing per process rather than one goal-string read
+%per name.
+kind(metta_deprecation/3, host_service).
+%The callable doors' cost read, the same shape as the deprecation row above it:
+%the shim answers a bound function's docstring line from the row the head
+%declares, and the RESOLUTION of that row -- which measure an unnamed one takes
+%from the head's arrow -- is the engine's. Publishing it is what stops a binding
+%deriving the measure a second time and drifting from what (explain ...) says.
+kind(metta_cost_declaration/4, host_service).
+kind(metta_head_claims/3, host_service).
+kind(metta_head_property/3, host_service).
+kind(metta_head_origins/3, host_service).
+%Two questions a host's static analysis asks the engine instead of restating
+%its tables: where a written form leaves a variable unevaluated, read off the
+%effect planner's evaluated-argument table and the declaration masks, so the
+%Python lint keeps no head list of binding forms; and whether a value would
+%be admitted for a declared parameter type under a space's typing policy, the
+%compiled call check's own relation, so a user typing rule reaches the lint.
+kind(metta_form_unevaluated_variable_paths/3, host_service).
+kind(metta_argument_admitted/3, host_service).
+%Which heads one MeTTa source REGISTERS, read from the source and never run.
+%The registration spellings are the engine's own (`import_prolog_function` and
+%its four importer siblings), so a host that read them itself would carry a
+%table of engine forms that goes stale the day a sixth is added -- which is
+%exactly what the generated library reference did by not reading them at all,
+%counting lib_memo at zero names while nine were callable.
+kind(metta_string_registrations/2, host_service).
+%The one door through which a host binding registers a listener with SWI: once
+%per process, unnamed, never removed, and holding no mutex while SWI takes the
+%channel's event-list lock, which it also holds across every callback it
+%delivers (engine/host_listeners.pl).
+kind(metta_listen/2, host_service).
+%A host query supplies one dynamic carrier around an engine-owned goal, then
+%reads the same effective carrier and its multiplicative identity when it
+%decodes or initializes answer annotations. These are doors into the algebra
+%policy, not host-side orchestration: keeping them published prevents a binding
+%from reproducing the scope stack, declaration fallback, or descriptor lookup.
+kind(metta_with_under/2, host_service).
+kind(metta_with_evaluation_context/2, host_service).
+kind(metta_evaluation_context/1, host_service).
+kind(metta_ordered_match_limit/6, host_service).
+kind(metta_effective_algebra/2, host_service).
+kind(metta_current_algebra/3, host_service).
+kind(metta_algebra_one/2, host_service).
+kind(metta_require_algebra_value/3, host_service).
+kind(metta_apply_algebra_operation/5, host_service).
+kind(metta_annotation/2, host_service).
+kind(metta_k_extend/4, host_service).
+%A binding's cast asks which refinement a value violates once the witness has
+%declined it, so its refusal can name `(Gt 0)` and the value rather than the
+%value's types (engine/metta/refinements.pl, metta_refinement_violation/3).
+kind(metta_refinement_violation/3, host_service).
+%The host run and load surface: the grouped runner (with the
+%using-substitution folded in as Bindings), the status runner, the load
+%lifecycle and the manifest read, plus the reducible-head test the status
+%vocabularies report. These replaced the parse-prepare-process walk and
+%the six-deep load nest every binding used to carry: prepare_parsed_forms,
+%process_form, read_metta_source, load_imported_metta_file_impl,
+%replacing_previous_load, with_source_load, fun_here and
+%translate_special_dl left this list with them (2026-08-20), and
+%parse_metta_source moved to the extension service list below, the import
+%libraries being its remaining callers.
+kind(metta_host_run_source/4, host_service).
+kind(metta_host_run_source_status/3, host_service).
+kind(metta_host_load_file/3, host_service).
+kind(metta_host_read_forms/2, host_service).
+kind(metta_host_with_stack_limit/2, host_service).
+kind(metta_with_trailed/3, host_service).
+kind(metta_with_trailed_enumeration/3, host_service).
+kind(metta_with_trailed_push/3, host_service).
+
+% Declare a reader beside its writer:
+%   :- seam:context_reader(active, '$module_active', value(true)).
+% value(Pattern) reads one term; stack(Pattern) enumerates a nearest-first
+% stack. The declaration supplies both the callable predicate and its inline
+% read, avoiding an extra predicate call on each hot-path guard check.
+% [source: engine/ext_points.pl:context_read/3; commit=3a931690116abfa8a5a37ecba3fe179d826cd712]
+% Context readers inspect the scoped root its writer set through one of the
+% metta_with_trailed doors, never an asserted guard.
+:- multifile context_reader/4.
+kind(context_reader/4, declaration).
+
+context_read(value(Pattern), Key, nb_current(Key, Pattern)).
+context_read(stack(Pattern), Key,
+             ( nb_current(Key, [First|Rest]),
+               ( Rest == [] -> Pattern = First
+               ; ( Pattern = First ; lists:member(Pattern, Rest) ) ) )).
+
+:- multifile system:term_expansion/2.
+system:term_expansion((:- seam:context_reader(Head, Key, Shape)),
+                      [ seam:context_reader(Head, Owner, Key, Shape),
+                        (Head :- Read) ]) :-
+    must_be(callable, Head),
+    must_be(atom, Key),
+    ( nonvar(Shape), context_read(Shape, Key, Read) -> true
+    ; domain_error(context_reader_shape, Shape) ),
+    prolog_load_context(module, Owner).
+
+:- multifile system:goal_expansion/2.
+system:goal_expansion(Head, Read) :-
+    nonvar(Head), context_reader(Head, Owner, Key, Shape),
+    \+ current_prolog_flag(xref, true),
+    prolog_load_context(module, Module),
+    ( Module == Owner -> true
+    ; '$get_predicate_attribute'(Module:Head, imported, Owner) ),
+    context_read(Shape, Key, Read).
+%An inference budget over a goal an engine will RESUME, which is knowledge a
+%host cannot hold correctly on its own: the engine counts its own inferences
+%and the host thread cannot see them, so a bound placed around engine_next/2
+%charges the host's pull loop. Two seats wrote that bound independently and
+%both made the same mistake, which is why the wrapper is built here and handed
+%back rather than described. engine/metta/control.pl carries the measurements.
+kind(metta_host_inference_budget/3, host_service).
+%The joined-worker credits the measuring thread discarded, so the host's
+%counters door reports the work that produced its answers and not a stopped
+%branch's spend (engine/metta/control.pl, metta_join_measured/3); the host
+%reads it beside the interrupt poll's term and takes the delta out.
+kind(metta_discarded_inferences/1, host_service).
+%The join brackets lib_thread settles its workers through: a bracketed
+%thread_join/2 answering the joined worker's credit, the same bracket that
+%discards it, and the discarding write (engine/metta/control.pl).
+kind(metta_join_measured/3, service).
+kind(metta_join_discarding/2, service).
+kind(metta_discard_inferences/1, service).
+%The same bargain on the other axis. A wall-clock bound cannot be placed around
+%engine_next/2 either, and for a sharper reason: call_with_time_limit/2 cannot
+%interrupt a goal running inside an engine, so a host that wraps its pull loop
+%in one waits for the current pull to return before the alarm is ever seen.
+%The wrapper is built engine-side and handed back, where the deadline sits
+%inside the engine's own goal and can act.
+kind(metta_host_time_budget/3, host_service).
+% Cursor ownership is engine knowledge: a transaction's caller must perform
+% its work, while an outside cursor remains a suspended engine. Hosts retain
+% an opaque handle and use these services for every operation on it.
+% [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
+kind(metta_host_hold/3, host_service).
+kind(metta_host_hold_next/2, host_service).
+kind(metta_host_hold_chunk/3, host_service).
+kind(metta_host_hold_post/3, host_service).
+kind(metta_host_hold_close/1, host_service).
+% The host library roster reads the platform capabilities absent in this build.
+kind(metta_platform_absent/1, host_service).
+kind(metta_host_function_generation/1, host_service).
+kind(metta_host_function_callable_from/2, host_service).
+% Written and explicitly referenced names in one namespace, including its
+% private names. Inherited process-wide functions are not explicit imports.
+kind(metta_host_reference_names/2, host_service).
+%Setting the engine-wide print-suppression flag. engine/filereader.pl decides
+%it from argv at load time and an embedded host has no argv, so two seats had each
+%written the same retract-then-assert under a private name and the engine's own
+%export comment named one of them. This is that seat-agnostic bookkeeping,
+%engine-side once (CMeTTa C2, which filed the duplication as an engine finding
+%rather than fixing it in the third binding).
+kind(metta_host_set_silent/1, host_service).
+%A host may ask for a cardinality hint before opening a cursor. The engine owns
+%whether doing so would repeat an effect, so this one semidet question wraps
+%the shared effect walk and fails closed on unknown goals.
+kind(metta_host_goal_repeatable/2, host_service).
+kind(metta_host_goal_effect_plan/4, host_service).
+%The three source-side projections of that same walk. A world must be able to
+%ask what a target WOULD do before translating it, what replaying a frozen
+%image compiles, and which operations a saga step can execute, and none of
+%those questions may be answered by re-walking the term in a host: the masks,
+%static refusals and staged boundaries the engine applies are the answer.
+kind(metta_host_source_effect_plan/4, host_service).
+kind(metta_host_source_compile_effect_plan/4, host_service).
+kind(metta_host_source_runtime_effect_plan/4, host_service).
+kind(metta_reducible_head/2, host_service).
+%Proof tools may open only a dispatch route the engine identifies as its
+%shipped direct path. Every policy-sensitive route is executed engine-side and
+%reported opaque, keeping host derivations out of the six-axis implementation.
+kind(metta_host_dispatch_proof_step/6, host_service).
+%The stack-depth charge engine/spaces/foreign.pl's
+%metta_instrument_recursive_clause/3 writes in front of every recursive
+%equation's body, recognised in a clause body a host is walking. A proof tree
+%walks compiled clauses, meets the charge as ordinary goals, and would report
+%the engine counting its own recursion as a premise of the program. The
+%recognising is engine-side rather than a shape each binding spells again,
+%because every binding that walks clauses needs it and a second spelling drifts
+%the moment the charge changes
+%[tested: test_a_recursive_proof_omits_the_engine_stack_charge].
+kind(metta_host_stack_charge/3, host_service).
+%Grouped answers carry a reader-name state. Host codecs flatten that state for
+%their variable tag and use the same engine writer for host text.
+%
+%THE PAIR IS Name-Var, `-`/2 and not `=`/2, with Name an atom carrying no `$`,
+%and it is written down here because three bindings had to discover it by
+%experiment. sread_with_names/3 answers pairs of that shape, metta_name_pairs/2
+%flattens the grouped-answer state into the same shape, and both writers below
+%take it. Passing [] is legal and means "no names": the writer numbers the
+%variables instead, so a caller who wrote (f $x $x $y) gets (f $_0 $_0 $_1)
+%back [measured 2026-08-27: sread_with_names("(f $x $x $y)", T, M) binds M to
+%[y-_G1, x-_G2], swrite_with_names(T, M, S) gives "(f $x $x $y)" and
+%swrite_with_names(T, [], S) gives "(f $_0 $_0 $_1)"].
+kind(metta_name_pairs/2, host_service).
+kind(swrite_with_names/3, host_service).
+%The persistence surface moved engine-side the same day: the fast cache's
+%save and integrity-checked load, the space digest, and the host-value
+%substitution walk the using-runs share. metta_add_atom/3 and import_when/4
+%left the list with them, the fast loader having been their last transport
+%caller.
+kind(metta_host_save_fast/3, host_service).
+kind(metta_host_source_atoms/2, host_service).
+kind(metta_host_program_source/2, host_service).
+kind(metta_host_load_fast/2, host_service).
+kind(metta_host_fast_header/1, host_service).
+kind(metta_host_digest/2, host_service).
+kind(metta_host_substitute/3, host_service).
+%The registration lifecycle: open proves a name free before the host mutates
+%anything, adopt makes an asserted dispatch clause a claimed function of the
+%base tier, drop retires one arity, forget releases a name nothing defines.
+%These four replaced the seven bookkeeping predicates every binding restated
+%in order (claim_function_name, function_changed,
+%recompile_definitions_mentioning, refuse_other_tiers_name, register_fun_in,
+%release_function_name, unregister_fun_everywhere, 2026-08-20), and the
+%dependent recompile that rode the shim's function_changed clause
+%is the engine's own now, so those events are pure observations again.
+kind(metta_host_open_function/3, host_service).
+kind(metta_host_adopt_function/4, host_service).
+kind(metta_host_drop_function/2, host_service).
+kind(metta_host_forget_function/1, host_service).
+%Reader classes keep their callable on the engine side. A host registers or
+%removes one mapping through these services and owns construction through the
+%handler seam declared below.
+kind(metta_host_register_reader_token/2, host_service).
+kind(metta_host_unregister_reader_token/1, host_service).
+%The space read-and-remove pair a host talks to storage through:
+%metta_host_stored/2 enumerates stored atoms unifying a pattern
+%(index-directed native, provider-enumerated foreign), and
+%metta_host_remove_reported/3 removes with the whether-anything-went
+%verdict a host API wants, existence probed before the mutation. These
+%replaced get_native_atom/2, native_storage_module/2 and
+%metta_remove_atom/3 on this list (2026-08-20); the index-directed
+%existence probe is engine-internal now.
+%
+%THE VERDICT IS THE PLAIN BOOLEAN true OR false, and it is written down here
+%because a host cannot read it off the name: the first C implementation
+%guessed the atom `removed` and reported every successful removal as a miss,
+%silently, because a wrong guess still unifies with a fresh variable. true
+%means an atom matching the term was there and is not now; false means the
+%removal changed nothing, whether the space was empty of it or the provider
+%declined [measured 2026-08-27: add-atom then remove answers true, the same
+%removal repeated answers false, and a term never stored answers false;
+%source: engine/spaces/foreign.pl, metta_host_remove_reported/3].
+kind(metta_host_stored/2, host_service).
+kind(metta_host_remove_reported/3, host_service).
+%The native proof-leaf decoder keeps private module and predicate encodings
+%behind one host call, including expression-named spaces.
+kind(metta_host_native_fact/4, host_service).
+%The explain mirror: one call answers what the seam already decided for a
+%query (per-pattern classes with term origins, the plan's claimed and rest
+%indexes, refusals preflighted), so a host renders prose instead of
+%re-deriving routing precedence. foreign_pushdown_class/3,
+%metta_refuse_guard/2, refuse_lossy_plan/4, metta_handles_route/5 and
+%foreign_provides/2 left this list with it (2026-08-20); the two that
+%extensions genuinely consult moved to the service list below.
+kind(metta_host_explain_match/3, host_service).
+%The bulk space cleanups: clear a space whoever holds it (Prolog providers
+%through their seam, native spaces with the announce-when-watched and
+%tabling-death rules), and clear the (defined ...) reflection facts about
+%one space in one crossing. clear_foreign_atoms/1, clear_native_atoms/1 and
+%atom_hook_clause/2 left this list with them (2026-08-20): the
+%handler census is engine-internal now, handed to the hooks-idle ownership
+%seams as an argument.
+kind(metta_host_clear_space/1, host_service).
+kind(metta_host_clear_defined/1, host_service).
+%Creation-time space topology and lifecycle are engine-owned, while Python's
+%context-manager surface requests those transitions through these calls.
+kind(metta_declare_space_parent/2, host_service).
+kind(metta_declare_restricted_space/2, host_service).
+kind(metta_assert_space_releasable/1, host_service).
+kind(metta_release_space/1, host_service).
+%WHO OWNS A SPACE NAME, taken at the moment a provider goes live rather than
+%discovered later as a wrong answer. seam:foreign_space/1 above is a CONDITION
+%on a name, so it cannot be enumerated and no provider can see its peers; the
+%three shipped providers therefore each kept a private registry and two of
+%them matching one name resolved by clause order. These take and give back an
+%extent -- a name, or a namespace as prefix(P), because MORK's ownership
+%genuinely is `every name beginning &mork` -- and refuse a second claim naming
+%both owners. metta_space_claim/2 is the table itself, so `metta list` and the
+%conformance kit can read the ownership map they could not have before.
+%
+%A door and not a check: nothing on a space operation's path calls these, for
+%the reason engine/spaces/foreign.pl's own section records, that one shared
+%test in front of every space door moved four benchmarks
+%[measured 2026-08-20]. metta_release_space/1 above is a different verb on
+%purpose -- it ends a space's life, where these end one provider's claim on
+%its name.
+kind(metta_claim_space/2, host_service).
+kind(metta_disclaim_space/2, host_service).
+kind(metta_space_claim/2, host_service).
+%The builtin-refusal classification: operation, kind, expected and culprit
+%read from the error term the engine's own throwers shape, absence left
+%unbound for the host to map to its None (2026-08-20).
+kind(metta_host_operation_error/5, host_service).
+%The rest of the refusal contract, one table and the readings that answer
+%from it: which KIND a ball is and the fields that kind carries
+%(metta_host_error_kind/3), the kinds themselves as rows a seat can enumerate
+%(metta_host_error_kind_row/3), the reserved control envelope's kind and
+%payload, the line a reader failure named, and the capability a restricted
+%space lacks. Every seat classified by its own copy before 2026-09-07 and the
+%copies disagreed, so the table moved here and the seats read it
+%[source: docs/journal/2026-09-07-two-seats-one-error-taxonomy.md].
+kind(metta_host_error_kind/3, host_service).
+kind(metta_host_error_kind_row/3, host_service).
+kind(metta_host_control_signal_info/3, host_service).
+kind(metta_host_control_signal_line/2, host_service).
+kind(metta_host_space_capability_error/4, host_service).
+%The refusal DECLARATIONS beside the kinds: engine/spaces/catalog.pl holds one
+%(refusal ...) row per kind with the class name a seat raises, the ground the
+%refusal stands on and its remedy template, and metta_host_refusal/6 answers
+%all three for a raised ball with the template's <field> holes already filled
+%from it. Every seat renders the same remedy because only one renderer exists
+%[source: docs/journal/2026-09-07-every-refusal-is-a-row.md].
+kind(metta_host_refusal/6, host_service).
+kind(metta_host_refusal_row/4, host_service).
+kind(match_foreign/5, host_service).
+kind(metta_add_atoms/2, host_service).
+kind(metta_source_declarations/2, host_service).
+kind(metta_space_names/1, host_service).
+kind(metta_space_registered/1, host_service).
+% Backtrackable atom-key indexes retain the caller's original term values.
+% [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
+kind(metta_atom_index_new/1, host_service).
+kind(metta_atom_index_bind/4, host_service).
+kind(metta_atom_index_get/3, host_service).
+%The space species test is on this list because a host CODEC needs it:
+%the wire's `p` tag is a species tag, so an
+%encoder has to ask what the engine's own metatype_of/2 asks, which is this
+%[source: engine/metta/types.pl, metatype_of(X, 'Grounded') :- atom(X),
+%metta_space_operand(X)]. metta_space_name/1 below is the wider operand test
+%is-space/2 answers and is the wrong question here: it accepts any ampersand
+%name, including a State cell, where get-metatype answers Symbol or answers
+%Grounded for a different reason.
+kind(metta_space_operand/1, host_service).
+kind(metta_string_declarations/2, host_service).
+kind(metta_substitute_self/3, host_service).
+kind(metta_trace_source/5, host_service).
+%Fire forget_derived above. A host asks for it before replaying a recorded
+%run; the engine owns the firing because an event seam's clauses are the
+%extensions' and the telling is the engine's.
+kind(metta_forget_derived/0, host_service).
+%The debugger's session pair. A transport creates and steps the engine that
+%holds a suspended program, the way it does for a lazy cursor, but the
+%WRAPPERS a breakpoint needs are the tracer's and only one session may own
+%them at a time, so beginning and ending a session is the engine's to decide
+%and refuse. metta_debug_run/3 is the goal that goes inside the engine.
+kind(metta_debug_begin/2, host_service).
+kind(metta_debug_run/3, host_service).
+kind(metta_debug_end/0, host_service).
+kind(metta_annotations/2, host_service).
+kind(metta_contract_fact/1, host_service).
+kind(metta_error_answer/3, host_service).
+kind(metta_handles_coherent/1, host_service).
+kind(metta_on_error_mode/3, host_service).
+kind(metta_source_reset/1, host_service).
+kind(metta_speculate/1, host_service).
+kind(metta_transaction/1, host_service).
+kind(metta_transaction/2, host_service).
+kind(metta_transaction_notified/3, host_service).
+kind(metta_after_foreign/2, host_service).
+kind(metta_foreign_completion/2, host_service).
+kind(metta_world_effect_coverage/2, host_service).
+kind(metta_effect_covered/2, host_service).
+kind(metta_compensation/2, host_service).
+kind(metta_transport_failure/1, host_service).
+kind(metta_with_state_write_fence/1, host_service).
+kind(metta_live_state_cell/1, host_service).
+kind(sread_with_names/3, host_service).
+kind(unregister_metta_extension/1, host_service).
+kind(with_metta_module/2, host_service).
+%The dispatch-ownership question behind every host direct-call door: a
+%declared or rule-owned head declines the raw fast path (P14.32). One
+%engine-owned door instead of the two raw reads it wraps, so the
+%declaration walk and the rule registry stay free to move.
+kind(metta_typed_dispatch_applies/2, host_service).
+%What this build's PLATFORM carries: every capability, whether it is present,
+%the platform library it rests on and what its absence costs. A host on a
+%reduced platform (SWI compiled to WebAssembly has no threads, alarms or
+%subprocesses) has to know this to say what it cannot run, and until it was
+%published the only record was SWI's stderr during boot, which
+%extensions/node parses against a hand-kept table. A census is engine
+%knowledge and this is the read of it; the engine records it once, at the
+%guarded loads in engine/metta.pl, and the forms that rest on an absent
+%capability refuse by name from the same table.
+kind(metta_platform/4, host_service).
+
+%The post-commit stream's five services. Transaction owners open and finish
+%frames; a provider whose own durable channel reports a committed change may
+%enter it through observe/3. A launch that must happen only after commit uses
+%observation_defer/2 with paired commit and rollback goals. The frame stack is
+%engine state, so extensions call these names and never reach its thread-local
+%representation [tested:
+%test_a_transaction_commits_async_launch_before_its_landing,
+%test_a_failed_launch_watcher_does_not_strand_committed_async_work,
+%test_a_rolled_back_async_launch_never_starts_or_lands; commit=39092863ae34184a9f955f185ff57c1ff177ec40].
+kind(observation_begin/0, service).
+kind(observation_commit/0, service).
+kind(observation_discard/0, service).
+kind(observation_defer/2, service).
+kind(observe/3, service).
+
+%A DIFFERENT observation, next to those five because a reader looking for one
+%finds the other. Those enter a transaction's post-commit stream; this is the
+%door to engine/source_observation.pl, the coverage and Error-frame observer
+%engine/metta.pl deliberately does not load at boot: nothing an ordinary
+%program does needs it, and the exception hook it leaves resident is charged
+%to every compiled host request [source: engine/metta.pl, the comment above
+%metta_ensure_source_observation/0]. So whoever wants an observation loads it,
+%and lib/lib_observe/lib_observe.pl's observe-source/4 is the shipped caller.
+%
+%Published rather than reached around. source_observation:observe_source/4 is
+%exported by its own module and cannot be its own loader, so a library allowed
+%to call it needs a published way to make it exist; the only alternative on
+%offer is a library running load_files/2 over an engine path, which is the
+%reach this gate exists to refuse
+%[tested: sh check.sh lib-surface; commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
+kind(metta_ensure_source_observation/0, service).
+
+%The declared source discipline of a context, (source Ctx Kind): the
+%conformance kit reads the declaration the enforcement reads instead
+%of trusting a caller's claim, so the read is a published service.
+kind(metta_source/2, service).
+kind(swrite/2, service).
+%Presentation text is deliberately distinct from the inverse writer. A host
+%or extension uses this only where lossless re-reading is not the contract
+%[tested: every_seam_declares_one_kind, parser_display; commit=53686aed41e7ff02de69052198afdb537536cbdb].
+%sdisplay_with_names/3 takes the same Name-Var list swrite_with_names/3 does,
+%described above.
+kind(sdisplay/2, service).
+kind(sdisplay_with_names/3, service).
+% Console interpolation leaves a string's characters unquoted; other values
+% use the same presentation writer as the engine's format-args operation.
+kind(metta_console_text/2, service).
+kind(sread/2, service).
+%Moved from the host_service list on 2026-08-20: the host bindings read
+%source through metta_host_run_source/4 and its siblings now, and the
+%remaining callers are extension libraries (lib_gitimport, lib_import),
+%which is exactly what this kind means.
+kind(parse_metta_source/2, service).
+kind(metta_reader_token_class/3, service).
+kind(metta_reader_token_source/2, service).
+kind(metta_symbol_writable/1, service).
+
+%The other two halves of the platform census, both engine-defined and both
+%with a caller outside the engine already. metta_requires/1 is the DECLARATION
+%a Prolog library writes at its top, read out of the source before the source
+%runs, so a library that cannot work on this build never loads;
+%lib/lib_thread/lib_thread.pl carries one. metta_require_platform/2 is the runtime guard a
+%library or a compiled body calls before doing work the platform cannot
+%support; lib/lib_gitimport/lib_gitimport.pl calls it and the compiler emits it into both
+%(hyperpose ...) branches, which is why it is also a seam:engine_emitted/1
+%name.
+kind(metta_requires/1, service).
+kind(metta_require_platform/2, service).
+
+%Every head the compiler gives a special meaning to, enumerable. A reflection
+%library wants the SET, and reading engine/translator.pl's clause table for it
+%is a dependency no walk can see and one that answers silently for nothing
+%when the table moves module.
+kind(metta_special_form_head/1, service).
+kind(metta_unwritable_symbol/2, service).
+
+%THE CATALOG'S CONSULTATION SITES, published for extensions. A route-cap
+%advisor or any consumer of a declared kind reads the same routed view the
+%engine reads: metta_shape_route/5 answers the most specific coherent
+%entry for a query under any shape-routed head, shipped or third-party,
+%and metta_contract_fact/1 is the raw row read beneath it (already a
+%host_service above; named here in prose so an extension author finds the
+%pair together).
+kind(metta_shape_route/5, service).
+%Turning seam:catalog_row_changed/2 on for ONE head, and off again. The event
+%above is silent until a head is watched, so this pair is what makes it fire
+%and what a consumer calls when it stops mirroring; watching twice is watching
+%once and unwatching a head nobody watched succeeds.
+kind(watch_catalog_rows/1, service).
+kind(unwatch_catalog_rows/1, service).
+%The event-capability door, for an extension that BLOCKS on a context's
+%changes rather than merely observing them: lib/lib_thread/lib_thread.pl's Linda pair
+%parks a caller until an atom arrives, and parking on a context that
+%promises no events is a hang rather than a wait. Throws naming the context
+%and the caller's own word for what it wanted to do; succeeds silently for a
+%context that can deliver, native spaces included
+%[tested: test_a_blocking_take_waits_for_a_matching_atom_and_removes_exactly_one].
+kind(metta_require_events/2, service).
+%The routing classifier and the capability probe, consulted by
+%lib/lib_conformance/lib_conformance.pl: published for extensions, no longer part of the
+%host transport's own list.
+kind(foreign_pushdown_class/3, service).
+kind(foreign_provides/2, service).
+
+%ERRORS. An extension that throws reports in the vocabulary of whatever threw,
+%so `Y is X * 2` on a symbol names is/2 rather than the operation the program
+%wrote. These two are how a builtin avoids that, and EXTENDING.md has told
+%extension authors to call both for longer than either was declared: the
+%rethrow in a worked example at two places and the type error in a third
+%[source: EXTENDING.md, "Making your errors read like a builtin's"]. Declaring
+%them changes nothing about who may call them and puts a decision that was
+%already made into the data that the checker reads.
+kind(throw_metta_type_error/3, service).
+kind(rethrow_metta_operation_error/2, service).
+% Native arithmetic kernels share the engine's IEEE retry and flag restoration
+% rather than defining a second policy for non-finite floating results.
+kind(metta_saturating_recover/4, service).
+
+%CONTEXT. Which module the call site is in. A named space compiles its
+%equations into a module of its own, so a function name alone does not identify
+%a function, and a handler keeping state per function has to ask. It is read
+%rather than passed because dispatch_call/4 is consulted on every
+%compiled call site and an extra argument there is not free.
+kind(current_metta_module/1, service).
+
+%CONTEXT, the other half: which MODULE a space compiles into, and which space
+%a module serves. Published because Phase 11 made them necessary rather than
+%convenient. A space and its module were the same atom for every space but
+%&self, so a library could pass a space name wherever a module was wanted and
+%it worked by coincidence; they are different atoms now and
+%with_metta_module/2 REFUSES a space name, so a library that runs a goal in a
+%space has to ask. lib_memo.pl and lib_tabling.pl each carried a hand-written
+%copy of the inverse before this
+%[source: ai-phase11-module-survey.md section 1.3, which counted four copies
+%of it, three of them outside engine/spaces.pl].
+kind(space_module/2, service).
+kind(metta_module_space/2, service).
+%The space a program is running in, beside the module it compiles into. A
+%library that reads a declaration out of the running space asks for the space,
+%not the module, because a declaration is stored as an atom.
+kind(current_metta_space/1, service).
+%Whether a term is a space name at all, the test every extension taking a
+%space argument needs before it uses one. 'is-space'/2 is the MeTTa spelling
+%of the same question and is published as a builtin; this is the Prolog one,
+%and it is the test rather than a lookup, so an unbound or computed term is
+%refused instead of read as an empty space.
+kind(metta_space_name/1, service).
+
+%EVALUATION IN A SPACE. space_module/2 above names the module a space compiles
+%into; this is what a library names it FOR. lib/lib_thread/lib_thread.pl runs a MeTTa
+%expression on a worker thread eight different ways and every one of them
+%goes through here, because a thread inherits no context and the module has to
+%travel with the expression [source: lib/lib_thread/lib_thread.pl, par_map_/4 and its
+%siblings].
+kind(eval_metta_in_module/3, service).
+
+%NATIVE STORAGE. A space has two halves and the execution one is declared
+%above. This is the other: which module a native space's atoms live in, which
+%functor answers them, and what clause one atom becomes. Published as a group
+%because a library that pre-generates a space's storage needs all three at
+%once and must use the SAME spelling add-atom uses -- lib/lib_import/lib_import.pl
+%converts a data file to Prolog facts ahead of time, and a second spelling of
+%the format would load clauses the space could never read, which is the defect
+%that file's own header records. ensure_native_storage_module/2 is the
+%make-it-exist half, for a writer that runs before the space holds anything.
+kind(native_storage_module/2, service).
+kind(native_storage_functor/2, service).
+kind(ensure_native_storage_module/2, service).
+kind(native_atom_clause/4, service).
+kind(metta_storage_term/4, service).
+% A host registration retains original native occurrences through completion.
+% The raw pair admits a reference; the decoder recovers its syntax only.
+% The owned-record reader shares commit validation and returns owner references
+% plus Ref-CompleteRow pairs, refusing duplicate or malformed native keys.
+kind(metta_native_pair/4, host_service).
+kind(metta_owned_clause/2, host_service).
+kind(metta_owned_record_occurrences/3, host_service).
+kind(metta_actor/1, host_service).
+kind(metta_token_order/3, service).
+kind(metta_token_parts/3, service).
+kind(metta_token_portable/2, service).
+kind(metta_token_receive/2, service).
+kind(metta_generation_receive/1, service).
+kind(metta_host_blame/3, host_service).
+%The match a foreign provider answers, published for the library that CHECKS
+%providers: lib/lib_conformance/lib_conformance.pl runs a provider's own atoms back through it
+%to prove the over-approximation contract holds. match_foreign/5 is the host
+%transport's arity and is a host_service above; this is the four-argument
+%engine-side call an extension makes.
+kind(match_foreign/4, service).
+
+%EFFECTS AND CACHING. The five classes, their order and their join live in the
+%engine, so libraries do not restate the lattice. metta_operation_effect/2
+%returns the canonical reflected class for one registered operation;
+%metta_operation_plan_effect/2 joins a list of operation names and fails if
+%any member is unclassified. The effect walk remains the stricter cache door:
+%only pureStructural is inert there, while space reads are tracked explicitly.
+%[tested: effects_lattice:effect_services_are_published;
+%commit=3cfbe0d7417b1c453c2dc12d47e2e47e7de461f7]
+kind(metta_effect_rank/2, service).
+kind(metta_effect_join/3, service).
+kind(metta_effect_compose/2, service).
+kind(metta_effect_class_canonical/2, service).
+kind(metta_operation_effect/2, service).
+%Only an owned arrow declaration qualifies; ordinary inferred catalog rows do not.
+kind(metta_annotated_operation_effect/2, service).
+kind(metta_operation_plan_effect/2, service).
+kind(metta_effect_walk/3, service).
+kind(metta_function_cacheable/1, service).
+kind(metta_function_cacheable/2, service).
+%A library that batches a compile-time analysis needs to distinguish one
+%source program from an isolated equation and recompile the affected call
+%surface through the loader's established invalidation path.
+kind(active_source_program/1, service).
+kind(recompile_function_impl/1, service).
+%The same recompile bounded to ONE module, for a decision that is per module
+%and per name: rebuilding the name everywhere priced a first evaluation by how
+%many other live spaces defined the same head.
+kind(recompile_function_impl_in/2, service).
+
+%THE SUPPORT GRAPH's other direction. Its handler seams are declared in
+%engine/support_graph.pl (support_invalidation_action/1 and four more), so an
+%extension can already be CALLED by the graph; these are the three calls it
+%makes back to take part -- record an edge, invalidate from a changed input,
+%and drop a node. Declaring only the inbound half is what left lib/lib_memo/lib_memo.pl
+%reaching into the graph's internals to do the outbound one.
+kind(support_record/2, service).
+kind(support_invalidate/1, service).
+kind(support_forget/1, service).
+kind(support_memo_take_change/2, service).
+kind(support_memo_sccs/2, service).
+
+%SOURCE AND VOCABULARY. The published parser hands back parsed/3 terms, so
+%without a way to take one apart the answer is opaque; parsed_form_parts/4 is
+%that way and belongs beside parse_metta_source/2 above.
+kind(parsed_form_parts/4, service).
+%Where a relative path resolves from. The bare working_dir/1 has a clause only
+%while a .metta load is active, so a library that reads a file from anywhere
+%else simply failed with no answer and no error; this is the one that falls
+%back to the process directory [source: lib/lib_import/lib_import.pl, 'static-import!'/3].
+kind(current_working_dir/1, service).
+%Membership in a declared vocabulary, the question every consulting site asks.
+%A library validating its own option against a vocabulary the catalog declares
+%reads the same table the engine reads, so a value the catalog gains is
+%accepted without editing the library.
+kind(metta_vocabulary_value/2, service).
+% Enumerate the same live vocabulary for a host capability declaration.
+kind(metta_vocabulary_values/2, service).
+%The members of a (some-of Vocab) argument, read by the library that compiles
+%them. The write door and the compiler read ONE parse of the row, so a member
+%the door admitted is the member the compiler sees, applied arguments and all
+%[source: engine/spaces/catalog.pl, metta_policy_members/3].
+kind(metta_policy_members/3, service).
+%The import lifecycle's marker. A library that performs an import of its own
+%(lib/lib_gitimport/lib_gitimport.pl's git-import!) has to run under the same marker, or a
+%failed load leaves behind the clauses the engine would have erased.
+kind(run_with_loading_marker/2, service).
+% Reflect and withdraw the same source ownership the import loader records.
+kind(metta_import_record/2, service).
+kind(metta_unimport/2, service).
+%The third error-vocabulary service, beside the two above. engine/kernel.pl's
+%own builtins refuse an unbound argument through it, and a library builtin
+%that takes an input refuses the same way rather than inventing a message.
+kind(refuse_unbound_input/2, service).
+
+%Extra type candidates for grounded host objects, beyond the object's own
+%classes: a protocol the object satisfies may name a type, so a declared
+%(-> DLTensor ...) can hold across libraries.
+:- multifile grounded_extra_type/2.
+kind(grounded_extra_type/2, declaration).
+
+%A host bridge may compute an object's type candidates itself: values can sit
+%in envelope objects the boundary must not rewrite, so names or structural
+%type expressions cross rather than the value. Structural candidates use
+%the same terms as declared arrow types [tested: run_tests(tensor_shapes);
+%commit=4eaefdd8d40e53b2613722287302a14b41704662]. What a bridge owns is the CLASS
+%WALK: when one answers, its names stand in for the walk, and with none the
+%local walk applies. It does not own grounded_extra_type/2 above, which is
+%consulted either way, because a declaration seam is additive and reading
+%this one as owning the whole answer silently dropped every declared type
+%in the shipped configuration
+%[tested: extensions/python/tests/ch11_python_as_a_notation/test_ops.py::test_a_declared_type_survives_the_library_being_loaded].
+:- multifile grounded_type_names/2.
+kind(grounded_type_names/2, ownership).
+
+%The host's own class enumeration, the fallback when no envelope bridge
+%answered: walking a value's classes is host code by nature, so the host
+%bridge supplies it and an engine with no host loaded has no clause here,
+%which is the correct answer for a configuration in which no host value
+%can exist.
+:- multifile grounded_class_type/2.
+kind(grounded_class_type/2, ownership).
+
+%A host bridge's own builtins are seam:extension_builtin/2, declared beside a
+%backend's for the same reason and with the same effect class. See its comment.
+
+%A host claims an import whose source is its own kind of file and performs
+%the whole job itself, lifecycle included, through the published
+%import_when/4; with no host loaded, or none claiming, every import is a
+%MeTTa import.
+:- multifile host_import/1.
+kind(host_import/1, ownership).
+
+%The boot claims a Prolog source as one it governs: engine/qlf_boot.pl
+%answers for the sources whose artifacts it stamps and purges as one set,
+%and the engine's runtime loaders (metta_load_source/2 in
+%engine/metta/interop.pl) load a claimed source through its compiled
+%artifact and every other one from source. A process that never loaded the
+%boot has no clause here and claims nothing.
+:- multifile compiled_source/1.
+kind(compiled_source/1, ownership).
+
+%Whether a value is a live host object at all, the question in front of
+%every grounded-type lookup: the engine's own cheap class tests run first,
+%and this seam is the bridge's part, so an engine with no host loaded
+%answers no at one failed lookup and never initializes anything.
+:- multifile host_object/1.
+kind(host_object/1, ownership).
+
+%Construct a reader token through the host that owns its retained callable.
+%The token text is the full lexeme, quotes included for a string token, and the
+%answer is the engine term the reader will return.
+:- multifile host_reader_token_construct/3.
+kind(host_reader_token_construct/3, ownership).
+
+%A registered rewriter runs over function and runnable source forms; a host installs one only
+%while it is needed (the Python bridge registers its import-as alias rewrite
+%when the first alias lands), so a program that never uses the feature pays
+%one failed lookup per form and nothing more, the same install-on-demand
+%shape the atom hooks use. Its four arguments are Term, Origins, Rewritten,
+%RewrittenOrigins. Origins is source, value, or children(ChildOrigins), aligned
+%with the term. A shape-changing extension must transform both outputs.
+%The reader validates that tree before applying source-name resolution.
+%Source observation keeps coordinates for every subtree a rewriter returns
+%unchanged at its position and reports the path above a change as generated.
+:- dynamic form_rewriter/1.
+:- multifile form_rewriter/1.
+kind(form_rewriter/1, ownership).
+
+%%%% Published means exported %%%%
+%
+%Until now a declaration was a promise nothing kept: a seam declared here was
+%no more reachable, and no less internal, than the predicate beside it, and the
+%two surface checks answered "is this published" by reading this table a second
+%time. Declaring a seam EXPORTS it, so the promise is a fact the module system
+%holds and the checks ASK for: published_surface/1 in
+%tests/prolog/surface_walk.pl reads module_property(Engine, exports(E)) and no
+%longer reads this table
+%[tested: every_declared_seam_that_exists_is_exported,
+%a_seam_declared_in_a_later_file_is_exported,
+%a_declaration_without_a_definition_is_not_exported].
+%
+%Every kind, not services alone. An extension resolves a handler seam by name
+%as surely as it calls a service, and a name the engine publishes in either
+%direction is surface either way. What the kinds still decide is who writes the
+%clauses, which every_seam_kind_matches_its_direction checks apart.
+%
+%A declaration whose predicate does not exist yet is skipped rather than
+%refused: a library declares its own seam beside the clauses that define it,
+%and a seam is declared here before the file that defines it is loaded. The
+%listener below is what catches both, and it is the same channel the atom
+%hooks use, so a clause that arrives by consult is seen exactly as one that
+%arrives by assert.
+%A seam this module's own declaration already exports needs nothing done, and
+%doing it anyway is not free: export/1 at RUN time also pushes the name into
+%every module that has imported from here, so re-exporting the handler seams
+%put seam:function_removed/1 into the engine's module on top of the different
+%function_removed/1 engine/spaces.pl defines there, and SWI reported "Local
+%definition of user:function_removed/1 overrides weak import from seam" on
+%every static-check run. Two modules holding one name is what a module system
+%is FOR; an accidental import of one into the other is not
+%[measured 2026-08-22].
+publish(Seam) :-
+    (   seam_home(Seam, Home),
+        \+ ( module_property(Home, exports(Exports)), memberchk(Seam, Exports) )
+    ->  Home:export(Seam)
+    ;   true
+    ).
+
+%!  seam_home(+Seam, -Module) is semidet.
+%
+%   Which module a declared seam's clauses live in: this module for every
+%   handler seam, the engine core for control_exception/1 because the
+%   translator emits it and a space's module has to import it from there, and
+%   whichever subsystem defines a service for the rest.
+%
+%   implementation_module/1 rather than current_predicate/1, because
+%   current_predicate/1 answers for a predicate this module can merely SEE. A
+%   module inherits its base, so asking it that way said `seam` owned swrite/2
+%   and every other engine service, and the boot sweep then exported ninety-five
+%   of them out of the wrong module: the engine's own export list came back
+%   holding twenty-six names where it holds a hundred and twenty
+%   [measured 2026-08-22]. This is the same question the layering lane asks of
+%   a call, and it has one answer per predicate
+%   [source: SWI-Prolog predicate_property/2, implementation_module(Module)].
+seam_home(Name/Arity, Home) :-
+    functor(Head, Name, Arity),
+    (   defined_in(seam, Head)
+    ->  Home = seam
+    ;   metta_engine_module(Engine),
+        (   implemented_in(Engine, Head, Home)
+        ->  true
+        ;   clause(kind(Name/Arity, _), _, Reference),
+            clause_property(Reference, file(File)),
+            source_file_property(File, module(Home)),
+            Home \== seam,
+            Home \== Engine,
+            defined_in(Home, Head)
+        )
+    ).
+
+% A late library's private service is outside the engine's import chain until
+% publication. Its kind/2 clause identifies the source file, and SWI records
+% the module that file declares. Reading that record avoids a second ownership
+% registry that survives unload_file/1. clause_property(module/1) alone answers
+% `seam` for these multifile facts, so it cannot identify the declaring library.
+% [tested: metta_published_surface:a_seam_declared_in_a_later_file_is_exported,
+% metta_published_surface:unloading_a_late_seam_removes_its_home; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+
+%The definedness half is load-bearing and not a belt-and-braces check. Asking
+%implementation_module/1 about a name nothing has defined answers with the
+%module that was ASKED, so every seam declared before its definition loads
+%came back owned by whoever asked first: the boot directive in this file
+%exported forty-odd engine services out of `seam` and SWI then reported each
+%as "Exported procedure seam:refuse_unbound_input/2 is not defined"
+%[measured 2026-08-22].
+%
+%It asks current_predicate/1 down the module inheritance chain, and never
+%predicate_property(Module:Head, defined), because on a name nothing defines
+%that property runs SWI's undefined-procedure trap: define_or_generate/1 falls
+%through to '$define_predicate'/1, which searches the whole autoload library
+%index before raising the existence error a catch/3 here would swallow
+%[source: /usr/lib/swi-prolog/boot/syspred.pl, define_or_generate/1 and
+%property_predicate/2]. The miss costs 1,030 inferences where this spelling
+%costs 12, and the sweep below asks it twice per seam -- once in `seam` and
+%once in the engine module -- for every seam whose defining file has not
+%loaded yet, which at the boot directive is most of them. That was 2,114
+%inferences per seam and 305,970 of a 543,929-inference boot, 56%, and it is
+%why three added kind/2 rows cost 6,300
+%[measured 2026-09-06: engine/bench.pl bench_run(boot), 543,929 before and
+%240,641 after, per-seam publish/1 meter over both sweeps; commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
+%engine/spaces/foreign.pl's visible_predicate_definition/3 is spelled this way
+%for the trap's other half: probing a name an inherited static defines caches
+%the resolution as an import link and poisons the module against the local
+%definition that was about to arrive. implementation_module/1 is then asked
+%only about a name that exists, so its own '$find_library'/5 fallback -- the
+%same index search by another door -- is never reached, and nothing here can
+%raise the error the catch/3 used to absorb.
+implemented_in(Module, Head, Home) :-
+    functor(Head, Name, Arity),
+    default_module(Module, Inherited),
+    current_predicate(Inherited:Name/Arity),
+    !,
+    predicate_property(Module:Head, implementation_module(Home)).
+
+defined_in(Module, Head) :- implemented_in(Module, Head, Module).
+
+publish_declared :-
+    forall(kind(Seam, _), publish(Seam)).
+
+%A seam declared later publishes itself. Only the additions matter, so a
+%retract is ignored: SWI has no unexport, and a seam withdrawn at run time is
+%not a thing the tree does.
+declared(Action, Reference) :-
+    % policy-inventory-exempt: mechanism-internal; reason=asserta and assertz are prolog_listen/2's own action vocabulary for a clause arriving rather than an engine decision; evidence=engine/ext_points.pl:declared/2
+    (   memberchk(Action, [asserta, assertz]),
+        blob(Reference, clause),
+        catch(clause(kind(Seam, _), _, Reference), _, fail)
+    ->  publish(Seam)
+    ;   true
+    ).
+
+:- metta_listen(kind/2, declared).
+%And the ones declared above, which the listener could not have seen. The
+%sweep runs again from engine/metta.pl's own initialization, after every file
+%the engine loads has defined what it declared here.
+:- publish_declared.
+
+:- use_module(library(prolog_wrap)).
+
+dispatch_call(_, _, _, _) :- fail.
+cache_policy_changed(_).
+function_changed(_).
+function_clauses_changed(_).
+function_call_graph_changed(_, _).
+function_removed(_).
+source_program_compiled.
+deferred_translation_settled.
+
+%Atom hooks wrap the write predicates only while a multifile handler exists.
+%prolog_listen/2 sees clauses loaded later, so an engine without handlers keeps
+%the original direct write path. Multiple handlers still run through forall/2.
+
+atom_hook_clause(added, Ref) :- clause(atom_added(_, _), _, Ref).
+atom_hook_clause(removed, Ref) :- clause(atom_removed(_, _), _, Ref).
+
+%Both branches succeed or throw, never fail. This installer runs from inside a
+%prolog_listen/2 closure, and that channel's contract is asymmetric: on an
+%assertz "the hook is called after the clause has been added. If the hook
+%fails the clause is REMOVED", and on a retract "if the hook fails, the clause
+%is not removed" [source: SWI-Prolog 10.1 Reference Manual, Appendix B.9]. So
+%a failure here silently erases the handler that was just installed, or leaves
+%one the caller believes it erased, and either way a library's subscription
+%simply never fires with no error to find. The disable branches were already
+%total; these were not. Nothing observed fails, so this is the seam's own
+%installer being made unable to fail quietly rather than a live bug
+%[tested: a_handler_survives_its_own_installation].
+%The wrapped predicate is the WRITE DOOR's, and the module is asked rather
+%than written: writing `user` here meant "the engine" in one breath and "the
+%host" in the next, and only the second reading survives Phase 11. Asking
+%metta_engine_module/1 was the right question only while every engine file
+%shared that module. wrap_predicate/4 on a name a module merely IMPORTS wraps
+%the import and leaves the definition alone, so once engine/spaces.pl declared
+%a module of its own the wrapper would have watched a link the write door
+%never follows and no atom hook would ever fire; the same shape made a
+%translation-cache counter see every compile as a hit [measured 2026-08-22].
+%implementation_module/1 answers where a predicate actually lives, which is
+%the engine's module while the write door is there and the write door's module
+%once it is not.
+%
+%The WRAPPER BODY is left unqualified deliberately. wrap_predicate/4 declares
+%it `0` [source: library(prolog_wrap), meta_predicate wrap_predicate(:,+,-,0)],
+%so SWI qualifies it with this file's own module at compile time, which is the
+%same answer and is one SWI's code walker can follow: qualifying it by hand
+%with a run-time variable made three live wrapper bodies unreachable from any
+%root in tests/prolog/reachability.pl [measured 2026-08-19].
+enable_atom_hook(added) :-
+    write_door_module(metta_add_atom/4, Engine),
+    current_predicate_wrapper(Engine:metta_add_atom(_, _, _, _), metta_atom_added_hooks, _, _), !.
+enable_atom_hook(added) :-
+    write_door_module(metta_add_atom/4, Engine),
+    (   wrap_predicate(Engine:metta_add_atom(Space, Term, _Token, _Result), metta_atom_added_hooks, Wrapped,
+                       run_atom_added_hooks(Wrapped, Space, Term))
+    ->  true
+    ;   throw(error(metta_atom_hook_install_failed(added),
+                    context(enable_atom_hook/1,
+                            'the write wrapper could not be installed')))
+    ).
+enable_atom_hook(removed) :-
+    write_door_module(metta_remove_atom/3, Engine),
+    current_predicate_wrapper(Engine:metta_remove_atom(_, _, _), metta_atom_removed_hooks, _, _), !.
+enable_atom_hook(removed) :-
+    write_door_module(metta_remove_atom/3, Engine),
+    (   wrap_predicate(Engine:metta_remove_atom(Space, Term, Removed), metta_atom_removed_hooks, Wrapped,
+                       run_atom_removed_hooks(Wrapped, Space, Term, Removed))
+    ->  true
+    ;   throw(error(metta_atom_hook_install_failed(removed),
+                    context(enable_atom_hook/1,
+                            'the write wrapper could not be installed')))
+    ).
+
+:- multifile prolog:error_message//1.
+prolog:error_message(metta_atom_hook_install_failed(Kind)) -->
+    [ 'the ~w-atom write wrapper could not be installed, so a handler asserted \c
+       now would be removed again by prolog_listen/2 and never fire'-[Kind] ].
+
+%Where the write door actually lives, asked of SWI rather than assumed to be
+%the engine's own module.
+write_door_module(Name/Arity, Module) :-
+    functor(Head, Name, Arity),
+    metta_engine_module(Engine),
+    predicate_property(Engine:Head, implementation_module(Module)).
+
+run_atom_added_hooks(Wrapped, Space, Term) :-
+    call(Wrapped),
+    observe(added, Space, Term).
+
+run_atom_removed_hooks(Wrapped, Space, Term, Removed) :-
+    call(Wrapped),
+    ( Removed == true
+      -> observe(removed, Space, Term)
+      ; true ).
+
+%Datomic's transaction-report queue shape, applied at the write seam: raw
+%changes accumulate per thread until the transaction owner says the state is
+%committed. Frames hold events newest-first so a write is O(1); an inner
+%commit prepends its reverse segment to the parent's reverse segment, and the
+%outer commit reverses exactly once before dispatch. No coalescing: spaces are
+%multisets, so two identical writes are two ordinary events.
+observation_begin :-
+    observation_frames(Frames),
+    nb_setval('$metta_observation_frames', [[]|Frames]).
+
+observation_commit :-
+    observation_take_frame(Current, Rest, commit),
+    (   Rest = [Parent|Parents]
+    ->  append(Current, Parent, Merged),
+        nb_setval('$metta_observation_frames', [Merged|Parents])
+    ;   nb_setval('$metta_observation_frames', []),
+        (   Current == []
+        ->  true
+        ;   reverse(Current, Events),
+            observation_dispatch_segment(Events)
+        )
+    ).
+
+%One committed segment: every event in write order, then the boundary. The
+%boundary is announced on the failing path too, because the writes committed
+%whatever a subscriber did with them and a consumer that never hears the
+%boundary waits forever for an answer that already arrived.
+%
+%The clause lookup comes first and decides the whole shape, so a tree that
+%watches atoms but not boundaries reaches the dispatch it always reached and
+%sets up no catch frame for a handler that does not exist. A commit that
+%buffered no event does not get here at all: observation_commit tests the
+%frame above, which is every commit in a tree with no atom hook installed.
+observation_dispatch_segment(Events) :-
+    (   clause(segment_committed(_), _)
+    ->  catch(observation_dispatch_committed(Events),
+              Error,
+              ( observation_segment_committed(Events), throw(Error) )),
+        observation_segment_committed(Events)
+    ;   observation_dispatch_committed(Events)
+    ).
+
+%`( C -> A ; true )` rather than a cut, which is what an event seam's own rule
+%asks of its callers.
+observation_segment_committed(Events) :-
+    (   Events \== []
+    ->  observation_segment_spaces(Events, Spaces),
+        forall(segment_committed(Spaces), true)
+    ;   true
+    ).
+
+observation_segment_spaces(Events, Spaces) :-
+    findall(Space, member(event(_, Space, _), Events), Touched),
+    sort(Touched, Spaces).
+
+%A subscriber failure remains the caller's error, but the state has already
+%committed. Run any later deferred commit callbacks before rethrowing so an
+%async launch cannot be stranded between its durable launch event and start.
+%Ordinary later events retain the established stop-on-first-failure behavior.
+observation_dispatch_committed([]).
+observation_dispatch_committed([Event|Events]) :-
+    catch(observation_dispatch(Event),
+          Error,
+          ( observation_dispatch_deferred(Events), throw(Error) )),
+    observation_dispatch_committed(Events).
+
+observation_dispatch_deferred([]).
+observation_dispatch_deferred([defer(Commit, Discard)|Events]) :- !,
+    catch(call(Commit), _, catch(call(Discard), _, true)),
+    observation_dispatch_deferred(Events).
+observation_dispatch_deferred([_|Events]) :-
+    observation_dispatch_deferred(Events).
+
+observation_discard :-
+    observation_take_frame(Current, Rest, discard),
+    nb_setval('$metta_observation_frames', Rest),
+    reverse(Current, Events),
+    observation_rollback_all(Events, none).
+
+%Rollback owns cleanup, so one broken owner cannot strand every owner queued
+%after it. Preserve the old outward result after all callbacks have run: the
+%first exception wins, otherwise any failed callback makes the whole discard
+%fail. This is the same cleanup-then-rethrow discipline used by resource
+%unwinding and ExceptionGroup collectors, except callers here already have a
+%single-error contract.
+observation_rollback_all([], none) :- !.
+observation_rollback_all([], failed) :-
+    !,
+    fail.
+observation_rollback_all([], error(Error)) :-
+    !,
+    throw(Error).
+observation_rollback_all([Event|Events], First0) :-
+    catch(( observation_rollback(Event)
+          -> Outcome = none
+          ;  Outcome = failed ),
+          Error,
+          Outcome = error(Error)),
+    observation_first_failure(First0, Outcome, First),
+    observation_rollback_all(Events, First).
+
+observation_first_failure(none, Failure, Failure) :- !.
+observation_first_failure(First, _Later, First).
+
+:- meta_predicate observation_defer(0, 0).
+observation_defer(Commit, Discard) :-
+    must_be(callable, Commit),
+    must_be(callable, Discard),
+    (   observation_frames([Current|Parents])
+    ->  copy_term(defer(Commit, Discard), Deferred),
+        nb_setval('$metta_observation_frames', [[Deferred|Current]|Parents])
+    ;   call(Commit)
+    ).
+
+observe(Action, Space, Term) :-
+    (   observation_frames([Current|Parents])
+    ->  copy_term(event(Action, Space, Term), Event),
+        nb_setval('$metta_observation_frames', [[Event|Current]|Parents])
+    %An unscoped write is a segment of one, and it stays the DIRECT dispatch
+    %it always was while nothing is listening for boundaries. The guard is
+    %inline rather than a predicate of its own, and it is the whole of what
+    %this seam adds to the write path of a tree that watches atoms and not
+    %boundaries: without it every such write would pay a cons cell, a catch
+    %frame and a two-step recursion for a handler that is not there.
+    ;   Event = event(Action, Space, Term),
+        (   clause(segment_committed(_), _)
+        ->  catch(observation_dispatch(Event),
+                  Error,
+                  ( observation_segment_committed([Event]), throw(Error) )),
+            observation_segment_committed([Event])
+        ;   observation_dispatch(Event)
+        )
+    ).
+
+observation_frames(Frames) :-
+    (   nb_current('$metta_observation_frames', Current)
+    ->  Frames = Current
+    ;   Frames = []
+    ).
+
+observation_take_frame(Current, Rest, Operation) :-
+    (   observation_frames([Current|Rest])
+    ->  true
+    ;   throw(error(existence_error(observation_frame, Operation),
+                    context(Operation,
+                            'no post-commit observation frame is open')))
+    ).
+
+observation_dispatch(event(added, Space, Term)) :-
+    forall(atom_added(Space, Term), true).
+observation_dispatch(event(removed, Space, Term)) :-
+    forall(atom_removed(Space, Term), true).
+observation_dispatch(defer(Commit, Discard)) :-
+    catch(call(Commit),
+          Error,
+          ( catch(call(Discard), _, true), throw(Error) )).
+
+observation_rollback(event(_, _, _)).
+observation_rollback(defer(_, Discard)) :-
+    call(Discard).
+
+disable_atom_hook(added) :-
+    write_door_module(metta_add_atom/4, Engine),
+    ( unwrap_predicate(Engine:metta_add_atom/4, metta_atom_added_hooks) -> true ; true ).
+disable_atom_hook(removed) :-
+    write_door_module(metta_remove_atom/3, Engine),
+    ( unwrap_predicate(Engine:metta_remove_atom/3, metta_atom_removed_hooks) -> true ; true ).
+
+sync_atom_hook(Kind) :- ( atom_hook_clause(Kind, _)
+                                -> enable_atom_hook(Kind)
+                                ; disable_atom_hook(Kind) ).
+
+atom_hook_changed(Kind, Action, Context) :-
+    ( ( Action == asserta ; Action == assertz ; Action == rollback(retract) )
+      -> enable_atom_hook(Kind)
+    ; ( Action == retract ; Action == rollback(asserta) ; Action == rollback(assertz) )
+      -> ( atom_hook_clause(Kind, Other), Other \== Context
+           -> true ; disable_atom_hook(Kind) )
+    ; Action == retractall, Context = end(_)
+      -> sync_atom_hook(Kind)
+    ; true ).
+
+:- metta_listen(atom_added/2, atom_hook_changed(added)).
+:- metta_listen(atom_removed/2, atom_hook_changed(removed)).
+:- sync_atom_hook(added).
+:- sync_atom_hook(removed).
+:- initialization(sync_atom_hook(added), restore_state).
+:- initialization(sync_atom_hook(removed), restore_state).

@@ -2,13 +2,13 @@ cff-version: 1.2.0
 message: >-
   If you use this software, cite it as below. It follows the semantics of
   PeTTa, which is a separate work and is cited under references.
-title: "MeTTa Kernel"
+title: "MeTTa"
 type: software
 authors:
   - alias: "MesTTo"
     email: "a.mesto@student.unsw.edu.au"
-repository-code: "https://github.com/MesTTo/MeTTa-Kernel"
-url: "https://mestto.github.io/MeTTa-Kernel/"
+repository-code: "https://github.com/MesTTo/MeTTa"
+url: "https://mestto.github.io/MeTTa/"
 license: MIT
 version: "0.8.0"
 keywords:

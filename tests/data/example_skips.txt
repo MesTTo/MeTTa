@@ -18,7 +18,7 @@
 # 2026-08-26 and neither half was true. It is not long-running: given its
 # quit command it loads all 2,821 lines, sets up the board and exits 0 in
 # 0.26, 0.27 and 0.27 seconds over three runs, printing 501,917 bytes
-# [measured 2026-08-26, printf 'q\n' | sh run.sh
+# [measured 2026-08-26, printf 'q\n' | sh tools/run.sh
 # examples/ch22-a-reasoner-you-can-serve/22-03-search/06-greedy_chess.metta]. And no benchmark names it; the
 # only artifact that does is an "upstream-timeout" row carrying no numbers
 # in tests/data/upstream-parity-baseline.json, whose harness no lane invokes.
@@ -28,7 +28,7 @@
 # for every read once stdin is at EOF. So under a runner the loop never
 # ends rather than running long: 17,973,938 lines in 120 seconds, one
 # prompt and one refusal per cycle, where the terminating run above prints
-# 16,123 and stops; then exit 124 [measured 2026-08-26, sh run.sh
+# 16,123 and stops; then exit 124 [measured 2026-08-26, sh tools/run.sh
 # examples/ch22-a-reasoner-you-can-serve/22-03-search/06-greedy_chess.metta < /dev/null].
 examples/ch14-seeing-your-program/02-repl.metta              needs an interactive terminal
 examples/ch11-python-as-a-notation/07-torch.metta        needs torch installed

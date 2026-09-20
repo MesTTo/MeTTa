@@ -1,8 +1,8 @@
 # Purpose: build the VitePress site and publish it to GitHub Pages.
 #
-# The site is a PROJECT page, served from https://mestto.github.io/MeTTa-Kernel/
+# The site is a PROJECT page, served from https://mestto.github.io/MeTTa/
 # rather than a domain root, which is why website/.vitepress/config.ts sets
-# `base: "/MeTTa-Kernel/"`. A base that disagrees with the repository name
+# `base: "/MeTTa/"`. A base that disagrees with the repository name
 # builds a site whose every asset link 404s, and the build itself cannot
 # notice, so the base and this workflow's destination are one decision.
 #

@@ -120,7 +120,7 @@ the scope change. Measurement logs are
 measurement remains in the scratch receipt, not as evidence for a different
 example body.
 
-Additional checks: `sh check.sh door-sync reference mypy ty` passes mypy but
+Additional checks: `sh tools/check.sh door-sync reference mypy ty` passes mypy but
 reports five ty diagnostics in earlier annotation/callable providers, two
 stale generated reference pages and two dependent door-row failures. The
 reference selftest passes four cases. Preserve

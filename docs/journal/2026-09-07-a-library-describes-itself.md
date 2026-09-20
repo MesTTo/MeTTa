@@ -173,14 +173,14 @@ the atom made it 57.
 
 | command | exit |
 | --- | --- |
-| `sh check.sh ruff mypy imports imports-selftest layering` | 0 |
-| `sh check.sh libdoc reference aio-mirror init-stub` | 0 |
-| `sh check.sh llms-selftest evidence` | 0 |
+| `sh tools/check.sh ruff mypy imports imports-selftest layering` | 0 |
+| `sh tools/check.sh libdoc reference aio-mirror init-stub` | 0 |
+| `sh tools/check.sh llms-selftest evidence` | 0 |
 | `sh extensions/python/test.sh tests/ch08_data/test_library_card.py` | 0, 15 tests |
 | `sh extensions/python/test.sh tests/ch01_getting_started/test_lock.py` | 0, 14 tests |
 | `cd tests/prolog && swipl ... suites/host/prolog_interface.plt` | 0, 57 tests |
 | `sh tests/shell/test_packaged_cli.sh` | 0 |
-| `sh check.sh llms` | 1, one finding |
+| `sh tools/check.sh llms` | 1, one finding |
 
 The `llms` finding is `extensions/node/llms.txt:238: browser/ names nothing in
 the tree`. It is the node seat's esbuild bundle, and esbuild is not in this

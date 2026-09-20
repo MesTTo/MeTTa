@@ -13,10 +13,10 @@ classification reduced that set to two engine-internal predicates and one
 user-facing tally, `ho_specialization_unverified/2`.
 
 Tried: ran a higher-order function under
-`(pragma! verify-specializations true)` through `sh run.sh` -> the test passed,
+`(pragma! verify-specializations true)` through `sh tools/run.sh` -> the test passed,
 the verifier recorded its result, and neither stdout nor stderr named coverage.
 
-Rejected: `print_message(informational, ...)`, because `sh run.sh` invokes SWI
+Rejected: `print_message(informational, ...)`, because `sh tools/run.sh` invokes SWI
 with `-q` and suppresses that channel. Revisit for diagnostics a user did not
 explicitly request.
 
@@ -30,7 +30,7 @@ Decided: the corpus differential parses and aggregates the report. A clean run
 with zero reported checks fails as vacuous; inference-bounded checks remain
 visible without silently changing the verifier's existing acceptance policy.
 
-Tried: `sh run.sh examples/ch14-seeing-your-program/01-time_and_pragmas.metta`
+Tried: `sh tools/run.sh examples/ch14-seeing-your-program/01-time_and_pragmas.metta`
 -> exit 0 and stderr contained `verify-specializations checked 1
 specialization(s): 1 agreed, 0 could not be checked inside the
 200000-inference bound` under the launcher's normal `-q` path.
@@ -43,13 +43,13 @@ Tried: enumerated every executable `print_message/2` in the 42-file Prolog
 engine corpus -> seven calls, two at `informational`, none at `silent` or
 `debug`. The informational calls are the equation-head authoring note in
 `engine/translator/analysis.pl` and the source-replacement report in
-`engine/filereader/source_lifecycle.pl`. `sh run.sh` always supplied `-q`, so
+`engine/filereader/source_lifecycle.pl`. `sh tools/run.sh` always supplied `-q`, so
 neither had a standalone user-visible invocation.
 
 Rejected: raising either message to `warning`, because both are optional
 authoring detail and the default quiet invocation is intentional.
 
-Decided: `sh run.sh --verbose file.metta` omits SWI's `-q` and the engine strips
+Decided: `sh tools/run.sh --verbose file.metta` omits SWI's `-q` and the engine strips
 the option before choosing the file. One general launcher door exposes both
 reports at their existing level; Python already has the equivalent
 `MeTTa(verbose=True)` door.
@@ -375,7 +375,7 @@ Found: `run.sh` now goes through `bounded.sh`, which gives every process this
 repository starts a deadline and a parent-death link, and
 `tests/checks/check_process_bounds.py` reads every `tests/shell/*.sh` for a
 command position that skipped it. The verbosity lane's two launcher calls were
-written before that existed, so they are `bounded sh run.sh ...` here and the
+written before that existed, so they are `bounded sh tools/run.sh ...` here and the
 probe directory is a plain `mktemp -d`, which the gate's repository-local
 scratch supplies through `TMPDIR`. Nesting is what `bounded.sh` documents: the
 tighter of the outer and inner ceilings is the one in force.

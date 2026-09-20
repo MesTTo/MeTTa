@@ -134,7 +134,7 @@ findings; `llms-selftest` passes 61 planted cases; `layering` accounts for 944
 calls with 81 contract lines across six components; `lib-surface` checks 895
 clauses and 470 equations; `policy-inventory` finds no violations across 20
 runtime rows; `kernel-ledger` finds none across 68 heads. Command:
-`sh check.sh llms llms-selftest layering lib-surface policy-inventory kernel-ledger`.
+`sh tools/check.sh llms llms-selftest layering lib-surface policy-inventory kernel-ledger`.
 
 Final verification: `sh extensions/python/test.sh` exits 0 with 3,544 passed,
 48 skipped and five warnings in 208.35 seconds. `sh engine/test.sh` exits 0
@@ -224,7 +224,7 @@ and accounted evaluation, rejection, and restoration of the outer context.
 Tried: the integrated `sh extensions/python/test.sh` passes 3611 tests with
 48 skips and five warnings in 127.46 seconds. `sh engine/test.sh` exits zero
 across 79 suite invocations, 2195 tests and 1436 subtests. The exact requested
-`sh check.sh llms llms-selftest layering lib-surface policy-inventory kernel-ledger`
+`sh tools/check.sh llms llms-selftest layering lib-surface policy-inventory kernel-ledger`
 exits zero with all six gates green. Layering covers 949 calls through 81
 contracts. Generated async, stub and reference checks agree; the algebra
 surface type check reports no issues.

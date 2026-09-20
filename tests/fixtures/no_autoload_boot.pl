@@ -7,7 +7,7 @@
 %     ensure_loaded('../../engine/main.pl'), so main.pl's own
 %     initialization(main, main) still reads current_prolog_flag(argv, _)
 %     the normal way, which is what run.sh's NO_AUTOLOAD=1 branch relies on
-%     [measured 2026-08-18: NO_AUTOLOAD=1 sh test.sh, 200/200 examples/].
+%     [measured 2026-08-18: NO_AUTOLOAD=1 sh tools/test.sh, 200/200 examples/].
 %   - a failure to reach engine/main.pl HALTS with status 2 rather than
 %     continuing. Without that, swipl finished loading a file that defines
 %     nothing, exited 0 having printed nothing, and engine/check.sh's

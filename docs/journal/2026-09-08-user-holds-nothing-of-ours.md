@@ -589,7 +589,7 @@ assignments removed confirms that only comments and the measured point values
 changed. Commands: `python extensions/python/tools/twin_coverage.py --repin
 --reason "The engine and library module boundaries retain explicit lookup
 owners, including host registration and returned callback goals"`, exit 0;
-`sh check.sh twins`, exit 1 with the findings below.
+`sh tools/check.sh twins`, exit 1 with the findings below.
 
 The comparison ceilings already include the compiled-definition and declared
 program-cost credits. They are left as measured failures by the landing ruling;

@@ -292,15 +292,15 @@ the recorded figure, so a date alone would have stamped a number the tree no
 longer produces.
 
 Decided: `examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/05-import_space_identity.metta`
-cites its own path instead of a command. `sh run.sh <file>` is refused because
-run.sh has no `exit` or `return` of its own to read, and `sh test.sh <file>`,
+cites its own path instead of a command. `sh tools/run.sh <file>` is refused because
+run.sh has no `exit` or `return` of its own to read, and `sh tools/test.sh <file>`,
 the shape two ch20 siblings write, is accepted on test.sh alone:
 `gate_command_problems` returns as soon as `SHELL_COMMAND` matches, so the path
 argument is never read and the claim says nothing about this file. The bare
 path is the shape four 20-01 examples write and the only one the checker takes
 through all three of its questions FOR THIS FILE: it holds `(test ...)` forms,
 so it can fail, and test.sh's corpus collector runs it under a GATE lane. Run
-both ways: `sh test.sh <file>` exits 0 with eleven green forms, and with the
+both ways: `sh tools/test.sh <file>` exits 0 with eleven green forms, and with the
 first expectation flipped to `(absent)` it exits 1, printing
 `is (present), should (absent). ❌` and naming the file.
 

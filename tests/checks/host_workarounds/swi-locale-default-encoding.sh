@@ -16,7 +16,7 @@
 #   Future Enhancements: None
 # [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 #  absent on 10.1.14 built with tests/checks/host_workarounds/swi-locale-default-encoding.patch;
-#  command=sh check.sh host-workarounds;
+#  command=sh tools/check.sh host-workarounds;
 #  fixture=SWI-Prolog 10.1.14 with the patch; commit=ce2fe3fdad6c4c1b7457dbcf438b3f42d1ec5612]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}

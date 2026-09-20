@@ -10,7 +10,7 @@
 #   - `present` iff loading `'one.pl'` leaves no one.qlf while loading `two`
 #     writes two.qlf; a stem that writes nothing prints neither word, which
 #     the lane reports as a broken reproduction [measured 2026-09-10: source,
-#     artifact; command=sh check.sh host-workarounds; fixture=SWI-Prolog
+#     artifact; command=sh tools/check.sh host-workarounds; fixture=SWI-Prolog
 #     10.1.13; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 # Open Obligations:
 #   To Do: None
@@ -18,7 +18,7 @@
 #   Future Enhancements: None
 # [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 #  absent on 10.1.14 built with tests/checks/host_workarounds/swi-qlf-extension-spec.patch;
-#  command=sh check.sh host-workarounds;
+#  command=sh tools/check.sh host-workarounds;
 #  fixture=SWI-Prolog 10.1.14 with the patch; commit=b045ab60c186e14b700fd689c3195b196b7778ec]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}

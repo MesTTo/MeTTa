@@ -38,7 +38,7 @@ python -m pytest -q -n 0 --benchmark-disable --randomly-seed=1125382488 \
   extensions/python/tests/ch09_types/test_refined_unions.py
 ```
 
-`sh check.sh ruff evidence layering` passes, with four pending pins and no
+`sh tools/check.sh ruff evidence layering` passes, with four pending pins and no
 unbacked evidence. `jscpd --reporters json --output ai-tmp/ai-classes-c56a-clones
 --max-lines 10000 --max-size 1mb --formats-exts 'python:py' --format python
 --no-gitignore --noTips extensions/python/metta/_catalog/annotations.py
@@ -79,7 +79,7 @@ python -m pytest -q -n 0 --benchmark-disable --randomly-seed=1125382488 \
   extensions/python/tests/ch03_atoms_and_expressions/test_callable_values.py
 ```
 
-`sh check.sh ruff evidence layering` passes with one pending pin and no
+`sh tools/check.sh ruff evidence layering` passes with one pending pin and no
 unbacked claim. The preceding clone command with call_signatures.py and
 annotations.py as its two inputs and ai-classes-c56b-clones as its output
 finds no clones. Logs use `ai-tmp/ai-classes-c56b-{ty,mypy,python,checks,clones}.log`.
@@ -109,7 +109,7 @@ Verification plan: run callable values, ports, frames, expanded applications,
 parameter binding and class contracts; run the full ty and mypy lanes, Ruff,
 evidence and layering; review clones and finish the series' provenance checks.
 
-Verified: `sh check.sh ty mypy ruff evidence layering` passes. Ty reports no
+Verified: `sh tools/check.sh ty mypy ruff evidence layering` passes. Ty reports no
 diagnostics; mypy passes the 185-file core and the separate one-, three- and
 one-file public typing checks. Evidence has two pending pins and no unbacked
 claims. The following command passes 139 existing callable cases:

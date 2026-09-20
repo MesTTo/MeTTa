@@ -130,7 +130,7 @@ backwards in files this branch does not own. The rebuild is written down now
 (`ai-tmp/build-history.sh`): every commit starts from `git reset --hard petta`
 and checks out only the files it owns, so no commit can inherit a stale one.
 
-Measured: the whole `GATE_ONLY=1 sh check.sh` on a provisioned `git archive` of
+Measured: the whole `GATE_ONLY=1 sh tools/check.sh` on a provisioned `git archive` of
 trunk and on this branch, one after the other on the same box, twice as trunk
 moved. Both times this branch's failing lane set was a SUBSET of trunk's, never
 a superset, and every lane whose output could carry a count read the same on

@@ -1,0 +1,759 @@
+% Purpose: plan and execute indexed native-space matches and relational conjunction joins
+% Guarantees: content clearing retires module-owned support state while keeping
+%   edges owned by live consumers [tested: reference_publication;
+%   commit=901a768e17b3ad2559b19d2895a250451a88da99].
+% Guarantees: grounded_length/2 counts visible native occurrences through
+% storage metadata and requires a length owner for every foreign parent
+% [tested: run_tests(space_length_refinements); commit=d336b911f0d727b50a5660eb86f5ed44b35303b5].
+% Guarantees: open reads enumerate expressions and scalars in named and
+%   parametric spaces [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarded by: catalog clear acquires '$metta_typing_policy' before
+%   '$metta_arrow_products', matching annotated declaration publication
+%   [source: engine/spaces/arrow_products.pl:metta_with_arrow_product_update/1;
+%   commit=bbb512316280110a747e31c26adfc31e8c5104be]. Ordinary clear lets provider callbacks suspend before
+%   reconciling product ownership [tested: extensions/node/test/remote.test.ts
+%   "does not carry clear across the wire, and says why"; commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
+% Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
+% Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
+% Guarantees: native_match_order/3 answers the conjunct
+%   match_relational_conjuncts/5 leads with, through cheapest_conjunct/6 itself
+%   rather than a second reading of its rule, so (explain (match ...)) cannot
+%   name an order the matcher does not take [tested:
+%   native_generic_join:the_nested_loop_order_names_the_conjunct_the_matcher_leads_with;
+%   commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
+% [tested: tests/prolog/suites/spaces/spaces.plt, native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+
+:- consult('generic_join.pl').
+
+%Native conjunctions call their space predicate directly. The recursive helper
+%keeps the provider decision outside the candidate loop.
+%A conjunction is a JOIN, and the engine ran it as a nested loop in SOURCE
+%order: each conjunct enumerated under every binding of the ones before it.
+%That is quadratic where the join's own bound is not. Measured on the triangle
+%query over a graph with a hub joined to everything in both directions, where
+%no triangle exists at all, instructions differenced against the same file
+%whose query is one unconstrained conjunct: 13,502,606 at 100 edges rising by
+%exactly 4.0x per doubling to 3,620,340,557 at 1,600, while the AGM bound for a
+%triangle over N edges is N^1.5, about 64,000 there
+%[measured 2026-08-23].
+%
+%Enumerating the conjunct with the FEWEST matches first removes it. Binding
+%`$x,$y` from the first conjunct gives N choices and `$z` from the second gives
+%deg(`$y`) more, which for the hub is another N/2, and only then does the third
+%conjunct fail; taking the most constrained conjunct instead binds `$z` from
+%the one that offers a single value and refutes the row at once. This is the
+%minimum-remaining-values heuristic of constraint solving and the reason
+%leapfrog triejoin seeks in its smallest relation
+%[source: Veldhuizen, Leapfrog Triejoin, ICDT 2014, arXiv:1210.0481].
+%
+%The fallback below is NOT worst-case optimal: no ordering
+%of a nested loop attains the AGM bound on the instance that bound is tight
+%for, which is why a worst-case-optimal join intersects a variable's candidate
+%sets across every conjunct that mentions it rather than generating from one
+%and testing in the rest. That needs sorted access per variable, which the
+%whole-conjunction seam foreign_plan/5 exists to delegate for providers.
+%Full native conjunctions reach generic_join.pl through match_conjunction/3;
+%its per-variable domains remove the intermediate product. Bounded callers
+%retain this streaming path so finding one answer need not read every input.
+%
+%MULTIPLICITY is preserved exactly because the atom combinations are the same
+%ones, merely visited in another order: `(, (edge $x $y) (edge $x $y))` over a
+%space holding `(edge a b)` twice answers four rows here as it did before.
+%Answer ORDER is not preserved, and is not specified.
+%Adopted from upstream PeTTa's matcher, whose whole cycle discipline is ONE
+%test per answer on the OUT template: unification binds raw, so
+%first-argument indexing dispatches and rational trees are legal bindings,
+%and an answer whose template carries a cyclic binding is refused. A cyclic
+%binding the template does not mention FLOWS, which is upstream's measured
+%law: against a stored (rt (f $x) $x), the pattern (rt $y $y) with template
+%`hit` answers hit, with the pattern itself as template answers nothing, and
+%with an acyclic (rt ok ok) twin beside it answers hit twice
+%[measured 2026-08-30 on PeTTa-base@43705f5, src/spaces.pl match/4; tested:
+%spaces:a_cyclic_binding_is_refused_only_when_the_template_carries_it].
+%One refinement past upstream's spelling: upstream re-tests the template
+%after EVERY conjunct step as an artifact of its recursive clause, but a
+%cyclic mid-join binding either reaches the terminal clause, which tests it,
+%or backtracks away untested, so the test here sits ONLY at answer sites --
+%the terminal conjunct clause and the leaf clauses; a skew join pays zero
+%per-step inferences.
+%The entry scan, its C twin and the per-candidate acyclic_term(PatArgs) that
+%this replaces moved the same growing-term walk between spellings without
+%removing it -- the walk count per answer is identical -- and added a
+%per-call classification the walk never needed; the test is spelled
+%acyclic_term/1 because it is upstream's \+ cyclic_term/1 at half the
+%inference price (1 against 2, which the skew bench prices at 5,000
+%answers per query), walking at the same speed (0.063s against 0.061s per
+%200 walks of a 200k-node term), so the adoption deletes apparatus, not
+%protection [measured 2026-08-30; command=swipl one-shot forall/between
+%timing; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
+match_native(_, _, LComma, OutPattern, Result) :- LComma == [','], !,
+                                                  acyclic_term(OutPattern),
+                                                  Result = OutPattern.
+match_native(Module, Space, [Comma|Conjuncts], OutPattern, Result) :-
+    Comma == ',',
+    Conjuncts = [_, _|_],
+    relational_conjuncts(Conjuncts),
+    !,
+    match_relational_conjuncts(Module, Space, Conjuncts, OutPattern, Result).
+
+match_native(Module, Space, [Comma|[Head|Tail]], OutPattern, Result) :- Comma == ',',
+                                                                        var(Head), !,
+                                                                        get_native_atom(Module, Space, Head),
+                                                                        match_native(Module, Space, [','|Tail], OutPattern, Result).
+match_native(Module, Space, [Comma|[Head|Tail]], OutPattern, Result) :- Comma == ',',
+                                                                        ( Head == [] ; \+ is_list(Head) ), !,
+                                                                        get_native_scalar_atom_in(Module, Head),
+                                                                        match_native(Module, Space, [','|Tail], OutPattern, Result).
+match_native(Module, Space, [Comma|[[Rel|PatArgs]|Tail]], OutPattern, Result) :- Comma == ',', !,
+                                                                                native_expression(Module, Space, Rel, PatArgs),
+                                                                                match_native(Module, Space, [','|Tail], OutPattern, Result).
+
+%When the native pattern itself is a variable, enumerate all atoms.
+match_native(Module, Space, PatternVar, OutPattern, Result) :- var(PatternVar), !,
+                                                               get_native_atom(Module, Space, PatternVar),
+                                                               acyclic_term(OutPattern),
+                                                               Result = OutPattern.
+
+match_native(Module, _, Pattern, OutPattern, Result) :-
+    ( Pattern == [] ; \+ is_list(Pattern) ), !,
+    get_native_scalar_atom_in(Module, Pattern),
+    acyclic_term(OutPattern),
+    Result = OutPattern.
+
+match_native(Module, Space, [Rel|PatArgs], OutPattern, Result) :- native_expression(Module, Space, Rel, PatArgs),
+                                                                  acyclic_term(OutPattern),
+                                                                  Result = OutPattern.
+
+%Every conjunct list reached below is a SUBLIST of one relational_conjuncts/1
+%has already accepted, and being relational is a property of each conjunct on
+%its own, so asking again at every level walked the remaining conjuncts once
+%per conjunct.
+match_relational_conjuncts(Module, Space, Conjuncts, OutPattern, Result) :-
+    cheapest_conjunct(Module, Space, Conjuncts, _, Goal, Rest),
+    call(Goal),
+    (   Rest = [_, _|_]
+    ->  match_relational_conjuncts(Module, Space, Rest, OutPattern, Result)
+    ;   match_native(Module, Space, [','|Rest], OutPattern, Result)
+    ).
+
+%Read one stored expression through its private module. The module's unknown
+%flag is fail, so a virgin arity fails directly and this indexed path needs no
+%exception handler.
+%The storage call unifies raw, so first-argument indexing dispatches, and
+%rational-tree bindings are legal: the ONE cycle test lives on the answer
+%template at every match_native/5 answer site, upstream PeTTa's own
+%placement. The earlier occurs discipline (a rational-tree instantiation
+%is never an answer, whatever the template) is withdrawn by the alignment:
+%a cyclic binding the template does not carry now answers, as upstream
+%measures [source: PeTTa-base@43705f5 src/spaces.pl match/4].
+%Every remaining conjunct is an expression whose head is settled, which is the
+%shape the reordering understands. Anything else keeps source order.
+relational_conjuncts([]).
+relational_conjuncts([Conjunct|Conjuncts]) :-
+    nonvar(Conjunct),
+    Conjunct = [Rel|_],
+    nonvar(Rel),
+    relational_conjuncts(Conjuncts).
+
+%The remaining conjunct with the fewest matches under the current bindings,
+%found by a DOUBLING probe that stops as soon as one conjunct is exhausted:
+%counting them all would cost as much as the join. A conjunct exhausted inside
+%the current limit is known to be no larger than it, so the first one that
+%exhausts wins and the probe costs O(smallest) rather than O(relation). Past
+%the last limit every remaining conjunct offers more matches than the probe can
+%distinguish, and source order is as good a choice as any.
+%The first conjunct that offers AT MOST ONE match, which is the whole of the
+%win: a conjunct with one match settles its variables and refutes the row at
+%once, where the loop would otherwise enumerate another conjunct's many.
+%Distinguishing two matches from three is not worth a probe that every step of
+%every join pays, so the question asked is the cheap one, and the leading
+%conjunct's goal is built once and kept for the fallback that uses it.
+%Chosen is the conjunct the Goal belongs to, which the join itself never needs
+%and (explain (match ...)) does: an extra head argument costs the join no
+%inference, where a wrapper predicate around this would cost one per level.
+cheapest_conjunct(Module, Space, [First|More], Chosen, Goal, Rest) :-
+    conjunct_goal(Module, Space, First, FirstGoal),
+    (   goal_matches_at_most_one(FirstGoal)
+    ->  Chosen = First,
+        Goal = FirstGoal,
+        Rest = More
+    ;   selective_conjunct(Module, Space, More, Best, Found, Others)
+    ->  Chosen = Best,
+        Goal = Found,
+        Rest = [First|Others]
+    ;   Chosen = First,
+        Goal = FirstGoal,
+        Rest = More
+    ).
+
+selective_conjunct(Module, Space, Conjuncts, Best, Goal, Rest) :-
+    select(Best, Conjuncts, Rest),
+    conjunct_goal(Module, Space, Best, Goal),
+    goal_matches_at_most_one(Goal),
+    !.
+
+%The order the retained nested loop takes at its FIRST level, which is the only
+%level a reader can be told about without running the join: this same question
+%is re-asked at every level under the bindings the levels above it made, so the
+%order below is exact about the conjunct that leads and says nothing about the
+%rest beyond the order they are offered in.
+%A pattern the reordering does not accept keeps source order, which is what
+%match_native/5's remaining conjunction clauses do, and a single pattern is its
+%own order.
+native_match_order(Space, [Comma|Conjuncts], Order) :-
+    Comma == ',',
+    !,
+    (   Conjuncts = [_, _|_],
+        relational_conjuncts(Conjuncts),
+        native_storage_module_cache(Space, Module),
+        \+ space_parent(Space, _)
+    ->  cheapest_conjunct(Module, Space, Conjuncts, Chosen, _, Rest),
+        Order = [Chosen|Rest]
+    ;   Order = Conjuncts
+    ).
+native_match_order(_, Pattern, [Pattern]).
+
+%The callable form of one conjunct, built ONCE and used by both the probe and
+%the enumeration that follows it. native_expression/4 rebuilds it with =../2 on
+%every call, and the probe would otherwise pay for that a second and a third
+%time on the hottest path a join has.
+conjunct_goal(Module, [Family|Parameters], [Rel|PatArgs], Module:Goal) :-
+    Space = [Family|Parameters],
+    space_parametric(Space),
+    !,
+    metta_storage_term('$metta_parametric_atom', [Rel|PatArgs], _, Goal).
+conjunct_goal(Module, Space, [Rel|PatArgs], Module:Goal) :-
+    metta_storage_term(Space, [Rel|PatArgs], _, Goal).
+
+%Has this goal AT MOST ONE solution, asked by both join paths: the native one
+%passes the storage call conjunct_goal/4 built, the routed one passes match/4
+%so the read reaches through the whole chain.
+%
+%Counted in a mutable cell under a single negation. nb_setarg/3 is not undone by
+%the failure that drives the enumeration, so the count survives while every
+%binding the probe made is discarded, which is the accumulator
+%has_type_derive/3 uses for the same reason; and `\+` alone suffices, since it
+%keeps no bindings of its own. It costs neither the solution list findnsols/4
+%builds nor a copy_term/2, which together measured +11.4% on a dense join where
+%this measures +2.35%. deterministic/1 is not a cheaper substitute: inside a
+%negation it always reports a choicepoint, so no conjunct is ever chosen and
+%both the skewed and the dense case get slower than doing nothing.
+goal_matches_at_most_one(Goal) :-
+    State = seen(0),
+    \+ (   call(Goal),
+           arg(1, State, Before),
+           After is Before + 1,
+           nb_setarg(1, State, After),
+           After >= 2
+       ).
+
+native_expression(Module, [Family|Parameters], Rel, PatArgs) :-
+    Space = [Family|Parameters],
+    space_parametric(Space),
+    !,
+    metta_storage_term('$metta_parametric_atom', [Rel|PatArgs], _, Term),
+    call(Module:Term).
+native_expression(Module, Space, Rel, PatArgs) :-
+    metta_storage_term(Space, [Rel|PatArgs], _, Term),
+    call(Module:Term).
+
+'get-atoms'(Space, Pattern) :- nonvar(Space),
+                               seam:foreign_space(Space), !,
+                               refuse_absent_capability(Space, enumerate),
+                               metta_source_guard(Space),
+                               seam:foreign_atoms(Space, Pattern).
+
+%Get all atoms in space, irregard of arity. A first argument that is not a
+%space is refused HERE and not in get_native_atom/2 below, for the same reason
+%metta_add_atom/3 leaves the check to 'add-atom'/3: this is the door a MeTTa
+%program comes through and the one that owes it a MeTTa answer, while the
+%storage read below is an engine internal whose callers hold a space name
+%already and would read an error atom as a stored atom
+%[tested: test_get_atoms_on_an_unbound_space_names_the_operation].
+%The storage lookup decides it here too, for match/4's reason: a read of a
+%space the engine holds pays nothing, and only an unknown name reaches
+%metta_space_name/1. get_native_atom/3 rather than /2 because the lookup /2
+%would repeat has already happened in the condition.
+'get-atoms'([Family|Parameters], Pattern) :-
+    Space = [Family|Parameters],
+    space_parametric(Space),
+    !,
+    (   native_storage_module_ready(Space, Module)
+    ->  get_native_atom(Module, Space, Pattern)
+    ;   fail
+    ).
+'get-atoms'(Space, Pattern) :-
+    (   atom(Space)
+    ->  (   native_storage_module_ready(Space, Module)
+        ->  (   space_parent(Space, _)
+            ->  get_inherited_atom(Space, Module, Pattern)
+            ;   get_native_atom(Module, Space, Pattern)
+            )
+        ;   metta_space_name(Space)
+        ->  fail
+        ;   space_argument_error('get-atoms', [Space], Pattern)
+        )
+    ;   space_argument_error('get-atoms', [Space], Pattern)
+    ).
+
+get_inherited_atom(Space, OwnModule, Pattern) :-
+    space_read_chain(Space, Each),
+    (   Each == Space
+    ->  get_native_atom(OwnModule, Space, Pattern)
+    ;   get_atom_read_link(Each, Pattern)
+    ).
+
+get_atom_read_link(Space, Pattern) :-
+    seam:foreign_space(Space),
+    !,
+    refuse_absent_capability(Space, enumerate),
+    metta_source_guard(Space),
+    seam:foreign_atoms(Space, Pattern).
+get_atom_read_link(Space, Pattern) :-
+    native_storage_module_ready(Space, Module),
+    get_native_atom(Module, Space, Pattern).
+
+%Drop every atom a space holds. Expressions and scalars live in different
+%predicates, so a caller that wipes only the space predicate would leave the
+%scalars standing and a pooled name's next life would inherit them.
+%Clearing a foreign space is the provider's own operation, and it lived in
+%extensions/python/metta/_binding/shim.pl, so a Prolog provider that implemented clear (as
+%lib/lib_redis/lib_redis.pl does) was reachable only when Python was in the process:
+%under run.sh the engine had no path to it at all. The shim now calls this.
+clear_foreign_atoms(Space) :-
+    foreign_write(Space, clear, seam:foreign_clear(Space)),
+    metta_prune_arrow_products(Space).
+
+%A space has two halves and this used to empty one of them. The storage sweep
+%below drops every stored atom, and the atoms that also COMPILED left their
+%clauses standing in the space's execution module, so a space holding nothing
+%still answered its own functions: define (= (past-life) inherited), clear,
+%and `!(past-life)` in that space still answered `inherited` over an empty
+%space [measured 2026-08-19]. Space names
+%are POOLED, so that is a previous life answering through a recycled name.
+%
+%It was masked rather than absent: extensions/python/metta/_binding/shim.pl's clear removes
+%equations through the removal funnel before calling this, so the Python door
+%was whole and the ENGINE's own door was not. Every other caller got the half
+%clear, and P1.14's reload will come through this one.
+%
+%So the compiled half leaves first, through metta_remove_atom/3, which is the
+%code that owns each shape: an equation un-compiles its clause and forgets the
+%function name when nothing else defines it, a declaration recompiles the call
+%sites it was shaping. Only those two shapes, because only those two have a
+%compiled half, which is exactly the two clauses metta_remove_atom/3 answers
+%specially; a plain atom is storage and nothing else, so the sweep is both
+%correct and one retractall per arity rather than one removal per atom.
+%
+%The funnel is idempotent, so the shim's own pass in front of this one leaves
+%nothing here to find and no removal is announced twice
+%[tested: spaces_execution_modules:clearing_a_space_empties_its_execution_module,
+%test_a_recycled_space_name_inherits_no_clauses_from_its_past_life].
+%Only a pool whose synthesized admission guard and capacity row coexist gets
+%a counter. Its dynamic fact participates in an enclosing transaction exactly
+%like the stored atom clauses do, so a rollback restores both. The regular
+%write door never probes it: successful claimed writes update it from the hook
+%path, while an indexed removal clause exists only for counted spaces. Removing
+%the capacity row drops both facts; adding the row back recounts once before
+%the next decision. An equation can be a derived duplicate that stores nothing,
+%so that rare shape recounts after the write instead of assuming one landed
+%[tested: capacity_counter_changes_roll_back_with_the_atoms,
+%capacity_redeclaration_recounts_writes_made_while_unbounded;
+%commit=819b139c7cdbdaa673f854713e8beb988eb12ead].
+:- dynamic metta_capacity_count/2.
+:- dynamic metta_capacity_remove_hook/2.
+
+metta_capacity_contract_added(Pool) :-
+    (   metta_capacity_admission_claim(Pool)
+    ->  metta_capacity_count_install(Pool)
+    ;   true
+    ).
+
+metta_capacity_admission_claim(Pool) :-
+    atom_concat('space-admission-guard-', Pool, Guard),
+    metta_hook_claim(Pool, pre_add, Guard, _).
+
+metta_capacity_count_claim(Pool) :-
+    (   '$metta_atoms:&metta':'&metta'(capacity, Pool, _, _)
+    ->  metta_capacity_count_install(Pool)
+    ;   true
+    ).
+
+metta_capacity_count_install(Space) :-
+    (   seam:foreign_space(Space)
+    ->  true
+    ;   with_mutex('$metta_capacity_count',
+                   transaction(( (   metta_capacity_count(Space, _)
+                                 ->  true
+                                 ;   space_atom_count_uncached(Space, Count),
+                                     assertz(metta_capacity_count(Space, Count))
+                                 ),
+                                 metta_capacity_remove_hook_install(Space) )))
+    ).
+
+metta_capacity_count_uninstall(Space) :-
+    with_mutex('$metta_capacity_count',
+               transaction(( retractall(metta_capacity_count(Space, _)),
+                             forall(retract(metta_capacity_remove_hook(Space,
+                                                                       Ref)),
+                                    catch(erase(Ref), _, true)) ))).
+
+%A claim-time clause specializes remove_sexp/3 on the ground pool name.
+%First-argument indexing skips it for every unclaimed space, so ordinary
+%removals retain their old inference count instead of paying a failed counter
+%probe [measured: register-op 44334 inferences on 2026-08-21, min of 3;
+%command=cd python && python bench.py --counter-only --keep-going;
+%fixture=extensions/python/benchmarks/test_benchmarks.py::test_register_operation;
+%commit=819b139c7cdbdaa673f854713e8beb988eb12ead]. The clause and its reference are dynamic database state,
+%hence an enclosing transaction rolls their installation back with the claim.
+metta_capacity_remove_hook_install(Space) :-
+    (   metta_capacity_remove_hook(Space, _)
+    ->  true
+    ;   asserta((remove_sexp(Space, Term, Removed) :-
+                    !,
+                    metta_capacity_remove_sexp(Space, Term, Removed)), Ref),
+        assertz(metta_capacity_remove_hook(Space, Ref))
+    ).
+
+metta_capacity_remove_sexp('&metta', [Rel|Args], Removed) :- !,
+    (   native_storage_module_ready('&metta', Module)
+    ->  metta_storage_term('&metta', [Rel|Args], _, Term),
+        ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
+        native_retract_one(Module:Term, Removed),
+        (   Removed == true
+        ->  metta_catalog_note_removed([Rel|Args])
+        ;   true
+        )
+    ;   Removed = false
+    ),
+    metta_capacity_count_removed_known('&metta', Removed).
+metta_capacity_remove_sexp(Space, [Rel|Args], Removed) :- !,
+    (   native_storage_module_ready(Space, Module)
+    ->  native_storage_functor(Space, Functor),
+        metta_storage_term(Functor, [Rel|Args], _, Term),
+        native_retract_one(Module:Term, Removed)
+    ;   Removed = false
+    ),
+    metta_capacity_count_removed_known(Space, Removed).
+metta_capacity_remove_sexp(Space, Atom, Removed) :-
+    (   native_storage_module_ready(Space, Module)
+    ->  native_retract_one(Module:'$metta_native_scalar'(Atom, _), Removed)
+    ;   Removed = false
+    ),
+    metta_capacity_count_removed_known(Space, Removed).
+
+metta_capacity_counts_prune :-
+    findall(Pool, metta_capacity_count(Pool, _), Pools0),
+    sort(Pools0, Pools),
+    forall(member(Pool, Pools),
+           (   '$metta_atoms:&metta':'&metta'(capacity, Pool, _, _)
+           ->  true
+           ;   metta_capacity_count_uninstall(Pool)
+           )).
+
+metta_capacity_count_added(Space, [=, [F|_], _]) :-
+    atom(F),
+    !,
+    metta_capacity_count_recount(Space).
+metta_capacity_count_added(Space, _) :-
+    metta_capacity_count_delta(Space, 1).
+
+metta_capacity_count_added_known(Space, [=, [F|_], _]) :-
+    atom(F),
+    !,
+    metta_capacity_count_recount(Space).
+metta_capacity_count_added_known(Space, _) :-
+    metta_capacity_count_delta_known(Space, 1).
+
+metta_capacity_count_removed_known(_, false) :- !.
+metta_capacity_count_removed_known(Space, true) :-
+    metta_capacity_count_delta_known(Space, -1).
+
+metta_capacity_count_delta(Space, Delta) :-
+    (   metta_capacity_count(Space, _)
+    ->  metta_capacity_count_delta_known(Space, Delta)
+    ;   true
+    ).
+
+metta_capacity_count_delta_known(Space, Delta) :-
+    with_mutex('$metta_capacity_count',
+               transaction(( (   retract(metta_capacity_count(Space, Count0))
+                             ->  Count1 is Count0 + Delta,
+                                 (   Count1 >= 0
+                                 ->  Count = Count1
+                                 ;   space_atom_count_uncached(Space, Count)
+                                 ),
+                                 assertz(metta_capacity_count(Space, Count))
+                             ;   true
+                             ) ))).
+
+metta_capacity_count_recount(Space) :-
+    (   metta_capacity_count(Space, _)
+    ->  with_mutex('$metta_capacity_count',
+                   ( space_atom_count_uncached(Space, Count),
+                     transaction(( retractall(metta_capacity_count(Space, _)),
+                                   assertz(metta_capacity_count(Space, Count)) )) ))
+    ;   true
+    ).
+
+metta_capacity_count_cleared('&metta') :-
+    !,
+    with_mutex('$metta_capacity_count',
+               transaction(( retractall(metta_capacity_count(_, _)),
+                             forall(retract(metta_capacity_remove_hook(_, Ref)),
+                                    catch(erase(Ref), _, true)) ))).
+metta_capacity_count_cleared(Space) :-
+    (   metta_capacity_count(Space, _)
+    ->  with_mutex('$metta_capacity_count',
+                   transaction(( retractall(metta_capacity_count(Space, _)),
+                                 assertz(metta_capacity_count(Space, 0)) )))
+    ;   true
+    ).
+
+%How many atoms a native space OWNS. Inherited match, get-atoms and
+%space-contains read the child-first chain; this count deliberately does not,
+%because capacity constrains the writable front store rather than its parents.
+%A capacity-claimed pool reads its
+%incremental fact; every other space reads the store's own per-predicate
+%clause bookkeeping, the manual's count-asserted-facts idiom
+%[source: https://www.swi-prolog.org/pldoc/man?predicate=predicate_property%2F2].
+%A space that has never been written has no storage module and holds nothing.
+%A foreign space's atoms live with its provider, where the only general count
+%is an enumeration; hiding that would promise the wrong complexity class
+%[tested: spaces_atom_count:a_foreign_space_has_no_native_count].
+space_atom_count(Space, Count) :-
+    metta_capacity_count(Space, Count),
+    !.
+space_atom_count(Space, Count) :-
+    (   seam:foreign_space(Space)
+    ->  throw(error(metta_foreign_space_count(Space), none))
+    ;   space_atom_count_uncached(Space, Count)
+    ).
+
+space_atom_count_uncached(Space, Count) :-
+    (   native_storage_module_ready(Space, Module)
+    ->  findall(N,
+                ( current_predicate(Module:Name/Arity),
+                  functor(Head, Name, Arity),
+                  (   predicate_property(Module:Head, number_of_clauses(N))
+                  ->  true
+                  ;   N = 0
+                  ) ),
+                Counts),
+        sum_list(Counts, Count)
+    ;   Count = 0
+    ).
+
+% A space's length is its visible bag, while capacity counts its front store.
+% Read clause counts rather than atoms. Each foreign link must supply a length;
+% collecting only successful counts would silently omit an unsized parent.
+:- multifile seam:grounded_length/2.
+seam:grounded_length(Space, Count) :-
+    metta_space_operand(Space),
+    \+ seam:foreign_space(Space),
+    findall(Each, space_read_chain(Space, Each), Chain),
+    maplist(metta_space_link_length, Chain, Counts),
+    sum_list(Counts, Count).
+
+metta_space_link_length(Space, Count) :-
+    (   seam:foreign_space(Space)
+    ->  once(seam:grounded_length(Space, Count))
+    ;   space_atom_count(Space, Count)
+    ).
+
+%A catalog clear cannot withdraw a declaration stored in another space.
+%Hold the publication lock across this check and the catalog sweep. Ordinary
+%clear calls providers without this lock, then reconciles against retained
+%declarations so a product published after the sweep keeps its owned row.
+clear_native_atoms('&metta') :-
+    !,
+    metta_with_arrow_product_update(
+        ( (   metta_arrow_product(Name, Owner, Type, _, _),
+              Owner \== '&metta'
+          ->  throw(error(permission_error(clear, annotated_arrow_catalog, '&metta'),
+                          context(clear_native_atoms/1,
+                                  remove_declaration(Owner, [':', Name, Type]))))
+          ;   true
+          ),
+          clear_native_atoms_stored('&metta') )).
+clear_native_atoms(Space) :-
+    clear_native_atoms_stored(Space).
+
+clear_native_atoms_stored(Space) :-
+    (   native_storage_module_ready(Space, Module)
+    ->  space_module(Space, SupportModule),
+        findall(Atom, compiled_half_atom(Space, Module, Atom), Compiled),
+        forall(member(Atom, Compiled),
+               ( metta_remove_atom(Space, Atom, _) -> true ; true )),
+        % The plain-store sweep is one operation; compiled withdrawals above
+        % each consume their own generation through the removal funnel.
+        flag('$metta_generation', Generation, Generation+1),
+        native_storage_functor(Space, Functor),
+        forall(( current_predicate(Module:Functor/Arity),
+                 functor(Head, Functor, Arity) ),
+               metta_retract_storage(Module:Head)),
+        metta_retract_storage(Module:'$metta_native_scalar'(_, _))
+    ;   SupportModule = none
+    ),
+    metta_prune_arrow_products(Space),
+    metta_capacity_count_cleared(Space),
+    retractall(import_life(Space, _, _)),
+    (   SupportModule \== none
+    ->  support_graph:support_clear_module(SupportModule)
+    ;   true
+    ),
+    forget_space_source_loads(Space).
+
+%The atoms whose removal has a consequence beyond storage, which are exactly
+%the two shapes metta_remove_atom/3 answers specially; a shape added there
+%without being added here would go back to leaving its compiled half behind a
+%clear.
+%
+%Asked of the storage predicate by HEAD SYMBOL rather than by filtering a walk
+%of the space. The head is the first argument, so this is one indexed lookup
+%per shape and a space of plain atoms pays nothing for the question; filtering
+%an enumeration cost one inference per stored atom on every clear, which the
+%benchmarks saw as +20,002 inferences on py-method-call and +8,000 on
+%handle-round-trip [measured 2026-08-19].
+compiled_half_atom(Space, Module, [=, Head, Body]) :-
+    native_storage_functor(Space, Functor),
+    Term =.. [Functor, =, Head, Body, _],
+    call(Module:Term),
+    Head = [F|_], atom(F).
+compiled_half_atom(Space, Module, [':', F, Type]) :-
+    native_storage_functor(Space, Functor),
+    Term =.. [Functor, ':', F, Type, _],
+    call(Module:Term),
+    atom(F), fun(F).
+
+%Enumeration answers the space's expressions and then its scalar atoms.
+%native_storage_module_ready/2 is a dynamic lookup, so an unbound space
+%enumerated every space ever written to and !(collapse (get-atoms $any))
+%answered with another space's atoms without ever naming it.
+%
+%This raise is the ENGINE's invariant and not the language's answer: a MeTTa
+%program cannot reach it, because 'get-atoms'/2 above refuses a first argument
+%that is not a space before it gets here. What is left is an engine caller
+%that lost its space name, and that is a bug in the engine rather than in a
+%program, so it throws instead of answering an atom the caller would store
+%[tested: spaces_storage_modules:reading_atoms_requires_a_named_space].
+get_native_atom(Space, Pattern) :-
+    ( var(Space) -> instantiation_error(Space) ; true ),
+    metta_refuse_module_for_space(Space, get_native_atom/2),
+    native_storage_module_ready(Space, Module),
+    get_native_atom(Module, Space, Pattern).
+
+%The mirror of with_metta_module/2's refusal, at the space-name doors: a
+%space MODULE handed where a NAME is wanted read exactly like a miss, the
+%store answering "not held" with no type error, so a wrong-argument call
+%was indistinguishable from absence and a plt cleanup once removed nothing
+%from four of five cases in silence. The two execution-module prefixes turn it
+%into a refusal at the door
+%[tested: test_a_module_where_a_space_name_is_wanted_refuses_by_name].
+metta_refuse_module_for_space(Space, Door) :-
+    (   atom(Space),
+        (   metta_exec_module_prefix(Prefix),
+            sub_atom(Space, 0, _, _, Prefix)
+        ;   sub_atom(Space, 0, _, _, '$metta_param_exec:')
+        )
+    ->  throw(error(type_error(metta_space_name, Space),
+                    context(Door,
+                            'a space MODULE arrived where a space NAME is \c
+                             wanted; space_module/2 maps the exact atomic or \c
+                             expression identifier to this module, not back')))
+    ;   true
+    ).
+
+%A pattern whose SHAPE is known builds the storage head FIRST, so the
+%store's argument indexing dispatches the way match/4's identical read
+%does, instead of enumerating every clause under an unbound head and
+%filtering afterwards: a bound-pattern read through this door was
+%O(space held) where the same read through match was one indexed lookup
+%[measured 2026-08-21: a per-add presence probe through the old path
+%cost 2,055 inferences at 2,000 held atoms and 21,055 at 10,000,
+%linear, against 69.01 flat through match's spelling of the same
+%question; through this clause the same probe reads 57.01 at 2,000 and
+%57.00 at 10,000]. Reads bind raw, as
+%native_expression/4's do under the petta alignment: the one cycle test
+%sits on the match answer template, and the enumeration doors carry none,
+%exactly as upstream's get-atoms carries none. A partial list keeps the enumerating
+%clause below, and a bound SCALAR skips both, because =../2 on it threw
+%where the store owed a clean miss and the scalar shelf is that atom's
+%own clause anyway [tested: spaces_contains].
+get_native_atom(Module, [Family|Parameters], Pattern) :-
+    is_list(Pattern),
+    Pattern = [_|_],
+    Space = [Family|Parameters],
+    space_parametric(Space),
+    !,
+    metta_storage_term('$metta_parametric_atom', Pattern, _, Head),
+    call(Module:Head).
+get_native_atom(Module, Space, Pattern) :-
+    is_list(Pattern),
+    Pattern = [_|_],
+    !,
+    metta_storage_term(Space, Pattern, _, Head),
+    call(Module:Head).
+%A PARTIAL list with a bound head keeps the head's index too: the arity is
+%open, so one storage head cannot be built, but the held arities are a small
+%enumerable set and within each the first argument dispatches exactly as
+%above. Without this pair an open-tail probe fell to the clause/2 walk below
+%and read every stored atom: lib_tabling's `'get-atoms'('&metta', [tabled|_])`
+%existence check, run per compiled equation, cost the whole catalog per event,
+%23.7 inferences per held row over one tabling_fib load, linear from 74,268
+%inferences at +0 planted rows through 78,777 at +200 to 97,977 at +1,000
+%[measured 2026-08-26: the three totals left; command=python - with MeTTa().space then
+%m.stats() around m.run(examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta) after N
+%`!(add-atom &metta (visibility dummy-N PUBLIC))` writes, fresh process per
+%N; fixture=p14-integration with engine/reader.so; commit=2b2d6f3e36d259e789ad7d977eebc3623b002970]. A bound
+%head that is itself compound shares one principal functor across such rows
+%and degrades toward the walk only for that shape. The head decomposes into
+%FRESH arguments before unifying with the pattern, because =.. on the pattern
+%itself raised a raw type error for an improper tail such as [a|b] whenever
+%any clause reached it, a store-content-dependent accident the walk below
+%still carries for unbound heads; through this pair an improper tail is a
+%deterministic miss [tested: an_open_tail_probe_reads_through_the_head_index].
+get_native_atom(Module, [Family|Parameters], Pattern) :-
+    nonvar(Pattern),
+    Pattern = [Rel|_],
+    nonvar(Rel),
+    \+ is_list(Pattern),
+    Space = [Family|Parameters],
+    space_parametric(Space),
+    !,
+    current_predicate(Module:'$metta_parametric_atom'/Arity),
+    Arity >= 2,
+    functor(Head, '$metta_parametric_atom', Arity),
+    arg(1, Head, Rel),
+    call(Module:Head),
+    metta_storage_term(_, Args, _, Head),
+    Args = Pattern.
+get_native_atom(Module, Space, Pattern) :-
+    nonvar(Pattern),
+    Pattern = [Rel|_],
+    nonvar(Rel),
+    \+ is_list(Pattern),
+    !,
+    current_predicate(Module:Space/Arity),
+    Arity >= 2,
+    functor(Head, Space, Arity),
+    arg(1, Head, Rel),
+    call(Module:Head),
+    metta_storage_term(_, Args, _, Head),
+    Args = Pattern.
+get_native_atom(Module, Space, Pattern) :-
+    \+ atomic(Pattern),
+    native_storage_functor(Space, Functor),
+    current_predicate(Module:Functor/Arity),
+    functor(Head, Functor, Arity),
+    clause(Module:Head, true),
+    metta_storage_term(Functor, Pattern, _, Head).
+get_native_atom(Module, _, Pattern) :-
+    get_native_scalar_atom_in(Module, Pattern).
+
+get_native_scalar_atom_in(Module, Pattern) :-
+    Module:'$metta_native_scalar'(Pattern, _).

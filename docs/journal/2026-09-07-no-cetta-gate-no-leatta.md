@@ -137,7 +137,7 @@ on this box and the fork's is called `cetta`, so the example skips either way;
 the prose now names the binary the code resolves rather than a fork the code
 never reaches.
 
-Tried: `GATE_ONLY=1 sh check.sh` on the committed tree -> eleven lanes red.
+Tried: `GATE_ONLY=1 sh tools/check.sh` on the committed tree -> eleven lanes red.
 Every one was attributed with a positive control on ONE tree and ONE artifact
 set, `engine/*.qlf` cleared and re-warmed per arm, by restoring the touched
 directories to cc22aa14 and re-measuring:

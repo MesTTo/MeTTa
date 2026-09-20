@@ -44,7 +44,7 @@ the engine's growth rather than on anything about cursors.
 Assumes: `metta` imports, which the lane's interpreter is the one that can do
 Guarantees:
   - the kept half exceeds the bound and the dropped half stays under it
-    [tested: sh check.sh memray]
+    [tested: sh tools/check.sh memray]
   - both halves measure the same quantity, so the comparison between them means
     something. One mark OBJECT carries the bound and the filter to both, so
     there is no second spelling that could drift from the first

@@ -46,7 +46,7 @@ check("writes is an ordinary item", str(e["writes"]), "(writes undeclared)")
 
 `.atoms` is every item in the engine's order, so `store.add(*e.atoms)` puts an
 explanation in a space and `match` queries it afterwards. The whole example is
-[`operations/explaining_a_query.py`](https://github.com/MesTTo/MeTTa-Kernel/blob/main/extensions/python/examples/operations/explaining_a_query.py).
+[`operations/explaining_a_query.py`](https://github.com/MesTTo/MeTTa/blob/main/extensions/python/examples/operations/explaining_a_query.py).
 
 The plan item names the join the matcher **runs**, not the one the query's
 shape allows. A cyclic conjunction reads `generic-join` with its variable order
@@ -68,7 +68,7 @@ lazy view answers it without pulling a row.
 
 ## Which functions are worth caching
 
-`sh check.sh memo-advisor` reads a workload's own call counts and proposes
+`sh tools/check.sh memo-advisor` reads a workload's own call counts and proposes
 `(cache <head> force)` or `(cache <head> refuse)` rows, pricing each by running
 the whole workload again in a fresh process with the row declared. Each
 proposal is one line:

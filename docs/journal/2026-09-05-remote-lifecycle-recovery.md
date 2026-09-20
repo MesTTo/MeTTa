@@ -64,7 +64,7 @@ on the implementation branch.
 Final verification: `HYPOTHESIS_PROFILE=ci RUSTC_WRAPPER= PYTEST_ADDOPTS=-rs
 CHECK_PY="$VENV/bin/python" sh extensions/python/test.sh` passed 3,080 tests,
 skipped 48 and exited 0. This is the updated 3,031-test baseline plus 49
-regressions. Then `RUSTC_WRAPPER= CHECK_PY="$VENV/bin/python" sh check.sh ruff
+regressions. Then `RUSTC_WRAPPER= CHECK_PY="$VENV/bin/python" sh tools/check.sh ruff
 artifact-paths` passed both gates with zero artifact-path findings and exit 0.
 The complete log and row assertions are in `ai-tmp/ai-remote-lifecycle.md`.
 Environment: Rebuilt native artifacts after the worktree relocation, disabled

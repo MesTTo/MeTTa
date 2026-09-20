@@ -55,7 +55,7 @@ Guarantees:
     pattern answered 7 findings over 11 spawns where the grammar answers 13
     over 26, over the POSITIONS fixture below]
     [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
-  - a spawner NAMED inside a quoted argument, `sed 's|sh run.sh ...|'`, is not
+  - a spawner NAMED inside a quoted argument, `sed 's|sh tools/run.sh ...|'`, is not
     a command and is not reported
     [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
@@ -176,7 +176,7 @@ HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 """
 
 #: `exec` keeps the command position open, and every seat's test.sh ends with
-#: one. Deleting the wrapper from `exec sh bounded.sh "$PY" -m pytest` leaves
+#: one. Deleting the wrapper from `exec sh tools/bounded.sh "$PY" -m pytest` leaves
 #: `exec "$PY" -m pytest`, which read as clean until this case was planted.
 #: `command -v` must NOT match for the same reason it never has: it asks PATH a
 #: question and starts nothing.
@@ -202,7 +202,7 @@ exec "$PY" -m pytest tests
 #: That last one was real: extensions/mork/mork_ffi/build.sh carried it.
 #:
 #: The `sed` line is the negative the other shapes need. Its expression NAMES
-#: `sh run.sh`, and reading a quoted word as a command reported it; the
+#: `sh tools/run.sh`, and reading a quoted word as a command reported it; the
 #: opt-out that spared it in tests/shell/test_example_runner_surfaces_failures.sh
 #: was a workaround for this pass and is gone with it.
 POSITIONS = """#!/bin/sh
@@ -249,7 +249,7 @@ RUSTFLAGS="-C target-cpu=native" TMPDIR="$HERE" cargo build prefix-loose
 bounded env METTA_PROBE=1 swipl -g halt env-bound.pl
 env METTA_PROBE=1 swipl -g halt env-loose.pl
 
-sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$HERE/test.sh" > quoted-argument.sh
+sed 's|sh tools/run.sh "$f" 2>&1|sh tools/run.sh "$f"|' "$HERE/test.sh" > quoted-argument.sh
 """
 
 #: Spans whose only job is to be CUT. `truncations` below reads every prefix
@@ -447,7 +447,7 @@ def main() -> int:
             f"bounded half reports the same findings while covering less.")
     if "run.sh" in reported:
         problems.append(
-            "the planted `sed 's|sh run.sh ...|'` was reported. Its expression "
+            "the planted `sed 's|sh tools/run.sh ...|'` was reported. Its expression "
             "NAMES a command and is not one, and reading it as a spawn is what "
             "put an opt-out on that line in the tree.")
 

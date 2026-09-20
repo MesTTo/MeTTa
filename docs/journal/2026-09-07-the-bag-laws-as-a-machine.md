@@ -152,7 +152,7 @@ order under `-p no:randomly` passes, so the order is not the variable and the
 per-test reseeding is. This branch met it once because its two new files
 changed which seed the shuffle drew.
 
-Open: `sh check.sh llms` reports `extensions/node/llms.txt:238: \`browser/\`
+Open: `sh tools/check.sh llms` reports `extensions/node/llms.txt:238: \`browser/\`
 names nothing in the tree` in any isolated worktree. It is not this branch's:
 a pristine control worktree at the same base `70ac99da`, with no edits at all,
 reports the same claim and three more (`_runtime/`, `runtime.json`, `wasm/`).

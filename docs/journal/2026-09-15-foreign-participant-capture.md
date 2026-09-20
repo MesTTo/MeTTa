@@ -48,7 +48,7 @@ there, which then shadows the fixture's `user:fpc_provider/3` for every later te
 (`implementation_module` answered `plunit_foreign_participant_capture` after the first test).
 Decided: registration edits go through `fpc_register/3` and `fpc_unregister/1`, defined beside
 the fixture in `user`. Rerun -> 16 (+5) pass.
-Tried: `sh check.sh prolog-static` -> red on a compile warning, `Begin`, `Commit`, `Rollback`
+Tried: `sh tools/check.sh prolog-static` -> red on a compile warning, `Begin`, `Commit`, `Rollback`
 introduced in one branch of `metta_capture_participant/2`; the protocol shape is now checked
 first and the three goals bound after the branch. Lane green.
 Tried: `sh extensions/python/test.sh ch15/test_participant_capture.py ch19/test_foreign.py

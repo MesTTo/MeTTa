@@ -125,7 +125,7 @@ to be regenerated (`fngen.py --write`), a `syntax_introductions.txt` row for
 and two derived counts in `llms.txt`: 300 builtins to 301, measured through
 `m.self.builtins()`, and 258 example programs to 259.
 
-Tried: `GATE_ONLY=1 sh check.sh`, once, on the frozen tree at loadavg 32-58.
+Tried: `GATE_ONLY=1 sh tools/check.sh`, once, on the frozen tree at loadavg 32-58.
 13 of 106 lanes red. Two were this change's and both are fixed:
 
 Tried: `prolog-static` -> `Variable not introduced in all branches: Missing`

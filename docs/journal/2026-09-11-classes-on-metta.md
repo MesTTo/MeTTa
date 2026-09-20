@@ -276,7 +276,7 @@ The new corpus example has seven assertions and a Python twin. Its full-example 
 
 Tried: the final corpus run and its twin -> seven of seven assertions, equal stored content, 21,949 MeTTa inferences and 19,782 Python inferences, zero findings. `jscpd --format prolog --formats-exts 'prolog:pl,plt' --min-lines 5 --min-tokens 50` reports one seven-line test clone, 1.38% over the two new Prolog files; no production clone. The duplicated mutation and error golden remains beside each test because the two cases change different declaration scopes.
 
-Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=../../../PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
+Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh tools/check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=../../../PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
 
 ## 2026-09-11: class-space admission and open recursion
 
@@ -402,7 +402,7 @@ rows once and test their axes. This preserves the existential policy check
 and reduces the common compiler path for every function using the guard.
 
 Verified: `sh engine/test.sh` passes the complete engine battery after the
-indexed dispatch change. `sh check.sh host-workarounds host-workarounds-selftest`
+indexed dispatch change. `sh tools/check.sh host-workarounds host-workarounds-selftest`
 passes: 12 ledger entries, 21 sites, all reproductions answer `present`, and
 all ten planted violations are reported.
 
@@ -922,7 +922,7 @@ executes the emitted audited check, and the cost regression covers
 
 ## 2026-09-12: the cache-expiry negative control includes assertion ownership
 
-Found: `sh check.sh binding binding-selftest llms llms-selftest` reports one
+Found: `sh tools/check.sh binding binding-selftest llms llms-selftest` reports one
 counter failure after the reference counts are corrected. The eager first
 failed query still costs 14 under every cache lifetime. The deliberately lazy
 control costs 1,307/1,533/1,539 at lifetimes 10/0/-1, so the expired-minus-fresh
@@ -957,7 +957,7 @@ and 110,051 inferences at 100, 1,000 and 10,000 iterations. The earlier typed
 counts were 19,251, 192,051 and 1,920,051. Log:
 `ai-tmp/ai-classes-c3-callee-cost3.log`.
 
-Found: the native grain example passes `sh test.sh` but fails through the
+Found: the native grain example passes `sh tools/test.sh` but fails through the
 Python loader with population `(50)` and remaining count zero. A trace of
 the returned receivers shows distinct tokens. A match before the first write
 finds no field rows. Removing `scope-defer` in a disposable source probe restores
@@ -980,7 +980,7 @@ diagnostic location. `sh extensions/python/test.sh
 tests/ch09_types/test_class_construction.py -k concrete_field_annotations -n 0`
 passes one test (`ai-tmp/ai-classes-c3-unimported-after2.log`).
 
-Verified: `sh test.sh examples/ch17-concurrency-and-the-loop/08-class_grains.metta`
+Verified: `sh tools/test.sh examples/ch17-concurrency-and-the-loop/08-class_grains.metta`
 passes the grain and native cleanup claims. The added cleanup claim exercises
 the longhand `scope_defer`, `drop-space` and `space_drop`; the coverage gate had
 correctly reported those three new callable heads without an example.
@@ -992,7 +992,7 @@ measured whole-program difference, 12,383,349. Logs:
 `ai-tmp/ai-classes-c3-grain-{corpus,twin}-complete.log`;
 three-process measurement: `ai-tmp/ai-classes-c3-grain-twin-measure5.log`.
 
-Verified: `sh check.sh corpus-coverage cumulative-syntax example-origins llms`
+Verified: `sh tools/check.sh corpus-coverage cumulative-syntax example-origins llms`
 passes every selected lane and the implied origins selftest. The corpus has
 321 executable non-skipped programs, 326 non-fixture files, and 347 files
 including fixtures. Upstream attribution remains 143 derived, with 204 written
@@ -1296,7 +1296,7 @@ supertype. The compiler's optional receiver-type proof follows the existing
 numeric-proof rule: a MeTTa local type alias does not need a Python namespace
 binding, while the ordinary annotation claim still owns validation.
 
-Tried: `sh check.sh mypy ruff` passes both lanes, including all four mypy
+Tried: `sh tools/check.sh mypy ruff` passes both lanes, including all four mypy
 invocations (`ai-tmp/ai-classes-c6-types-style-complete.log`). The initial run
 found 138 style findings and one remaining optional-hook type error after the
 class and compiler annotations were reconciled. Targeted Ruff fixes were
@@ -1653,7 +1653,7 @@ opcode 152, minor opcode 3. Every other test passes. The tagged-guard fixture
 passes in this full retained-worker run, and neither previous native
 order-dependent failure recurs.
 
-Verified: `sh check.sh host-workarounds evidence provenance-pin-selftest llms
+Verified: `sh tools/check.sh host-workarounds evidence provenance-pin-selftest llms
 llms-selftest corpus-coverage cumulative-syntax example-origins ruff mypy`
 passes every check except four evidence citations. The source ownership tag
 used a basename instead of its repository path; the three bare-host probes
@@ -1662,7 +1662,7 @@ as registered runners. Cite their actual host-workarounds gate, whose protocol
 already runs those commands and validates their terminal verdicts. No probe
 or evidence-checker behavior changes.
 
-Verified: `METTA_UPSTREAM=../../../PeTTa-base sh check.sh evidence
+Verified: `METTA_UPSTREAM=../../../PeTTa-base sh tools/check.sh evidence
 host-workarounds example-origins` then passes all selected and implied lanes.
 There are zero unbacked tags across 7,547 claims, 13 host workaround entries
 and 33 sites; every reproduction reports present. Attribution reports
@@ -1702,7 +1702,7 @@ its current ch20 path; update that citation without changing the historical
 measurement. Receipt: `ai-tmp/ai-classes-c10-fixture-metadata.log`.
 
 Verified: `CHECK_PY tests/checks/check_evidence_selftest.py` reports zero
-defects; `sh check.sh evidence provenance-pin-selftest ruff` passes all three
+defects; `sh tools/check.sh evidence provenance-pin-selftest ruff` passes all three
 lanes after the citation correction. Receipts:
 `ai-tmp/ai-classes-c10-fixture-evidence-after.log` and
 `ai-tmp/ai-classes-c11-evidence-metadata.log`. Runtime code and fixture forms
@@ -1794,7 +1794,7 @@ during cleanup. The earlier grain-cost table therefore remains current.
 Receipts: `ai-tmp/ai-classes-c15-grain-costs.log` and the exact comparison
 with the earlier sample set in `ai-tmp/ai-classes-c15-grain-comparison.log`.
 
-Verified: `sh check.sh host-workarounds evidence` passes both lanes after
+Verified: `sh tools/check.sh host-workarounds evidence` passes both lanes after
 staging the required tracked reproduction. The ledger now has 14 entries
 and 34 sites; every host reproduction answers present. The first attempt
 correctly refuses the reproduction while it is still untracked. Receipt:
@@ -1912,7 +1912,7 @@ equal stored content, 2530792 native and 14248453 twin inferences. Receipts:
 `ai-tmp/ai-classes-c17-inline-grain-twin.log`. Engine and library QLF files
 were deleted before every measurement; the corpus lane ran alone.
 
-Verified: `sh check.sh evidence provenance-pin-selftest ruff host-workarounds`
+Verified: `sh tools/check.sh evidence provenance-pin-selftest ruff host-workarounds`
 passes all four lanes, with 14 host entries and 34 sites. Receipt:
 `ai-tmp/ai-classes-c17-inline-metadata.log`. `jscpd
 engine/translator/typing.pl tests/prolog/suites/translator/check_commits.plt
@@ -2094,7 +2094,7 @@ example paths; `ai-classes-c19-reference-twins-verified.log` records the run.
 
 ## 2026-09-13: class imports follow the package foundations
 
-Measured: `sh check.sh layering` reports 14 Python violations in the grain
+Measured: `sh tools/check.sh layering` reports 14 Python violations in the grain
 implementation; the same command at pristine c75181adc passes. The control's
 1836 source files match their commit objects. Native layering passes on both
 trees. Logs: `ai-classes-c19-reference-layering-corrected.log` and
@@ -2130,7 +2130,7 @@ Verified: the corrected import and class cohort passes all 399 tests with
 `pytest -q -n 4 --benchmark-disable --randomly-seed=1125382488`, over
 `test_lazy_loading.py`, `test_class_grains.py`, `test_class_field_values.py`,
 `test_class_construction.py`, `test_type_inspection.py` and
-`test_reference_patterns.py`. Ruff and `sh check.sh layering mypy` pass;
+`test_reference_patterns.py`. Ruff and `sh tools/check.sh layering mypy` pass;
 mypy checks 179, 1, 3 and 1 source files in its four configurations. The
 reference rows and grain twins pass 15 claims with equal stores and unchanged
 budgets. Logs use the `ai-classes-c20-import-` prefix: `python-corrected`,
@@ -2819,7 +2819,7 @@ Verified: `sh ai-tmp/ai-classes-c44-method-verify.sh` runs the commands in
 cases. Thirteen native suites pass 265 tests plus 63 subtests. Layering, mypy,
 evidence and refusal-grounds pass. Ruff's final RUF043 finding was an
 unmarked test regex; marking it raw leaves its value unchanged. The affected
-refusal and ordered cleanup controls pass 4 cases, and `sh check.sh ruff`
+refusal and ordered cleanup controls pass 4 cases, and `sh tools/check.sh ruff`
 passes. Logs: `ai-classes-c44-method-final-{python,native,checks,controls,ruff}.log`.
 
 Clone review: jscpd's default 1,000-line limit skipped the three largest

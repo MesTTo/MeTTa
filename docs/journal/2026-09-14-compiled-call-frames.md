@@ -89,7 +89,7 @@ file census excludes the new, unstaged test file. The existing claims name
 the correct test functions. Staging the fixture makes it visible to the
 evidence census; no code or test is changed to satisfy that check.
 
-Tried: `sh check.sh evidence` after staging passes with zero unbacked claims.
+Tried: `sh tools/check.sh evidence` after staging passes with zero unbacked claims.
 Log: ai-classes-c46-verified-evidence.log. The three production files' clone
 scan reports 2342 lines, 22544 tokens and zero clones. Command: `jscpd
 --min-lines 5 --min-tokens 70 --max-lines 10000 --max-size 1mb --noTips

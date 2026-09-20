@@ -231,7 +231,7 @@ the plain hole is that rule now.
 
 ### The lanes, and the reds attributed
 
-`sh check.sh ruff mypy mypy-template-surface llms llms-selftest evidence
+`sh tools/check.sh ruff mypy mypy-template-surface llms llms-selftest evidence
 libdoc reference init-stub` all pass. `mypy-template-surface` grew a
 `check_rendering` function, so the 3.14 conformance lane covers the render
 door's annotations as well as the reader's.
@@ -276,7 +276,7 @@ failed in 400.66 s, shuffled seed 1262444922, with the box at loadavg 98
 
 The first failure is the ruff burn-down above, red at the base with the same
 number. The second is `test_the_snippet_auditor_runs_from_the_gate`, which
-spawns `sh check.sh snippets` under a 30-second bound inside the test itself:
+spawns `sh tools/check.sh snippets` under a 30-second bound inside the test itself:
 alone it passes in 28.42 s, which is that bound minus a second and a half, so
 four pytest workers and the rest of the box push it over. Nothing on this
 branch touches `check.sh` or the auditor. Read as load, per the wave's own

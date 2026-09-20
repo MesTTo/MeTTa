@@ -75,7 +75,7 @@ Verified: the new collector cases, native parameter fixture and seven Atom
 collector cases pass 27 tests with the same serial pytest options. Log:
 `ai-tmp/ai-classes-c58-collectors-held.log`.
 
-Verified: `sh check.sh layering ruff mypy ty evidence refusal-grounds
+Verified: `sh tools/check.sh layering ruff mypy ty evidence refusal-grounds
 policy-inventory` passes all selected lanes. Evidence has 7,849 claims and zero
 unbacked references; refusal grounds has 121 CompileError sites, three semantic
 sites and one MeTTa fence, with zero findings. Policy inventory has 20 runtime

@@ -246,7 +246,7 @@ evaluations: 150 queries, all of them `claim`), so it pays +75 per evaluation
 and +37,500 over its 500. That is the whole of this branch's movement on the
 Python counter suite: every other row in `benchmarks` measures IDENTICALLY to a
 pristine control at the branch base, to the inference
-[measured 2026-09-07; command=sh check.sh benchmarks on this tree and on a
+[measured 2026-09-07; command=sh tools/check.sh benchmarks on this tree and on a
 detached worktree at 5621c456; fixture=matching C and MORK artifacts on both;
 commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 

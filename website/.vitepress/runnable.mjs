@@ -156,7 +156,7 @@ export function runContainer(md) {
       if (!corpus.has(example)) {
         throw refuse(env,
           `${example} is not an example the corpus runner runs; it must be a path under ` +
-          `${ROOTS.prefix} that \`sh test.sh\` lists and tests/data/example_skips.txt does not skip`,
+          `${ROOTS.prefix} that \`sh tools/test.sh\` lists and tests/data/example_skips.txt does not skip`,
         );
       }
       const fence = fenceInside(tokens, index, env);

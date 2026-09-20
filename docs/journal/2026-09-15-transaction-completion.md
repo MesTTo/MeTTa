@@ -77,7 +77,7 @@ the fixture's `fco_provider/4` and `fco_native/1` from the unit's own module, cr
 locals there (the same trap the participant suite met); the edits go through `fco_register/4`
 and `fco_mark/1` in `user`. The first replacement dropped a parenthesis per call and the parser
 silently skipped those tests; the suite reported fewer tests, not errors.
-Tried: `sh check.sh prolog-static` -> red twice: `Begin`/`Commit`/`Rollback` and `Error`
+Tried: `sh tools/check.sh prolog-static` -> red twice: `Begin`/`Commit`/`Rollback` and `Error`
 introduced in one branch each (`metta_capture_participant/2`, `metta_transaction_decision/3`);
 the shape is checked first and the variables bound after the branch.
 Tried: the Python controls -> `test_reconciliation_runs_after_original_completion_and_attempts_

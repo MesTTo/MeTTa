@@ -185,7 +185,7 @@ Two rows move up, and both are attributed:
 
 Tried: the latency of the corpus statement's own spawn-and-wait, measured
 rather than assumed. Quiet, the atom lands 60 to 270 microseconds after the
-spawn. Under the load the example corpus itself makes -- `sh test.sh` launches
+spawn. Under the load the example corpus itself makes -- `sh tools/test.sh` launches
 every example at once, 181 SWI processes at the peak, loadavg 22 -- seventy
 rounds read 0.08 to 5.1 milliseconds. Ten seconds is two thousand times the
 worst of those.

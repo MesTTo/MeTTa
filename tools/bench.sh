@@ -30,11 +30,13 @@
 
 set -u
 
-HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+# The repository root, which is this script's PARENT: these drivers live in
+# tools/ so the root stays short enough to read at a glance.
+HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$HERE/bounded.sh" "$@"; }
+bounded() { sh "$HERE/tools/bounded.sh" "$@"; }
 
 found=''
 failed=''

@@ -480,7 +480,7 @@ def _bound(head: str, arguments: tuple[str, ...]) -> bool:
     """Whether this command IS the bound rather than something needing one.
 
     Three spellings reach the same file: the `bounded` and `in_py` helpers,
-    and `sh bounded.sh` written out, which is what the helpers themselves and
+    and `sh tools/bounded.sh` written out, which is what the helpers themselves and
     every `exec` at the end of a seat's test.sh use. Only the first operand is
     read, so a bounded.sh named inside a `-g` goal or a `-c` script is not
     mistaken for the wrapper.
@@ -513,7 +513,7 @@ def line_spawns(line: str) -> list[tuple[str, bool]]:
 
 def scripts() -> list[Path]:
     """The gate scripts, discovered the way check.sh discovers them."""
-    found = [REPO / "check.sh", REPO / "engine" / "check.sh"]
+    found = [REPO / "tools" / "check.sh", REPO / "engine" / "check.sh"]
     found += sorted((REPO / "extensions").glob("*/check.sh"))
     return [p for p in found if p.is_file()]
 
@@ -526,8 +526,8 @@ def runners() -> list[Path]:
     select-python.sh and gate_scratch.sh because they are sourced and start
     nothing.
     """
-    excluded = {REPO / "bounded.sh",
-                REPO / "select-python.sh",
+    excluded = {REPO / "tools" / "bounded.sh",
+                REPO / "tools" / "select-python.sh",
                 REPO / "tests" / "checks" / "gate_scratch.sh"}
     found = [
         *(REPO / name for name in ("test.sh", "run.sh", "bench.sh", "build.sh",
@@ -560,7 +560,7 @@ def _uncommented(lines: list[str]) -> list[tuple[int, str, str | None]]:
 
     A backslash continuation is JOINED, because a continued command is one
     command and its bound sits at the front of it. Reading the halves apart
-    reported `bounded sh bounded.sh \\` as bounded and the `"$PY" -m pytest`
+    reported `bounded sh tools/bounded.sh \\` as bounded and the `"$PY" -m pytest`
     on the next line as an unbounded spawn, which is the same command twice.
     """
     out: list[tuple[int, str, str | None]] = []

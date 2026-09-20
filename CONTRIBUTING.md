@@ -34,7 +34,7 @@ on its own, and its message says what changed and why. Two unrelated fixes
 are two pull requests, and a fix plus the reformatting done on the way past
 it is not one change.
 
-Gate-green means `GATE_ONLY=1 sh check.sh` passes on the tree you are
+Gate-green means `GATE_ONLY=1 sh tools/check.sh` passes on the tree you are
 proposing, every lane of it, on an interpreter you name in the pull request.
 A green subset is not evidence, because the lanes catch different things and
 the ones a change is least expected to touch are the ones that catch it.
@@ -53,10 +53,10 @@ further is asked of you.
 One command runs everything:
 
 ```sh
-sh check.sh                          # both tiers
-GATE_ONLY=1 sh check.sh              # the blocking tier, what CI blocks on
-sh check.sh ruff mypy                # named lanes only
-CHECK_PY=/path/to/python sh check.sh # pick the interpreter
+sh tools/check.sh                          # both tiers
+GATE_ONLY=1 sh tools/check.sh              # the blocking tier, what CI blocks on
+sh tools/check.sh ruff mypy                # named lanes only
+CHECK_PY=/path/to/python sh tools/check.sh # pick the interpreter
 ```
 
 There are two tiers and they mean different things. A GATE lane must pass:
@@ -112,12 +112,12 @@ which holds a deadline in a process of the child's own and links that child to
 the process that started it:
 
 ```sh
-sh bounded.sh swipl -q -s engine/main.pl -- program.metta
-sh bounded.sh --ceiling 60 npm --prefix extensions/node run test
+sh tools/bounded.sh swipl -q -s engine/main.pl -- program.metta
+sh tools/bounded.sh --ceiling 60 npm --prefix extensions/node run test
 ```
 
 The MeTTa corpus under `examples/` is self-checking and each file runs as a
-program. `sh test.sh` runs the examples the shell suite covers and takes each
+program. `sh tools/test.sh` runs the examples the shell suite covers and takes each
 process's exit status as the verdict. The shell regressions under
 `tests/regression/` cover process behaviour and multi-process state that a
 single PlUnit engine cannot represent.

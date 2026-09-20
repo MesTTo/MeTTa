@@ -148,7 +148,7 @@ one process carries state between files, and
 reads the table counters the files before it left, so a subset changed what
 those files cost for a reason that was not the row's.
 
-The advisor's controls, `sh check.sh memo-advisor-selftest`: a pure head called
+The advisor's controls, `sh tools/check.sh memo-advisor-selftest`: a pure head called
 1,000 times over three distinct arguments is proposed as `(cache weigh force)`
 and measured at 3,644,672 inferences before and 165,016 after, a delta of
 3,479,656 and a 99.7% hit ratio; a head declared `oracleIO`, called 300 times
@@ -156,7 +156,7 @@ and declined as not recursive exactly like the first, is never proposed; a
 workload that calls no compiled head is refused by name.
 
 The advisor's first run over `bench`, the memoisation chapter, is
-`sh check.sh memo-advisor`: 16 compiled heads called, the default eight
+`sh tools/check.sh memo-advisor`: 16 compiled heads called, the default eight
 candidates, and six rows proposed, every one of them measured as a LOSS.
 `(cache import_prolog_functions_from_file force)` at -24,893 inferences,
 `(cache tabled force)` at -6,339, `(cache twohop force)` at -3,215,
@@ -209,7 +209,7 @@ names, `spaces` +2, `materialize` +1, the engine module +3, the shim +2, is
 `current_predicate/1`'s enumeration: `system:current_predicate/1` redos,
 `assoc:get_assoc/3` and `system:'$btree_find_node'/5` each rise by exactly 8
 between the two trees, and nothing else in the whole profile moves.
-`sh check.sh benchmarks instructions` is red on BOTH trees with the same 22
+`sh tools/check.sh benchmarks instructions` is red on BOTH trees with the same 22
 failures, `direct-join` reporting the identical `[121145, 121139, 121139]`
 against a pinned 121,099 in each, so the pins at this base predate the branch
 and the +24 rides on a lane already red by +205 on that row.

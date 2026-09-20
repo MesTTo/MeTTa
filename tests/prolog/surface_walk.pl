@@ -287,7 +287,7 @@ scan_sees_every_planted_reach(Total, Missed) :-
 
 % The planted callee has to be an engine predicate that is NOT published, or
 % the probe proves nothing; a caller checks that before trusting the result.
-% [tested: sh check.sh prolog-static; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+% [tested: sh tools/check.sh prolog-static; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 planted_internal(imported_predicate/2).
 
 % The helper's OWN clause is walked beside the probe, because that is how SWI

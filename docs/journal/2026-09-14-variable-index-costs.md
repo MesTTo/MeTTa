@@ -92,7 +92,7 @@ atom-index module directly; the engine facade still publishes the same
 services to its other consumers. The codec needs local term storage, not
 engine initialization. Log: `ai-classes-c53-final-native.log`.
 
-Tried: `sh check.sh prolog lib-autoload prolog-static` exposed an undeclared
+Tried: `sh tools/check.sh prolog lib-autoload prolog-static` exposed an undeclared
 `directory_file_path/3` dependency with autoload disabled. The expanded
 loading matrix reproduces it in four cases; importing the owner explicitly
 makes all ten loading cases pass. Logs:
@@ -104,7 +104,7 @@ Tested: `sh ai-tmp/ai-classes-c53-verify.sh ai-classes-c53-verified` passes
 1,076 tests plus 2,471 subtests across 41 native suite reports and 2,852
 Python cases with one skip. Its native, python, spaces and checks phase
 logs are `ai-classes-c53-verified-{native,python,spaces,checks}.log`.
-The check phase runs `sh check.sh binding layering ruff mypy evidence
+The check phase runs `sh tools/check.sh binding layering ruff mypy evidence
 refusal-grounds policy-inventory llms llms-selftest host-workarounds prolog
 lib-autoload`; every selected lane passes, including all 85 binding
 selftests and their 96 measured twin runs. The earlier prolog-static GLX

@@ -5,13 +5,13 @@
 #   the host interpreter.
 # Guarantees: present means the QLF that loads with its optional entry disabled
 #   dies with signal 11 when replay loads that entry's missing include
-#   [tested: sh check.sh host-workarounds; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
+#   [tested: sh tools/check.sh host-workarounds; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 # Owns resources: only the supplied scratch tree is written; bounded.sh reaps
 #   children, and core files are disabled for the deliberate crash.
 # [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 #  absent (safe-replay) on 10.1.14 built with
 #  tests/checks/host_workarounds/swi-qlf-failed-include-source-module.patch, three
-#  runs of three; command=sh check.sh host-workarounds;
+#  runs of three; command=sh tools/check.sh host-workarounds;
 #  fixture=SWI-Prolog 10.1.14 with the patch; commit=9954e37b2700fa1f4e81be9e22cda2e7f606c432]
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}

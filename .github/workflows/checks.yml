@@ -192,7 +192,7 @@ jobs:
           # reads, so the packages uv resolved become importable from inside
           # the engine as well as beside it.
           export PYTHONPATH="$("$CHECK_PY" -c 'import site; print(site.getsitepackages()[0])')"
-          GATE_ONLY=1 sh check.sh
+          GATE_ONLY=1 sh tools/check.sh
 
   # The burn-down surface. Always runs, never blocks, and the log is the
   # record of what section of ai-code-organisation-and-fixes.md is left.
@@ -224,7 +224,7 @@ jobs:
         env:
           CHECK_PY: ${{ github.workspace }}/.venv/bin/python
         run: |
-          sh check.sh ruff mypy ty pylint perflint xenon refurb bandit \
+          sh tools/check.sh ruff mypy ty pylint perflint xenon refurb bandit \
                       deptry interrogate codespell imports || true
 
   # The declared Python floor, tested rather than asserted.
@@ -541,7 +541,7 @@ jobs:
   # the janus bridge, an ipykernel, and the upstream checkout to run the
   # kernel's own configuration against.
   #
-  # The script is invoked DIRECTLY rather than through `sh check.sh kernel`.
+  # The script is invoked DIRECTLY rather than through `sh tools/check.sh kernel`.
   # That lane is REPORT, and a REPORT failure is printed and forgiven, so
   # running it through the driver here would report a dead kernel as a green
   # job. CI=true is what turns every skip in it into a refusal.

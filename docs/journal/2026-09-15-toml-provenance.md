@@ -29,7 +29,7 @@ Verified: `python tests/checks/check_pin_provenance_selftest.py` reports zero
 defects over 58 placeholders in 21 files after the change. The receipt is
 `ai-tmp/ai-classes-c60-toml-after.log`.
 
-The same self-test passes on Python 3.12.13. `sh check.sh evidence
+The same self-test passes on Python 3.12.13. `sh tools/check.sh evidence
 evidence-selftest provenance-pin-selftest ruff` passes, including zero unbacked
 references in 7,856 claims and all 36 planted evidence citations. The source
 inventory suite was repeated on the resulting series: 13 tests pass on Python

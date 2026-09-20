@@ -29,12 +29,14 @@
 
 set -eu
 
-HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+# The repository root, which is this script's PARENT: these drivers live in
+# tools/ so the root stays short enough to read at a glance.
+HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)
 WORKSPACE=$(dirname -- "$HERE")
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$HERE/bounded.sh" "$@"; }
+bounded() { sh "$HERE/tools/bounded.sh" "$@"; }
 
 command -v git >/dev/null 2>&1 || {
     echo "build.sh: git is not on PATH, and the sibling checkouts below need it" >&2

@@ -45,7 +45,7 @@ python -m pytest -q -n 0 --benchmark-disable --randomly-seed=1125382488 \
   extensions/python/tests/ch14_seeing_your_program/test_source_observation.py
 sh engine/test.sh tests/prolog/suites/translator/translator.plt \
   tests/prolog/suites/evaluation/metatype_mask.plt
-sh check.sh ruff mypy evidence layering refusal-grounds policy-inventory
+sh tools/check.sh ruff mypy evidence layering refusal-grounds policy-inventory
 ```
 
 Results: 1,971 Python tests and 217 native tests with 117 subtests passed;

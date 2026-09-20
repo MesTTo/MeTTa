@@ -1,6 +1,6 @@
 % Purpose: detect implicit NUL membership in the host's String splitter.
 % Guarantees: a failed ordinary control or an unexpected result refuses a verdict.
-% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+% [tested: sh tools/check.sh host-workarounds host-workarounds-selftest; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
 
 main :-
     ( split_string("a,b", ",", "", ["a","b"]) -> true

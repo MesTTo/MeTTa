@@ -15,7 +15,7 @@ is. A green subset is not evidence: the lanes catch different things, and the
 one a change is least expected to touch is the one that catches it.
 -->
 
-- [ ] `GATE_ONLY=1 sh check.sh` passes on this tree, every lane
+- [ ] `GATE_ONLY=1 sh tools/check.sh` passes on this tree, every lane
 - [ ] the behaviour change carries its test, in the tier that matches it
 - [ ] every file added or touched has an obligation header whose open
       obligations are `None`, or this pull request says why one cannot be

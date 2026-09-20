@@ -128,7 +128,7 @@ field.
 
 ## The gate behind it
 
-`sh check.sh no-hardcoded-integration` reads all three seats and reports a
+`sh tools/check.sh no-hardcoded-integration` reads all three seats and reports a
 library named outside the one site that registers it. The names are derived
 from what the sources reach for rather than from a list, so a library the
 checker has never heard of is still seen, and three shell tests build a package

@@ -66,7 +66,7 @@ the retained callback. Log: `ai-classes-c29-captured-contract.log`.
 The initial cleanup fixture used a dataclass reverse hook that its registered
 constructor bypasses. Constructor validation supplies the actual rejected
 value boundary; its corrected witness passes in
-`ai-classes-c28-callable-conversion-after.log`. `sh check.sh ruff mypy`
+`ai-classes-c28-callable-conversion-after.log`. `sh tools/check.sh ruff mypy`
 passes all type checks; the Ruff run reports 32 findings across this work and
 the pending method implementation. Import order, slot order, conversion
 control flow and the two new fixtures were corrected before partition.

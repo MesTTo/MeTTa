@@ -1,6 +1,6 @@
 % Purpose: detect pathname canonicalization dropping a NUL and its suffix.
 % Guarantees: a normal relative-path control remains intact; present requires
-% truncation to that control. [tested: sh check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
+% truncation to that control. [tested: sh tools/check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 
 :- use_module(library(lists), [memberchk/2]).
 

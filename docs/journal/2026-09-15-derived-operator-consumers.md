@@ -70,7 +70,7 @@ runs. Native peak resident memory is 41484 KiB; the broad Python selection peaks
 at 2043760 KiB. Logs are `ai-tmp/ai-classes-c61b-{native,python,
 mentions-repaired,checks}.log`.
 
-Tested: `GATE_ONLY=1 sh check.sh artifact-sync artifact-sync-selftest
+Tested: `GATE_ONLY=1 sh tools/check.sh artifact-sync artifact-sync-selftest
 protocol-sync protocol-sync-selftest` passes all four lanes. The protocol lane
 runs 177 tests and 326 subtests; the artifact lane runs 13 controls. Log:
 `ai-tmp/ai-classes-c61b-generated-gates.log`. The clone scan records one unchanged

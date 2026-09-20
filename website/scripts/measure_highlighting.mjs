@@ -28,7 +28,7 @@ const BACKGROUND = { light: "#f6f6f7", dark: "#161618" };
 // measurement is over the code a reader meets rather than a synthetic sample.
 const SAMPLES = {
   python: `from metta import MeTTa, S, V\n\nm = MeTTa().space()\nm.add(S.parent(S.tom, S.bob))\nrows = m.match(S.parent(S.tom, V.child))\nassert rows.to_dicts() == [{"child": "Bob"}]\n`,
-  typescript: `import { metta, S, V, fn } from "metta-node";\n\nconst m = await metta();\nm.add(S.parent(S.tom, S.bob));\nconsole.log(String(await m.eval(fn.add(1, 2)).one()));\nm.dispose();\n`,
+  typescript: `import { metta, S, V, fn } from "tsmetta";\n\nconst m = await metta();\nm.add(S.parent(S.tom, S.bob));\nconsole.log(String(await m.eval(fn.add(1, 2)).one()));\nm.dispose();\n`,
   c: `#include "cmetta.h"\n\nint main(void) {\n  mt_engine *e = mt_init(NULL);\n  mt_term t = mt_eval(e, "(+ 1 2)");\n  printf("%s\\n", mt_text(t));\n  return 0;\n}\n`,
   bash: `sudo apt install swi-prolog\npip install 'pymetta[engine]'\n`,
 };

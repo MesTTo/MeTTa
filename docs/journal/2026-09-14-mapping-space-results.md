@@ -61,7 +61,7 @@ and 594 space cases. Its check phase finds ten lint findings, one missing
 dictionary type annotation and seven unbacked tags because the new tests
 had not yet been staged. After those corrections and five additional empty
 and malformed-image cases, `sh ai-tmp/ai-classes-c54-python.command` passes
-2111 cases and `sh check.sh ruff mypy evidence` passes. Evidence has zero
+2111 cases and `sh tools/check.sh ruff mypy evidence` passes. Evidence has zero
 unbacked tags. Logs are `ai-tmp/ai-classes-c54-verified-{native,python,spaces,checks}.log`,
 `ai-tmp/ai-classes-c54-python-final.log` and
 `ai-tmp/ai-classes-c54-static-verified.log`.

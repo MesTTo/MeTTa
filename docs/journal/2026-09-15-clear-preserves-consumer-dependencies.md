@@ -92,7 +92,7 @@ it does not establish a linear total release cost. Those preceding withdrawals
 remain an open performance obligation. Exact query records are in
 `ai-tmp/ai-classes-c55c-combined-profile.queries.json`.
 
-Verified: `sh check.sh prolog lib-autoload evidence layering host-workarounds
+Verified: `sh tools/check.sh prolog lib-autoload evidence layering host-workarounds
 policy-inventory` passes. Evidence finds 7,828 claims, no unbacked claims and
 six pending pins; the host ledger verifies 16 entries and 37 sites. The log is
 `ai-tmp/ai-classes-c55c-combined-checks.log`.

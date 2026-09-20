@@ -129,7 +129,7 @@ Rejected: enumeration precedence and Distribution object equality. Neither ident
 
 Verified: the focused seam/discovery battery reports 85 passed and two generated-reference failures in 230.55 seconds, `ai-tmp/ai-audits-f07.log`. Both failures report `reference: 3 stale projections: website/reference/metta-results.md, website/reference/metta-seam.md, website/reference/metta.md`. The reference generator refreshes the advertised contract and the two F15 index-signature projections omitted from that commit. No behavioral acceptance failed.
 
-Verified: `sh check.sh reference` exits 0 after regeneration; `ai-tmp/ai-audits-f07-reference.log`.
+Verified: `sh tools/check.sh reference` exits 0 after regeneration; `ai-tmp/ai-audits-f07-reference.log`.
 
 ### F05: immutable registry records
 
@@ -263,13 +263,13 @@ Verified: all 87 context and existing HTTP controls pass in 22.21 seconds; `ai-t
 
 ### Door projections left stale by the F08, F11 and A8 repairs
 
-Tried: `sh check.sh door-sync` on the branch tip reports stale `website/reference/python-door-contracts.md` and `llms.txt`; the drift is the Rows.one and Rows.into docstrings and the RemoteCursor.__exit__ annotations those commits changed without regenerating. `ai-tmp/ai-audits-t3-lanes.log`.
+Tried: `sh tools/check.sh door-sync` on the branch tip reports stale `website/reference/python-door-contracts.md` and `llms.txt`; the drift is the Rows.one and Rows.into docstrings and the RemoteCursor.__exit__ annotations those commits changed without regenerating. `ai-tmp/ai-audits-t3-lanes.log`.
 
 Decided: regenerate through `tools/doorgen.py --write` alone; no source changes. `door-sync: 227 contracts and every projection agree`; `ai-tmp/ai-audits-t3-regenerate.log`.
 
 ### The seat's Ruff lane over the acceptance tests
 
-Tried: `sh check.sh ruff` on the branch tip reports 17 findings in five acceptance tests committed earlier on this branch (`test_table_ingestion_boundary.py`, `test_entry_point_collisions.py`, `test_registration_identity.py`, `test_registration_publication.py`, `test_unregister_rollback.py`): PLR0917, B023, PERF401, ARG005, TRY003, EM101, EM102. The lane was green at the cut (`trunk-gate-efac42a31.log` line 54363). `ai-tmp/ai-audits-t3-lanes.log`.
+Tried: `sh tools/check.sh ruff` on the branch tip reports 17 findings in five acceptance tests committed earlier on this branch (`test_table_ingestion_boundary.py`, `test_entry_point_collisions.py`, `test_registration_identity.py`, `test_registration_publication.py`, `test_unregister_rollback.py`): PLR0917, B023, PERF401, ARG005, TRY003, EM101, EM102. The lane was green at the cut (`trunk-gate-efac42a31.log` line 54363). `ai-tmp/ai-audits-t3-lanes.log`.
 
 Decided: keyword-only fixture parameters, an `_advertising(entries)` closure in place of the loop-bound lambda, a list comprehension, underscore-prefixed unused listener parameters and bound exception messages. No suppression. `ruff check metta tests tools examples/language-feature-examples bench.py ext conftest.py _workspace.py`: All checks passed.
 
@@ -287,7 +287,7 @@ Verified: mypy, mypy-root-impl, the three typing fixtures, the template fixture 
 
 ### What the whole gate found that the chapters did not
 
-Tried: `GATE_ONLY=1 sh check.sh` on the branch tip, 73 minutes, exit 1, `ai-tmp/ai-audits-final-gate.log`. Fifteen lanes red against the baseline's sixteen (`ai-tmp/next-work/trunk-gate-efac42a31.log`): eleven are the baseline's own, and four were not.
+Tried: `GATE_ONLY=1 sh tools/check.sh` on the branch tip, 73 minutes, exit 1, `ai-tmp/ai-audits-final-gate.log`. Fifteen lanes red against the baseline's sixteen (`ai-tmp/next-work/trunk-gate-efac42a31.log`): eleven are the baseline's own, and four were not.
 
 Tried: `stranger-python` failed with `tables.add reads a registered frame, a mapping of columns, __arrow_c_stream__(), or an iterable of rows; Frame offers none`. The stranger fixture's `solars.Frame` offers `iter_rows()`, the vendor method spelling F12 removed from the core, and its frame row declared no `rows` reader. `layering` failed with two violations: the pandas and polars ingestion tests reached `metta._catalog.arrow` to prove the native path did not open the Arrow reader. The `ruff-configuration` burn-down failed at TRY 29 against 26 and EM 4 against 3, all four sites added by this branch. `ext/metta-graphql/tests/test_graphql.py::test_the_seats_scalars_are_what_serialize` failed with `'mappingproxy' object does not support item assignment`: it swapped a serializer by writing `row.fields["schema"]`, which is the bypass F05's frozen row closed.
 
@@ -319,10 +319,10 @@ Tried: the final whole gate's `node-binding` lane failed one of 650 cases, `name
 
 Decided: build the roster from `Object.values(ProviderCapability)` in the generated vocabulary plus the three words `bridge.pl` registers through the catalog's `(vocabulary-member ...)` door (`bounded`, `pushdown`, `transactional`), and derive the `ProviderCapability` union the same way. The engine's row is then the one description, which is what `bridge.pl`'s own comment already said the list was.
 
-Verified: `npm run typecheck` is silent and `sh check.sh node-binding` reports 650 tests, 650 pass, 0 fail; `ai-tmp/ai-audits-node-binding.log`.
+Verified: `npm run typecheck` is silent and `sh tools/check.sh node-binding` reports 650 tests, 650 pass, 0 fail; `ai-tmp/ai-audits-node-binding.log`.
 
 ### Headers for the declared frame reader
 
 Decided: `tables.py` states the new contract, that a registered frame library's rows reach ingestion through the reader it declares and an unreadable source is refused naming that declaration, and the two provider headers say `tables.add` calls their declared reader rather than only that they declare one, because their fixture changed from "the Arrow reader is not opened" to "ingestion called this row". All three cite `179bcf460`, the commit whose tree holds those tests.
 
-Verified: `sh check.sh evidence provenance-pin-selftest ruff reference reference-selftest door-sync` passes; `ai-tmp/ai-audits-evidence-3.log`, `ai-tmp/ai-audits-header-lanes.log`.
+Verified: `sh tools/check.sh evidence provenance-pin-selftest ruff reference reference-selftest door-sync` passes; `ai-tmp/ai-audits-evidence-3.log`, `ai-tmp/ai-audits-header-lanes.log`.

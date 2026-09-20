@@ -1,7 +1,7 @@
 % Purpose: compare native TCP peer addresses against IPv4 and IPv6 loopback.
 % Guarantees: present identifies the IPv6 peer formatted as ip(0,0,0,0),
 % and absent requires the complete IPv6 loopback address.
-% [tested: sh check.sh host-workarounds; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
+% [tested: sh tools/check.sh host-workarounds; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
 % Owns resources: cleanup closes listeners, clients and accepted sockets.
 
 :- use_module(library(socket),
