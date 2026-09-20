@@ -5917,6 +5917,223 @@
       "tags": [
         "measured"
       ]
+    },
+    "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one": {
+      "title": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+    },
+    "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500": {
+      "title": "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500",
+      "supports": [
+        "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first": {
+      "title": "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first",
+      "supports": [
+        {
+          "node": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "status": "untried"
+        },
+        {
+          "node": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "relation": "addresses",
+          "target": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        }
+      ]
+    },
+    "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself": {
+      "title": "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself",
+      "supports": [
+        {
+          "node": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "status": "abandoned"
+        }
+      ],
+      "supersedes": [
+        "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples": {
+      "title": "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples"
+    },
+    "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once": {
+      "title": "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once",
+      "supports": [
+        "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move": {
+      "title": "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose": {
+      "title": "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose",
+      "supports": [
+        "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would": {
+      "title": "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would"
+    },
+    "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits": {
+      "title": "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits",
+      "supports": [
+        "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples": {
+      "title": "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples"
+    },
+    "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to": {
+      "title": "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to",
+      "supports": [
+        "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl": {
+      "title": "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl"
+    },
+    "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh": {
+      "title": "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh",
+      "supports": [
+        "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree": {
+      "title": "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree"
+    },
+    "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount": {
+      "title": "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount",
+      "supports": [
+        "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it": {
+      "title": "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it"
+    },
+    "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags": {
+      "title": "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags",
+      "supports": [
+        "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values": {
+      "title": "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values"
+    },
+    "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository": {
+      "title": "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository",
+      "supports": [
+        "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see": {
+      "title": "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see",
+      "supports": [
+        {
+          "node": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "status": "untried"
+        },
+        {
+          "node": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "relation": "addresses",
+          "target": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        }
+      ]
+    },
+    "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed": {
+      "title": "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed",
+      "supports": [
+        {
+          "node": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why": {
+      "title": "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why"
+    },
+    "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored": {
+      "title": "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored",
+      "supports": [
+        "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep": {
+      "title": "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep"
+    },
+    "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds": {
+      "title": "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds",
+      "supports": [
+        "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout": {
+      "title": "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout"
+    },
+    "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count": {
+      "title": "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count",
+      "supports": [
+        "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with": {
+      "title": "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with"
+    },
+    "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce": {
+      "title": "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce",
+      "supports": [
+        "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -6887,6 +7104,22 @@
       "status": "untried",
       "addresses": [
         "twenty-two prerequisite guards across six runners report ok for a lane that ran nothing, because each prints a note and exits or returns 0 where the gate already has 125 for a run that says nothing about the tree"
+      ]
+    },
+    "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected": {
+      "title": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+      "effort": 1,
+      "status": "abandoned",
+      "addresses": [
+        "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+      ]
+    },
+    "re-pin the six node rows to what this box measures and record the mount as the mechanism": {
+      "title": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
       ]
     }
   },
@@ -29555,6 +29788,616 @@
         ]
       ],
       "id": "1742661c97e4027d"
+    },
+    {
+      "at": "2026-09-20T02:53:36.390934+00:00",
+      "after": "04942bc532451c27f3e1065b59a3f5c282849f18",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500\", \"tags\": [\"measured\"], \"title\": \"the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first\", \"tags\": [], \"title\": \"measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected\", \"fields\": {\"effort\": 1, \"addresses\": [\"the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one\"]}}, {\"op\": \"status\", \"id\": \"measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected\", \"because\": \"it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself\", \"tags\": [\"measured\"], \"status\": \"abandoned\"}]",
+      "parents": [
+        "1742661c97e4027d"
+      ],
+      "assert": [
+        [
+          "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself",
+          "sort",
+          "prop"
+        ],
+        [
+          "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself",
+          "supersedes",
+          "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first"
+        ],
+        [
+          "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself",
+          "supports",
+          {
+            "node": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+            "status": "abandoned"
+          }
+        ],
+        [
+          "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself",
+          "tags",
+          "measured"
+        ],
+        [
+          "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself",
+          "title",
+          "it establishes the SHAPE, a first call of 200 inferences against a steady 7, but it is not a faithful model of the node row, which costs about 173 inferences a call against this probe's 7, so a null result on this probe says nothing about the node seat and the controlled reversal has to be run against the node benchmark itself"
+        ],
+        [
+          "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500",
+          "supports",
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        ],
+        [
+          "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500",
+          "title",
+          "measured 2026-09-20 in two independent batteries, every one of six samples reading exactly 86785; the case's setup is outside the measured window by the sampler's own contract, and a per-call change would move the total by a multiple of 500"
+        ],
+        [
+          "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first",
+          "sort",
+          "prop"
+        ],
+        [
+          "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first",
+          "supports",
+          {
+            "node": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+            "status": "untried"
+          }
+        ],
+        [
+          "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first",
+          "supports",
+          {
+            "node": "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+            "relation": "addresses",
+            "target": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+          }
+        ],
+        [
+          "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first",
+          "title",
+          "the Python seat drives the same engine and answers in seconds where a node run needs a build, so if the shape is a first-call charge it shows there first"
+        ],
+        [
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one",
+          "title",
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        ],
+        [
+          "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "sort",
+          "approach"
+        ],
+        [
+          "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "addresses",
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        ],
+        [
+          "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "effort",
+          1
+        ],
+        [
+          "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "status",
+          "abandoned"
+        ],
+        [
+          "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected",
+          "title",
+          "measure the first call and the steady calls separately through the Python seat, so the one-time charge is separated from the per-call one before anything is bisected"
+        ]
+      ],
+      "id": "adbf1700a8a4a004"
+    },
+    {
+      "at": "2026-09-20T02:56:38.086590+00:00",
+      "after": "04942bc532451c27f3e1065b59a3f5c282849f18",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once\", \"tags\": [\"measured\"], \"title\": \"the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits\", \"tags\": [\"source\"], \"title\": \"the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would\", \"fields\": {}}]",
+      "parents": [
+        "adbf1700a8a4a004"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once",
+          "supports",
+          "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once",
+          "title",
+          "measured 2026-09-20 in battery 9, the engine restored to the superproject pin's gitlink and the battery re-provisioned from it, which eliminates all eighteen engine commits in the range at once"
+        ],
+        [
+          "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits",
+          "supports",
+          "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would"
+        ],
+        [
+          "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits",
+          "title",
+          "read extensions/node/src/engine.ts: boot consults /metta/engine/metta.pl inside a virtual root that mountInto populates from REPO_ROOT, and the record's earlier define-call bisect rebuilt the seat only because it was moving the seat's own commits"
+        ],
+        [
+          "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose",
+          "sort",
+          "prop"
+        ],
+        [
+          "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose",
+          "supports",
+          "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move"
+        ],
+        [
+          "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose",
+          "tags",
+          "measured"
+        ],
+        [
+          "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose",
+          "title",
+          "swapping the lib submodule to the same pin changed the outcome from a clean three-sample reading to an engine that refuses to boot, naming interop.pl:1942, so the arm reaches the code it claims to; this control was obtained free from an arm that was void for its own purpose"
+        ],
+        [
+          "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move",
+          "sort",
+          "prop"
+        ],
+        [
+          "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move",
+          "title",
+          "the controlled-reversal method does respond to the tree, so the engine's unchanged number is a real negative rather than a measurement that could not move"
+        ],
+        [
+          "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples",
+          "sort",
+          "prop"
+        ],
+        [
+          "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples",
+          "title",
+          "the define-call regression is not in the engine: with the engine checked out at the commit the pin was taken against and everything else at HEAD, the node row still reads 86785 in all three samples"
+        ],
+        [
+          "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would",
+          "sort",
+          "prop"
+        ],
+        [
+          "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would",
+          "title",
+          "the node seat mounts the engine sources from a host directory at run time rather than from its compiled build, so an engine arm needs no TypeScript rebuild while a node-source arm would"
+        ]
+      ],
+      "id": "b08f0baf38cf58e1"
+    },
+    {
+      "at": "2026-09-20T03:03:02.135396+00:00",
+      "after": "04942bc532451c27f3e1065b59a3f5c282849f18",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to\", \"tags\": [\"measured\"], \"title\": \"every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh\", \"tags\": [\"source\"], \"title\": \"the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount\", \"tags\": [\"source\"], \"title\": \"the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags\", \"tags\": [\"source\"], \"title\": \"the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it\", \"fields\": {}}]",
+      "parents": [
+        "b08f0baf38cf58e1"
+      ],
+      "assert": [
+        [
+          "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples",
+          "sort",
+          "prop"
+        ],
+        [
+          "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples",
+          "title",
+          "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples"
+        ],
+        [
+          "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount",
+          "sort",
+          "prop"
+        ],
+        [
+          "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount",
+          "supports",
+          "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree"
+        ],
+        [
+          "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount",
+          "tags",
+          "source"
+        ],
+        [
+          "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount",
+          "title",
+          "git show --stat on b88bfb4ce reads 82 deletions and no insertions for extensions/node/benchmarks/baseline.json, which is a move into the new submodule rather than an edit; the value was set at 230338526 and its own comment cites commit 9adbb4f304, which predates the mount"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to",
+          "supports",
+          "every component that moved between the define-call pin and HEAD has been restored to its pinned commit and the row does not move: engine alone, engine with lib, the benchmark harness alone, and engine with lib with the harness with the Python seat together all read 86785 in all three samples"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to",
+          "title",
+          "measured 2026-09-20 in battery 9, each arm re-provisioned from a checkout with that submodule checked out at the superproject pin's gitlink, and the lib-alone arm's boot refusal is what proves the arms reach the code they claim to"
+        ],
+        [
+          "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags",
+          "supports",
+          "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it"
+        ],
+        [
+          "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags",
+          "title",
+          "read extensions/node/src/platform.ts: the mount filter is a name predicate rejecting .qlf and .qlf-stamp, the package root is found by walking up for bridge.pl beside package.json, and each seat's extension.pl is written in individually; the stamp records only runtime, seats, swipl_wasm, v8 and v8_flags"
+        ],
+        [
+          "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh",
+          "supports",
+          "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl"
+        ],
+        [
+          "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh",
+          "tags",
+          "source"
+        ],
+        [
+          "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh",
+          "title",
+          "read git show --stat for each: 5ca1e85 touches llms.txt only, 2132a36 touches .gitignore only, e5f43b0 is the skip-word change to check.sh, bench.sh and test.sh"
+        ],
+        [
+          "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it",
+          "title",
+          "the node seat mounts sources by path and excludes compiled artifacts, so the shape of the tree it mounts is part of the configuration a pin is taken against, and the configuration stamp the harness checks does not record it"
+        ],
+        [
+          "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl",
+          "sort",
+          "prop"
+        ],
+        [
+          "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl",
+          "title",
+          "the node seat's own three commits in that range cannot touch the count: one edits llms.txt, one adds bytecode rules to a gitignore, and one is today's runner change, so none reaches src or bridge.pl"
+        ],
+        [
+          "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree",
+          "title",
+          "the pinned 86353 was measured on the PRE-MOUNT monorepo and carried across the submodule mount without being re-measured, so the row has been comparing against a number taken from a differently-shaped tree"
+        ]
+      ],
+      "id": "f0a92e2dcc044f5a"
+    },
+    {
+      "at": "2026-09-20T03:04:04.642473+00:00",
+      "after": "04942bc532451c27f3e1065b59a3f5c282849f18",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository\", \"tags\": [\"measured\"], \"title\": \"the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see\", \"tags\": [], \"title\": \"re-pin the six node rows to what this box measures and record the mount as the mechanism\", \"fields\": {\"effort\": 1, \"addresses\": [\"the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one\"]}}, {\"op\": \"status\", \"id\": \"re-pin the six node rows to what this box measures and record the mount as the mechanism\", \"because\": \"the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored\", \"tags\": [\"measured\"], \"title\": \"the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why\", \"fields\": {}}]",
+      "parents": [
+        "f0a92e2dcc044f5a"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository",
+          "supports",
+          "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values"
+        ],
+        [
+          "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository",
+          "title",
+          "measured 2026-09-20 in a worktree at b88bfb4ce^, so the submodule mount is refuted as the cause along with every component in the range, and what remains unaccounted for is environmental rather than anything in this repository"
+        ],
+        [
+          "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored",
+          "supports",
+          "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why"
+        ],
+        [
+          "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored",
+          "title",
+          "measured 2026-09-20: the stamp's five fields all match, swipl-wasm 8.0.6 and node v22.22.1 among them, and the row is still 432 inferences out at the pin's own commit range with every component restored"
+        ],
+        [
+          "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why",
+          "sort",
+          "prop"
+        ],
+        [
+          "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why",
+          "title",
+          "the benchmark harness's configuration stamp records the runtime, the seat names, the swipl-wasm and V8 versions and the V8 flags, and none of those distinguishes this box from the one the node pins were taken on, so a pin can fail to reproduce with nothing in the stamp saying why"
+        ],
+        [
+          "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see",
+          "sort",
+          "prop"
+        ],
+        [
+          "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see",
+          "supports",
+          {
+            "node": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+            "status": "untried"
+          }
+        ],
+        [
+          "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see",
+          "supports",
+          {
+            "node": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+            "relation": "addresses",
+            "target": "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+          }
+        ],
+        [
+          "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see",
+          "title",
+          "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see"
+        ],
+        [
+          "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed",
+          "supersedes",
+          "the harness asks for a re-pin with the mechanism beside it, and the mount was the last structural change the pin did not see"
+        ],
+        [
+          "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed",
+          "supports",
+          {
+            "node": "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed",
+          "tags",
+          "measured"
+        ],
+        [
+          "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed",
+          "title",
+          "the mount is refuted: the pre-mount tree reads the same 86785, so naming it as the mechanism would be a fabricated reason, and this repository's own precedent when a pin failed to reproduce at its own commit was to treat the failure to reproduce AS the finding rather than accept the pin, recorded in the 2026-09-08 entry on every benchmark row placed"
+        ],
+        [
+          "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values",
+          "title",
+          "the pre-mount tree does not reproduce the pin either: checked out at the mount's parent, which is the monorepo shape and the component contents the pin was taken on, given both MORK objects and the native reader and its own fresh TypeScript build, the row still reads 86785 and the same six cases sit outside the band with the same values"
+        ],
+        [
+          "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "sort",
+          "approach"
+        ],
+        [
+          "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "addresses",
+          "the node seat's define-call row costs 86785 inferences against a pinned 86353, a deterministic 432 more, and 432 is not a multiple of the 500 calls it measures, so the whole of it is a one-time charge rather than a per-call one"
+        ],
+        [
+          "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "effort",
+          1
+        ],
+        [
+          "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "status",
+          "unwanted"
+        ],
+        [
+          "re-pin the six node rows to what this box measures and record the mount as the mechanism",
+          "title",
+          "re-pin the six node rows to what this box measures and record the mount as the mechanism"
+        ]
+      ],
+      "id": "03aca5589094d640"
+    },
+    {
+      "at": "2026-09-20T03:06:01.816900+00:00",
+      "after": "04942bc532451c27f3e1065b59a3f5c282849f18",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds\", \"tags\": [\"source\"], \"title\": \"this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count\", \"tags\": [\"source\"], \"title\": \"every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce\", \"tags\": [\"measured\"], \"title\": \"the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with\", \"fields\": {}}]",
+      "parents": [
+        "03aca5589094d640"
+      ],
+      "assert": [
+        [
+          "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout",
+          "sort",
+          "prop"
+        ],
+        [
+          "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout",
+          "title",
+          "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout"
+        ],
+        [
+          "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count",
+          "supports",
+          "every arm of the define-call investigation was a rewritten-in-place tree, so all of them are on the same side of that effect and none of them could have reproduced the pin: a battery is an rsync copy, a git worktree add writes every file, and each submodule arm was a checkout"
+        ],
+        [
+          "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count",
+          "tags",
+          "source"
+        ],
+        [
+          "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count",
+          "title",
+          "read tools/battery.sh, whose provision is an rsync snapshot, and the arms themselves were git worktree add and git -C <sub> checkout, which is the same shape the 2026-09-06 entry names as raising the count"
+        ],
+        [
+          "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds",
+          "supports",
+          "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep"
+        ],
+        [
+          "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds",
+          "tags",
+          "source"
+        ],
+        [
+          "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds",
+          "title",
+          "recorded in the 2026-09-06 release re-pin entry, which rejects the re-pin on that ground and names the controls it ran: the four rewritten engine files reverted with artifacts cleared per arm, and the C artifacts byte-identical across rebuilds"
+        ],
+        [
+          "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce",
+          "supports",
+          "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with"
+        ],
+        [
+          "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce",
+          "tags",
+          "measured"
+        ],
+        [
+          "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce",
+          "title",
+          "the 2026-09-06 entry measures the effect and keeps the pin, and nine of the eleven lanes in this box's recorded red baseline are measurement lanes rather than correctness ones, which is the shape that effect would produce"
+        ],
+        [
+          "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with",
+          "title",
+          "the gate runs every benchmark lane in a battery, which is an rsync copy and therefore a rewritten-in-place tree, while the pins those lanes compare against were taken in trees that were not, so a pinned measurement lane cannot pass under the protocol the gate runs it with"
+        ],
+        [
+          "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep",
+          "sort",
+          "prop"
+        ],
+        [
+          "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep",
+          "title",
+          "this repository has already measured, with controls, that rewriting a tree's files in place raises these inference counters deterministically: a freshly cloned tree read the committed pin inside its allowance while a tree whose files had been rewritten read twenty-one higher, and a copy of the same bytes over 236 tracked files did it, as did a checkout per commit through a sweep"
+        ]
+      ],
+      "id": "115ea8a448e50efa"
     }
   ]
 }

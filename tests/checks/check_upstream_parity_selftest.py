@@ -66,10 +66,12 @@ Guarantees:
     on; a cold first touch is discarded rather than counted; and a program
     with no mode at all is reported as having no cost
     [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
-  - an absent upstream checkout refuses where ``CI=true`` and prints a skip
-    naming the pin elsewhere, the sibling checkout is AT that pin, and a
-    kernel or container that denies the counter is named with the two knobs
-    that decide it [tested: this file is its own gate; commit=fc990fa3042ee05d931d3928694e89021be32855]
+  - an absent upstream checkout refuses where ``CI=true`` and reports a SKIP
+    elsewhere, exit 125, which the gate names under MEASURED NOTHING rather
+    than reporting as a pass; the skip names the pin, the sibling checkout is
+    AT that pin, and a kernel or container that denies the counter is named
+    with the two knobs that decide it [tested: this file is its own gate;
+    commit=fc990fa3042ee05d931d3928694e89021be32855]
 Owns resources: artifact_fixture_failures restores the bytes and timestamps of
   the checkout's original generated artifacts and stamp, including on failure.
   check.sh serializes lanes that share them.
@@ -587,10 +589,15 @@ def upstream_prerequisite_failures() -> list[str]:
                 "the lane can pass in CI without measuring"
             )
         os.environ.pop("CI")
-        if lane.upstream_prerequisite() != 0:
+        # 125, the gate's word for a run that says nothing about the tree, not
+        # 0. Off CI a developer who has not cloned upstream should get a
+        # printed skip, and until 2026-09-20 that skip was spelled 0, so the
+        # summary read `GATE parity-perf ok` under the note saying nothing had
+        # been compared. A skip still neither passes nor fails the run.
+        if lane.upstream_prerequisite() != 125:
             failures.append(
-                "an absent upstream checkout refused off CI, where a developer "
-                "who has not cloned it should get a printed skip"
+                "an absent upstream checkout did not report a SKIP off CI, so "
+                "the lane reads as having compared something it never saw"
             )
         #and the skip has to name the pin, or the reader cannot act on it.
         buffer = io.StringIO()

@@ -1225,12 +1225,19 @@ def upstream_prerequisite(
             file=sys.stderr,
         )
         return 1
+    # 125, which is what a printed skip is WORTH to the summary: check.sh's
+    # run() reports it as `skipped` and names the lane under MEASURED NOTHING.
+    # Returning 0 printed this note and then reported `GATE parity-perf ok`,
+    # so off CI the lane read exactly like one that had compared everything
+    # [measured 2026-09-20, the whole-gate run in battery 7]. The CI refusal
+    # above is unchanged, and a skip still neither passes nor fails the gate,
+    # so what changes is only that the reader can see it.
     print(
         f"note: {absence}; nothing to compare. Check "
         f"{UPSTREAM_REMOTE} out at {UPSTREAM_COMMIT[:7]} there to run it; "
         f"{remedy}"
     )
-    return 0
+    return 125
 
 
 def main() -> int:

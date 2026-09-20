@@ -103,6 +103,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   rather than replaced in bulk, because a guard that reports a legitimately
   inapplicable case must keep exiting `0`.
 
+  The two Python lanes with the same shape move with them.
+  `GATE parity-perf` had been reporting `ok` while printing `upstream checkout
+  not found ...; nothing to compare`, so a gate lane passed without comparing
+  anything; it reports `skipped` now, and
+  `check_upstream_parity_selftest.py`, which pinned the old contract, pins the
+  new one. `check_jupyter_kernel.py`'s `note()` is both of its call sites'
+  `return`, so it ends the lane without starting a kernel and returns 125 too.
+  Its per-part `skipped: no upstream checkout` message is untouched: that one
+  does not end the lane, which goes on to test the kernel against this fork's
+  own tree and has therefore measured something. Verified: `parity-perf
+  skipped`, `parity-perf-selftest ok`, `kernel ok`.
+
 - The `memray` lane discriminates again. Both halves of its plant now exclude
   SWI's own stack growth, which is the engine's arena rather than anything the
   caller retains: Prolog stacks grow to hold a term and are never returned to

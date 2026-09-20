@@ -114,13 +114,24 @@ ANSWER = "3"
 
 
 def note(missing: str, remedy: str) -> int:
-    """Print a skip, or refuse where the lane is load-bearing."""
+    """Print a skip, or refuse where the lane is load-bearing.
+
+    125 rather than 0, because both call sites are `return note(...)` from
+    `main` and so end the lane without starting a kernel. That is the gate's
+    own word for a run that says nothing about the tree: check.sh's `run()`
+    reports it as `skipped` and names the lane under MEASURED NOTHING, where 0
+    reported `ok` for a lane that launched nothing.
+
+    The per-part "skipped: no upstream checkout" message below is a different
+    thing and does not reach here: the lane carries on and tests the kernel
+    against this fork's own tree, so it has measured something and says `ok`.
+    """
     if os.environ.get("CI") == "true":
         print(f"error: {missing}; refusing to pass the kernel gate without it. {remedy}",
               file=sys.stderr)
         return 1
     print(f"note: {missing}; the kernel was not started. {remedy}")
-    return 0
+    return 125
 
 
 def importable(name: str) -> bool:
