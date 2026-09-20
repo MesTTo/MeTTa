@@ -250,6 +250,27 @@ def main() -> int:
         except ModuleNotFoundError:
             broke = True
         expect(broke, "a submodule that BREAKS while importing was called absent")
+        # The other half of the taxonomy: a module raising ImportError DIRECTLY
+        # never reaches the ModuleNotFoundError arm, so it is a separate branch
+        # and needs its own plant.
+        (package / "refuses.py").write_text(
+            "raise ImportError('planted refusal')\n", encoding="utf-8")
+        refused = False
+        try:
+            _unreachable(plantedpkg, ["refuses"])
+        except ImportError:
+            refused = True
+        expect(refused, "a submodule raising ImportError directly was called absent")
+        # And the finding a reader actually meets. dotted_findings takes the
+        # root it resolves against, so this reaches the real branch without
+        # writing a broken module into the shipped package and racing a
+        # parallel run.
+        reported = dotted_findings(
+            SHEET, "`plantedpkg.refuses.thing`", package=plantedpkg)
+        expect(
+            len(reported) == 1 and "could not be resolved" in reported[0],
+            "a module that raises while importing was not reported as a breakage",
+        )
     finally:
         sys.path.remove(str(planted))
         shutil.rmtree(planted, ignore_errors=True)

@@ -9546,6 +9546,190 @@
       "tags": [
         "tested"
       ]
+    },
+    "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim": {
+      "title": "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim"
+    },
+    "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case": {
+      "title": "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case",
+      "supports": [
+        "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions": {
+      "title": "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions"
+    },
+    "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)": {
+      "title": "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)",
+      "supports": [
+        "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference": {
+      "title": "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+      "supports": [
+        {
+          "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level",
+        "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation": {
+      "title": "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+      "supports": [
+        {
+          "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first",
+        "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly": {
+      "title": "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+      "supports": [
+        {
+          "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "status": "abandoned"
+        }
+      ],
+      "supersedes": [
+        "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them",
+        "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it": {
+      "title": "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+      "supports": [
+        {
+          "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken",
+        "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase": {
+      "title": "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase",
+      "supports": [
+        {
+          "node": "find WHY the row outlives its clause before writing any fix, by checking whether metta_reference_source_reader/3 and metta_reference_resolve_source/5 are under the same transactional regime and whether one Ref can appear in two rows",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a notransact mismatch would mean a rolled-back transaction restores the row while the physical erase stays done, which explains the intermittency exactly; a duplicate Ref would mean the forall erases the same clause twice, which explains it without any transaction at all, and the two want different fixes"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving": {
+      "title": "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving",
+      "supports": [
+        {
+          "node": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had": {
+      "title": "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had",
+      "supports": [
+        {
+          "node": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "status": "abandoned"
+        }
+      ],
+      "supersedes": [
+        "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone": {
+      "title": "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone",
+      "supports": [
+        {
+          "node": "run every remaining lane one at a time, waiting for each to finish before starting the next",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the memory is the binding constraint rather than the wall clock, so serialising is what makes each verdict about the tree instead of about the machine"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly": {
+      "title": "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly"
+    },
+    "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind": {
+      "title": "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind",
+      "supports": [
+        "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__": {
+      "title": "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__"
+    },
+    "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well": {
+      "title": "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well",
+      "supports": [
+        "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree": {
+      "title": "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree"
+    },
+    "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup": {
+      "title": "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup",
+      "supports": [
+        "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -10710,7 +10894,7 @@
     "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause": {
       "title": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
       ]
@@ -10742,7 +10926,7 @@
     "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared": {
       "title": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
@@ -10750,7 +10934,7 @@
     "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace": {
       "title": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
       "effort": 1,
-      "status": "active",
+      "status": "abandoned",
       "addresses": [
         "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
@@ -10774,7 +10958,7 @@
     "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all": {
       "title": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
       "effort": 3,
-      "status": "untried",
+      "status": "done",
       "addresses": [
         "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
@@ -10782,7 +10966,7 @@
     "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint": {
       "title": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
@@ -10790,7 +10974,7 @@
     "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it": {
       "title": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
       "effort": 2,
-      "status": "untried",
+      "status": "abandoned",
       "addresses": [
         "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
@@ -10833,7 +11017,7 @@
     "find WHY the row outlives its clause before writing any fix, by checking whether metta_reference_source_reader/3 and metta_reference_resolve_source/5 are under the same transactional regime and whether one Ref can appear in two rows": {
       "title": "find WHY the row outlives its clause before writing any fix, by checking whether metta_reference_source_reader/3 and metta_reference_resolve_source/5 are under the same transactional regime and whether one Ref can appear in two rows",
       "effort": 1,
-      "status": "untried",
+      "status": "done",
       "addresses": [
         "a metta_reference_source_reader/3 row can name an already-dead clause reference, and erase/1 on it fails silently rather than being a no-op"
       ]
@@ -10897,7 +11081,7 @@
     "run every remaining lane one at a time, waiting for each to finish before starting the next": {
       "title": "run every remaining lane one at a time, waiting for each to finish before starting the next",
       "effort": 1,
-      "status": "untried",
+      "status": "done",
       "addresses": [
         "I ran lanes concurrently on a box with 60GB and filled it, which killed a gate and five processes earlier"
       ]
@@ -43991,6 +44175,495 @@
         ]
       ],
       "id": "809d4a68e92c42b6"
+    },
+    {
+      "at": "2026-09-20T09:34:19.987671+00:00",
+      "after": "28a1f4e982054e9b58a4dc0d87e0e7a294bb443b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case\", \"tags\": [\"tested\"], \"title\": \"my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)\", \"tags\": [\"tested\"], \"title\": \"the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions\", \"fields\": {}}]",
+      "parents": [
+        "809d4a68e92c42b6"
+      ],
+      "assert": [
+        [
+          "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case",
+          "sort",
+          "prop"
+        ],
+        [
+          "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case",
+          "supports",
+          "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim"
+        ],
+        [
+          "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case",
+          "tags",
+          "tested"
+        ],
+        [
+          "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case",
+          "title",
+          "both arrive as ModuleNotFoundError and only the name attribute separates them; the selftest now plants a package with an absent submodule and one whose own import names a missing dependency, and collapsing the two back to except ImportError fails that case"
+        ],
+        [
+          "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim",
+          "title",
+          "my first dotted resolver had an exception-taxonomy defect: it read every ImportError as proof the segment was absent, so a module that exists and breaks while loading would have been reported as a stale sheet claim"
+        ],
+        [
+          "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions",
+          "sort",
+          "prop"
+        ],
+        [
+          "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions",
+          "title",
+          "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions"
+        ],
+        [
+          "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)",
+          "sort",
+          "prop"
+        ],
+        [
+          "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)",
+          "supports",
+          "the llms selftest went from 73 planted cases to 81 and every new one was checked in both directions"
+        ],
+        [
+          "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)",
+          "tags",
+          "tested"
+        ],
+        [
+          "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)",
+          "title",
+          "with the dotted walk short-circuited three of the six path cases fail, and with the taxonomy collapsed the breakage case fails; with both restored it reads 81 planted case(s), 0 failure(s)"
+        ]
+      ],
+      "id": "2d6d39ecedfd8e6e"
+    },
+    {
+      "at": "2026-09-20T09:36:05.653034+00:00",
+      "after": "29d73cef550aa8cbf245b618d0e513869d8d22dc",
+      "did": "[{\"op\": \"status\", \"id\": \"instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint\", \"because\": \"this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared\", \"because\": \"the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace\", \"because\": \"superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly\", \"tags\": [\"measured\"], \"status\": \"abandoned\"}, {\"op\": \"status\", \"id\": \"read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause\", \"because\": \"the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "2d6d39ecedfd8e6e"
+      ],
+      "assert": [
+        [
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+          "sort",
+          "prop"
+        ],
+        [
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+          "supersedes",
+          "the two named branches did not fire, so a third caller empties the readers; marking the replace itself catches whichever it is, and pairing it with the refusal in one run orders them"
+        ],
+        [
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+          "supersedes",
+          "running in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit"
+        ],
+        [
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+          "supports",
+          {
+            "node": "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+            "status": "abandoned"
+          }
+        ],
+        [
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+          "tags",
+          "measured"
+        ],
+        [
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly",
+          "title",
+          "superseded before it ran: the tight-loop probe tests/prolog/probes/reference_load_race.pl reaches the failure in about a second and within a few hundred iterations, so a 40-run hunt was no longer the cheapest way to get the clearing call and the refusal into one trace, and the reflog above put them there directly"
+        ],
+        [
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+          "supersedes",
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first"
+        ],
+        [
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+          "supersedes",
+          "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit"
+        ],
+        [
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+          "supports",
+          {
+            "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+            "status": "done"
+          }
+        ],
+        [
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+          "tags",
+          "measured"
+        ],
+        [
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation",
+          "title",
+          "the reflog built for this, recording assert, row_retract and erase_ok against a notransact table keyed on the reference, produced the interleaving 5082 assert, 5103 row_retract, 5104 erase_ok, 5145 row_retract, which is what showed the SAME row being retracted twice and sent the hunt to cross-thread isolation"
+        ],
+        [
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+          "supersedes",
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken"
+        ],
+        [
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+          "supersedes",
+          "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors"
+        ],
+        [
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+          "supports",
+          {
+            "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+            "status": "done"
+          }
+        ],
+        [
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+          "tags",
+          "measured"
+        ],
+        [
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it",
+          "title",
+          "the shared cause was real and is fixed: metta.plt's failure was repaired earlier in this session and plunit now exits 0 over the whole suite; dev-typed's 158 findings are a separate systematic backlog of Type error: 'X' expected, found 'Y', not a consequence of metta.plt, so one check did settle it"
+        ],
+        [
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+          "supersedes",
+          "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level"
+        ],
+        [
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+          "supersedes",
+          "hunting over 40 runs in the background; engine/metta/reference_loading.pl and engine/metta/references.pl are instrumented, backups at ai-tmp/spec-repro/rl.keep and ai-tmp/spec-repro/refs.keep, and BOTH MUST BE RESTORED before any commit"
+        ],
+        [
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+          "supports",
+          {
+            "node": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+            "status": "done"
+          }
+        ],
+        [
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+          "tags",
+          "measured"
+        ],
+        [
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference",
+          "title",
+          "this is exactly the technique that found the root cause: det ( G -> true ; format(user_error, ...), fail ) markers named the failing goal at six successive levels, X6 the transaction, T2 metta_reference_changed/1, C2 metta_reference_refresh/0, R3 the typing-policy wrapper, M4 metta_reference_publish_source/2, S1 the empty-assoc transaction, and finally E1 erase/1 failing on a dead reference"
+        ],
+        [
+          "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
+          "status",
+          "done"
+        ],
+        [
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "status",
+          "done"
+        ],
+        [
+          "mark every zero-length replace and the refusal together, and hunt over 40 runs, so the clearing call and the refusal appear in one trace",
+          "status",
+          "abandoned"
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "d1b68e37b93bcd2a"
+    },
+    {
+      "at": "2026-09-20T09:36:38.421135+00:00",
+      "after": "29d73cef550aa8cbf245b618d0e513869d8d22dc",
+      "did": "[{\"op\": \"status\", \"id\": \"find WHY the row outlives its clause before writing any fix, by checking whether metta_reference_source_reader/3 and metta_reference_resolve_source/5 are under the same transactional regime and whether one Ref can appear in two rows\", \"because\": \"it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all\", \"because\": \"the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it\", \"because\": \"never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had\", \"tags\": [\"measured\"], \"status\": \"abandoned\"}, {\"op\": \"status\", \"id\": \"run every remaining lane one at a time, waiting for each to finish before starting the next\", \"because\": \"carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "d1b68e37b93bcd2a"
+      ],
+      "assert": [
+        [
+          "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone",
+          "supersedes",
+          "the memory is the binding constraint rather than the wall clock, so serialising is what makes each verdict about the tree instead of about the machine"
+        ],
+        [
+          "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone",
+          "supports",
+          {
+            "node": "run every remaining lane one at a time, waiting for each to finish before starting the next",
+            "status": "done"
+          }
+        ],
+        [
+          "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone",
+          "tags",
+          "measured"
+        ],
+        [
+          "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone",
+          "title",
+          "carried out: prolog, prolog-static, evidence, host-workarounds, lib-autoload, lib-surface and llms were each run alone and each exited 0, the 182-suite Prolog battery was run one swipl at a time, and the full GATE_ONLY gate is the last one, running alone"
+        ],
+        [
+          "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase",
+          "sort",
+          "prop"
+        ],
+        [
+          "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase",
+          "supersedes",
+          "a notransact mismatch would mean a rolled-back transaction restores the row while the physical erase stays done, which explains the intermittency exactly; a duplicate Ref would mean the forall erases the same clause twice, which explains it without any transaction at all, and the two want different fixes"
+        ],
+        [
+          "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase",
+          "supports",
+          {
+            "node": "find WHY the row outlives its clause before writing any fix, by checking whether metta_reference_source_reader/3 and metta_reference_resolve_source/5 are under the same transactional regime and whether one Ref can appear in two rows",
+            "status": "done"
+          }
+        ],
+        [
+          "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase",
+          "tags",
+          "tested"
+        ],
+        [
+          "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase",
+          "title",
+          "it answered, and both of its own candidates were wrong: neither predicate is '$notransact' so there is no regime mismatch, and the reflog showed ONE assert rather than a duplicate reference. The real answer was the third thing, cross-thread snapshot isolation, reproduced in 20 lines at ai-tmp/erase-probe/thread_isolation.pl and now pinned by host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase"
+        ],
+        [
+          "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had",
+          "sort",
+          "prop"
+        ],
+        [
+          "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had",
+          "supersedes",
+          "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs"
+        ],
+        [
+          "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had",
+          "supports",
+          {
+            "node": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+            "status": "abandoned"
+          }
+        ],
+        [
+          "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had",
+          "tags",
+          "measured"
+        ],
+        [
+          "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had",
+          "title",
+          "never needed: the tight-loop probe reaches the failure in about a second, so the race stopped being rare enough to need widening, and det failure-side markers turned out not to close it the way the earlier inline format/2 markers had"
+        ],
+        [
+          "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving",
+          "supersedes",
+          "four hunts show that adding goals to the path suppresses the race, so the next instrument must not add work where the window is; nb_setval in a goal that already runs, read at the refusal, adds nothing between the goals that race"
+        ],
+        [
+          "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving",
+          "supports",
+          {
+            "node": "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+            "status": "done"
+          }
+        ],
+        [
+          "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving",
+          "tags",
+          "measured"
+        ],
+        [
+          "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving",
+          "title",
+          "the reflog is this, built as a '$notransact' table keyed on the clause reference so a rollback could not erase the evidence, and printed at the failing erase rather than at the catch-all; it is what produced the 5082/5103/5104/5145 interleaving"
+        ],
+        [
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "status",
+          "abandoned"
+        ],
+        [
+          "find WHY the row outlives its clause before writing any fix, by checking whether metta_reference_source_reader/3 and metta_reference_resolve_source/5 are under the same transactional regime and whether one Ref can appear in two rows",
+          "status",
+          "done"
+        ],
+        [
+          "read the failing goal's state without adding goals to the path, by recording it in a non-backtrackable global from inside metta_reference_declare/3's existing goals and printing it at the catch-all",
+          "status",
+          "done"
+        ],
+        [
+          "run every remaining lane one at a time, waiting for each to finish before starting the next",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "d7fb9d23ccdfe75b"
+    },
+    {
+      "at": "2026-09-20T09:37:31.882066+00:00",
+      "after": "4f6e6dc351b6c088bda7d8f03d5432fa292a3e72",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind\", \"tags\": [\"tested\"], \"title\": \"the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly\", \"fields\": {}}]",
+      "parents": [
+        "d7fb9d23ccdfe75b"
+      ],
+      "assert": [
+        [
+          "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly",
+          "sort",
+          "prop"
+        ],
+        [
+          "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly",
+          "title",
+          "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly"
+        ],
+        [
+          "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind",
+          "sort",
+          "prop"
+        ],
+        [
+          "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind",
+          "supports",
+          "the dotted resolver's exception taxonomy is now covered in all three branches: absent submodule, a module whose own import names a missing dependency, and a module raising ImportError directly"
+        ],
+        [
+          "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind",
+          "tags",
+          "tested"
+        ],
+        [
+          "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind",
+          "title",
+          "the selftest reads 83 planted cases with 0 failures, and collapsing the discrimination to a bare except ImportError fails all three; the third needed a module inside the real package, planted at metta/_selftest_broken_unit.py and removed in a finally, and no file is left behind"
+        ]
+      ],
+      "id": "d814e785024e8660"
+    },
+    {
+      "at": "2026-09-20T09:48:56.710252+00:00",
+      "after": "3bc2528ddc77407314cae623c310b90b9484b39c",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well\", \"tags\": [\"measured\"], \"title\": \"my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup\", \"tags\": [\"tested\"], \"title\": \"the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree\", \"fields\": {}}]",
+      "parents": [
+        "d814e785024e8660"
+      ],
+      "assert": [
+        [
+          "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well",
+          "sort",
+          "prop"
+        ],
+        [
+          "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well",
+          "supports",
+          "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__"
+        ],
+        [
+          "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well",
+          "tags",
+          "measured"
+        ],
+        [
+          "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well",
+          "title",
+          "found the stale _selftest_broken_unit.cpython-314.pyc after the run; a finally that removes the source does not remove the bytecode cache, and a parallel run would have raced the file as well"
+        ],
+        [
+          "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__",
+          "title",
+          "my first selftest for the ImportError branch polluted the shipped package and the pollution was real rather than theoretical: it wrote metta/_selftest_broken_unit.py, removed the .py in its finally, and left the .pyc behind in __pycache__"
+        ],
+        [
+          "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree",
+          "title",
+          "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree"
+        ],
+        [
+          "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup",
+          "sort",
+          "prop"
+        ],
+        [
+          "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup",
+          "supports",
+          "the repair was to make the resolver's root injectable rather than to clean up harder: dotted_findings takes the package it resolves against and derives the pattern root from it, so the selftest hands it a planted package and nothing is written into the tree"
+        ],
+        [
+          "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup",
+          "tags",
+          "tested"
+        ],
+        [
+          "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup",
+          "title",
+          "83 planted cases, 0 failures, all three taxonomy branches still fail when the discrimination is collapsed, the llms lane exits 0, and the name metta is now spelled once instead of in both the pattern and the lookup"
+        ]
+      ],
+      "id": "e2d937da26c69d7a"
     }
   ]
 }

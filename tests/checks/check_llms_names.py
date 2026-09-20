@@ -634,7 +634,10 @@ def _receivers(sheet: Path) -> tuple[dict[str, tuple[object, str]], list[str]]:
 #: edit=,` wraps mid-argument-list and was invisible to the span reading; a
 #: dotted path holds no whitespace, so the name alone is a safe anchor
 #: [measured 2026-09-20: the span form caught one planted path of two].
-_DOTTED = re.compile(r"`(metta(?:\.\w+){2,})")
+@cache
+def _dotted_pattern(root: str) -> re.Pattern[str]:
+    """Backticked paths into ROOT that go deeper than the one segment above."""
+    return re.compile(rf"`({re.escape(root)}(?:\.\w+){{2,}})")
 
 
 def _unreachable(package: object, segments: list[str]) -> str | None:
@@ -667,16 +670,25 @@ def _unreachable(package: object, segments: list[str]) -> str | None:
     return None
 
 
-def dotted_findings(sheet: Path, text: str) -> list[str]:
-    """Every dotted package path a sheet spells that no longer resolves."""
-    if sheet not in _PYTHON_DOCUMENTS:
-        return []
-    receivers, failure = _receivers(sheet)
-    if failure:
-        return failure
-    package, _label = receivers["metta"]
+def dotted_findings(sheet: Path, text: str, package: object | None = None) -> list[str]:
+    """Every dotted package path a sheet spells that no longer resolves.
+
+    `package` is the root to resolve against and defaults to the live metta
+    package. It is a parameter so a caller can inject a planted one: the
+    selftest needs a module that raises while importing, and writing that into
+    the shipped tree would pollute it and race a parallel run. The pattern
+    derives its root from whatever package it is handed, so nothing here spells
+    the name twice.
+    """
+    if package is None:
+        if sheet not in _PYTHON_DOCUMENTS:
+            return []
+        receivers, failure = _receivers(sheet)
+        if failure:
+            return failure
+        package, _label = receivers["metta"]
     findings: list[str] = []
-    for match in _DOTTED.finditer(text):
+    for match in _dotted_pattern(getattr(package, "__name__", "metta")).finditer(text):
         token = match.group(1)
         try:
             missing = _unreachable(package, token.split(".")[1:])
