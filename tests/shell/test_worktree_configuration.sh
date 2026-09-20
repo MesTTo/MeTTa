@@ -65,7 +65,7 @@ git -C "$project_dir" worktree add --quiet -b "$branch" "$tree"
 # lib/ was empty -- which the probe reported as the backend being present,
 # because an empty answer is not `absent`
 # [measured 2026-09-21: the unmuted probe answers `source_sink
-# '../lib/lib_memo/lib_memo' does not exist` four times; commit=WORKTREE].
+# '../lib/lib_memo/lib_memo' does not exist` four times; commit=c6ed562a1a6f964aba906206f2558489b107dc24].
 bounded sh "$tree/tools/components.sh" >/dev/null 2>&1 ||
     { echo "FAIL: the probe worktree's components could not be checked out" >&2; exit 1; }
 

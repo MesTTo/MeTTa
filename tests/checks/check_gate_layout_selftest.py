@@ -11,12 +11,12 @@ is what the agreement case here does.
 Assumes: a checkout of this repository with the drivers in place.
 Guarantees:
   - every driver `gate_layout` names resolves in the tree [tested: this file;
-    commit=WORKTREE]
+    commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - every value is relative, so joining it onto a fixture root plants the
-    shape the repository has [tested: this file; commit=WORKTREE]
+    shape the repository has [tested: this file; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - `artifacts.CHECK_SH` and `gate_layout.CHECK` are the same path, so the
     generator and the checkers cannot disagree about where the driver lives
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: run against a tree whose drivers have not been built or checked
     out, which it reports as a missing driver rather than passing.
 """

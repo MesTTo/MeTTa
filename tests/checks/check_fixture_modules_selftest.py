@@ -9,8 +9,8 @@ that matters in practice: the entry each fixture actually copies must reach
 Assumes: a writable scratch directory under `ai-tmp/`.
 Guarantees:
   - transitive siblings are reached, and a name that is not a file beside the
-    source is dropped [tested: this file; commit=WORKTREE]
-  - an import cycle terminates [tested: this file; commit=WORKTREE]
+    source is dropped [tested: this file; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
+  - an import cycle terminates [tested: this file; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: a checker reaches a module without an import statement naming it;
     that is outside what reading the source can decide and the module says so.
 """

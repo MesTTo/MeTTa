@@ -317,7 +317,7 @@ def _the_roster_and_the_resolver_agree(roster: list[Member], root: Path) -> list
     # in `tool.uv.sources`", so the earlier reading here -- that nothing may
     # demand it be declared -- was right about this rule and wrong about uv
     # [measured 2026-09-21: the removal probed in a battery worktree at
-    # 358c8dc15; commit=WORKTREE]
+    # 358c8dc15; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
     # [tested: tests/checks/check_layering_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb].
     allowed = named | {_canonical(manifest.get("project", {}).get("name", ""))}
     return [

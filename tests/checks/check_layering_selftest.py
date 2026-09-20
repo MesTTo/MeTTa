@@ -307,7 +307,7 @@ def main() -> int:
         # occur in, so the lane ran green here for as long as it ran red on the
         # repository [measured 2026-09-21: `sh tools/check.sh layering` at
         # 358c8dc15 reported one finding while `uv lock --offline --check`
-        # exited 0 on the same tree; commit=WORKTREE].
+        # exited 0 on the same tree; commit=c6ed562a1a6f964aba906206f2558489b107dc24].
         found = _reported(
             scratch,
             "pyproject.toml",

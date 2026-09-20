@@ -10,14 +10,14 @@ planted defect is the shape this whole session kept finding.
 Assumes: run inside a checkout.
 Guarantees:
   - a suffix inside the command substitution is read
-    [tested: tests/checks/check_script_references_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_script_references_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - a suffix written AFTER the closing paren is read, which is the shape
     engine/test.sh uses and which one version missed by a directory
-    [tested: tests/checks/check_script_references_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_script_references_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - a variable the file does not assign is left alone rather than guessed at
-    [tested: tests/checks/check_script_references_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_script_references_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - a tail that resolves is not reported, and one that does not is
-    [tested: tests/checks/check_script_references_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_script_references_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
   To Do: None

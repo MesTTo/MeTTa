@@ -14,7 +14,7 @@
     `cannot open test.sh`, `cannot open .../bounded.sh` and
     `FileNotFoundError: .../check.sh` signatures; the three at HEAD are
     artifact-sync-selftest, scratch-retention and spec-status-selftest, each
-    exiting 1 before this module existed and 0 after; commit=WORKTREE].
+    exiting 1 before this module existed and 0 after; commit=c6ed562a1a6f964aba906206f2558489b107dc24].
 
     A path check cannot close that: a planted tree names nothing in the
     repository, so a rule over literal repository paths sees a fixture as
@@ -29,10 +29,10 @@ Guarantees:
   - `CHECK`, `TEST` and `BOUNDED` are the three root gate drivers, in the
     spelling `tests/checks/evidence_runners.py` refuses a tree for missing
     [tested: tests/checks/check_spec_status_selftest.py,
-    tests/checks/check_gate_scratch_selftest.py; commit=WORKTREE]
+    tests/checks/check_gate_scratch_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - every value is relative, so joining it onto a temporary directory plants
     the same shape the repository has [tested:
-    tests/checks/check_gate_layout_selftest.py; commit=WORKTREE]
+    tests/checks/check_gate_layout_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: a component's own runner is wanted; those are per-component and
     `evidence_runners.RUNNERS` derives them from the component roster rather
     than listing them here.

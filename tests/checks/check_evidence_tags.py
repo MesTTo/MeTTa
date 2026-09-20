@@ -359,7 +359,7 @@ CLAIM_SOURCES = (
     # 2026-09-21: pin_provenance reported tools/battery.sh as "OUTSIDE the
     # evidence gate's globs, so nothing reads this file's claims and nothing
     # would ever resolve them", the same way metta_py.py was found;
-    # commit=WORKTREE].
+    # commit=c6ed562a1a6f964aba906206f2558489b107dc24].
     "tools/*.sh",
     "engine/*.sh",
     "extensions/*/*.sh",

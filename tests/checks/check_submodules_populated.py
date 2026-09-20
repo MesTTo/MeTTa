@@ -21,7 +21,7 @@ Guarantees:
   - a workflow step that runs `actions/checkout` without `submodules:` is reported, in both the
     `- uses:` and `- name:`/`uses:` shapes, while prose naming the action is not; a tree mounting
     nothing is silent here too [tested: tests/checks/check_submodules_populated_selftest.py;
-    commit=WORKTREE]
+    commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: run outside a git checkout, which it reports rather than passing.
 Open Obligations:
   To Do: None
@@ -111,7 +111,7 @@ def unpopulating_checkouts(root: Path) -> list[str]:
     failed that way, `report` included, whose own step is `|| true` and
     cannot fail [measured 2026-09-21: run 35521501467 failed 11 of 11 jobs,
     against 13 checkout steps across five workflows with no `submodules:`
-    between them; commit=WORKTREE].
+    between them; commit=c6ed562a1a6f964aba906206f2558489b107dc24].
 
     Read by indentation rather than through a YAML parser, because the
     property is whether one key appears in one block: `pyyaml` is not a

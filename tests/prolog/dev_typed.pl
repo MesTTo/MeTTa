@@ -96,7 +96,7 @@
 %
 % What these clauses do, and what they do NOT do. Both sides are the same loop
 % over the same 182 suites, the only difference being this block
-% [measured 2026-09-21; commit=WORKTREE]:
+% [measured 2026-09-21; commit=c6ed562a1a6f964aba906206f2558489b107dc24]:
 %
 %                  passed   failed   type errors
 %     without        8615      363           150

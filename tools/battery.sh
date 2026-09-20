@@ -41,7 +41,7 @@
 #   battery.sh, battery_selftest.sh, bench.sh, bounded.sh, build.sh, check.sh,
 #   components.sh, run.sh, select-python.sh, test.sh and worktree.sh; the
 #   header said the first two were all of it and that the other two did not
-#   exist; commit=WORKTREE]. What this does is copy the working tree as it
+#   exist; commit=c6ed562a1a6f964aba906206f2558489b107dc24]. What this does is copy the working tree as it
 #   stands, which is how to ask what a gate says about the tree you are
 #   editing right now, uncommitted state included.
 

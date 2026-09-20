@@ -24,13 +24,13 @@ Assumes: every module a copied checker needs from beside it is reached by a
 Guarantees:
   - the answer contains every entry name that exists, and every sibling
     reachable from one transitively [tested:
-    tests/checks/check_fixture_modules_selftest.py; commit=WORKTREE]
+    tests/checks/check_fixture_modules_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - an import cycle terminates, because a name already answered is not
     followed again [tested: tests/checks/check_fixture_modules_selftest.py;
-    commit=WORKTREE]
+    commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - a name that is not a file beside the source is dropped rather than raising,
     so a stdlib or third-party import never reaches a fixture tree [tested:
-    tests/checks/check_fixture_modules_selftest.py; commit=WORKTREE]
+    tests/checks/check_fixture_modules_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: a checker reaches a module by a path the import statement does not
     name, such as `importlib.import_module(variable)` or a `sys.path` entry
     outside `tests/checks/`; those stay the caller's to copy.
