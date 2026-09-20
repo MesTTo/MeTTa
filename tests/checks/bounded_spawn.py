@@ -38,7 +38,7 @@ import os
 from pathlib import Path
 
 #: The repository's one bound. Every runner in this tree reaches the same file.
-BOUNDED = Path(__file__).resolve().parents[2] / "bounded.sh"
+BOUNDED = Path(__file__).resolve().parents[2] / "tools" / "bounded.sh"
 
 #: How far ABOVE a caller's own `timeout=` the child's ceiling sits. The
 #: caller must still be the one that gives up first, so its

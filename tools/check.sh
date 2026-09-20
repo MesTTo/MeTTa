@@ -352,7 +352,7 @@ for component in "$HERE/engine" \
         # and the C writer gate every lane below. Everything else degrades to a
         # slower or absent configuration its own lanes already report on.
         if [ "$name" = engine ]; then
-            echo "error: engine/reader.c or engine/writer.c failed to build; the C reader and writer gate every lane" >&2
+            echo "error: engine/c/reader.c or engine/c/writer.c failed to build; the C reader and writer gate every lane" >&2
             exit 1
         fi
         echo "note: $name failed to build; its lanes report against that" >&2

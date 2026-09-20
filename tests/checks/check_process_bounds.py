@@ -530,8 +530,10 @@ def runners() -> list[Path]:
                 REPO / "tools" / "select-python.sh",
                 REPO / "tests" / "checks" / "gate_scratch.sh"}
     found = [
-        *(REPO / name for name in ("test.sh", "run.sh", "bench.sh", "build.sh",
-                                   "worktree.sh")),
+        # Derived rather than listed: the helper scripts live in tools/ and the
+        # set changes, so a hand-written roster goes stale the next time one
+        # arrives. The excluded set below removes the ones that start nothing.
+        *sorted((REPO / "tools").glob("*.sh")),
         *sorted((REPO / "engine").glob("*.sh")),
         *sorted((REPO / "extensions").glob("*/*.sh")),
         *sorted((REPO / "extensions").glob("*/*/*.sh")),
@@ -783,7 +785,15 @@ def helper_defects(paths: list[Path], root: Path) -> list[str]:
                     f"    Move the definition above the first call."
                 )
                 break
-    driver = root / "check.sh"
+    # The top-level driver, wherever it sits. It moved into tools/, and a
+    # hard-coded root/check.sh stopped being a file, which made the check
+    # below pass without looking at anything while 18 lanes went unbounded.
+    # The selftest plants its own at the root of a fixture, so both are read
+    # out of the list this function was already given.
+    driver = next((path for path in paths
+                   if path.name == "check.sh"
+                   and path.parent in (root, root / "tools")),
+                  root / "check.sh")
     if driver.is_file() and not re.search(
         r"^in_py\(\)\s*\{[^}]*\bbounded\b",
         driver.read_text(encoding="utf-8"), re.MULTILINE

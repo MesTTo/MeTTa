@@ -17,6 +17,9 @@ set -eu
 
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 BATTERY="$HERE/battery.sh"
+# Every spawn goes through the repository's one bound, so a killed selftest
+# cannot leave a provision rsyncing with nothing holding its ceiling.
+bounded() { sh "$HERE/bounded.sh" "$@"; }
 FIXTURE=$(cd "$HERE/.." && pwd)/ai-tmp/battery-selftest
 INDEX=selftest
 failures=0
@@ -36,7 +39,7 @@ plant_source() {
 # rather than only that something did.
 expect() {
     what=$1; want=$2; shift 2
-    if BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" verify "$INDEX" > "$FIXTURE/out" 2>&1
+    if BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" verify "$INDEX" > "$FIXTURE/out" 2>&1
     then got=0; else got=$?; fi
     if [ "$got" -eq 0 ] && [ "$want" -eq 0 ]; then
         echo "  ok   $what: accepted, as it should be"
@@ -54,10 +57,10 @@ expect() {
 }
 
 plant_source
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 # Asked for rather than recomputed: a second copy of the layout rule here is a
 # second thing to keep in step, and it was wrong the first time.
-TREE=$(sh "$BATTERY" path "$INDEX")
+TREE=$(bounded sh "$BATTERY" path "$INDEX")
 
 echo "battery selftest:"
 expect "an untouched copy" 0
@@ -65,18 +68,18 @@ expect "an untouched copy" 0
 printf 'CHANGED\n' > "$TREE/package/inner/deep.txt"
 expect "a modified file" 1 "deep.txt"
 
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 printf 'stray\n' > "$TREE/package/extra.txt"
 expect "a file the source does not have" 1 "extra.txt"
 
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 rm "$TREE/package/mid.txt"
 expect "a file the battery is missing" 1 "mid.txt"
 
 # The regression this tool was born with: provision writes ai-tmp/ into the
 # tree it has just copied, which moves the parent directory's mtime. Before -O
 # that read as drift, so the checker failed on its own writes.
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 mkdir -p "$TREE/ai-tmp" "$TREE/package/__pycache__"
 printf 'log\n' > "$TREE/ai-tmp/run.log"
 printf 'bytes\n' > "$TREE/package/__pycache__/mid.pyc"
@@ -92,11 +95,11 @@ expect "excluded scratch written into the battery" 0
 # index unusable [measured 2026-09-20 on wt-battery-6], and SILENTLY at this
 # fixture's depth, exit 0 with the directory still there. The quiet one is
 # why this asserts the tree rather than the status.
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 mkdir -p "$TREE/repos/fixture_lib/.git/refs/heads"
 printf 'ref: refs/heads/master\n' > "$TREE/repos/fixture_lib/.git/HEAD"
 printf 'built\n' > "$TREE/repos/fixture_lib/setup.py"
-if BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX" \
+if BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX" \
        > "$FIXTURE/out" 2>&1
 then
     if [ -e "$TREE/repos" ]; then
@@ -119,10 +122,10 @@ expect "the tree that provision has just cleared" 0
 # `.mutmut/` became permanent [measured 2026-09-20]. Naming .mutmut in the
 # exclusions would fix that directory and strand on the next tool's scratch,
 # so the caches are swept instead and this is what says so.
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 mkdir -p "$TREE/scratch/inner/__pycache__"
 printf 'bytes\n' > "$TREE/scratch/inner/__pycache__/mid.pyc"
-if BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX" \
+if BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX" \
        > "$FIXTURE/out" 2>&1
 then
     if [ -e "$TREE/scratch" ]; then
@@ -151,7 +154,7 @@ mkdir -p "$REPO"
     git add top.txt
     git -c user.email=selftest@example.invalid -c user.name=selftest \
         commit -qm "fixture" ) > "$FIXTURE/out" 2>&1
-BATTERY_SOURCE="$REPO" sh "$BATTERY" provision "$INDEX" > "$FIXTURE/out" 2>&1
+BATTERY_SOURCE="$REPO" bounded sh "$BATTERY" provision "$INDEX" > "$FIXTURE/out" 2>&1
 answered=$(git -C "$TREE" rev-parse --show-toplevel 2>/dev/null)
 if [ "$answered" = "$(cd "$TREE" && pwd -P)" ]; then
     echo "  ok   the battery answers git about itself, not about its parent"
@@ -170,7 +173,7 @@ rm -rf "$TREE/.git"
 # drift [measured 2026-09-20].
 mkdir -p "$FIXTURE/src/node_modules/pkg"
 printf 'dep\n' > "$FIXTURE/src/node_modules/pkg/index.js"
-BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 if [ -e "$TREE/node_modules/pkg/index.js" ]; then
     echo "  ok   an install directory: reachable from the battery"
 else

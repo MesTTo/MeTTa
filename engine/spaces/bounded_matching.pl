@@ -476,7 +476,7 @@ metta_prune_scan_ok_(All) :-
 %engine/bench.pl, three identical samples at each of a94f804c, b3753db7 and
 %046b0054; commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046].
 %
-%The answer is not to put unification back. engine/empty_prune.c asks the SAME
+%The answer is not to put unification back. engine/c/empty_prune.c asks the SAME
 %identity question in C: PL_get_atom compares an atom handle and answers false
 %for an attributed variable without touching it, so no hook can fire, and one
 %foreign call retires one inference where the walk retires n. A 10,000-element

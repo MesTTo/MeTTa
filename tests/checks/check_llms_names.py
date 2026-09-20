@@ -443,7 +443,7 @@ _COUNT_CLAIMS = (
     (
         "reader.c lines",
         re.compile(
-            r"\| `engine/\*\*/\*\.pl` \|[^\n]*?`engine/reader\.c`, "
+            r"\| `engine/\*\*/\*\.pl` \|[^\n]*?`engine/c/reader\.c`, "
             r"(?P<count>[\d,]+) lines"
         ),
         "reader_lines",
@@ -451,7 +451,7 @@ _COUNT_CLAIMS = (
     (
         "json_codec.c lines",
         re.compile(
-            r"\| `engine/\*\*/\*\.pl` \|[^\n]*?`engine/json_codec\.c`, "
+            r"\| `engine/\*\*/\*\.pl` \|[^\n]*?`engine/c/json_codec\.c`, "
             r"(?P<count>[\d,]+) lines"
         ),
         "json_codec_lines",
@@ -900,8 +900,8 @@ def source_counts(root: Path = REPO) -> dict[str, int]:
         "metta_units": len(list((root / "engine/metta").glob("*.pl"))),
         "translator_units": len(list((root / "engine/translator").glob("*.pl"))),
         "spaces_units": len(list((root / "engine/spaces").glob("*.pl"))),
-        "reader_lines": _line_count(root / "engine/reader.c"),
-        "json_codec_lines": _line_count(root / "engine/json_codec.c"),
+        "reader_lines": _line_count(root / "engine/c/reader.c"),
+        "json_codec_lines": _line_count(root / "engine/c/json_codec.c"),
         "extension_point_kinds": len(extension_kinds),
     }
     counts.update({f"extension_points_{kind}": count for kind, count in extension_kinds.items()})

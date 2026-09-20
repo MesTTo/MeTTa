@@ -83,7 +83,7 @@
 %   - parse_metta_source/2 consumes comments in its grammars without building a
 %     stripped source copy [measured: 7,736,802 versus 8,874,582 inferences for
 %     twenty parses of 48,786 codes, 2026-08-15].
-%   - parse_metta_source/2 dispatches to the C reader (engine/reader.c via
+%   - parse_metta_source/2 dispatches to the C reader (engine/c/reader.c via
 %     parser:metta_c_parse_source/4) when it is loaded and the shipped token
 %     classes are active, and parse_metta_source_prolog/2 stays the
 %     specification it is held to, variant-identical results over the corpus
@@ -1242,7 +1242,7 @@ parse_metta_source(S, ParsedForms) :-
     ).
 
 %The Prolog reader, which stays the specification the C reader in
-%engine/reader.c is held to: tests/prolog/suites/reader/reader_c.plt parses the whole
+%engine/c/reader.c is held to: tests/prolog/suites/reader/reader_c.plt parses the whole
 %example corpus and an adversarial battery through both and requires
 %variant-identical forms and identical error terms.
 parse_metta_source_prolog(S, ParsedForms) :-

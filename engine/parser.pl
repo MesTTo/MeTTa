@@ -696,7 +696,7 @@ swrite_mode('$metta_variable'(Index), _) --> !, "$_", { number_codes(Index, Cs) 
 %`true` reads back as the same boolean. The atom `'True'` remains unwritable as
 %a plain symbol for the same reason it always was, since its text would read
 %back as the boolean rather than as itself; metta_symbol_writable/1 below still
-%refuses it, as does symbol_writable() in engine/writer.c.
+%refuses it, as does symbol_writable() in engine/c/writer.c.
 %
 %This is upstream PeTTa's spelling, which is the arbiter on this branch
 %[source: PeTTa@ae66fa8 src/parser.pl:76-78 maps `True`/`False` on READ and
