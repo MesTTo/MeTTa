@@ -73,3 +73,6 @@ pypi.txt
 
 # Notes about the tools and environment this repository uses but does not own.
 ai-notes/
+
+# Catalog runtime state, written where a program that imports lib_package runs.
+catalog/

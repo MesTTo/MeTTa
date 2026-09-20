@@ -10602,6 +10602,87 @@
       "tags": [
         "measured"
       ]
+    },
+    "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described": {
+      "title": "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described",
+      "worth": 80,
+      "wanted": true
+    },
+    "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model": {
+      "title": "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model",
+      "supports": [
+        "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence": {
+      "title": "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence",
+      "supports": [
+        {
+          "node": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "status": "untried"
+        },
+        {
+          "node": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "relation": "creates",
+          "target": "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+        }
+      ]
+    },
+    "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index": {
+      "title": "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index",
+      "supports": [
+        {
+          "node": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README": {
+      "title": "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+    },
+    "measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus": {
+      "title": "measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus",
+      "supports": [
+        "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+      ]
+    },
+    "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy": {
+      "title": "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy",
+      "supports": [
+        {
+          "node": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "status": "untried"
+        },
+        {
+          "node": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "relation": "addresses",
+          "target": "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+        }
+      ]
+    },
+    "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail": {
+      "title": "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail",
+      "supports": [
+        {
+          "node": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -12111,6 +12192,22 @@
       "status": "done",
       "addresses": [
         "evidence_runners.gate_scripts() filtered its runner list by is_file(), so when check.sh and test.sh moved into tools/ the root driver left the tuple silently and every consumer went blind to the gate's own lanes"
+      ]
+    },
+    "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in": {
+      "title": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+      "effort": 3,
+      "status": "done",
+      "creates": [
+        "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+      ]
+    },
+    "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file": {
+      "title": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
       ]
     }
   },
@@ -48301,6 +48398,245 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "9c6952b8eb700838"
+    },
+    {
+      "at": "2026-09-20T14:00:00.085478+00:00",
+      "after": "63503421f70eccb868bc9c81682a744d7d963e6e",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model\", \"tags\": [\"user\"], \"title\": \"every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described\", \"fields\": {\"worth\": 80}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence\", \"tags\": [], \"title\": \"rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in\", \"fields\": {\"effort\": 3, \"consequences\": [\"every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described\"]}}, {\"op\": \"status\", \"id\": \"rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in\", \"because\": \"README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus\", \"tags\": [], \"title\": \"the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy\", \"tags\": [], \"title\": \"attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file\", \"fields\": {\"effort\": 1, \"addresses\": [\"the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README\"]}}, {\"op\": \"status\", \"id\": \"attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file\", \"because\": \"38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "9c6952b8eb700838"
+      ],
+      "assert": [
+        [
+          "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index",
+          "sort",
+          "prop"
+        ],
+        [
+          "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index",
+          "supersedes",
+          "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence"
+        ],
+        [
+          "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index",
+          "supports",
+          {
+            "node": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+            "status": "done"
+          }
+        ],
+        [
+          "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index",
+          "tags",
+          "tested"
+        ],
+        [
+          "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index",
+          "title",
+          "README.md is 1,111 lines and 52 fences against 804 and 21, with 33 metta and 13 python where it had 10 and 29; battery 1 exits 0 with 81 passing, and a further 38 gate the examples index"
+        ],
+        [
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described",
+          "sort",
+          "prop"
+        ],
+        [
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described",
+          "title",
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+        ],
+        [
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described",
+          "wanted",
+          true
+        ],
+        [
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described",
+          "worth",
+          80
+        ],
+        [
+          "measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus",
+          "supports",
+          "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+        ],
+        [
+          "measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus",
+          "title",
+          "measured: test_readme.py:27 binds README to workspace()/'README.md' and nothing else reads a fence; 37 hand-copied snippets would have been an ungated corpus"
+        ],
+        [
+          "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence",
+          "sort",
+          "prop"
+        ],
+        [
+          "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence",
+          "supports",
+          {
+            "node": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+            "status": "untried"
+          }
+        ],
+        [
+          "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence",
+          "supports",
+          {
+            "node": "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+            "relation": "creates",
+            "target": "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+          }
+        ],
+        [
+          "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence",
+          "title",
+          "the corpus is 360 gate-run programs, so quoting it costs nothing to maintain and cannot go stale; sweeping every one in its own subprocess said which 343 run standalone, and only those are eligible for a fence"
+        ],
+        [
+          "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README",
+          "sort",
+          "prop"
+        ],
+        [
+          "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README",
+          "title",
+          "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+        ],
+        [
+          "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy",
+          "supports",
+          {
+            "node": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+            "status": "untried"
+          }
+        ],
+        [
+          "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy",
+          "supports",
+          {
+            "node": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+            "relation": "addresses",
+            "target": "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+          }
+        ],
+        [
+          "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy",
+          "title",
+          "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy"
+        ],
+        [
+          "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model",
+          "sort",
+          "prop"
+        ],
+        [
+          "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model",
+          "supports",
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+        ],
+        [
+          "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model",
+          "tags",
+          "user"
+        ],
+        [
+          "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model",
+          "title",
+          "user 2026-09-20: 'teh readme is serving as a showcase, that is the point, showcasing everything', 'it should just SHOW SHOW SHOW', and the cmetta README named as the model"
+        ],
+        [
+          "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail",
+          "sort",
+          "prop"
+        ],
+        [
+          "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail",
+          "supersedes",
+          "the fences are excerpts so they cannot be executed the way the root README's blocks are; line membership is the weaker claim that still catches a renamed door, a reworded call or an invented keyword argument, which is what a reader would copy"
+        ],
+        [
+          "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail",
+          "supports",
+          {
+            "node": "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+            "status": "done"
+          }
+        ],
+        [
+          "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail",
+          "tags",
+          "tested"
+        ],
+        [
+          "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail",
+          "title",
+          "38 pass, and an invented line planted in the first fence turns that example's case red and names the file, so the check can fail"
+        ],
+        [
+          "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "sort",
+          "approach"
+        ],
+        [
+          "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "addresses",
+          "the examples index quoted 37 programs and nothing checked the quotes, because test_readme.py reads only the root README"
+        ],
+        [
+          "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "effort",
+          1
+        ],
+        [
+          "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "status",
+          "done"
+        ],
+        [
+          "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file",
+          "title",
+          "attribute every fence in the examples index with the example's repository-relative path and require each non-blank line to be a line of that file"
+        ],
+        [
+          "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "sort",
+          "approach"
+        ],
+        [
+          "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "creates",
+          "every repository's front page is a showcase: the architecture first, then every capability shown by a code block rather than described"
+        ],
+        [
+          "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "effort",
+          3
+        ],
+        [
+          "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "status",
+          "done"
+        ],
+        [
+          "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in",
+          "title",
+          "rebuild the root README around the architecture and fill it from a bank of corpus examples each verified to run standalone before it goes in"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "20f9d62686f9b8bd"
     }
   ]
 }
