@@ -13191,6 +13191,279 @@
           "target": "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
         }
       ]
+    },
+    "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy": {
+      "title": "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy"
+    },
+    "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py": {
+      "title": "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py",
+      "supports": [
+        "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations": {
+      "title": "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations"
+    },
+    "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check": {
+      "title": "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check",
+      "supports": [
+        "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes": {
+      "title": "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes"
+    },
+    "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches": {
+      "title": "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches",
+      "supports": [
+        "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space": {
+      "title": "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space"
+    },
+    "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self": {
+      "title": "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self",
+      "supports": [
+        "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as": {
+      "title": "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as"
+    },
+    "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>": {
+      "title": "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>",
+      "supports": [
+        "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced": {
+      "title": "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced",
+      "attacks": [
+        "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs": {
+      "title": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary": {
+      "title": "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary",
+      "supports": [
+        "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+        {
+          "node": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends": {
+      "title": "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends",
+      "supports": [
+        {
+          "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "status": "untried"
+        },
+        {
+          "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "relation": "addresses",
+          "target": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+        }
+      ]
+    },
+    "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power": {
+      "title": "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power"
+    },
+    "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool": {
+      "title": "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool",
+      "supports": [
+        "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case": {
+      "title": "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+      "blocks": [
+        "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+      ]
+    },
+    "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing": {
+      "title": "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing",
+      "supports": [
+        "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+        {
+          "node": "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+          "relation": "blocks",
+          "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first": {
+      "title": "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first"
+    },
+    "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107": {
+      "title": "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107",
+      "supports": [
+        "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility": {
+      "title": "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility"
+    },
+    "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus": {
+      "title": "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus",
+      "supports": [
+        "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted": {
+      "title": "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted",
+      "supports": [
+        {
+          "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "status": "untried"
+        },
+        {
+          "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "relation": "addresses",
+          "target": "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
+        }
+      ]
+    },
+    "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked": {
+      "title": "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked",
+      "supports": [
+        {
+          "node": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "status": "untried"
+        },
+        {
+          "node": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "relation": "addresses",
+          "target": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+        }
+      ]
+    },
+    "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit": {
+      "title": "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit",
+      "supports": [
+        {
+          "node": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2": {
+      "title": "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2"
+    },
+    "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state": {
+      "title": "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state",
+      "supports": [
+        "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state": {
+      "title": "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state",
+      "supports": [
+        {
+          "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends"
+      ]
+    },
+    "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held": {
+      "title": "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held",
+      "supports": [
+        {
+          "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted"
+      ]
+    },
+    "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it": {
+      "title": "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it"
+    },
+    "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']": {
+      "title": "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']",
+      "supports": [
+        "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19": {
+      "title": "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19",
+      "worth": 80,
+      "wanted": true
+    },
+    "agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to": {
+      "title": "agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to",
+      "supports": [
+        "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19"
+      ]
+    },
+    "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation": {
+      "title": "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation"
+    },
+    "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked": {
+      "title": "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked",
+      "supports": [
+        "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -14935,6 +15208,30 @@
       "status": "untried",
       "addresses": [
         "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
+      ]
+    },
+    "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list": {
+      "title": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+      "effort": 1,
+      "status": "active",
+      "addresses": [
+        "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+      ]
+    },
+    "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising": {
+      "title": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+      "effort": 2,
+      "status": "active",
+      "addresses": [
+        "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
+      ]
+    },
+    "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees": {
+      "title": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+      "effort": 1,
+      "status": "unwanted",
+      "addresses": [
+        "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
       ]
     }
   },
@@ -58356,6 +58653,785 @@
         ]
       ],
       "id": "ada62d6e59f03954"
+    },
+    {
+      "at": "2026-09-20T20:10:21.932816+00:00",
+      "after": "fe9e26b2772182e514a4a630f148f5aa846030d0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py\", \"tags\": [\"measured\"], \"title\": \"the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check\", \"tags\": [\"source\"], \"title\": \"the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches\", \"tags\": [\"measured\"], \"title\": \"the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self\", \"tags\": [\"measured\"], \"title\": \"the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>\", \"tags\": [\"measured\"], \"title\": \"the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as\", \"fields\": {}}]",
+      "parents": [
+        "ada62d6e59f03954"
+      ],
+      "assert": [
+        [
+          "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches",
+          "supports",
+          "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes"
+        ],
+        [
+          "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches",
+          "title",
+          "ai-tmp/ai-probe-redis.py measured all four facts in one process; library(redis) is present on this box and no server answers 127.0.0.1:6379, so the intended path is a MettaError the helper already catches"
+        ],
+        [
+          "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self",
+          "supports",
+          "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space"
+        ],
+        [
+          "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self",
+          "title",
+          "ai-tmp/ai-probe-self.py printed engine.self before and after space(), probe.metta.self and home.metta.self"
+        ],
+        [
+          "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py",
+          "supports",
+          "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy"
+        ],
+        [
+          "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py",
+          "title",
+          "counted from the lane log by finding phrase, and read against the tool's own --repin and --observe paths in extensions/python/tools/twin_coverage.py"
+        ],
+        [
+          "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>",
+          "sort",
+          "prop"
+        ],
+        [
+          "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>",
+          "supports",
+          "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as"
+        ],
+        [
+          "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>",
+          "tags",
+          "measured"
+        ],
+        [
+          "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>",
+          "title",
+          "diff -q reports both identical, and twin_for maps examples/<rest> to TWINS/<rest> while these sit at TWINS/examples/<rest>"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check",
+          "sort",
+          "prop"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check",
+          "supports",
+          "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check",
+          "tags",
+          "source"
+        ],
+        [
+          "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check",
+          "title",
+          "read at extensions/python/tools/twin_coverage.py around the repin branch and the --observe argument check"
+        ],
+        [
+          "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations",
+          "sort",
+          "prop"
+        ],
+        [
+          "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations",
+          "title",
+          "the point pins and the envelope pins are ORTHOGONAL knobs: --repin explicitly refuses an envelope budget with 'point re-pin does not apply; widen with --observe', and --observe requires at least ten full-lane observations"
+        ],
+        [
+          "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space",
+          "sort",
+          "prop"
+        ],
+        [
+          "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space",
+          "title",
+          "the redis twin's attached() assumes space.metta.self is the home, but engine.space(S.probe).metta.self is the probe space itself: engine.self is unchanged by space() (&pyspace_1 before and after), so space.metta is deliberately the engine as seen FROM that space"
+        ],
+        [
+          "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes",
+          "title",
+          "the twin that fails to run is a TWIN defect, not an engine defect and not the loader fix: the backing row registers redis-attach correctly (prolog redis-attach defined in [('lib_redis', 3)], arity/2 = [3]) and the lookup succeeds on the home space, failing only on the probe space the twin's attached() helper passes"
+        ],
+        [
+          "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy",
+          "title",
+          "the twins lane's 288 findings decompose into SIX kinds, not 288 cases: 249 point-pin overruns, 17 envelope/protocol mismatches, 6 declared overruns no longer needed, 2 stored-content divergences, 1 twin that fails to run, 2 orphan twins; each kind has one remedy"
+        ],
+        [
+          "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as",
+          "title",
+          "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as"
+        ]
+      ],
+      "id": "a3d685e95b4be95a"
+    },
+    {
+      "at": "2026-09-20T20:13:37.169952+00:00",
+      "after": "fe9e26b2772182e514a4a630f148f5aa846030d0",
+      "did": "[{\"op\": \"attack\", \"id\": \"the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as\", \"because\": \"they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced\", \"tags\": [\"measured\"]}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary\", \"tags\": [\"source\"], \"title\": \"orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends\", \"tags\": [], \"title\": \"enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list\", \"fields\": {\"effort\": 1, \"addresses\": [\"orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool\", \"tags\": [\"measured\"], \"title\": \"the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing\", \"tags\": [\"measured\"], \"title\": \"orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case\", \"fields\": {\"blocks\": [\"the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107\", \"tags\": [\"measured\"], \"title\": \"I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first\", \"fields\": {}}]",
+      "parents": [
+        "a3d685e95b4be95a"
+      ],
+      "assert": [
+        [
+          "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first",
+          "sort",
+          "prop"
+        ],
+        [
+          "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first",
+          "title",
+          "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first"
+        ],
+        [
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends",
+          "sort",
+          "prop"
+        ],
+        [
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends",
+          "supports",
+          {
+            "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+            "status": "untried"
+          }
+        ],
+        [
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends",
+          "supports",
+          {
+            "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+            "relation": "addresses",
+            "target": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+          }
+        ],
+        [
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends",
+          "title",
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends"
+        ],
+        [
+          "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool",
+          "supports",
+          "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power"
+        ],
+        [
+          "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool",
+          "title",
+          "ai-tmp/ai-check-orphans.py computed both sets against the live corpus without modifying the tool"
+        ],
+        [
+          "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary",
+          "supports",
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+        ],
+        [
+          "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary",
+          "supports",
+          {
+            "node": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary",
+          "tags",
+          "source"
+        ],
+        [
+          "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary",
+          "title",
+          "extensions/python/tools/twin_coverage.py's orphans() excludes only the literal name _fixtures, and a directory walk has no notion of a repository boundary"
+        ],
+        [
+          "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107",
+          "supports",
+          "I nearly shipped a patch that changed attached()'s signature while updating one of its FOUR call sites; the three in twin() pass `shared`, whose .metta.self is `shared` for the same reason, and they never fired only because available() raises first"
+        ],
+        [
+          "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107",
+          "tags",
+          "measured"
+        ],
+        [
+          "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107",
+          "title",
+          "grep for attached( in the redis twin names lines 23, 50, 63, 99 and 107"
+        ],
+        [
+          "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing",
+          "supports",
+          "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
+        ],
+        [
+          "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing",
+          "supports",
+          {
+            "node": "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+            "relation": "blocks",
+            "target": "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+          }
+        ],
+        [
+          "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing",
+          "tags",
+          "measured"
+        ],
+        [
+          "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing",
+          "title",
+          "grep for orphan in tests/checks/check_twin_coverage_selftest.py returns nothing"
+        ],
+        [
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+          "sort",
+          "prop"
+        ],
+        [
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs",
+          "title",
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+        ],
+        [
+          "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+          "sort",
+          "prop"
+        ],
+        [
+          "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+          "blocks",
+          "the twins lane exits 0 on examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta"
+        ],
+        [
+          "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case",
+          "title",
+          "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
+        ],
+        [
+          "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power",
+          "sort",
+          "prop"
+        ],
+        [
+          "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power",
+          "title",
+          "the git ls-files enumeration was validated before being applied: it answers 0 orphans where the walk answers 2, its 323 tracked twins are exactly the twinned-example count, and a genuinely orphaned twin stays tracked so the check keeps its power"
+        ],
+        [
+          "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced",
+          "sort",
+          "prop"
+        ],
+        [
+          "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced",
+          "attacks",
+          "the two orphan twins are byte-identical copies of examples/ch18-performance/18-03-algebra-carriers/*.py sitting one directory too deep inside the twins tree, under an extra examples/ segment no other twin has, so they are stray duplicates from a move rather than the content decision they were previously recorded as"
+        ],
+        [
+          "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced",
+          "tags",
+          "measured"
+        ],
+        [
+          "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced",
+          "title",
+          "they are not stray copies at all: git ls-files in the twins repo answers a bare gitlink for examples/, so the corpus is MOUNTED there as a submodule by commit 5481c831, and the files are that second repository's own examples rather than anything misplaced"
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "sort",
+          "approach"
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "addresses",
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "effort",
+          1
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "status",
+          "untried"
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "title",
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list"
+        ]
+      ],
+      "id": "51493ae8d7581802"
+    },
+    {
+      "at": "2026-09-20T20:16:05.749076+00:00",
+      "after": "fe9e26b2772182e514a4a630f148f5aa846030d0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus\", \"tags\": [\"measured\"], \"title\": \"bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted\", \"tags\": [], \"title\": \"give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising\", \"fields\": {\"effort\": 2, \"addresses\": [\"orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case\"]}}]",
+      "parents": [
+        "51493ae8d7581802"
+      ],
+      "assert": [
+        [
+          "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility",
+          "sort",
+          "prop"
+        ],
+        [
+          "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility",
+          "title",
+          "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility"
+        ],
+        [
+          "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus",
+          "supports",
+          "bare git ls-files is CORRECT for orphans() even though the many-repo journal warns it stops at submodules and another helper passes --recurse-submodules: that warning is about enumerating every component's files, while orphans() asks which files the TWINS repository owns, and a component mounted inside it is a different repository's responsibility"
+        ],
+        [
+          "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus",
+          "title",
+          "measured rather than assumed: git ls-files '*.py' in the twins repo answers 323, exactly the twinned-example count the lane reports, and 0 under the mounted corpus"
+        ],
+        [
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted",
+          "sort",
+          "prop"
+        ],
+        [
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted",
+          "supports",
+          {
+            "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+            "status": "untried"
+          }
+        ],
+        [
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted",
+          "supports",
+          {
+            "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+            "relation": "addresses",
+            "target": "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
+          }
+        ],
+        [
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted",
+          "title",
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted"
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "sort",
+          "approach"
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "addresses",
+          "orphans() has no selftest: the twins selftest names it nowhere, so neither the current walk nor a replacement is held by a planted case"
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "effort",
+          2
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "status",
+          "untried"
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "title",
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising"
+        ]
+      ],
+      "id": "fb49c2eaad892f87"
+    },
+    {
+      "at": "2026-09-20T20:17:53.078283+00:00",
+      "after": "fe9e26b2772182e514a4a630f148f5aa846030d0",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked\", \"tags\": [], \"title\": \"reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees\", \"fields\": {\"effort\": 1, \"addresses\": [\"orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs\"]}}, {\"op\": \"status\", \"id\": \"reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees\", \"because\": \"it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit\", \"tags\": [\"source\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state\", \"tags\": [\"tested\"], \"title\": \"the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2\", \"fields\": {}}]",
+      "parents": [
+        "fb49c2eaad892f87"
+      ],
+      "assert": [
+        [
+          "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit",
+          "sort",
+          "prop"
+        ],
+        [
+          "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit",
+          "supersedes",
+          "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked"
+        ],
+        [
+          "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit",
+          "supports",
+          {
+            "node": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit",
+          "tags",
+          "source"
+        ],
+        [
+          "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit",
+          "title",
+          "it passes --recurse-submodules, which answers what ANY repository under a root owns where orphans() must ask what THIS repository owns; recursing would list the mounted corpus's examples again and restore the very defect. It also sits in tests/checks of the superproject while twin_coverage.py is in the python seat, which the layering lane governs. The rule is cited rather than restated, and the recursion trap is named in the comment because it is what a reader reaching for the shared helper would hit"
+        ],
+        [
+          "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state",
+          "supports",
+          "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2"
+        ],
+        [
+          "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state",
+          "tags",
+          "tested"
+        ],
+        [
+          "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state",
+          "title",
+          "the gate was running over the real tree at the time, so editing it would have returned a verdict about no particular state"
+        ],
+        [
+          "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2",
+          "sort",
+          "prop"
+        ],
+        [
+          "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2",
+          "title",
+          "the patch was proven against COPIES before being applied to the tree: both files compile after patching in ai-tmp/patchtest, and the orphan enumeration was computed against the live corpus beforehand, answering 0 where the walk answers 2"
+        ],
+        [
+          "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked",
+          "supports",
+          {
+            "node": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+            "status": "untried"
+          }
+        ],
+        [
+          "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked",
+          "supports",
+          {
+            "node": "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+            "relation": "addresses",
+            "target": "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+          }
+        ],
+        [
+          "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked",
+          "title",
+          "the repository should state a rule once, and that helper's docstring already says what the repository tracks is what it is responsible for, asked of git rather than walked"
+        ],
+        [
+          "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "sort",
+          "approach"
+        ],
+        [
+          "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "addresses",
+          "orphans() enumerates twins with TWINS.rglob('*.py'), which walks into the corpus submodule mounted inside the twins repository and reports that repository's own .py examples as twins of examples nothing runs"
+        ],
+        [
+          "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "effort",
+          1
+        ],
+        [
+          "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "status",
+          "unwanted"
+        ],
+        [
+          "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees",
+          "title",
+          "reuse tests/checks/evidence_runners.py:tracked/1 in orphans() instead of writing a second git ls-files call, since that helper already states the rule and handles planted trees"
+        ]
+      ],
+      "id": "d3f4700c4c11813e"
+    },
+    {
+      "at": "2026-09-20T20:18:10.893873+00:00",
+      "after": "fe9e26b2772182e514a4a630f148f5aa846030d0",
+      "did": "[{\"op\": \"status\", \"id\": \"enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list\", \"because\": \"the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state\", \"tags\": [], \"status\": \"active\"}, {\"op\": \"status\", \"id\": \"give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising\", \"because\": \"drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "d3f4700c4c11813e"
+      ],
+      "assert": [
+        [
+          "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held",
+          "sort",
+          "prop"
+        ],
+        [
+          "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held",
+          "supersedes",
+          "the twins selftest's own stated discipline is that a gate nobody has watched fail is a gate nobody knows the shape of, and orphan discovery is the one decision it never planted"
+        ],
+        [
+          "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held",
+          "supports",
+          {
+            "node": "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+            "status": "active"
+          }
+        ],
+        [
+          "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held",
+          "title",
+          "drafted in ai-tmp/ai-orphan-selftest.py against the suite's own plant-and-assert shape; it lands with the enumeration change because a guarantee nobody can watch fail is not held"
+        ],
+        [
+          "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state",
+          "sort",
+          "prop"
+        ],
+        [
+          "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state",
+          "supersedes",
+          "adding 'examples' beside '_fixtures' guards one spelling and leaves the next mounted component to repeat it; git already knows which files are this repository's, the codebase already uses that idiom in check_script_references.py, and it is strictly cheaper because the walk never descends"
+        ],
+        [
+          "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state",
+          "supports",
+          {
+            "node": "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+            "status": "active"
+          }
+        ],
+        [
+          "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state",
+          "title",
+          "the patch is written and proven against copies in ai-tmp/patchtest; it is held back only because a gate is running over the real tree and editing it mid-run would return a verdict about no particular state"
+        ],
+        [
+          "enumerate the twin set with git ls-files in the twins repository instead of walking its directory, so the submodule boundary is respected by construction rather than by a name in an exclusion list",
+          "status",
+          "active"
+        ],
+        [
+          "give orphans() a planted selftest in both directions: a tracked twin whose example the corpus does not run must be reported, and a file belonging to a repository mounted inside the twins tree must not, with the plant asserting a directory walk DOES reach the mounted file so the boundary is what the check is exercising",
+          "status",
+          "active"
+        ]
+      ],
+      "id": "415ef0a2526a90c0"
+    },
+    {
+      "at": "2026-09-20T20:19:34.153389+00:00",
+      "after": "fe9e26b2772182e514a4a630f148f5aa846030d0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']\", \"tags\": [\"tested\"], \"title\": \"the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it\", \"fields\": {}}, {\"op\": \"add-goal\", \"id\": null, \"because\": \"agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to\", \"tags\": [], \"title\": \"the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19\", \"fields\": {\"worth\": 80}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked\", \"tags\": [\"source\"], \"title\": \"the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation\", \"fields\": {}}]",
+      "parents": [
+        "415ef0a2526a90c0"
+      ],
+      "assert": [
+        [
+          "agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to",
+          "sort",
+          "prop"
+        ],
+        [
+          "agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to",
+          "supports",
+          "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19"
+        ],
+        [
+          "agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to",
+          "title",
+          "agenticmind plan reported the tree unsatisfiable with g1 stuck and i3 unhandled, which surfaced a prior session's unresolved thread that nothing in this session was attached to"
+        ],
+        [
+          "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']",
+          "supports",
+          "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it"
+        ],
+        [
+          "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']",
+          "tags",
+          "tested"
+        ],
+        [
+          "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']",
+          "title",
+          "ai-tmp/ai-try-orphan-selftest.py imported twin_coverage from ai-tmp/patchtest and printed reported=['02-gone.py'] against walked=['01-real.py','02-gone.py','03-foreign.py']"
+        ],
+        [
+          "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked",
+          "supports",
+          "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation"
+        ],
+        [
+          "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked",
+          "tags",
+          "source"
+        ],
+        [
+          "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked",
+          "title",
+          "grep found run GATE door-order pointing at extensions/python/tools/doororder.py, and the lane had not yet appeared in the log when checked"
+        ],
+        [
+          "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation",
+          "title",
+          "the door-order lane IS inside the gate currently running, at tools/check.sh:904, so this run reports on g1 directly rather than needing a separate investigation"
+        ],
+        [
+          "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19",
+          "title",
+          "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19"
+        ],
+        [
+          "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19",
+          "wanted",
+          true
+        ],
+        [
+          "the door-order lane and test_door_rows.py both pass, which the record has carried as stuck since 2026-09-19",
+          "worth",
+          80
+        ],
+        [
+          "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it",
+          "title",
+          "the orphan selftest was proven GREEN against the PATCHED copy before either change touched the tree, and its plant discriminates in both directions: the tracked twin whose example does not exist is reported, the tracked twin whose example does exist is not, and the mounted repository's file is not reported although the assertion confirms a directory walk DOES reach it"
+        ]
+      ],
+      "id": "3b32f84fd4d6af7d"
     }
   ]
 }

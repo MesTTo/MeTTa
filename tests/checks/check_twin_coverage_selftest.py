@@ -43,6 +43,7 @@ Decides: the plants are written into scratch rather than committed under
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -276,6 +277,77 @@ def capability_failures() -> list[str]:
     return failures
 
 
+def _git(where: Path, *arguments: str) -> None:
+    """One git command in a planted tree, identity supplied so a commit lands."""
+    subprocess.run(
+        ["git", "-C", str(where),
+         "-c", "user.name=selftest", "-c", "user.email=selftest@example.invalid",
+         *arguments],
+        check=True, capture_output=True, text=True,
+    )
+
+
+def orphan_failures() -> list[str]:
+    """A tracked twin the corpus does not run is reported; a file belonging to a repository mounted inside the twins tree is not.
+
+    The corpus IS mounted inside the twins repository, so a directory walk
+    reached a second repository and called its examples twins of examples
+    nothing runs. The plant is that shape rather than that case: a twins
+    repository holding one live twin, one whose example does not exist, and a
+    mounted repository of its own. The walk assertion is why this proves
+    something -- it confirms the foreign file is reachable by walking, so a
+    silent answer means the boundary is what decided and not an empty tree.
+    """
+    failures = []
+    with tempfile.TemporaryDirectory(prefix="metta-twins-orphan-") as directory:
+        root = Path(directory)
+        (root / "examples" / "ch00").mkdir(parents=True)
+        (root / "examples" / "ch00" / "01-real.metta").write_text(
+            "!(test 1 1)\n", encoding="utf-8")
+
+        twins = lane.twins_root(root)
+        (twins / "ch00").mkdir(parents=True)
+        for name in ("01-real.py", "02-gone.py"):
+            (twins / "ch00" / name).write_text("def twin(m):\n    pass\n", encoding="utf-8")
+        _git(twins, "init", "-q")
+
+        mounted = twins / "mounted"
+        (mounted / "ch00").mkdir(parents=True)
+        (mounted / "ch00" / "03-foreign.py").write_text(
+            "def twin(m):\n    pass\n", encoding="utf-8")
+        _git(mounted, "init", "-q")
+        _git(mounted, "add", "ch00/03-foreign.py")
+        _git(mounted, "commit", "-qm", "the mounted repository's own file")
+
+        _git(twins, "add", "ch00", "mounted")
+        _git(twins, "commit", "-qm", "two twins and a mounted repository")
+
+        reported = {path.name for path in lane.orphans(root)}
+        walked = {path.name for path in twins.rglob("*.py")}
+
+        if "02-gone.py" not in reported:
+            failures.append(
+                "a tracked twin whose example the corpus does not run was not "
+                f"reported as an orphan: {sorted(reported)}"
+            )
+        if "01-real.py" in reported:
+            failures.append(
+                "a twin whose example the corpus DOES run was reported as an "
+                f"orphan: {sorted(reported)}"
+            )
+        if "03-foreign.py" not in walked:
+            failures.append(
+                "the plant is wrong: a directory walk did not reach the mounted "
+                "repository, so a silent answer proves nothing about the boundary"
+            )
+        if "03-foreign.py" in reported:
+            failures.append(
+                "a file belonging to a repository mounted inside the twins tree "
+                f"was reported as an orphan twin: {sorted(reported)}"
+            )
+    return failures
+
+
 def main() -> int:
     """Plant every verdict the lane makes, and report the ones it missed."""
     failures = [
@@ -284,6 +356,7 @@ def main() -> int:
         *divergence_failures(),
         *overrun_failures(),
         *capability_failures(),
+        *orphan_failures(),
     ]
     for failure in failures:
         print(f"twins selftest: {failure}", file=sys.stderr)
@@ -293,8 +366,9 @@ def main() -> int:
         "twins selftest: a flipped assertion, a budget past its allowance in "
         "both directions, a stale and a wrong stored-content divergence, and "
         "an undeclared band overrun each fail the lane, a budget declared "
-        "where a capability is present stays uncompared where it is absent; "
-        "the honest copies of all four pass"
+        "where a capability is present stays uncompared where it is absent, "
+        "and a twin covering nothing is reported while a mounted repository's "
+        "own file is not; the honest copies of all four pass"
     )
     return 0
 
