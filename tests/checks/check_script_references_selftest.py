@@ -97,6 +97,19 @@ def main() -> int:
     pairs = checked.REFERENCE.findall('bounded() { sh "$HERE/tools/bounded.sh" "$@"; }')
     if pairs != [("HERE", BOUNDED)]:
         problems.append(f"the reference pattern read {pairs}")
+    # EMBEDDED in a larger quoted string, which is the shape the reaping lane
+    # writes: `WRAPPER="sh $ROOT/bounded.sh"`. The pattern used to require the
+    # quote immediately before the `$`, so the one file this check exists for
+    # was the one it could not see.
+    pairs = checked.REFERENCE.findall('WRAPPER="sh $ROOT/tools/bounded.sh"')
+    if pairs != [("ROOT", BOUNDED)]:
+        problems.append(f"an embedded reference read {pairs}")
+    # An environment prefix inside the command substitution, which is how a
+    # script neutralises CDPATH: without this the assignment did not match,
+    # the variable had no base, and every reference through it was skipped.
+    prefixed = 'ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)\n'
+    if not checked.bases(prefixed, root / "tests/shell/x.sh"):
+        problems.append("an assignment with a CDPATH= prefix was not read at all")
     problems += planted_tree()
     for problem in problems:
         print(f"  {problem}")

@@ -48,7 +48,16 @@ ROOT = next(parent for parent in Path(__file__).resolve().parents
 #: `HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)`, whose suffix is what
 #: separates a component's own root from the repository's.
 ASSIGNMENT = re.compile(
-    r'^(\w+)=\$\(\s*cd(?:\s+--)?\s+"?\$\(\s*dirname(?:\s+--)?\s+"\$0"\s*\)'
+    r'^(\w+)=\$\('
+    # An environment prefix inside the substitution, which is how a script
+    # neutralises CDPATH before cd: `ROOT=$(CDPATH= cd -- ...)`. Without this
+    # the assignment did not match at all, the variable had no base, and every
+    # reference through it was skipped as uncomputable rather than checked --
+    # which is how tests/shell/test_bounded_reaping.sh kept naming
+    # `$ROOT/bounded.sh` through the move into tools/ and failed all twelve of
+    # its cases [measured 2026-09-21; commit=WORKTREE].
+    r'(?:\w+=\S*\s+)*'
+    r'\s*cd(?:\s+--)?\s+"?\$\(\s*dirname(?:\s+--)?\s+"\$0"\s*\)'
     r'([^"\s]*)"?\s*&&\s*pwd\s*\)'
     # A second suffix position: engine/test.sh writes the `/..` AFTER the
     # closing paren, and reading only the inner one put $HERE a directory
@@ -56,8 +65,13 @@ ASSIGNMENT = re.compile(
     r'([^"\s;]*)',
     re.MULTILINE,
 )
-#: A reference through one of those variables.
-REFERENCE = re.compile(r'"\$\{?(\w+)\}?/([A-Za-z0-9_./-]+\.sh)"')
+#: A reference through one of those variables, ANYWHERE rather than as the
+#: whole of a quoted string. The pattern used to require the `"` immediately
+#: before the `$`, so `WRAPPER="sh $ROOT/bounded.sh"` -- the wrapper under test
+#: in the reaping lane -- was invisible to the one check written to find
+#: exactly that [measured 2026-09-21: the lane failed twelve of its thirteen
+#: cases while this passed; commit=WORKTREE].
+REFERENCE = re.compile(r'\$\{?(\w+)\}?/([A-Za-z0-9_./-]+\.sh)')
 
 
 def bases(text: str, path: Path) -> dict[str, Path]:
@@ -101,6 +115,11 @@ def findings(root: Path = ROOT) -> list[str]:
             continue
         known = bases(text, path)
         for number, line in enumerate(text.splitlines(), start=1):
+            # Prose, not a reference. The pattern no longer anchors on a quote,
+            # so a comment explaining where the helpers moved to would report
+            # itself; these files carry several such explanations.
+            if line.lstrip().startswith("#"):
+                continue
             for name, tail in REFERENCE.findall(line):
                 base = known.get(name)
                 if base is None or (base / tail).is_file():

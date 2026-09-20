@@ -64,7 +64,7 @@ trap 'rm -rf "$WORK"' EXIT HUP INT TERM
 if [ "$#" -gt 0 ]; then
     WRAPPER="$*"
 else
-    WRAPPER="sh $ROOT/bounded.sh"
+    WRAPPER="sh $ROOT/tools/bounded.sh"
 fi
 # An hour, so that a death inside the 20s window below is the owner link and
 # cannot be the deadline.
