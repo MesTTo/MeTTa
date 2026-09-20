@@ -162,6 +162,23 @@ fi
 git -C "$REPO" worktree remove --force "$TREE" > /dev/null 2>&1 || true
 rm -rf "$TREE/.git"
 
+# An install directory is excluded so a battery's own is not swept, which also
+# means one that never had it never gets it: the lane needing it then fails in
+# the battery and passes in the checkout. provision LINKS what the source has,
+# and the exclusion must protect a SYMLINK, which a pattern ending in `/` does
+# not match -- with one, verify reported the link it had just been given as
+# drift [measured 2026-09-20].
+mkdir -p "$FIXTURE/src/node_modules/pkg"
+printf 'dep\n' > "$FIXTURE/src/node_modules/pkg/index.js"
+BATTERY_SOURCE="$FIXTURE/src" sh "$BATTERY" provision "$INDEX"
+if [ -e "$TREE/node_modules/pkg/index.js" ]; then
+    echo "  ok   an install directory: reachable from the battery"
+else
+    echo "  FAIL an install directory: the battery cannot reach it"
+    failures=$((failures + 1))
+fi
+expect "the battery holding a linked install directory" 0
+
 rm -rf "$TREE"
 [ "$failures" -eq 0 ] || { echo "battery selftest: $failures case(s) failed"; exit 1; }
 echo "battery selftest: every planted drift was refused, no excluded write was,"

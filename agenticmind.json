@@ -5396,6 +5396,47 @@
       "tags": [
         "measured"
       ]
+    },
+    "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran": {
+      "title": "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+    },
+    "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory": {
+      "title": "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory",
+      "supports": [
+        "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing": {
+      "title": "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing",
+      "supports": [
+        {
+          "node": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "status": "untried"
+        },
+        {
+          "node": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "relation": "addresses",
+          "target": "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+        }
+      ]
+    },
+    "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored": {
+      "title": "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored",
+      "supports": [
+        {
+          "node": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -6291,6 +6332,14 @@
       "status": "done",
       "addresses": [
         "an install directory is excluded from the snapshot so a battery's own copy is not swept, which also means a battery that never had one never gets one, and a lane needing it fails there while passing in the checkout"
+      ]
+    },
+    "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory": {
+      "title": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
       ]
     }
   },
@@ -27429,6 +27478,127 @@
         ]
       ],
       "id": "ef03cb4d65934c69"
+    },
+    {
+      "at": "2026-09-20T00:38:06.962357+00:00",
+      "after": "06529883f3bb2115ce78479e1f274b95ba54a337",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory\", \"tags\": [\"measured\"], \"title\": \"the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing\", \"tags\": [], \"title\": \"drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory\", \"fields\": {\"effort\": 1, \"addresses\": [\"the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran\"]}}, {\"op\": \"status\", \"id\": \"drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory\", \"because\": \"verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "ef03cb4d65934c69"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory",
+          "supports",
+          "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+        ],
+        [
+          "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory",
+          "title",
+          "measured 2026-09-20: a whole-gate run stopped immediately with 'battery 7 is NOT a copy ... *deleting extensions/node/node_modules', and the battery held that path as a symlink where the source holds a directory"
+        ],
+        [
+          "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran",
+          "title",
+          "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+        ],
+        [
+          "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing",
+          "supports",
+          {
+            "node": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing",
+          "supports",
+          {
+            "node": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+            "relation": "addresses",
+            "target": "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+          }
+        ],
+        [
+          "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing",
+          "title",
+          "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing"
+        ],
+        [
+          "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored",
+          "sort",
+          "prop"
+        ],
+        [
+          "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored",
+          "supersedes",
+          "the two halves have to agree about what an install directory IS, and provisioning places a link where the source has a directory, so a pattern that only matches directories protects the wrong thing"
+        ],
+        [
+          "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored",
+          "supports",
+          {
+            "node": "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+            "status": "done"
+          }
+        ],
+        [
+          "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored",
+          "tags",
+          "tested"
+        ],
+        [
+          "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored",
+          "title",
+          "verify reports only the edited tool itself, which a re-provision resolves, where it had reported the link as drift; the selftest grew a case planting an install directory in the fixture source and asserting the battery can reach it and still verifies clean, and that case fails with the trailing slash restored"
+        ],
+        [
+          "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "sort",
+          "approach"
+        ],
+        [
+          "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "addresses",
+          "the snapshot's install-directory exclusions ended in a slash, which matches directories only, so the symlink provisioning had just placed was left unprotected and verify refused the battery as drifted before any lane ran"
+        ],
+        [
+          "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "effort",
+          1
+        ],
+        [
+          "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "status",
+          "done"
+        ],
+        [
+          "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory",
+          "title",
+          "drop the trailing slash from the install-directory exclusions so they match a symlink as well as a directory"
+        ]
+      ],
+      "id": "e07a745d54b1cccd"
     }
   ]
 }

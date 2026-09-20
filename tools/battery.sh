@@ -99,7 +99,13 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 # stop. Sweeping costs a recompile and nothing else, which is the right price
 # for never stranding a tree.
 #
-# ai-tmp/, node_modules/ and .venv*/ keep both halves, because losing them
+# Those last two carry NO trailing slash, because battery_link_installs puts a
+# SYMLINK where the source has a directory, and a pattern ending in `/` matches
+# directories only: with one, rsync did not protect the link it had just been
+# given and `verify` reported `*deleting extensions/node/node_modules` as drift
+# [measured 2026-09-20].
+#
+# ai-tmp/, node_modules and .venv* keep both halves, because losing them
 # changes WHAT RUNS rather than how fast: ai-tmp/ holds this tree's own
 # occupancy record, provenance and logs, and the other two are the installed
 # configuration a lane gates on, whose absence makes a suite skip and report
@@ -122,7 +128,7 @@ snapshot() {
           ${caches:+--filter="P .mypy_cache/"} \
           ${caches:+--filter="P .ruff_cache/"} \
           --exclude=ai-tmp/ --exclude='ai-tmp-*' \
-          --exclude=node_modules/ --exclude='.venv*/' \
+          --exclude=node_modules --exclude='.venv*' \
           "$@"
 }
 
