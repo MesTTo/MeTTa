@@ -12487,6 +12487,22 @@
       "tags": [
         "measured"
       ]
+    },
+    "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer": {
+      "title": "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+      "supports": [
+        {
+          "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing",
+        "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -14180,7 +14196,7 @@
     "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182": {
       "title": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the plunit and dev-typed lanes exit zero"
       ]
@@ -55671,6 +55687,55 @@
         ]
       ],
       "id": "386eecd0c440363b"
+    },
+    {
+      "at": "2026-09-20T18:11:31.485944+00:00",
+      "after": "1f2a4f41ae77ef004e20db018cf6198409722da0",
+      "did": "[{\"op\": \"status\", \"id\": \"re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182\", \"because\": \"all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "386eecd0c440363b"
+      ],
+      "assert": [
+        [
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+          "sort",
+          "prop"
+        ],
+        [
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+          "supersedes",
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing"
+        ],
+        [
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+          "supersedes",
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands"
+        ],
+        [
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+          "supports",
+          {
+            "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+            "status": "done"
+          }
+        ],
+        [
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+          "tags",
+          "measured"
+        ],
+        [
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer",
+          "title",
+          "all 38 re-measured: the debt is 120 failures over 35 suites rather than 141 over 38. Three suites were never the typed build's -- shim.plt's 18 were my own missing environment, and lib_database's 2 and source_observation_artifacts' 1 are fixed by this session's changes. The remaining debt is long-tailed and heterogeneous, with a surviving lead that two of three sampled singletons fail on plunit's 'Generated unexpected warning or error' rather than on a wrong answer"
+        ],
+        [
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "c55283f505b2762d"
     }
   ]
 }
