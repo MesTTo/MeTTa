@@ -57,7 +57,7 @@ project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$project_dir/bounded.sh" "$@"; }
+bounded() { sh "$project_dir/tools/bounded.sh" "$@"; }
 
 probe=$(mktemp -d)
 trap 'rm -rf "$probe"' EXIT HUP INT TERM
@@ -78,8 +78,8 @@ printf '!(foo\n'              > "$probe/syntax_error.metta"
 # be told from a walk that sees nothing. Same shape as the planted reaches in
 # tests/prolog/surface_walk.pl.
 crippled="$probe/test-stdout-only.sh"
-sed 's|sh tools/run.sh "$f" 2>&1|sh tools/run.sh "$f"|' "$project_dir/test.sh" > "$crippled"
-if cmp -s "$crippled" "$project_dir/test.sh"; then
+sed 's|sh tools/run.sh "$f" 2>&1|sh tools/run.sh "$f"|' "$project_dir/tools/test.sh" > "$crippled"
+if cmp -s "$crippled" "$project_dir/tools/test.sh"; then
     echo "FAIL: the stdout-only copy of test.sh is identical to test.sh, so \
 every check against it below proves nothing. test.sh's capture line was \
 reworded; update the sed above to match it." >&2
@@ -126,7 +126,7 @@ failed() {
 }
 
 for shape in test_mismatch assert_mismatch one_sided_mismatch syntax_error; do
-    run_fixture "$project_dir/test.sh" "$shape" "$shape"
+    run_fixture "$project_dir/tools/test.sh" "$shape" "$shape"
     failed "$shape"
 done
 
@@ -177,7 +177,7 @@ silent_about syntax_error    "MeTTa assertion failed"
 # compiled-goal listing that sits in the same $output. That listing is what
 # test.sh's filter exists to drop, so a run reporting it would mean the filter
 # stopped filtering, not that the example got noisier.
-run_fixture "$project_dir/test.sh" passes passes
+run_fixture "$project_dir/tools/test.sh" passes passes
 [ "$(cat "$probe/passes.rc")" = 0 ] ||
     fail "test.sh exited nonzero for a file whose only form passes" passes
 grep -qF -- "is 1, should 1" "$probe/passes.out" ||

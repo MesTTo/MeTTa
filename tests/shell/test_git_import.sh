@@ -27,7 +27,7 @@ project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$project_dir/bounded.sh" "$@"; }
+bounded() { sh "$project_dir/tools/bounded.sh" "$@"; }
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT HUP INT TERM
 

@@ -30,7 +30,7 @@ project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$project_dir/bounded.sh" "$@"; }
+bounded() { sh "$project_dir/tools/bounded.sh" "$@"; }
 
 if [ ! -e "$project_dir/extensions/mork/mork_ffi/target/release/libmork_ffi.so" ]; then
     echo "skipped: the main checkout has no MORK build to compare against"
@@ -56,7 +56,7 @@ git -C "$project_dir" worktree add --quiet -b "$branch" "$tree"
 # stays the precise one this test needs: an engine that is there, running one
 # backend fewer. Without this the probe answers nothing and the test reports
 # that it can no longer show its own difference.
-cp "$project_dir/components.sh" "$tree/components.sh"
+cp "$project_dir/tools/components.sh" "$tree/components.sh"
 bounded sh "$tree/components.sh" >/dev/null 2>&1 ||
     { echo "FAIL: the probe worktree's components could not be checked out" >&2; exit 1; }
 
@@ -77,7 +77,7 @@ if [ "$before" != absent ]; then
     exit 1
 fi
 
-cp "$project_dir/worktree.sh" "$tree/worktree.sh"
+cp "$project_dir/tools/worktree.sh" "$tree/worktree.sh"
 bounded sh "$tree/worktree.sh" >/dev/null
 
 after=$(probe_backend "$tree")

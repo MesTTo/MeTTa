@@ -10273,6 +10273,56 @@
       "supports": [
         "I read an in-flight clone as finished for the second time this session, because the population check ran in the same message as the launch rather than after the completion marker"
       ]
+    },
+    "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause": {
+      "title": "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+    },
+    "measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text": {
+      "title": "measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text",
+      "supports": [
+        "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+      ]
+    },
+    "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands": {
+      "title": "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands",
+      "supports": [
+        {
+          "node": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "status": "untried"
+        },
+        {
+          "node": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "relation": "addresses",
+          "target": "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+        }
+      ]
+    },
+    "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component": {
+      "title": "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component",
+      "supports": [
+        {
+          "node": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes": {
+      "title": "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes"
+    },
+    "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0": {
+      "title": "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0",
+      "supports": [
+        "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -11742,6 +11792,14 @@
       "status": "done",
       "creates": [
         "the engine is ordinary tracked files in this repository and MeTTa-Kernel is retired, with its history preserved here"
+      ]
+    },
+    "sweep every reference to a moved script and read each changed site back rather than trusting the substitution": {
+      "title": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
       ]
     }
   },
@@ -46943,6 +47001,155 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "571925dd6eeba444"
+    },
+    {
+      "at": "2026-09-20T13:11:01.289818+00:00",
+      "after": "3b1f2ab34f21e760e93dce1f0d018912e235c189",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text\", \"tags\": [], \"title\": \"moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands\", \"tags\": [], \"title\": \"sweep every reference to a moved script and read each changed site back rather than trusting the substitution\", \"fields\": {\"effort\": 1, \"addresses\": [\"moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause\"]}}, {\"op\": \"status\", \"id\": \"sweep every reference to a moved script and read each changed site back rather than trusting the substitution\", \"because\": \"all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0\", \"tags\": [\"measured\"], \"title\": \"test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes\", \"fields\": {}}]",
+      "parents": [
+        "571925dd6eeba444"
+      ],
+      "assert": [
+        [
+          "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component",
+          "sort",
+          "prop"
+        ],
+        [
+          "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component",
+          "supersedes",
+          "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands"
+        ],
+        [
+          "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component",
+          "supports",
+          {
+            "node": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+            "status": "done"
+          }
+        ],
+        [
+          "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component",
+          "tags",
+          "tested"
+        ],
+        [
+          "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component",
+          "title",
+          "all 24 sites now name tools/, a re-grep for the unqualified forms returns nothing, and the selftest fixture at check_process_bounds_selftest.py:82 is correct unchanged because check_process_bounds.py:405 matches the last path component"
+        ],
+        [
+          "measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text",
+          "supports",
+          "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+        ],
+        [
+          "measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text",
+          "title",
+          "measured after the move: grep for '$project_dir/<script>.sh' and 'sh <script>.sh' outside tools/ found them, and three of them were failing tests rather than dead text"
+        ],
+        [
+          "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0",
+          "supports",
+          "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes"
+        ],
+        [
+          "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0",
+          "title",
+          "measured: the test fails identically in ai-tmp/wt-merge and in wt-battery-1, node scripts/bundle-browser.mjs reproduces ERR_MODULE_NOT_FOUND directly, website/.gitignore ignores node_modules, and package.json:16 declares markdown-it-container ^4.0.0"
+        ],
+        [
+          "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause",
+          "sort",
+          "prop"
+        ],
+        [
+          "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause",
+          "title",
+          "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+        ],
+        [
+          "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes",
+          "sort",
+          "prop"
+        ],
+        [
+          "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes",
+          "title",
+          "test_the_site_build_refuses_without_the_browser_kit fails in the real tree as well as the battery, and the cause is that website/node_modules is absent so runnable.mjs cannot import markdown-it-container; it is declared in website/package.json, so the tree was simply never npm-installed and this predates today's changes"
+        ],
+        [
+          "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands",
+          "supports",
+          {
+            "node": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+            "status": "untried"
+          }
+        ],
+        [
+          "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands",
+          "supports",
+          {
+            "node": "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+            "relation": "addresses",
+            "target": "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+          }
+        ],
+        [
+          "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands",
+          "title",
+          "this is the third time today a mechanical rename was right in most places and wrong in a few; reading the sites back is what separates the two, and the checker that matches on a path's last component makes one fixture correct as it stands"
+        ],
+        [
+          "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "sort",
+          "approach"
+        ],
+        [
+          "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "addresses",
+          "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+        ],
+        [
+          "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "effort",
+          1
+        ],
+        [
+          "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "status",
+          "done"
+        ],
+        [
+          "sweep every reference to a moved script and read each changed site back rather than trusting the substitution",
+          "title",
+          "sweep every reference to a moved script and read each changed site back rather than trusting the substitution"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "00e5f541feff95fe"
     }
   ]
 }

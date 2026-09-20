@@ -35,7 +35,7 @@ project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$project_dir/bounded.sh" "$@"; }
+bounded() { sh "$project_dir/tools/bounded.sh" "$@"; }
 
 # The mark is built from its code point rather than written literally, so
 # this file stays ASCII and cannot itself be the thing that breaks.

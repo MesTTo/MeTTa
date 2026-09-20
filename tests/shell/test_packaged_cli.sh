@@ -39,8 +39,8 @@ command -v swipl >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 METTA_ROOT="$project_dir"
-. "$project_dir/select-python.sh"
-bounded() { sh "$project_dir/bounded.sh" "$@"; }
+. "$project_dir/tools/select-python.sh"
+bounded() { sh "$project_dir/tools/bounded.sh" "$@"; }
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT HUP INT TERM
 

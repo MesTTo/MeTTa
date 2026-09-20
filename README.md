@@ -906,6 +906,8 @@ int main(void)
 - [examples/](examples/) — 386 examples in 22 chapters, every one run by the
   gate, so none of it is stale.
 - [EXTENDING.md](EXTENDING.md) — writing an integration.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — working on this repository.
+- [SECURITY.md](SECURITY.md) — reporting a vulnerability.
 
 ## Citing
 
