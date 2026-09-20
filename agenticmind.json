@@ -7686,6 +7686,210 @@
       "tags": [
         "measured"
       ]
+    },
+    "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row": {
+      "title": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form": {
+      "title": "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form",
+      "supports": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+        {
+          "node": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the intermittent is a latent RACE my change exposed rather than a defect my change introduced": {
+      "title": "the intermittent is a latent RACE my change exposed rather than a defect my change introduced"
+    },
+    "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes": {
+      "title": "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes",
+      "supports": [
+        "the intermittent is a latent RACE my change exposed rather than a defect my change introduced"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the bag-workaround lift is NOT the cause of the intermittent": {
+      "title": "the bag-workaround lift is NOT the cause of the intermittent"
+    },
+    "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10": {
+      "title": "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10",
+      "supports": [
+        "the bag-workaround lift is NOT the cause of the intermittent"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection": {
+      "title": "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection"
+    },
+    "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not": {
+      "title": "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not",
+      "supports": [
+        "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I first attributed the intermittent to the snapshot and was wrong": {
+      "title": "I first attributed the intermittent to the snapshot and was wrong"
+    },
+    "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more": {
+      "title": "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more",
+      "supports": [
+        "I first attributed the intermittent to the snapshot and was wrong"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved": {
+      "title": "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved",
+      "attacks": [
+        "the intermittent is a latent RACE my change exposed rather than a defect my change introduced"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way": {
+      "title": "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way",
+      "attacks": [
+        "the bag-workaround lift is NOT the cause of the intermittent"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop": {
+      "title": "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop"
+    },
+    "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement": {
+      "title": "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement",
+      "supports": [
+        "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike": {
+      "title": "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike"
+    },
+    "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks": {
+      "title": "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks",
+      "supports": [
+        "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread": {
+      "title": "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread"
+    },
+    "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine": {
+      "title": "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine",
+      "supports": [
+        "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own": {
+      "title": "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own"
+    },
+    "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route": {
+      "title": "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route",
+      "supports": [
+        "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal": {
+      "title": "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal"
+    },
+    "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent": {
+      "title": "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent",
+      "supports": [
+        "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first": {
+      "title": "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first",
+      "supports": [
+        {
+          "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "status": "untried"
+        },
+        {
+          "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit": {
+      "title": "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+      "supports": [
+        {
+          "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first"
+      ]
+    },
+    "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count": {
+      "title": "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th": {
+      "title": "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th",
+      "supports": [
+        "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+        {
+          "node": "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "of pytest's five failures, one was mine and four are the recorded baseline": {
+      "title": "of pytest's five failures, one was mine and four are the recorded baseline"
+    },
+    "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes": {
+      "title": "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes",
+      "supports": [
+        "of pytest's five failures, one was mine and four are the recorded baseline"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -8877,6 +9081,14 @@
       "status": "done",
       "addresses": [
         "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
+      ]
+    },
+    "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared": {
+      "title": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+      "effort": 1,
+      "status": "active",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
     }
   },
@@ -36589,6 +36801,564 @@
         ]
       ],
       "id": "76bfb28ba47013b5"
+    },
+    {
+      "at": "2026-09-20T06:22:47.515634+00:00",
+      "after": "8a6f8a1b8778fe2460fd382e78e2eb02b9ecb566",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form\", \"tags\": [\"measured\"], \"title\": \"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes\", \"tags\": [\"measured\"], \"title\": \"the intermittent is a latent RACE my change exposed rather than a defect my change introduced\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10\", \"tags\": [\"measured\"], \"title\": \"the bag-workaround lift is NOT the cause of the intermittent\", \"fields\": {}}]",
+      "parents": [
+        "76bfb28ba47013b5"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes",
+          "supports",
+          "the intermittent is a latent RACE my change exposed rather than a defect my change introduced"
+        ],
+        [
+          "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes",
+          "title",
+          "MEASURED 2026-09-20 as a gradient rather than a switch: the pre-session specializer failed 0 of 20, my file with snapshot/1 failed 6 of 20, and my file with snapshot/1 replaced by call/1 -- a semantically null edit, since an instrumented run shows this suite reaches that predicate 0 times -- failed 1 of 10; a semantic cause could not vary with an edit the suite never executes"
+        ],
+        [
+          "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form",
+          "supports",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form",
+          "supports",
+          {
+            "node": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form",
+          "title",
+          "MEASURED 2026-09-20: 3 failures in 10 runs of the suite alone on the current tree, and the battery's plunit run failed on it at the 9th of its 20 forall iterations; the error is process_loader_form/3: Could not translate MeTTa form"
+        ],
+        [
+          "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10",
+          "supports",
+          "the bag-workaround lift is NOT the cause of the intermittent"
+        ],
+        [
+          "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10",
+          "title",
+          "MEASURED 2026-09-20: reverting engine/metta/limits.pl alone left 3 failures in 10, while reverting engine/specializer.pl alone gave 0 in 10"
+        ],
+        [
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+          "sort",
+          "prop"
+        ],
+        [
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row",
+          "title",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "the bag-workaround lift is NOT the cause of the intermittent",
+          "sort",
+          "prop"
+        ],
+        [
+          "the bag-workaround lift is NOT the cause of the intermittent",
+          "title",
+          "the bag-workaround lift is NOT the cause of the intermittent"
+        ],
+        [
+          "the intermittent is a latent RACE my change exposed rather than a defect my change introduced",
+          "sort",
+          "prop"
+        ],
+        [
+          "the intermittent is a latent RACE my change exposed rather than a defect my change introduced",
+          "title",
+          "the intermittent is a latent RACE my change exposed rather than a defect my change introduced"
+        ]
+      ],
+      "id": "a20683169c4c347d"
+    },
+    {
+      "at": "2026-09-20T06:24:45.406041+00:00",
+      "after": "8a6f8a1b8778fe2460fd382e78e2eb02b9ecb566",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not\", \"tags\": [\"measured\"], \"title\": \"at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more\", \"tags\": [\"measured\"], \"title\": \"I first attributed the intermittent to the snapshot and was wrong\", \"fields\": {}}]",
+      "parents": [
+        "a20683169c4c347d"
+      ],
+      "assert": [
+        [
+          "I first attributed the intermittent to the snapshot and was wrong",
+          "sort",
+          "prop"
+        ],
+        [
+          "I first attributed the intermittent to the snapshot and was wrong",
+          "title",
+          "I first attributed the intermittent to the snapshot and was wrong"
+        ],
+        [
+          "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not",
+          "supports",
+          "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection"
+        ],
+        [
+          "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not",
+          "title",
+          "MEASURED 2026-09-20 by instrumenting filereader.pl's catch-all clause: it printed space='&library:/tmp/swipl_metta_2900852_92.metta#1' readers=[] total_loader_clauses=7, so the seven generic clauses were present and the per-space projections were not"
+        ],
+        [
+          "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection",
+          "sort",
+          "prop"
+        ],
+        [
+          "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection",
+          "title",
+          "at the moment of the intermittent failure the space has NO reader clauses installed, so the race is an ordering one and not a corrupted projection"
+        ],
+        [
+          "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more",
+          "sort",
+          "prop"
+        ],
+        [
+          "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more",
+          "supports",
+          "I first attributed the intermittent to the snapshot and was wrong"
+        ],
+        [
+          "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more",
+          "tags",
+          "measured"
+        ],
+        [
+          "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more",
+          "title",
+          "reverting engine/specializer.pl gave 0 of 20 and that read as attribution, but an instrumented run shows this suite reaches metta_discarding_writes/1 zero times, and the same file with snapshot/1 replaced by call/1 still failed 1 of 10; the file's shape shifts timing and nothing more"
+        ]
+      ],
+      "id": "c8691fc607a7d585"
+    },
+    {
+      "at": "2026-09-20T06:33:21.027501+00:00",
+      "after": "8a6f8a1b8778fe2460fd382e78e2eb02b9ecb566",
+      "did": "[{\"op\": \"attack\", \"id\": \"the intermittent is a latent RACE my change exposed rather than a defect my change introduced\", \"because\": \"HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved\", \"tags\": [\"measured\"]}, {\"op\": \"attack\", \"id\": \"the bag-workaround lift is NOT the cause of the intermittent\", \"because\": \"the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way\", \"tags\": [\"measured\"]}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement\", \"tags\": [\"measured\"], \"title\": \"I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks\", \"tags\": [\"measured\"], \"title\": \"reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike\", \"fields\": {}}]",
+      "parents": [
+        "c8691fc607a7d585"
+      ],
+      "assert": [
+        [
+          "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved",
+          "sort",
+          "prop"
+        ],
+        [
+          "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved",
+          "attacks",
+          "the intermittent is a latent RACE my change exposed rather than a defect my change introduced"
+        ],
+        [
+          "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved",
+          "tags",
+          "measured"
+        ],
+        [
+          "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved",
+          "title",
+          "HALF RIGHT and reported as whole: an ABA measurement on 2026-09-20 under steady load gives current 2/10, pre-session 1/10, current 1/10, so the PRE-SESSION engine fails too and the rates are indistinguishable at this sample size. The race is pre-existing, and my change neither introduced NOR measurably exposed it; the earlier 0-of-20 for the pre-session engine was luck in an underpowered run whose blocks were not interleaved"
+        ],
+        [
+          "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop",
+          "sort",
+          "prop"
+        ],
+        [
+          "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop",
+          "title",
+          "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop"
+        ],
+        [
+          "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks",
+          "supports",
+          "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike"
+        ],
+        [
+          "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks",
+          "title",
+          "MEASURED 2026-09-20 in an ABA design under steady load 7.4 to 8.0 with the pytest battery running: 2/10, 1/10, 1/10 across the three blocks"
+        ],
+        [
+          "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike",
+          "sort",
+          "prop"
+        ],
+        [
+          "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike",
+          "title",
+          "reference_loading's suspended-background-query test fails about 1 to 2 runs in 10 on this box, on the pre-session engine and on HEAD alike"
+        ],
+        [
+          "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way",
+          "sort",
+          "prop"
+        ],
+        [
+          "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way",
+          "attacks",
+          "the bag-workaround lift is NOT the cause of the intermittent"
+        ],
+        [
+          "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way",
+          "tags",
+          "measured"
+        ],
+        [
+          "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way",
+          "title",
+          "the conclusion holds but the evidence was the same confounded run; the ABA measurement supersedes it, and nothing in my change is implicated either way"
+        ],
+        [
+          "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement",
+          "sort",
+          "prop"
+        ],
+        [
+          "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement",
+          "supports",
+          "I stated a confounded A/B as an established attribution, which is the failure the interleaved protocol exists to stop"
+        ],
+        [
+          "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement",
+          "tags",
+          "measured"
+        ],
+        [
+          "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement",
+          "title",
+          "the first comparison ran its two arms at different times under a changing background load, with three batteries starting and finishing between them, and 10 runs per arm cannot separate a 10% rate from a 30% one; the tree's own push gate already requires interleaved A/B with min-of-3, and I did not apply it to a correctness measurement"
+        ]
+      ],
+      "id": "ba8503253b89b665"
+    },
+    {
+      "at": "2026-09-20T06:35:48.153263+00:00",
+      "after": "8a6f8a1b8778fe2460fd382e78e2eb02b9ecb566",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine\", \"tags\": [\"measured\"], \"title\": \"thread_self/1 inside an SWI engine answers the ENGINE and not the host thread\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route\", \"tags\": [\"measured\"], \"title\": \"SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent\", \"tags\": [\"source\"], \"title\": \"the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first\", \"tags\": [], \"title\": \"log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared\", \"fields\": {\"effort\": 1, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"status\", \"id\": \"log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared\", \"because\": \"a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "ba8503253b89b665"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine",
+          "supports",
+          "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread"
+        ],
+        [
+          "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine",
+          "title",
+          "MEASURED 2026-09-20 in plain patched SWI: the outer goal answers main and the same call inside engine_create/3 answers <engine>(2,0x...); metta_source_flight_enter/2 keys a load's owner on thread_self, so a flight started inside an engine is owned by the engine"
+        ],
+        [
+          "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route",
+          "supports",
+          "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own"
+        ],
+        [
+          "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route",
+          "title",
+          "MEASURED 2026-09-20: five create-and-destroy cycles answered five distinct blob addresses, and sort/2 kept all five, which refutes the identity-reuse route"
+        ],
+        [
+          "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own",
+          "sort",
+          "prop"
+        ],
+        [
+          "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own",
+          "title",
+          "SWI does NOT reuse an engine identity after engine_destroy/1, so a stale flight row cannot be mistaken for the next engine's own"
+        ],
+        [
+          "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "sort",
+          "prop"
+        ],
+        [
+          "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "supersedes",
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first"
+        ],
+        [
+          "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "supports",
+          {
+            "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+            "status": "active"
+          }
+        ],
+        [
+          "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit",
+          "title",
+          "a 40-run hunt is in flight in the background with engine/metta/reference_sources.pl and engine/filereader.pl instrumented; the backups are ai-tmp/spec-repro/refsrc.keep and ai-tmp/spec-repro/fr.keep and BOTH MUST BE RESTORED before any commit"
+        ],
+        [
+          "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent",
+          "supports",
+          "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal"
+        ],
+        [
+          "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent",
+          "tags",
+          "source"
+        ],
+        [
+          "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent",
+          "title",
+          "engine/materialize.pl:20-33 and 873-975; metta_source_flight_enter/2 is called under with_mutex(metta_loader, ...) and the failing test runs its whole body inside engine_create/3, which is both halves of what that rule exists to prevent"
+        ],
+        [
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first",
+          "sort",
+          "prop"
+        ],
+        [
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first",
+          "supports",
+          {
+            "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+            "status": "untried"
+          }
+        ],
+        [
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first",
+          "supports",
+          {
+            "node": "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first",
+          "title",
+          "readers=[] has exactly three causes -- publication never ran, publication ran and a release cleared it, or the drain abandoned it on an epoch bump -- and the replace history distinguishes the first two directly; the test's own name, survives_release, makes the second the one to look at first"
+        ],
+        [
+          "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal",
+          "title",
+          "the tree already avoids this class: materialize.pl runs one standing engine with engine_post/3 rather than creating one per callback, and avoids acquiring a mutex inside an engine goal"
+        ],
+        [
+          "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread",
+          "sort",
+          "prop"
+        ],
+        [
+          "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread",
+          "title",
+          "thread_self/1 inside an SWI engine answers the ENGINE and not the host thread"
+        ],
+        [
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "sort",
+          "approach"
+        ],
+        [
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "effort",
+          1
+        ],
+        [
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "status",
+          "active"
+        ],
+        [
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared",
+          "title",
+          "log every metta_reference_source_replace/2 call with its clause count, and print the history for the space at the refusal, to separate never-published from published-then-cleared"
+        ]
+      ],
+      "id": "6396f030cf46cb68"
+    },
+    {
+      "at": "2026-09-20T06:39:59.422916+00:00",
+      "after": "8a6f8a1b8778fe2460fd382e78e2eb02b9ecb566",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th\", \"tags\": [\"measured\"], \"title\": \"committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes\", \"tags\": [\"measured\"], \"title\": \"of pytest's five failures, one was mine and four are the recorded baseline\", \"fields\": {}}]",
+      "parents": [
+        "6396f030cf46cb68"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th",
+          "supports",
+          "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count"
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th",
+          "supports",
+          {
+            "node": "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th",
+          "title",
+          "MEASURED 2026-09-20 in battery 3: test_the_stated_corpus_size_is_the_real_one failed with `examples/README.md says 359, the runners run 360`; the file that commit cd086bd22 described but did not contain is the 360th"
+        ],
+        [
+          "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes",
+          "supports",
+          "of pytest's five failures, one was mine and four are the recorded baseline"
+        ],
+        [
+          "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes",
+          "title",
+          "MEASURED 2026-09-20: the corpus count was mine and is fixed; the twin-coverage one names four _fixtures/*.py under extensions/python/examples/ch11 that I never touched, and the browser-kit, aio and MORK ones are environment and backend lanes unrelated to this session's changes"
+        ],
+        [
+          "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+          "sort",
+          "prop"
+        ],
+        [
+          "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count",
+          "title",
+          "committing the package-rows example took the corpus from 359 to 360 and left examples/README.md stating the old count"
+        ],
+        [
+          "of pytest's five failures, one was mine and four are the recorded baseline",
+          "sort",
+          "prop"
+        ],
+        [
+          "of pytest's five failures, one was mine and four are the recorded baseline",
+          "title",
+          "of pytest's five failures, one was mine and four are the recorded baseline"
+        ]
+      ],
+      "id": "09cdf1448f74ec94"
     }
   ]
 }
