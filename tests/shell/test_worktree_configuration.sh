@@ -56,8 +56,17 @@ git -C "$project_dir" worktree add --quiet -b "$branch" "$tree"
 # stays the precise one this test needs: an engine that is there, running one
 # backend fewer. Without this the probe answers nothing and the test reports
 # that it can no longer show its own difference.
-cp "$project_dir/tools/components.sh" "$tree/components.sh"
-bounded sh "$tree/components.sh" >/dev/null 2>&1 ||
+# The worktree's OWN copy, at its own depth. This used to copy the script to
+# `$tree/components.sh` and run it there, which worked while it lived at the
+# repository root: it derives the checkout from its own directory, and since
+# moving into tools/ that is `$(dirname $0)/..`. One level shallower, `..`
+# reached the temporary directory HOLDING the worktree, so it populated
+# nothing here, exited 0, and left the probe below to consult an engine whose
+# lib/ was empty -- which the probe reported as the backend being present,
+# because an empty answer is not `absent`
+# [measured 2026-09-21: the unmuted probe answers `source_sink
+# '../lib/lib_memo/lib_memo' does not exist` four times; commit=WORKTREE].
+bounded sh "$tree/tools/components.sh" >/dev/null 2>&1 ||
     { echo "FAIL: the probe worktree's components could not be checked out" >&2; exit 1; }
 
 # The probe asks the ENGINE whether the backend registered, rather than
@@ -71,6 +80,17 @@ probe_backend() {
 }
 
 before=$(probe_backend "$tree")
+# An EMPTY answer is the probe failing, not the backend loading. Both used to
+# land in the message below, which then accused the worktree of already having
+# the backend when the truth was that the engine did not load at all -- and the
+# engine's own errors go to the stderr `probe_backend` discards, so the run
+# said nothing about why.
+if [ -z "$before" ]; then
+    echo "FAIL: the probe answered nothing, so the engine did not load in the" >&2
+    echo "      worktree; re-run probe_backend without its 2>/dev/null to see" >&2
+    echo "      why, and check that tools/components.sh populated \$tree/lib" >&2
+    exit 1
+fi
 if [ "$before" != absent ]; then
     echo "FAIL: a fresh worktree already reports the backend as '$before';" >&2
     echo "      this test can no longer show the difference it exists for" >&2

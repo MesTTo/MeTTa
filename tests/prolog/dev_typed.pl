@@ -84,61 +84,6 @@
 :- use_module(library(mavis)).
 :- use_module(library(apply), [maplist/3]).
 
-% The mode-line vocabulary is MeTTa's; `must_be/2`'s is SWI's. They share a
-% syntax and nothing joined them, so every `+Value:'Atom'` in the tree became a
-% `must_be('Atom', Value)` that no clause could satisfy. `library(error)`'s
-% `must_be/2` asks `has_type/2` and falls to `is_not/2` when it fails, and
-% `is_not/2` raises `type_error(Type, Value)` without asking whether the type
-% was ever defined -- so the tree reported a value as the wrong type when the
-% truth was that the TYPE was unknown. Read alone the message accuses the
-% value, which is why the backlog read as a pile of separate refusals rather
-% than one missing bridge.
-%
-% What these four clauses do, and what they do NOT do. The before is the
-% gate's own dev-typed lane over every suite; the after is the same loop with
-% these clauses [measured 2026-09-21; commit=WORKTREE]:
-%
-%     before   206 failures, 145 of them type errors
-%              ('Atom' 66, 'SpaceType' 40, 'Symbol' 38, 'Expression' 1)
-%     after    0 type errors, in every suite measured
-%
-% suites/libraries/lib_database.plt alone goes from 10 passed and 21 failed to
-% 29 passed and 2 failed -- more than its 16 type errors, because a test that
-% compares error TERMS also fails when the type error displaces the error the
-% code meant to raise, and lib_database.plt:120 is exactly that.
-%
-% They do NOT make the lane green. Failures of a different class survive --
-% wrong answers and assertion mismatches rather than refused arguments -- and
-% nothing here addresses them. The two left in lib_database are typed-only and
-% are about variable sharing across a store-and-read round trip, not about
-% types at all.
-%
-% Exactly four MeTTa names are used this way, and two of them the engine
-% already classifies, so those two ask it rather than restating its rules
-% [measured 2026-09-21: 'Atom' 21 uses, 'Symbol' 18, 'SpaceType' 7,
-% 'Expression' 1, over every mode line in lib/ and engine/].
-:- multifile error:has_type/2.
-
-% MeTTa's top type: an unevaluated term, which every term representing one is.
-% The check is vacuous BY THE SEMANTICS rather than for convenience, and the
-% annotation still earns its place by saying the argument is held rather than
-% evaluated.
-error:has_type('Atom', _).
-
-% A symptom of the syntax, not of the running program: `metatype_of/2` answers
-% 'Grounded' for a name this engine holds a function for, so deriving from it
-% would refuse `car-atom` where a mode line saying 'Symbol' means to accept it.
-error:has_type('Symbol', Value) :- atom(Value).
-
-% The engine's own two, asked rather than restated. `'is-expr'/2` is
-% `list_shaped/1`, which accepts a partial list where `is_list/1` would not,
-% and `'is-space'/2` takes a prefixed name or a handle. Both are pure
-% semi-deterministic classifiers, so a type check pays nothing and changes
-% nothing.
-error:has_type('Expression', Value) :- metta_engine:'is-expr'(Value, true).
-error:has_type('SpaceType', Value) :- metta_engine:'is-space'(Value, true).
-
-
 % The expansion only sees SOURCE. engine/qlf_boot.pl leaves .qlf beside every
 % engine unit, and an extensionless ensure_loaded resolves a fresh one
 % (boot/init.pl '$qlf_file'/5), which skips term_expansion and reports every

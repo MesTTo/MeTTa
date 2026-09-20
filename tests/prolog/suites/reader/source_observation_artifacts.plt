@@ -35,9 +35,9 @@ test(the_second_shipping_boot_preserves_observed_arithmetic) :-
                        [relative_to(Directory), file_type(directory)]),
     artifact_process(Root, find, [engine, lib, '-name', '*.qlf', '-delete']),
     Example = 'examples/ch20-extending-the-engine/20-05-observing-execution/03-source-errors.metta',
-    artifact_process(Root, sh, ['run.sh', Example]),
+    artifact_process(Root, sh, ['tools/run.sh', Example]),
     artifact_times(Root, Warmed),
-    artifact_process(Root, sh, ['run.sh', Example]),
+    artifact_process(Root, sh, ['tools/run.sh', Example]),
     artifact_times(Root, Warmed).
 
 :- end_tests(source_observation_artifacts).

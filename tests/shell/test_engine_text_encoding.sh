@@ -72,7 +72,7 @@ tar -C "$project_dir" -cf - \
     . 2>/dev/null | ( cd "$tree" && tar -xf - 2>/dev/null )
 # The pipeline's status is the extractor's, so it is not the oracle here.
 # What the copy is FOR is the thing to check: the engine and the example.
-if [ ! -f "$tree/engine/main.pl" ] || [ ! -f "$tree/run.sh" ]; then
+if [ ! -f "$tree/engine/main.pl" ] || [ ! -f "$tree/tools/run.sh" ]; then
     echo "FAIL: could not copy the tree to probe under" >&2
     exit 1
 fi

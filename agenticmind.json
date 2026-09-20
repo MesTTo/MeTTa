@@ -11958,6 +11958,54 @@
       "tags": [
         "measured"
       ]
+    },
+    "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain": {
+      "title": "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain"
+    },
+    "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole": {
+      "title": "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole",
+      "supports": [
+        "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left": {
+      "title": "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left"
+    },
+    "grouped the remaining Type error messages by expected type across the sweep": {
+      "title": "grouped the remaining Type error messages by expected type across the sweep",
+      "supports": [
+        "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1": {
+      "title": "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1"
+    },
+    "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it": {
+      "title": "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it",
+      "supports": [
+        "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite": {
+      "title": "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop": {
+      "title": "the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop",
+      "supports": [
+        "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite"
+      ]
     }
   },
   "approaches": {
@@ -53621,6 +53669,137 @@
         ]
       ],
       "id": "c15e9e13d7eaa00e"
+    },
+    {
+      "at": "2026-09-20T17:31:22.883815+00:00",
+      "after": "c62d38b9800e02da093eb34794f40c86b11efa71",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole\", \"tags\": [\"measured\"], \"title\": \"the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grouped the remaining Type error messages by expected type across the sweep\", \"tags\": [\"measured\"], \"title\": \"not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it\", \"tags\": [\"measured\"], \"title\": \"my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop\", \"tags\": [\"reasoning\"], \"title\": \"a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite\", \"fields\": {}}]",
+      "parents": [
+        "c15e9e13d7eaa00e"
+      ],
+      "assert": [
+        [
+          "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it",
+          "sort",
+          "prop"
+        ],
+        [
+          "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it",
+          "supports",
+          "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1"
+        ],
+        [
+          "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it",
+          "tags",
+          "measured"
+        ],
+        [
+          "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it",
+          "title",
+          "'Number' is an OUTPUT argument at tests/data/prologface/lib_face_fixture.pl:31, so it defers until bound and no suite reaches it, which is why the sweep showed no error for it and why scoping the scan narrowly hid it"
+        ],
+        [
+          "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite",
+          "sort",
+          "prop"
+        ],
+        [
+          "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite",
+          "title",
+          "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite"
+        ],
+        [
+          "grouped the remaining Type error messages by expected type across the sweep",
+          "sort",
+          "prop"
+        ],
+        [
+          "grouped the remaining Type error messages by expected type across the sweep",
+          "supports",
+          "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left"
+        ],
+        [
+          "grouped the remaining Type error messages by expected type across the sweep",
+          "tags",
+          "measured"
+        ],
+        [
+          "grouped the remaining Type error messages by expected type across the sweep",
+          "title",
+          "grouped the remaining Type error messages by expected type across the sweep"
+        ],
+        [
+          "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole",
+          "supports",
+          "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain"
+        ],
+        [
+          "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole",
+          "title",
+          "measured 2026-09-21 over all 182 suites: 8776 passed, 202 failed, 12 type errors; I had quoted a 48-suite partial as the whole"
+        ],
+        [
+          "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1",
+          "sort",
+          "prop"
+        ],
+        [
+          "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1",
+          "title",
+          "my 'exactly four MeTTa names' was measured over lib/ and engine/ only; over every .pl outside vendor/ there are five, 'Atom' 84, 'Symbol' 72, 'SpaceType' 28, 'Expression' 4 and 'Number' 1"
+        ],
+        [
+          "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left",
+          "sort",
+          "prop"
+        ],
+        [
+          "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left",
+          "title",
+          "not one of the 12 surviving type errors is a MeTTa name: 9 are `string' in suites/seams/lib_package.plt, so they are ordinary SWI type errors of the kind a mode line exists to catch and are findings the bridge UNCOVERED rather than residue it left"
+        ],
+        [
+          "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain",
+          "sort",
+          "prop"
+        ],
+        [
+          "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain",
+          "title",
+          "the committed bridge comment claimed '0 type errors, in every suite measured', which the complete 182-suite sweep falsifies: 12 remain"
+        ],
+        [
+          "the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop",
+          "sort",
+          "prop"
+        ],
+        [
+          "the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop",
+          "supports",
+          "a before/after that uses two different harnesses is not an A/B: the 206-failure baseline came from the gate's dev-typed section and the after from my own loop, and the two count differently even though both call dev_typed_suites per suite"
+        ],
+        [
+          "the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop",
+          "title",
+          "the type-error counts are comparable because each suite emits the same messages, but the failure counts are not; the baseline is being re-measured with the same loop"
+        ]
+      ],
+      "id": "548449d190b724c7"
     }
   ]
 }
