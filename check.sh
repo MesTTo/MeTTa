@@ -180,11 +180,19 @@ run GATE boot-determinism sh -c "cd '$HERE' && sh tests/shell/test_boot_inferenc
 # Undefined predicates in the engine. Nothing checked the Prolog side before
 # this; SWI has had the check built in all along.
 #
-# Two names are known-absent at load time and are allowed:
-#   mettafunc/2  asserted at runtime by process_metta_string inside
-#                prolog_interop_example/0 (engine/main.pl:18). SWI's own advice
-#                is `:- dynamic mettafunc/2.`, which would clear it properly.
-# Anything else is a regression and fails. Shrink this list, never grow it.
+# The names that are known-absent at load time, and the reason each is deferred
+# rather than missing, are rows in tests/prolog/deferred_references.pl, which
+# this lane loads and which also owns the walk. They used to be a regex here,
+# an allowed/2 table in tests/prolog/library_autoload.pl and nothing at all in
+# tests/prolog/static_checks.pl, so the same fact was written three times in
+# three notations with nothing checking that they agreed. One of them had
+# already rotted: this regex carried mettafunc/2 with a note saying
+# `:- dynamic mettafunc/2.` would clear it, and by 2026-09-20 the walk had
+# stopped reporting the name at all, while the suggested declaration would have
+# named the wrong module, since engine/main.pl is module metta_main and the
+# generated mettafunc/2 resolves through the &self execution module. A row that
+# stops firing now fails the lane instead of sitting there.
+#
 # mork_test/0 used to be here too, because engine/main.pl called it by name behind
 # a `mork` branch; it is seam:backend_selftest/0 now, declared multifile, so a
 # process with no backend has a predicate with no clauses rather than a call to
@@ -210,20 +218,17 @@ run GATE boot-determinism sh -c "cd '$HERE' && sh tests/shell/test_boot_inferenc
 # engine/metta/space_hooks.pl with seam:kind/2 rows in engine/ext_points.pl,
 # and this lane running tokenless is the regression gate on that: reintroduce
 # an engine call to a hook only a seat declares and this reports it.
-PROLOG_KNOWN_UNDEFINED='mettafunc/2'
+#
+# undefined_verdict/0 prints its own findings and halts, so no pipeline stands
+# between the walk and this lane's status. The old shape piped swipl through two
+# greps, which reports the last filter's status rather than the walk's.
 check_prolog() {
     cd "$HERE" || return 1
-    unexpected=$(
-        bounded swipl -q -g "use_module(library(check)), \
-                     set_prolog_flag(autoload, false), \
-                     consult('engine/main.pl'), list_undefined, halt." \
-              -t 'halt(1)' 2>&1 \
-            | grep -E 'which is referenced by' \
-            | grep -vE "$PROLOG_KNOWN_UNDEFINED"
-    )
-    [ -z "$unexpected" ] && return 0
-    echo "$unexpected"
-    return 1
+    bounded swipl -q -g "set_prolog_flag(autoload, false), \
+                 consult('tests/prolog/deferred_references.pl'), \
+                 consult('engine/main.pl'), \
+                 undefined_verdict." \
+          -t 'halt(1)'
 }
 run GATE prolog check_prolog
 
