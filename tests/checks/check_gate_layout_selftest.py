@@ -1,5 +1,4 @@
-"""Purpose: prove the gate's driver layout is stated once and that every
-    statement of it agrees.
+"""Purpose: prove every statement of the gate's driver layout agrees.
 
 The layout has two unavoidable homes, because `extensions/python/tools/
 artifacts.py` is seat tooling inside a submodule and cannot import a

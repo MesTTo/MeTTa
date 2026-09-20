@@ -84,6 +84,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from gate_layout import BOUNDED  # noqa: E402  -- installed above
+
 LEDGER = Path("docs/host-workarounds.md")
 KEY = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 MARKER = re.compile(r"^[\s%#;/*!]*Workaround:(.*)$")

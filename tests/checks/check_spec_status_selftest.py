@@ -62,8 +62,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
-from gate_layout import CHECK, TEST  # noqa: E402  -- the one statement of the driver layout
 from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
+from gate_layout import CHECK, TEST  # noqa: E402  -- the one statement of the driver layout
 
 #: The pytest collector's own anchor, READ from the collector rather than
 #: restated here. Two self-tests plant it into a fixture tree and both used to

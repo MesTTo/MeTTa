@@ -84,6 +84,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from gate_layout import CHECK as _CHECK  # noqa: E402  -- installed above
+
 sys.path.insert(0, str(ROOT / "extensions/python/tools"))
 from artifacts import ARTIFACTS  # noqa: E402 -- a checkout tool, imported once the root is known
 

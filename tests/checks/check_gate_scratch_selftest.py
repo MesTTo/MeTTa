@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from gate_layout import CHECK  # noqa: E402  -- the directory above is installed first
+
 HELPER = ROOT / "tests" / "checks" / "gate_scratch.sh"
 
 _HOLDER = r"""

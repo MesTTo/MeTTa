@@ -66,8 +66,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from check_evidence_tags import PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
-from pin_provenance import sites  # noqa: E402
 from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
+from pin_provenance import sites  # noqa: E402
 
 WORD = f"commit={PLACEHOLDER}"
 TAG = "tested"

@@ -35,13 +35,12 @@ Open Obligations:
 from __future__ import annotations
 
 import os
-from pathlib import Path
-
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from gate_layout import BOUNDED as _BOUNDED  # noqa: E402  -- installed above
+from gate_layout import BOUNDED as _BOUNDED
 
 #: The repository's one bound. Every runner in this tree reaches the same file.
 BOUNDED = Path(__file__).resolve().parents[2] / _BOUNDED

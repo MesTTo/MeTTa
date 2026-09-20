@@ -1,5 +1,6 @@
-"""Purpose: name the gate's driver scripts once, as paths relative to a root,
-    so production code and planted fixture trees cannot disagree about where
+"""Purpose: name the gate's driver scripts once, as paths relative to a root.
+
+    Production code and planted fixture trees then cannot disagree about where
     they live.
 
     Moving `check.sh`, `test.sh` and `bounded.sh` into `tools/` cost thirteen of

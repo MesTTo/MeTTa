@@ -88,11 +88,16 @@ from __future__ import annotations
 
 import ast
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
+
+sys.path.insert(0, str(HERE))
+
+from gate_layout import BOUNDED, CHECK  # noqa: E402  -- HERE is installed above
 
 #: The programs a script starts that can outlive it. `sh` is here because every
 #: test.sh and bench.sh the lanes call is a shell script that starts more, and

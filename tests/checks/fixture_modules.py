@@ -1,5 +1,6 @@
-"""Purpose: answer which checker modules a fixture tree must carry, by reading
-    the imports rather than by keeping a list beside each fixture.
+"""Purpose: answer which checker modules a fixture tree must carry.
+
+    Read from the imports rather than kept as a list beside each fixture.
 
     Three selftests copy a checker into a planted tree and run it there, and
     each named the modules to copy by hand. Adding one import to

@@ -1,5 +1,6 @@
-"""Purpose: prove `fixture_modules.sibling_closure` answers what a planted tree
-    must carry, over a tree planted for the purpose rather than over this one.
+"""Purpose: prove `fixture_modules.sibling_closure` answers what a tree must carry.
+
+Measured over a tree planted for the purpose rather than over this one.
 
 Every case here plants its own modules, so the answers do not move when a real
 checker gains an import. The one case read against the repository is the one

@@ -34,7 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_script_references as checked
-from gate_layout import BOUNDED  # noqa: E402  -- the directory above is installed first
+from gate_layout import BOUNDED
 
 #: text, the file it stands for, the variable, and the directory it must name.
 BASES: tuple[tuple[str, str, str, str], ...] = (
