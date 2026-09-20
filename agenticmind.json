@@ -12234,6 +12234,66 @@
       "tags": [
         "source"
       ]
+    },
+    "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees": {
+      "title": "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees"
+    },
+    "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites": {
+      "title": "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites",
+      "supports": [
+        "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree": {
+      "title": "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference": {
+      "title": "dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference",
+      "supports": [
+        "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree"
+      ]
+    },
+    "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too": {
+      "title": "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too"
+    },
+    "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them": {
+      "title": "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them",
+      "supports": [
+        "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention": {
+      "title": "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention"
+    },
+    "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'": {
+      "title": "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'",
+      "supports": [
+        "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes": {
+      "title": "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes"
+    },
+    "each was probed at HEAD rather than inferred from the stale log": {
+      "title": "each was probed at HEAD rather than inferred from the stale log",
+      "supports": [
+        "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -54657,6 +54717,184 @@
         "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
       },
       "id": "0defeda02145a003"
+    },
+    {
+      "at": "2026-09-20T17:58:40.183071+00:00",
+      "after": "7b5faf90d0e8eda51a40237e35456cce7a8dfb72",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites\", \"tags\": [\"measured\"], \"title\": \"the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference\", \"tags\": [\"reasoning\"], \"title\": \"the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them\", \"tags\": [\"measured\"], \"title\": \"I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too\", \"fields\": {}}]",
+      "parents": [
+        "0defeda02145a003"
+      ],
+      "assert": [
+        [
+          "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too",
+          "sort",
+          "prop"
+        ],
+        [
+          "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too",
+          "title",
+          "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too"
+        ],
+        [
+          "dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference",
+          "supports",
+          "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree"
+        ],
+        [
+          "dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference",
+          "title",
+          "dev_typed.pl's Guarantees say the development build is TRANSPARENT and that dev_typed_suites is what says so; an untyped sweep over the same 182 suites is running to produce the difference"
+        ],
+        [
+          "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them",
+          "supports",
+          "I have been describing 202 typed failures as a backlog belonging to the typed build, which overstates it by however many suites are red in the plain build too"
+        ],
+        [
+          "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them",
+          "tags",
+          "measured"
+        ],
+        [
+          "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them",
+          "title",
+          "lib_csv_surface alone accounts for 45 of the 202 and is redder without the types than with them"
+        ],
+        [
+          "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites",
+          "supports",
+          "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees"
+        ],
+        [
+          "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites",
+          "title",
+          "measured 2026-09-21: sh engine/test.sh suites/libraries/lib_csv_surface.plt exits 1 with 39 passed and 89 failed, against 45 failed under dev_typed_suites"
+        ],
+        [
+          "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree",
+          "title",
+          "the number that measures the typed build is typed failures MINUS untyped ones, because its stated guarantee is TRANSPARENCY: every suite that passes plain must pass typed. Reporting the typed total alone credits the typed build with every ordinary red in the tree"
+        ],
+        [
+          "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees",
+          "title",
+          "the typed build's 202 remaining failures are NOT all typed-build defects: suites/libraries/lib_csv_surface.plt answers 45 failures typed and 89 UNTYPED, so it is a pre-existing red in the ordinary build that the typed run merely also sees"
+        ]
+      ],
+      "telemetry": {
+        "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+      },
+      "id": "99c6623037f87688"
+    },
+    {
+      "at": "2026-09-20T17:59:46.167209+00:00",
+      "after": "7b5faf90d0e8eda51a40237e35456cce7a8dfb72",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'\", \"tags\": [\"measured\"], \"title\": \"sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each was probed at HEAD rather than inferred from the stale log\", \"tags\": [\"measured\"], \"title\": \"of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes\", \"fields\": {}}]",
+      "parents": [
+        "99c6623037f87688"
+      ],
+      "assert": [
+        [
+          "each was probed at HEAD rather than inferred from the stale log",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was probed at HEAD rather than inferred from the stale log",
+          "supports",
+          "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes"
+        ],
+        [
+          "each was probed at HEAD rather than inferred from the stale log",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was probed at HEAD rather than inferred from the stale log",
+          "title",
+          "each was probed at HEAD rather than inferred from the stale log"
+        ],
+        [
+          "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'",
+          "supports",
+          "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention"
+        ],
+        [
+          "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'",
+          "title",
+          "measured 2026-09-21: two runs of sh tools/check.sh naming them exited 0 with 'all gate checks passed'"
+        ],
+        [
+          "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes",
+          "sort",
+          "prop"
+        ],
+        [
+          "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes",
+          "title",
+          "of the original 30, the accounting is now complete except for the battery-4 verdict: 13 were the tools/ move and their files resolve at HEAD, 16 are verified green, instructions is a host mismatch rather than a regression, dev-typed is repaired from 150 type errors to 12, and worktree is blocked on components being ahead of their remotes"
+        ],
+        [
+          "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention",
+          "sort",
+          "prop"
+        ],
+        [
+          "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention",
+          "title",
+          "sixteen lanes from the 30-lane verdict are verified green together in the working tree, not one at a time: encoding, layering (both lanes of that name), script-refs, script-refs-selftest, gate-layout-selftest, fixture-modules-selftest, submodules, submodules-selftest, artifact-sync, artifact-sync-selftest, closed-sets, spec-status-selftest, evidence, example-origins-selftest and scratch-retention"
+        ]
+      ],
+      "telemetry": {
+        "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+      },
+      "id": "a60322c3b1c5c1c5"
     }
   ]
 }
