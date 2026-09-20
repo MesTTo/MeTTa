@@ -7529,6 +7529,163 @@
       "tags": [
         "tested"
       ]
+    },
+    "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors": {
+      "title": "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors",
+      "supports": [
+        {
+          "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken"
+      ]
+    },
+    "the lock-order cycle is reported as KNOWN and does not fail its lane": {
+      "title": "the lock-order cycle is reported as KNOWN and does not fail its lane"
+    },
+    "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order": {
+      "title": "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order",
+      "supports": [
+        "the lock-order cycle is reported as KNOWN and does not fail its lane"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "know whether door-order is closable or is genuinely a baseline red": {
+      "title": "know whether door-order is closable or is genuinely a baseline red",
+      "worth": 30,
+      "wanted": true
+    },
+    "it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed": {
+      "title": "it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed",
+      "supports": [
+        "know whether door-order is closable or is genuinely a baseline red"
+      ]
+    },
+    "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all": {
+      "title": "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all",
+      "supports": [
+        {
+          "node": "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "status": "untried"
+        },
+        {
+          "node": "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "relation": "addresses",
+          "target": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+        }
+      ]
+    },
+    "three checks are in flight and nothing further can be decided without them": {
+      "title": "three checks are in flight and nothing further can be decided without them"
+    },
+    "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green": {
+      "title": "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green",
+      "supports": [
+        "three checks are in flight and nothing further can be decided without them"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the release provenance pins resolve to the commit whose tree supplied the evidence": {
+      "title": "the release provenance pins resolve to the commit whose tree supplied the evidence",
+      "worth": 40,
+      "wanted": true
+    },
+    "66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release": {
+      "title": "66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release",
+      "supports": [
+        "the release provenance pins resolve to the commit whose tree supplied the evidence"
+      ]
+    },
+    "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit": {
+      "title": "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit"
+    },
+    "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it": {
+      "title": "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it",
+      "supports": [
+        "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone": {
+      "title": "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone"
+    },
+    "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed": {
+      "title": "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed",
+      "supports": [
+        "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean": {
+      "title": "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+      "blocks": [
+        "the release provenance pins resolve to the commit whose tree supplied the evidence"
+      ]
+    },
+    "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report": {
+      "title": "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report",
+      "supports": [
+        "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+        {
+          "node": "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+          "relation": "blocks",
+          "target": "the release provenance pins resolve to the commit whose tree supplied the evidence"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains": {
+      "title": "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains",
+      "supports": [
+        {
+          "node": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "status": "untried"
+        },
+        {
+          "node": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "relation": "addresses",
+          "target": "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
+        }
+      ]
+    },
+    "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts": {
+      "title": "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts",
+      "supports": [
+        {
+          "node": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table": {
+      "title": "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table"
+    },
+    "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline": {
+      "title": "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline",
+      "supports": [
+        "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -8693,7 +8850,7 @@
     "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause": {
       "title": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
       "effort": 1,
-      "status": "untried",
+      "status": "active",
       "addresses": [
         "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
       ]
@@ -8704,6 +8861,22 @@
       "status": "done",
       "addresses": [
         "the verification mode runs an effectful function three times, so a specialization over a state write answers a value that is wrong by two extra applications"
+      ]
+    },
+    "run door-order in a battery and read its actual failure instead of reasoning from its comment": {
+      "title": "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+      ]
+    },
+    "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time": {
+      "title": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
       ]
     }
   },
@@ -35948,6 +36121,474 @@
         ]
       ],
       "id": "bac9b762dc81a790"
+    },
+    {
+      "at": "2026-09-20T06:10:49.064434+00:00",
+      "after": "f285c4b165cd69a71086d3132d6a4605f1c176c0",
+      "did": "[{\"op\": \"status\", \"id\": \"read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause\", \"because\": \"battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors\", \"tags\": [], \"status\": \"active\"}]",
+      "parents": [
+        "bac9b762dc81a790"
+      ],
+      "assert": [
+        [
+          "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors",
+          "supersedes",
+          "the two lanes run the same suites and the suite that failed is fixed, so a single run decides it where a separate lock-order investigation would cost a diagnosis of something that is not broken"
+        ],
+        [
+          "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors",
+          "supports",
+          {
+            "node": "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+            "status": "active"
+          }
+        ],
+        [
+          "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors",
+          "title",
+          "battery 2 is running sh check.sh plunit dev-typed on a snapshot taken after the metta.plt fix, and battery 3 is running pytest to check the bag lift against the Python seat's findall over cursors"
+        ],
+        [
+          "read the running plunit and dev-typed battery rather than diagnosing dev-typed separately, since one check settles whether both lanes shared the metta.plt cause",
+          "status",
+          "active"
+        ]
+      ],
+      "id": "e033a34a8da25520"
+    },
+    {
+      "at": "2026-09-20T06:11:40.030862+00:00",
+      "after": "f285c4b165cd69a71086d3132d6a4605f1c176c0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order\", \"tags\": [\"source\"], \"title\": \"the lock-order cycle is reported as KNOWN and does not fail its lane\", \"fields\": {}}, {\"op\": \"add-goal\", \"id\": null, \"because\": \"it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed\", \"tags\": [], \"title\": \"know whether door-order is closable or is genuinely a baseline red\", \"fields\": {\"worth\": 30}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all\", \"tags\": [], \"title\": \"run door-order in a battery and read its actual failure instead of reasoning from its comment\", \"fields\": {\"effort\": 1, \"addresses\": [\"a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green\", \"tags\": [\"measured\"], \"title\": \"three checks are in flight and nothing further can be decided without them\", \"fields\": {}}]",
+      "parents": [
+        "e033a34a8da25520"
+      ],
+      "assert": [
+        [
+          "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green",
+          "supports",
+          "three checks are in flight and nothing further can be decided without them"
+        ],
+        [
+          "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green",
+          "tags",
+          "measured"
+        ],
+        [
+          "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green",
+          "title",
+          "battery 1 runs door-order, battery 2 runs plunit and dev-typed on a snapshot taken after the metta.plt fix, and battery 3 runs pytest against the lifted bag workaround; every other lane this session touched has been re-run green"
+        ],
+        [
+          "it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed",
+          "supports",
+          "know whether door-order is closable or is genuinely a baseline red"
+        ],
+        [
+          "it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed",
+          "title",
+          "it is the one lane the handover singles out as never having been green, and the release bar accepts the recorded baseline, so its status should be established rather than assumed"
+        ],
+        [
+          "know whether door-order is closable or is genuinely a baseline red",
+          "sort",
+          "prop"
+        ],
+        [
+          "know whether door-order is closable or is genuinely a baseline red",
+          "title",
+          "know whether door-order is closable or is genuinely a baseline red"
+        ],
+        [
+          "know whether door-order is closable or is genuinely a baseline red",
+          "wanted",
+          true
+        ],
+        [
+          "know whether door-order is closable or is genuinely a baseline red",
+          "worth",
+          30
+        ],
+        [
+          "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order",
+          "supports",
+          "the lock-order cycle is reported as KNOWN and does not fail its lane"
+        ],
+        [
+          "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order",
+          "tags",
+          "source"
+        ],
+        [
+          "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order",
+          "title",
+          "tests/prolog/lock_order.pl defines known(Cycle) :- known_cycle(Cycle,_) and print_cycle/2 prints the status word, so the line dev-typed ends on says known; the same file's lock_order_audit/1 fails for an inventoried cycle NO suite showed, which is the unused-suppression discipline applied to mutex order"
+        ],
+        [
+          "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all",
+          "supports",
+          {
+            "node": "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+            "status": "untried"
+          }
+        ],
+        [
+          "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all",
+          "supports",
+          {
+            "node": "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+            "relation": "addresses",
+            "target": "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+          }
+        ],
+        [
+          "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all",
+          "title",
+          "the lane is a drift check over the generated verdict table extensions/python/metta/doors/_orders.py, and a drift check either regenerates cleanly or names a boundary it cannot resolve; which of the two decides whether there is work here at all"
+        ],
+        [
+          "the lock-order cycle is reported as KNOWN and does not fail its lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lock-order cycle is reported as KNOWN and does not fail its lane",
+          "title",
+          "the lock-order cycle is reported as KNOWN and does not fail its lane"
+        ],
+        [
+          "three checks are in flight and nothing further can be decided without them",
+          "sort",
+          "prop"
+        ],
+        [
+          "three checks are in flight and nothing further can be decided without them",
+          "title",
+          "three checks are in flight and nothing further can be decided without them"
+        ],
+        [
+          "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "sort",
+          "approach"
+        ],
+        [
+          "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "addresses",
+          "a lock-order cycle of two, '$metta_typing_policy' and metta_deferred_translation, fails the dev-typed lane"
+        ],
+        [
+          "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "effort",
+          1
+        ],
+        [
+          "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "status",
+          "untried"
+        ],
+        [
+          "run door-order in a battery and read its actual failure instead of reasoning from its comment",
+          "title",
+          "run door-order in a battery and read its actual failure instead of reasoning from its comment"
+        ]
+      ],
+      "id": "be49ff90e30d5dbe"
+    },
+    {
+      "at": "2026-09-20T06:12:24.852548+00:00",
+      "after": "f285c4b165cd69a71086d3132d6a4605f1c176c0",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release\", \"tags\": [], \"title\": \"the release provenance pins resolve to the commit whose tree supplied the evidence\", \"fields\": {\"worth\": 40}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it\", \"tags\": [\"source\"], \"title\": \"pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed\", \"tags\": [\"source\"], \"title\": \"the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone\", \"fields\": {}}]",
+      "parents": [
+        "be49ff90e30d5dbe"
+      ],
+      "assert": [
+        [
+          "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit",
+          "sort",
+          "prop"
+        ],
+        [
+          "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit",
+          "title",
+          "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit"
+        ],
+        [
+          "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it",
+          "supports",
+          "pin_provenance.py takes no default commit on purpose, and the release sequence is land every functional commit, then pin against the LAST of them in a provenance-only commit"
+        ],
+        [
+          "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it",
+          "tags",
+          "source"
+        ],
+        [
+          "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it",
+          "title",
+          "read tests/checks/pin_provenance.py:552-600: a bare run reports, --check exits 1 if any placeholder would be rewritten, and --commit <A> writes A's full object ID; the comment records that a default of HEAD caused three sets of pins to be written and reverted in one session, each carrying a measurement taken days earlier onto a commit whose tree never produced it"
+        ],
+        [
+          "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone",
+          "title",
+          "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone"
+        ],
+        [
+          "the release provenance pins resolve to the commit whose tree supplied the evidence",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release provenance pins resolve to the commit whose tree supplied the evidence",
+          "title",
+          "the release provenance pins resolve to the commit whose tree supplied the evidence"
+        ],
+        [
+          "the release provenance pins resolve to the commit whose tree supplied the evidence",
+          "wanted",
+          true
+        ],
+        [
+          "the release provenance pins resolve to the commit whose tree supplied the evidence",
+          "worth",
+          40
+        ],
+        [
+          "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed",
+          "supports",
+          "the pass decides per file class rather than per byte, so a placeholder inside a non-docstring Python string literal is left alone"
+        ],
+        [
+          "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed",
+          "tags",
+          "source"
+        ],
+        [
+          "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed",
+          "title",
+          "the tool's docstring records the 2026-08-31 failure a plain textual substitution caused: it reached into twelve string literals, the re-pin tool began writing a stale object ID into every twin it priced, and the evidence gate's own self-test had an object ID planted where it was still testing for the word, so the RELEASE=1 rule went untested and passed"
+        ],
+        [
+          "66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release",
+          "sort",
+          "prop"
+        ],
+        [
+          "66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release",
+          "supports",
+          "the release provenance pins resolve to the commit whose tree supplied the evidence"
+        ],
+        [
+          "66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release",
+          "title",
+          "66 commit=WORKTREE placeholders are open and the evidence lane counts them, so they are the last functional step before a release"
+        ]
+      ],
+      "id": "f0dc3f2e6a4087c3"
+    },
+    {
+      "at": "2026-09-20T06:17:07.477629+00:00",
+      "after": "f285c4b165cd69a71086d3132d6a4605f1c176c0",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report\", \"tags\": [\"measured\"], \"title\": \"four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean\", \"fields\": {\"blocks\": [\"the release provenance pins resolve to the commit whose tree supplied the evidence\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains\", \"tags\": [], \"title\": \"add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time\", \"fields\": {\"effort\": 1, \"addresses\": [\"four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean\"]}}, {\"op\": \"status\", \"id\": \"add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time\", \"because\": \"MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline\", \"tags\": [\"measured\"], \"title\": \"door-order is a genuine baseline red carrying real outstanding work, not a stale generated table\", \"fields\": {}}]",
+      "parents": [
+        "f0dc3f2e6a4087c3"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline",
+          "supports",
+          "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table"
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline",
+          "title",
+          "MEASURED 2026-09-20 in battery 1: the lane answers counts 0:27, 1:16, 2:2 and unordered:182, naming 182 doors whose dispatch the analysis cannot order, over 29,584 call sites in 114s; regenerating the table would not change that, so it stays in the accepted baseline"
+        ],
+        [
+          "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report",
+          "supports",
+          "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
+        ],
+        [
+          "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report",
+          "supports",
+          {
+            "node": "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+            "relation": "blocks",
+            "target": "the release provenance pins resolve to the commit whose tree supplied the evidence"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report",
+          "title",
+          "MEASURED 2026-09-20: pin_provenance.py --check named agenticmind.json and the three tests/data/lib_package Prolog files, and its return is `1 if (reporting and total) or missed else 0`, so `missed` fails the --commit run too and not only the report"
+        ],
+        [
+          "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts",
+          "supersedes",
+          "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains"
+        ],
+        [
+          "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts",
+          "supports",
+          {
+            "node": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+            "status": "done"
+          }
+        ],
+        [
+          "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts",
+          "title",
+          "MEASURED 2026-09-20: the net reports 0 files outside the globs, and evidence, evidence-selftest and provenance-pin-selftest are all ok with 0 unbacked tags; three of the record's own occurrences turned out to be backticked mentions the tool already exempts"
+        ],
+        [
+          "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table",
+          "sort",
+          "prop"
+        ],
+        [
+          "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table",
+          "title",
+          "door-order is a genuine baseline red carrying real outstanding work, not a stale generated table"
+        ],
+        [
+          "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+          "sort",
+          "prop"
+        ],
+        [
+          "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+          "blocks",
+          "the release provenance pins resolve to the commit whose tree supplied the evidence"
+        ],
+        [
+          "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean",
+          "title",
+          "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
+        ],
+        [
+          "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains",
+          "sort",
+          "prop"
+        ],
+        [
+          "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains",
+          "supports",
+          {
+            "node": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+            "status": "untried"
+          }
+        ],
+        [
+          "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains",
+          "supports",
+          {
+            "node": "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+            "relation": "addresses",
+            "target": "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
+          }
+        ],
+        [
+          "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains",
+          "title",
+          "that list's own comments record the out-of-glob net naming files on four earlier dates and the repair each time being to add the glob, pin half only; tests/data/prologface was named one directory at a time, so the general glob covers the next fixture directory the first time it carries a pin instead of the next time the net complains"
+        ],
+        [
+          "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "sort",
+          "approach"
+        ],
+        [
+          "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "addresses",
+          "four files carry provenance placeholders outside every glob, and the net exits 1 on any such file, so the release pin pass could not come back clean"
+        ],
+        [
+          "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "effort",
+          1
+        ],
+        [
+          "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "status",
+          "done"
+        ],
+        [
+          "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time",
+          "title",
+          "add the two missing globs to PROVENANCE_SOURCES, the general tests/data one and the record, rather than one directory at a time"
+        ]
+      ],
+      "id": "76bfb28ba47013b5"
     }
   ]
 }

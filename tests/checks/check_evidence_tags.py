@@ -445,6 +445,26 @@ PROVENANCE_SOURCES = (
     "extensions/python/tests/*.py",
     "extensions/*/benchmarks/*.json",
     "engine/*.json",
+    # The Prolog fixtures a suite DRIVES, which carry obligation headers of
+    # their own: tests/data/lib_package/mutations.pl is the package-law
+    # mutation harness engine/check.sh runs as the package-mutations GATE, and
+    # its neighbours are the support it loads. tests/data/prologface/*.pl was
+    # named one directory at a time in the claim half above; this glob is the
+    # general one, so the next fixture directory is covered the first time it
+    # carries a pin instead of the next time the out-of-glob net names it
+    # [measured 2026-09-20 by tests/checks/pin_provenance.py --check, which
+    # reported all three of lib_package's].
+    "tests/data/**/*.pl",
+    # The RECORD. agenticmind.json quotes evidence tags inside the reasons it
+    # carries, because "MEASURED ...; commit=WORKTREE" is the reason a status
+    # was given, so it spells the placeholder in a commentless format exactly
+    # as the baselines above do. It joins the PIN half only and never the
+    # claim half: a record's reasons are an account of what was believed and
+    # why, not source claims for the evidence gate to resolve
+    # [measured 2026-09-20: 5 pins, and the net exits 1 on any file it cannot
+    # reach, so an unreachable one blocks the release pass rather than only
+    # the report].
+    "agenticmind.json",
     "*.sh",
     "engine/*.sh",
     "extensions/*/*.sh",
