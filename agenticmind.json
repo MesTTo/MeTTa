@@ -8195,6 +8195,156 @@
       "supersedes": [
         "the counterexample from four hunts is that inline format/2 goals cost on EVERY call and close the window; a clause that runs only when the earlier clauses have all failed costs nothing on success, which puts back exactly the detail abstracted away instead of redesigning the instrument. Four predicates get one each, metta_reference_declare/3, metta_reference_source/3, metta_reference_read_manifest/3 and metta_reference_check_form/6, so the innermost one that prints names the level"
       ]
+    },
+    "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately": {
+      "title": "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately"
+    },
+    "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal": {
+      "title": "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal",
+      "supports": [
+        "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert": {
+      "title": "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert"
+    },
+    "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have": {
+      "title": "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have",
+      "supports": [
+        "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source": {
+      "title": "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source"
+    },
+    "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished": {
+      "title": "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished",
+      "supports": [
+        "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a waiter never reads finished from not-yet-registered in the reference loader": {
+      "title": "a waiter never reads finished from not-yet-registered in the reference loader",
+      "worth": 35,
+      "wanted": true
+    },
+    "it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once": {
+      "title": "it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once",
+      "supports": [
+        "a waiter never reads finished from not-yet-registered in the reference loader"
+      ]
+    },
+    "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs": {
+      "title": "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs",
+      "supports": [
+        {
+          "node": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "status": "untried"
+        },
+        {
+          "node": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing": {
+      "title": "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing"
+    },
+    "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic": {
+      "title": "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic",
+      "supports": [
+        "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix": {
+      "title": "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix"
+    },
+    "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged": {
+      "title": "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged",
+      "supports": [
+        "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two": {
+      "title": "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two"
+    },
+    "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible": {
+      "title": "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible",
+      "supports": [
+        "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged": {
+      "title": "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged"
+    },
+    "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8": {
+      "title": "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8",
+      "supports": [
+        "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the standing transaction-visibility rule is what my retry violated": {
+      "title": "the standing transaction-visibility rule is what my retry violated"
+    },
+    "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state": {
+      "title": "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state",
+      "supports": [
+        "the standing transaction-visibility rule is what my retry violated"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes": {
+      "title": "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes",
+      "supports": [
+        {
+          "node": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "status": "untried"
+        },
+        {
+          "node": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "relation": "addresses",
+          "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        }
+      ]
+    },
+    "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard": {
+      "title": "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard",
+      "supports": [
+        {
+          "node": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -9432,6 +9582,22 @@
       "title": "instrument on the FAILURE side, with a last clause per predicate that prints and fails, so the success path pays nothing but a choicepoint",
       "effort": 1,
       "status": "active",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it": {
+      "title": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+      ]
+    },
+    "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after": {
+      "title": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+      "effort": 2,
+      "status": "done",
       "addresses": [
         "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
       ]
@@ -38634,6 +38800,457 @@
         ]
       ],
       "id": "0d22b4a0c5c4246b"
+    },
+    {
+      "at": "2026-09-20T06:54:02.898733+00:00",
+      "after": "d6f487286ee4b774800465faa959aa32b4efa6f0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal\", \"tags\": [\"source\"], \"title\": \"reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have\", \"tags\": [\"source\"], \"title\": \"that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert\", \"fields\": {}}]",
+      "parents": [
+        "0d22b4a0c5c4246b"
+      ],
+      "assert": [
+        [
+          "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal",
+          "supports",
+          "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately"
+        ],
+        [
+          "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal",
+          "tags",
+          "source"
+        ],
+        [
+          "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal",
+          "title",
+          "read the source: metta_reference_thread_call(thread_spawn, ...) precedes assertz(metta_reference_load_state(Home, pending(Future))), and the Future only exists after the spawn, which is why it is ordered that way; the same file's metta_source_flight_enter/2 shows the closed form, asserting the flight under with_mutex before running the goal"
+        ],
+        [
+          "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately",
+          "sort",
+          "prop"
+        ],
+        [
+          "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately",
+          "title",
+          "reference_loading.pl:227-229 spawns the worker BEFORE recording pending(Future), so a waiter arriving between them sees no state and metta_reference_wait/1's final `; true` returns immediately"
+        ],
+        [
+          "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert",
+          "sort",
+          "prop"
+        ],
+        [
+          "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert",
+          "title",
+          "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert"
+        ],
+        [
+          "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have",
+          "sort",
+          "prop"
+        ],
+        [
+          "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have",
+          "supports",
+          "that window is NOT the cause of this intermittent, because the failing caller reaches the wait in the same thread that did the spawn and the assert"
+        ],
+        [
+          "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have",
+          "tags",
+          "source"
+        ],
+        [
+          "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have",
+          "title",
+          "the test body is metta_add_atom(A,[from,Path],_), metta_reference_wait(Home), ... inside one engine, so the two goals are sequential in one thread and the assert has landed before the wait runs; the window needs a SECOND waiter to be hit, which this test does not have"
+        ]
+      ],
+      "id": "d0113d5c39618f49"
+    },
+    {
+      "at": "2026-09-20T06:54:25.431444+00:00",
+      "after": "d6f487286ee4b774800465faa959aa32b4efa6f0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished\", \"tags\": [\"source\"], \"title\": \"the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source\", \"fields\": {}}, {\"op\": \"add-goal\", \"id\": null, \"because\": \"it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once\", \"tags\": [], \"title\": \"a waiter never reads finished from not-yet-registered in the reference loader\", \"fields\": {\"worth\": 35}}]",
+      "parents": [
+        "d0113d5c39618f49"
+      ],
+      "assert": [
+        [
+          "a waiter never reads finished from not-yet-registered in the reference loader",
+          "sort",
+          "prop"
+        ],
+        [
+          "a waiter never reads finished from not-yet-registered in the reference loader",
+          "title",
+          "a waiter never reads finished from not-yet-registered in the reference loader"
+        ],
+        [
+          "a waiter never reads finished from not-yet-registered in the reference loader",
+          "wanted",
+          true
+        ],
+        [
+          "a waiter never reads finished from not-yet-registered in the reference loader",
+          "worth",
+          35
+        ],
+        [
+          "it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once",
+          "supports",
+          "a waiter never reads finished from not-yet-registered in the reference loader"
+        ],
+        [
+          "it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once",
+          "title",
+          "it is a live race with no observed failure yet, found while chasing a different one; recording it with its reachability costs nothing and changing a concurrency protocol on no observed failure, at the end of a long session, is the risk this session has already been bitten by once"
+        ],
+        [
+          "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished",
+          "sort",
+          "prop"
+        ],
+        [
+          "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished",
+          "supports",
+          "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source"
+        ],
+        [
+          "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished",
+          "tags",
+          "source"
+        ],
+        [
+          "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished",
+          "title",
+          "reference_loading.pl installs the wrappers at line 224, before the spawn at 227, and each wrapper body is (metta_reference_wait(Home), call(Original)); so any OTHER thread that calls a wrapped manifest head between the spawn and the assertz is a second waiter, finds no load state, takes metta_reference_wait/1's final `; true` and proceeds as though the load had finished"
+        ],
+        [
+          "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source",
+          "sort",
+          "prop"
+        ],
+        [
+          "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source",
+          "title",
+          "the spawn-before-register window is REACHABLE, so it is a latent defect and not merely a shape in the source"
+        ]
+      ],
+      "id": "11388b6039caf00c"
+    },
+    {
+      "at": "2026-09-20T06:58:53.614055+00:00",
+      "after": "d6f487286ee4b774800465faa959aa32b4efa6f0",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs\", \"tags\": [], \"title\": \"amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it\", \"fields\": {\"effort\": 2, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic\", \"tags\": [\"measured\"], \"title\": \"the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing\", \"fields\": {}}]",
+      "parents": [
+        "11388b6039caf00c"
+      ],
+      "assert": [
+        [
+          "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic",
+          "supports",
+          "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing"
+        ],
+        [
+          "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic",
+          "title",
+          "MEASURED 2026-09-20: a sleep(0.05) between thread_spawn and assertz(metta_reference_load_state(Home, pending(Future))) gave 0 refusals in 3 runs, where the unamplified rate is 1 to 2 in 10; if a waiter arriving in that window caused the failure, a 50ms window would have made it deterministic"
+        ],
+        [
+          "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs",
+          "sort",
+          "prop"
+        ],
+        [
+          "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs",
+          "supports",
+          {
+            "node": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+            "status": "untried"
+          }
+        ],
+        [
+          "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs",
+          "supports",
+          {
+            "node": "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs",
+          "title",
+          "four instrumentation hunts showed the hit rate falling as markers were added, so the instrument was destroying what it measured; a delay INSIDE a candidate window makes the race deterministic if that window is the one, and leaves it untouched if it is not, which turns a rare intermittent into a yes-or-no question answered in three runs"
+        ],
+        [
+          "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing",
+          "title",
+          "the spawn-before-register window is NOT the cause: widening it to 50ms changed nothing"
+        ],
+        [
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "sort",
+          "approach"
+        ],
+        [
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "effort",
+          2
+        ],
+        [
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "status",
+          "untried"
+        ],
+        [
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it",
+          "title",
+          "amplify a suspected window with a sleep instead of observing it, since observation closes the race and amplification widens it"
+        ]
+      ],
+      "id": "df387937fa03e326"
+    },
+    {
+      "at": "2026-09-20T07:26:29.577563+00:00",
+      "after": "d6f487286ee4b774800465faa959aa32b4efa6f0",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged\", \"tags\": [\"measured\"], \"title\": \"the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible\", \"tags\": [\"measured\"], \"title\": \"the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8\", \"tags\": [\"measured\"], \"title\": \"the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state\", \"tags\": [\"source\"], \"title\": \"the standing transaction-visibility rule is what my retry violated\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes\", \"tags\": [], \"title\": \"keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after\", \"fields\": {\"effort\": 2, \"addresses\": [\"reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row\"]}}, {\"op\": \"status\", \"id\": \"keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after\", \"because\": \"the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "df387937fa03e326"
+      ],
+      "assert": [
+        [
+          "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8",
+          "sort",
+          "prop"
+        ],
+        [
+          "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8",
+          "supports",
+          "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged"
+        ],
+        [
+          "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8",
+          "tags",
+          "measured"
+        ],
+        [
+          "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8",
+          "title",
+          "CHANGELOG.md and docs/journal/2026-09-11-classes-on-metta.md record an invalidation wave retracting a construction's registrations between its translation and its assert, remedied by checking the rows still stand and publishing once more; applied here it made things WORSE, 8 of 8 runs failing against 7 of 8, because publishing twice is itself orphan-producing, and deferring the check to post-commit only reached 6 of 8"
+        ],
+        [
+          "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible",
+          "supports",
+          "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two"
+        ],
+        [
+          "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible",
+          "title",
+          "MEASURED 2026-09-20 by observing the ownership check from inside the findall: SEEN lists nine clauses all free and NOW lists no owned projection; an event log of every assert and row shows both projections were asserted AND rowed and never erased, so the row is written and then not visible"
+        ],
+        [
+          "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged",
+          "supports",
+          "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix"
+        ],
+        [
+          "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged",
+          "title",
+          "MEASURED 2026-09-20 over eight runs of a 6,000-iteration loop: two ended in compound_name_arguments/3 Type error `compound' expected found `!', and none did once metta_reference_source_rewrite_body/6's guard became compound(Goal) instead of nonvar(Goal); an atom body has no sub-goals to rewrite and the clause below already returns it unchanged"
+        ],
+        [
+          "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state",
+          "sort",
+          "prop"
+        ],
+        [
+          "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state",
+          "supports",
+          "the standing transaction-visibility rule is what my retry violated"
+        ],
+        [
+          "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state",
+          "tags",
+          "source"
+        ],
+        [
+          "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state",
+          "title",
+          "docs/journal/2026-09-08-what-the-waivers-were-paying-for.md: do not infer clause liveness from a live enumeration inside nested SWI transactions, use captured references and post-commit observations; metta_reference_publish_readers/2 read the ownership table live while a nested transaction was open, so its verdict was about no particular state"
+        ],
+        [
+          "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged",
+          "title",
+          "the engine has met this exact orphan before, in the specializer, and its recorded remedy does not transfer unchanged"
+        ],
+        [
+          "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard",
+          "sort",
+          "prop"
+        ],
+        [
+          "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard",
+          "supersedes",
+          "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes"
+        ],
+        [
+          "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard",
+          "supports",
+          {
+            "node": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+            "status": "done"
+          }
+        ],
+        [
+          "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard",
+          "tags",
+          "tested"
+        ],
+        [
+          "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard",
+          "title",
+          "the guard is committed with its measurement, tests/prolog/probes/reference_load_race.pl reproduces the refusal at iteration 85 in about a second, and all 38 tests of the suite pass with the guard"
+        ],
+        [
+          "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix",
+          "title",
+          "the reference-loading intermittent has TWO failure modes and one of them is a plain bug with a one-word fix"
+        ],
+        [
+          "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two",
+          "sort",
+          "prop"
+        ],
+        [
+          "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two",
+          "title",
+          "the remaining failure is an ORPHANED projection: the producer finds nine clauses for a space, two of them its own loader projections carrying no ownership row, and builds four loaders where the template admits two"
+        ],
+        [
+          "the standing transaction-visibility rule is what my retry violated",
+          "sort",
+          "prop"
+        ],
+        [
+          "the standing transaction-visibility rule is what my retry violated",
+          "title",
+          "the standing transaction-visibility rule is what my retry violated"
+        ],
+        [
+          "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes",
+          "sort",
+          "prop"
+        ],
+        [
+          "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes",
+          "supports",
+          {
+            "node": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+            "status": "untried"
+          }
+        ],
+        [
+          "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes",
+          "supports",
+          {
+            "node": "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+            "relation": "addresses",
+            "target": "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+          }
+        ],
+        [
+          "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes",
+          "title",
+          "three measured attempts at cleanup-after made it worse, and the measurements say why: a second publication is itself how an orphan is made. The next attempt has to stop the row and the clause parting company, which is a decision about publication ordering, and the probe makes each candidate answerable in seconds instead of minutes"
+        ],
+        [
+          "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "sort",
+          "approach"
+        ],
+        [
+          "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "addresses",
+          "reference_loading:a_suspended_background_qualified_query_survives_release fails intermittently, refusing to translate a (from FILE (qualified q)) row"
+        ],
+        [
+          "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "effort",
+          2
+        ],
+        [
+          "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "status",
+          "done"
+        ],
+        [
+          "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after",
+          "title",
+          "keep the verified guard, promote the reproduction into the tree as a probe, and leave the orphan to a fix that prevents it rather than cleans up after"
+        ]
+      ],
+      "id": "1c1450119a523fc2"
     }
   ]
 }

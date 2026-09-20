@@ -62,6 +62,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A clause body that is an atom no longer kills the reference-source rewrite.
+  `metta_reference_source_rewrite_body/6` guarded its decomposition with
+  `nonvar`, and `compound_name_arguments/3` throws for an atom rather than
+  failing, so a body holding the bare cut raised where the walk should have
+  stopped; the producer asserts every projected reader as
+  `(Head :- !, Resolve, Body)`, so such bodies occur. Measured 2026-09-20 over
+  eight runs of a 6,000-iteration loop: two ended in that type error and none
+  did after the guard became `compound`.
+- `tests/prolog/probes/reference_load_race.pl` reproduces the reference-loading
+  intermittent in about a second, where the suite needs minutes: it drives the
+  suspended background qualified query in a loop, reusing the suite's own
+  fixture helpers so the case cannot drift from the test. The suite's remaining
+  failure mode, a projected reader left with no ownership row, is characterised
+  in the record but not fixed.
+
 - The builtin-type table's test reads the contract it is testing. It asserted
   the table equals `lib_builtin_types.metta` plus the prelude, which forbids
   the extension `engine/metta.pl` documents: an external Prolog library extends
