@@ -10323,6 +10323,73 @@
       "tags": [
         "measured"
       ]
+    },
+    "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure": {
+      "title": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+    },
+    "user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h": {
+      "title": "user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h",
+      "supports": [
+        "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+      ]
+    },
+    "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh": {
+      "title": "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh",
+      "supports": [
+        {
+          "node": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "status": "untried"
+        },
+        {
+          "node": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "relation": "addresses",
+          "target": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        }
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved": {
+      "title": "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved",
+      "supports": [
+        {
+          "node": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "it would take the root from 38 to 31 and mirror the superproject's own tools/": {
+      "title": "it would take the root from 38 to 31 and mirror the superproject's own tools/",
+      "supports": [
+        {
+          "node": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "status": "untried"
+        },
+        {
+          "node": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "relation": "addresses",
+          "target": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        }
+      ]
+    },
+    "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter": {
+      "title": "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter",
+      "supports": [
+        {
+          "node": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "it would take the root from 38 to 31 and mirror the superproject's own tools/"
+      ]
     }
   },
   "approaches": {
@@ -11800,6 +11867,22 @@
       "status": "done",
       "addresses": [
         "moving the root helper scripts into tools/ left 24 call sites naming the old paths: 9 in the example corpus, 10 in tests/shell, one in the mork seat's tests, two cp targets, and the governance test's expected clause"
+      ]
+    },
+    "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it": {
+      "title": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+      ]
+    },
+    "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well": {
+      "title": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
       ]
     }
   },
@@ -47150,6 +47233,205 @@
         "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
       },
       "id": "00e5f541feff95fe"
+    },
+    {
+      "at": "2026-09-20T13:13:30.646041+00:00",
+      "after": "289300eaaa0024fd1b018e73c3e794d8a0d5db89",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h\", \"tags\": [], \"title\": \"the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh\", \"tags\": [\"user\"], \"title\": \"move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it\", \"fields\": {\"effort\": 1, \"addresses\": [\"the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure\"]}}, {\"op\": \"status\", \"id\": \"move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it\", \"because\": \"rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it would take the root from 38 to 31 and mirror the superproject's own tools/\", \"tags\": [], \"title\": \"group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well\", \"fields\": {\"effort\": 2, \"addresses\": [\"the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure\"]}}, {\"op\": \"status\", \"id\": \"group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well\", \"because\": \"296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter\", \"tags\": [], \"status\": \"unwanted\"}]",
+      "parents": [
+        "00e5f541feff95fe"
+      ],
+      "assert": [
+        [
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh",
+          "supports",
+          {
+            "node": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+            "status": "untried"
+          }
+        ],
+        [
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh",
+          "supports",
+          {
+            "node": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+            "relation": "addresses",
+            "target": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+          }
+        ],
+        [
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh",
+          "tags",
+          "user"
+        ],
+        [
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh",
+          "title",
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh"
+        ],
+        [
+          "it would take the root from 38 to 31 and mirror the superproject's own tools/",
+          "sort",
+          "prop"
+        ],
+        [
+          "it would take the root from 38 to 31 and mirror the superproject's own tools/",
+          "supports",
+          {
+            "node": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+            "status": "untried"
+          }
+        ],
+        [
+          "it would take the root from 38 to 31 and mirror the superproject's own tools/",
+          "supports",
+          {
+            "node": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+            "relation": "addresses",
+            "target": "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+          }
+        ],
+        [
+          "it would take the root from 38 to 31 and mirror the superproject's own tools/",
+          "title",
+          "it would take the root from 38 to 31 and mirror the superproject's own tools/"
+        ],
+        [
+          "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved",
+          "sort",
+          "prop"
+        ],
+        [
+          "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved",
+          "supersedes",
+          "every accelerated unit resolves its artifact through prolog_load_context/2 against its own directory, so moving the artifacts too would mean changing eight load sites to gain nothing, while moving only the sources costs one loop in build.sh"
+        ],
+        [
+          "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved",
+          "supports",
+          {
+            "node": "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+            "status": "done"
+          }
+        ],
+        [
+          "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved",
+          "tags",
+          "tested"
+        ],
+        [
+          "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved",
+          "title",
+          "rm engine/*.so && sh engine/build.sh exits 0 and rebuilds all seven, and the tracked root went 49 to 38 once the C files moved"
+        ],
+        [
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure",
+          "title",
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        ],
+        [
+          "user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h",
+          "sort",
+          "prop"
+        ],
+        [
+          "user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h",
+          "supports",
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        ],
+        [
+          "user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h",
+          "title",
+          "user 2026-09-20: 'the metta kernal as well there are c files there are too many root files they should be grouped in a folder'; measured 49 tracked entries at engine/ root, of which 7 .c and 1 .h"
+        ],
+        [
+          "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter",
+          "sort",
+          "prop"
+        ],
+        [
+          "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter",
+          "supersedes",
+          "it would take the root from 38 to 31 and mirror the superproject's own tools/"
+        ],
+        [
+          "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter",
+          "supports",
+          {
+            "node": "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter",
+          "title",
+          "296 sites name those scripts, and most are evidence tags in comments citing the command as it stood at the commit they pin, so rewriting them would falsify the provenance the tags exist to carry; the remaining 29 root files are .pl module facades, which are the engine's structure rather than clutter"
+        ],
+        [
+          "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "sort",
+          "approach"
+        ],
+        [
+          "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "addresses",
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        ],
+        [
+          "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "effort",
+          2
+        ],
+        [
+          "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "status",
+          "unwanted"
+        ],
+        [
+          "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well",
+          "title",
+          "group the engine's four shell scripts, bench.py and bench-baseline.json under engine/tools/ as well"
+        ],
+        [
+          "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "sort",
+          "approach"
+        ],
+        [
+          "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "addresses",
+          "the engine's root listed 49 tracked files, eight of them C sources and a header, which said nothing about the engine's structure"
+        ],
+        [
+          "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "effort",
+          1
+        ],
+        [
+          "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "status",
+          "done"
+        ],
+        [
+          "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it",
+          "title",
+          "move the engine's C sources to engine/c/ and have build.sh read them from there while still writing each .so beside the .pl that loads it"
+        ]
+      ],
+      "telemetry": {
+        "focus": "dispatch two codex genius agents, one per seat, each in its own verified filesystem copy on its own component branch, briefed from a file in its own tree"
+      },
+      "id": "b42cbed77a41845a"
     }
   ]
 }

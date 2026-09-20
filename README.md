@@ -540,7 +540,7 @@ MeTTa's own evaluator, written in MeTTa.
 
 # PyMeTTa
 
-`pip install PyMeTTa` — 104 root exports over 20 public modules, and the 61
+`pip install PyMeTTa`. 104 root exports over 20 public modules, and the 61
 libraries of the Library Pack. Repository:
 [MesTTo/PyMeTTa](https://github.com/MesTTo/PyMeTTa).
 
@@ -631,7 +631,7 @@ lifted = metta.reflection.match(S.effect(S.upto, V.e))
 assert [str(row.e) for row in lifted] == ["nondeterministicReadOnly"]
 ```
 
-**Also in the box** — `metta.vocabularies` names 49 closed value sets
+**Also in the box.** `metta.vocabularies` names 49 closed value sets
 (`Semiring`, `EffectClass`, `Determinism`, `CachePolicy`, `Volatility`,
 `Delivery`); `metta.foreign` has 20 capability protocols (`Matcher`,
 `BulkAdder`, `Transactional`, `Snapshotter`, `Planner`, `WorldCommitter`);
@@ -724,11 +724,11 @@ assert all(name in found.why().render() for name in ("abc", "p1", "p2", "p4", "p
 
 # TSMeTTa
 
-`npm install tsmetta` — the engine is a WebAssembly SWI-Prolog inside your Node
+`npm install tsmetta`. The engine is a WebAssembly SWI-Prolog inside your Node
 process, so there is nothing to install, and the same code runs in a browser.
 Repository: [MesTTo/TSMeTTa](https://github.com/MesTTo/TSMeTTa).
 
-**The surface** — `S` and `V` proxies with camelCase reaching MeTTa's hyphens
+**The surface.** `S` and `V` proxies with camelCase reaching MeTTa's hyphens
 (`fn.carAtom` is `car-atom`); `space`, `spaces`, `view`, `State`, `ScopeHandle`,
 `World`, `Limits`, `Stats`; `answers`, `matching`, `derivation`, `strategies`,
 `schema`; `define` with `trace` and `lower`; `algebra` with the same semirings
@@ -781,7 +781,7 @@ m.dispose();
 A C program opens the engine in its own process, builds terms and asks.
 Repository: [MesTTo/CMeTTa](https://github.com/MesTTo/CMeTTa).
 
-**The surface** — `mt_open`, `mt_close`, `mt_verbose`, `mt_thread_attach`;
+**The surface.** `mt_open`, `mt_close`, `mt_verbose`, `mt_thread_attach`;
 constructors `mt_sym`, `mt_var`, `mt_text`, `mt_num`, `mt_real`, `mt_bool`,
 `mt_unit`, `mt_bigint`, `mt_rational`, `mt_spaceref`, `mt_exprv`, every one
 `MT_MUST_USE`; explicit refcounting through `mt_keep` and `mt_drop`, so
@@ -790,7 +790,7 @@ ownership is in the signature; `mt_kind_of`, `mt_name`, `mt_int`, `mt_float`,
 `mt_bindings_*` and `mt_substitute` exposed directly; `mt_self`, `mt_catalog`,
 `mt_space_open` and the add/del/match/eval/atoms/count/wipe set; `mt_run`,
 `mt_load`, `mt_do`, then `mt_next` or `mt_row_next` and `mt_bound`; `mt_parse`,
-`mt_show`, `mt_write_dup`; and no exceptions — `mt_error`, `mt_errmsg`,
+`mt_show`, `mt_write_dup`; and no exceptions: `mt_error`, `mt_errmsg`,
 `mt_remedy` and `mt_ground` mean a refusal names its own fix.
 
 `mt_def` installs a C function as a MeTTa head with its effect class declared.
@@ -899,15 +899,15 @@ int main(void)
 
 # Documentation
 
-- [llms.txt](llms.txt) — the language and every surface, with exact return
+- [llms.txt](llms.txt): the language and every surface, with exact return
   shapes. A gate checks its names against the live engine.
-- [extensions/python/llms.txt](extensions/python/llms.txt) — the Python library
+- [extensions/python/llms.txt](extensions/python/llms.txt): the Python library
   alone.
-- [examples/](examples/) — 386 examples in 22 chapters, every one run by the
+- [examples/](examples/): 386 examples in 22 chapters, every one run by the
   gate, so none of it is stale.
-- [EXTENDING.md](EXTENDING.md) — writing an integration.
-- [CONTRIBUTING.md](CONTRIBUTING.md) — working on this repository.
-- [SECURITY.md](SECURITY.md) — reporting a vulnerability.
+- [EXTENDING.md](EXTENDING.md): writing an integration.
+- [CONTRIBUTING.md](CONTRIBUTING.md): working on this repository.
+- [SECURITY.md](SECURITY.md): reporting a vulnerability.
 
 ## Citing
 
