@@ -699,6 +699,17 @@ seam:engine_emitted(case_default_runtime/2).
 seam:engine_emitted(case_runtime/3).
 seam:engine_emitted(control_exception/1).
 seam:engine_emitted(foldall/4).
+%Beside foldall/4 and for its reason: both are control forms
+%translate_special_dl/5 compiles, named together in special_forms.pl's own list
+%of them, so neither is a name a program supplies. `forall` is SWI's own
+%forall/2 rather than a runtime helper of ours, which is why it was missed --
+%the emitted goal looks like a builtin rather than something this engine
+%writes -- and capturable all the same: a space defining `forall` would take
+%the goal the translator emitted for `(forall $gen $test)`. Nothing in the
+%corpus or the libraries defines it [measured 2026-09-20: no `(= (forall` in
+%examples/ or lib/, and static_checks.pl reports it as the one capturable
+%emitted goal not named here].
+seam:engine_emitted(forall/2).
 seam:engine_emitted(has_type/2).
 seam:engine_emitted(check_argument_type/3).
 seam:engine_emitted(check_argument_type_under_policy/3).
