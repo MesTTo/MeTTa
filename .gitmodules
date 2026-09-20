@@ -1,24 +1,24 @@
 [submodule "engine"]
 	path = engine
-	url = /home/user/Dev/PyPeTTa1/components/MeTTa-Kernel.git
+	url = https://github.com/MesTTo/metta-engine.git
 [submodule "lib"]
 	path = lib
-	url = /home/user/Dev/PyPeTTa1/components/metta-lib.git
+	url = https://github.com/MesTTo/metta-lib.git
 [submodule "examples"]
 	path = examples
-	url = /home/user/Dev/PyPeTTa1/components/MeTTa-Examples.git
+	url = https://github.com/MesTTo/MeTTa-Examples.git
 [submodule "ext"]
 	path = ext
-	url = /home/user/Dev/PyPeTTa1/components/metta-extensions.git
+	url = https://github.com/MesTTo/metta-extensions.git
 [submodule "extensions/python"]
 	path = extensions/python
-	url = /home/user/Dev/PyPeTTa1/components/pymetta.git
+	url = https://github.com/MesTTo/pymetta.git
 [submodule "extensions/cmetta"]
 	path = extensions/cmetta
-	url = /home/user/Dev/PyPeTTa1/components/cmetta.git
+	url = https://github.com/MesTTo/cmetta.git
 [submodule "extensions/node"]
 	path = extensions/node
-	url = /home/user/Dev/PyPeTTa1/components/metta-node.git
+	url = https://github.com/MesTTo/metta-node.git
 [submodule "extensions/mork"]
 	path = extensions/mork
-	url = /home/user/Dev/PyPeTTa1/components/metta-mork.git
+	url = https://github.com/MesTTo/metta-mork.git
