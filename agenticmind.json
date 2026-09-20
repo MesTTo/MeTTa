@@ -12558,6 +12558,69 @@
       "tags": [
         "measured"
       ]
+    },
+    "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD": {
+      "title": "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD"
+    },
+    "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists": {
+      "title": "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists",
+      "supports": [
+        "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle": {
+      "title": "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle"
+    },
+    "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it": {
+      "title": "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it",
+      "supports": [
+        "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench": {
+      "title": "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench"
+    },
+    "each verified by running its lane before and after; all now exit 0": {
+      "title": "each verified by running its lane before and after; all now exit 0",
+      "supports": [
+        "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud": {
+      "title": "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve": {
+      "title": "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve",
+      "supports": [
+        "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added": {
+      "title": "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added"
+    },
+    "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here": {
+      "title": "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here",
+      "supports": [
+        "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -55949,6 +56012,172 @@
         ]
       ],
       "id": "65979e42bea07fbb"
+    },
+    {
+      "at": "2026-09-20T19:26:58.263146+00:00",
+      "after": "54fedcb0e19bc3e3d7ebf90dfb50bcac9fce5d32",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists\", \"tags\": [\"measured\"], \"title\": \"the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it\", \"tags\": [\"measured\"], \"title\": \"the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each verified by running its lane before and after; all now exit 0\", \"tags\": [\"measured\"], \"title\": \"probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here\", \"tags\": [\"measured\"], \"title\": \"two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added\", \"fields\": {}}]",
+      "parents": [
+        "65979e42bea07fbb"
+      ],
+      "assert": [
+        [
+          "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here",
+          "sort",
+          "prop"
+        ],
+        [
+          "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here",
+          "supports",
+          "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added"
+        ],
+        [
+          "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here",
+          "tags",
+          "measured"
+        ],
+        [
+          "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here",
+          "title",
+          "F821 named both undefined names; the same missing-import slip was caught in check_closed_sets.py and check_host_workarounds.py earlier and missed here"
+        ],
+        [
+          "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud",
+          "sort",
+          "prop"
+        ],
+        [
+          "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud",
+          "title",
+          "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud"
+        ],
+        [
+          "each verified by running its lane before and after; all now exit 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "each verified by running its lane before and after; all now exit 0",
+          "supports",
+          "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench"
+        ],
+        [
+          "each verified by running its lane before and after; all now exit 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "each verified by running its lane before and after; all now exit 0",
+          "title",
+          "each verified by running its lane before and after; all now exit 0"
+        ],
+        [
+          "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench",
+          "sort",
+          "prop"
+        ],
+        [
+          "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench",
+          "title",
+          "probing the 21 at HEAD found SIX more tools/ casualties nothing had caught: three bare 'sh test.sh' in engine/check.sh feeding the shell, examples and no-autoload lanes, and five '$ROOT/<script>.sh' references across engine/bench.sh and extensions/node/bench.sh feeding boot-determinism and engine-bench"
+        ],
+        [
+          "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists",
+          "sort",
+          "prop"
+        ],
+        [
+          "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists",
+          "supports",
+          "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD"
+        ],
+        [
+          "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists",
+          "tags",
+          "measured"
+        ],
+        [
+          "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists",
+          "title",
+          "read ai-tmp/wt-battery-4/ai-tmp/battery.provenance against git log; this is the third verdict this session about a tree that no longer exists"
+        ],
+        [
+          "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle",
+          "sort",
+          "prop"
+        ],
+        [
+          "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle",
+          "title",
+          "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle"
+        ],
+        [
+          "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD",
+          "sort",
+          "prop"
+        ],
+        [
+          "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD",
+          "title",
+          "the completed gate's verdict was again about a stale tree: battery-4's provenance records revision cf282de8f taken at 02:56, which predates sixteen commits including the encoding, reaping, evidence-glob, lib_database and dev_typed fixes, and encoding, reaping and evidence are all in its failure list while each is verified green at HEAD"
+        ],
+        [
+          "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve",
+          "supports",
+          "all three of check_script_references' misses were the same thing: the BASE, not the reference. A quote-anchored pattern, an assignment with a CDPATH= prefix, and a root named from another root each left a variable unresolved, and an unresolved base SKIPS while a wrong one would be loud"
+        ],
+        [
+          "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve",
+          "title",
+          "the lane reported 0 findings throughout while eight real stale references sat in files whose variables it could not resolve"
+        ],
+        [
+          "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it",
+          "supports",
+          "the background task reported 'completed (exit code 0)' while the gate exited 1 with 21 failing lanes: that 0 is the shell wrapper's status, not the gate's, and the log's own 'battery 4: exit 1' is the oracle"
+        ],
+        [
+          "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it",
+          "tags",
+          "measured"
+        ],
+        [
+          "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it",
+          "title",
+          "the same fail-open shape as piping a gate into tail; reading the verdict line rather than the notification is what caught it"
+        ],
+        [
+          "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added",
+          "sort",
+          "prop"
+        ],
+        [
+          "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added",
+          "title",
+          "two of the gate's failures were regressions I introduced: process-bounds ended in a NameError because I used CHECK and BOUNDED there without importing them, and ruff/ruff-drivers flagged import blocks and docstring summaries in the files I added"
+        ]
+      ],
+      "id": "dee79052232d3fba"
     }
   ]
 }
