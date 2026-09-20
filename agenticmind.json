@@ -14496,6 +14496,58 @@
       "supports": [
         "the README's own header comment promised 'every python fence executes' and 'the ts and c fences are the text of files their own gates build', which would have become false the moment the sections went; it now promises only what the file carries"
       ]
+    },
+    "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b": {
+      "title": "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+      "supports": [
+        {
+          "node": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the protocol records observed extrema exactly and refuses an invented allowance, so the only lawful way to cover a tail is to observe it; ten rounds missed 23659 by two inferences",
+        "launched in the background after the seventeen ten-round envelopes were committed"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started": {
+      "title": "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started"
+    },
+    "twin_coverage.py exits 0 on the committed tree": {
+      "title": "twin_coverage.py exits 0 on the committed tree",
+      "supports": [
+        "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once": {
+      "title": "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once"
+    },
+    "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all": {
+      "title": "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all",
+      "supports": [
+        "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured": {
+      "title": "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured"
+    },
+    "twenty full-lane observations, failures=0": {
+      "title": "twenty full-lane observations, failures=0",
+      "supports": [
+        "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -16341,7 +16393,7 @@
     "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema": {
       "title": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema",
       "effort": 2,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the twins lane is red on 288 of 323 twinned examples with inference counts above their pinned budgets, a corpus-wide state far larger than the four findings previously recorded for this lane"
       ]
@@ -63464,6 +63516,148 @@
         "focus": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema"
       },
       "id": "0d2a7e01f6d97f0a"
+    },
+    {
+      "at": "2026-09-20T23:43:10.185075+00:00",
+      "after": "43e964002671a680825823b7ab4c1020de20f651",
+      "did": "[{\"op\": \"status\", \"id\": \"observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema\", \"because\": \"twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"twin_coverage.py exits 0 on the committed tree\", \"tags\": [\"measured\"], \"title\": \"THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all\", \"tags\": [\"measured\"], \"title\": \"I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"twenty full-lane observations, failures=0\", \"tags\": [\"measured\"], \"title\": \"01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured\", \"fields\": {}}]",
+      "parents": [
+        "0d2a7e01f6d97f0a"
+      ],
+      "assert": [
+        [
+          "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once",
+          "sort",
+          "prop"
+        ],
+        [
+          "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once",
+          "title",
+          "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once"
+        ],
+        [
+          "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started",
+          "sort",
+          "prop"
+        ],
+        [
+          "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started",
+          "title",
+          "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started"
+        ],
+        [
+          "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all",
+          "supports",
+          "I ran the envelope writer TWICE by accident, the second time with output discarded, which prepended a no-op paragraph saying 23657..23669 to 23657..23669 into all seventeen twins; caught by counting the paragraphs, repaired by reverting the twins repo to its commit and applying once"
+        ],
+        [
+          "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all",
+          "tags",
+          "measured"
+        ],
+        [
+          "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all",
+          "title",
+          "a script that appends history is not idempotent, so a second invocation writes a second entry, and discarding its output is what hid that it had run at all"
+        ],
+        [
+          "twenty full-lane observations, failures=0",
+          "sort",
+          "prop"
+        ],
+        [
+          "twenty full-lane observations, failures=0",
+          "supports",
+          "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured"
+        ],
+        [
+          "twenty full-lane observations, failures=0",
+          "tags",
+          "measured"
+        ],
+        [
+          "twenty full-lane observations, failures=0",
+          "title",
+          "twenty full-lane observations, failures=0"
+        ],
+        [
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+          "sort",
+          "prop"
+        ],
+        [
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+          "supersedes",
+          "the protocol records observed extrema exactly and refuses an invented allowance, so the only lawful way to cover a tail is to observe it; ten rounds missed 23659 by two inferences"
+        ],
+        [
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+          "supersedes",
+          "launched in the background after the seventeen ten-round envelopes were committed"
+        ],
+        [
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+          "supports",
+          {
+            "node": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema",
+            "status": "done"
+          }
+        ],
+        [
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+          "tags",
+          "measured"
+        ],
+        [
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b",
+          "title",
+          "twenty rounds put 23657..23669 around the 23659 that failed against the ten-round 23661..23666, eleven of the seventeen are unchanged because their counts are deterministic, and the twins lane now reports 0 findings over 323 twinned examples at exit 0; committed as 6cc1ae1b"
+        ],
+        [
+          "twin_coverage.py exits 0 on the committed tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "twin_coverage.py exits 0 on the committed tree",
+          "supports",
+          "THE TWINS LANE IS GREEN: 0 findings over 323 twinned examples, from 288 when this session started"
+        ],
+        [
+          "twin_coverage.py exits 0 on the committed tree",
+          "tags",
+          "measured"
+        ],
+        [
+          "twin_coverage.py exits 0 on the committed tree",
+          "title",
+          "twin_coverage.py exits 0 on the committed tree"
+        ],
+        [
+          "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured",
+          "sort",
+          "prop"
+        ],
+        [
+          "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured",
+          "title",
+          "01-thread_lib's envelope widened from 707107..738987 to 706513..1232095 over twenty rounds, which is a band wide enough to weaken it as a guard; it is the spread that example actually has, and the alternative would be a bound nobody measured"
+        ],
+        [
+          "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema"
+      },
+      "id": "f7cef3ab0a2416c3"
     }
   ]
 }
