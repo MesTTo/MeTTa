@@ -36,7 +36,16 @@ jobs:
       # syscall through; it does not grant privileges.
       options: --security-opt seccomp=unconfined
     steps:
+      # Every component of this repository is a submodule since the many-repo
+      # split, and `actions/checkout` does not populate one unless asked. Without
+      # this the runner gets eight empty directories: the root `pyproject.toml` is
+      # a symlink into `extensions/python/`, so it dangles and `setup-python`
+      # fails with "The specified python version file at: pyproject.toml doesn't
+      # exist" before any check runs, which is why every job of run 35521501467
+      # failed including `report`, whose own step cannot fail.
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       # The parity lane compares this engine against numbers measured from
       # upstream PeTTa at this commit, and it REFUSES rather than skipping
@@ -204,6 +213,8 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
@@ -244,6 +255,8 @@ jobs:
         python: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: astral-sh/setup-uv@v7
         with:
@@ -317,6 +330,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
@@ -403,6 +418,8 @@ jobs:
       image: ghcr.io/mestto/metta-kernel-ci:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
@@ -552,6 +569,8 @@ jobs:
       image: ghcr.io/mestto/metta-kernel-ci:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Check out the pinned upstream PeTTa beside the repository
         # The kernel's OWN configuration is a PeTTa tree in upstream's layout,

@@ -28,6 +28,26 @@ def git(*args: str, cwd: Path) -> str:
                           check=True).stdout.strip()
 
 
+#: The two step shapes this repository writes, each with and without the key.
+#: They are independent of the gitlink cases above, so they are named rather
+#: than crossed with them.
+LIST_STEP = "jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n"
+NAMED_STEP = "jobs:\n  a:\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n"
+#: One spelling serves both: a `- uses:` at indent 6 and a `- name:` step's
+#: `uses:` at indent 8 both take their `with:` at indent 8.
+POPULATED = "        with:\n          submodules: recursive\n"
+#: Prose naming the action is not a step, and a rule that reads it as one
+#: would fire on this file's own explanation of itself.
+COMMENTED = "jobs:\n  a:\n    steps:\n      # actions/checkout needs asking\n      - run: true\n"
+
+
+def plant_workflow(scratch: Path, name: str, text: str) -> None:
+    """Write one workflow into a planted checkout."""
+    target = scratch / ".github" / "workflows" / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(text, encoding="utf-8")
+
+
 def plant(scratch: Path, *, entry: bool, link: bool, populated: bool) -> Path:
     """A checkout mounting one component, with each of the three facts chosen."""
     shutil.rmtree(scratch, ignore_errors=True)
@@ -70,6 +90,54 @@ def main() -> int:
 
         # And a checkout with nothing mounted is clean rather than suspicious.
         found = pass_under_test.findings(plant(scratch, entry=False, link=False, populated=True))
+        assert found == [], found
+
+        # A workflow that clones without the components leaves every lane
+        # scanning empty directories, and says so as a dangling symlink rather
+        # than as a missing submodule. Both step shapes, because the repository
+        # writes both and an indentation reader can see one and miss the other.
+        for name, step in (("list.yml", LIST_STEP), ("named.yml", NAMED_STEP)):
+            plant(scratch, entry=True, link=True, populated=True)
+            plant_workflow(scratch, name, step)
+            found = pass_under_test.findings(scratch)
+            assert any("without `submodules: recursive`" in line for line in found), (name, found)
+
+            plant_workflow(scratch, name, step + POPULATED)
+            found = pass_under_test.findings(scratch)
+            assert found == [], (name, found)
+
+        # The KEY is not the answer: `false` is the default that caused this,
+        # and `true` stops at the first level while this repository mounts a
+        # component inside a component. A rule matching only `submodules:`
+        # accepts both as a fix.
+        for value in ("false", "true", "''"):
+            plant(scratch, entry=True, link=True, populated=True)
+            plant_workflow(scratch, "value.yml",
+                           LIST_STEP + f"        with:\n          submodules: {value}\n")
+            found = pass_under_test.findings(scratch)
+            assert any("without `submodules: recursive`" in line for line in found), (value, found)
+
+        # A quoted or loosely spaced `recursive` is the same answer, so the
+        # rule reads the value rather than matching one exact line.
+        for spelling in ("submodules: recursive", "submodules:  recursive",
+                         "submodules: 'recursive'", 'submodules: "recursive"'):
+            plant(scratch, entry=True, link=True, populated=True)
+            plant_workflow(scratch, "spelling.yml", LIST_STEP + f"        with:\n          {spelling}\n")
+            found = pass_under_test.findings(scratch)
+            assert found == [], (spelling, found)
+
+        # Prose naming the action is not a step. Without this the rule fires on
+        # every comment that explains why the key is there, this file included.
+        plant(scratch, entry=True, link=True, populated=True)
+        plant_workflow(scratch, "comment.yml", COMMENTED)
+        found = pass_under_test.findings(scratch)
+        assert found == [], found
+
+        # The rule is silent until the split lands: a checkout mounting nothing
+        # needs no populating checkout, however its workflows are written.
+        plant(scratch, entry=False, link=False, populated=True)
+        plant_workflow(scratch, "list.yml", LIST_STEP)
+        found = pass_under_test.findings(scratch)
         assert found == [], found
     finally:
         shutil.rmtree(base, ignore_errors=True)

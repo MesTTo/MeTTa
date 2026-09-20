@@ -18,6 +18,10 @@ Guarantees:
   - a checkout with no submodules passes and says so, so this lane is silent until the split
     lands rather than needing to be added with it [tested:
     tests/checks/check_submodules_populated_selftest.py; commit=500290ef67f6198adc1ce17c1f70e5a5173647bb]
+  - a workflow step that runs `actions/checkout` without `submodules:` is reported, in both the
+    `- uses:` and `- name:`/`uses:` shapes, while prose naming the action is not; a tree mounting
+    nothing is silent here too [tested: tests/checks/check_submodules_populated_selftest.py;
+    commit=WORKTREE]
 Fails when: run outside a git checkout, which it reports rather than passing.
 Open Obligations:
   To Do: None
@@ -58,6 +62,82 @@ def declared(root: Path) -> list[str]:
     return sorted(line.split(" ", 1)[1] for line in read.stdout.splitlines() if " " in line)
 
 
+#: The action that clones a workflow's tree, and the key that makes it bring
+#: the components with it.
+CHECKOUT = "actions/checkout"
+#: `recursive`, not merely present and not `true`: this repository mounts a
+#: component inside a component (the twins under `extensions/python/examples/`),
+#: and `true` stops at the first level while `false` is the default that caused
+#: this. Matching the KEY alone would accept `submodules: false` as a fix.
+POPULATES = "recursive"
+
+
+def _populates(block: list[str]) -> bool:
+    """Whether a step's block asks for the components, recursively."""
+    for line in block:
+        key, sep, value = line.strip().partition(":")
+        if sep and key.strip() == "submodules":
+            return value.strip().strip("'\"") == POPULATES
+    return False
+
+
+def _step_block(lines: list[str], start: int) -> list[str]:
+    """The lines belonging to the step whose `uses:` is at `start`.
+
+    A step ends at the next line that is either less indented or a new list
+    item at the same indent, which covers both shapes this repository writes:
+    `- uses: actions/checkout@v4` with `with:` indented under it, and a
+    `- name:` step whose `uses:` and `with:` sit at the same depth.
+    """
+    indent = len(lines[start]) - len(lines[start].lstrip())
+    block = []
+    for line in lines[start + 1:]:
+        if not line.strip():
+            continue
+        here = len(line) - len(line.lstrip())
+        if here < indent or (here == indent and line.lstrip().startswith("- ")):
+            break
+        block.append(line)
+    return block
+
+
+def unpopulating_checkouts(root: Path) -> list[str]:
+    """Every workflow checkout that would leave the components empty.
+
+    `actions/checkout` does not populate a submodule unless asked, and the
+    failure does not name submodules: the root `pyproject.toml` is a symlink
+    into `extensions/python/`, so it dangles and `setup-python` reports that
+    the file "doesn't exist" before any check runs. Every job of one run
+    failed that way, `report` included, whose own step is `|| true` and
+    cannot fail [measured 2026-09-21: run 35521501467 failed 11 of 11 jobs,
+    against 13 checkout steps across five workflows with no `submodules:`
+    between them; commit=WORKTREE].
+
+    Read by indentation rather than through a YAML parser, because the
+    property is whether one key appears in one block: `pyyaml` is not a
+    declared dependency here and `deptry` refuses an undeclared import, so a
+    parser would trade this lane for that one.
+    """
+    found: list[str] = []
+    for path in sorted((root / ".github" / "workflows").glob("*.yml")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for index, line in enumerate(lines):
+            bare = line.lstrip()
+            if bare.startswith("#") or CHECKOUT not in bare:
+                continue
+            # The `uses:` line itself, not a comment or a job name mentioning it.
+            if bare.partition(":")[0].removeprefix("- ").strip() != "uses":
+                continue
+            if not _populates(_step_block(lines, index)):
+                where = f".github/workflows/{path.name}:{index + 1}"
+                found.append(
+                    f"{where}: checks out without `submodules: recursive`, so every component "
+                    f"is an empty directory and the root pyproject.toml symlink dangles before "
+                    f"any check runs"
+                )
+    return found
+
+
 def findings(root: Path = ROOT) -> list[str]:
     """Every component that is mounted but unusable, in reading order."""
     mounted, named = gitlinks(root), declared(root)
@@ -71,6 +151,12 @@ def findings(root: Path = ROOT) -> list[str]:
         if path in named and not any((root / path).glob("*")):
             found.append(f"{path}: mounted and empty, so every lane that walks the tree silently "
                          f"skips it; populate it with `{REMEDY}`")
+    # Appended rather than returned early, so a workflow finding never hides a
+    # gitlink one. Only once the split has landed: a checkout with no
+    # components needs no populating checkout, which is the silence the rules
+    # above already keep.
+    if mounted:
+        found += unpopulating_checkouts(root)
     return found
 
 

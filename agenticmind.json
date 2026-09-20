@@ -11536,6 +11536,107 @@
       "tags": [
         "source"
       ]
+    },
+    "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove": {
+      "title": "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove"
+    },
+    "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'": {
+      "title": "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'",
+      "supports": [
+        "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against": {
+      "title": "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against"
+    },
+    "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730": {
+      "title": "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730",
+      "supports": [
+        "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19": {
+      "title": "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19"
+    },
+    "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner": {
+      "title": "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner",
+      "supports": [
+        "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository": {
+      "title": "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository"
+    },
+    "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for": {
+      "title": "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for",
+      "supports": [
+        "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily": {
+      "title": "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily"
+    },
+    "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive": {
+      "title": "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive",
+      "supports": [
+        "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline": {
+      "title": "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline",
+      "supports": [
+        {
+          "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "status": "untried"
+        },
+        {
+          "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "relation": "addresses",
+          "target": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+        }
+      ]
+    },
+    "launched in the background after confirming zero live processes under any battery tree": {
+      "title": "launched in the background after confirming zero live processes under any battery tree",
+      "supports": [
+        {
+          "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop": {
+      "title": "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop"
+    },
+    "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear": {
+      "title": "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear",
+      "supports": [
+        "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -13168,6 +13269,14 @@
       "status": "unwanted",
       "addresses": [
         "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter": {
+      "title": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+      "effort": 1,
+      "status": "active",
+      "addresses": [
+        "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
       ]
     }
   },
@@ -51978,6 +52087,280 @@
         "focus": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD"
       },
       "id": "d27b991c7d983413"
+    },
+    {
+      "at": "2026-09-20T16:56:39.276849+00:00",
+      "after": "cf282de8f1197a3d55f1030ed1f4a9c4d6c34596",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'\", \"tags\": [\"measured\"], \"title\": \"the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730\", \"tags\": [\"source\"], \"title\": \"that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner\", \"tags\": [\"source\"], \"title\": \"I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for\", \"tags\": [\"measured\"], \"title\": \"my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive\", \"tags\": [\"source\"], \"title\": \"24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline\", \"tags\": [], \"title\": \"run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter\", \"fields\": {\"effort\": 1, \"addresses\": [\"the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree\"]}}, {\"op\": \"status\", \"id\": \"run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter\", \"because\": \"launched in the background after confirming zero live processes under any battery tree\", \"tags\": [\"tested\"], \"status\": \"active\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear\", \"tags\": [\"measured\"], \"title\": \"wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop\", \"fields\": {}}]",
+      "parents": [
+        "d27b991c7d983413"
+      ],
+      "assert": [
+        [
+          "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear",
+          "sort",
+          "prop"
+        ],
+        [
+          "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear",
+          "supports",
+          "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop"
+        ],
+        [
+          "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear",
+          "tags",
+          "measured"
+        ],
+        [
+          "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear",
+          "title",
+          "/proc/loadavg read 11.36 8.98 7.12 with agentsview at 77.8% CPU, chrome, plasma and other sessions; none of it runaway and none of it mine to clear"
+        ],
+        [
+          "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19",
+          "sort",
+          "prop"
+        ],
+        [
+          "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19",
+          "title",
+          "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19"
+        ],
+        [
+          "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for",
+          "sort",
+          "prop"
+        ],
+        [
+          "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for",
+          "supports",
+          "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository"
+        ],
+        [
+          "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for",
+          "tags",
+          "measured"
+        ],
+        [
+          "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for",
+          "title",
+          "ai-tmp/wt-battery-1/extensions/python came to hold ch03-atoms-and-expressions and report ec79a7d4; the main checkout at wt-merge/extensions/python stayed clean at 726aacd3a, which is the separation battery trees exist for"
+        ],
+        [
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline",
+          "supports",
+          {
+            "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+            "status": "untried"
+          }
+        ],
+        [
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline",
+          "supports",
+          {
+            "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+            "relation": "addresses",
+            "target": "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+          }
+        ],
+        [
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline",
+          "title",
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline"
+        ],
+        [
+          "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730",
+          "supports",
+          "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against"
+        ],
+        [
+          "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730",
+          "tags",
+          "source"
+        ],
+        [
+          "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730",
+          "title",
+          "extensions/python/benchmarks/baseline.json:66 against the gate's reported minimum of 3374756730"
+        ],
+        [
+          "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner",
+          "sort",
+          "prop"
+        ],
+        [
+          "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner",
+          "supports",
+          "I built a battery tree with git worktree plus submodule update, which tools/battery.sh's own header says cannot produce a faithful copy of this repository and records as having caused 169 phantom failures against a 4-failure baseline on 2026-09-19"
+        ],
+        [
+          "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner",
+          "tags",
+          "source"
+        ],
+        [
+          "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner",
+          "title",
+          "git worktree add on the superproject does not materialise a submodule's worktree and git stash create does not capture one; batteries here are rsync FILESYSTEM snapshots holding no .git at any level, and tools/battery.sh is the only provisioner"
+        ],
+        [
+          "launched in the background after confirming zero live processes under any battery tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "launched in the background after confirming zero live processes under any battery tree",
+          "supersedes",
+          "battery.sh provisions by rsync from the working tree and refuses to run unless verify reports byte-identity, so the verdict names a known state; CHECK_PY alone does not fix the host because swipl still resolves from PATH, which is how the previous run measured an unpatched binary against a patched baseline"
+        ],
+        [
+          "launched in the background after confirming zero live processes under any battery tree",
+          "supports",
+          {
+            "node": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+            "status": "active"
+          }
+        ],
+        [
+          "launched in the background after confirming zero live processes under any battery tree",
+          "tags",
+          "tested"
+        ],
+        [
+          "launched in the background after confirming zero live processes under any battery tree",
+          "title",
+          "launched in the background after confirming zero live processes under any battery tree"
+        ],
+        [
+          "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository",
+          "sort",
+          "prop"
+        ],
+        [
+          "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository",
+          "title",
+          "my hand-rolled battery setup checked out a nested submodule's commit into the seat, because the nested .git pointed at a worktree gitdir that does not exist in a battery tree, so git -C walked up and operated on the parent repository"
+        ],
+        [
+          "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'",
+          "supports",
+          "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove"
+        ],
+        [
+          "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'",
+          "tags",
+          "measured"
+        ],
+        [
+          "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'",
+          "title",
+          "tests/checks/host_workarounds/swi-cleanup-window.pl answers 'present' under /usr/bin/swipl and 'absent' under /home/user/Dev/swipl-patched/bin/swipl, the two resolve to different files with different md5 sums, and extensions/python/benchmarks/baseline.json's own re-pin note says the 3294446835 figure was measured 'in a provisioned battery worktree with the .qlf set rebuilt on the patched SWI-Prolog 10.1.14'"
+        ],
+        [
+          "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against",
+          "sort",
+          "prop"
+        ],
+        [
+          "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against",
+          "title",
+          "that same baseline note prices a host change at +491,277,571 instructions, which is six times the 80,309,895 gap being called a regression, so the host axis dominates the measurement it was being read against"
+        ],
+        [
+          "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove",
+          "sort",
+          "prop"
+        ],
+        [
+          "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove",
+          "title",
+          "the +2.44% alpha-unique instruction regression is NOT established, because the baseline was pinned on the patched SWI host and the gate that reported it ran on /usr/bin/swipl, which is a different binary that still shows the defects the patches remove"
+        ],
+        [
+          "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive",
+          "sort",
+          "prop"
+        ],
+        [
+          "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive",
+          "supports",
+          "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily"
+        ],
+        [
+          "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive",
+          "tags",
+          "source"
+        ],
+        [
+          "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive",
+          "title",
+          "tools/check.sh:367-374,444-467 with engine/qlf_boot.pl's purge of stale artifacts; I had read the 24-versus-30 count as conclusive"
+        ],
+        [
+          "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop",
+          "sort",
+          "prop"
+        ],
+        [
+          "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop",
+          "title",
+          "wall-clock lanes in this run will be noisy and only instruction and inference counts should be read, because the box carries a persistent load of about 7 from the user's desktop"
+        ],
+        [
+          "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily",
+          "sort",
+          "prop"
+        ],
+        [
+          "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily",
+          "title",
+          "24 of 30 .qlf files missing in a battery tree is not by itself evidence of an unprovisioned gate, because tools/check.sh performs one bounded engine boot before the concurrent lanes and generates missing QLFs lazily"
+        ],
+        [
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "sort",
+          "approach"
+        ],
+        [
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "addresses",
+          "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+        ],
+        [
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "effort",
+          1
+        ],
+        [
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "status",
+          "active"
+        ],
+        [
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter",
+          "title",
+          "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+        ]
+      ],
+      "telemetry": {
+        "focus": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD"
+      },
+      "id": "a63d1d2bfb905a9f"
     }
   ]
 }

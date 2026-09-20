@@ -32,12 +32,18 @@
 #   registration in the superproject's admin area, left by a `git worktree add`
 #   that predates this tool -- wt-battery-6 is registered at 14f5c43b5 with no
 #   gitfile in the tree. Neither is authoritative: ai-tmp/battery.provenance is.
-#   This is the ONLY provisioner. The header used to name components.sh and
-#   worktree.sh beside it; neither file exists, and a reader sent to them for a
-#   gate that needs committed state found nothing [measured 2026-09-20: tools/
-#   holds battery.sh and battery_selftest.sh and nothing else]. What this does
-#   is copy the working tree as it stands, which is how to ask what a gate says
-#   about the tree you are editing right now, uncommitted state included.
+#   This is the ONLY provisioner of a BATTERY. components.sh and worktree.sh
+#   are back beside it and do different jobs: components.sh turns a component
+#   directory into a checkout of its own repository around the files already
+#   there, and worktree.sh makes a git worktree. Neither produces a tree a
+#   gate verdict can name, because a worktree of this superproject does not
+#   materialise a submodule's working tree [measured 2026-09-21: tools/ holds
+#   battery.sh, battery_selftest.sh, bench.sh, bounded.sh, build.sh, check.sh,
+#   components.sh, run.sh, select-python.sh, test.sh and worktree.sh; the
+#   header said the first two were all of it and that the other two did not
+#   exist; commit=WORKTREE]. What this does is copy the working tree as it
+#   stands, which is how to ask what a gate says about the tree you are
+#   editing right now, uncommitted state included.
 
 set -eu
 
