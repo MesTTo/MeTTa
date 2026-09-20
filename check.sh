@@ -175,6 +175,13 @@ case " $WANT " in *" seat-layering "*) WANT="$WANT layering" ;; esac
 case " $WANT " in *" seat-layering-selftest "*) WANT="$WANT layering-selftest" ;; esac
 FAILED=''
 SKIPPED=''
+# Whole seconds per lane and for the run. Without them the only cost signal is
+# a battery's provenance stamp against its log's mtime: one number for 206
+# lanes, which cannot separate a slow lane from a stalled one [2026-09-20: a
+# run 63 minutes into the component block, with nothing in the log saying where
+# the time had gone]. Whole seconds, because what a reader decides from this is
+# which lane is eating the run, and no sub-second lane is ever that.
+CHECK_STARTED=$(date +%s)
 SUMMARY=$(mktemp "${TMPDIR:-/tmp}/metta-check.XXXXXX")
 MEMORY_SCALE_DATA=$(mktemp "${TMPDIR:-/tmp}/metta-memory-scale.XXXXXX")
 MEMORY_SCALE_STATUS=$(mktemp "${TMPDIR:-/tmp}/metta-memory-scale-status.XXXXXX")
@@ -254,10 +261,12 @@ run() {
     # what says every such spawn has one, so this branch is a division of
     # labour rather than a gap.
     lane_status=0
+    lane_started=$(date +%s)
     case "$(command -v "$1" 2>/dev/null)" in
         /*) bounded "$@" || lane_status=$? ;;
         *)  "$@" || lane_status=$? ;;
     esac
+    lane_elapsed=$(( $(date +%s) - lane_started ))
     if [ "$lane_status" -eq 0 ]; then
         status=ok
     elif [ "$lane_status" -eq 125 ]; then
@@ -290,7 +299,7 @@ run() {
             status=findings
         fi
     fi
-    printf '%s\t%s\t%s\n' "$tier" "$name" "$status" >> "$SUMMARY"
+    printf '%s\t%s\t%s\t%s\n' "$tier" "$name" "$status" "$lane_elapsed" >> "$SUMMARY"
 }
 
 in_py() { ( cd "$PYDIR" && bounded "$@" ); }
@@ -1041,7 +1050,15 @@ run REPORT jscpd-prolog sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --fo
 
 # -------------------------------------------------------------------- report
 printf '\n================ summary ================\n'
-awk -F'\t' '{ printf "%-6s %-12s %s\n", $1, $2, $3 }' "$SUMMARY"
+awk -F'\t' '{ printf "%-6s %-12s %-9s %5ds\n", $1, $2, $3, $4 }' "$SUMMARY"
+
+# The table is in run order, which is the wrong order for the one question a
+# reader brings to it. Ten rows, because the cost here is long-tailed: the
+# 2026-09-20 run spent its first hour inside a handful of component lanes while
+# the other two hundred cost seconds apiece.
+printf '\nran for %ds; the lanes that cost it:\n' "$(( $(date +%s) - CHECK_STARTED ))"
+sort -t"$(printf '\t')" -k4,4nr "$SUMMARY" | head -10 |
+    awk -F'\t' '$4 > 0 { printf "  %5ds  %s\n", $4, $2 }'
 
 # Named before the verdict, and on every run, because the point of the word is
 # that a reader scanning the last two lines learns a lane had nothing to say.

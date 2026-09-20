@@ -5559,6 +5559,68 @@
       "tags": [
         "measured"
       ]
+    },
+    "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it": {
+      "title": "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+    },
+    "measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported": {
+      "title": "measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported",
+      "supports": [
+        "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+      ]
+    },
+    "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action": {
+      "title": "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action",
+      "supports": [
+        {
+          "node": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "status": "untried"
+        },
+        {
+          "node": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "relation": "addresses",
+          "target": "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+        }
+      ]
+    },
+    "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row": {
+      "title": "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row",
+      "supports": [
+        {
+          "node": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it": {
+      "title": "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it"
+    },
+    "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners": {
+      "title": "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners",
+      "supports": [
+        "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories": {
+      "title": "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories"
+    },
+    "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55": {
+      "title": "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55",
+      "supports": [
+        "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -6470,6 +6532,14 @@
       "status": "untried",
       "addresses": [
         "laws 6, 7, 8, 11 and 12 of the packages design have no engine behaviour behind them: an uncovered unclaimed backing imports without refusing, a backing registers in the seam space rather than the library's home, a boot row never performs, a performer's answer is discarded instead of kept as a receipt, and a backed head still answers after its source is unimported"
+      ]
+    },
+    "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes": {
+      "title": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
       ]
     }
   },
@@ -28077,6 +28147,182 @@
         ]
       ],
       "id": "73f166017ebf7721"
+    },
+    {
+      "at": "2026-09-20T01:44:15.340861+00:00",
+      "after": "2e2bd7389b81751b29c8bd436225f9304d3e7d11",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported\", \"tags\": [], \"title\": \"the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action\", \"tags\": [], \"title\": \"time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes\", \"fields\": {\"effort\": 1, \"addresses\": [\"the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it\"]}}, {\"op\": \"status\", \"id\": \"time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes\", \"because\": \"sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners\", \"tags\": [\"measured\"], \"title\": \"the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55\", \"tags\": [\"measured\"], \"title\": \"the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories\", \"fields\": {}}]",
+      "parents": [
+        "73f166017ebf7721"
+      ],
+      "assert": [
+        [
+          "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners",
+          "supports",
+          "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it"
+        ],
+        [
+          "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners",
+          "title",
+          "counted 2026-09-20 from run lines in the driver and in engine, ext and every extensions component check file, and confirmed against a completed run whose log announced exactly 206 lane banners"
+        ],
+        [
+          "measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported",
+          "supports",
+          "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+        ],
+        [
+          "measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported",
+          "title",
+          "measured 2026-09-20: answering how long a running gate had left took reconstructing the lane roster from the driver and its sourced component files, reading mutmut's own progress counter out of the log, and reading a process start time from ps, none of which the run itself reported"
+        ],
+        [
+          "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55",
+          "supports",
+          "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories"
+        ],
+        [
+          "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55",
+          "title",
+          "measured from the battery provenance stamp at 10:38:07, ps reporting the mutmut process started 11:38:06, and mutmut's own counter reaching 438 processed by 11:40:55"
+        ],
+        [
+          "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row",
+          "sort",
+          "prop"
+        ],
+        [
+          "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row",
+          "supersedes",
+          "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action"
+        ],
+        [
+          "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row",
+          "supports",
+          {
+            "node": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+            "status": "done"
+          }
+        ],
+        [
+          "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row",
+          "tags",
+          "tested"
+        ],
+        [
+          "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row",
+          "title",
+          "sh -n accepts the file and the renderer was exercised on a synthetic four-row summary, printing the aligned seconds column and ordering mutation 214s above pytest 96s while dropping the zero-cost row"
+        ],
+        [
+          "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories",
+          "sort",
+          "prop"
+        ],
+        [
+          "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories",
+          "title",
+          "the component block holds the gate's cost and the workspace block does not: a 2026-09-20 run spent 64 minutes reaching lane 98 of 206, with mutation alone taking about 4 minutes over 469 mutants of the atom factories"
+        ],
+        [
+          "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action",
+          "sort",
+          "prop"
+        ],
+        [
+          "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action",
+          "supports",
+          {
+            "node": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+            "status": "untried"
+          }
+        ],
+        [
+          "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action",
+          "supports",
+          {
+            "node": "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+            "relation": "addresses",
+            "target": "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+          }
+        ],
+        [
+          "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action",
+          "title",
+          "the driver already wraps every lane in one place and already writes one summary row per lane, so the cost is two date calls and a fourth column; the long tail is what makes the total unreadable, so the sorted head is what turns the number into an action"
+        ],
+        [
+          "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it",
+          "title",
+          "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+        ],
+        [
+          "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it",
+          "title",
+          "the whole gate is 206 lanes: two in the driver before the component loop, 96 contributed by the sourced component check files, and 108 more in the driver after it"
+        ],
+        [
+          "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "sort",
+          "approach"
+        ],
+        [
+          "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "addresses",
+          "the gate driver records no per-lane cost, so the only timing a finished run leaves is a battery's provenance stamp against its log mtime, which is one number for 206 lanes and cannot say which lane spent it"
+        ],
+        [
+          "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "effort",
+          1
+        ],
+        [
+          "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "status",
+          "done"
+        ],
+        [
+          "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes",
+          "title",
+          "time every lane in the gate driver's run function and print the seconds beside each summary row, plus the run total and the ten costliest lanes"
+        ]
+      ],
+      "id": "97820c1a53440c54"
     }
   ]
 }
