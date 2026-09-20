@@ -63,6 +63,14 @@ install(Mutation) :-
     ; throw(error(existence_error(package_mutation, Mutation), none)) ).
 
 replacement(no_coverage, lib_package:package_coverage(_,_,_,_,_), _, true).
+%The guard removed, leaving the question that RESOLVES its head. Asking
+%whether a head is already loaded then defines it, because resolving an
+%undefined predicate fires the undefined-procedure hook and the engine
+%answers that by translating the name -- from inside the registration that
+%has not yet recorded the arity the equation's own body calls.
+replacement(resolving_head_source,
+            lib_package:package_head_source(Module, Head, File), _,
+            predicate_property(Module:Head, file(File))).
 replacement(no_claim_bootstrap, lib_package:package_register_claims, Wrapped,
             (nb_current('$package_mutant_claims_ready',true) -> true
             ; call(Wrapped), nb_setval('$package_mutant_claims_ready',true))).
@@ -160,6 +168,8 @@ witness(packages, the_package_head_is_internal_in_every_space, no_internal).
 
 group(no_claim_bootstrap, [default_claim_recovers_after_withdrawal_and_failed_activation]).
 group(no_coverage, [uncovered_backing_refuses_by_head]).
+group(resolving_head_source,
+      [a_backing_row_registers_before_the_equations_calling_it_translate]).
 group(perform_available, [unclaimed_backing_is_skipped_when_equations_cover_it]).
 group(no_selection, [first_claimed_backing_wins_and_alternative_remains_visible,
                      an_unused_native_alternative_need_not_exist,
