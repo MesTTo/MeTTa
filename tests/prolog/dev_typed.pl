@@ -102,16 +102,14 @@
 %     without        8615      363           150
 %     with           8776      202            12
 %
-% 17 suites improve and none regresses. Every one of the 150 was a MeTTa name;
-% not one of the 12 is (9 are `string' in suites/seams/lib_package.plt), so
-% what is left are ordinary SWI type errors of the kind a mode line is FOR --
+% 17 suites improve and none regresses. Every one of the 150 was a MeTTa name
+% and not one of the 12 is -- 9 are `string' in suites/seams/lib_package.plt --
+% so what is left are ordinary SWI type errors of the kind a mode line is FOR,
 % findings this uncovered rather than residue it left.
 %
-% The twelve are ordinary SWI type errors of the kind a mode line is FOR, so
-% they are findings this uncovered rather than residue it left. What it does
-% not do is make the lane green: 202 failures remain over 182 suites, of a
-% different class -- wrong answers and assertion mismatches rather than refused
-% arguments.
+% It does NOT make the lane green. 202 failures remain, of a different class:
+% wrong answers and assertion mismatches rather than refused arguments, and
+% nothing here addresses them.
 %
 % suites/libraries/lib_database.plt alone goes from 10 passed and 21 failed to
 % 29 passed and 2 failed -- more than its 16 type errors, because a test that
@@ -119,12 +117,6 @@
 % code meant to raise, and lib_database.plt:120 is exactly that. The two left
 % there are typed-only and about variable sharing across a store-and-read round
 % trip, not about types.
-%
-% They do NOT make the lane green. Failures of a different class survive --
-% wrong answers and assertion mismatches rather than refused arguments -- and
-% nothing here addresses them. The two left in lib_database are typed-only and
-% are about variable sharing across a store-and-read round trip, not about
-% types at all.
 %
 % Five MeTTa names are used this way, and two of them the engine already
 % classifies, so those two ask it rather than restating its rules
