@@ -239,7 +239,7 @@ def main() -> int:
         (package / "broken.py").write_text(
             "import definitely_not_a_real_module\n", encoding="utf-8")
         sys.path.insert(0, str(planted))
-        import plantedpkg  # noqa: PLC0415  -- planted for this case alone
+        import plantedpkg
         expect(
             _unreachable(plantedpkg, ["absent"]) == "plantedpkg.absent",
             "an absent submodule was not reported absent",

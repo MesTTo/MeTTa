@@ -163,10 +163,10 @@ undefined_findings(Unexpected, Stale) :-
 unexpected_sites(Rows, Unexpected) :-
     probe(Probe),
     findall(PI-Site,
-            ( member(PI-Froms, Rows),
+            ( member(PI-Callers, Rows),
               PI \== Probe,
-              member(From, Froms),
-              site_of(From, File, Site),
+              member(Caller, Callers),
+              site_of(Caller, File, Site),
               \+ ( deferred_reference(PI, Licensed, _),
                    member(Relative, Licensed),
                    sub_atom(File, _, _, 0, Relative) ) ),
