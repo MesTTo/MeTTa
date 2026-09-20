@@ -379,14 +379,14 @@ fi
 # in METTA_TIMEOUT and emptying PATH, which is the one configuration
 # `command -v setpriv` can find nothing in. Every program below is named
 # absolutely for the same reason.
-enforcer=$(sh "$ROOT/bounded.sh" --enforcer)
+enforcer=$(sh "$ROOT/tools/bounded.sh" --enforcer)
 # Not in a command substitution: bounded.sh has to be forked by THIS shell for
 # `--owner $$` to name its real parent, and `$( )` would put a subshell between
 # them.
 METTA_TIMEOUT="$enforcer" PATH=/nonexistent \
-    /bin/sh "$ROOT/bounded.sh" --owner $$ \
+    /bin/sh "$ROOT/tools/bounded.sh" --owner $$ \
     /bin/sh -c 'METTA_TIMEOUT="$1" PATH=/nonexistent /bin/sh "$2" /bin/echo nested-ran' \
-    seven "$enforcer" "$ROOT/bounded.sh" > "$WORK/seven.out" 2>"$WORK/seven.err"
+    seven "$enforcer" "$ROOT/tools/bounded.sh" > "$WORK/seven.out" 2>"$WORK/seven.err"
 nested=$(cat "$WORK/seven.out" 2>/dev/null || true)
 if [ "$nested" = nested-ran ]; then
     printf 'ok  7  the no-setpriv rung still runs, and so does a nested call\n'

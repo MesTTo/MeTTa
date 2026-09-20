@@ -40,7 +40,7 @@ main :-
     engine_destroy(Engine).
 PL
 
-if sh "$root/bounded.sh" "$swipl" -q -f none -s "$scratch/frame.pl" -g main -t halt \
+if sh "$root/tools/bounded.sh" "$swipl" -q -f none -s "$scratch/frame.pl" -g main -t halt \
         > "$scratch/stdout" 2> "$scratch/stderr"; then
     status=0
 else

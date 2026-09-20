@@ -36,14 +36,14 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 # this tree and a command typed by hand all reach. run.sh bounds its own swipl
 # and this bounds run.sh, so the tighter of the two ceilings is the one in
 # force for both.
-bounded() { sh "$ROOT/bounded.sh" "$@"; }
+bounded() { sh "$ROOT/tools/bounded.sh" "$@"; }
 
 probe=$(mktemp -d)
 trap 'rm -rf "$probe"' EXIT HUP INT TERM
 
 fixture=$ROOT/tests/fixtures/verbose_head_pattern.metta
-bounded sh "$ROOT/run.sh" "$fixture" >"$probe/quiet.out" 2>&1
-bounded sh "$ROOT/run.sh" --verbose "$fixture" >"$probe/verbose.out" 2>&1
+bounded sh "$ROOT/tools/run.sh" "$fixture" >"$probe/quiet.out" 2>&1
+bounded sh "$ROOT/tools/run.sh" --verbose "$fixture" >"$probe/verbose.out" 2>&1
 
 NOTE='the head of (= (visible-head ...) ...) holds the call (visible-inner ...)'
 if grep -F "$NOTE" "$probe/quiet.out" >/dev/null; then

@@ -43,14 +43,14 @@ HERE=$(cd -- "$(dirname -- "$0")" && pwd)/..
 # One spelling of the bound, implemented in bounded.sh. A plunit suite that
 # does not terminate is the exact shape this repository has been bitten by
 # twice, and a suite run BY HAND is the case a gate lane cannot reach.
-bounded() { sh "$HERE/bounded.sh" "$@"; }
+bounded() { sh "$HERE/tools/bounded.sh" "$@"; }
 
 # The suites drive Python through Janus, which follows VIRTUAL_ENV rather than
 # any interpreter this script picks, so a run BY HAND has to export the same
 # environment the gate does or shim.plt's 18 scalar-semantics cases fail on a
 # missing module that is installed in the checkout's own virtual environment.
 METTA_ROOT="$HERE"
-. "$HERE/select-python.sh"
+. "$HERE/tools/select-python.sh"
 
 run_plunit() {
     # The named suites are resolved AFTER this cd, so a path given from the

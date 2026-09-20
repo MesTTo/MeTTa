@@ -5,7 +5,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$ROOT/bounded.sh" "$@"; }
+bounded() { sh "$ROOT/tools/bounded.sh" "$@"; }
 PATH="$ROOT/../../local/swipl-9.3.36/bin:$PATH"
 export PATH
 fixture=$(mktemp -d)
@@ -48,7 +48,7 @@ mkdir -p "$proj"
 run_prog() {
     prog="$1"
     log="$2"
-    ( cd "$proj" && bounded --ceiling 120 sh "$ROOT/run.sh" \
+    ( cd "$proj" && bounded --ceiling 120 sh "$ROOT/tools/run.sh" \
         "$prog" --silent ) > "$log" 2>&1
 }
 

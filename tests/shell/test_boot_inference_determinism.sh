@@ -56,7 +56,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$ROOT/bounded.sh" "$@"; }
+bounded() { sh "$ROOT/tools/bounded.sh" "$@"; }
 
 cd "$ROOT"
 

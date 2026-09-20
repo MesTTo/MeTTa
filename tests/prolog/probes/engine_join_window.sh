@@ -37,7 +37,7 @@ ulimit -c 0 2>/dev/null || true
 # bounded.sh rather than a bare `timeout`, which on this box is the uutils
 # reimplementation: it costs 102ms a call against GNU's 0.65ms and signals the
 # command's pid alone. bounded.sh prefers the GNU one where both are installed.
-bounded() { sh "$ROOT/bounded.sh" --ceiling "$LIMIT" "$@"; }
+bounded() { sh "$ROOT/tools/bounded.sh" --ceiling "$LIMIT" "$@"; }
 
 tally() {
     mode=$1

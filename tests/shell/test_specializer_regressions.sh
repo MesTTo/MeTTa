@@ -7,7 +7,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$ROOT/bounded.sh" "$@"; }
+bounded() { sh "$ROOT/tools/bounded.sh" "$@"; }
 PATH="$ROOT/../../local/swipl-9.3.36/bin:$PATH"
 export PATH
 TMPDIR=${TMPDIR:-/tmp}
@@ -16,7 +16,7 @@ run_ok() {
     name="$1"
     file="$2"
     log="$TMPDIR/metta-${name}-$$.log"
-    bounded --ceiling 15 sh "$ROOT/run.sh" "$ROOT/$file" > "$log" 2>&1
+    bounded --ceiling 15 sh "$ROOT/tools/run.sh" "$ROOT/$file" > "$log" 2>&1
     printf '%s\n' "$log"
 }
 
@@ -48,7 +48,7 @@ grep -q 'partial wrap' "$log" || { echo "repro3 missing parent wrap type output"
 # key generated before the arithmetic error.
 log="$TMPDIR/metta-repro4-$$.log"
 set +e
-bounded --ceiling 15 sh "$ROOT/run.sh" \
+bounded --ceiling 15 sh "$ROOT/tools/run.sh" \
     "$ROOT/tests/fixtures/repro4_variant_normalization.metta" > "$log" 2>&1
 status=$?
 set -e

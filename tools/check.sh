@@ -560,6 +560,8 @@ run GATE   parity-fuzz-selftest "$PY" "$HERE/tests/checks/check_upstream_fuzz_se
 run GATE llms       "$PY" "$HERE/tests/checks/check_llms_names.py"
 run GATE readme-fences "$PY" "$HERE/tests/checks/check_readme_fences.py"
 run GATE readme-fences-selftest "$PY" "$HERE/tests/checks/check_readme_fences_selftest.py"
+run GATE script-refs "$PY" "$HERE/tests/checks/check_script_references.py"
+run GATE script-refs-selftest "$PY" "$HERE/tests/checks/check_script_references_selftest.py"
 run GATE llms-selftest "$PY" "$HERE/tests/checks/check_llms_selftest.py"
 
 # KERNEL.md's two rosters and six counts come from the running translator.

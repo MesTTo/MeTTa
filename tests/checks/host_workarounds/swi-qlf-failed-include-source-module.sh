@@ -17,7 +17,7 @@ set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../../.." && pwd)
-bounded() { sh "$root/bounded.sh" "$@"; }
+bounded() { sh "$root/tools/bounded.sh" "$@"; }
 ulimit -c 0
 
 cat > "$scratch/unit.pl" <<'PL'

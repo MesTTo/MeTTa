@@ -17,7 +17,7 @@ set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
 swipl=${SWIPL:-swipl}
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../../.." && pwd)
-enforcer=$(sh "$root/bounded.sh" --enforcer)
+enforcer=$(sh "$root/tools/bounded.sh" --enforcer)
 cat > "$scratch/cycle.pl" <<'PL'
 :- dynamic watched/1.
 % The callback runs with the watched/1 channel's list lock held. It tells the
@@ -53,7 +53,7 @@ status=0
 # The enforcer's default status distinguishes expiry (124) from a child's
 # unrelated signal. bounded.sh itself preserves the child's signal status.
 # https://github.com/coreutils/coreutils/blob/v9.7/src/timeout.c
-sh "$root/bounded.sh" --ceiling 0 "$enforcer" -k 1 10 "$swipl" -q -f none \
+sh "$root/tools/bounded.sh" --ceiling 0 "$enforcer" -k 1 10 "$swipl" -q -f none \
     -s "$scratch/cycle.pl" -g main -t halt -- cycle \
     > "$scratch/cycle.log" 2>&1 || status=$?
 case "$status" in
