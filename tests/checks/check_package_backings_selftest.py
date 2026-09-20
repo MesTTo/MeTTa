@@ -33,7 +33,11 @@ ROOT = next(parent for parent in Path(__file__).resolve().parents
             if (parent / "engine").is_dir() and (parent / "lib").is_dir())
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from check_package_backings import _seat_set, disagreements, findings  # noqa: E402  -- the path is installed above
+from check_package_backings import (  # noqa: E402  -- the path is installed above
+    _seat_set,
+    disagreements,
+    findings,
+)
 
 MAKES_THE_CALL = '!(import_prolog_functions_from_file (library a.pl) (a-head))\n'
 

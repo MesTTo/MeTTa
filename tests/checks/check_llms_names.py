@@ -105,10 +105,10 @@ import argparse
 import inspect
 import os
 import re
-from functools import cache
 import subprocess
 import sys
 from collections.abc import Iterator, Mapping
+from functools import cache
 from pathlib import Path
 
 from bounded_spawn import bounded
@@ -273,8 +273,11 @@ def _build_output(directory: str, token: str) -> bool:
 
 
 def _resolves(sheet: Path, token: str) -> bool:
-    """Whether a path claim names something this checkout actually holds, or
-    deliberately does not hold because a build produces it."""
+    """Whether a path claim names something this checkout answers for.
+
+    It answers for a path it actually holds, and for one it deliberately does
+    not hold because a build is what produces it.
+    """
     if _build_output(str(sheet.parent), token):
         return True
     bases = (sheet.parent, REPO)

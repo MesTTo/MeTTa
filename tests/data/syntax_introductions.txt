@@ -259,8 +259,6 @@ atomically                        17-00-04
 call                              17-00-04
 test-no-answer                    17-00-04
 translatePredicate                17-00-04
-from                              17-00-08
-internal                          17-00-08
 only                              17-00-08
 exists_file                       19-01-02
 context-space                     19-01-03

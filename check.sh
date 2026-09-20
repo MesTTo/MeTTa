@@ -934,7 +934,13 @@ check_component_python() {
     found=$(cd "$HERE" && git ls-files --recurse-submodules -- 'engine/*.py' 'extensions/*/*.py' \
                 'extensions/*/*/*.py' 'examples/ch19-*/*.py' 'tests/checks/*.py' |
             grep -v '^extensions/python/')
-    [ -n "$found" ] || return 0
+    # 125 rather than 0: no driver to lint means this run says nothing about
+    # the tree, which the summary should name rather than report as a pass.
+    [ -n "$found" ] || {
+        echo "note: git lists no component driver outside the Python seat, so \
+there is nothing for this lane to lint" >&2
+        return 125
+    }
     # shellcheck disable=SC2086  -- the list is newline-separated paths this
     # tree owns, and word splitting is how they reach ruff as arguments.
     ( cd "$HERE" && bounded "$PY" -m ruff check $found )
