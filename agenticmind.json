@@ -12106,6 +12106,66 @@
       "tags": [
         "measured"
       ]
+    },
+    "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals": {
+      "title": "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms": {
+      "title": "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms",
+      "supports": [
+        "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+        {
+          "node": "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom": {
+      "title": "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom"
+    },
+    "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly": {
+      "title": "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly",
+      "supports": [
+        "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at": {
+      "title": "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange": {
+      "title": "changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange",
+      "supports": [
+        "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at"
+      ]
+    },
+    "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade": {
+      "title": "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+      "supports": [
+        {
+          "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses",
+        "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -13687,7 +13747,7 @@
       "tags": [
         "reasoning"
       ],
-      "status": "active",
+      "status": "done",
       "addresses": [
         "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
       ]
@@ -54168,6 +54228,170 @@
         ]
       ],
       "id": "6a9490d46f16b0de"
+    },
+    {
+      "at": "2026-09-20T17:43:26.985859+00:00",
+      "after": "5a8ec2f510e4408d5f6c4cd090742c388879fc41",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms\", \"tags\": [\"measured\"], \"title\": \"the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly\", \"tags\": [\"source\"], \"title\": \"those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange\", \"tags\": [\"reasoning\"], \"title\": \"fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at\", \"fields\": {}}]",
+      "parents": [
+        "6a9490d46f16b0de"
+      ],
+      "assert": [
+        [
+          "changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange",
+          "sort",
+          "prop"
+        ],
+        [
+          "changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange",
+          "supports",
+          "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at"
+        ],
+        [
+          "changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange",
+          "title",
+          "changing the mode line to atom documents the internal caller and misdescribes the door; changing the callers to pass strings changes what the libraries exchange"
+        ],
+        [
+          "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at",
+          "sort",
+          "prop"
+        ],
+        [
+          "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at",
+          "title",
+          "fixing them needs a ruling on whether a mode line states the MeTTa door's type or the Prolog predicate's, which is a design decision rather than a repair, so it is characterised here instead of guessed at"
+        ],
+        [
+          "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly",
+          "supports",
+          "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom"
+        ],
+        [
+          "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly",
+          "tags",
+          "source"
+        ],
+        [
+          "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly",
+          "title",
+          "lib_package builds its receipt with directory_file_path(Directory,'performed.metta',Receipt) at lib_package.pl:836 and 906 and hands it to lib_file's predicates directly"
+        ],
+        [
+          "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms",
+          "supports",
+          "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals"
+        ],
+        [
+          "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms",
+          "supports",
+          {
+            "node": "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms",
+          "title",
+          "measured 2026-09-21: every message is `Type error: string expected, found '<dir>/performed.metta' (an atom)`, and lib_file's string-typed arguments are all outputs of MeTTa-facing doors ('read-file!' -Content:string, 'temp-path!' -Path:string, 'dir-glob' -Path:string) while SWI's directory_file_path/3 yields atoms"
+        ],
+        [
+          "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+          "sort",
+          "prop"
+        ],
+        [
+          "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals",
+          "title",
+          "the nine `string' type errors the bridge uncovered in lib_package are one shape: a mode line declaring an OUTPUT as string, satisfied with an atom path, on calls that cross from lib_package into lib_file's Prolog internals"
+        ],
+        [
+          "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom",
+          "sort",
+          "prop"
+        ],
+        [
+          "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom",
+          "title",
+          "those nine are a door-boundary question rather than a typo: the mode lines describe what a MeTTa caller receives, where a path IS a String, and the failing calls are Prolog-to-Prolog between two libraries, where a path is an atom"
+        ]
+      ],
+      "id": "1da22f1c7d72a950"
+    },
+    {
+      "at": "2026-09-20T17:44:29.445095+00:00",
+      "after": "5a8ec2f510e4408d5f6c4cd090742c388879fc41",
+      "did": "[{\"op\": \"status\", \"id\": \"classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD\", \"because\": \"the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "1da22f1c7d72a950"
+      ],
+      "assert": [
+        [
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+          "sort",
+          "prop"
+        ],
+        [
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+          "supersedes",
+          "13 of the 30 name one missing file, so lane count overstates defect count by an order of magnitude and attributing lane by lane would spend the session on corpses"
+        ],
+        [
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+          "supersedes",
+          "probed at HEAD: tools/{check,test,bounded}.sh all resolve and engine is no longer a gitlink, so the script-move and submodule lanes are dead"
+        ],
+        [
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+          "supports",
+          {
+            "node": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+            "status": "done"
+          }
+        ],
+        [
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+          "tags",
+          "measured"
+        ],
+        [
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade",
+          "title",
+          "the classification is complete and every surviving cause was re-probed at HEAD. Thirteen lanes were one git mv into tools/ and resolve there; submodules was the engine absorption and is dead; layering was a checker defect comparing distribution names raw and is fixed; instructions was a patched-versus-stock host mismatch and is not a code regression; dev-typed was one missing has_type bridge, measured 363 failures and 150 type errors down to 202 and 12 over 182 suites; artifact-sync, scratch-retention, spec-status-selftest, example-origins-selftest and twins are fixed and green; encoding was a fourth tools/ casualty and is green. The residue is named rather than open: worktree fails because every component is ahead of its remote so its probe cannot clone the pinned state, which is a push and the user's to make, and the remaining lanes are being re-run by the battery-4 gate now in flight, whose verdict is the one claim still unmade"
+        ],
+        [
+          "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "4ac9e84dd22a2929"
     }
   ]
 }
