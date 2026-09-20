@@ -74,20 +74,25 @@ def bases(text: str, path: Path) -> dict[str, Path]:
     return found
 
 
-def tracked() -> list[str]:
-    """Every shell script this repository tracks."""
+def tracked(root: Path = ROOT) -> list[str]:
+    """Every shell script the repository at `root` tracks."""
     listed = subprocess.run(
-        ["git", "-C", str(ROOT), "ls-files", "*.sh"],
+        ["git", "-C", str(root), "ls-files", "*.sh"],
         capture_output=True, text=True, check=False,
     ).stdout.split()
     return sorted(listed)
 
 
-def findings() -> list[str]:
-    """Each reference whose tail names no file under its variable's base."""
+def findings(root: Path = ROOT) -> list[str]:
+    """Each reference whose tail names no file under its variable's base.
+
+    `root` is a parameter so the selftest can put a planted tree in front of
+    this, the way check_process_bounds_selftest does: a guarantee about what
+    this reports is only held by something that calls it.
+    """
     out: list[str] = []
-    for rel in tracked():
-        path = ROOT / rel
+    for rel in tracked(root):
+        path = root / rel
         if not path.is_file():
             continue
         try:
@@ -100,7 +105,7 @@ def findings() -> list[str]:
                 base = known.get(name)
                 if base is None or (base / tail).is_file():
                     continue
-                where = base.relative_to(ROOT) if base != ROOT else "the repository root"
+                where = base.relative_to(root) if base != root else "the repository root"
                 out.append(
                     f"{rel}:{number}: ${name} is {where}, which holds no {tail}. "
                     f"The helper scripts live in tools/, so a reference written "

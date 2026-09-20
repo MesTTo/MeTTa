@@ -23,7 +23,9 @@ Open Obligations:
 
 from __future__ import annotations
 
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -37,6 +39,37 @@ BASES: tuple[tuple[str, str, str, str], ...] = (
     ('HERE=$(cd -- "$(dirname -- "$0")" && pwd)/..\n', "tools/x.sh", "HERE", "."),
     ('ROOT=$(cd "$(dirname "$0")/../.." && pwd)\n', "a/b/x.sh", "ROOT", "."),
 )
+
+
+def planted_tree() -> list[str]:
+    """findings() itself, over a tree that is a repository with a broken
+    reference in it and a sound one beside it.
+
+    The cases above exercise the two readers; this exercises what the module
+    GUARANTEES, which is what it reports. check_process_bounds_selftest holds
+    its own checker the same way, and without this the end-to-end promise was
+    made by a docstring and proved only by hand.
+    """  # noqa: D205  -- the narrative is one continuous invariant
+    out: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="script-refs-") as scratch:
+        root = Path(scratch)
+        (root / "tools").mkdir()
+        (root / "tools" / "bounded.sh").write_text("#!/bin/sh\n")
+        head = 'HERE=$(cd -- "$(dirname -- "$0")/.." && pwd)\n'
+        (root / "tools" / "sound.sh").write_text(
+            head + 'bounded() { sh "$HERE/tools/bounded.sh" "$@"; }\n')
+        (root / "tools" / "broken.sh").write_text(
+            head + 'bounded() { sh "$HERE/bounded.sh" "$@"; }\n')
+        for command in (["init", "-q"], ["add", "-A"]):
+            subprocess.run(["git", "-C", str(root), *command],
+                           capture_output=True, check=False)
+        reported = checked.findings(root)
+        named = [line for line in reported if "broken.sh" in line]
+        if not named:
+            out.append("findings() did not report a reference to a file that is not there")
+        if any("sound.sh" in line for line in reported):
+            out.append("findings() reported a reference that resolves")
+    return out
 
 
 def main() -> int:
@@ -59,10 +92,11 @@ def main() -> int:
     pairs = checked.REFERENCE.findall('bounded() { sh "$HERE/tools/bounded.sh" "$@"; }')
     if pairs != [("HERE", "tools/bounded.sh")]:
         problems.append(f"the reference pattern read {pairs}")
+    problems += planted_tree()
     for problem in problems:
         print(f"  {problem}")
     print(f"script-references-selftest: {len(problems)} finding(s) over "
-          f"{len(BASES) + 2} planted case(s)")
+          f"{len(BASES) + 4} planted case(s)")
     return 1 if problems else 0
 
 

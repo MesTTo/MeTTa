@@ -10942,6 +10942,68 @@
       "tags": [
         "user"
       ]
+    },
+    "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely": {
+      "title": "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+    },
+    "measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'": {
+      "title": "measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'",
+      "supports": [
+        "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+      ]
+    },
+    "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly": {
+      "title": "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly",
+      "supports": [
+        {
+          "node": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "status": "untried"
+        },
+        {
+          "node": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "relation": "addresses",
+          "target": "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+        }
+      ]
+    },
+    "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root": {
+      "title": "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root",
+      "supports": [
+        {
+          "node": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name": {
+      "title": "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third": {
+      "title": "measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third",
+      "supports": [
+        "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name"
+      ]
+    },
+    "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations": {
+      "title": "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations"
+    },
+    "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason": {
+      "title": "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason",
+      "supports": [
+        "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -12499,6 +12561,14 @@
       "status": "unwanted",
       "addresses": [
         "the node parity branch is finished but unmerged, and merging it is not a trivial fast-forward: 19 commits over 50 files against the released main's 3 over 26, with 8 files changed on both sides including package.json, src/index.ts, src/engine.ts, src/platform.ts and bridge.pl"
+      ]
+    },
+    "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes": {
+      "title": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
       ]
     }
   },
@@ -49692,6 +49762,182 @@
         ]
       ],
       "id": "25cab93cfdc224b2"
+    },
+    {
+      "at": "2026-09-20T15:53:10.700167+00:00",
+      "after": "6ba95503e1eebbced7e2bba20ebafe66e8a78508",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'\", \"tags\": [], \"title\": \"moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly\", \"tags\": [], \"title\": \"check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes\", \"fields\": {\"effort\": 2, \"addresses\": [\"moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely\"]}}, {\"op\": \"status\", \"id\": \"check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes\", \"because\": \"tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third\", \"tags\": [\"reasoning\"], \"title\": \"I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason\", \"tags\": [\"source\"], \"title\": \"tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations\", \"fields\": {}}]",
+      "parents": [
+        "25cab93cfdc224b2"
+      ],
+      "assert": [
+        [
+          "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name",
+          "sort",
+          "prop"
+        ],
+        [
+          "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name",
+          "title",
+          "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name"
+        ],
+        [
+          "measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'",
+          "supports",
+          "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+        ],
+        [
+          "measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'",
+          "title",
+          "measured: an empty corpus calling 82 backed claims unbacked, a disarmed guard over 18 unbounded lanes, the process bound not found, and the bounded-wrapper selftest failing every case with 'cannot open .../bounded.sh'"
+        ],
+        [
+          "measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third",
+          "supports",
+          "I built that check wrong twice, and each way was a failure I had spent the session naming in other people's code: first it could not fail at all, because its own search list included tools/ so the broken reference resolved; then it over-fired on 54 correct references, because it guessed the base from the variable's name"
+        ],
+        [
+          "measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third",
+          "title",
+          "measured: exit 0 with a reverted reference on the first version, 54 findings on a clean tree on the second, 0 and a correct single finding on the third"
+        ],
+        [
+          "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely",
+          "sort",
+          "prop"
+        ],
+        [
+          "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely",
+          "title",
+          "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+        ],
+        [
+          "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations",
+          "title",
+          "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations"
+        ],
+        [
+          "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root",
+          "supersedes",
+          "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly"
+        ],
+        [
+          "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root",
+          "supports",
+          {
+            "node": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+            "status": "done"
+          }
+        ],
+        [
+          "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root",
+          "tags",
+          "tested"
+        ],
+        [
+          "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root",
+          "title",
+          "tests/checks/check_script_references.py reads 0 findings on the repaired tree, exits 1 naming file, line, variable and base when one reference is reverted, and its selftest holds all three refuted shapes over 6 planted cases; it found the eighth instance itself, engine/test.sh reaching for bounded.sh and select-python.sh at the root"
+        ],
+        [
+          "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly",
+          "sort",
+          "prop"
+        ],
+        [
+          "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly",
+          "supports",
+          {
+            "node": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+            "status": "untried"
+          }
+        ],
+        [
+          "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly",
+          "supports",
+          {
+            "node": "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+            "relation": "addresses",
+            "target": "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+          }
+        ],
+        [
+          "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly",
+          "title",
+          "the reference is the thing that is wrong, so checking it names the cause instead of a symptom eight steps downstream; the assignment shape this repository writes is uniform enough to read exactly"
+        ],
+        [
+          "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason",
+          "sort",
+          "prop"
+        ],
+        [
+          "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason",
+          "supports",
+          "tests/checks/check_artifact_paths.py already held the rule that settles this, fold only what is literal and skip what is computed rather than guessing, and reading it before writing would have saved both refutations"
+        ],
+        [
+          "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason",
+          "tags",
+          "source"
+        ],
+        [
+          "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason",
+          "title",
+          "the semantic-search recall named it, with check_process_bounds recording that regex scanning had produced 10 wrong answers across 13 shell shapes for the same reason"
+        ],
+        [
+          "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "sort",
+          "approach"
+        ],
+        [
+          "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "addresses",
+          "moving the helper scripts into tools/ broke references in eight places and nothing checked that a referenced script exists, so each break surfaced as something else entirely"
+        ],
+        [
+          "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "effort",
+          2
+        ],
+        [
+          "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "status",
+          "done"
+        ],
+        [
+          "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes",
+          "title",
+          "check that a shell reference through a root variable names a file, reading the variable's base from the assignment the file makes"
+        ]
+      ],
+      "id": "3693e94a2801b5c2"
     }
   ]
 }
