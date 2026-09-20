@@ -238,6 +238,61 @@ battery_link_installs() {
     done
 }
 
+# A component's Rust manifest can name a source tree OUTSIDE this repository by
+# a RELATIVE path, and a relative path resolves somewhere different at every
+# tree depth. mork_ffi names ../../../../MORK, which is PyPeTTa1/MORK from the
+# checkout, PeTTa/ai-tmp/MORK from a worktree one level down, and nothing at all
+# from a battery one level below that, so `mork-rust` failed with `failed to
+# read .../ai-tmp/MORK/kernel/Cargo.toml`: a verdict about where the tree sits
+# rather than about the tree [measured 2026-09-20]. Linking them in the control's
+# parent is the correction this repository already made once, on 2026-09-09.
+#
+# DERIVED from the manifests rather than naming MORK and PathMap, so a component
+# that grows a third sibling is carried without editing this. Linked for the
+# reason the installs are: these are sources owned elsewhere, large, and the
+# battery must read the same ones rather than own a second copy.
+#
+# The link lands OUTSIDE the battery, in the directory the battery's own
+# relative path points at, which is the source tree's ai-tmp. That is scratch,
+# the snapshot excludes it, and one link there serves every battery beneath it.
+battery_link_sibling_sources() {
+    sibling_tree=$1
+    for sibling_manifest in $(cd "$ROOT" && find . -maxdepth 4 -name Cargo.toml \
+                                  -not -path '*/target/*' 2>/dev/null); do
+        sibling_dir=$(dirname "${sibling_manifest#./}")
+        for sibling_path in $(sed -n 's/.*path *= *"\([^"]*\)".*/\1/p' \
+                                  "$ROOT/${sibling_manifest#./}" 2>/dev/null); do
+            case $sibling_path in /*) continue ;; esac
+            # The TOPMOST component the path escapes into, not the dependency
+            # directory itself. A crate inheriting from `workspace.dependencies`
+            # resolves its workspace root by walking UP from its own manifest, so
+            # a link to the crate alone leaves that walk inside the battery's
+            # scratch where no root exists [measured 2026-09-20: linking
+            # MORK/kernel gave `error inheriting env_logger from workspace root
+            # manifest ... failed to find a workspace root`, where linking MORK
+            # carries the root with it].
+            sibling_rest=$sibling_path
+            while :; do
+                case $sibling_rest in ../*) sibling_rest=${sibling_rest#../} ;; *) break ;; esac
+            done
+            sibling_climb=${sibling_path%"$sibling_rest"}
+            sibling_entry=$sibling_climb${sibling_rest%%/*}
+            # -m rather than -f, because the battery-side path is exactly the
+            # one that does not exist yet and -f refuses to resolve it.
+            sibling_source=$(readlink -m "$ROOT/$sibling_dir/$sibling_entry")
+            sibling_target=$(readlink -m "$sibling_tree/$sibling_dir/$sibling_entry")
+            # A path inside the repository is the component's own business and
+            # the snapshot already carries it; outside is what a battery at a
+            # different depth cannot reach.
+            case $sibling_source in "$ROOT"/*) continue ;; esac
+            [ -d "$sibling_source" ] || continue
+            [ -e "$sibling_target" ] && continue
+            mkdir -p "$(dirname "$sibling_target")"
+            ln -s "$sibling_source" "$sibling_target" 2>/dev/null || true
+        done
+    done
+}
+
 provision() {
     tree=$(tree_for "$1")
     if held=$(occupant "$tree"); then
@@ -253,6 +308,7 @@ provision() {
         battery_git_identity "$ROOT/$component" "$tree/$component"
     done
     battery_link_installs "$tree"
+    battery_link_sibling_sources "$tree"
     mkdir -p "$tree/ai-tmp"
     {
         echo "source:   $ROOT"
