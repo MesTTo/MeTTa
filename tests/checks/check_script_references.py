@@ -74,17 +74,45 @@ ASSIGNMENT = re.compile(
 REFERENCE = re.compile(r'\$\{?(\w+)\}?/([A-Za-z0-9_./-]+\.sh)')
 
 
+#: A root named from ANOTHER root rather than from `$0`. Both bench.sh files
+#: do this -- `ROOT=$(dirname -- "$HERE")` and `ROOT=$(cd -- "$HERE/../.." &&
+#: pwd)` -- and neither was resolvable, so every reference through $ROOT in
+#: them was skipped. That is where all three misses of this checker have been:
+#: not in recognising a reference, but in knowing where its variable points,
+#: and an unresolvable base SKIPS silently while a wrong one would be loud
+#: [measured 2026-09-21: engine/bench.sh carried three stale references and
+#: extensions/node/bench.sh two while this reported 0 findings; commit=WORKTREE].
+DERIVED_DIRNAME = re.compile(r'^(\w+)=\$\(\s*dirname(?:\s+--)?\s+"\$(\w+)"\s*\)', re.MULTILINE)
+DERIVED_CD = re.compile(
+    r'^(\w+)=\$\(\s*(?:\w+=\S*\s+)*cd(?:\s+--)?\s+"\$(\w+)([^"]*)"\s*&&\s*pwd\s*\)',
+    re.MULTILINE,
+)
+
+
+def _walk(base: Path, steps: str) -> Path:
+    """Follow a literal `/..`-and-name suffix from a directory."""
+    for step in steps.strip("/").split("/"):
+        if step == "..":
+            base = base.parent
+        elif step:
+            base = base / step
+    return base
+
+
 def bases(text: str, path: Path) -> dict[str, Path]:
     """Each root variable the file assigns, and the directory it names."""
     found: dict[str, Path] = {}
     for name, inner, outer in ASSIGNMENT.findall(text):
-        base = path.parent
-        for step in f"{inner}/{outer}".strip("/").split("/"):
-            if step == "..":
-                base = base.parent
-            elif step:
-                base = base / step
-        found[name] = base
+        found[name] = _walk(path.parent, f"{inner}/{outer}")
+    # Then the ones named from those, to a fixed point: a file may define
+    # HERE from $0 and ROOT from HERE, in either order in the text.
+    pending = [(n, o, "") for n, o in DERIVED_DIRNAME.findall(text)]
+    pending += [(n, o, s) for n, o, s in DERIVED_CD.findall(text)]
+    for _ in range(len(pending)):
+        for name, other, suffix in pending:
+            if name in found or other not in found:
+                continue
+            found[name] = _walk(found[other], suffix) if suffix else found[other].parent
     return found
 
 

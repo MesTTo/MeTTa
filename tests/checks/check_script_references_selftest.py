@@ -110,6 +110,20 @@ def main() -> int:
     prefixed = 'ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)\n'
     if not checked.bases(prefixed, root / "tests/shell/x.sh"):
         problems.append("an assignment with a CDPATH= prefix was not read at all")
+    # A root named from ANOTHER root, which both bench.sh files do. Neither
+    # shape was resolvable, so every reference through $ROOT in them was
+    # skipped -- silently, because an unresolvable base and a sound one leave
+    # the same trace.
+    derived = ('HERE=$(cd -- "$(dirname -- "$0")" && pwd)\n'
+               'ROOT=$(dirname -- "$HERE")\n')
+    got = checked.bases(derived, root / "engine/bench.sh")
+    if got.get("ROOT") != root:
+        problems.append(f"ROOT=$(dirname -- \"$HERE\") read as {got.get('ROOT')}, wanted {root}")
+    climbed = ('HERE=$(cd -- "$(dirname -- "$0")" && pwd)\n'
+               'ROOT=$(cd -- "$HERE/../.." && pwd)\n')
+    got = checked.bases(climbed, root / "extensions/node/bench.sh")
+    if got.get("ROOT") != root:
+        problems.append(f"ROOT=$(cd -- \"$HERE/../..\") read as {got.get('ROOT')}, wanted {root}")
     problems += planted_tree()
     for problem in problems:
         print(f"  {problem}")

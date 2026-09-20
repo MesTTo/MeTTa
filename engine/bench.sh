@@ -55,7 +55,7 @@ ROOT=$(dirname -- "$HERE")
 
 # One spelling of the bound, implemented in bounded.sh, which every runner in
 # this tree and a command typed by hand all reach.
-bounded() { sh "$ROOT/bounded.sh" "$@"; }
+bounded() { sh "$ROOT/tools/bounded.sh" "$@"; }
 
 if ! command -v swipl >/dev/null 2>&1; then
     echo "engine/bench.sh: swipl not found; the engine benchmark suite will not run" >&2
@@ -65,7 +65,7 @@ fi
 # The same interpreter check.sh picks, and the same exported environment, so a
 # bare run and a gated run choose the same one.
 METTA_ROOT="$ROOT"
-. "$ROOT/select-python.sh"
+. "$ROOT/tools/select-python.sh"
 if [ -z "$PY" ]; then
     echo "engine/bench.sh: no python found (set CHECK_PY); the engine benchmark \
 suite will not run" >&2
@@ -89,4 +89,4 @@ extensions/python. The engine benchmark suite will not run" >&2
     exit 0
 fi
 
-exec sh "$ROOT/bounded.sh" "$PY" "$HERE/bench.py" "$@"
+exec sh "$ROOT/tools/bounded.sh" "$PY" "$HERE/bench.py" "$@"
