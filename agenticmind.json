@@ -12318,6 +12318,71 @@
       "tags": [
         "measured"
       ]
+    },
+    "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds": {
+      "title": "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds"
+    },
+    "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module": {
+      "title": "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module",
+      "supports": [
+        "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else": {
+      "title": "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses": {
+      "title": "typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses",
+      "supports": [
+        "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else"
+      ]
+    },
+    "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect": {
+      "title": "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect"
+    },
+    "18 is exactly the count my sweep attributed to the typed build": {
+      "title": "18 is exactly the count my sweep attributed to the typed build",
+      "supports": [
+        "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing": {
+      "title": "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing",
+      "supports": [
+        {
+          "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "status": "untried"
+        },
+        {
+          "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "relation": "addresses",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ]
+    },
+    "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands": {
+      "title": "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands",
+      "supports": [
+        {
+          "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "status": "active"
+        }
+      ],
+      "supersedes": [
+        "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -14006,6 +14071,14 @@
       "status": "done",
       "addresses": [
         "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+      ]
+    },
+    "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182": {
+      "title": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+      "effort": 1,
+      "status": "active",
+      "addresses": [
+        "the plunit and dev-typed lanes exit zero"
       ]
     }
   },
@@ -54993,6 +55066,190 @@
         "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
       },
       "id": "c1055c3281650da8"
+    },
+    {
+      "at": "2026-09-20T18:06:10.194639+00:00",
+      "after": "b8c179fcd37a0e1d5e20057e3449d1f9e2d819e9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module\", \"tags\": [\"measured\"], \"title\": \"my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses\", \"tags\": [\"reasoning\"], \"title\": \"the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"18 is exactly the count my sweep attributed to the typed build\", \"tags\": [\"source\"], \"title\": \"the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing\", \"tags\": [], \"title\": \"re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182\", \"fields\": {\"effort\": 1, \"addresses\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"status\", \"id\": \"re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182\", \"because\": \"launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands\", \"tags\": [\"tested\"], \"status\": \"active\"}]",
+      "parents": [
+        "c1055c3281650da8"
+      ],
+      "assert": [
+        [
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands",
+          "sort",
+          "prop"
+        ],
+        [
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands",
+          "supersedes",
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing"
+        ],
+        [
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands",
+          "supports",
+          {
+            "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+            "status": "active"
+          }
+        ],
+        [
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands",
+          "tags",
+          "tested"
+        ],
+        [
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands",
+          "title",
+          "launched in the background; the previous figure of 141 debt failures across 38 suites cannot be quoted until it lands"
+        ],
+        [
+          "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module",
+          "supports",
+          "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds"
+        ],
+        [
+          "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module",
+          "title",
+          "measured 2026-09-21: all 18 shim.plt failures are Python 'ModuleNotFoundError', and engine/test.sh's own header says a run by hand without the exported environment fails exactly shim.plt's 18 scalar-semantics cases on a missing module"
+        ],
+        [
+          "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds",
+          "sort",
+          "prop"
+        ],
+        [
+          "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds",
+          "title",
+          "my typed sweeps called swipl directly and never exported VIRTUAL_ENV, while the untyped sweep went through engine/test.sh which sources tools/select-python.sh and does, so the transparency comparison was between two different environments rather than two builds"
+        ],
+        [
+          "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else",
+          "sort",
+          "prop"
+        ],
+        [
+          "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else",
+          "title",
+          "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else"
+        ],
+        [
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing",
+          "supports",
+          {
+            "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+            "status": "untried"
+          }
+        ],
+        [
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing",
+          "supports",
+          {
+            "node": "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+            "relation": "addresses",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing",
+          "title",
+          "the confound only reaches suites that drive Python, and the debt set is where the answer changes; re-running 182 under a loadavg of 31 would cost far more and tell the same thing"
+        ],
+        [
+          "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect",
+          "title",
+          "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect"
+        ],
+        [
+          "typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses",
+          "sort",
+          "prop"
+        ],
+        [
+          "typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses",
+          "supports",
+          "the bridge A/B is NOT affected by that error, because both of its sides ran under the same bare harness, so it measures the has_type block and nothing else"
+        ],
+        [
+          "typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses",
+          "title",
+          "typed-baseline.tsv and typed-full.tsv were produced by the same loop differing only in whether dev_typed.pl carried the clauses"
+        ],
+        [
+          "18 is exactly the count my sweep attributed to the typed build",
+          "sort",
+          "prop"
+        ],
+        [
+          "18 is exactly the count my sweep attributed to the typed build",
+          "supports",
+          "the tree documents this trap with the number: engine/test.sh:48-52 names VIRTUAL_ENV, janus and shim.plt's 18 cases, and tools/select-python.sh:48-50 is what exports it; I reproduced the documented failure rather than discovering a defect"
+        ],
+        [
+          "18 is exactly the count my sweep attributed to the typed build",
+          "tags",
+          "source"
+        ],
+        [
+          "18 is exactly the count my sweep attributed to the typed build",
+          "title",
+          "18 is exactly the count my sweep attributed to the typed build"
+        ],
+        [
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "sort",
+          "approach"
+        ],
+        [
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "addresses",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "effort",
+          1
+        ],
+        [
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "status",
+          "active"
+        ],
+        [
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182",
+          "title",
+          "re-measure the 38 transparency-debt suites with VIRTUAL_ENV exported the way the gate exports it, rather than re-running all 182"
+        ]
+      ],
+      "telemetry": {
+        "focus": "run the full gate through tools/battery.sh run 4 with the patched host first on PATH and CHECK_PY naming the venv interpreter"
+      },
+      "id": "2f41fcec06d62834"
     }
   ]
 }
