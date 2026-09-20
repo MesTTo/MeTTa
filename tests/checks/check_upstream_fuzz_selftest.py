@@ -1,11 +1,16 @@
 """Purpose: prove the fuzz lane tells its six outcomes apart and shrinks a real one.
 
 Every plant passes through ``check_upstream_fuzz`` itself with only
-``engine_run`` replaced, so the self-test and the production lane cannot drift
-into testing different questions. No engine is started: ``engine_run`` is the
-single place that lane touches a process, and a stand-in evaluator over the
-planted census's own language exercises the whole classify, suppress, shrink
-and report path.
+``engine_run``, ``strategy_for`` and the sibling-checkout prerequisite
+replaced, so the self-test and the production lane cannot drift into testing
+different questions. The prerequisite is replaced because it belongs to the
+LANE and not to this file: no engine here reads an upstream, and leaving the
+real check in made the self-test depend on an optional clone sitting beside the
+tree, present next to a working checkout and absent next to a battery.
+
+No engine is started: ``engine_run`` is the single place that lane touches a
+process, and a stand-in evaluator over the planted census's own language
+exercises the whole classify, suppress, shrink and report path.
 
 The questions are the ones a differential against an ARBITER has to get right:
 
@@ -181,6 +186,21 @@ def _run(role_outputs, argv, *, facts=(0, 2), queries=(1, 2),
     original = lane.strategy_for
     lane.strategy_for = lambda _census: testing.programs(
         census=census or PLANTED, facts=facts, queries=queries)
+    # The sibling checkout is the lane's prerequisite and NOT this file's: every
+    # engine here is `_off_by_one`, ten lines of Python, so no upstream is ever
+    # read. Leaving the real check in place made the selftest depend on an
+    # optional clone that sits BESIDE the tree, which is present next to a
+    # working checkout and absent next to a battery, where the parent directory
+    # is a different one. The lane then skipped, wrote no report, and the first
+    # case read that as the shrinker having found nothing
+    # [measured 2026-09-20: status 125 and `upstream checkout not found`, in a
+    # battery whose parent holds no PeTTa-upstream while the checkout's does].
+    #
+    # Replaced rather than worked around, the same way `engine_run` and
+    # `strategy_for` are: what this file tests is the classifier and the
+    # shrinker, and neither reads a sibling.
+    original_present = lane.parity.upstream_present
+    lane.parity.upstream_present = lambda: True
     buffer = io.StringIO()
     try:
         with planted(role_outputs), contextlib.redirect_stdout(buffer), \
@@ -188,6 +208,7 @@ def _run(role_outputs, argv, *, facts=(0, 2), queries=(1, 2),
             status = lane.main(["--report", str(where), "--timeout", "1", *argv])
     finally:
         lane.strategy_for = original
+        lane.parity.upstream_present = original_present
     printed = buffer.getvalue()
     return status, _counts(printed), printed, where
 
