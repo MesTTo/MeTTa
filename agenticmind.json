@@ -11637,6 +11637,327 @@
       "tags": [
         "measured"
       ]
+    },
+    "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for": {
+      "title": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be": {
+      "title": "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be",
+      "supports": [
+        "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+        {
+          "node": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience": {
+      "title": "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience",
+      "supports": [
+        {
+          "node": "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "status": "untried"
+        },
+        {
+          "node": "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "relation": "addresses",
+          "target": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+        }
+      ]
+    },
+    "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects": {
+      "title": "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects"
+    },
+    "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses": {
+      "title": "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses",
+      "supports": [
+        "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses": {
+      "title": "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses"
+    },
+    "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work": {
+      "title": "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work",
+      "supports": [
+        "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause": {
+      "title": "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause"
+    },
+    "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run": {
+      "title": "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run",
+      "supports": [
+        "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly": {
+      "title": "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly"
+    },
+    "measured directly under swipl with vendor/ on the library path": {
+      "title": "measured directly under swipl with vendor/ on the library path",
+      "supports": [
+        "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1": {
+      "title": "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1"
+    },
+    "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree": {
+      "title": "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree",
+      "supports": [
+        "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it": {
+      "title": "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it"
+    },
+    "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)": {
+      "title": "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)",
+      "supports": [
+        "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure": {
+      "title": "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure"
+    },
+    "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression": {
+      "title": "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression",
+      "supports": [
+        "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way": {
+      "title": "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way",
+      "supports": [
+        {
+          "node": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "status": "untried"
+        },
+        {
+          "node": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "relation": "addresses",
+          "target": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+        }
+      ]
+    },
+    "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly": {
+      "title": "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly",
+      "supports": [
+        {
+          "node": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way"
+      ],
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence": {
+      "title": "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence"
+    },
+    "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'": {
+      "title": "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'",
+      "supports": [
+        "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed": {
+      "title": "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed"
+    },
+    "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)": {
+      "title": "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)",
+      "supports": [
+        "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89": {
+      "title": "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89"
+    },
+    "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers": {
+      "title": "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers",
+      "supports": [
+        "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations": {
+      "title": "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations"
+    },
+    "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing": {
+      "title": "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing",
+      "supports": [
+        "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents": {
+      "title": "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "both errors above had the same shape and neither was visible in the data itself": {
+      "title": "both errors above had the same shape and neither was visible in the data itself",
+      "supports": [
+        "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents"
+      ]
+    },
+    "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise": {
+      "title": "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise"
+    },
+    "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone": {
+      "title": "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone",
+      "supports": [
+        "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check": {
+      "title": "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check"
+    },
+    "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier": {
+      "title": "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier",
+      "supports": [
+        "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip": {
+      "title": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+      "blocks": [
+        "the plunit and dev-typed lanes exit zero"
+      ]
+    },
+    "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot": {
+      "title": "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot",
+      "supports": [
+        "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+        {
+          "node": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+          "relation": "blocks",
+          "target": "the plunit and dev-typed lanes exit zero"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares": {
+      "title": "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares",
+      "supports": [
+        {
+          "node": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "status": "untried"
+        },
+        {
+          "node": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "relation": "addresses",
+          "target": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        }
+      ]
+    },
+    "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes": {
+      "title": "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes",
+      "supports": [
+        {
+          "node": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names": {
+      "title": "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names",
+      "supports": [
+        {
+          "node": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "status": "untried"
+        },
+        {
+          "node": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "relation": "addresses",
+          "target": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        }
+      ]
+    },
+    "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path": {
+      "title": "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path",
+      "supports": [
+        {
+          "node": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape": {
+      "title": "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape"
+    },
+    "the hook and the mode-line removal both left the suite at 29 passed and 2 failed": {
+      "title": "the hook and the mode-line removal both left the suite at 29 passed and 2 failed",
+      "supports": [
+        "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -13277,6 +13598,38 @@
       "status": "active",
       "addresses": [
         "the gate verdict in hand was measured on a snapshot that predates the tools/ move fixes, the engine absorption and the twin fixes, so 30 named lanes cannot be attributed to the release tree"
+      ]
+    },
+    "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers": {
+      "title": "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+      ]
+    },
+    "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered": {
+      "title": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+      ]
+    },
+    "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value": {
+      "title": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+      "effort": 1,
+      "status": "failed",
+      "addresses": [
+        "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+      ]
+    },
+    "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes": {
+      "title": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+      "effort": 1,
+      "status": "failed",
+      "addresses": [
+        "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
       ]
     }
   },
@@ -52361,6 +52714,913 @@
         "focus": "classify the 30 failing lanes by cause rather than by lane, then re-probe only the causes that survive at HEAD"
       },
       "id": "a63d1d2bfb905a9f"
+    },
+    {
+      "at": "2026-09-20T17:13:00.766959+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be\", \"tags\": [\"measured\"], \"title\": \"the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience\", \"tags\": [], \"title\": \"register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers\", \"fields\": {\"effort\": 1, \"addresses\": [\"the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses\", \"tags\": [\"measured\"], \"title\": \"a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work\", \"tags\": [\"measured\"], \"title\": \"the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run\", \"tags\": [\"measured\"], \"title\": \"I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured directly under swipl with vendor/ on the library path\", \"tags\": [\"measured\"], \"title\": \"my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly\", \"fields\": {}}]",
+      "parents": [
+        "a63d1d2bfb905a9f"
+      ],
+      "assert": [
+        [
+          "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause",
+          "sort",
+          "prop"
+        ],
+        [
+          "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause",
+          "title",
+          "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause"
+        ],
+        [
+          "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects",
+          "sort",
+          "prop"
+        ],
+        [
+          "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects",
+          "title",
+          "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects"
+        ],
+        [
+          "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses",
+          "supports",
+          "a probe of that bridge took one suite from 10 passed/21 failed to 29 passed/2 failed with all 16 'Atom' type errors gone, so the recorded backlog of 158 typed refusals is one missing bridge rather than 158 defects"
+        ],
+        [
+          "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses",
+          "title",
+          "measured 2026-09-21 A/B on suites/libraries/lib_database.plt, dev_typed_suites with and without four has_type clauses"
+        ],
+        [
+          "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be",
+          "supports",
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+        ],
+        [
+          "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be",
+          "supports",
+          {
+            "node": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be",
+          "title",
+          "measured 2026-09-21: exactly four quoted type names appear in mode lines across lib/ and engine/ -- 'Atom' 21 times, 'Symbol' 18, 'SpaceType' 7, 'Expression' 1 -- and swipl answers existence_error(type,'Atom') for each under a bare must_be"
+        ],
+        [
+          "measured directly under swipl with vendor/ on the library path",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured directly under swipl with vendor/ on the library path",
+          "supports",
+          "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly"
+        ],
+        [
+          "measured directly under swipl with vendor/ on the library path",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured directly under swipl with vendor/ on the library path",
+          "title",
+          "measured directly under swipl with vendor/ on the library path"
+        ],
+        [
+          "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly",
+          "title",
+          "my first mechanism for the typed refusals was that the four MeTTa types are simply unknown to must_be, which is refuted by the error SHAPE: an unknown type raises existence_error(type,T) while the gate shows type_error(T,Value), so something does define them and defines them too strictly"
+        ],
+        [
+          "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work",
+          "supports",
+          "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses"
+        ],
+        [
+          "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work",
+          "tags",
+          "measured"
+        ],
+        [
+          "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work",
+          "title",
+          "the 2026-09-20 entry grouped them as '158 of them are the typed build refusing a value the untyped build accepts' and treated the count as the size of the work"
+        ],
+        [
+          "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience",
+          "sort",
+          "prop"
+        ],
+        [
+          "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience",
+          "supports",
+          {
+            "node": "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+            "status": "untried"
+          }
+        ],
+        [
+          "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience",
+          "supports",
+          {
+            "node": "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+            "relation": "addresses",
+            "target": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+          }
+        ],
+        [
+          "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience",
+          "title",
+          "the collision exists only under mavis and only dev_typed.pl installs it, so the bridge belongs there and production never sees it; the engine already ships 'is-expr'/2 (list_shaped/1) and 'is-space'/2 as pure semi-det classifiers, so the Expression and SpaceType clauses derive rather than restate, and 'Atom' is MeTTa's top type so its check is vacuously true by the semantics rather than by convenience"
+        ],
+        [
+          "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses",
+          "title",
+          "the record's estimate that dev-typed's 158 refusals are a multi-session programme rests on counting the failures rather than their cause; the cause is single and the fix is four clauses"
+        ],
+        [
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for",
+          "title",
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+        ],
+        [
+          "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run",
+          "sort",
+          "prop"
+        ],
+        [
+          "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run",
+          "supports",
+          "I first read the 1090 library error lines as a regression from switching the gate to the patched SWI host; the previous stock-host run had MORE of them, so the host switch was not the cause"
+        ],
+        [
+          "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run",
+          "tags",
+          "measured"
+        ],
+        [
+          "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run",
+          "title",
+          "1090 library-suite error lines in battery-3's stock-host run against 302 and still running in battery-4's patched-host run"
+        ],
+        [
+          "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "sort",
+          "approach"
+        ],
+        [
+          "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "addresses",
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+        ],
+        [
+          "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "effort",
+          1
+        ],
+        [
+          "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "status",
+          "untried"
+        ],
+        [
+          "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers",
+          "title",
+          "register error:has_type/2 for the four MeTTa type names in dev_typed.pl, derived from the engine's own classifiers"
+        ]
+      ],
+      "id": "5235c3a00dacd466"
+    },
+    {
+      "at": "2026-09-20T17:15:27.017858+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree\", \"tags\": [\"measured\"], \"title\": \"the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)\", \"tags\": [\"measured\"], \"title\": \"with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the pattern was [A-Z][a-z]* where the names include SpaceType and Expression\", \"tags\": [\"measured\"], \"title\": \"I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure\", \"fields\": {}}]",
+      "parents": [
+        "5235c3a00dacd466"
+      ],
+      "assert": [
+        [
+          "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure",
+          "sort",
+          "prop"
+        ],
+        [
+          "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure",
+          "title",
+          "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure"
+        ],
+        [
+          "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree",
+          "supports",
+          "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1"
+        ],
+        [
+          "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree",
+          "tags",
+          "measured"
+        ],
+        [
+          "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree",
+          "title",
+          "extracted from battery-4's dev-typed section, which ran the same check_dev_typed suite loop on the pre-bridge tree"
+        ],
+        [
+          "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)",
+          "supports",
+          "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it"
+        ],
+        [
+          "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)",
+          "title",
+          "measured 2026-09-21 over suites/*/*.plt with dev_typed_suites; the probe and the derived version agree exactly on lib_database (29 passed, 2 failed, 0 type errors)"
+        ],
+        [
+          "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression",
+          "supports",
+          "I counted the baseline's type errors as 105 with a regex requiring lowercase after the initial capital, which silently dropped every SpaceType; the per-kind breakdown summing to 145 is the right figure"
+        ],
+        [
+          "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression",
+          "tags",
+          "measured"
+        ],
+        [
+          "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression",
+          "title",
+          "the pattern was [A-Z][a-z]* where the names include SpaceType and Expression"
+        ],
+        [
+          "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1",
+          "title",
+          "the typed build's baseline, measured by the gate's own dev-typed lane on a snapshot taken before the bridge, is 206 failures of which 145 are type errors: Atom 66, SpaceType 40, Symbol 38, Expression 1"
+        ],
+        [
+          "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it",
+          "sort",
+          "prop"
+        ],
+        [
+          "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it",
+          "title",
+          "with the bridge the same 48 suites report 0 type errors and 115 failures, so it removes all 145 type refusals and 91 of the 206 failures; the remaining 115 are a different class and are NOT addressed by it"
+        ]
+      ],
+      "id": "39f3d642a475a67a"
+    },
+    {
+      "at": "2026-09-20T17:16:03.666037+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way\", \"tags\": [], \"title\": \"add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered\", \"fields\": {\"effort\": 2, \"addresses\": [\"the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for\"]}}, {\"op\": \"status\", \"id\": \"add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered\", \"because\": \"the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly\", \"tags\": [\"reasoning\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "39f3d642a475a67a"
+      ],
+      "assert": [
+        [
+          "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way",
+          "sort",
+          "prop"
+        ],
+        [
+          "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way",
+          "supports",
+          {
+            "node": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+            "status": "untried"
+          }
+        ],
+        [
+          "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way",
+          "supports",
+          {
+            "node": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+            "relation": "addresses",
+            "target": "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+          }
+        ],
+        [
+          "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way",
+          "title",
+          "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way"
+        ],
+        [
+          "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly",
+          "supersedes",
+          "registering four names fixes four names, and the CI checkout case showed that repairing sites without a guard leaves the next one to break the same way"
+        ],
+        [
+          "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly",
+          "supports",
+          {
+            "node": "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly",
+          "title",
+          "the two cases differ in the property that made the guard worth building. An unregistered type fails the dev-typed lane LOUDLY and names the type, whereas an unpopulated CI checkout failed silently as a setup-python error about a dangling symlink. What let this class survive was misattribution rather than silence: type_error(Type,Value) accuses the value when the type was never defined, and that is answered by the comment naming the trap. A scanner for mode-line types would be machinery serving a case that already fails visibly"
+        ],
+        [
+          "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "sort",
+          "approach"
+        ],
+        [
+          "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "addresses",
+          "the typed build's refusals are one foreign type-system collision: mavis turns a PlDoc mode line into SWI must_be/2, and the mode lines carry MeTTa type names that SWI's error:has_type/2 has no clause for"
+        ],
+        [
+          "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "effort",
+          2
+        ],
+        [
+          "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "status",
+          "unwanted"
+        ],
+        [
+          "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered",
+          "title",
+          "add a check that every quoted type name used in a mode line has an error:has_type/2 clause, so a fifth MeTTa type cannot arrive unregistered"
+        ]
+      ],
+      "id": "b3eb7f02961c902d"
+    },
+    {
+      "at": "2026-09-20T17:16:34.885599+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'\", \"tags\": [\"measured\"], \"title\": \"I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)\", \"tags\": [\"measured\"], \"title\": \"the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed\", \"fields\": {}}]",
+      "parents": [
+        "b3eb7f02961c902d"
+      ],
+      "assert": [
+        [
+          "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence",
+          "sort",
+          "prop"
+        ],
+        [
+          "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence",
+          "title",
+          "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence"
+        ],
+        [
+          "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)",
+          "supports",
+          "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed"
+        ],
+        [
+          "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)",
+          "title",
+          "measured over suites/*/*.plt; the survivors are wrong answers and assertion mismatches rather than refused arguments, concentrated in lib_csv_surface (45), shim (18), prelude (15) and metta (10)"
+        ],
+        [
+          "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed",
+          "title",
+          "the bridge does not make the dev-typed lane green: 115 failures of a different class survive it, so the lane stays red until those are addressed"
+        ],
+        [
+          "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'",
+          "sort",
+          "prop"
+        ],
+        [
+          "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'",
+          "supports",
+          "I wrote '158 refusals to 0' into the bridge's own comment, taking 158 from the 2026-09-20 record and 0 from the type-error count while 115 failures of other kinds remain; both halves were wrong and the comment would have shipped as evidence"
+        ],
+        [
+          "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'",
+          "tags",
+          "measured"
+        ],
+        [
+          "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'",
+          "title",
+          "the measured baseline is 206 failures of which 145 are type errors, and the after is 115 failures with 0 type errors; 158 was a different grouping and 'to 0' read as 'all suites pass'"
+        ]
+      ],
+      "id": "9100bca9bcbfa2fe"
+    },
+    {
+      "at": "2026-09-20T17:17:30.565296+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers\", \"tags\": [\"measured\"], \"title\": \"I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing\", \"tags\": [\"measured\"], \"title\": \"I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"both errors above had the same shape and neither was visible in the data itself\", \"tags\": [\"reasoning\"], \"title\": \"a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents\", \"fields\": {}}]",
+      "parents": [
+        "9100bca9bcbfa2fe"
+      ],
+      "assert": [
+        [
+          "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations",
+          "sort",
+          "prop"
+        ],
+        [
+          "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations",
+          "title",
+          "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations"
+        ],
+        [
+          "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89",
+          "sort",
+          "prop"
+        ],
+        [
+          "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89",
+          "title",
+          "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89"
+        ],
+        [
+          "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents",
+          "sort",
+          "prop"
+        ],
+        [
+          "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents",
+          "title",
+          "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents"
+        ],
+        [
+          "both errors above had the same shape and neither was visible in the data itself",
+          "sort",
+          "prop"
+        ],
+        [
+          "both errors above had the same shape and neither was visible in the data itself",
+          "supports",
+          "a sweep over N suites must be checked against the suite COUNT before its totals are quoted, because a partial file is indistinguishable from a complete one by its contents"
+        ],
+        [
+          "both errors above had the same shape and neither was visible in the data itself",
+          "title",
+          "both errors above had the same shape and neither was visible in the data itself"
+        ],
+        [
+          "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing",
+          "sort",
+          "prop"
+        ],
+        [
+          "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing",
+          "supports",
+          "I left the first sweep running while editing the file it reads, so its rows after that point measured the derived bridge rather than the probe and the file became a mixture of two configurations"
+        ],
+        [
+          "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing",
+          "tags",
+          "measured"
+        ],
+        [
+          "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing",
+          "title",
+          "each suite is a fresh swipl that re-reads dev_typed.pl; the edit was comment-only so the numbers are not wrong, but the file can no longer be said to measure one thing"
+        ],
+        [
+          "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers",
+          "sort",
+          "prop"
+        ],
+        [
+          "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers",
+          "supports",
+          "I read a growing results file as a finished one twice, reporting 48 of 182 suites as the whole sweep and then quoting 115 failures as the post-bridge total when the partial probe had already reached 174 over 89"
+        ],
+        [
+          "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers",
+          "tags",
+          "measured"
+        ],
+        [
+          "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers",
+          "title",
+          "wc -l answered 48 while the loop was still running; there are 182 suites under tests/prolog/suites/*/*.plt, which is what the gate's own dev-typed loop covers"
+        ]
+      ],
+      "id": "43bbc63ebfae8106"
+    },
+    {
+      "at": "2026-09-20T17:18:14.233407+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone\", \"tags\": [\"measured\"], \"title\": \"152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier\", \"tags\": [\"measured\"], \"title\": \"the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check\", \"fields\": {}}]",
+      "parents": [
+        "43bbc63ebfae8106"
+      ],
+      "assert": [
+        [
+          "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier",
+          "sort",
+          "prop"
+        ],
+        [
+          "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier",
+          "supports",
+          "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check"
+        ],
+        [
+          "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier",
+          "tags",
+          "measured"
+        ],
+        [
+          "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier",
+          "title",
+          "a list holding plain variables should satisfy persistent_value's acyclic_term and term_attvars conditions, so this is a defect that was invisible while every value was refused earlier"
+        ],
+        [
+          "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone",
+          "supports",
+          "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise"
+        ],
+        [
+          "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone",
+          "tags",
+          "measured"
+        ],
+        [
+          "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone",
+          "title",
+          "lib_database.plt:120 asserts error(type_error('Atom',S))=error(domain_error(persistent_value,_)); the suite goes from 21 failures to 2 with the bridge, far more than its 16 type errors alone"
+        ],
+        [
+          "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check",
+          "sort",
+          "prop"
+        ],
+        [
+          "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check",
+          "title",
+          "the bridge uncovers real failures the type error was masking: two of the seven non-type-error reasons are lib_database's own domain_error(persistent_value,[pair,_,_]), which only reaches the test once the argument survives the mode-line check"
+        ],
+        [
+          "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise",
+          "sort",
+          "prop"
+        ],
+        [
+          "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise",
+          "title",
+          "152 of the typed build's 159 'received error' failures are the type-error class, and most of its 97 assertion failures are downstream of them, because a test comparing error terms fails when the type error displaces the error the code meant to raise"
+        ]
+      ],
+      "id": "2107b0c43614aa10"
+    },
+    {
+      "at": "2026-09-20T17:22:40.022751+00:00",
+      "after": "3696c31d12665e647dd907b4a99f3a92f1b90206",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot\", \"tags\": [\"measured\"], \"title\": \"two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip\", \"fields\": {\"blocks\": [\"the plunit and dev-typed lanes exit zero\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares\", \"tags\": [], \"title\": \"make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value\", \"fields\": {\"effort\": 1, \"addresses\": [\"two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip\"]}}, {\"op\": \"status\", \"id\": \"make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value\", \"because\": \"built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names\", \"tags\": [], \"title\": \"drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes\", \"fields\": {\"effort\": 1, \"addresses\": [\"two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip\"]}}, {\"op\": \"status\", \"id\": \"drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes\", \"because\": \"measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the hook and the mode-line removal both left the suite at 29 passed and 2 failed\", \"tags\": [\"measured\"], \"title\": \"I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape\", \"fields\": {}}]",
+      "parents": [
+        "2107b0c43614aa10"
+      ],
+      "assert": [
+        [
+          "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape",
+          "sort",
+          "prop"
+        ],
+        [
+          "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape",
+          "title",
+          "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape"
+        ],
+        [
+          "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes",
+          "sort",
+          "prop"
+        ],
+        [
+          "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes",
+          "supersedes",
+          "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares"
+        ],
+        [
+          "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes",
+          "supports",
+          {
+            "node": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+            "status": "failed"
+          }
+        ],
+        [
+          "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes",
+          "tags",
+          "measured"
+        ],
+        [
+          "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes",
+          "title",
+          "built and measured: the hook leaves lib_database at 29 passed 2 failed, identical to the bridge alone, so the attribute is not what these two rest on. It also fights a policy dev_typed.pl already states and measured on 2026-08-19, that an argument which is a term under construction is left UNTYPED rather than annotated; reverted, and vendor/mavis.pl is back to its three documented changes"
+        ],
+        [
+          "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot",
+          "supports",
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        ],
+        [
+          "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot",
+          "supports",
+          {
+            "node": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+            "relation": "blocks",
+            "target": "the plunit and dev-typed lanes exit zero"
+          }
+        ],
+        [
+          "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot",
+          "title",
+          "measured 2026-09-21: suites/libraries/lib_database.plt exits 0 with 29 passed untyped and 29 passed 2 failed typed, the failures being assertion at lines 358 and 361 of variable_sharing_is_local_to_each_occurrence_and_snapshot"
+        ],
+        [
+          "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path",
+          "supersedes",
+          "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names"
+        ],
+        [
+          "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path",
+          "supports",
+          {
+            "node": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+            "status": "failed"
+          }
+        ],
+        [
+          "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path",
+          "title",
+          "measured: still 29 passed 2 failed, so these two mode lines are not the source either. Reverted rather than kept, because it removes documentation from a shipped library and buys no measured improvement; the attribute must be arriving from another annotated predicate in the store-and-read path"
+        ],
+        [
+          "the hook and the mode-line removal both left the suite at 29 passed and 2 failed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the hook and the mode-line removal both left the suite at 29 passed and 2 failed",
+          "supports",
+          "I formed the same hypothesis twice from the same mechanism and both times the measurement refuted it, which is what says the residual two are NOT the when/2 attribute; the next step is to find which annotated predicate in the store-and-read path the attribute comes from, if any, rather than a third guess at the same shape"
+        ],
+        [
+          "the hook and the mode-line removal both left the suite at 29 passed and 2 failed",
+          "tags",
+          "measured"
+        ],
+        [
+          "the hook and the mode-line removal both left the suite at 29 passed and 2 failed",
+          "title",
+          "the hook and the mode-line removal both left the suite at 29 passed and 2 failed"
+        ],
+        [
+          "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names",
+          "sort",
+          "prop"
+        ],
+        [
+          "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names",
+          "supports",
+          {
+            "node": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+            "status": "untried"
+          }
+        ],
+        [
+          "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names",
+          "supports",
+          {
+            "node": "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+            "relation": "addresses",
+            "target": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+          }
+        ],
+        [
+          "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names",
+          "title",
+          "the library documents that a held value may contain plain variables, so those arguments are non-ground by design and annotating them is the hazard the policy names"
+        ],
+        [
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+          "sort",
+          "prop"
+        ],
+        [
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+          "blocks",
+          "the plunit and dev-typed lanes exit zero"
+        ],
+        [
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip",
+          "title",
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        ],
+        [
+          "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares",
+          "sort",
+          "prop"
+        ],
+        [
+          "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares",
+          "supports",
+          {
+            "node": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+            "status": "untried"
+          }
+        ],
+        [
+          "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares",
+          "supports",
+          {
+            "node": "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+            "relation": "addresses",
+            "target": "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+          }
+        ],
+        [
+          "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares",
+          "title",
+          "when/2 attaches an attribute to every variable in a non-ground argument, measured as term_attvars going from [] to [_], and an attributed term is not a variant of the same term without one, which is exactly what =@= compares"
+        ],
+        [
+          "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "sort",
+          "approach"
+        ],
+        [
+          "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "addresses",
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        ],
+        [
+          "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "effort",
+          1
+        ],
+        [
+          "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "status",
+          "failed"
+        ],
+        [
+          "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes",
+          "title",
+          "drop the ':Atom' from the two lib_database mode lines whose argument is a term under construction, which is what dev_typed.pl's own Decides prescribes"
+        ],
+        [
+          "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "sort",
+          "approach"
+        ],
+        [
+          "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "addresses",
+          "two lib_database tests fail under the typed build and pass untyped, asserting that a stored value read back is =@= to the term stored: Shared=[pair,X,X] does not compare alpha-identical after a round trip"
+        ],
+        [
+          "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "effort",
+          1
+        ],
+        [
+          "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "status",
+          "failed"
+        ],
+        [
+          "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value",
+          "title",
+          "make the four MeTTa types immediate through a mavis:immediate_type/1 hook, so a check that needs no groundness does not leave a when/2 attribute on the value"
+        ]
+      ],
+      "id": "c15e9e13d7eaa00e"
     }
   ]
 }
