@@ -384,4 +384,49 @@ cancel_writer(File) :-
     assertion(Status == true), file_text(File,Text), assertion(Text == "old\n"), no_stage(File),
     'csv-append!'(File,[["after"]],true).
 
+%A failure injected into an operation releases what that operation owns and
+%leaves the destination as it was. Six helpers above already assert it, one per
+%injection point, and counting which OPERATION each names showed the family had
+%grown lopsided: csv-snapshot! carried five of them and csv-write! five, while
+%csv-read! appeared nine times in this suite inside no refusal at all, csv-space
+%four times inside none, and csv-append! eight times inside one
+%[measured 2026-09-21]. These three close that, at the same injection points the
+%existing helpers use, so the law is asserted of every effectful operation the
+%library ships rather than of the two it was easiest to write.
+
+test(a_failed_read_close_names_the_error_and_releases_the_stream) :- with_file(read_close_failure).
+read_close_failure(File) :-
+    write_text(File,"a\nb\n"),
+    setup_call_cleanup(
+        wrap_predicate(system:close(Stream),csv_read_close,Wrapped,
+            ( stream_property(Stream,file_name(File)), stream_property(Stream,mode(read))
+            -> call(Wrapped),throw(error(io_error(close,Stream),injected))
+            ; call(Wrapped) )),
+        must_throw(findall(Row,'csv-read!'(File,Row),_),error(_,_)),
+        unwrap_predicate(system:close(_),csv_read_close)),
+    no_stream(File).
+
+test(an_unreadable_source_refuses_the_view_and_leaves_no_stream) :- with_file(space_input_failure).
+%csv-space builds a DESCRIPTOR and reads the input to validate it; it allocates
+%no space of its own, which is why an injected creation failure finds nothing to
+%fail and the refusal has to come from the input [source: lib_csv.pl:53-56,
+%csv_with_input then csv_descriptor, no ensure_native_storage_module].
+space_input_failure(File) :-
+    make_directory(File),
+    must_throw('csv-space'(File,_),error(_,_)),
+    no_stream(File).
+
+test(a_failed_append_close_preserves_the_file_and_leaves_no_staging) :- with_file(append_close_failure).
+append_close_failure(File) :-
+    write_text(File,"old\n"),
+    setup_call_cleanup(
+        wrap_predicate(system:close(Stream),csv_append_close,Wrapped,
+            ( ( stream_property(Stream,mode(write)), stream_property(Stream,file_name(Name)),
+                file_base_name(Name,contents) )
+            -> call(Wrapped),throw(error(io_error(close,Stream),injected))
+            ; call(Wrapped) )),
+        must_throw('csv-append!'(File,[["new"]],true),error(_,_)),
+        unwrap_predicate(system:close(_),csv_append_close)),
+    file_text(File,Actual), assertion(Actual == "old\n"), no_stage(File).
+
 :- end_tests(lib_csv_surface).
