@@ -27,7 +27,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import check_refusal_coverage as checker  # noqa: E402
+import check_refusal_coverage as checker
 
 
 def _plant(root: Path, doc: str, suite: str) -> Path:

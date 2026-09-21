@@ -5147,10 +5147,10 @@ across several operations, which is what they are for.
 
 #### lib_crypto
 
-- `crypto-hash-bytes` (-> %Undefined% Expression String) -- Hash an expression of byte integers 0..255 without text transcoding
+- `crypto-hash-bytes` (-> %Undefined% %Undefined% String) -- Hash an expression of byte integers 0..255 without text transcoding
 - `crypto-hash-file!` (-> %Undefined% %Undefined% String) -- Hash a file's bytes through a bounded buffer
 - `crypto-hash` (-> %Undefined% %Undefined% String) -- Hash UTF-8 text, with the same contract as crypto_hash
-- `crypto-hmac-bytes` (-> %Undefined% Expression Expression String) -- Authenticate raw bytes with a raw byte key; both expressions contain only integers 0..255
+- `crypto-hmac-bytes` (-> %Undefined% %Undefined% %Undefined% String) -- Authenticate raw bytes with a raw byte key; both expressions contain only integers 0..255
 - `crypto-hmac` (-> %Undefined% %Undefined% %Undefined% String) -- Authenticate UTF-8 text with a UTF-8 key and a fixed-output digest
 - `crypto-password-hash` (-> %Undefined% Number String) -- Derive a PBKDF2-SHA512 password record from UTF-8 Password with 16 random salt bytes and 2^Cost iterations
 - `crypto-password-verify` (-> %Undefined% %Undefined% Bool) -- Verify a PBKDF2-SHA512 record, returning True or False for a valid record
@@ -5265,21 +5265,21 @@ across several operations, which is what they are for.
 - `dir-exists` (-> %Undefined% Bool) -- True when a directory exists at the path, following links, False otherwise
 - `dir-glob` (-> %Undefined% %Undefined% Expression String) -- Answer every path under Directory matching a relative pattern of slash-separated components, in depth-first codepoint order
 - `dir-walk` (-> %Undefined% Expression String) -- Answer every descendant of a directory, one full path per answer, depth first with each directory's names in codepoint order
-- `exit!` (-> Number %Undefined%) -- Terminate the entire process with integer status 0 through 255, including an embedding host; not an application-level return, so MeTTa catch does not turn it into a local value
-- `file-close!` (-> Number Bool) -- Close a handle file-open! gave
+- `exit!` (-> %Undefined% %Undefined%) -- Terminate the entire process with integer status 0 through 255, including an embedding host; not an application-level return, so MeTTa catch does not turn it into a local value
+- `file-close!` (-> %Undefined% Bool) -- Close a handle file-open! gave
 - `file-exists` (-> %Undefined% Bool) -- True when a regular file exists at the path, following links, False otherwise
-- `file-get-size!` (-> Number Number) -- Answer the size of the whole file in bytes, not of what is left to read, so seeking does not change the answer; a handle without a file name measures the stream position instead
+- `file-get-size!` (-> %Undefined% Number) -- Answer the size of the whole file in bytes, not of what is left to read, so seeking does not change the answer; a handle without a file name measures the stream position instead
 - `file-kind` (-> %Undefined% Symbol) -- Classify the entry at Path without following it: link for a symbolic link, dangling or not; directory; file; other for an entry that exists and is none of those, such as a FIFO, socket or device; missing when nothing is observable at the path
 - `file-lines!` (-> %Undefined% Expression) -- The lines of a UTF-8 file as an expression of Strings, split on LF with one terminal empty line omitted; CR and NUL stay data
 - `file-metadata!` (-> %Undefined% %Undefined%) -- Snapshot kind, modified Unix time and file size as queryable atoms in a new space: (kind file|directory), (modified Seconds) and, for a file, (size Bytes)
 - `file-open!` (-> %Undefined% %Undefined% Number) -- Open a file and answer a handle
-- `file-read-bytes!` (-> Number Expression) -- Read the remaining bytes, or at most Count bytes, from a binary handle's cursor as an expression of integers 0 to 255
-- `file-read-exact!` (-> Number Number String) -- Read at most Count characters from a text handle's cursor, HE's contract: a short read near the end of the file is the answer, not an error
-- `file-read-to-string!` (-> Number String) -- Read from the cursor to the end of a text handle as one String
-- `file-seek!` (-> Number Number Bool) -- Move the cursor to a byte offset from the start of the file, so the next read starts there; a negative position moves to the start
+- `file-read-bytes!` (-> %Undefined% %Undefined% Expression) -- Read the remaining bytes, or at most Count bytes, from a binary handle's cursor as an expression of integers 0 to 255
+- `file-read-exact!` (-> %Undefined% %Undefined% String) -- Read at most Count characters from a text handle's cursor, HE's contract: a short read near the end of the file is the answer, not an error
+- `file-read-to-string!` (-> %Undefined% String) -- Read from the cursor to the end of a text handle as one String
+- `file-seek!` (-> %Undefined% %Undefined% Bool) -- Move the cursor to a byte offset from the start of the file, so the next read starts there; a negative position moves to the start
 - `file-space!` (-> %Undefined% %Undefined%) -- A file as a SPACE, the mettafied reading of reading a file: its lines become (line Number Text) atoms in a fresh space, so the file is queryable with match instead of being one long string to take apart
-- `file-write!` (-> Number %Undefined% Bool) -- Write text to a text handle and flush, adding no newline
-- `file-write-bytes!` (-> Number Expression Bool) -- Write an expression of integers 0 to 255 to a binary handle and flush
+- `file-write!` (-> %Undefined% %Undefined% Bool) -- Write text to a text handle and flush, adding no newline
+- `file-write-bytes!` (-> %Undefined% Expression Bool) -- Write an expression of integers 0 to 255 to a binary handle and flush
 - `list-dir!` (-> %Undefined% Expression) -- The names in a directory, without 
 - `make-dir!` (-> %Undefined% Bool) -- Create a directory and missing parents; an existing directory succeeds
 - `make-link!` (-> %Undefined% %Undefined% Bool) -- Create a symbolic link at Path holding Target exactly as written; a relative target is read relative to the link's own directory
@@ -5396,12 +5396,12 @@ across several operations, which is what they are for.
 
 #### lib_markup
 
-- `markup-attribute` (-> Expression Atom String) -- One attribute's value as a String, with no answer when the element does not carry it, which is the shape a lookup has here and in lib_pairs
-- `markup-parse-html` (-> String Expression) -- One HTML document in the same shape
-- `markup-parse-xml` (-> String Expression) -- One XML document as (element Name Attributes Children): the name a Symbol, each attribute an (attr Name Value) row and the children an expression of elements and Strings
-- `markup-select` (-> Expression Atom %Undefined%) -- Every match of the selector, one answer each and in document order
-- `markup-text` (-> Expression String) -- Every text node under the element, in document order, joined: the content a reader sees with the markup taken out
-- `markup-write` (-> Expression String) -- The element as XML text, without the declaration the host writes by default and without layout, so the text is exactly the element's own markup and parses back to it
+- `markup-attribute` (-> %Undefined% Atom String) -- One attribute's value as a String, with no answer when the element does not carry it, which is the shape a lookup has here and in lib_pairs
+- `markup-parse-html` (-> %Undefined% Expression) -- One HTML document in the same shape
+- `markup-parse-xml` (-> %Undefined% Expression) -- One XML document as (element Name Attributes Children): the name a Symbol, each attribute an (attr Name Value) row and the children an expression of elements and Strings
+- `markup-select` (-> %Undefined% Atom %Undefined%) -- Every match of the selector, one answer each and in document order
+- `markup-text` (-> %Undefined% String) -- Every text node under the element, in document order, joined: the content a reader sees with the markup taken out
+- `markup-write` (-> %Undefined% String) -- The element as XML text, without the declaration the host writes by default and without layout, so the text is exactly the element's own markup and parses back to it
 
 #### lib_math
 
@@ -5452,13 +5452,13 @@ across several operations, which is what they are for.
 
 #### lib_process
 
-- `process-run!` (-> String Expression Expression) -- Run the program with those arguments, wait for it, and answer (process-result Code Output Error): the exit code as a Number, and everything it wrote to its two streams as Strings
-- `process-run-input!` (-> String Expression String Expression) -- The same, with that text written to the program's standard input and the stream closed, which is how a program that reads its input is fed without a temporary file
-- `process-signal!` (-> Number Symbol Bool) -- Send one of the signals this library names: `term` asks a program to stop, `kill` takes it away without asking, `int` is what a terminal's interrupt sends and `hup` is what a closed terminal sends
+- `process-run!` (-> %Undefined% %Undefined% Expression) -- Run the program with those arguments, wait for it, and answer (process-result Code Output Error): the exit code as a Number, and everything it wrote to its two streams as Strings
+- `process-run-input!` (-> %Undefined% %Undefined% %Undefined% Expression) -- The same, with that text written to the program's standard input and the stream closed, which is how a program that reads its input is fed without a temporary file
+- `process-signal!` (-> %Undefined% Symbol Bool) -- Send one of the signals this library names: `term` asks a program to stop, `kill` takes it away without asking, `int` is what a terminal's interrupt sends and `hup` is what a closed terminal sends
 - `process-signals` (-> Expression) -- Every signal process-signal! sends, as data: the same list its refusal names
-- `process-start!` (-> String Expression Number) -- Start the program and answer its identifier without waiting
-- `process-status` (-> Number %Undefined%) -- Whether the process is still running, without waiting for it: the Symbol `running` while it is, and its exit code once it is not
-- `process-wait!` (-> Number Number) -- Wait for the process and answer its exit code, or the negative of the signal that ended it
+- `process-start!` (-> %Undefined% %Undefined% Number) -- Start the program and answer its identifier without waiting
+- `process-status` (-> %Undefined% %Undefined%) -- Whether the process is still running, without waiting for it: the Symbol `running` while it is, and its exit code once it is not
+- `process-wait!` (-> %Undefined% Number) -- Wait for the process and answer its exit code, or the negative of the signal that ended it
 
 #### lib_random
 
@@ -5738,18 +5738,18 @@ across several operations, which is what they are for.
 #### lib_vector
 
 - `cosine-of-normalized` (-> Expression Expression Number) -- The dot specialization used for normalized vectors, as an ordinary equation
-- `cosine` (-> Expression Expression Number) -- Return the cosine similarity of equal-dimensional numeric expressions
-- `dot` (-> Expression Expression Number) -- Return the dot product as a float
-- `norm` (-> Expression Number) -- Return the correctly rounded Euclidean length of a numeric expression
+- `cosine` (-> %Undefined% %Undefined% Number) -- Return the cosine similarity of equal-dimensional numeric expressions
+- `dot` (-> %Undefined% %Undefined% Number) -- Return the dot product as a float
+- `norm` (-> %Undefined% Number) -- Return the correctly rounded Euclidean length of a numeric expression
 - `random-normal-vector` (-> Number Expression) -- Fold Count fresh positive uniform draws onto Accumulator with cons-atom, then normalize
-- `vector-add` (-> Expression Expression Expression) -- Add equal-dimensional numeric expressions component by component
-- `vector-distance` (-> Expression Expression Number) -- Return the correctly rounded Euclidean distance of equal-dimensional numeric expressions
-- `vector-divide` (-> Expression Expression Expression) -- Divide corresponding components
+- `vector-add` (-> %Undefined% %Undefined% Expression) -- Add equal-dimensional numeric expressions component by component
+- `vector-distance` (-> %Undefined% %Undefined% Number) -- Return the correctly rounded Euclidean distance of equal-dimensional numeric expressions
+- `vector-divide` (-> %Undefined% %Undefined% Expression) -- Divide corresponding components
 - `vector-fill` (-> Number Number Expression) -- Collect Count copies of Value from a MeTTa range
-- `vector-multiply` (-> Expression Expression Expression) -- Multiply corresponding components, with vector-add's exact, floating and dimension rules
-- `vector-normalize` (-> Expression Expression) -- Return floating coordinates in the same direction with unit length, rounding each exact finite ratio once
-- `vector-scale` (-> Expression Number Expression) -- Multiply every component by Factor, with vector-multiply's number rules
-- `vector-subtract` (-> Expression Expression Expression) -- Subtract Right from Left component by component, with vector-add's exact, floating and dimension rules
+- `vector-multiply` (-> %Undefined% %Undefined% Expression) -- Multiply corresponding components, with vector-add's exact, floating and dimension rules
+- `vector-normalize` (-> %Undefined% Expression) -- Return floating coordinates in the same direction with unit length, rounding each exact finite ratio once
+- `vector-scale` (-> %Undefined% %Undefined% Expression) -- Multiply every component by Factor, with vector-multiply's number rules
+- `vector-subtract` (-> %Undefined% %Undefined% Expression) -- Subtract Right from Left component by component, with vector-add's exact, floating and dimension rules
 
 #### lib_yaml
 

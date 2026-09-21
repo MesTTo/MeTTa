@@ -3,8 +3,9 @@
 %     fifteenth promise costs a row rather than a test body.
 % Assumes:
 %     - every expectation below was MEASURED by calling the head, never
-%       predicted from its prose [measured 2026-09-21, ai-tmp/probe_refusals.pl
-%       and probe3.pl; each term is the one the head actually threw]
+%       predicted from its prose [measured 2026-09-21; every row below
+%       re-measures it on each run, because the expected term is compared
+%       against what the head actually throws rather than against prose]
 %     - lib_socket's metta_requires(socket) directive fails on this engine, so
 %       the library's predicates load but its capability gate does not; the two
 %       socket rows reach the handle table in lib_file regardless
@@ -19,7 +20,9 @@
 %       [tested: a_capability_refusal_is_not_inducible_here]
 %     - the assertion itself is not vacuous: a goal that succeeds, one that
 %       fails, and one that throws the wrong term each fail must_throw/2
-%       [tested: the_assertion_sees_a_planted_success, _failure, _mismatch]
+%       [tested: the_assertion_sees_a_planted_success,
+%       the_assertion_sees_a_planted_failure,
+%       the_assertion_sees_a_planted_mismatch]
 % Fails when: a row's trigger stops being a trigger, which reads as a red test
 %     naming the head rather than as silent coverage loss.
 % Open Obligations:

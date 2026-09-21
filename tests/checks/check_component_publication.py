@@ -1,5 +1,6 @@
-"""Purpose: name every component pin that no remote carries, because a release
-owes a fresh recursive clone and such a pin makes one impossible.
+"""Purpose: name every component pin that no remote carries.
+
+A release owes a fresh recursive clone, and such a pin makes one impossible.
 
 components.sh prints UNPUBLISHED beside a pin it had to take from a sibling
 worktree, which keeps provisioning working while work is unpushed. Nothing
@@ -33,12 +34,12 @@ Assumes: run inside a checkout whose components are themselves checkouts;
 Guarantees:
   - exits 0 always. This is a REPORT lane while the backlog is nonzero, and
     becomes a GATE when it clears, which is this repository's own convention
-    for a burn-down surface.
+    for a burn-down surface [tested: tests/checks/check_component_publication_selftest.py; commit=WORKTREE]
   - a pin no ref of a remote reaches is named with its component and that
     remote, over EVERY remote the component has rather than only the one
     .gitmodules declares, because a private mirror and a public one can
-    disagree and which holds a pin is a separate fact per remote
-  - a question it could not answer is reported as unanswered, never as a
+    disagree and which holds a pin is a separate fact per remote [tested: tests/checks/check_component_publication_selftest.py; commit=WORKTREE]
+  - [tested: tests/checks/check_component_publication_selftest.py; commit=WORKTREE] a question it could not answer is reported as unanswered, never as a
     pass and never as a failure: an unreachable remote, an absent pin and an
     absent remote head each say so in their own words. merge-base fails when
     EITHER operand is missing, so both are checked; testing only the head
@@ -65,16 +66,19 @@ REMOTES = os.environ.get("METTA_CHECK_REMOTES") == "1"
 
 
 def _git(*argv: str, cwd: Path) -> str:
-    """git's output, or the empty string when it refuses; no shell is involved."""
+    """Git's output, or the empty string when it refuses; no shell is involved."""
     done = subprocess.run(["git", *argv], cwd=cwd, capture_output=True,  # nosec B603 B607
                           text=True, check=False)
     return done.stdout.strip() if done.returncode == 0 else ""
 
 
 def _ok(*argv: str, cwd: Path) -> bool:
-    """Whether git SUCCEEDED, which is a different question from its output:
+    """Whether git SUCCEEDED.
+
+    A different question from its output:
     `cat-file -e` and `merge-base --is-ancestor` both answer in the status and
-    print nothing, so reading their stdout says they failed when they passed."""
+    print nothing, so reading their stdout says they failed when they passed.
+    """
     return subprocess.run(["git", *argv], cwd=cwd,  # nosec B603 B607
                           capture_output=True, check=False).returncode == 0
 

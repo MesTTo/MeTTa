@@ -1103,10 +1103,10 @@ def builtin_count_findings(sheet: Path, text: str) -> list[str]:
     if python_path not in sys.path:
         sys.path.insert(0, python_path)
     try:
-        from metta import MeTTa  # noqa: PLC0415 -- the lane costs nothing until it runs
+        from metta import MeTTa
         with MeTTa() as session:
             live = len(session.self.builtins())
-    except Exception as absent:  # noqa: BLE001 -- any failure leaves the count unchecked
+    except Exception as absent:
         return [
             f"{sheet.relative_to(REPO)}: the engine did not boot, so the builtin "
             f"count went unchecked: {absent}"

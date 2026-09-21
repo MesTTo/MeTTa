@@ -60,6 +60,7 @@ if str(HERE) not in sys.path:
 from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     REPO,
     _unreachable,
+    builtin_count_findings,
     closed_value_findings,
     closed_value_source_findings,
     count_findings,
@@ -69,7 +70,6 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     method_findings,
     near_miss_findings,
     omitted_head_findings,
-    builtin_count_findings,
     operator_word_findings,
     operator_words,
     path_findings,

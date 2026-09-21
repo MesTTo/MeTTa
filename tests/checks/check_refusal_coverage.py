@@ -52,8 +52,8 @@ ROOT = next(parent for parent in Path(__file__).resolve().parents
 
 #: A `%!` block and the comment lines under it: the head it documents, then its
 #: prose.
-BLOCK = re.compile(r"((?:^%!.*\n)+)((?:^%.*\n)*)", re.M)
-HEAD = re.compile(r"^%!\s+\'?([a-z][a-z0-9-]*!?)\'?\(", re.M)
+BLOCK = re.compile(r"((?:^%!.*\n)+)((?:^%.*\n)*)", re.MULTILINE)
+HEAD = re.compile(r"^%!\s+\'?([a-z][a-z0-9-]*!?)\'?\(", re.MULTILINE)
 #: The words a contract uses to promise a refusal OF THE HEAD IT DOCUMENTS.
 #: `refus*` is deliberately absent: the libraries use it about a sibling far
 #: more often than about the documented head, so it reported platform-keys and
@@ -62,7 +62,7 @@ HEAD = re.compile(r"^%!\s+\'?([a-z][a-z0-9-]*!?)\'?\(", re.M)
 #: which promise anything about the head. `raises` and `is an error` take the
 #: documented head as their subject [measured 2026-09-21: 24 findings with
 #: `refus*`, 19 without, and the five removed were all false].
-PROMISE = re.compile(r"\b(raises?|is an error)\b", re.I)
+PROMISE = re.compile(r"\b(raises?|is an error)\b", re.IGNORECASE)
 #: A raise verb whose subject is the CALLER'S body, not the documented head.
 #: A scope-taking combinator describes cleanup that happens "when the body
 #: raises", which promises nothing about the head itself refusing. Stripping
@@ -71,7 +71,7 @@ PROMISE = re.compile(r"\b(raises?|is an error)\b", re.I)
 #: and drops with-temp-dir, whose only mention is the body's [measured
 #: 2026-09-21: three mentions in the tree, all in lib_file, and with-temp-dir
 #: was reported as an unwitnessed promise it never made].
-OTHER_ACTOR = re.compile(r"\bthe (?:body|caller)\b[^.;]*?\brais(?:e|es|ed)\b", re.I)
+OTHER_ACTOR = re.compile(r"\bthe (?:body|caller)\b[^.;]*?\brais(?:e|es|ed)\b", re.IGNORECASE)
 #: A refusal term: the library names them for what they refuse.
 REFUSAL_TERM = r"\'[a-z-]*(?:error|refus|not-found|denied|mismatch|exists|overlap)[a-z-]*\'"
 
@@ -102,7 +102,7 @@ def _witnessed(operation: str, suites: str) -> bool:
     if re.search(r"(?:refusal_case|not_inducible)\(\s*\'" + name + r"\'", suites):
         return True
     # a whole test clause whose options promise a throw and whose body calls it
-    for clause in re.finditer(r"^test\(.*?(?<!\.)\.\s*$", suites, re.S | re.M):
+    for clause in re.finditer(r"^test\(.*?(?<!\.)\.\s*$", suites, re.DOTALL | re.MULTILINE):
         text = clause.group(0)
         if "throws(" in text and re.search(r"\'" + name + r"\'", text):
             return True

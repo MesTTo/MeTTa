@@ -40,16 +40,17 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import check_component_publication as checker  # noqa: E402
+import check_component_publication as checker
 
-SCRATCH = Path(__file__).resolve().parents[2] / "ai-tmp" / "component-publication-selftest"
+SCRATCH = Path(__file__).resolve().parents[2] / "ai-tmp" / "component-publication-selftest"  # artifact-path-created
 
 
 def _git(*argv: str, cwd: Path) -> str:
     done = subprocess.run(["git", *argv], cwd=cwd, capture_output=True,  # nosec B603 B607
                           text=True, check=False)
     if done.returncode != 0:
-        raise RuntimeError(f"git {' '.join(argv)} in {cwd}: {done.stderr.strip()}")
+        refused = f"git {' '.join(argv)} in {cwd}: {done.stderr.strip()}"
+        raise RuntimeError(refused)
     return done.stdout.strip()
 
 
@@ -87,8 +88,11 @@ def _plant(root: Path, url: str, sha: str) -> Path:
 
 
 def cases() -> list[tuple[str, str, int, int]]:
-    """Each case: what it is for, the marker its finding must carry, and the
-    two counts the summary must report."""
+    """Every planted case this selftest runs.
+
+    Each carries what it is for, the marker its finding must show, and the two
+    counts the summary must report.
+    """
     return [
         ("a pin some ref of the remote reaches is not reported", "", 0, 0),
         ("a pin no ref of the remote reaches is unresolvable", "is in none of", 1, 0),

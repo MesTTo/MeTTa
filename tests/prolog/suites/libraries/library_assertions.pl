@@ -11,8 +11,11 @@
 % Guarantees:
 %     - must_throw/2 fails its test when the goal succeeds, when it fails
 %       without throwing, and when the thrown term does not unify with the
-%       expectation [tested: library_refusals.plt:the_assertion_sees_a_planted
-%       _success, _a_planted_failure and _a_planted_mismatch; commit=WORKTREE]
+%       expectation [tested:
+%       library_refusals.plt:the_assertion_sees_a_planted_success,
+%       library_refusals.plt:the_assertion_sees_a_planted_failure,
+%       library_refusals.plt:the_assertion_sees_a_planted_mismatch;
+%       commit=WORKTREE]
 %     - the goal is called in its CALLER's module, so a suite naming a library
 %       predicate unqualified reaches the same predicate it reached when the
 %       definition was local to the suite [source: meta_predicate 0 below]

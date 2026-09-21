@@ -478,7 +478,7 @@ Returns: Hex
 *lib_crypto.metta:18*
 
 ```metta
-(: crypto-hash-bytes (-> %Undefined% Expression String))
+(: crypto-hash-bytes (-> %Undefined% %Undefined% String))
 ```
 
 Hash an expression of byte integers 0..255 without text transcoding. Empty bytes are valid. Algorithms and reduced-platform support match crypto-hash.
@@ -524,7 +524,7 @@ Returns: Hex
 *lib_crypto.metta:36*
 
 ```metta
-(: crypto-hmac-bytes (-> %Undefined% Expression Expression String))
+(: crypto-hmac-bytes (-> %Undefined% %Undefined% %Undefined% String))
 ```
 
 Authenticate raw bytes with a raw byte key; both expressions contain only integers 0..255. Algorithms and reduced support match crypto-hmac.
@@ -751,7 +751,7 @@ Returns: Space
 (: csv-space (-> %Undefined% SpaceType))
 ```
 
-Return a live read-only space of (row Field...) atoms. Each query reopens the UTF-8 file and preserves order and duplicate rows. Fields are Strings. Options are unique (separator String), (quote String), (newline String), (width infer|any|Number), and (skip Number) expressions. Defaults are comma, double quote, CRLF, inferred width and zero skipped records. An empty quote disables quoting. Skipped records still establish and validate width. Quote literal option data, for example (quote ((quote ""))). The parameter evaluates, so a function may also compute and return the complete options.
+Return a live read-only space of (row Field...) atoms. Each query reopens the UTF-8 file and preserves order and duplicate rows. Fields are Strings. Options are unique (separator String), (quote String), (newline String), (width infer|any|Number), and (skip Number) expressions. Defaults are comma, double quote, CRLF, inferred width and zero skipped records. An empty quote disables quoting. Skipped records still establish and validate width. Quote literal option data, for example (quote ((quote ""))). The parameter evaluates, so a function may also compute and return the complete options. The source is checked WHEN THE SPACE IS MADE, not only when it is queried: a path that cannot be read raises there, named for this call, so a bad path is refused where it was written rather than at the first query.
 
 1. Path
 2. Options
@@ -1861,7 +1861,7 @@ Returns: Entry
 *lib_file.metta:83*
 
 ```metta
-(: exit! (-> Number %Undefined%))
+(: exit! (-> %Undefined% %Undefined%))
 ```
 
 Terminate the entire process with integer status 0 through 255, including an embedding host; not an application-level return, so MeTTa catch does not turn it into a local value.
@@ -1875,7 +1875,7 @@ Returns: Never
 *lib_file.metta:89*
 
 ```metta
-(: file-close! (-> Number Bool))
+(: file-close! (-> %Undefined% Bool))
 ```
 
 Close a handle file-open! gave. Closing twice is silent, because a cleanup path should not have to check first; a failed close raises by name, because a write that never reached the disk is data lost. The three standard streams are refused: the process owns them and a closed one cannot be put back. Not in HE's stdlib. A process that can open files and never close them leaks descriptors until it dies, so this exists.
@@ -1903,7 +1903,7 @@ Returns: Answer
 *lib_file.metta:101*
 
 ```metta
-(: file-get-size! (-> Number Number))
+(: file-get-size! (-> %Undefined% Number))
 ```
 
 Answer the size of the whole file in bytes, not of what is left to read, so seeking does not change the answer; a handle without a file name measures the stream position instead.
@@ -1974,11 +1974,11 @@ Returns: Handle
 *lib_file.metta:132*
 
 ```metta
-(: file-read-bytes! (-> Number Expression))
+(: file-read-bytes! (-> %Undefined% %Undefined% Expression))
 ```
 
 ```metta
-(: file-read-bytes! (-> Number Number Expression))
+(: file-read-bytes! (-> %Undefined% Expression))
 ```
 
 Read the remaining bytes, or at most Count bytes, from a binary handle's cursor as an expression of integers 0 to 255. A short read at the end of the file is the answer. A text handle refuses.
@@ -1993,7 +1993,7 @@ Returns: Bytes
 *lib_file.metta:138*
 
 ```metta
-(: file-read-exact! (-> Number Number String))
+(: file-read-exact! (-> %Undefined% %Undefined% String))
 ```
 
 Read at most Count characters from a text handle's cursor, HE's contract: a short read near the end of the file is the answer, not an error.
@@ -2008,7 +2008,7 @@ Returns: Content
 *lib_file.metta:144*
 
 ```metta
-(: file-read-to-string! (-> Number String))
+(: file-read-to-string! (-> %Undefined% String))
 ```
 
 Read from the cursor to the end of a text handle as one String.
@@ -2022,7 +2022,7 @@ Returns: Content
 *lib_file.metta:150*
 
 ```metta
-(: file-seek! (-> Number Number Bool))
+(: file-seek! (-> %Undefined% %Undefined% Bool))
 ```
 
 Move the cursor to a byte offset from the start of the file, so the next read starts there; a negative position moves to the start.
@@ -2051,7 +2051,7 @@ Returns: Space
 *lib_file.metta:162*
 
 ```metta
-(: file-write! (-> Number %Undefined% Bool))
+(: file-write! (-> %Undefined% %Undefined% Bool))
 ```
 
 Write text to a text handle and flush, adding no newline.
@@ -2066,7 +2066,7 @@ Returns: Done
 *lib_file.metta:168*
 
 ```metta
-(: file-write-bytes! (-> Number Expression Bool))
+(: file-write-bytes! (-> %Undefined% Expression Bool))
 ```
 
 Write an expression of integers 0 to 255 to a binary handle and flush. The bytes are validated before anything is written. A text handle refuses.
@@ -3467,7 +3467,7 @@ Returns: Topics
 *lib_markup.metta:35*
 
 ```metta
-(: markup-attribute (-> Expression Atom String))
+(: markup-attribute (-> %Undefined% Atom String))
 ```
 
 One attribute's value as a String, with no answer when the element does not carry it, which is the shape a lookup has here and in lib_pairs. The name is HELD, which an attribute name has to be: one is often called id, class or type, and each of those is also a name the engine knows. Declared Symbol the call was refused with a BadArgType naming the identity function's arrow, and declared %Undefined% the name was evaluated and matched nothing [measured 2026-09-12: both, over (markup-attribute $doc id)].
@@ -3482,7 +3482,7 @@ Returns: Value
 *lib_markup.metta:41*
 
 ```metta
-(: markup-parse-html (-> String Expression))
+(: markup-parse-html (-> %Undefined% Expression))
 ```
 
 One HTML document in the same shape. HTML's own rules are the host's: an omitted end tag that HTML allows is not an error, so `<p>one<p>two` parses, while a stray close tag or unparsable text is still a refusal.
@@ -3496,7 +3496,7 @@ Returns: Element
 *lib_markup.metta:47*
 
 ```metta
-(: markup-parse-xml (-> String Expression))
+(: markup-parse-xml (-> %Undefined% Expression))
 ```
 
 One XML document as (element Name Attributes Children): the name a Symbol, each attribute an (attr Name Value) row and the children an expression of elements and Strings. The attribute row is tagged so that a document holding an `id` or a `class` is inert data rather than a call. The parse is STRICT. The host's parser repairs a missing end tag, a stray close tag and character data outside any element, warns on stderr and answers a DOM anyway; every one of those becomes a refusal here, because a document that needed repair is a document the sender got wrong. An external SYSTEM entity is refused for the same reason, which is also what keeps a parse from fetching a file or a URL the document names.
@@ -3510,7 +3510,7 @@ Returns: Element
 *lib_markup.metta:53*
 
 ```metta
-(: markup-select (-> Expression Atom %Undefined%))
+(: markup-select (-> %Undefined% Atom %Undefined%))
 ```
 
 Every match of the selector, one answer each and in document order. A selector that matches nothing has no answer, which is what makes a selection compose with collapse and with an if over it. The selector is an expression, and a collection of steps is a path: (descendant Name) is every element of that name at any depth, (child Name) every immediate child of that name, and (self Name) the element itself when it carries that name. The other three MODIFY the step they follow: (index N) takes the Nth match counting from one, (attribute Name) answers that attribute's value as a String and (text) answers the element's text content. An unknown form is refused with the five listed.
@@ -3525,7 +3525,7 @@ Returns: Selected
 *lib_markup.metta:59*
 
 ```metta
-(: markup-text (-> Expression String))
+(: markup-text (-> %Undefined% String))
 ```
 
 Every text node under the element, in document order, joined: the content a reader sees with the markup taken out. An element with no text answers the empty String.
@@ -3539,7 +3539,7 @@ Returns: Text
 *lib_markup.metta:65*
 
 ```metta
-(: markup-write (-> Expression String))
+(: markup-write (-> %Undefined% String))
 ```
 
 The element as XML text, without the declaration the host writes by default and without layout, so the text is exactly the element's own markup and parses back to it.
@@ -4017,7 +4017,7 @@ Returns: Grammar forms
 *lib_process.metta:31*
 
 ```metta
-(: process-run! (-> String Expression Expression))
+(: process-run! (-> %Undefined% %Undefined% Expression))
 ```
 
 Run the program with those arguments, wait for it, and answer (process-result Code Output Error): the exit code as a Number, and everything it wrote to its two streams as Strings. A nonzero code is a STATUS, because a program that ran and failed is not the same as one that could not run; only a launch that could not happen raises, naming the program. The arguments are a collection and never a command line, so nothing in them can become a second command. Both streams are read to completion before the wait, which is what keeps a program that fills a pipe from deadlocking.
@@ -4032,7 +4032,7 @@ Returns: Result
 *lib_process.metta:37*
 
 ```metta
-(: process-run-input! (-> String Expression String Expression))
+(: process-run-input! (-> %Undefined% %Undefined% %Undefined% Expression))
 ```
 
 The same, with that text written to the program's standard input and the stream closed, which is how a program that reads its input is fed without a temporary file.
@@ -4048,7 +4048,7 @@ Returns: Result
 *lib_process.metta:43*
 
 ```metta
-(: process-signal! (-> Number Symbol Bool))
+(: process-signal! (-> %Undefined% Symbol Bool))
 ```
 
 Send one of the signals this library names: `term` asks a program to stop, `kill` takes it away without asking, `int` is what a terminal's interrupt sends and `hup` is what a closed terminal sends. A signal the library does not know is refused with the four listed; the process still has to be waited for afterwards.
@@ -4075,7 +4075,7 @@ Returns: Signals
 *lib_process.metta:55*
 
 ```metta
-(: process-start! (-> String Expression Number))
+(: process-start! (-> %Undefined% %Undefined% Number))
 ```
 
 Start the program and answer its identifier without waiting. Its three streams are this process's own, so what it writes appears where this program's output does; a run whose output matters is process-run!'s job. The caller has to wait for it or signal it: until it does, the host keeps the exit status.
@@ -4090,7 +4090,7 @@ Returns: Process
 *lib_process.metta:61*
 
 ```metta
-(: process-status (-> Number %Undefined%))
+(: process-status (-> %Undefined% %Undefined%))
 ```
 
 Whether the process is still running, without waiting for it: the Symbol `running` while it is, and its exit code once it is not. This is what a program polls.
@@ -4104,7 +4104,7 @@ Returns: Status
 *lib_process.metta:67*
 
 ```metta
-(: process-wait! (-> Number Number))
+(: process-wait! (-> %Undefined% Number))
 ```
 
 Wait for the process and answer its exit code, or the negative of the signal that ended it. Waiting twice for one process raises, because the host has already forgotten it.
@@ -7509,7 +7509,7 @@ Returns: Vector
 *lib_vector.metta:59*
 
 ```metta
-(: cosine (-> Expression Expression Number))
+(: cosine (-> %Undefined% %Undefined% Number))
 ```
 
 Return the cosine similarity of equal-dimensional numeric expressions. Compute the exact finite ratio before rounding, even if a norm would overflow or underflow. Zero or nonfinite vectors produce NaN.
@@ -7524,7 +7524,7 @@ Returns: Similarity
 *lib_vector.metta:65*
 
 ```metta
-(: dot (-> Expression Expression Number))
+(: dot (-> %Undefined% %Undefined% Number))
 ```
 
 Return the dot product as a float. Accumulate exact finite products before one rounding; preserve IEEE infinities and NaNs. Empty inputs return 0.0. Both complete numeric expressions must have the same dimension.
@@ -7539,7 +7539,7 @@ Returns: Product
 *lib_vector.metta:71*
 
 ```metta
-(: norm (-> Expression Number))
+(: norm (-> %Undefined% Number))
 ```
 
 Return the correctly rounded Euclidean length of a numeric expression. Exact squared sums avoid intermediate overflow and underflow. Empty inputs return 0.0; NaN propagates and infinity without NaN returns infinity.
@@ -7553,7 +7553,7 @@ Returns: Length
 *lib_vector.metta:77*
 
 ```metta
-(: vector-add (-> Expression Expression Expression))
+(: vector-add (-> %Undefined% %Undefined% Expression))
 ```
 
 Add equal-dimensional numeric expressions component by component. Exact operands stay exact; a floating operand makes that result a float rounded once. Preserve IEEE signed zeros, infinities and NaNs.
@@ -7568,7 +7568,7 @@ Returns: Vector
 *lib_vector.metta:83*
 
 ```metta
-(: vector-distance (-> Expression Expression Number))
+(: vector-distance (-> %Undefined% %Undefined% Number))
 ```
 
 Return the correctly rounded Euclidean distance of equal-dimensional numeric expressions. Subtract and sum squared differences exactly before the final root; preserve IEEE infinity and NaN behavior. Empty returns 0.0.
@@ -7583,7 +7583,7 @@ Returns: Distance
 *lib_vector.metta:89*
 
 ```metta
-(: vector-divide (-> Expression Expression Expression))
+(: vector-divide (-> %Undefined% %Undefined% Expression))
 ```
 
 Divide corresponding components. Exact operands return exact rationals; an exact zero divisor raises for the whole operation. A floating operand selects rounded floating results and IEEE zero division. Dimensions match.
@@ -7598,7 +7598,7 @@ Returns: Vector
 *lib_vector.metta:95*
 
 ```metta
-(: vector-multiply (-> Expression Expression Expression))
+(: vector-multiply (-> %Undefined% %Undefined% Expression))
 ```
 
 Multiply corresponding components, with vector-add's exact, floating and dimension rules. Use dot to sum the exact products before rounding.
@@ -7613,7 +7613,7 @@ Returns: Vector
 *lib_vector.metta:101*
 
 ```metta
-(: vector-normalize (-> Expression Expression))
+(: vector-normalize (-> %Undefined% Expression))
 ```
 
 Return floating coordinates in the same direction with unit length, rounding each exact finite ratio once. Keep direction when a rounded norm would overflow or underflow. Empty stays empty; zero vectors yield NaNs. An infinite norm maps finite coordinates to signed zero and infinities to NaN; a NaN norm yields NaNs. Signed zero coordinates keep their signs.
@@ -7627,7 +7627,7 @@ Returns: Unit
 *lib_vector.metta:107*
 
 ```metta
-(: vector-scale (-> Expression Number Expression))
+(: vector-scale (-> %Undefined% %Undefined% Expression))
 ```
 
 Multiply every component by Factor, with vector-multiply's number rules. Validate Factor even when the vector is empty.
@@ -7642,7 +7642,7 @@ Returns: Scaled
 *lib_vector.metta:113*
 
 ```metta
-(: vector-subtract (-> Expression Expression Expression))
+(: vector-subtract (-> %Undefined% %Undefined% Expression))
 ```
 
 Subtract Right from Left component by component, with vector-add's exact, floating and dimension rules.
