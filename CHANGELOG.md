@@ -69,6 +69,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A translator rule registered by one space answers the same thing in every
+  other space. `add-translator-rule!` takes a head over for the whole process
+  by design, but the `(: name ...)` beside the equation is an ordinary atom in
+  the registering space, so elsewhere `apply_translator_rule_dl` found no
+  declaration, took its untyped branch and EVALUATED the argument before the
+  expansion could place it. For `lib_derived`'s `once`, whose `Atom` parameter
+  exists precisely to keep the generator unrun, `(take 1 ...)` then never
+  received a generator: `(collapse (once (superpose (1 2))))` answered `(1 2)`
+  in any space that had not imported the library, and said nothing. The rule's
+  declared type is now read from the rule's own home when the calling space has
+  none; a space that has one still wins.
+
 - The development build no longer reports a different refusal from the one a
   library raises for itself. A PlDoc mode line restating a type the predicate's
   own body already validates is a second description of one fact, and mavis

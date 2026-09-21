@@ -1034,6 +1034,33 @@ agg_reduce(AF, Acc, Val, NewAcc) :- reduce([AF, Acc, Val], NewAcc, _).
 translate_expr_to_conj(Input, Conj, Out) :- translate_expr(Input, Goals, Out),
                                             goals_list_to_conj(Goals, Conj).
 
+%The type a rule's head was DECLARED with, read where the rule lives when the
+%calling space does not have it.
+%
+%add-translator-rule! registers for every space and the rest of the session,
+%but the `(: name ...)` beside the equation is an ordinary atom in the
+%registering space. A space that never imported the library therefore found no
+%declaration, took the untyped branch below, and EVALUATED the argument before
+%the expansion could place it -- which for lib_derived's `once`, whose Atom
+%parameter exists precisely to keep the generator unrun, meant `(take 1 ...)`
+%never received a generator and every answer passed straight through. `once`
+%stopped cutting in every space but the importing one, and said nothing
+%[measured 2026-09-21: !(collapse (once (superpose (1 2)))) answered (1 2) in a
+% fresh space of a process where lib_derived had been imported elsewhere, (1)
+% in the importing space, and (1) in that same fresh space the moment
+% `(: once (-> Atom %Undefined%))` was added to it].
+%
+%The calling space wins where it HAS a declaration, so a space may still say
+%something of its own; the rule's home is only the fallback, which makes this
+%additive and leaves every call that resolves today on the path it already took.
+translator_rule_type_chain(HV, _RuleModule, TypeChain) :-
+    type_declaration(HV, TypeChain),
+    !.
+translator_rule_type_chain(HV, RuleModule, TypeChain) :-
+    type_declaration_in(RuleModule, HV, Raw),
+    metta_runtime_type(Raw, TypeChain).
+
+
 %Expand one call through a translator rule. The rule is an ordinary MeTTa
 %equation, so it lives in the module of the space that wrote it: called
 %unqualified it resolved in the ENGINE's module and raised Unknown procedure
@@ -1172,7 +1199,7 @@ translate_expr_to_conj(Input, Conj, Out) :- translate_expr(Input, Goals, Out),
 %both declarations and the body module without a second lookup.
 apply_translator_rule_dl(HV, Declarations, RuleModule,
                          Args, AfterHead, Goals, Out) :-
-    (   catch_recover(type_declaration(HV, TypeChain), fail)
+    (   catch_recover(translator_rule_type_chain(HV, RuleModule, TypeChain), fail)
     ->  TypeChain = [->|Xs],
         append(ArgTypes, [_], Xs),
         translate_args_by_type_dl(Args, ArgTypes, AfterHead, AfterArgs, Values)
