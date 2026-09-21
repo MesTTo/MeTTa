@@ -686,7 +686,23 @@ UNMEASURABLE = {
 
 
 def build_baseline() -> dict:
-    """Measure both engines over the whole corpus and answer a fresh baseline."""
+    """Measure both engines over the whole corpus and answer a fresh baseline.
+
+    A row this run CANNOT measure keeps whatever the committed baseline already
+    holds, marked `carried`, instead of being flattened to a status-only stub.
+    Not having measured something and having no measurement of it are different
+    outcomes, and they were written the same way: on a box under load 163 of
+    these rows come back `unmeasurable-null`, because the instruction null
+    control's own spread exceeds resolution, so a rebaseline there discarded
+    163 rows of work taken on a quiet one [measured 2026-09-22]. That made
+    `--rebaseline` an operation you could only run on an idle machine, and the
+    machine is not always idle.
+
+    Only what this run could not measure is carried. A row that measures is
+    always re-measured, and `carried` says which is which, so nothing here ever
+    tells a reader a stale number is fresh.
+    """
+    previous = json.loads(BASELINE.read_text()) if BASELINE.exists() else {}
     entries: dict[str, dict] = {"//": {"status": "meta", **_carried_meta()}}
     ratios = []
     negatives = []
@@ -715,8 +731,13 @@ def build_baseline() -> dict:
             continue
         ours = measure(REPO, example)
         if ours["status"] in ("nondeterministic", "unstable", "below-floor", "unmeasurable-null"):
-            entries[name] = {"status": ours["status"], "detail": ours.get("detail", "")}
-            print(f"  {name}: {ours['status']}, excluded ({ours.get('detail', '')})")
+            kept = previous.get(name, {})
+            if kept.get("status") == "measured":
+                entries[name] = {**kept, "carried": ours["status"]}
+                print(f"  {name}: {ours['status']}, carried the committed measurement forward")
+            else:
+                entries[name] = {"status": ours["status"], "detail": ours.get("detail", "")}
+                print(f"  {name}: {ours['status']}, excluded ({ours.get('detail', '')})")
             continue
         if ours["status"] == "negative-net":
             entries[name] = {

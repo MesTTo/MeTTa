@@ -19530,6 +19530,117 @@
       "tags": [
         "measured"
       ]
+    },
+    "I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong": {
+      "title": "I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong",
+      "attacks": [
+        "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change"
+      ]
+    },
+    "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure": {
+      "title": "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure"
+    },
+    "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them": {
+      "title": "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them",
+      "supports": [
+        "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for": {
+      "title": "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for"
+    },
+    "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule": {
+      "title": "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule",
+      "supports": [
+        "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161": {
+      "title": "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161"
+    },
+    "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation": {
+      "title": "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation",
+      "supports": [
+        "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses": {
+      "title": "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses"
+    },
+    "measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce": {
+      "title": "measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce",
+      "supports": [
+        "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses"
+      ]
+    },
+    "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do": {
+      "title": "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do"
+    },
+    "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline": {
+      "title": "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline",
+      "supports": [
+        "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one": {
+      "title": "an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one",
+      "attacks": [
+        "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for"
+      ]
+    },
+    "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box": {
+      "title": "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box"
+    },
+    "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125": {
+      "title": "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125",
+      "supports": [
+        "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything": {
+      "title": "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything"
+    },
+    "measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53": {
+      "title": "measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53",
+      "supports": [
+        "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything"
+      ]
+    },
+    "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash": {
+      "title": "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash"
+    },
+    "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests": {
+      "title": "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests",
+      "supports": [
+        "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not": {
+      "title": "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not"
+    },
+    "3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all": {
+      "title": "3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all",
+      "supports": [
+        "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not"
+      ]
     }
   },
   "approaches": {
@@ -83552,6 +83663,313 @@
         ]
       ],
       "id": "a0cd5573231da2bd"
+    },
+    {
+      "at": "2026-09-21T19:52:52.097468+00:00",
+      "after": "17325c0e63bfc369f6281160e83a415900375baf",
+      "did": "[{\"op\": \"attack\", \"id\": \"parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change\", \"because\": \"I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong\", \"tags\": []}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them\", \"tags\": [\"measured\"], \"title\": \"three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule\", \"tags\": [\"measured\"], \"title\": \"two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation\", \"tags\": [\"measured\"], \"title\": \"combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce\", \"tags\": [], \"title\": \"that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline\", \"tags\": [\"measured\"], \"title\": \"parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do\", \"fields\": {}}]",
+      "parents": [
+        "a0cd5573231da2bd"
+      ],
+      "assert": [
+        [
+          "I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong",
+          "sort",
+          "prop"
+        ],
+        [
+          "I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong",
+          "attacks",
+          "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change"
+        ],
+        [
+          "I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong",
+          "title",
+          "I read only the tail. Buried above the 163 refusal lines are three TREE DRIFT findings on INFERENCE counts, which are deterministic and load-independent: 06-spaces_removeallatoms 22805 against a frozen 15519, 07-datetime 77923 against 21651, and 11-combinatorics_lib 749968 against 78161. The lane is red for a real reason as well as an environmental one, and calling it purely environmental was wrong"
+        ],
+        [
+          "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161",
+          "sort",
+          "prop"
+        ],
+        [
+          "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161",
+          "title",
+          "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161"
+        ],
+        [
+          "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule",
+          "sort",
+          "prop"
+        ],
+        [
+          "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule",
+          "supports",
+          "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for"
+        ],
+        [
+          "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule",
+          "tags",
+          "measured"
+        ],
+        [
+          "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule",
+          "title",
+          "git log dates on tests/data/upstream-parity-baseline.json and on each example inside the examples submodule"
+        ],
+        [
+          "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline",
+          "supports",
+          "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do"
+        ],
+        [
+          "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline",
+          "title",
+          "measured 2026-09-22 by ps -eo pcpu --sort=-pcpu and reading /proc/399959/cmdline"
+        ],
+        [
+          "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation",
+          "supports",
+          "combinatorics_lib's 9.6x shows in TWO independent lanes, parity-perf and the twins corpus, which makes it a property of the tree rather than of either harness. A direct Python reproduction gives 839871 inferences against the driver's 749968: different harness, same order of magnitude against the frozen 78161"
+        ],
+        [
+          "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation",
+          "title",
+          "measured 2026-09-22 with m.stats() over the example's own text; the record already carried the twins observation"
+        ],
+        [
+          "measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce",
+          "supports",
+          "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses"
+        ],
+        [
+          "measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce",
+          "title",
+          "measured 2026-09-22: 839871 against the lane's 749968, plus an ERROR line the examples lane does not produce"
+        ],
+        [
+          "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them",
+          "supports",
+          "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure"
+        ],
+        [
+          "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them",
+          "title",
+          "measured 2026-09-22: gate-ship at 09-21 23:23, gate-ship3 at 02:33 and gate-ship4 at 05:25 all report 22805, 77923 and 749968, so the numbers are stable and none of this session's changes moved them"
+        ],
+        [
+          "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do",
+          "sort",
+          "prop"
+        ],
+        [
+          "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do",
+          "title",
+          "parity-perf's 163 load refusals are caused by a process that is not mine and not this repository's: /home/user/Dev/MeTTa/ai-codex-next/ai-battery-2/target/release/metta --bench-check residuation 150, parented by scripts/model.py differential, at 99.9 per cent of a core since 02:10. The box never fell below loadavg 3.4 in twenty minutes of waiting, and stopping another session's benchmark is not mine to do"
+        ],
+        [
+          "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses",
+          "sort",
+          "prop"
+        ],
+        [
+          "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses",
+          "title",
+          "that Python reproduction is NOT faithful and must not be used for a bisect as it stands: it runs the example's text through m.run rather than through the engine's own runner, and it raised an assertion the green examples lane does not, (assertEqualMsg (!= 1e20 1e20) true) under the range-step case. The faithful path is tests/fixtures/parity_driver.pl, which is what the lane uses"
+        ],
+        [
+          "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure",
+          "sort",
+          "prop"
+        ],
+        [
+          "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure",
+          "title",
+          "three examples have drifted from their frozen parity baselines by deterministic inference counts, identical to the digit across three complete gate runs on different trees: 06-spaces_removeallatoms +47 per cent, 07-datetime +260 per cent, 11-combinatorics_lib +859 per cent. The project's rule makes deterministic within-tree drift beyond 2 per cent plus 200 a gate failure"
+        ],
+        [
+          "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for",
+          "sort",
+          "prop"
+        ],
+        [
+          "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for",
+          "title",
+          "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for"
+        ]
+      ],
+      "id": "797351ea6b3ec5df"
+    },
+    {
+      "at": "2026-09-21T20:54:48.684790+00:00",
+      "after": "17325c0e63bfc369f6281160e83a415900375baf",
+      "did": "[{\"op\": \"attack\", \"id\": \"two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for\", \"because\": \"an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one\", \"tags\": []}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125\", \"tags\": [\"source\"], \"title\": \"the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53\", \"tags\": [], \"title\": \"a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests\", \"tags\": [\"measured\"], \"title\": \"fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all\", \"tags\": [], \"title\": \"that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not\", \"fields\": {}}]",
+      "parents": [
+        "797351ea6b3ec5df"
+      ],
+      "assert": [
+        [
+          "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything",
+          "sort",
+          "prop"
+        ],
+        [
+          "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything",
+          "title",
+          "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything"
+        ],
+        [
+          "an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one",
+          "sort",
+          "prop"
+        ],
+        [
+          "an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one",
+          "attacks",
+          "two of the three are real regressions rather than stale pins, and the dates separate them: the baseline was measured 2026-09-19, while 06-spaces_removeallatoms last changed 2026-08-31 and 11-combinatorics_lib 2026-09-13, so both were pinned against the example text they still carry. Only 07-datetime changed after the baseline, on 2026-09-21, which is the one a re-pin would be honest for"
+        ],
+        [
+          "an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one",
+          "title",
+          "an unchanged EXAMPLE does not mean unchanged LIBRARIES beneath it, and that is the step I skipped. The baseline was pinned at 2026-09-19 07:10:51 and the superproject merge 97763e7fa landed at 08:56:12 the same morning, bringing sixty libraries derived in MeTTa. lib_combinatorics is now 169 lines of .metta and 0 lines of .pl, so the example runs over a MeTTa derivation where the baseline measured a Prolog one"
+        ],
+        [
+          "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash",
+          "sort",
+          "prop"
+        ],
+        [
+          "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash",
+          "title",
+          "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash"
+        ],
+        [
+          "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests",
+          "supports",
+          "fixing the pytest truncation revealed a second bound nobody had met: the full 8129 tests at four workers do not fit bounded.sh's 3600s ceiling, so the lane was killed at 3600s with 'gnutimeout: the monitored command dumped core' and zero 'replacing crashed worker' lines. The restart budget was never exercised, because the run died of time rather than of a crash"
+        ],
+        [
+          "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests",
+          "title",
+          "measured 2026-09-22: the lane ran 3603s against a previous 1827s, and 1827s was the truncated run that covered 4761 tests"
+        ],
+        [
+          "measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53",
+          "supports",
+          "a faithful --rebaseline cannot be run here now: the instruction half needs a box quiet enough that a 1.457-billion-instruction null holds within about 0.0009 per cent, and another session's benchmark has held this one above loadavg 3.4 for hours. The inference half is load-independent and could be re-pinned alone, but --rebaseline re-measures everything"
+        ],
+        [
+          "measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53",
+          "title",
+          "measured 2026-09-22: twenty minutes of waiting never reached loadavg 1.5, and the lane refused 163 rows at 3.53"
+        ],
+        [
+          "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125",
+          "supports",
+          "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box"
+        ],
+        [
+          "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125",
+          "tags",
+          "source"
+        ],
+        [
+          "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125",
+          "title",
+          "read the merge commit, the library's composition, and PyPeTTa1/CLAUDE.md's record of the ruling; --rebaseline is documented at tests/checks/check_upstream_parity.py:68 and 125"
+        ],
+        [
+          "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not",
+          "sort",
+          "prop"
+        ],
+        [
+          "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not",
+          "title",
+          "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not"
+        ],
+        [
+          "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box",
+          "sort",
+          "prop"
+        ],
+        [
+          "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box",
+          "title",
+          "the parity drift is a baseline measured on the pre-derivation tree, not an engine regression, and the cost is one the project already accepted: the 2026-09-14 ruling is that libraries are written derived in MeTTa and 'I am ok with the MeTTa way being less performant than Prolog ... because anyways in the future the engine will be more performant'. The correct fix is check_upstream_parity.py --rebaseline, which carries every meta note the old baseline held forward, run on a quiet box"
+        ],
+        [
+          "3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all",
+          "supports",
+          "that gives the worker count a justification it did not have before, and a better one than speed: at four workers the complete suite does not fit the ceiling its own lane sets, so the count is not a preference but what makes the lane able to run at all. It still owes the load evidence that four carries and six does not"
+        ],
+        [
+          "3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all",
+          "title",
+          "3603s at n=4 for the full collection against a 3600s ceiling leaves no margin at all"
+        ]
+      ],
+      "id": "1e564b87c7ea9dda"
     }
   ]
 }
