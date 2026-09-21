@@ -11,6 +11,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An installed copy of 0.9.0 could not import 37 of its 185 modules unless a
+  `pyproject.toml` or a `.git` happened to sit above it, which an ordinary pip
+  venv outside a project directory does not have. `metta.algebra`,
+  `metta.library`, `metta.lint`, `metta.testing`, `metta.parallel`,
+  `metta.remote`, `metta.ipython`, `metta.pytest_plugin`, `metta.importing`,
+  `metta.integrate`, `metta.manifest`, `metta.subscribe` and `metta.aio` all
+  raised, and so did `metta.space()`. Two module-level constants resolved a
+  checkout-only path at import time, the benchmark cost ledger and the fuzz
+  head census, and `seat()` and `workspace()` raise by design in an install
+  rather than guess a tree. Both are now resolved where they are used, inside
+  the handler each consumer already had for their absence. The published 0.8.0
+  imports 97 of its 98 modules from such a location and this now imports every
+  one of its own.
+
 - The engine benchmark's `evaluate` and `translate` inference pins are re-pinned to
   the tree that ships, with the mechanism measured rather than asserted: the
   submodule mount replaced the engine tree the pins were taken on, and the diff

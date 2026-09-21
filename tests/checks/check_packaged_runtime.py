@@ -92,6 +92,16 @@ def check_broken_wheel(wheel: Path, scratch: Path) -> None:
         completed = subprocess.run(bounded(argv), cwd=scratch, env=environment,
                                    capture_output=True, text=True, check=False)
         assert completed.returncode == 0, (door, completed.stdout, completed.stderr)
+        # stderr was already in hand here and only ever reached the FAILURE
+        # message, so a door that booted with a broken load reported success:
+        # SWI prints a failed use_module directive there and carries on, which
+        # is how 0.9.0's shim.pl emitted four ERROR lines at first boot while
+        # every value assertion passed. Measured 2026-09-22 against the built
+        # 0.9.0 wheel: both doors write 0 bytes, and the standalone one writes
+        # its whole transpiler trace to STDOUT, so this costs no allowlist.
+        assert not completed.stderr, (
+            f"the {door} door wrote {len(completed.stderr)} bytes to stderr, "
+            f"which a sound runtime does not: {completed.stderr[:400]}")
     assert (runtime / "engine" / "metta.qlf").is_file(), "the negative test must replay QLF"
 
     for relative, replacement in (
