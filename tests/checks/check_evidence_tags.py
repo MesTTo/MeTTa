@@ -1341,10 +1341,10 @@ GATE_COMMAND = re.compile(
 #:
 #: Without this the body was split into words, and the leading interpreter was
 #: read as a test NAME. Two such claims passed for as long as they had been
-#: written because `python` happened to be the stem of a shipped example,
-#: examples/integration/python.metta, so a phrasebook claim was backed by an
-#: unrelated MeTTa program; renaming that file to carry its reading-order
-#: number is what exposed it [measured 2026-08-27].
+#: written because `python` happened to be the stem of a shipped example, the
+#: one now at examples/ch11-python-as-a-notation/01-python.metta, so a
+#: phrasebook claim was backed by an unrelated MeTTa program; giving that file
+#: its reading-order number is what exposed it [measured 2026-08-27].
 SCRIPT_COMMAND = re.compile(
     r"\b(?:python3?|swipl|node)\s+((?:[\w.-]+/)*[\w.-]+\.(?:py|pl|mjs|ts))\b"
 )

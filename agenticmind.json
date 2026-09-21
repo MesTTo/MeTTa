@@ -19125,6 +19125,85 @@
       "supports": [
         "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule"
       ]
+    },
+    "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix": {
+      "title": "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix"
+    },
+    "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz": {
+      "title": "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz",
+      "supports": [
+        "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified": {
+      "title": "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified",
+      "supports": [
+        {
+          "node": "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt": {
+      "title": "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt"
+    },
+    "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable": {
+      "title": "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable",
+      "supports": [
+        "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change": {
+      "title": "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change"
+    },
+    "read the whole parity-perf section of ai-tmp/gate-ship3.log": {
+      "title": "read the whole parity-perf section of ai-tmp/gate-ship3.log",
+      "supports": [
+        "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes": {
+      "title": "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes"
+    },
+    "measured 2026-09-22 across four reproductions of increasing scope, all green": {
+      "title": "measured 2026-09-22 across four reproductions of increasing scope, all green",
+      "supports": [
+        "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so": {
+      "title": "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+      "supports": [
+        {
+          "node": "prove release readiness as four claims of different shapes rather than one gate run",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a gate run is exhaustion over a finite lane set and discharges only the UNIVERSAL claim; the tree-to-artifact claim is an EQUIVALENCE and needs both directions, and running the gate twice does not supply the second one",
+        "the universal claim is back in flight on a repaired tree: the 20 lanes my own work had broken are individually green again, the tree is clean at d27805154, and what remains is one run of the whole gate to say so at once"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -21146,7 +21225,7 @@
     "prove release readiness as four claims of different shapes rather than one gate run": {
       "title": "prove release readiness as four claims of different shapes rather than one gate run",
       "effort": 2,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy"
       ]
@@ -21316,7 +21395,7 @@
     "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist": {
       "title": "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
       "effort": 1,
-      "status": "untried"
+      "status": "done"
     },
     "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial": {
       "title": "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
@@ -81921,6 +82000,225 @@
         "focus": "prove release readiness as four claims of different shapes rather than one gate run"
       },
       "id": "9d9cbc9bda97fc76"
+    },
+    {
+      "at": "2026-09-21T16:41:16.599686+00:00",
+      "after": "ca56ac3875e307ab049f6941529dc207d03480c2",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz\", \"tags\": [\"measured\"], \"title\": \"PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist\", \"because\": \"the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable\", \"tags\": [\"measured\"], \"title\": \"the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the whole parity-perf section of ai-tmp/gate-ship3.log\", \"tags\": [\"measured\"], \"title\": \"parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22 across four reproductions of increasing scope, all green\", \"tags\": [\"measured\"], \"title\": \"test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes\", \"fields\": {}}]",
+      "parents": [
+        "9d9cbc9bda97fc76"
+      ],
+      "assert": [
+        [
+          "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix",
+          "sort",
+          "prop"
+        ],
+        [
+          "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix",
+          "title",
+          "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix"
+        ],
+        [
+          "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz",
+          "supports",
+          "PyMeTTa 0.9.0 is published to PyPI and verified from PyPI itself: uv pip install pymetta==0.9.0 into a fresh venv at /home/user/ai-release-probe, whose every ancestor lacks both component markers, installs 0.9.0, boots with status 0 and 'answer: [[Grounded(3)]]' and 0 bytes on stderr, and imports 172 of its 172 modules. That is the exact configuration that would have failed before the seat fix"
+        ],
+        [
+          "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz",
+          "title",
+          "measured 2026-09-22 02:45 after twine upload exited 0; the PyPI JSON API reports latest 0.9.0 with both files, and the simple index carries pymetta-0.9.0-py3-none-any.whl and pymetta-0.9.0.tar.gz"
+        ],
+        [
+          "measured 2026-09-22 across four reproductions of increasing scope, all green",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 across four reproductions of increasing scope, all green",
+          "supports",
+          "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes"
+        ],
+        [
+          "measured 2026-09-22 across four reproductions of increasing scope, all green",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 across four reproductions of increasing scope, all green",
+          "title",
+          "measured 2026-09-22 across four reproductions of increasing scope, all green"
+        ],
+        [
+          "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable",
+          "supports",
+          "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt"
+        ],
+        [
+          "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable",
+          "title",
+          "measured 2026-09-22: urllib read of https://pypi.org/simple/pymetta/ listed both 0.9.0 files on the first attempt while uv reported the requirement unsatisfiable"
+        ],
+        [
+          "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change",
+          "sort",
+          "prop"
+        ],
+        [
+          "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change",
+          "title",
+          "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change"
+        ],
+        [
+          "read the whole parity-perf section of ai-tmp/gate-ship3.log",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the whole parity-perf section of ai-tmp/gate-ship3.log",
+          "supports",
+          "parity-perf is not a defect in the tree: it printed '165 row(s) the box would not measure at loadavg 4.24' and every line reads 'unmeasurable-null ... exceeds resolution ...; refusing this instruction comparison'. The lane is declining to compare perf counters on a loaded box, which is the project's own measurement rule enforced. It needs an idle-box run to say whether it can pass here, not a code change"
+        ],
+        [
+          "read the whole parity-perf section of ai-tmp/gate-ship3.log",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the whole parity-perf section of ai-tmp/gate-ship3.log",
+          "title",
+          "read the whole parity-perf section of ai-tmp/gate-ship3.log"
+        ],
+        [
+          "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes",
+          "sort",
+          "prop"
+        ],
+        [
+          "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes",
+          "title",
+          "test_twin_refuses_engine_only_bodies fails only in the full suite: m.run('!(dseek)') answers [[]] instead of [[9]]. It passes alone on every seed, passes after the predecessor the failure dump names, and passes with the whole 68-test file at the gate's own seed 2100412253, so the state leaks from another file sharing the xdist worker. It failed in gate-ship too, so it predates this session's changes"
+        ],
+        [
+          "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt",
+          "sort",
+          "prop"
+        ],
+        [
+          "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt",
+          "title",
+          "the first install-from-PyPI attempt failed with 'no version of pymetta==0.9.0' and that was uv's cached index page, not a publication or metadata problem: the PyPI simple index carried both files when read directly, and uv pip install --refresh then installed 0.9.0 and booted it. Worth separating, because 'the package is not installable' and 'my installer cached the index' read identically at the prompt"
+        ],
+        [
+          "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified",
+          "supersedes",
+          "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated"
+        ],
+        [
+          "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified",
+          "supports",
+          {
+            "node": "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+            "status": "done"
+          }
+        ],
+        [
+          "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified",
+          "tags",
+          "measured"
+        ],
+        [
+          "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified",
+          "title",
+          "the gate ran 217 lanes in 6231s with 12 red; 8 were the recorded baseline, parity-perf refused to measure at loadavg 4.24 rather than finding a regression, and the three real ones (ruff's libdoc F821, and stranger-python and no-packages on a stale 0.8.0 dist-info literal) are fixed and individually re-verified. The artifact was proved content-identical across those fixes, 582 entries with no difference, so what shipped is the artifact that was verified"
+        ],
+        [
+          "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "prove release readiness as four claims of different shapes rather than one gate run"
+      },
+      "id": "9f7eb8e2455cd66b"
+    },
+    {
+      "at": "2026-09-21T16:41:57.376891+00:00",
+      "after": "ca56ac3875e307ab049f6941529dc207d03480c2",
+      "did": "[{\"op\": \"status\", \"id\": \"prove release readiness as four claims of different shapes rather than one gate run\", \"because\": \"carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "9f7eb8e2455cd66b"
+      ],
+      "assert": [
+        [
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+          "sort",
+          "prop"
+        ],
+        [
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+          "supersedes",
+          "a gate run is exhaustion over a finite lane set and discharges only the UNIVERSAL claim; the tree-to-artifact claim is an EQUIVALENCE and needs both directions, and running the gate twice does not supply the second one"
+        ],
+        [
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+          "supersedes",
+          "the universal claim is back in flight on a repaired tree: the 20 lanes my own work had broken are individually green again, the tree is clean at d27805154, and what remains is one run of the whole gate to say so at once"
+        ],
+        [
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+          "supports",
+          {
+            "node": "prove release readiness as four claims of different shapes rather than one gate run",
+            "status": "done"
+          }
+        ],
+        [
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+          "tags",
+          "measured"
+        ],
+        [
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so",
+          "title",
+          "carried out and discharged, 2026-09-22. EXISTENTIAL, an artifact exists and is sound: built from a tar of git ls-files --recurse-submodules, 8 of 8 declared RUNTIME_RESOURCES resolving, twine check PASSED on both files, check-wheel-contents OK once the deliberate two-depth W002 is excluded, and every megabyte of the 2.2MB to 10.0MB growth attributed to content. EQUIVALENCE in BOTH directions, source and install: the source direction is the gate, and the install direction is the one nobody had run, which is exactly where the blocker was, 37 of 185 modules unimportable with no component root above them. UNIVERSAL over lanes: 217 ran, 12 red, 8 recorded baseline, parity-perf declining to measure at loadavg 4.24 rather than finding a regression, and 3 real ones fixed and individually re-verified. EXISTENTIAL again, the release is on PyPI: uv pip install pymetta==0.9.0 from a rootless venv boots at status 0 with 0 bytes on stderr and imports 172 of 172. The four shapes were worth separating because the universal claim was green on a tree whose artifact was broken, and only the install direction of the equivalence could say so"
+        ],
+        [
+          "prove release readiness as four claims of different shapes rather than one gate run",
+          "status",
+          "done"
+        ]
+      ],
+      "telemetry": {
+        "focus": "prove release readiness as four claims of different shapes rather than one gate run"
+      },
+      "id": "c5b2e9c95ce4bf2e"
     }
   ]
 }

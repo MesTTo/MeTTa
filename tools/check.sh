@@ -465,6 +465,18 @@ run REPORT component-publication "$PY" "$HERE/tests/checks/check_component_publi
 run GATE component-publication-selftest "$PY" "$HERE/tests/checks/check_component_publication_selftest.py"
 run GATE refusal-coverage-selftest "$PY" "$HERE/tests/checks/check_refusal_coverage_selftest.py"
 
+# check_script_references.py exists because moving the helper scripts into
+# tools/ broke references in seven places and every one failed silently. The
+# examples are the same shape and had no such lane: a page naming an example
+# by path is a hardcoded path nothing checked, so moving or renaming one rots
+# the reference instead of failing here. A GATE rather than a REPORT from the
+# start, because the three it found are fixed in the same commit and a lane
+# with no backlog can hold the line; it is also what makes redistributing the
+# topic examples into the chaptered corpus safe, since a half-finished move
+# cannot pass.
+run GATE example-references "$PY" "$HERE/tests/checks/check_example_references.py"
+run GATE example-references-selftest "$PY" "$HERE/tests/checks/check_example_references_selftest.py"
+
 # A suite that loads engine/metta.pl reads the engine's COMPILED artifacts, and
 # SWI's staleness check covers a .qlf's immediate source only. The engine's
 # units are consulted by umbrellas, so engine/spaces/foreign.pl compiles into
