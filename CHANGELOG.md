@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The README shows a worked example of every library in the pack, sixty of them
+  as `metta` fences the gate runs on a fresh space, and names the sixteen whose
+  own definitions and signatures use sequence variables, `(:seg $rest)`, and so
+  need this kernel rather than a stock PeTTa one. `lib_gitimport` is described
+  without a fence: it has no MeTTa half and is the Prolog backing `lib_package`
+  calls to fetch a repository.
+
 - `lib_package` owns package coverage, native contracts, home registration,
   setup receipts, dependency catalogs and handle lifetimes. Requirements run
   before a replaceable `package-load` interpreter. Import uses prepared local

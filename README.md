@@ -239,7 +239,10 @@ Multiset operations over atoms.
 
 ## Sequence variables
 
-A pattern child that stands for a run of atoms.
+A pattern child that stands for a run of atoms. Upstream PeTTa has no such
+pattern, so this is the one part of the language below that a stock kernel will
+not parse, and the sixteen libraries listed under [the library pack](#the-library-pack)
+are written with it.
 
 ```metta
 !(test (collapse (let ((:seg $pre) SEP (:seg $post)) (a b SEP c SEP d)
@@ -614,6 +617,576 @@ MeTTa's own evaluator, written in MeTTa.
 
 `git-import!` fetches and builds a library from source; see
 [the example](examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/06-git_import.metta).
+
+# The library pack
+
+Sixty-one libraries sit under `lib/`. None is loaded until a program names it,
+and every example below is run by the gate on a fresh space, so a line that
+stops being true fails the build instead of going stale on the page.
+
+Sixteen of them are written in a language upstream PeTTa does not accept. They
+use the sequence variables above, `(:seg $rest)` and its anonymous `...`, in
+their own definitions and signatures: `lib_sets` types union as
+`(-> (:seg Expression) Expression)` so it takes any number of sets, and
+`lib_strategy` types `seq` the same way. What they mean is PeTTa's; what they
+are written in is a superset of it, so these sixteen need this kernel:
+
+> `lib_builtin_types`, `lib_combinatorics`, `lib_database`, `lib_datastructures`, `lib_encoding`, `lib_functional`, `lib_graph`, `lib_package`, `lib_pairs`, `lib_parsing`, `lib_random`, `lib_sets`, `lib_statistics`, `lib_strategy`, `lib_tabling`, `lib_uuid`.
+
+The other forty-four import and run on either. `lib_gitimport` is the
+sixty-first and has no MeTTa half at all: it is the Prolog backing
+`lib_package` calls to fetch a repository, reached through a package
+requirement rather than through `import!`.
+
+One example each is what this page is for. Every head a library exports, with
+its own `(@doc ...)` text, is in `website/reference/metta-libraries.md`,
+generated from the live atoms by `extensions/python/tools/libdoc.py`; `help!`
+and `get-doc` answer the same atoms at the prompt.
+
+### `lib_builtin_types`
+
+Arithmetic, comparison and the format machinery every other library assumes.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_builtin_types))
+!(test (format-args "{} and {}" ("only")) "only and ")
+```
+
+### `lib_cli`
+
+Argument vectors, typed options and generated help.
+
+```metta
+!(import! &self (library lib_cli))
+!(test (cli-types) (boolean integer float atom string metta))
+```
+
+### `lib_combinatorics`
+
+Ranges, subsets, permutations and k-combinations.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_combinatorics))
+!(test (choose2l (a b c)) ((a b) (a c) (b c)))
+```
+
+### `lib_compression`
+
+Gzip and zlib over bytes and files, and archive entries.
+
+```metta
+!(import! &self (library lib_compression))
+!(test (compression-formats) (gzip zlib))
+```
+
+### `lib_conformance`
+
+Prove a foreign space provider against the same contract the Python kit uses.
+
+```metta
+!(import! &self (library lib_conformance))
+!(test (get-type check-space-provider) (-> Atom Expression))
+```
+
+### `lib_constraints`
+
+Rational and boolean constraint solving, CLP(Q) and CLP(B).
+
+```metta
+!(import! &self (library lib_constraints))
+!(test (clpq (= (+ $x 1) 3)) True)
+```
+
+### `lib_crypto`
+
+Hashes, HMACs, password records and random bytes.
+
+```metta
+!(import! &self (library lib_crypto))
+!(test (crypto-hash sha256 "") "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+```
+
+### `lib_csv`
+
+Lossless CSV text, bounded streaming and transactional file writes.
+
+```metta
+!(import! &self (library lib_csv))
+!(test (csv-parse "001,\"a,b\"\r\n002,9\r\n") (("001" "a,b") ("002" "9")))
+```
+
+### `lib_database`
+
+A persistent journal a space reads and writes through.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_database))
+!(test (get-type database-open!) (-> %Undefined% Symbol %Undefined%))
+```
+
+### `lib_datastructures`
+
+Finger trees and persistent maps.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_datastructures))
+!(test (map-size (map-from-pairs ((a 1) (b 2)))) 2)
+```
+
+### `lib_datetime`
+
+Timestamps, calendar fields and formatting.
+
+```metta
+!(import! &self (library lib_datetime))
+!(test (day-of-week 1766188800) Saturday)
+```
+
+### `lib_derived`
+
+The derived control forms, `once` among them: the forms the compiler keeps
+fused, written out as translator rules so a program can have the smaller
+instruction set and pay the difference knowingly. `add-translator-rule!`
+registers for every space and the rest of the session, so a program that only
+wanted it briefly gives it back.
+
+```metta
+!(import! &self (library lib_derived))
+!(test (once (superpose (1 2 3))) 1)
+!(remove-translator-rule! once)
+```
+
+### `lib_dict`
+
+A space used as a dictionary.
+
+```metta
+!(import! &self (library lib_dict))
+!(test (dict-size (dict-put (new-space) a 1)) 1)
+```
+
+### `lib_doc`
+
+Documentation as data, queryable like anything else.
+
+```metta
+!(import! &self (library lib_doc))
+!(test (get-metatype (get-doc get-doc)) Expression)
+```
+
+### `lib_encoding`
+
+Base64, hex and UTF-8 between text and bytes.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_encoding))
+!(test (utf8-encode "hi") (104 105))
+```
+
+### `lib_file`
+
+Files, directories, handles and transactional publication.
+
+```metta
+!(import! &self (library lib_file))
+!(test (path-join "one" "two") "one/two")
+```
+
+### `lib_functional`
+
+Zip, chunk, window, partition and the folds.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_functional))
+!(test (zip (1 2 3) (a b c)) ((1 a) (2 b) (3 c)))
+```
+
+### `lib_graph`
+
+Vertices, edges, reachability and topological order.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_graph))
+!(test (graph-topological-order ((a (b)) (b ()))) (a b))
+```
+
+### `lib_he`
+
+The hyperon-experimental compatibility surface.
+
+```metta
+!(import! &self (library lib_he))
+!(test (unify (f a) (f $x) $x none) a)
+```
+
+### `lib_http`
+
+HTTP requests and a local server.
+
+```metta
+!(import! &self (library lib_http))
+!(test (http-methods) (delete get head post put patch options))
+```
+
+### `lib_import`
+
+Loading MeTTa and Prolog from files and modules.
+
+```metta
+!(import! &self (library lib_import))
+!(test (get-metatype use-module!) Grounded)
+```
+
+### `lib_json`
+
+JSON to atoms, to spaces, and back.
+
+```metta
+!(import! &self (library lib_json))
+!(test (json-decode "[1,2,3]") (1 2 3))
+```
+
+### `lib_logging`
+
+Levelled, topic-scoped logging.
+
+```metta
+!(import! &self (library lib_logging))
+!(test (log-levels) (debug informational warning error))
+```
+
+### `lib_markup`
+
+XML and HTML parsing with selectors.
+
+```metta
+!(import! &self (library lib_markup))
+!(test (markup-text (markup-parse-xml "<p>hi</p>")) "hi")
+```
+
+### `lib_math`
+
+Gcd, rationals, factorisation and exact roots.
+
+```metta
+!(import! &self (library lib_math))
+!(test (math-gcd (12 18)) 6)
+```
+
+### `lib_measure`
+
+Instruction and inference counters around a goal.
+
+```metta
+!(import! &self (library lib_measure))
+!(test (get-metatype measure) Symbol)
+```
+
+### `lib_memo`
+
+Memoised evaluation with an explicit cache.
+
+```metta
+!(import! &self (library lib_memo))
+!(test (get-metatype memo) Symbol)
+```
+
+### `lib_mm2`
+
+Minimal MeTTa 2, the small kernel.
+
+```metta
+!(import! &self (library lib_mm2))
+!(test (get-type ＋) (-> Atom %Undefined%))
+```
+
+### `lib_nars`
+
+Non-axiomatic reasoning.
+
+```metta
+!(import! &self (library lib_nars))
+!(test (get-metatype nars) Symbol)
+```
+
+### `lib_observe`
+
+Trace and observe a source as it loads.
+
+```metta
+!(import! &self (library lib_observe))
+!(test (get-type observe-source) (-> SpaceType String String SpaceType))
+```
+
+### `lib_package`
+
+Packages, their catalogs, requirements and native backings.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_package))
+!(test (size-atom (collapse (match &catalogs (package $n $p) $n))) 61)
+```
+
+### `lib_pairs`
+
+Association lists, grouped, sorted and looked up.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_pairs))
+!(test (pairs-lookup ((a 1) (b 2)) b) 2)
+```
+
+### `lib_parsing`
+
+Parser combinators over a grammar term.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_parsing))
+!(test (grammar-parse (lit "ab") "ab") "ab")
+```
+
+### `lib_patrick`
+
+Composition and iteration combinators.
+
+```metta
+!(import! &self (library lib_patrick))
+!(test (get-type compose) (-> Atom _ _))
+```
+
+### `lib_pln`
+
+Probabilistic logic networks, truth and confidence.
+
+```metta
+!(import! &self (library lib_pln))
+!(test (Truth_w2c 1) 0.5)
+```
+
+### `lib_pln2`
+
+The second PLN formulation.
+
+```metta
+!(import! &self (library lib_pln2))
+!(test (get-metatype pln2) Symbol)
+```
+
+### `lib_process`
+
+Run a program, wait on it, signal it.
+
+```metta
+!(import! &self (library lib_process))
+!(test (process-run! "echo" ("hi")) (process-result 0 "hi\n" ""))
+```
+
+### `lib_random`
+
+Shuffles, samples and the named distributions.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_random))
+!(test (random-shuffle! ()) ())
+```
+
+### `lib_redis`
+
+A Redis server as a space.
+
+```metta
+!(import! &self (library lib_redis))
+!(test (get-metatype redis-open!) Symbol)
+```
+
+### `lib_reflect`
+
+Ask the engine about its own atoms.
+
+```metta
+!(import! &self (library lib_reflect))
+!(test (atom-variables (f $x $y)) ($x $y))
+```
+
+### `lib_regex`
+
+Match, capture, split and replace.
+
+```metta
+!(import! &self (library lib_regex))
+!(test (re-match "(?i)^needle" "Needle in a haystack") True)
+```
+
+### `lib_roman`
+
+Roman numerals, as a worked small library.
+
+```metta
+!(import! &self (library lib_roman))
+!(test (get-metatype roman) Symbol)
+```
+
+### `lib_sets`
+
+Sets over expressions, with variadic union and intersection.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_sets))
+!(test (set-of (3 1 2 1)) (1 2 3))
+```
+
+### `lib_socket`
+
+TCP and UDP endpoints.
+
+```metta
+!(import! &self (library lib_socket))
+!(test (socket-wait! () infinite) ())
+```
+
+### `lib_soft`
+
+Soft symbol similarity and scoring.
+
+```metta
+!(import! &self (library lib_soft))
+!(test (sym-sim a a) 1.0)
+```
+
+### `lib_spaces`
+
+Move, copy, drain and count atoms between spaces.
+
+```metta
+!(import! &self (library lib_spaces))
+!(test (match-count (new-space) ($x)) 0)
+```
+
+### `lib_statistics`
+
+Means, quantiles, ranks and correlation.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_statistics))
+!(test (stats-mean (1 2 3)) 2)
+```
+
+### `lib_strategy`
+
+Rewriting strategies, seq and choice among them.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_strategy))
+!(test (get-type seq) (-> Atom (:seg Atom) %Undefined%))
+```
+
+### `lib_string`
+
+Codepoint text, slicing, padding and similarity.
+
+```metta
+!(import! &self (library lib_string))
+!(test (string-length "a🦊é") 3)
+```
+
+### `lib_system`
+
+The environment, the working directory and platform facts.
+
+```metta
+!(import! &self (library lib_system))
+!(test (collapse (env-get "NO_SUCH_VARIABLE_HERE")) ())
+```
+
+### `lib_tabling`
+
+Tabled evaluation with explicit cache control.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_tabling))
+!(test (get-type tabled) (-> Atom Bool))
+```
+
+### `lib_testing`
+
+The test harness the corpus itself runs on, and this page with it.
+
+```metta
+!(import! &self (library lib_testing))
+!(test (== 1 1) True)
+```
+
+### `lib_thread`
+
+Spawn, scope, capture and the parallel forms.
+
+```metta
+!(import! &self (library lib_thread))
+!(test (get-type spawn) (-> Atom %Undefined%))
+```
+
+### `lib_torch`
+
+PyTorch tensors as grounded atoms.
+
+```metta
+!(import! &self (library lib_torch))
+!(test (get-type torch-tensor) (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+### `lib_unicode`
+
+Normalisation, graphemes and character properties.
+
+```metta
+!(import! &self (library lib_unicode))
+!(test (unicode-normalize nfkc "ﬃ") "ffi")
+```
+
+### `lib_uri`
+
+Parse, build, resolve and normalise URIs.
+
+```metta
+!(import! &self (library lib_uri))
+!(test (uri-parts "") (("path" "")))
+```
+
+### `lib_uuid`
+
+UUID generation, parsing and versions.  Needs sequence variables.
+
+```metta
+!(import! &self (library lib_uuid))
+!(test (uuid-version (uuid-random!)) 4)
+```
+
+### `lib_vector`
+
+Dot, norm, cosine and the elementwise operations.
+
+```metta
+!(import! &self (library lib_vector))
+!(test (dot (1.0 2.0) (3.0 4.0)) 11.0)
+```
+
+### `lib_yaml`
+
+YAML to atoms and back.
+
+```metta
+!(import! &self (library lib_yaml))
+!(test (yaml-decode "- 1\n- 2\n") (1 2))
+```
+
+### `lib_zar`
+
+Consult Prolog files and import their predicates.
+
+```metta
+!(import! &self (library lib_zar))
+!(test (get-type consult_file) (-> %Undefined% %Undefined%))
+```
 
 # CMeTTa
 
