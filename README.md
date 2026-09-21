@@ -645,7 +645,7 @@ and `get-doc` answer the same atoms at the prompt.
 
 ### `lib_builtin_types`
 
-Arithmetic, comparison and the format machinery every other library assumes.  Needs sequence variables.
+Declare the type surface of MeTTa's shipped builtins, its type-kind markers included, for engine reflection and optional live typed dispatch. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_builtin_types))
@@ -654,7 +654,7 @@ Arithmetic, comparison and the format machinery every other library assumes.  Ne
 
 ### `lib_cli`
 
-Argument vectors, typed options and generated help.
+Declare typed command-line parsing, help and exact argument access.
 
 ```metta
 !(import! &self (library lib_cli))
@@ -663,7 +663,7 @@ Argument vectors, typed options and generated help.
 
 ### `lib_combinatorics`
 
-Ranges, subsets, permutations and k-combinations.  Needs sequence variables.
+Finite choices and exact counts as MeTTa answer streams. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_combinatorics))
@@ -672,7 +672,7 @@ Ranges, subsets, permutations and k-combinations.  Needs sequence variables.
 
 ### `lib_compression`
 
-Gzip and zlib over bytes and files, and archive entries.
+Declare compression and archive operations from native typed exports.
 
 ```metta
 !(import! &self (library lib_compression))
@@ -681,7 +681,7 @@ Gzip and zlib over bytes and files, and archive entries.
 
 ### `lib_conformance`
 
-Prove a foreign space provider against the same contract the Python kit uses.
+Prove a foreign space provider before its users find out, for the tier that had no way to do it.
 
 ```metta
 !(import! &self (library lib_conformance))
@@ -690,7 +690,7 @@ Prove a foreign space provider against the same contract the Python kit uses.
 
 ### `lib_constraints`
 
-Rational and boolean constraint solving, CLP(Q) and CLP(B).
+Expose SWI's clpq and clpb as MeTTa operations.
 
 ```metta
 !(import! &self (library lib_constraints))
@@ -699,7 +699,7 @@ Rational and boolean constraint solving, CLP(Q) and CLP(B).
 
 ### `lib_crypto`
 
-Hashes, HMACs, password records and random bytes.
+Expose the native crypto declarations, types and help to MeTTa.
 
 ```metta
 !(import! &self (library lib_crypto))
@@ -708,7 +708,7 @@ Hashes, HMACs, password records and random bytes.
 
 ### `lib_csv`
 
-Lossless CSV text, bounded streaming and transactional file writes.
+Lossless CSV text, streamed rows, live views and mutable snapshots.
 
 ```metta
 !(import! &self (library lib_csv))
@@ -717,7 +717,7 @@ Lossless CSV text, bounded streaming and transactional file writes.
 
 ### `lib_database`
 
-A persistent journal a space reads and writes through.  Needs sequence variables.
+Declare independent persistent stores from the native typed exports. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_database))
@@ -726,7 +726,7 @@ A persistent journal a space reads and writes through.  Needs sequence variables
 
 ### `lib_datastructures`
 
-Finger trees and persistent maps.  Needs sequence variables.
+Immutable maps, priority queues, functional queues and finger trees. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_datastructures))
@@ -735,7 +735,7 @@ Finger trees and persistent maps.  Needs sequence variables.
 
 ### `lib_datetime`
 
-Timestamps, calendar fields and formatting.
+Supply clocks, calendar records, parsing and explicit-zone arithmetic.
 
 ```metta
 !(import! &self (library lib_datetime))
@@ -744,7 +744,7 @@ Timestamps, calendar fields and formatting.
 
 ### `lib_derived`
 
-The derived control forms, `once` among them: the forms the compiler keeps
+The derived forms the engine keeps FUSED into its compiler, written out as translator rules, so a program that wants the smaller instruction set can have it and pay the difference knowingly.
 fused, written out as translator rules so a program can have the smaller
 instruction set and pay the difference knowingly. `add-translator-rule!`
 registers for every space and the rest of the session, so a program that only
@@ -758,7 +758,7 @@ wanted it briefly gives it back.
 
 ### `lib_dict`
 
-A space used as a dictionary.
+A space used as a dictionary; the dict story, and it is the space.
 
 ```metta
 !(import! &self (library lib_dict))
@@ -767,7 +767,7 @@ A space used as a dictionary.
 
 ### `lib_doc`
 
-Documentation as data, queryable like anything else.
+Preserve the old lib_doc import path after its vocabulary moved into the engine.
 
 ```metta
 !(import! &self (library lib_doc))
@@ -776,7 +776,7 @@ Documentation as data, queryable like anything else.
 
 ### `lib_encoding`
 
-Base64, hex and UTF-8 between text and bytes.  Needs sequence variables.
+Compose UTF8/base64 host codecs with inspectable MeTTa hex recipes. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_encoding))
@@ -785,7 +785,7 @@ Base64, hex and UTF-8 between text and bytes.  Needs sequence variables.
 
 ### `lib_file`
 
-Files, directories, handles and transactional publication.
+Files, directories, paths, links, traversal, scopes and streams.
 
 ```metta
 !(import! &self (library lib_file))
@@ -794,7 +794,7 @@ Files, directories, handles and transactional publication.
 
 ### `lib_functional`
 
-Zip, chunk, window, partition and the folds.  Needs sequence variables.
+Compose collection transformations and held control forms in MeTTa. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_functional))
@@ -803,7 +803,7 @@ Zip, chunk, window, partition and the folds.  Needs sequence variables.
 
 ### `lib_graph`
 
-Vertices, edges, reachability and topological order.  Needs sequence variables.
+Derive directed graphs from canonical relation and set expressions. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_graph))
@@ -821,7 +821,7 @@ The hyperon-experimental compatibility surface.
 
 ### `lib_http`
 
-HTTP requests and a local server.
+Declare the HTTP surface generated from its native typed exports.
 
 ```metta
 !(import! &self (library lib_http))
@@ -830,7 +830,7 @@ HTTP requests and a local server.
 
 ### `lib_import`
 
-Loading MeTTa and Prolog from files and modules.
+Load Prolog support and expose source imports as queryable data.
 
 ```metta
 !(import! &self (library lib_import))
@@ -839,7 +839,7 @@ Loading MeTTa and Prolog from files and modules.
 
 ### `lib_json`
 
-JSON to atoms, to spaces, and back.
+JSON documents whose objects are queryable spaces.
 
 ```metta
 !(import! &self (library lib_json))
@@ -848,7 +848,7 @@ JSON to atoms, to spaces, and back.
 
 ### `lib_logging`
 
-Levelled, topic-scoped logging.
+Structured host messages, topic controls and explicit handlers.
 
 ```metta
 !(import! &self (library lib_logging))
@@ -857,7 +857,7 @@ Levelled, topic-scoped logging.
 
 ### `lib_markup`
 
-XML and HTML parsing with selectors.
+XML and HTML as expressions, with a selector language over them.
 
 ```metta
 !(import! &self (library lib_markup))
@@ -866,7 +866,7 @@ XML and HTML parsing with selectors.
 
 ### `lib_math`
 
-Gcd, rationals, factorisation and exact roots.
+Compose exact number operations over the shared numeric providers.
 
 ```metta
 !(import! &self (library lib_math))
@@ -875,7 +875,7 @@ Gcd, rationals, factorisation and exact roots.
 
 ### `lib_measure`
 
-Instruction and inference counters around a goal.
+Weighted-superposition operations for normalization, ranking, sampling, aggregation, and expectation.
 
 ```metta
 !(import! &self (library lib_measure))
@@ -884,7 +884,7 @@ Instruction and inference counters around a goal.
 
 ### `lib_memo`
 
-Memoised evaluation with an explicit cache.
+Expose the resident automatic and explicit memoization controls.
 
 ```metta
 !(import! &self (library lib_memo))
@@ -893,7 +893,7 @@ Memoised evaluation with an explicit cache.
 
 ### `lib_mm2`
 
-Minimal MeTTa 2, the small kernel.
+Five operators as a notation over `&mork`, the on-demand half of a seat whose provider is `extensions/mork`.
 
 ```metta
 !(import! &self (library lib_mm2))
@@ -902,7 +902,7 @@ Minimal MeTTa 2, the small kernel.
 
 ### `lib_nars`
 
-Non-axiomatic reasoning.
+Provide NARS truth functions, inference rules, and bounded derivation.
 
 ```metta
 !(import! &self (library lib_nars))
@@ -911,7 +911,7 @@ Non-axiomatic reasoning.
 
 ### `lib_observe`
 
-Trace and observe a source as it loads.
+Make execution observations queryable with match and get-atoms.
 
 ```metta
 !(import! &self (library lib_observe))
@@ -920,7 +920,7 @@ Trace and observe a source as it loads.
 
 ### `lib_package`
 
-Packages, their catalogs, requirements and native backings.  Needs sequence variables.
+Document the default package interpreter and its explicit setup door. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_package))
@@ -929,7 +929,7 @@ Packages, their catalogs, requirements and native backings.  Needs sequence vari
 
 ### `lib_pairs`
 
-Association lists, grouped, sorted and looked up.  Needs sequence variables.
+Read ordinary (Key Value) pairs as a relation through collection operations. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_pairs))
@@ -938,7 +938,7 @@ Association lists, grouped, sorted and looked up.  Needs sequence variables.
 
 ### `lib_parsing`
 
-Parser combinators over a grammar term.  Needs sequence variables.
+Prepare grammar data as ordinary nondeterministic MeTTa functions. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_parsing))
@@ -947,7 +947,7 @@ Parser combinators over a grammar term.  Needs sequence variables.
 
 ### `lib_patrick`
 
-Composition and iteration combinators.
+lib_patrick's four idioms: composition and iteration.
 
 ```metta
 !(import! &self (library lib_patrick))
@@ -956,7 +956,7 @@ Composition and iteration combinators.
 
 ### `lib_pln`
 
-Probabilistic logic networks, truth and confidence.
+Probabilistic logic network truth functions, confidence and weight.
 
 ```metta
 !(import! &self (library lib_pln))
@@ -965,7 +965,7 @@ Probabilistic logic networks, truth and confidence.
 
 ### `lib_pln2`
 
-The second PLN formulation.
+An isolated, assumption-explicit truth-value library for Beta and moment formulas that are independently checked rather than inherited from legacy lib_pln policy.
 
 ```metta
 !(import! &self (library lib_pln2))
@@ -974,7 +974,7 @@ The second PLN formulation.
 
 ### `lib_process`
 
-Run a program, wait on it, signal it.
+Run a program with an argument vector, capture what it wrote, and start, watch, signal and wait for one that outlives the call.
 
 ```metta
 !(import! &self (library lib_process))
@@ -983,7 +983,7 @@ Run a program, wait on it, signal it.
 
 ### `lib_random`
 
-Shuffles, samples and the named distributions.  Needs sequence variables.
+Construct inspectable sample programs and select distinct occurrences. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_random))
@@ -992,7 +992,7 @@ Shuffles, samples and the named distributions.  Needs sequence variables.
 
 ### `lib_redis`
 
-A Redis server as a space.
+Shared spaces over Redis, SWI's own library(redis) underneath, plugged into the engine's foreign-space seam.
 
 ```metta
 !(import! &self (library lib_redis))
@@ -1001,7 +1001,7 @@ A Redis server as a space.
 
 ### `lib_reflect`
 
-Ask the engine about its own atoms.
+Inspect the engine's surface and manipulate literal terms as data.
 
 ```metta
 !(import! &self (library lib_reflect))
@@ -1010,7 +1010,7 @@ Ask the engine about its own atoms.
 
 ### `lib_regex`
 
-Match, capture, split and replace.
+Declare compiled PCRE2 matching, capture scans and substitutions.
 
 ```metta
 !(import! &self (library lib_regex))
@@ -1019,7 +1019,7 @@ Match, capture, split and replace.
 
 ### `lib_roman`
 
-Roman numerals, as a worked small library.
+Tracing helpers and higher-order list operations, `map-flat` among them.
 
 ```metta
 !(import! &self (library lib_roman))
@@ -1028,7 +1028,7 @@ Roman numerals, as a worked small library.
 
 ### `lib_sets`
 
-Sets over expressions, with variadic union and intersection.  Needs sequence variables.
+Derive set operations over canonical expressions from core collections. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_sets))
@@ -1037,7 +1037,7 @@ Sets over expressions, with variadic union and intersection.  Needs sequence var
 
 ### `lib_socket`
 
-TCP and UDP endpoints.
+Typed generated socket operations over File's owned stream handles.
 
 ```metta
 !(import! &self (library lib_socket))
@@ -1046,7 +1046,7 @@ TCP and UDP endpoints.
 
 ### `lib_soft`
 
-Soft symbol similarity and scoring.
+Score written terms using symbol similarity and structural recursion.
 
 ```metta
 !(import! &self (library lib_soft))
@@ -1055,7 +1055,7 @@ Soft symbol similarity and scoring.
 
 ### `lib_spaces`
 
-Move, copy, drain and count atoms between spaces.
+Migrate, copy, drain and count atoms between spaces.
 
 ```metta
 !(import! &self (library lib_spaces))
@@ -1064,7 +1064,7 @@ Move, copy, drain and count atoms between spaces.
 
 ### `lib_statistics`
 
-Means, quantiles, ranks and correlation.  Needs sequence variables.
+Derive sample summaries and finite probability laws in MeTTa. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_statistics))
@@ -1073,7 +1073,7 @@ Means, quantiles, ranks and correlation.  Needs sequence variables.
 
 ### `lib_strategy`
 
-Rewriting strategies, seq and choice among them.  Needs sequence variables.
+Compose literal term rewrites through ordinary MeTTa functions. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_strategy))
@@ -1082,7 +1082,7 @@ Rewriting strategies, seq and choice among them.  Needs sequence variables.
 
 ### `lib_string`
 
-Codepoint text, slicing, padding and similarity.
+Compose String recipes over the shared text and metric providers.
 
 ```metta
 !(import! &self (library lib_string))
@@ -1091,7 +1091,7 @@ Codepoint text, slicing, padding and similarity.
 
 ### `lib_system`
 
-The environment, the working directory and platform facts.
+The environment, the working directory and what the host says about itself, as data a program can read and write.
 
 ```metta
 !(import! &self (library lib_system))
@@ -1100,7 +1100,7 @@ The environment, the working directory and platform facts.
 
 ### `lib_tabling`
 
-Tabled evaluation with explicit cache control.  Needs sequence variables.
+The runtime control plane for tabling MeTTa functions. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_tabling))
@@ -1109,7 +1109,7 @@ Tabled evaluation with explicit cache control.  Needs sequence variables.
 
 ### `lib_testing`
 
-The test harness the corpus itself runs on, and this page with it.
+Import finite generators for properties expressed with core assertions.
 
 ```metta
 !(import! &self (library lib_testing))
@@ -1118,7 +1118,7 @@ The test harness the corpus itself runs on, and this page with it.
 
 ### `lib_thread`
 
-Spawn, scope, capture and the parallel forms.
+Publish parallel data operations, M:N engine futures, timers, channels, pools, Linda waits and locks over SWI-Prolog primitives.
 
 ```metta
 !(import! &self (library lib_thread))
@@ -1127,7 +1127,7 @@ Spawn, scope, capture and the parallel forms.
 
 ### `lib_torch`
 
-PyTorch tensors as grounded atoms.
+PyTorch from plain MeTTa through py-call: tensors, algebra, reductions, activations, the exits back to MeTTa data and autograd, with no Python-side setup needed beyond torch being importable.
 
 ```metta
 !(import! &self (library lib_torch))
@@ -1136,7 +1136,7 @@ PyTorch tensors as grounded atoms.
 
 ### `lib_unicode`
 
-Normalisation, graphemes and character properties.
+The Unicode character database and the standard text transformations over it.
 
 ```metta
 !(import! &self (library lib_unicode))
@@ -1145,7 +1145,7 @@ Normalisation, graphemes and character properties.
 
 ### `lib_uri`
 
-Parse, build, resolve and normalise URIs.
+Declare URI operations from their native typed exports.
 
 ```metta
 !(import! &self (library lib_uri))
@@ -1154,7 +1154,7 @@ Parse, build, resolve and normalise URIs.
 
 ### `lib_uuid`
 
-UUID generation, parsing and versions.  Needs sequence variables.
+Compose UUID names, namespaces and byte fields as MeTTa equations. Needs sequence variables.
 
 ```metta
 !(import! &self (library lib_uuid))
@@ -1163,7 +1163,7 @@ UUID generation, parsing and versions.  Needs sequence variables.
 
 ### `lib_vector`
 
-Dot, norm, cosine and the elementwise operations.
+Compose numeric construction from MeTTa streams and shared kernels.
 
 ```metta
 !(import! &self (library lib_vector))
@@ -1172,7 +1172,7 @@ Dot, norm, cosine and the elementwise operations.
 
 ### `lib_yaml`
 
-YAML to atoms and back.
+YAML documents as MeTTa values, in the shape lib_json already uses.
 
 ```metta
 !(import! &self (library lib_yaml))
@@ -1181,7 +1181,7 @@ YAML to atoms and back.
 
 ### `lib_zar`
 
-Consult Prolog files and import their predicates.
+Prolog interop: predicate-style `consult` and `use_module` wrappers.
 
 ```metta
 !(import! &self (library lib_zar))
