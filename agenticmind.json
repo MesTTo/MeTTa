@@ -16464,6 +16464,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed": {
+      "title": "those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed",
+      "attacks": [
+        "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+      ]
+    },
+    "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes": {
+      "title": "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes",
+      "supports": [
+        {
+          "node": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic": {
+      "title": "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "read the checker's Purpose section on 2026-09-21": {
+      "title": "read the checker's Purpose section on 2026-09-21",
+      "supports": [
+        "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -18437,7 +18473,7 @@
     "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!": {
       "title": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
       "effort": 4,
-      "status": "untried",
+      "status": "unwanted",
       "addresses": [
         "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
       ]
@@ -71179,6 +71215,100 @@
         ]
       ],
       "id": "21c8d4bf57b328a5"
+    },
+    {
+      "at": "2026-09-21T05:33:30.457338+00:00",
+      "after": "1f017a6668fed402a0c56ec4dc29f42399839572",
+      "did": "[{\"op\": \"attack\", \"id\": \"written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5\", \"because\": \"those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed\", \"tags\": []}, {\"op\": \"status\", \"id\": \"state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!\", \"because\": \"the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the checker's Purpose section on 2026-09-21\", \"tags\": [\"source\", \"reasoning\"], \"title\": \"the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic\", \"fields\": {}}]",
+      "parents": [
+        "21c8d4bf57b328a5"
+      ],
+      "assert": [
+        [
+          "read the checker's Purpose section on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the checker's Purpose section on 2026-09-21",
+          "supports",
+          "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic"
+        ],
+        [
+          "read the checker's Purpose section on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read the checker's Purpose section on 2026-09-21",
+          "title",
+          "read the checker's Purpose section on 2026-09-21"
+        ],
+        [
+          "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes",
+          "supersedes",
+          "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell"
+        ],
+        [
+          "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes",
+          "supports",
+          {
+            "node": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes",
+          "tags",
+          "measured"
+        ],
+        [
+          "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes",
+          "title",
+          "the cells are filled, and the table is measurably NOT shorter: the three injection bodies are 27 lines together, while a generator carrying name, file, content, wrapped target, tag, injection, operation and expected is eight columns at about six lines a row plus an eight-line law, so 26. It would also need a ninth slot for the postcondition that differs, since one case asserts no_stream and the others do not, and the injection is a closure over variables the wrap binds rather than data. That is a parametrisation with more slots than it removes"
+        ],
+        [
+          "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic",
+          "sort",
+          "prop"
+        ],
+        [
+          "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic",
+          "title",
+          "the coverage-heuristic route to the same visibility is already closed with a reason I cannot defeat: check_refusal_coverage.py's own header records that its first version asked which exercised heads look effectful and 'reported eighteen heads of which most were noise', which is why it asks about documented CONTRACTS instead. Counting uses against must_throw assertions is that rejected question wearing different arithmetic"
+        ],
+        [
+          "those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed",
+          "sort",
+          "prop"
+        ],
+        [
+          "those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed",
+          "attacks",
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+        ],
+        [
+          "those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed",
+          "title",
+          "those counts are stale: measured 2026-09-21 the same file gives csv-read! 3 assertions inside must_throw, csv-space 3 and csv-append! 2, because the csv witnesses added this session filled exactly those three cells. No csv operation now has zero failure coverage, so the gap the issue names is closed"
+        ],
+        [
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "id": "ae7ec647547a7677"
     }
   ]
 }
