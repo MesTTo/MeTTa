@@ -16617,6 +16617,87 @@
       "tags": [
         "measured"
       ]
+    },
+    "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established": {
+      "title": "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero": {
+      "title": "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero",
+      "supports": [
+        "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine": {
+      "title": "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine"
+    },
+    "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines": {
+      "title": "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines",
+      "supports": [
+        "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout": {
+      "title": "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout"
+    },
+    "read the refusal text the harness printed beside the boot row on 2026-09-21": {
+      "title": "read the refusal text the harness printed beside the boot row on 2026-09-21",
+      "supports": [
+        "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits": {
+      "title": "measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits",
+      "attacks": [
+        "the door-rows cost is cache-key identity in metta/doors/_order.py, not recursion in _bases: _core is @cache-keyed on (sources, entries, lifetimes) and holds the SOLVED graph so an outside door costs only CallGraph.extended, and the module's own docstring records a full solve at 97.73s against 2.57s for an extension, so a registration whose key is new pays the full solve"
+      ]
+    },
+    "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site": {
+      "title": "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl": {
+      "title": "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl",
+      "supports": [
+        "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences": {
+      "title": "the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences",
+      "attacks": [
+        "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine"
+      ]
+    },
+    "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree": {
+      "title": "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076": {
+      "title": "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076",
+      "supports": [
+        "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -71752,6 +71833,234 @@
         ]
       ],
       "id": "c9c139c85e4b7a96"
+    },
+    {
+      "at": "2026-09-21T05:41:02.526171+00:00",
+      "after": "2c6705cb21c1b7f149de5046a7071cc38c1e4bc9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines\", \"tags\": [\"measured\"], \"title\": \"replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the refusal text the harness printed beside the boot row on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout\", \"fields\": {}}]",
+      "parents": [
+        "c9c139c85e4b7a96"
+      ],
+      "assert": [
+        [
+          "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established",
+          "sort",
+          "prop"
+        ],
+        [
+          "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established",
+          "title",
+          "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established"
+        ],
+        [
+          "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout",
+          "sort",
+          "prop"
+        ],
+        [
+          "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout",
+          "title",
+          "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout"
+        ],
+        [
+          "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines",
+          "supports",
+          "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine"
+        ],
+        [
+          "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines",
+          "title",
+          "ran engine/bench.sh --counter-only on both arms in the same worktree on 2026-09-21 and diffed the inference lines"
+        ],
+        [
+          "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero",
+          "sort",
+          "prop"
+        ],
+        [
+          "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero",
+          "supports",
+          "I overstated the earlier re-pin verification: the commit said engine-bench --counter-only exits 0 with all six cases at +0, but there are TEN cases and six were at +0. I counted matches of a +0 pattern and reported the count as if it covered every case. The gate did exit 0, which is the claim that mattered, but the coverage sentence was not established"
+        ],
+        [
+          "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero",
+          "tags",
+          "measured"
+        ],
+        [
+          "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero",
+          "title",
+          "re-read the full counter output on 2026-09-21 and found boot, constructor-control, constructor-plain and constructor-sorted all nonzero"
+        ],
+        [
+          "read the refusal text the harness printed beside the boot row on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the refusal text the harness printed beside the boot row on 2026-09-21",
+          "supports",
+          "boot's +26,281 against its pin is not drift: the row refuses to compare from this worktree because instruction and inference counts depend on the checkout's path length, 45 characters at depth 7 here against the canonical 29 at depth 5, and the harness prints NOT MEASURED IN THIS CONFIGURATION for exactly that. The 2026-09-19 journal records the same refusal for battery worktrees, so the +4 is recorded here for whoever re-pins boot from the canonical checkout"
+        ],
+        [
+          "read the refusal text the harness printed beside the boot row on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the refusal text the harness printed beside the boot row on 2026-09-21",
+          "title",
+          "read the refusal text the harness printed beside the boot row on 2026-09-21"
+        ],
+        [
+          "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine",
+          "sort",
+          "prop"
+        ],
+        [
+          "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine",
+          "title",
+          "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine"
+        ]
+      ],
+      "id": "6e77ddee9604f29d"
+    },
+    {
+      "at": "2026-09-21T05:41:40.836559+00:00",
+      "after": "057802a4f232665e23258fa5f64f1da92d6398a9",
+      "did": "[{\"op\": \"attack\", \"id\": \"the door-rows cost is cache-key identity in metta/doors/_order.py, not recursion in _bases: _core is @cache-keyed on (sources, entries, lifetimes) and holds the SOLVED graph so an outside door costs only CallGraph.extended, and the module's own docstring records a full solve at 97.73s against 2.57s for an extension, so a registration whose key is new pays the full solve\", \"because\": \"measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits\", \"tags\": []}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site\", \"fields\": {}}]",
+      "parents": [
+        "6e77ddee9604f29d"
+      ],
+      "assert": [
+        [
+          "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl",
+          "sort",
+          "prop"
+        ],
+        [
+          "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl",
+          "supports",
+          "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site"
+        ],
+        [
+          "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl",
+          "tags",
+          "measured"
+        ],
+        [
+          "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl",
+          "title",
+          "enumerated every reader and writer of both tables on 2026-09-21; the others are reads in lowering.pl, constructors.pl and runtime.pl"
+        ],
+        [
+          "measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits",
+          "attacks",
+          "the door-rows cost is cache-key identity in metta/doors/_order.py, not recursion in _bases: _core is @cache-keyed on (sources, entries, lifetimes) and holds the SOLVED graph so an outside door costs only CallGraph.extended, and the module's own docstring records a full solve at 97.73s against 2.57s for an extension, so a registration whose key is new pays the full solve"
+        ],
+        [
+          "measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits",
+          "title",
+          "measured afterwards: seven of the nine slow cases have core_miss 0 and still cost about 63 seconds each, so they take the cached extension path and the cost is inside it; cache-key identity explains the two misses and not the seven hits"
+        ],
+        [
+          "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site",
+          "sort",
+          "prop"
+        ],
+        [
+          "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site",
+          "title",
+          "my reading of drop_fun_meta_rows as three spellings of ONE hazard was wrong: they are three spellings of three reachability situations. Every writer of fun_meta_clause/4 and fun_meta_projection/4 holds with_mutex('$metta_fun_metadata'), all three sites in analysis.pl, so the bare erases there are serialised and correct, while the dispatch guards are also erased by source withdrawal, which does not hold that mutex, and needed the tolerance. The rule is reachability outside the mutex, and it is now written at the site"
+        ]
+      ],
+      "id": "3243e1ae54dbad2c"
+    },
+    {
+      "at": "2026-09-21T05:42:35.233475+00:00",
+      "after": "057802a4f232665e23258fa5f64f1da92d6398a9",
+      "did": "[{\"op\": \"attack\", \"id\": \"replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine\", \"because\": \"the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences\", \"tags\": []}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree\", \"fields\": {}}]",
+      "parents": [
+        "3243e1ae54dbad2c"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076",
+          "supports",
+          "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree"
+        ],
+        [
+          "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076",
+          "title",
+          "measured 2026-09-21: three arms each warmed then sampled read 342072, while the unwarmed B arm read 342076"
+        ],
+        [
+          "the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences",
+          "attacks",
+          "replacing the four check-then-act erases with try_erase costs +4 boot inferences and nothing anywhere else, attributed by A/B in one tree rather than against the pin: reverting the two files and re-running gives boot 342072 against 342076 with every other case byte-identical, which also shows the three constructor +1 rows and boot's +26k are pre-existing rather than mine"
+        ],
+        [
+          "the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences",
+          "title",
+          "the 4 was a stale-QLF artifact and not the change: the boot case loads engine/metta under qcompile(auto), so the first boot after an edit recompiles and reads a different count, and the B arm was sampled immediately after git apply restored the files. Re-run with the QLF warmed separately on each arm, pre-change, with-change and with-comment all read 342072 in three identical samples, so the change costs ZERO inferences"
+        ],
+        [
+          "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree",
+          "title",
+          "warm the QLF on each arm before sampling or the arms are not comparable: adding a COMMENT appeared to remove 4 boot inferences, which no comment can do, and that impossibility is what exposed the artifact. The harness warms once before it samples, but that warm-up is itself the recompile when a source file is newer than its .qlf, so a run started right after an edit measures a different compile state than a settled tree"
+        ]
+      ],
+      "id": "bdaf33b8afc3f506"
     }
   ]
 }

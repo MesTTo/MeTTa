@@ -147,11 +147,16 @@ metta_prune_arrow_products(Space) :-
                           Stored =@= Type ) ),
                    metta_erase_arrow_product(Ref)))).
 
+%try_erase/1 rather than a clause_property(_, erased) test first: that is
+%check-then-act over the shared clause store, and the mutex above does not
+%close the window because the other eraser is source withdrawal, which does
+%not take it. The named operation tolerates the lost race and still lets a
+%non-clause blob's type_error through, so nothing the test bought is lost.
 metta_erase_arrow_product(Ref) :-
     retractall(metta_arrow_product(_, _, _, _, Ref)),
     forall(retract(metta_arrow_dispatch(Ref, DispatchRef)),
-           ( clause_property(DispatchRef, erased) -> true ; erase(DispatchRef) )),
-    ( clause_property(Ref, erased) -> true ; erase(Ref) ).
+           host_transactions:try_erase(DispatchRef)),
+    host_transactions:try_erase(Ref).
 
 metta_set_cardinality_verification(Value) :-
     retractall(metta_cardinality_verified),

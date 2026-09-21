@@ -272,6 +272,14 @@ drop_fun_meta_rows(Module, F, Args, Body, Owner) :-
     ( once(( clause(fun_meta_clause(Module, F, StoredArgs, StoredBody), true, Ref),
              (StoredArgs-StoredBody) =@= (Args-Body),
              source_removal_owns_metadata(Owner, Ref) ))
+    %Two spellings on purpose, and the rule is reachability rather than
+    %taste. drop_segment_dispatch/3 tolerates a reference already gone
+    %because its guards are ALSO erased by source withdrawal, which does not
+    %hold this mutex. HeadRef and Ref are erased here alone: every writer of
+    %fun_meta_clause/4 and fun_meta_projection/4 runs under
+    %with_mutex('$metta_fun_metadata'), the three sites in this file, so
+    %there is no second eraser to lose a race with and a failure here would
+    %be a real defect rather than a lost race. Tolerating it would hide that.
     -> retract(fun_meta_projection(Module, F, Ref, HeadRef)),
        drop_segment_dispatch(Module, F, Ref),
        erase(HeadRef),
@@ -308,10 +316,19 @@ clear_fun_meta(Module, F) :-
 % Like annotated-arrow dispatch, each installed guard belongs to the source
 % occurrence that needs it. Source withdrawal can already have erased a ref.
 % [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
+%
+%try_erase/1 rather than testing clause_property(_, erased) first, which is
+%check-then-act and cannot be made atomic here: the ROW is read from this
+%transaction's snapshot while erase/1 acts on the shared clause store, so the
+%reference can be erased between the test and the erase and no discipline
+%inside one thread closes that. host_transactions:try_erase/1 is the named
+%operation for exactly this, and it is not weaker: ignore/1 tolerates the
+%lost race, which is all the test was buying, while a non-clause blob still
+%raises its type_error because ignore/1 catches failure and not exceptions.
 drop_segment_dispatch(Module, F, Ref) :-
     forall(retract(segment_dispatch_refs(Module, F, Ref, CompileRef, RuntimeRef)),
-           ( ( clause_property(CompileRef, erased) -> true ; erase(CompileRef) ),
-             ( clause_property(RuntimeRef, erased) -> true ; erase(RuntimeRef) ) )).
+           ( host_transactions:try_erase(CompileRef),
+             host_transactions:try_erase(RuntimeRef) )).
 
 % WHAT THE COMPILER DECIDED ABOUT A HEAD PATTERN POSITION, one row per
 % position, and every decision it can take there is recorded because all of
