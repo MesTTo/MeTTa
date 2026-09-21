@@ -26,8 +26,10 @@ Guarantees:
   - a pin the remote's main does not contain is named with its component,
     the remote and what that remote's main actually is
   - a question it could not answer is reported as unanswered, never as a
-    pass: an unreachable remote and an object this checkout does not hold
-    both say so in their own words
+    pass and never as a failure: an unreachable remote, an absent pin and an
+    absent remote head each say so in their own words. merge-base fails when
+    EITHER operand is missing, so both are checked; testing only the head
+    reported an absent pin as one the remote does not contain
 Fails when: nothing. It reports.
 Open Obligations:
   To Do: make this a GATE once every component pin is pushed
@@ -99,6 +101,14 @@ def findings(root: Path = ROOT, prefix: str = "") -> list[str]:
                        f"reached, so pin {sha[:9]} could not be checked")
             continue
         head = advertised[0]
+        # BOTH objects, not just the remote's. merge-base --is-ancestor fails
+        # when either operand is missing, so checking only the head turned an
+        # absent pin into "the remote does not contain it", which is a false
+        # answer to a question this checkout cannot answer at all.
+        if not _ok("cat-file", "-e", sha, cwd=component):
+            out.append(f"{shown}: this checkout does not hold pin {sha[:9]}, so whether "
+                       f"{url}'s main contains it could not be checked")
+            continue
         if not _ok("cat-file", "-e", head, cwd=component):
             out.append(f"{shown}: this checkout does not hold {url}'s main {head[:9]}, "
                        f"so pin {sha[:9]} could not be checked against it")

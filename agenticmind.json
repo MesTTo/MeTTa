@@ -16407,6 +16407,63 @@
       "tags": [
         "measured"
       ]
+    },
+    "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units": {
+      "title": "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units",
+      "supports": [
+        {
+          "node": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took": {
+      "title": "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took",
+      "supports": [
+        {
+          "node": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0": {
+      "title": "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0",
+      "supports": [
+        {
+          "node": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would": {
+      "title": "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would"
+    },
+    "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py": {
+      "title": "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py",
+      "supports": [
+        "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -17782,7 +17839,7 @@
     "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta": {
       "title": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
       "effort": 2,
-      "status": "untried",
+      "status": "unwanted",
       "addresses": [
         "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
       ]
@@ -17817,7 +17874,7 @@
       "tags": [
         "reasoning"
       ],
-      "status": "untried",
+      "status": "unwanted",
       "addresses": [
         "the engine-bench GATE fails three pins: constructor-sorted instructions 32,046,978 against baseline 31,674,786 plus 1 percent, evaluate inferences 562,418 against 562,288 plus 4, and translate inferences 317,192 against 315,192 plus 4"
       ]
@@ -18396,7 +18453,7 @@
     "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies": {
       "title": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
       "effort": 2,
-      "status": "untried",
+      "status": "done",
       "addresses": [
         "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
       ]
@@ -70971,6 +71028,157 @@
         ]
       ],
       "id": "3cdeaee119862f12"
+    },
+    {
+      "at": "2026-09-21T05:31:14.709875+00:00",
+      "after": "e9eb42fec92fd43a0f770f9e6e33a548020f9040",
+      "did": "[{\"op\": \"status\", \"id\": \"write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies\", \"because\": \"built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta\", \"because\": \"no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"status\", \"id\": \"measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once\", \"because\": \"same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "3cdeaee119862f12"
+      ],
+      "assert": [
+        [
+          "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units",
+          "sort",
+          "prop"
+        ],
+        [
+          "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units",
+          "supersedes",
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it"
+        ],
+        [
+          "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units",
+          "supports",
+          {
+            "node": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+            "status": "done"
+          }
+        ],
+        [
+          "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units",
+          "tags",
+          "measured"
+        ],
+        [
+          "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units",
+          "title",
+          "built as tests/prolog/suites/libraries/library_refusals.plt in commit a6fe346c7: twelve rows and one forall law, plus two not-inducible rows checked in the direction available and three anti-vacuity plants; the refusal-coverage lane went 14 to 0 and its selftest 5 to 9 cases, and the suite passes in the real engine/test.sh run of 440 units"
+        ],
+        [
+          "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took",
+          "sort",
+          "prop"
+        ],
+        [
+          "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took",
+          "supersedes",
+          "I have already been wrong once this session attributing an intermittent to my own change from a same-direction observation, and an ABA design refuted it; the pins are deterministic so one run per arm settles it"
+        ],
+        [
+          "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took",
+          "supports",
+          {
+            "node": "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took",
+          "tags",
+          "measured"
+        ],
+        [
+          "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took",
+          "title",
+          "no A/B over commits is possible for these rows: the pins were measured at 4c0533704 and the engine that ships is b694f3457, and git merge-base between them exits 1 because MeTTa-Kernel was a separate repository joined only as the absorb's second parent, so there is no line of commits to run A and B on. Attributed by mechanism instead in commit bdd8f6e28, which is the route the file's own constructor rows took"
+        ],
+        [
+          "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0",
+          "sort",
+          "prop"
+        ],
+        [
+          "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0",
+          "supersedes",
+          "two trees at once is what the repository already measured as invalid evidence, and a battery cannot hold a different revision because it has no .git; checking out each arm in turn in the real tree is the one shape that gives both arms the same artifacts and the same machine, and a trap returns the tree to its branch whatever happens"
+        ],
+        [
+          "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0",
+          "supports",
+          {
+            "node": "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0",
+          "tags",
+          "measured"
+        ],
+        [
+          "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0",
+          "title",
+          "same reason: the move is not inside a parent-child span. The two inference rows are re-pinned with their measured mechanism and engine-bench --counter-only exits 0 with all six cases at +0"
+        ],
+        [
+          "attribute the three pins by A/B: run engine-bench at 561cfeaa2^ and at HEAD, rather than reasoning from the shape of the delta",
+          "status",
+          "unwanted"
+        ],
+        [
+          "measure engine-bench at the fix commit and at its parent in the same tree, sequentially, rather than in two trees at once",
+          "status",
+          "unwanted"
+        ],
+        [
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "0b7dbbe6529e4a42"
+    },
+    {
+      "at": "2026-09-21T05:32:30.450979+00:00",
+      "after": "e9eb42fec92fd43a0f770f9e6e33a548020f9040",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py\", \"tags\": [\"measured\"], \"title\": \"the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would\", \"fields\": {}}]",
+      "parents": [
+        "0b7dbbe6529e4a42"
+      ],
+      "assert": [
+        [
+          "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would",
+          "sort",
+          "prop"
+        ],
+        [
+          "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would",
+          "title",
+          "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would"
+        ],
+        [
+          "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py",
+          "supports",
+          "the publication checker conflated unknown with false in the same function whose contract separates them: merge-base --is-ancestor fails when EITHER operand is missing and only the remote's head was checked, so a pin this checkout does not hold read as one the remote does not carry. Both operands are checked now and a planted absent pin turns all seven findings into unanswered ones, which is the branch firing rather than an argument that it would"
+        ],
+        [
+          "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py",
+          "tags",
+          "measured"
+        ],
+        [
+          "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py",
+          "title",
+          "the record named the conflation; reproduced it on 2026-09-21 by planting an absent sha through the checker's own git shim, then pinned it as case 3 of tests/checks/check_component_publication_selftest.py"
+        ]
+      ],
+      "id": "21c8d4bf57b328a5"
     }
   ]
 }

@@ -462,6 +462,7 @@ run REPORT refusal-coverage "$PY" "$HERE/tests/checks/check_refusal_coverage.py"
 # remote what its main is and reports a pin that main does not contain.
 # REPORT while the backlog is nonzero, a GATE once the pointers are pushed.
 run REPORT component-publication "$PY" "$HERE/tests/checks/check_component_publication.py"
+run GATE component-publication-selftest "$PY" "$HERE/tests/checks/check_component_publication_selftest.py"
 run GATE refusal-coverage-selftest "$PY" "$HERE/tests/checks/check_refusal_coverage_selftest.py"
 
 # A suite that loads engine/metta.pl reads the engine's COMPILED artifacts, and
