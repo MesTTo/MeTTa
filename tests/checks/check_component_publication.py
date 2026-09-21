@@ -12,7 +12,9 @@ Asking the REMOTE is the authoritative form, because a local
 remote-tracking ref is a memory and goes stale in the direction that matters:
 trusting it reported two unpublished pins where components.sh's own fetch
 found six, since this checkout's origin/main for `examples` contains a pin
-the remote's main does not [measured 2026-09-21].
+the remote's main does not [measured 2026-09-21]. It asks for EVERY head and
+tag, not just main, because `git clone` takes them all and a pin on any
+branch is therefore one a fresh clone resolves.
 
 But the gate is hermetic, and says so: "a gate that reaches the network fails
 for reasons that are not the tree" (tools/check.sh). Reaching out on every
@@ -112,25 +114,27 @@ def findings(root: Path = ROOT, prefix: str = "", *, remotes: bool | None = None
             out.append(f"{shown}: not a checkout here, so its pin {sha[:9]} cannot be checked")
             continue
         if not (REMOTES if remotes is None else remotes):
-            # Sound hermetically in one direction only: a pin on no
-            # remote-tracking branch cannot be on the remote either, since
-            # those refs only ever record what WAS fetched. The converse does
-            # not hold, so a pin that looks published is reported unconfirmed.
-            if not _git("branch", "-r", "--contains", sha, cwd=component):
-                out.append(f"{shown}: pin {sha[:9]} is on no remote-tracking branch of "
-                           f"{url}; a fresh clone cannot resolve it")
-            else:
-                out.append(f"{shown}: pin {sha[:9]} was not confirmed against {url} "
-                           f"(hermetic run; set METTA_CHECK_REMOTES=1 to ask it)")
+            # There is no sound NEGATIVE without the network, in either
+            # direction. A remote-tracking ref records only what was fetched,
+            # and components.sh fetches `origin main --no-tags`, so a pin
+            # absent from them may sit on a branch nobody fetched -- which a
+            # fresh clone WOULD bring, since a clone takes every head. So the
+            # hermetic run answers one thing: it did not look.
+            out.append(f"{shown}: pin {sha[:9]} was not confirmed against {url} "
+                       f"(hermetic run; set METTA_CHECK_REMOTES=1 to ask it)")
             if (component / ".gitmodules").is_file():
                 out.extend(findings(component, shown + "/", remotes=remotes))
             continue
-        advertised = _git("ls-remote", url, "refs/heads/main", cwd=component).split()
-        if not advertised:
-            out.append(f"{shown}: {url} advertises no refs/heads/main, or could not be "
+        # EVERY head the remote advertises, not just main: `git clone` takes
+        # them all, so a pin on any branch is one a fresh clone can resolve
+        # and calling it unresolvable because main lacks it is a closed-world
+        # error. Tags too, since a clone takes those by default as well.
+        listing = _git("ls-remote", "--heads", "--tags", url, cwd=component)
+        heads = [line.split()[0] for line in listing.splitlines() if line.split()]
+        if not heads:
+            out.append(f"{shown}: {url} advertises no refs, or could not be "
                        f"reached, so pin {sha[:9]} could not be checked")
             continue
-        head = advertised[0]
         # BOTH objects, not just the remote's. merge-base --is-ancestor fails
         # when either operand is missing, so checking only the head turned an
         # absent pin into "the remote does not contain it", which is a false
@@ -139,13 +143,17 @@ def findings(root: Path = ROOT, prefix: str = "", *, remotes: bool | None = None
             out.append(f"{shown}: this checkout does not hold pin {sha[:9]}, so whether "
                        f"{url}'s main contains it could not be checked")
             continue
-        if not _ok("cat-file", "-e", head, cwd=component):
-            out.append(f"{shown}: this checkout does not hold {url}'s main {head[:9]}, "
-                       f"so pin {sha[:9]} could not be checked against it")
+        held = [h for h in heads if _ok("cat-file", "-e", h, cwd=component)]
+        if not held:
+            out.append(f"{shown}: this checkout holds none of {url}'s {len(heads)} "
+                       f"advertised refs, so pin {sha[:9]} could not be checked")
             continue
-        if not _ok("merge-base", "--is-ancestor", sha, head, cwd=component):
-            out.append(f"{shown}: pin {sha[:9]} is not in {url}'s main, which is "
-                       f"{head[:9]}; a fresh clone cannot resolve it")
+        if not any(_ok("merge-base", "--is-ancestor", sha, h, cwd=component) for h in held):
+            missing = len(heads) - len(held)
+            unseen = f", and {missing} it does not hold" if missing else ""
+            out.append(f"{shown}: pin {sha[:9]} is in none of the {len(held)} refs "
+                       f"{url} advertises that this checkout holds{unseen}; "
+                       f"a fresh clone cannot resolve it")
         if (component / ".gitmodules").is_file():
             out.extend(findings(component, shown + "/", remotes=remotes))
     return out

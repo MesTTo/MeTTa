@@ -16547,6 +16547,42 @@
       "tags": [
         "source"
       ]
+    },
+    "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself": {
+      "title": "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself"
+    },
+    "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch": {
+      "title": "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch",
+      "supports": [
+        "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable": {
+      "title": "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable"
+    },
+    "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6": {
+      "title": "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6",
+      "supports": [
+        "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice": {
+      "title": "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice"
+    },
+    "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints": {
+      "title": "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints",
+      "supports": [
+        "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -71476,6 +71512,118 @@
         ]
       ],
       "id": "434f38c8b8b20b19"
+    },
+    {
+      "at": "2026-09-21T05:35:55.359798+00:00",
+      "after": "09c5c92e8238f85b67fdcf8e06817116d675ae7c",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch\", \"tags\": [\"source\"], \"title\": \"when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself\", \"fields\": {}}]",
+      "parents": [
+        "434f38c8b8b20b19"
+      ],
+      "assert": [
+        [
+          "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch",
+          "supports",
+          "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself"
+        ],
+        [
+          "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch",
+          "tags",
+          "source"
+        ],
+        [
+          "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch",
+          "title",
+          "the record named the collision; engine/bench.py:159-174 shows the bare-swipl launch"
+        ],
+        [
+          "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself",
+          "sort",
+          "prop"
+        ],
+        [
+          "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself",
+          "title",
+          "when the stamp can take a host key, version plus home is the WRONG identity: an in-place rebuild replaces the executable while preserving both, and engine/bench.py launches the bare swipl from PATH, so two different binaries would stamp alike. The fingerprint has to be of the artifact, a digest of the resolved swipl and of libswipl, taken from the executable the run actually launches rather than from flags it reports about itself"
+        ]
+      ],
+      "id": "53df439004093211"
+    },
+    {
+      "at": "2026-09-21T05:37:07.478738+00:00",
+      "after": "09c5c92e8238f85b67fdcf8e06817116d675ae7c",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6\", \"tags\": [\"measured\"], \"title\": \"the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints\", \"tags\": [\"measured\"], \"title\": \"removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice\", \"fields\": {}}]",
+      "parents": [
+        "53df439004093211"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6",
+          "supports",
+          "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable"
+        ],
+        [
+          "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6",
+          "title",
+          "measured 2026-09-21 by planting a pin on a side branch: with ancestry tested against main alone the selftest goes 5 of 6 and names the false unresolvable, and against every advertised head and tag it goes 6 of 6"
+        ],
+        [
+          "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints",
+          "supports",
+          "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice"
+        ],
+        [
+          "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints",
+          "title",
+          "ran both modes on 2026-09-21 and compared the declared count against the UNPUBLISHED lines components.sh prints"
+        ],
+        [
+          "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice",
+          "sort",
+          "prop"
+        ],
+        [
+          "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice",
+          "title",
+          "removing that error leaves the hermetic mode with NO sound negative, which is the honest shape rather than a loss: without the network it can only say it did not look, and it now reports 0 unresolvable with 9 unconfirmed where it used to claim 3. The declared mode's 6 independently matches components.sh's own fetch, which is a cross-check from a different mechanism rather than the same reasoning twice"
+        ],
+        [
+          "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable",
+          "sort",
+          "prop"
+        ],
+        [
+          "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable",
+          "title",
+          "the publication check had a closed-world error in BOTH modes and the record found it twice over: a remote-tracking ref records only what was fetched and components.sh fetches origin main --no-tags, while the authoritative mode tested ancestry against refs/heads/main alone. A git clone takes every head, so a pin on any other branch is resolvable by a fresh clone and both modes called it unresolvable"
+        ]
+      ],
+      "id": "eef5584a541a3fdd"
     }
   ]
 }

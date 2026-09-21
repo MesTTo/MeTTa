@@ -90,7 +90,11 @@ def cases() -> list[tuple[str, str, int, int]]:
     two counts the summary must report."""
     return [
         ("a pin the remote's main contains is not reported", "", 0, 0),
-        ("a pin the remote's main lacks is unresolvable", "is not in", 1, 0),
+        ("a pin the remote's main lacks is unresolvable", "is in none of", 1, 0),
+        # The closed-world fix: a clone takes EVERY head, so a pin on a branch
+        # that is not main is one a fresh clone resolves and must not be
+        # reported. Testing ancestry against main alone called it unresolvable.
+        ("a pin on a non-main remote branch is resolvable", "", 0, 0),
         ("a pin this checkout does not hold is unasked", "does not hold pin", 0, 1),
         ("a remote that cannot be reached is unasked", "could not be", 0, 1),
     ]
@@ -122,6 +126,12 @@ def main() -> int:
         elif what.startswith("a pin the remote's main lacks"):
             # A commit that exists only in the clone, which is the real case.
             pin = _commit(clone, "local-only")
+        elif what.startswith("a pin on a non-main remote branch"):
+            # Published, but on `side` rather than on main.
+            _git("checkout", "--quiet", "-b", "side", cwd=upstream)
+            pin = _commit(upstream, "on-a-side-branch")
+            _git("checkout", "--quiet", "main", cwd=upstream)
+            _git("fetch", "--quiet", "origin", cwd=clone)
         elif what.startswith("a pin this checkout does not hold"):
             # Not all zeros: that is git's NULL sha and update-index refuses
             # it outright ("cache entry has null sha1"), so the plant would
