@@ -15364,6 +15364,62 @@
       "tags": [
         "measured"
       ]
+    },
+    "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883": {
+      "title": "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883"
+    },
+    "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats": {
+      "title": "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats",
+      "supports": [
+        "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all": {
+      "title": "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done": {
+      "title": "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done",
+      "supports": [
+        "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+        {
+          "node": "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times": {
+      "title": "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times"
+    },
+    "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it": {
+      "title": "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it",
+      "supports": [
+        "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported": {
+      "title": "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported"
+    },
+    "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean": {
+      "title": "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean",
+      "supports": [
+        "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -66906,6 +66962,151 @@
         ]
       ],
       "id": "c3f5b4018f3cec9d"
+    },
+    {
+      "at": "2026-09-21T03:24:53.140496+00:00",
+      "after": "5b62ec6676e14fc3bed542b5d1accdd5b9dd7604",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats\", \"tags\": [\"measured\"], \"title\": \"the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done\", \"tags\": [\"measured\"], \"title\": \"the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read git status and git diff --stat in that worktree on 2026-09-21 without modifying it\", \"tags\": [\"measured\"], \"title\": \"that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ran git apply --check and --check --3way on 2026-09-21; both trees were left clean\", \"tags\": [\"measured\"], \"title\": \"porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported\", \"fields\": {}}]",
+      "parents": [
+        "c3f5b4018f3cec9d"
+      ],
+      "assert": [
+        [
+          "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported",
+          "sort",
+          "prop"
+        ],
+        [
+          "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported",
+          "title",
+          "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported"
+        ],
+        [
+          "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean",
+          "supports",
+          "porting it is a real merge rather than a copy: wt-battery-4's submodule base is 50 commits behind ours, a plain git apply fails on all three files, and git apply --3way reports conflicts in both _analysis.py and _order.py; _orders.py is the generated verdict table and should be regenerated rather than ported"
+        ],
+        [
+          "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean",
+          "title",
+          "ran git apply --check and --check --3way on 2026-09-21; both trees were left clean"
+        ],
+        [
+          "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats",
+          "supports",
+          "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883"
+        ],
+        [
+          "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats",
+          "title",
+          "ran python -m cProfile over the single expensive test on 2026-09-21 and read tottime and cumtime from the pstats"
+        ],
+        [
+          "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it",
+          "sort",
+          "prop"
+        ],
+        [
+          "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it",
+          "supports",
+          "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times"
+        ],
+        [
+          "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it",
+          "tags",
+          "measured"
+        ],
+        [
+          "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it",
+          "title",
+          "read git status and git diff --stat in that worktree on 2026-09-21 without modifying it"
+        ],
+        [
+          "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done",
+          "supports",
+          "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all"
+        ],
+        [
+          "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done",
+          "supports",
+          {
+            "node": "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done",
+          "title",
+          "read the signature at _analysis.py:1178 and searched the submodule's whole history with git log -S; the journal at docs/journal/2026-09-19-what-made-the-door-analysis-slow.md describes both as done"
+        ],
+        [
+          "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times",
+          "sort",
+          "prop"
+        ],
+        [
+          "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times",
+          "title",
+          "that work exists as UNCOMMITTED changes in the battery worktree ai-tmp/wt-battery-4: its extensions/python carries modified _analysis.py, _order.py and _orders.py, 331 insertions and 140 deletions over five files, and _container_operation appears in it ten times"
+        ],
+        [
+          "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all",
+          "title",
+          "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all"
+        ],
+        [
+          "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883",
+          "sort",
+          "prop"
+        ],
+        [
+          "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883",
+          "title",
+          "the profile of the released analyser answers step 1 of the journal's own plan for the remaining time: _container_call carries 280.3s cumulative of a 478s profile at 23,505,241 calls, against the 10,081,913 the journal measured after its first round, with _put at 66,963,438 against 29,096,618 and _attribute at 1,102,480 against 583,883"
+        ]
+      ],
+      "id": "b774c36289c92223"
     }
   ]
 }
