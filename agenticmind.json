@@ -16345,6 +16345,33 @@
       "supports": [
         "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer"
       ]
+    },
+    "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth": {
+      "title": "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth"
+    },
+    "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'": {
+      "title": "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'",
+      "supports": [
+        "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them": {
+      "title": "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh": {
+      "title": "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh",
+      "supports": [
+        "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -70743,6 +70770,82 @@
         ]
       ],
       "id": "1db8add4fec0f46d"
+    },
+    {
+      "at": "2026-09-21T05:28:23.620983+00:00",
+      "after": "92b67aebb3d123feee739e4ee20f48692954a820",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'\", \"tags\": [\"measured\"], \"title\": \"the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them\", \"fields\": {}}]",
+      "parents": [
+        "1db8add4fec0f46d"
+      ],
+      "assert": [
+        [
+          "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'",
+          "supports",
+          "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth"
+        ],
+        [
+          "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'",
+          "title",
+          "ran sh tests/shell/test_worktree_configuration.sh to status 0 on 2026-09-21, printing 'ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own'"
+        ],
+        [
+          "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh",
+          "supports",
+          "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them"
+        ],
+        [
+          "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh",
+          "tags",
+          "measured"
+        ],
+        [
+          "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh",
+          "title",
+          "read both call sites on 2026-09-21 after the failure printed the parent directory's path, $probe/tools/bounded.sh"
+        ],
+        [
+          "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them",
+          "sort",
+          "prop"
+        ],
+        [
+          "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them",
+          "title",
+          "the last of those three is the same defect the test's own comment records fixing: the script derives its checkout from dirname($0)/.., so invoked at the worktree ROOT it resolves to the directory HOLDING the worktree. The comment at lines 60-68 describes exactly this and line 69 duly calls components.sh at $tree/tools/, while line 101 kept calling worktree.sh at $tree/. One rule, two sites, fixed at one of them"
+        ],
+        [
+          "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth",
+          "title",
+          "the worktree GATE lane now passes, and it needed three independent repairs rather than one: components.sh supplying an unpushed pin from a sibling worktree, components.sh scoping its modified-files guard to files that predate the run plus checking update-ref, and the test invoking worktree.sh at its own depth"
+        ]
+      ],
+      "id": "c83abdee5f70f14a"
     }
   ]
 }

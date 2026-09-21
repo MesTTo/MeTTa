@@ -97,8 +97,15 @@ if [ "$before" != absent ]; then
     exit 1
 fi
 
-cp "$project_dir/tools/worktree.sh" "$tree/worktree.sh"
-bounded sh "$tree/worktree.sh" >/dev/null
+# At its own depth, for the reason the components.sh call above states: the
+# script derives the checkout from `$(dirname $0)/..`, so run from the
+# worktree ROOT that is the temporary directory HOLDING the worktree, and it
+# provisions that instead. The comment above records this defect being fixed
+# for components.sh; the identical call here kept it
+# [measured 2026-09-21: `cannot open $probe/tools/bounded.sh`, the parent of
+# the worktree, then "the components could not be checked out"].
+cp "$project_dir/tools/worktree.sh" "$tree/tools/worktree.sh"
+bounded sh "$tree/tools/worktree.sh" >/dev/null
 
 after=$(probe_backend "$tree")
 if [ "$after" != loaded ]; then
