@@ -685,6 +685,25 @@ UNMEASURABLE = {
 }
 
 
+#: The statuses that mean "this run could not measure it", as against a status
+#: that reports a measurement whose VALUE is a finding. `below-floor` and
+#: `negative-net` are the second kind and are recorded: they say the row was
+#: measured and the answer is wrong. These say nothing about the row at all,
+#: so a baseline that overwrites a good measurement with one of them has lost
+#: information rather than recorded any.
+_UNMEASURED = ("nondeterministic", "unstable", "below-floor", "unmeasurable-null", "timeout")
+
+
+def _carry(previous: dict, name: str, status: str, detail: str, side: str) -> dict:
+    """Keep the committed measurement when this run could not take a new one."""
+    kept = previous.get(name, {})
+    if kept.get("status") == "measured":
+        print(f"  {name}: {side}{status}, carried the committed measurement forward")
+        return {**kept, "carried": f"{side}{status}"}
+    print(f"  {name}: {side}{status}, excluded ({detail})")
+    return {"status": f"{side}{status}", "detail": detail}
+
+
 def build_baseline() -> dict:
     """Measure both engines over the whole corpus and answer a fresh baseline.
 
@@ -726,18 +745,16 @@ def build_baseline() -> dict:
             print(f"  {name}: UPSTREAM NET BELOW ITS OWN NULL CONTROL")
             continue
         if upstream["status"] != "ok":
-            entries[name] = {"status": f"upstream-{upstream['status']}",
-                             "detail": upstream.get("detail", "")}
+            entries[name] = (
+                _carry(previous, name, upstream["status"], upstream.get("detail", ""), "upstream-")
+                if upstream["status"] in _UNMEASURED
+                else {"status": f"upstream-{upstream['status']}",
+                      "detail": upstream.get("detail", "")}
+            )
             continue
         ours = measure(REPO, example)
-        if ours["status"] in ("nondeterministic", "unstable", "below-floor", "unmeasurable-null"):
-            kept = previous.get(name, {})
-            if kept.get("status") == "measured":
-                entries[name] = {**kept, "carried": ours["status"]}
-                print(f"  {name}: {ours['status']}, carried the committed measurement forward")
-            else:
-                entries[name] = {"status": ours["status"], "detail": ours.get("detail", "")}
-                print(f"  {name}: {ours['status']}, excluded ({ours.get('detail', '')})")
+        if ours["status"] in _UNMEASURED:
+            entries[name] = _carry(previous, name, ours["status"], ours.get("detail", ""), "")
             continue
         if ours["status"] == "negative-net":
             entries[name] = {
