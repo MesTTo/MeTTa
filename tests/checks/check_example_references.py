@@ -11,6 +11,7 @@ Assumes: a reference is a path ending in .py or .metta under an examples
     directory, written in prose, a fence, or a link.
 Guarantees:
   - every such reference outside the frozen history resolves to a file
+    [tested: tests/checks/check_example_references_selftest.py; commit=WORKTREE]
 Fails when: the reader wants the journal checked too; dated journal entries
     describe the tree as it stood and a path that has since moved is correct
     history rather than a broken link, so they are excluded by directory.

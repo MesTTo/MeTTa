@@ -19376,6 +19376,160 @@
       "tags": [
         "source"
       ]
+    },
+    "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short": {
+      "title": "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+    },
+    "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names": {
+      "title": "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names",
+      "supports": [
+        "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all": {
+      "title": "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all"
+    },
+    "the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository": {
+      "title": "the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository",
+      "supports": [
+        "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all"
+      ]
+    },
+    "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout": {
+      "title": "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+    },
+    "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift": {
+      "title": "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift",
+      "supports": [
+        "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone": {
+      "title": "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone",
+      "supports": [
+        {
+          "node": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "status": "untried"
+        },
+        {
+          "node": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "relation": "addresses",
+          "target": "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+        }
+      ]
+    },
+    "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped": {
+      "title": "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped",
+      "supports": [
+        {
+          "node": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken": {
+      "title": "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken"
+    },
+    "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write": {
+      "title": "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write",
+      "supports": [
+        "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims": {
+      "title": "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims"
+    },
+    "measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself": {
+      "title": "measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself",
+      "supports": [
+        "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims"
+      ]
+    },
+    "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused": {
+      "title": "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused"
+    },
+    "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages": {
+      "title": "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages",
+      "supports": [
+        "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess": {
+      "title": "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess",
+      "supports": [
+        {
+          "node": "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "status": "untried"
+        },
+        {
+          "node": "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "relation": "addresses",
+          "target": "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+        }
+      ]
+    },
+    "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them": {
+      "title": "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them"
+    },
+    "measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log": {
+      "title": "measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log",
+      "supports": [
+        "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them"
+      ]
+    },
+    "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes": {
+      "title": "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes"
+    },
+    "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false": {
+      "title": "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false",
+      "supports": [
+        "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value": {
+      "title": "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value"
+    },
+    "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341": {
+      "title": "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341",
+      "supports": [
+        "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena": {
+      "title": "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena"
+    },
+    "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here": {
+      "title": "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here",
+      "supports": [
+        "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -21611,6 +21765,22 @@
       "status": "untried",
       "addresses": [
         "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+      ]
+    },
+    "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks": {
+      "title": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+      ]
+    },
+    "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane": {
+      "title": "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
       ]
     }
   },
@@ -82943,6 +83113,445 @@
         ]
       ],
       "id": "b239e06784fde03a"
+    },
+    {
+      "at": "2026-09-21T18:17:55.002982+00:00",
+      "after": "7d86eb64aff22d056c6cfada7d3ff33ad739b049",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names\", \"tags\": [\"measured\"], \"title\": \"the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository\", \"tags\": [], \"title\": \"that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift\", \"tags\": [\"measured\"], \"title\": \"example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone\", \"tags\": [], \"title\": \"derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks\", \"fields\": {\"effort\": 1, \"addresses\": [\"example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout\"]}}, {\"op\": \"status\", \"id\": \"derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks\", \"because\": \"the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write\", \"tags\": [\"measured\"], \"title\": \"the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself\", \"tags\": [], \"title\": \"a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims\", \"fields\": {}}]",
+      "parents": [
+        "b239e06784fde03a"
+      ],
+      "assert": [
+        [
+          "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims",
+          "sort",
+          "prop"
+        ],
+        [
+          "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims",
+          "title",
+          "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims"
+        ],
+        [
+          "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout",
+          "sort",
+          "prop"
+        ],
+        [
+          "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout",
+          "title",
+          "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+        ],
+        [
+          "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write",
+          "supports",
+          "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken"
+        ],
+        [
+          "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write",
+          "title",
+          "measured 2026-09-22 by counting ORIGINS.tsv rows and examples/**/*.metta, then running the tool with --write"
+        ],
+        [
+          "measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself",
+          "supports",
+          "a tracked checker is scanned by itself: check_example_references.py passed when first run only because the file was still untracked and git ls-files could not see it, and reported two findings in its own explanatory comment once committed. Its prose now carries the two fixture names without their directory, which is what made them read as claims"
+        ],
+        [
+          "measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself",
+          "title",
+          "measured 2026-09-22: 0 findings before the commit, 2 after, both naming lines of the checker itself"
+        ],
+        [
+          "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names",
+          "supports",
+          "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+        ],
+        [
+          "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names",
+          "title",
+          "measured 2026-09-22: pytest --collect-only -q answers 8129, tests/repository alone 1579, and gate-ship3's pytest summary line accounts for 4761; the three tests/repository failures I found in a bare run are mentioned nowhere in either complete gate log except a ledger audit listing test names"
+        ],
+        [
+          "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift",
+          "supports",
+          "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+        ],
+        [
+          "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift",
+          "title",
+          "measured 2026-09-22: the lane printed 'no upstream checkout; set METTA_UPSTREAM' and exited 0 here, and with METTA_UPSTREAM pointing at PeTTa-base, which sits at 43705f5d9, it immediately found the drift"
+        ],
+        [
+          "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all",
+          "title",
+          "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all"
+        ],
+        [
+          "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken",
+          "sort",
+          "prop"
+        ],
+        [
+          "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken",
+          "title",
+          "the examples README had drifted 21 programs: it said '143 of the 365' and 'The other 242', which do not even sum, against a corpus of 386 with 143 derived and 243 written here. This is the third recorded occurrence of a count in that file going stale, the record already holding the 359-to-360 one, but it does NOT need a new derivation: example_origins.py already computes all three and already refuses when they drift. Only its upstream search was broken"
+        ],
+        [
+          "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short",
+          "title",
+          "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+        ],
+        [
+          "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped",
+          "supersedes",
+          "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone"
+        ],
+        [
+          "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped",
+          "supports",
+          {
+            "node": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+            "status": "done"
+          }
+        ],
+        [
+          "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped",
+          "tags",
+          "measured"
+        ],
+        [
+          "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped",
+          "title",
+          "the lane now answers '143 derived, 243 original' in this worktree with no environment variable set, where it previously skipped"
+        ],
+        [
+          "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone",
+          "supports",
+          {
+            "node": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+            "status": "untried"
+          }
+        ],
+        [
+          "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone",
+          "supports",
+          {
+            "node": "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+            "relation": "addresses",
+            "target": "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+          }
+        ],
+        [
+          "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone",
+          "title",
+          "the same principle metta/_roots.py states, that a location derived from the wrong anchor is silent when it is wrong; check_jupyter_kernel.py and check_upstream_parity.py have the same SHAPE but look for a differently named sibling, PeTTa-upstream, so they are not evidence of the same defect and were left alone"
+        ],
+        [
+          "the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository",
+          "sort",
+          "prop"
+        ],
+        [
+          "the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository",
+          "supports",
+          "that reframes the recorded baseline: 'pytest is a known red with three failures' was really 'pytest dies partway and nothing is learned about 3368 tests'. My bare runs were not wrong to disagree with the gate, they were the first time those tests ran at all"
+        ],
+        [
+          "the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository",
+          "title",
+          "the three that failed bare, test_the_ruff_configuration_enables_every_family_or_records_why_not, test_the_examples_readme_states_the_split and test_no_tracked_file_cites_an_absolute_workspace_path, are all in tests/repository"
+        ],
+        [
+          "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "sort",
+          "approach"
+        ],
+        [
+          "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "addresses",
+          "example_origins.py looked for the upstream checkout beside REPO, and a worktree's parent is not the checkout's parent: from ai-tmp/wt-merge, REPO.parent is .../PeTTa/ai-tmp while the sibling is two levels above it. Every gate runs in a worktree, so the lane answered 'no upstream checkout' and exited 0 in exactly the runs that matter, and checked only when somebody ran it by hand in the main checkout"
+        ],
+        [
+          "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "effort",
+          1
+        ],
+        [
+          "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "status",
+          "done"
+        ],
+        [
+          "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks",
+          "title",
+          "derive the sibling's home from --git-common-dir, which names the MAIN .git whatever tree asks"
+        ]
+      ],
+      "id": "dde641143ed5ecc3"
+    },
+    {
+      "at": "2026-09-21T18:21:20.072410+00:00",
+      "after": "7d86eb64aff22d056c6cfada7d3ff33ad739b049",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages\", \"tags\": [\"source\"], \"title\": \"--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess\", \"tags\": [], \"title\": \"set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane\", \"fields\": {\"effort\": 1, \"addresses\": [\"the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log\", \"tags\": [], \"title\": \"landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false\", \"tags\": [\"measured\"], \"title\": \"test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341\", \"tags\": [\"source\"], \"title\": \"the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here\", \"tags\": [\"measured\"], \"title\": \"the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena\", \"fields\": {}}]",
+      "parents": [
+        "dde641143ed5ecc3"
+      ],
+      "assert": [
+        [
+          "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused",
+          "sort",
+          "prop"
+        ],
+        [
+          "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused",
+          "title",
+          "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused"
+        ],
+        [
+          "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them",
+          "sort",
+          "prop"
+        ],
+        [
+          "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them",
+          "title",
+          "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them"
+        ],
+        [
+          "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false",
+          "supports",
+          "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes"
+        ],
+        [
+          "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false",
+          "title",
+          "measured 2026-09-22 across 1c8dde7ea and HEAD; the record's claims name the machine they were measured on, as in 'measured 2026-09-20: /home/user/Dev/swipl-patched/lib/swipl holds neither...', and respelling those repo-relative would make them false"
+        ],
+        [
+          "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here",
+          "supports",
+          "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena"
+        ],
+        [
+          "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here",
+          "title",
+          "measured 2026-09-22: 32 cores, MemTotal 61915MB, MemAvailable 27748MB; the arena is PathMap's, set by the crate's features rather than by anything in this repository, so it cannot be shrunk here"
+        ],
+        [
+          "measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log",
+          "supports",
+          "landing the restart budget will make the pytest lane RED with more failures than before, and that is the point rather than a regression: the ~3368 tests it has never reached include at least three real failures I found by running them bare, so the lane's current 'known red with two failures' has been hiding them"
+        ],
+        [
+          "measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log",
+          "title",
+          "measured 2026-09-22: a bare run of tests/repository alone gave 3 failed, 1573 passed, and none of the three appears in either complete gate log"
+        ],
+        [
+          "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess",
+          "sort",
+          "prop"
+        ],
+        [
+          "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess",
+          "supports",
+          {
+            "node": "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+            "status": "untried"
+          }
+        ],
+        [
+          "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess",
+          "supports",
+          {
+            "node": "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+            "relation": "addresses",
+            "target": "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+          }
+        ],
+        [
+          "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess",
+          "title",
+          "one crash per worker is an isolated fault and the suite is still worth finishing; more than that is systematic and stopping is the honest answer. The budget is the worker count because that is what makes it self-documenting rather than a guess"
+        ],
+        [
+          "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341",
+          "supports",
+          "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value"
+        ],
+        [
+          "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341",
+          "title",
+          "read extensions/python/test.sh:36-42 and extensions/python/tests/ch01_getting_started/test_packaging.py:311-341"
+        ],
+        [
+          "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages",
+          "sort",
+          "prop"
+        ],
+        [
+          "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages",
+          "supports",
+          "--max-worker-restart=0 does not prevent a retry, and the comment defending it conflates two things xdist keeps apart: handle_crashitem builds the crashed test's report with outcome='failed' BEFORE the restart decision, so the test fails either way and nothing is run twice; what 0 additionally does is triggershutdown(), so the queue the crashed worker had not reached is never served. --reruns, which would actually retry, is separately refused and stays refused"
+        ],
+        [
+          "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages",
+          "tags",
+          "source"
+        ],
+        [
+          "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages",
+          "title",
+          "read xdist 3.8.0 dsession.py:248-266 and handle_crashitem at 432-446 in site-packages"
+        ],
+        [
+          "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes",
+          "sort",
+          "prop"
+        ],
+        [
+          "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes",
+          "title",
+          "test_no_tracked_file_cites_an_absolute_workspace_path fails on agenticmind.json, which this repository deliberately tracks: .gitignore ignores .agenticmind/ with a comment saying the record itself is agenticmind.json. 154 lines cite an absolute home path, 136 of them predating this session. The test has never run in a gate because of the pytest truncation, so this is a latent failure that fixing the coverage gap exposes"
+        ],
+        [
+          "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value",
+          "title",
+          "the worker COUNT cannot move on my authority the way the restart budget can: test.sh calls 4 'the fixed load-tested ceiling' and test_packaging.py pins it, so 4 carries evidence that 6 does not. Replacing a load-tested setting with an untested one to claim a speed win is the compromise, not the fix; it needs the load protocol run at the new value"
+        ],
+        [
+          "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena",
+          "title",
+          "the worker-count formula the user approved is unsafe with the constant I gave it: min(cores, MemAvailable/320MB) answers 32 on this box, and 320MB came from measuring test_space.py, which never loads the mork seat. bounded.sh states the real declared demand, SWI's 8g stack limit plus the MORK backend's 4 GiB arena. Dividing by the largest DECLARED demand instead gives 6, safe even if every worker takes an arena"
+        ],
+        [
+          "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "sort",
+          "approach"
+        ],
+        [
+          "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "addresses",
+          "the gate's pytest lane reports on 59 per cent of the suite: collection is 8129 tests and the lane's own summary is 2 failed, 4679 passed, 80 skipped, which is 4761. The ~3368 it never reaches include every test in tests/repository. The cause is in its own flags: --max-worker-restart=0 never replaces a crashed worker, and the recorded baseline red test_mork_space.py::test_mm2_exec_transforms_inside_mork SIGABRTs its worker, so the lane loses a quarter of its parallelism mid-run and stops short"
+        ],
+        [
+          "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "effort",
+          1
+        ],
+        [
+          "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "status",
+          "untried"
+        ],
+        [
+          "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane",
+          "title",
+          "set the restart budget to the worker count rather than zero, so a crashed worker is replaced and the suite finishes while the crash still fails the lane"
+        ]
+      ],
+      "id": "a0cd5573231da2bd"
     }
   ]
 }
