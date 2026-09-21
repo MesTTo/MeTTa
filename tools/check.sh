@@ -441,6 +441,20 @@ run GATE policy-inventory-selftest "$PY" "$HERE/tests/checks/check_policy_invent
 run GATE refusal-grounds "$PY" "$HERE/tests/checks/check_refusal_grounds.py"
 run GATE refusal-grounds-selftest "$PY" "$HERE/tests/checks/check_refusal_grounds_selftest.py"
 
+# Those two ask whether a refusal is GROUNDED. This one asks whether it exists
+# at all, which is the other half and the half nothing was checking: which
+# effectful heads a library suite exercises and which it ever refuses are two
+# sets, and their difference is invisible while the tests are read one at a
+# time, because a missing refusal looks exactly like a test nobody wrote.
+# Printed as a table it is one line per empty cell. The table found a real
+# defect the day it was written: lib_csv_surface exercised csv-read! nine
+# times, csv-space four and csv-append! eight while refusing none, and writing
+# the missing ones showed csv-space accepting a DIRECTORY, because its path
+# probe opened the source with a goal of `true` and POSIX open(2) on a
+# directory succeeds. REPORT while the twenty open cells burn down.
+run REPORT refusal-coverage "$PY" "$HERE/tests/checks/check_refusal_coverage.py"
+run GATE refusal-coverage-selftest "$PY" "$HERE/tests/checks/check_refusal_coverage_selftest.py"
+
 # A suite that loads engine/metta.pl reads the engine's COMPILED artifacts, and
 # SWI's staleness check covers a .qlf's immediate source only. The engine's
 # units are consulted by umbrellas, so engine/spaces/foreign.pl compiles into
