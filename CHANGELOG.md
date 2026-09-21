@@ -7,6 +7,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The engine benchmark's `evaluate` and `translate` inference pins are re-pinned to
+  the tree that ships, with the mechanism measured rather than asserted: the
+  submodule mount replaced the engine tree the pins were taken on, and the diff
+  between the two trees lands on the translator, the specializer and the interop
+  and control modules those two cases exercise. No commit ladder is possible
+  between the pin and the tree because the two histories have no common ancestor,
+  which the comment states. The `constructor-sorted` instruction pin is left
+  as it was, because a perf counter needs an idle machine and an inference count
+  does not.
+
 ### Added
 
 - Every refusal the shipped libraries document is now witnessed by a test that
