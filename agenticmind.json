@@ -15420,6 +15420,54 @@
       "tags": [
         "measured"
       ]
+    },
+    "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7": {
+      "title": "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7",
+      "attacks": [
+        "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one": {
+      "title": "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one"
+    },
+    "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards": {
+      "title": "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards",
+      "supports": [
+        "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before": {
+      "title": "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before"
+    },
+    "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21": {
+      "title": "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21",
+      "supports": [
+        "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'": {
+      "title": "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'",
+      "tags": [
+        "meta-reasoning"
+      ]
+    },
+    "read the journal's own A/B and re-read my comparison against it": {
+      "title": "read the journal's own A/B and re-read my comparison against it",
+      "supports": [
+        "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -67107,6 +67155,143 @@
         ]
       ],
       "id": "b774c36289c92223"
+    },
+    {
+      "at": "2026-09-21T03:31:22.514124+00:00",
+      "after": "a841ad2f9a26b06391712a37f2705aeb336ebb9b",
+      "did": "[{\"op\": \"attack\", \"id\": \"the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all\", \"because\": \"the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7\", \"tags\": [\"source\"]}]",
+      "parents": [
+        "b774c36289c92223"
+      ],
+      "assert": [
+        [
+          "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7",
+          "sort",
+          "prop"
+        ],
+        [
+          "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7",
+          "attacks",
+          "the journal's second round of the door-analysis optimisation is not in the tree: _container_call still takes one Reference rather than the whole set of receivers, and _container_operation, which the journal says the per-container slot work moved to, does not exist in extensions/python's history at all"
+        ],
+        [
+          "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7",
+          "tags",
+          "source"
+        ],
+        [
+          "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7",
+          "title",
+          "the same journal measures container batching at 2.121e12 retired instructions against 1.996e12 for the committed analyser, a 6.3 per cent LOSS, and says 'the reverts stand'; the wt-battery-4 working tree holds work that was deliberately abandoned, not work that was lost, and the win of that round, refinement accumulation at 0.909x, IS an ancestor of HEAD as f6cbaded7"
+        ]
+      ],
+      "id": "8e5f64f900d0537b"
+    },
+    {
+      "at": "2026-09-21T03:43:39.996481+00:00",
+      "after": "a841ad2f9a26b06391712a37f2705aeb336ebb9b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards\", \"tags\": [\"measured\"], \"title\": \"the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"perf stat -e instructions:u,cycles:u around the single test on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the journal's own A/B and re-read my comparison against it\", \"tags\": [\"measured\", \"meta-reasoning\"], \"title\": \"my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'\", \"fields\": {}}]",
+      "parents": [
+        "8e5f64f900d0537b"
+      ],
+      "assert": [
+        [
+          "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'",
+          "sort",
+          "prop"
+        ],
+        [
+          "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'",
+          "tags",
+          "meta-reasoning"
+        ],
+        [
+          "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'",
+          "title",
+          "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'"
+        ],
+        [
+          "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21",
+          "supports",
+          "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before"
+        ],
+        [
+          "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21",
+          "title",
+          "perf stat -e instructions:u,cycles:u around the single test on 2026-09-21"
+        ],
+        [
+          "read the journal's own A/B and re-read my comparison against it",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the journal's own A/B and re-read my comparison against it",
+          "supports",
+          "my 9.2x regression framing aimed at the wrong subsystem: it compared a wall clock against the journal's wall clock, and that same journal shows four sequential runs of one unchanged analyser reading 116.3, 123.6, 132.1 and 157.3 seconds, a 35 per cent monotone drift, with the sentence 'nothing about any code is established by those numbers'"
+        ],
+        [
+          "read the journal's own A/B and re-read my comparison against it",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the journal's own A/B and re-read my comparison against it",
+          "title",
+          "read the journal's own A/B and re-read my comparison against it"
+        ],
+        [
+          "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards",
+          "supports",
+          "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one"
+        ],
+        [
+          "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards",
+          "title",
+          "read the test body and ran three separate entry probes on 2026-09-21, each restored afterwards"
+        ],
+        [
+          "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before",
+          "sort",
+          "prop"
+        ],
+        [
+          "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before",
+          "title",
+          "the deterministic cost of that test on this tree is 3.742e12 retired instructions and 1.232e12 cycles over 221.11 seconds, which is the counter this repository's measurement rule asks for and which no baseline existed for before"
+        ],
+        [
+          "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one",
+          "title",
+          "the expensive door test does not reach _order.live at all: an unambiguous print at live()'s first statement produced no output across a 223-second run, and neither did probes inside _core and around graph.extended; what it calls is doorfaces.synchronous((*core_rows(), row), ROOT) at test_door_rows.py:309, which generates the face declarations for every core row plus the registered one"
+        ]
+      ],
+      "id": "647a207835c4202c"
     }
   ]
 }
