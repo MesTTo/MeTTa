@@ -18889,6 +18889,242 @@
       "tags": [
         "source"
       ]
+    },
+    "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged": {
+      "title": "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged",
+      "supports": [
+        {
+          "node": "add a rootless import sweep to tests/shell/test_packaged_cli.sh: every module the package ships, imported from the install, with METTA_WORKSPACE, METTA_PATH and METTA_ROOT cleared and metta/_runtime skipped as a data payload carrying no __init__.py",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the three value assertions in that file and the four in the CI wheel job all passed while 37 modules were dead, because 'import metta' succeeding says nothing about the other 184; the sweep is the generative form and covers a module added later without editing anything. Clearing the three variables is what makes the rootless property hold by construction rather than by luck, which is exactly the accident that hid this: my own first probe put its venv inside the checkout and seat() found wt-merge/pyproject.toml, and my second put it under /home/user/Dev/PyPeTTa1 which has a .git"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for": {
+      "title": "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for"
+    },
+    "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers": {
+      "title": "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers",
+      "supports": [
+        "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it": {
+      "title": "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it"
+    },
+    "measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did": {
+      "title": "measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did",
+      "supports": [
+        "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it"
+      ]
+    },
+    "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th": {
+      "title": "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th"
+    },
+    "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names": {
+      "title": "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names",
+      "supports": [
+        "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for": {
+      "title": "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for"
+    },
+    "measured 2026-09-22 by hashing every zip member of both wheels": {
+      "title": "measured 2026-09-22 by hashing every zip member of both wheels",
+      "supports": [
+        "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated": {
+      "title": "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated",
+      "supports": [
+        {
+          "node": "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "status": "untried"
+        }
+      ]
+    },
+    "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files": {
+      "title": "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files"
+    },
+    "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files": {
+      "title": "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files",
+      "supports": [
+        "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three": {
+      "title": "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three"
+    },
+    "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists": {
+      "title": "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists",
+      "supports": [
+        "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it": {
+      "title": "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it"
+    },
+    "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py": {
+      "title": "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py",
+      "supports": [
+        "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand": {
+      "title": "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand"
+    },
+    "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling": {
+      "title": "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling",
+      "supports": [
+        "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught": {
+      "title": "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught",
+      "supports": [
+        {
+          "node": "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "status": "untried"
+        }
+      ]
+    },
+    "it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67": {
+      "title": "it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67",
+      "supports": [
+        {
+          "node": "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+          "status": "untried"
+        }
+      ]
+    },
+    "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane": {
+      "title": "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane"
+    },
+    "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites": {
+      "title": "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites",
+      "supports": [
+        "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea": {
+      "title": "the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea",
+      "attacks": [
+        "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it"
+      ]
+    },
+    "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing": {
+      "title": "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing",
+      "supports": [
+        {
+          "node": "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught"
+      ]
+    },
+    "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345": {
+      "title": "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345"
+    },
+    "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only": {
+      "title": "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only",
+      "supports": [
+        "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67": {
+      "title": "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67"
+    },
+    "measured 2026-09-22 by running the same selftest against both copies": {
+      "title": "measured 2026-09-22 by running the same selftest against both copies",
+      "supports": [
+        "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output": {
+      "title": "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+    },
+    "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap": {
+      "title": "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap",
+      "supports": [
+        "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory": {
+      "title": "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory",
+      "supports": [
+        {
+          "node": "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "status": "untried"
+        },
+        {
+          "node": "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "relation": "addresses",
+          "target": "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+        }
+      ]
+    },
+    "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'": {
+      "title": "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'"
+    },
+    "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0": {
+      "title": "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0",
+      "supports": [
+        "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule": {
+      "title": "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule"
+    },
+    "git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh": {
+      "title": "git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh",
+      "supports": [
+        "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule"
+      ]
     }
   },
   "approaches": {
@@ -21075,7 +21311,30 @@
     "add a rootless import sweep to tests/shell/test_packaged_cli.sh: every module the package ships, imported from the install, with METTA_WORKSPACE, METTA_PATH and METTA_ROOT cleared and metta/_runtime skipped as a data payload carrying no __init__.py": {
       "title": "add a rootless import sweep to tests/shell/test_packaged_cli.sh: every module the package ships, imported from the install, with METTA_WORKSPACE, METTA_PATH and METTA_ROOT cleared and metta/_runtime skipped as a data payload carrying no __init__.py",
       "effort": 1,
+      "status": "done"
+    },
+    "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist": {
+      "title": "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+      "effort": 1,
       "status": "untried"
+    },
+    "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial": {
+      "title": "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+      "effort": 2,
+      "status": "unwanted"
+    },
+    "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass": {
+      "title": "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+      "effort": 1,
+      "status": "untried"
+    },
+    "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not": {
+      "title": "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+      ]
     }
   },
   "format": 2,
@@ -80954,6 +81213,714 @@
         "focus": "prove release readiness as four claims of different shapes rather than one gate run"
       },
       "id": "8c8074abfd7999c6"
+    },
+    {
+      "at": "2026-09-21T14:49:54.305665+00:00",
+      "after": "1c8dde7ea24138f482c3e834b8a8152efd613cf8",
+      "did": "[{\"op\": \"status\", \"id\": \"add a rootless import sweep to tests/shell/test_packaged_cli.sh: every module the package ships, imported from the install, with METTA_WORKSPACE, METTA_PATH and METTA_ROOT cleared and metta/_runtime skipped as a data payload carrying no __init__.py\", \"because\": \"landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers\", \"tags\": [\"measured\"], \"title\": \"the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did\", \"tags\": [], \"title\": \"my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names\", \"tags\": [\"source\"], \"title\": \"the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by hashing every zip member of both wheels\", \"tags\": [\"measured\"], \"title\": \"the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated\", \"tags\": [], \"title\": \"run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist\", \"fields\": {\"effort\": 1}}]",
+      "parents": [
+        "8c8074abfd7999c6"
+      ],
+      "assert": [
+        [
+          "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged",
+          "sort",
+          "prop"
+        ],
+        [
+          "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged",
+          "supersedes",
+          "the three value assertions in that file and the four in the CI wheel job all passed while 37 modules were dead, because 'import metta' succeeding says nothing about the other 184; the sweep is the generative form and covers a module added later without editing anything. Clearing the three variables is what makes the rootless property hold by construction rather than by luck, which is exactly the accident that hid this: my own first probe put its venv inside the checkout and seat() found wt-merge/pyproject.toml, and my second put it under /home/user/Dev/PyPeTTa1 which has a .git"
+        ],
+        [
+          "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged",
+          "supports",
+          {
+            "node": "add a rootless import sweep to tests/shell/test_packaged_cli.sh: every module the package ships, imported from the install, with METTA_WORKSPACE, METTA_PATH and METTA_ROOT cleared and metta/_runtime skipped as a data payload carrying no __init__.py",
+            "status": "done"
+          }
+        ],
+        [
+          "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged",
+          "tags",
+          "measured"
+        ],
+        [
+          "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged",
+          "title",
+          "landed in 1c8dde7ea with the stderr rule and the derived resource list; the whole harness runs green on the live tree, 9 boots at zero stderr, 8 of 8 resources, 172 of 172 modules, and the pre-existing broken-wheel refusals unchanged"
+        ],
+        [
+          "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers",
+          "supports",
+          "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for"
+        ],
+        [
+          "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers",
+          "title",
+          "measured 2026-09-22 against wheels extracted under /home/user/ai-release-probe, whose every ancestor lacks both component markers"
+        ],
+        [
+          "measured 2026-09-22 by hashing every zip member of both wheels",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by hashing every zip member of both wheels",
+          "supports",
+          "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for"
+        ],
+        [
+          "measured 2026-09-22 by hashing every zip member of both wheels",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by hashing every zip member of both wheels",
+          "title",
+          "measured 2026-09-22 by hashing every zip member of both wheels"
+        ],
+        [
+          "measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did",
+          "supports",
+          "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it"
+        ],
+        [
+          "measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did",
+          "title",
+          "measured 2026-09-22 from ai-tmp/staged/packaged-live.log, which asserted 79 shipped modules need a checkout when none did"
+        ],
+        [
+          "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it",
+          "title",
+          "my first version of the import sweep was too strong and the harness caught it: it counted 79 ModuleNotFoundError from the deliberate --no-deps install and one correct refusal from metta.testing._machine as failures, conflating 'needs a checkout' with 'needs an uninstalled dependency'. Only the RuntimeError naming the component markers counts, because _roots.py is the only thing that raises it"
+        ],
+        [
+          "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names",
+          "supports",
+          "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th"
+        ],
+        [
+          "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names",
+          "title",
+          "read extensions/python/metta/_roots.py:1-20, which counts 243 parents[N] expressions across 203 files at six depths under ten different names"
+        ],
+        [
+          "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for",
+          "title",
+          "the import rule was narrowed after a counterexample and re-proved on three arms: it reports RED with 36 modules named on the broken wheel, green on the fixed one, and green on the published 0.8.0, so it can come back negative on the case it exists for"
+        ],
+        [
+          "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th",
+          "sort",
+          "prop"
+        ],
+        [
+          "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th",
+          "title",
+          "the narrowed import rule does NOT decide the case of a site that resolves a checkout path by counting parents rather than asking, which yields a wrong path silently instead of raising; that is the failure _roots.py exists to abolish and its docstring records 243 instances of, and nothing in the harness would see a 244th"
+        ],
+        [
+          "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated",
+          "sort",
+          "prop"
+        ],
+        [
+          "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated",
+          "supports",
+          {
+            "node": "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+            "status": "untried"
+          }
+        ],
+        [
+          "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated",
+          "title",
+          "the previous gate was proving d27805154, a tree that ships a package 37 of whose modules cannot be imported, so its verdict was about something that will not be released; it was stopped at 46 lanes rather than run to the end and repeated"
+        ],
+        [
+          "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for",
+          "title",
+          "the two release artifacts built from the fixed HEAD are content-identical to the ones built from the export: 582 entries each, no path only in one, no differing content. The sha256 differ because a wheel embeds timestamps and is not reproducible without SOURCE_DATE_EPOCH, which is a separate and minor packaging question nobody has asked for"
+        ],
+        [
+          "add a rootless import sweep to tests/shell/test_packaged_cli.sh: every module the package ships, imported from the install, with METTA_WORKSPACE, METTA_PATH and METTA_ROOT cleared and metta/_runtime skipped as a data payload carrying no __init__.py",
+          "status",
+          "done"
+        ],
+        [
+          "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "sort",
+          "approach"
+        ],
+        [
+          "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "effort",
+          1
+        ],
+        [
+          "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "status",
+          "untried"
+        ],
+        [
+          "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist",
+          "title",
+          "run one clean gate on 1c8dde7ea, the tree carrying the install fix and the three new packaging rules, then publish from ai-tmp/release-export2/dist"
+        ]
+      ],
+      "telemetry": {
+        "focus": "prove release readiness as four claims of different shapes rather than one gate run"
+      },
+      "id": "a0acbcce5261d1f7"
+    },
+    {
+      "at": "2026-09-21T14:53:16.783223+00:00",
+      "after": "1c8dde7ea24138f482c3e834b8a8152efd613cf8",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files\", \"tags\": [\"measured\"], \"title\": \"the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read all 37 Purpose lines 2026-09-22 and checked every named chapter exists\", \"tags\": [\"measured\"], \"title\": \"the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py\", \"tags\": [\"measured\"], \"title\": \"extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling\", \"tags\": [\"measured\"], \"title\": \"those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught\", \"tags\": [], \"title\": \"split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial\", \"fields\": {\"effort\": 2}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67\", \"tags\": [], \"title\": \"land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass\", \"fields\": {\"effort\": 1}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites\", \"tags\": [\"measured\"], \"title\": \"the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane\", \"fields\": {}}]",
+      "parents": [
+        "a0acbcce5261d1f7"
+      ],
+      "assert": [
+        [
+          "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it",
+          "title",
+          "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it"
+        ],
+        [
+          "it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67",
+          "sort",
+          "prop"
+        ],
+        [
+          "it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67",
+          "supports",
+          {
+            "node": "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+            "status": "untried"
+          }
+        ],
+        [
+          "it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67",
+          "title",
+          "it already finds the three real dangling references and already uses git ls-files --recurse-submodules, the blind spot that made an earlier version of it read 26 findings where there were 67"
+        ],
+        [
+          "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py",
+          "supports",
+          "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it"
+        ],
+        [
+          "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py",
+          "title",
+          "measured 2026-09-22 by counting fenced against unfenced lines and listing every Output in extensions/python/tools/artifacts.py"
+        ],
+        [
+          "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites",
+          "supports",
+          "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane"
+        ],
+        [
+          "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites",
+          "title",
+          "measured 2026-09-22 by locating each named basename in git ls-files --recurse-submodules and reading the three comment sites"
+        ],
+        [
+          "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling",
+          "supports",
+          "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand"
+        ],
+        [
+          "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling",
+          "title",
+          "measured 2026-09-22 by parsing all 37 entries and checking each excerpt line appears in its source in order: 37 accurate, 0 drifted, 0 dangling"
+        ],
+        [
+          "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files",
+          "supports",
+          "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files"
+        ],
+        [
+          "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files",
+          "title",
+          "measured 2026-09-22: git ls-files --recurse-submodules shows the chaptered MeTTa corpus at examples/chNN-* and the chaptered Python corpus at extensions/python/examples/language-feature-examples/chNN-*, while seven topic directories still hold 37 undistributed .py files"
+        ],
+        [
+          "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists",
+          "sort",
+          "prop"
+        ],
+        [
+          "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists",
+          "supports",
+          "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three"
+        ],
+        [
+          "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists",
+          "tags",
+          "measured"
+        ],
+        [
+          "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists",
+          "title",
+          "read all 37 Purpose lines 2026-09-22 and checked every named chapter exists"
+        ],
+        [
+          "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three",
+          "title",
+          "the 37 files map onto 16 existing chapters, decided from each file's own Purpose line, and the mapping is written as data at ai-tmp/examples-distribution.tsv rather than as prose, so the move is mechanical; ch19-spaces-backed-by-anything and ch22-a-reasoner-you-can-serve take 8 each, the rest one to three"
+        ],
+        [
+          "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught",
+          "sort",
+          "prop"
+        ],
+        [
+          "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught",
+          "supports",
+          {
+            "node": "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+            "status": "untried"
+          }
+        ],
+        [
+          "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught",
+          "title",
+          "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught"
+        ],
+        [
+          "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files",
+          "sort",
+          "prop"
+        ],
+        [
+          "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files",
+          "title",
+          "the examples redistribution the user asked for has in-repo prior art: the MeTTa corpus was already migrated from topic directories to chapters, so examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. What remains is the PYTHON seat's 37 topic files into extensions/python/examples/language-feature-examples, which is already chaptered the same way and already holds 323 .py files"
+        ],
+        [
+          "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane",
+          "title",
+          "the three dangling references resolve to: examples/language-feature-examples/reasoning/peano.py is now ch07-control-flow/07-05-recursion/06-peano.py, scallop_readme.py is now ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.py, and examples/integration/python.metta is now examples/ch11-python-as-a-notation/01-python.metta. The third is a comment NARRATING that rename, so it is correct history rather than a stale link, and it will be reworded to name the file as it is rather than allowlisted, because an exception is what stops the next reader trusting the lane"
+        ],
+        [
+          "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand",
+          "sort",
+          "prop"
+        ],
+        [
+          "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand",
+          "title",
+          "those 520 excerpt lines are all currently accurate: every one of the 37 excerpts is an in-order subsequence of the file it links, and no link dangles. That is not evidence the duplication is harmless, it is evidence somebody has been maintaining it by hand"
+        ],
+        [
+          "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+          "sort",
+          "approach"
+        ],
+        [
+          "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+          "effort",
+          1
+        ],
+        [
+          "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+          "status",
+          "untried"
+        ],
+        [
+          "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass",
+          "title",
+          "land ai-tmp/check_example_references.py as a lane before moving anything, so the move is safe by construction: it stays red until every reference is updated and a half-landed git mv cannot pass"
+        ],
+        [
+          "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "sort",
+          "approach"
+        ],
+        [
+          "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "effort",
+          2
+        ],
+        [
+          "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "status",
+          "untried"
+        ],
+        [
+          "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "title",
+          "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial"
+        ]
+      ],
+      "telemetry": {
+        "focus": "prove release readiness as four claims of different shapes rather than one gate run"
+      },
+      "id": "2f58e458efb2d804"
+    },
+    {
+      "at": "2026-09-21T14:54:05.718926+00:00",
+      "after": "1c8dde7ea24138f482c3e834b8a8152efd613cf8",
+      "did": "[{\"op\": \"attack\", \"id\": \"extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it\", \"because\": \"the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea\", \"tags\": []}, {\"op\": \"status\", \"id\": \"split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial\", \"because\": \"three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing\", \"tags\": [], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only\", \"tags\": [\"source\"], \"title\": \"what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by running the same selftest against both copies\", \"tags\": [\"measured\"], \"title\": \"check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67\", \"fields\": {}}]",
+      "parents": [
+        "2f58e458efb2d804"
+      ],
+      "assert": [
+        [
+          "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67",
+          "sort",
+          "prop"
+        ],
+        [
+          "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67",
+          "title",
+          "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67"
+        ],
+        [
+          "measured 2026-09-22 by running the same selftest against both copies",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by running the same selftest against both copies",
+          "supports",
+          "check_example_references_selftest.py discriminates rather than merely passing: 7 of 7 cases hold against the real checker, and against a copy using a bare git ls-files the submodule case reports 0 where it owes 1 and the suite drops to 6 of 7, so the case pins the exact defect that made an earlier version read 26 findings where there were 67"
+        ],
+        [
+          "measured 2026-09-22 by running the same selftest against both copies",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by running the same selftest against both copies",
+          "title",
+          "measured 2026-09-22 by running the same selftest against both copies"
+        ],
+        [
+          "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only",
+          "supports",
+          "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345"
+        ],
+        [
+          "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only",
+          "tags",
+          "source"
+        ],
+        [
+          "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only",
+          "title",
+          "read tests/repository/test_example_snippets.py at 176d0651b, whose regex is anchored on `extensions/python/examples/...` inside the index file only"
+        ],
+        [
+          "the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea",
+          "sort",
+          "prop"
+        ],
+        [
+          "the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea",
+          "attacks",
+          "extensions/python/examples/README.md is 879 lines of which 520 sit inside code fences, copied from the 37 example files it links, and it is owned by nothing: the artifact table declares 22 Outputs and this is not one of them, so neither artifact-sync nor any lane recomputes or checks it"
+        ],
+        [
+          "the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea",
+          "title",
+          "the second half is false: extensions/python/tests/repository/test_example_snippets.py checks every python fence against the file it names, asserts every fence carries a backticked source path, and asserts that path resolves, and pytest collects it on the ordinary run. Only the first half stands, that the index is not DERIVED; it is well checked. I found nothing because I grepped tools/ and tests/checks/ for the word 'excerpt' and the test lives in tests/repository/ and says 'snippets', which is searching the word I could spell instead of the idea"
+        ],
+        [
+          "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing",
+          "sort",
+          "prop"
+        ],
+        [
+          "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing",
+          "supersedes",
+          "the axes are not a cross-product: 'the path resolves' applies to every reference anywhere in the repo while excerpt and blurb matching apply only to this file, so it is one general rule plus one local set, N+K rather than 4x3. Putting '# show' markers in the 37 example files would make the excerpt computed, but those files are teaching material and presentation markers would be noise in the thing being taught"
+        ],
+        [
+          "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing",
+          "supports",
+          {
+            "node": "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing",
+          "title",
+          "three of the four checks already exist in test_example_snippets.py, and the fourth, in-order subsequence rather than set membership, differs only for a reordering in which every line still exists. Writing them again would be a second implementation of a concept that already has one, which is the defect this whole session has been removing"
+        ],
+        [
+          "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345",
+          "sort",
+          "prop"
+        ],
+        [
+          "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345",
+          "title",
+          "what the examples work still genuinely needs is only the dangling-reference lane and the move: test_example_snippets.py covers the INDEX and nothing covers references to example paths anywhere else, which is where all three real dangling references live, two in extensions/python/tools/twin_coverage.py:698 and one in tests/checks/check_evidence_tags.py:1345"
+        ],
+        [
+          "split the examples index by what each part is a function of: derive the absolute-path line from the link, check that the link resolves, check each excerpt is an in-order subsequence of its source, and check the blurb against the file's Purpose; leave the section grouping and the excerpt SELECTION authorial",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "telemetry": {
+        "focus": "prove release readiness as four claims of different shapes rather than one gate run"
+      },
+      "id": "89e1de0a15360051"
+    },
+    {
+      "at": "2026-09-21T16:37:49.557600+00:00",
+      "after": "1c8dde7ea24138f482c3e834b8a8152efd613cf8",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap\", \"tags\": [\"measured\"], \"title\": \"two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory\", \"tags\": [], \"title\": \"assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not\", \"fields\": {\"effort\": 1, \"addresses\": [\"two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0\", \"tags\": [\"source\"], \"title\": \"a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh\", \"tags\": [], \"title\": \"no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule\", \"fields\": {}}]",
+      "parents": [
+        "89e1de0a15360051"
+      ],
+      "assert": [
+        [
+          "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'",
+          "sort",
+          "prop"
+        ],
+        [
+          "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'",
+          "title",
+          "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'"
+        ],
+        [
+          "git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh",
+          "supports",
+          "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule"
+        ],
+        [
+          "git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh",
+          "title",
+          "git grep for a version literal across tests/ and tools/ returns only the two sites now fixed, my own comments, and an unrelated uutils version in tools/bounded.sh"
+        ],
+        [
+          "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap",
+          "supports",
+          "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+        ],
+        [
+          "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap",
+          "title",
+          "measured 2026-09-22 by running both scripts under sh -x from the repository root; the trace ends on the failing test -d followed by the trap"
+        ],
+        [
+          "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule",
+          "sort",
+          "prop"
+        ],
+        [
+          "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule",
+          "title",
+          "no lane was added for the stale-version class: after the fix there are zero hand-written copies of a version in the tree, uv.lock being generated, so a checker would be machinery guarding a pattern with no remaining members. The two sites broke from ONE bump, which is one event rather than the third occurrence that earns a rule"
+        ],
+        [
+          "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0",
+          "sort",
+          "prop"
+        ],
+        [
+          "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0",
+          "supports",
+          "a version literal is safe where the file writing it also DECLARES it and drifts where the declaration is elsewhere: the same script's solars-0.1.0.dist-info assertion is correct because the test generates that package's pyproject itself, while metta_arrays-0.8.0 and metta_pandas-0.8.0 named a version owned by ext/*/pyproject.toml. That is the discriminator, not 'literals are bad'"
+        ],
+        [
+          "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0",
+          "tags",
+          "source"
+        ],
+        [
+          "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0",
+          "title",
+          "read both assertion sites 2026-09-22; after the fix the only version literal left in tests/shell is solars-0.1.0"
+        ],
+        [
+          "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory",
+          "sort",
+          "prop"
+        ],
+        [
+          "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory",
+          "supports",
+          {
+            "node": "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+            "status": "untried"
+          }
+        ],
+        [
+          "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory",
+          "supports",
+          {
+            "node": "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+            "relation": "addresses",
+            "target": "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+          }
+        ],
+        [
+          "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory",
+          "title",
+          "the claim is that the install landed and the version was never the subject; exactly-one is unambiguous because the scratch directory is freshly made, and the message turns a silent lane into one that names the package and the directory"
+        ],
+        [
+          "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output",
+          "sort",
+          "prop"
+        ],
+        [
+          "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output",
+          "title",
+          "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+        ],
+        [
+          "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "sort",
+          "approach"
+        ],
+        [
+          "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "addresses",
+          "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+        ],
+        [
+          "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "effort",
+          1
+        ],
+        [
+          "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "status",
+          "untried"
+        ],
+        [
+          "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not",
+          "title",
+          "assert the install by IDENTITY rather than version, with find -name '<dist>-*.dist-info' counted to exactly one, and print what was expected when it is not"
+        ]
+      ],
+      "telemetry": {
+        "focus": "prove release readiness as four claims of different shapes rather than one gate run"
+      },
+      "id": "9d9cbc9bda97fc76"
     }
   ]
 }

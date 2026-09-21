@@ -484,7 +484,20 @@ test -d "$scratch/site/solars-0.1.0.dist-info"
 uv pip install --quiet --python "$CHECK_PY" --target "$scratch/site" --no-deps \
     "$project_dir/ext/metta-arrays" \
     "$project_dir/ext/metta-numpy"
-test -d "$scratch/site/metta_arrays-0.8.0.dist-info"
+# The version is NOT spelled here. It lives in ext/metta-arrays/pyproject.toml, and a copy of it in this
+# file is a second representation that drifts on the next bump with no build
+# error: the 0.8.0 to 0.9.0 bump left this line reading 0.8.0 and the lane
+# failed with a bare `test -d`, printing NOTHING, because set -e stops the
+# script and the EXIT trap wipes the scratch directory [measured 2026-09-22,
+# two lanes down for one stale literal]. What is being claimed is that the
+# install landed, so that is what is checked, by identity rather than version,
+# and it says so when it has not.
+installed=$(find "$scratch/site" -maxdepth 1 -type d -name 'metta_arrays-*.dist-info' | wc -l)
+if [ "$installed" -ne 1 ]; then
+    echo "expected exactly one metta_arrays-*.dist-info in $scratch/site, found $installed;" >&2
+    echo "  uv pip install of ext/metta-arrays did not land" >&2
+    exit 1
+fi
 
 run_with_solars() {
     PYTHONPATH="$scratch/site:$project_dir/extensions/python" \
