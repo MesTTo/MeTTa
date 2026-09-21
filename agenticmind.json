@@ -15468,6 +15468,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift": {
+      "title": "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift"
+    },
+    "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21": {
+      "title": "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21",
+      "supports": [
+        "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move": {
+      "title": "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move"
+    },
+    "read engine/bench.py:20-31 on 2026-09-21": {
+      "title": "read engine/bench.py:20-31 on 2026-09-21",
+      "supports": [
+        "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read": {
+      "title": "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read"
+    },
+    "counted the range and read its first-parent log on 2026-09-21": {
+      "title": "counted the range and read its first-parent log on 2026-09-21",
+      "supports": [
+        "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -67292,6 +67328,107 @@
         ]
       ],
       "id": "647a207835c4202c"
+    },
+    {
+      "at": "2026-09-21T03:45:00.118123+00:00",
+      "after": "7257e0d08ff0388577627d565e0ac6e708123580",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/bench.py:20-31 on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"counted the range and read its first-parent log on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read\", \"fields\": {}}]",
+      "parents": [
+        "647a207835c4202c"
+      ],
+      "assert": [
+        [
+          "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift",
+          "sort",
+          "prop"
+        ],
+        [
+          "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift",
+          "title",
+          "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift"
+        ],
+        [
+          "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read",
+          "sort",
+          "prop"
+        ],
+        [
+          "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read",
+          "title",
+          "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read"
+        ],
+        [
+          "counted the range and read its first-parent log on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted the range and read its first-parent log on 2026-09-21",
+          "supports",
+          "attributing the translate drift is a 68-commit range, not a guess: git rev-list 4c0533704..HEAD -- engine/ is 68 commits, and it contains 276b22a37 'Absorb the engine into this repository and retire MeTTa-Kernel as a separate one' and 289300eaa 'Group the engine's C sources under engine/c/', either of which moves load paths the boot and translate rows read"
+        ],
+        [
+          "counted the range and read its first-parent log on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted the range and read its first-parent log on 2026-09-21",
+          "title",
+          "counted the range and read its first-parent log on 2026-09-21"
+        ],
+        [
+          "read engine/bench.py:20-31 on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/bench.py:20-31 on 2026-09-21",
+          "supports",
+          "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move"
+        ],
+        [
+          "read engine/bench.py:20-31 on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/bench.py:20-31 on 2026-09-21",
+          "title",
+          "read engine/bench.py:20-31 on 2026-09-21"
+        ],
+        [
+          "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21",
+          "supports",
+          "attributed re-pinning is this repository's own documented practice rather than a decision only the user can make: engine/bench-baseline.json carries a trunk_merge_repin_comment that attributes a 315698-to-315192 move across 22 placed steps, each named with its commit and its inference delta, so a re-pin here is a ledger entry with a ladder behind it and not an acceptance of drift"
+        ],
+        [
+          "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21",
+          "title",
+          "read the trunk_merge_repin_comment in engine/bench-baseline.json on 2026-09-21"
+        ],
+        [
+          "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move",
+          "sort",
+          "prop"
+        ],
+        [
+          "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move",
+          "title",
+          "the engine-bench boot row's NOT MEASURED IN THIS CONFIGURATION does not fail the lane on a developer box: engine/bench.py's header guarantees the lane exits 0 with a named skip locally and 1 only where CI=true, so what fails it is the three pin regressions, translate +2000 inferences, evaluate +130 and a constructor-sorted instruction move"
+        ]
+      ],
+      "id": "0950c9cf7159e54a"
     }
   ]
 }
