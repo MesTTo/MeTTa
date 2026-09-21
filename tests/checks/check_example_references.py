@@ -16,7 +16,11 @@ Fails when: the reader wants the journal checked too; dated journal entries
     history rather than a broken link, so they are excluded by directory.
 """
 from __future__ import annotations
-import pathlib, re, subprocess, sys
+
+import pathlib
+import re
+import subprocess
+import sys
 
 #: A path under any examples directory, ending in a runnable extension.
 REFERENCE = re.compile(r"(?<![\w/$])((?:[\w./-]*?)examples/[\w./-]+\.(?:py|metta))")
@@ -82,8 +86,11 @@ def findings(root: pathlib.Path) -> list[str]:
           # A path is a CLAIM about the tree only where it cannot be a
           # construction. Prose and comments describe what exists; a string
           # literal in code may be a temporary a test is about to write, which
-          # is why examples/scratch.metta and examples/tracked.metta read as
-          # broken links when they are fixtures with a lifetime of one test.
+          # is why the `scratch.metta` and `tracked.metta` under an examples
+          # directory read as broken links when they are fixtures with a
+          # lifetime of one test. Spelled without their directory on purpose:
+          # this file is tracked, so it is scanned like any other and its own
+          # prose has to obey the rule it states.
           prose = path.suffix in {".md", ".txt"}
           comment = line.lstrip().startswith(("#", "//", "%", "*"))
           if not (prose or comment):
@@ -104,6 +111,7 @@ def findings(root: pathlib.Path) -> list[str]:
     return out
 
 def main() -> int:
+    """Report every dangling reference; exit nonzero when there is one."""
     root = ROOT
     found = findings(root)
     for line in found[:40]:

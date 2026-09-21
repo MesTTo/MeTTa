@@ -19204,6 +19204,178 @@
       "tags": [
         "measured"
       ]
+    },
+    "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle": {
+      "title": "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle"
+    },
+    "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2": {
+      "title": "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2",
+      "supports": [
+        "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile": {
+      "title": "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile"
+    },
+    "the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens": {
+      "title": "the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens",
+      "supports": [
+        "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile"
+      ]
+    },
+    "the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \"$@\" last and xdist takes the last value of a repeated option, which the file's own comment documents": {
+      "title": "the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \"$@\" last and xdist takes the last value of a repeated option, which the file's own comment documents",
+      "supports": [
+        {
+          "node": "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+          "status": "untried"
+        }
+      ]
+    },
+    "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine": {
+      "title": "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine"
+    },
+    "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked": {
+      "title": "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked",
+      "supports": [
+        "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong": {
+      "title": "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong"
+    },
+    "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step": {
+      "title": "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step",
+      "supports": [
+        "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor": {
+      "title": "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor",
+      "supports": [
+        {
+          "node": "adopt --dist worksteal in extensions/python/test.sh",
+          "status": "untried"
+        }
+      ]
+    },
+    "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption": {
+      "title": "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption",
+      "supports": [
+        {
+          "node": "adopt --dist worksteal in extensions/python/test.sh",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor"
+      ]
+    },
+    "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s": {
+      "title": "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+    },
+    "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical": {
+      "title": "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical",
+      "supports": [
+        "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not": {
+      "title": "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not",
+      "supports": [
+        {
+          "node": "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "status": "untried"
+        },
+        {
+          "node": "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "relation": "addresses",
+          "target": "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+        }
+      ]
+    },
+    "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls": {
+      "title": "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls"
+    },
+    "measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests": {
+      "title": "measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests",
+      "supports": [
+        "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls"
+      ]
+    },
+    "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies": {
+      "title": "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies"
+    },
+    "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))": {
+      "title": "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))",
+      "supports": [
+        "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references": {
+      "title": "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references"
+    },
+    "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed": {
+      "title": "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed",
+      "supports": [
+        "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this": {
+      "title": "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+    },
+    "measured 2026-09-22 by timing four consecutive calls over the same records in one process": {
+      "title": "measured 2026-09-22 by timing four consecutive calls over the same records in one process",
+      "supports": [
+        "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues": {
+      "title": "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues",
+      "supports": [
+        {
+          "node": "memoise live() on its records, the same shape _core already uses one level up",
+          "status": "untried"
+        },
+        {
+          "node": "memoise live() on its records, the same shape _core already uses one level up",
+          "relation": "addresses",
+          "target": "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+        }
+      ]
+    },
+    "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark": {
+      "title": "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark"
+    },
+    "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile": {
+      "title": "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile",
+      "supports": [
+        "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -21413,6 +21585,32 @@
       "status": "untried",
       "addresses": [
         "two gate lanes, stranger-python and no-packages, went red on a stale version literal: each asserted `test -d $scratch/site/<dist>-0.8.0.dist-info` while the version lives in ext/<pkg>/pyproject.toml, which the 0.8.0 to 0.9.0 bump moved. Neither lane said why: `test -d` prints nothing, set -e stops the script, and the EXIT trap wipes the scratch, so stranger-python's whole diagnostic was a bare exit 1 with zero output"
+      ]
+    },
+    "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate": {
+      "title": "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+      "effort": 2,
+      "status": "untried"
+    },
+    "adopt --dist worksteal in extensions/python/test.sh": {
+      "title": "adopt --dist worksteal in extensions/python/test.sh",
+      "effort": 1,
+      "status": "unwanted"
+    },
+    "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept": {
+      "title": "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+      "effort": 3,
+      "status": "untried",
+      "addresses": [
+        "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+      ]
+    },
+    "memoise live() on its records, the same shape _core already uses one level up": {
+      "title": "memoise live() on its records, the same shape _core already uses one level up",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
       ]
     }
   },
@@ -82219,6 +82417,532 @@
         "focus": "prove release readiness as four claims of different shapes rather than one gate run"
       },
       "id": "c5b2e9c95ce4bf2e"
+    },
+    {
+      "at": "2026-09-21T16:44:05.434987+00:00",
+      "after": "d18df0bd652cb0abedea0ac466ec6e4d3f4688b9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2\", \"tags\": [\"source\"], \"title\": \"xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens\", \"tags\": [], \"title\": \"the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \\\"$@\\\" last and xdist takes the last value of a repeated option, which the file's own comment documents\", \"tags\": [], \"title\": \"settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate\", \"fields\": {\"effort\": 2}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked\", \"tags\": [\"measured\"], \"title\": \"the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine\", \"fields\": {}}]",
+      "parents": [
+        "c5b2e9c95ce4bf2e"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked",
+          "supports",
+          "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine"
+        ],
+        [
+          "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked",
+          "title",
+          "measured 2026-09-22 by evaluating min(nproc, MemAvailable/320) with a floor of 2, the formula the user chose when asked"
+        ],
+        [
+          "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2",
+          "sort",
+          "prop"
+        ],
+        [
+          "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2",
+          "supports",
+          "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle"
+        ],
+        [
+          "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2",
+          "tags",
+          "source"
+        ],
+        [
+          "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2",
+          "title",
+          "read pytest_xdist 3.8.0's xdist/scheduler/worksteal.py at site-packages: the class docstring says tests are distributed evenly initially, _send_tests slices the head of a pending list built as range(len(collection)), and MIN_PENDING is 2"
+        ],
+        [
+          "the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \"$@\" last and xdist takes the last value of a repeated option, which the file's own comment documents",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \"$@\" last and xdist takes the last value of a repeated option, which the file's own comment documents",
+          "supports",
+          {
+            "node": "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+            "status": "untried"
+          }
+        ],
+        [
+          "the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \"$@\" last and xdist takes the last value of a repeated option, which the file's own comment documents",
+          "title",
+          "the 4.2x figure came from eight two-second tests in one file, which cannot exercise a cross-file fixture assumption, and the earlier whole-suite attempt was killed before it finished. The control is gate-ship3's pytest lane, 1827s with exactly three failures, all known. Neither arm needs a tree change: test.sh puts \"$@\" last and xdist takes the last value of a repeated option, which the file's own comment documents"
+        ],
+        [
+          "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine",
+          "sort",
+          "prop"
+        ],
+        [
+          "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine",
+          "title",
+          "the machine-derived worker count answers 32 on this box, not a memory-bound number: nproc is 32 and MemAvailable 21154MB allows 66 at 320MB each, so cores bind and the memory term is slack here. The shipped fixed value is 4, so the suite has been asking for 12% of the machine"
+        ],
+        [
+          "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile",
+          "sort",
+          "prop"
+        ],
+        [
+          "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile",
+          "title",
+          "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile"
+        ],
+        [
+          "the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens",
+          "sort",
+          "prop"
+        ],
+        [
+          "the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens",
+          "supports",
+          "the residual risk of worksteal is not locality but that a file SPLIT under steal constructs its module-scoped fixtures twice in two processes, which is a slowdown for an expensive fixture and a failure for a stateful one. The suite is known to carry cross-test state, since test_twin_refuses_engine_only_bodies fails only when another file shares its worker under the CURRENT loadfile"
+        ],
+        [
+          "the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens",
+          "title",
+          "the shipped comment chose loadfile so that 'keeping one test file whole preserves module fixtures', and that is the guarantee worksteal weakens"
+        ],
+        [
+          "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle",
+          "sort",
+          "prop"
+        ],
+        [
+          "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle",
+          "title",
+          "xdist's worksteal scheduler does preserve file locality while workers are busy, which the prepared test.sh comment asserted without a source: _send_tests takes self.pending[:num], a CONTIGUOUS slice of collection order, and collection order groups tests by file; stealing fires only when a worker drops below MIN_PENDING=2, which is when it would otherwise idle"
+        ],
+        [
+          "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+          "sort",
+          "approach"
+        ],
+        [
+          "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+          "effort",
+          2
+        ],
+        [
+          "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+          "status",
+          "untried"
+        ],
+        [
+          "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate",
+          "title",
+          "settle worksteal with a whole-suite A/B rather than the two-file measurement, comparing the PASS/FAIL SET against the loadfile control as well as the time, and run both arms standalone on a quiet box so the comparison is not confounded by the rest of a gate"
+        ]
+      ],
+      "id": "556459f9be4edc0a"
+    },
+    {
+      "at": "2026-09-21T17:04:31.810290+00:00",
+      "after": "d18df0bd652cb0abedea0ac466ec6e4d3f4688b9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step\", \"tags\": [\"source\"], \"title\": \"worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor\", \"tags\": [], \"title\": \"adopt --dist worksteal in extensions/python/test.sh\", \"fields\": {\"effort\": 1}}, {\"op\": \"status\", \"id\": \"adopt --dist worksteal in extensions/python/test.sh\", \"because\": \"it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption\", \"tags\": [], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical\", \"tags\": [\"measured\"], \"title\": \"the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not\", \"tags\": [], \"title\": \"shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept\", \"fields\": {\"effort\": 3, \"addresses\": [\"the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests\", \"tags\": [], \"title\": \"my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls\", \"fields\": {}}]",
+      "parents": [
+        "556459f9be4edc0a"
+      ],
+      "assert": [
+        [
+          "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption",
+          "sort",
+          "prop"
+        ],
+        [
+          "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption",
+          "supersedes",
+          "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor"
+        ],
+        [
+          "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption",
+          "supports",
+          {
+            "node": "adopt --dist worksteal in extensions/python/test.sh",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption",
+          "title",
+          "it trades the fixture-isolation guarantee loadfile was chosen FOR, and the trade is not conditional on stealing: the initial slice already cuts files. A whole-suite run at n=32 produced 21 failures against the loadfile control's 3, and 13 of them were parametrised cases of one test in ONE file, test_bound_watches_transfer_until_outer_completion, which is what a file cut at a slice boundary looks like. The measured 4.2x came from eight two-second tests inside a single file, a case that cannot exercise a cross-file fixture assumption"
+        ],
+        [
+          "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor",
+          "sort",
+          "prop"
+        ],
+        [
+          "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor",
+          "supports",
+          {
+            "node": "adopt --dist worksteal in extensions/python/test.sh",
+            "status": "untried"
+          }
+        ],
+        [
+          "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor",
+          "title",
+          "loadfile makes a file indivisible, so the suite's makespan is bounded below by its longest file however many workers exist, and worksteal removes that floor"
+        ],
+        [
+          "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical",
+          "supports",
+          "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+        ],
+        [
+          "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical",
+          "title",
+          "measured 2026-09-21 in a gate's own process tree; the bound is structural rather than empirical"
+        ],
+        [
+          "measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests",
+          "supports",
+          "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls"
+        ],
+        [
+          "measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests",
+          "title",
+          "measured 2026-09-22: sh extensions/python/test.sh exited 3 at 159s with an INTERNALERROR after 4649 of about 8129 tests"
+        ],
+        [
+          "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls",
+          "sort",
+          "prop"
+        ],
+        [
+          "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls",
+          "title",
+          "my A/B was invalid in BOTH arms and the method was the fault: test.sh is not self-contained, the gate wraps it with scratch and TMPDIR setup, and the record already shows 45 lib_csv_surface and 15 lib_json_surface failures traced to one fixture reading TMPDIR. The control had 13 failures before dying of a MemoryError inside ast.parse while pytest rendered a traceback under bounded.sh's RLIMIT_DATA, where the gate's own loadfile run had 3 and completed. The unit under test is the LANE, not the script it calls"
+        ],
+        [
+          "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step",
+          "sort",
+          "prop"
+        ],
+        [
+          "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step",
+          "supports",
+          "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong"
+        ],
+        [
+          "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step",
+          "tags",
+          "source"
+        ],
+        [
+          "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step",
+          "title",
+          "read xdist 3.8.0's scheduler/worksteal.py; with about 8000 tests at n=32 each worker takes roughly 250 contiguous items and every boundary lands mid-file. My own earlier reading noted the slice was contiguous and concluded locality held, which was too generous by exactly this step"
+        ],
+        [
+          "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s",
+          "sort",
+          "prop"
+        ],
+        [
+          "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s",
+          "title",
+          "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+        ],
+        [
+          "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not",
+          "sort",
+          "prop"
+        ],
+        [
+          "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not",
+          "supports",
+          {
+            "node": "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+            "status": "untried"
+          }
+        ],
+        [
+          "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not",
+          "supports",
+          {
+            "node": "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+            "relation": "addresses",
+            "target": "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+          }
+        ],
+        [
+          "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not",
+          "title",
+          "under the constraint that module fixtures must not be constructed twice, the indivisible unit MUST be a file, so the only way to lower max(longest file, total/n) is to lower the first term. That makes it a derivation rather than a preference: worksteal violates the constraint, splitting the file does not"
+        ],
+        [
+          "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong",
+          "sort",
+          "prop"
+        ],
+        [
+          "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong",
+          "title",
+          "worksteal splits a test file at the INITIAL distribution, not only when a worker would otherwise idle: _send_tests hands each node a contiguous slice of the collection whose boundaries fall at len(collection)/n, and those boundaries cut through whichever file spans them. Contiguous is not file-aligned. The prepared comment in ai-tmp/wt-battery-3/extensions/python/test.sh claims the opposite and is wrong"
+        ],
+        [
+          "adopt --dist worksteal in extensions/python/test.sh",
+          "sort",
+          "approach"
+        ],
+        [
+          "adopt --dist worksteal in extensions/python/test.sh",
+          "effort",
+          1
+        ],
+        [
+          "adopt --dist worksteal in extensions/python/test.sh",
+          "status",
+          "unwanted"
+        ],
+        [
+          "adopt --dist worksteal in extensions/python/test.sh",
+          "title",
+          "adopt --dist worksteal in extensions/python/test.sh"
+        ],
+        [
+          "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "sort",
+          "approach"
+        ],
+        [
+          "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "addresses",
+          "the makespan argument that motivated worksteal is still correct and still unaddressed: Graham's bound is max(longest indivisible task, total/n), loadfile makes a FILE indivisible, and test_door_rows.py was caught at 1296 seconds with one worker at 97.6% CPU and three idle. That term does not shrink with n, which is why the lane sits at 1827s"
+        ],
+        [
+          "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "effort",
+          3
+        ],
+        [
+          "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "status",
+          "untried"
+        ],
+        [
+          "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept",
+          "title",
+          "shorten the longest FILE rather than dividing files, so loadfile's indivisible unit gets smaller and the fixture guarantee is kept"
+        ]
+      ],
+      "id": "9040a90ab6b4ad16"
+    },
+    {
+      "at": "2026-09-21T17:44:09.126429+00:00",
+      "after": "d18df0bd652cb0abedea0ac466ec6e4d3f4688b9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))\", \"tags\": [\"measured\"], \"title\": \"my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed\", \"tags\": [\"source\"], \"title\": \"the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22 by timing four consecutive calls over the same records in one process\", \"tags\": [\"measured\"], \"title\": \"the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues\", \"tags\": [], \"title\": \"memoise live() on its records, the same shape _core already uses one level up\", \"fields\": {\"effort\": 1, \"addresses\": [\"the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile\", \"tags\": [\"source\"], \"title\": \"the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark\", \"fields\": {}}]",
+      "parents": [
+        "9040a90ab6b4ad16"
+      ],
+      "assert": [
+        [
+          "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues",
+          "sort",
+          "prop"
+        ],
+        [
+          "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues",
+          "supports",
+          {
+            "node": "memoise live() on its records, the same shape _core already uses one level up",
+            "status": "untried"
+          }
+        ],
+        [
+          "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues",
+          "supports",
+          {
+            "node": "memoise live() on its records, the same shape _core already uses one level up",
+            "relation": "addresses",
+            "target": "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+          }
+        ],
+        [
+          "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues",
+          "title",
+          "Door is a frozen slotted dataclass so the record tuple hashes, and the soundness argument is weaker than one the repository already accepts: the core cache survives ACROSS processes keyed on source text, while this lasts one process and is keyed on the rows too. A result is 211 Orders rather than a graph, so an entry per distinct record set is small. This is common-subexpression elimination, not a solver change, which is why it is orthogonal to the precision work the journal queues"
+        ],
+        [
+          "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))",
+          "supports",
+          "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies"
+        ],
+        [
+          "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))",
+          "title",
+          "measured 2026-09-22 by counting CallGraph._evaluate over orders((*table().values(), _record()))"
+        ],
+        [
+          "measured 2026-09-22 by timing four consecutive calls over the same records in one process",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by timing four consecutive calls over the same records in one process",
+          "supports",
+          "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+        ],
+        [
+          "measured 2026-09-22 by timing four consecutive calls over the same records in one process",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 by timing four consecutive calls over the same records in one process",
+          "title",
+          "measured 2026-09-22 by timing four consecutive calls over the same records in one process"
+        ],
+        [
+          "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies",
+          "sort",
+          "prop"
+        ],
+        [
+          "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies",
+          "title",
+          "my own measurement refutes the fixpoint-order hypothesis independently of the journal: one extension solve evaluates 2742 scopes 10360 times, mean 3.78, MEDIAN 1, max 26. A perfect order could remove at best the 3.78x excess and cycles make even that unreachable, so reordering is worth about 2x rather than the order of magnitude 'the worklist is a plain FIFO' implies"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed",
+          "supports",
+          "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed",
+          "title",
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md:200-225 and 366-375. Third time this session the record corrected a conclusion the code alone would have given: the code says what the analysis does, the journal says which explanations were already killed"
+        ],
+        [
+          "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile",
+          "supports",
+          "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark"
+        ],
+        [
+          "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile",
+          "tags",
+          "source"
+        ],
+        [
+          "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile",
+          "title",
+          "read the journal's own plan at 268-290, whose step 3 names it and whose step 1, profiling the committed analyser, this session discharged: _container_call still leads at 23.9M calls and 325s cumulative of a 615s profile"
+        ],
+        [
+          "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this",
+          "sort",
+          "prop"
+        ],
+        [
+          "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this",
+          "title",
+          "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+        ],
+        [
+          "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark",
+          "title",
+          "the door analysis's remaining cost is a PRECISION question the journal states and nothing in this session changes: the analysis is context-insensitive, so every caller's container pools into one parameter slot and one slot holds 3104 abstract references. Its fixes are context sensitivity or a coarser container abstraction, both of which change what the analysis ANSWERS and so need an equivalence obligation rather than a benchmark"
+        ],
+        [
+          "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references",
+          "sort",
+          "prop"
+        ],
+        [
+          "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references",
+          "title",
+          "the journal had already retired BOTH levers I reached for, each with measurement, and I reached for them from the code alone: SCC collapse because the store is large from large sets rather than redundant copies, hash consing having already removed those; and integer bitsets because unions improve while iteration slows 13 to 22x and this analysis iterates more than it unions. The standing result is T = c*P with c flat at 41 to 48 microseconds over a tenfold range of P, so the only lever is holding fewer references"
+        ],
+        [
+          "memoise live() on its records, the same shape _core already uses one level up",
+          "sort",
+          "approach"
+        ],
+        [
+          "memoise live() on its records, the same shape _core already uses one level up",
+          "addresses",
+          "the EXTENSION solve is not cached, so the same one is recomputed for identical input: orders() is uncached and atoms(rows) calls orders(rows) internally, so a caller doing both pays two whole extension solves. Measured with the IDENTICAL tuple object: orders 70.65s then 50.98s, atoms 58.22s then 56.02s. The shipped table alone costs 0.00s and zero evaluations, so every second of the slowest test is this"
+        ],
+        [
+          "memoise live() on its records, the same shape _core already uses one level up",
+          "effort",
+          1
+        ],
+        [
+          "memoise live() on its records, the same shape _core already uses one level up",
+          "status",
+          "untried"
+        ],
+        [
+          "memoise live() on its records, the same shape _core already uses one level up",
+          "title",
+          "memoise live() on its records, the same shape _core already uses one level up"
+        ]
+      ],
+      "id": "b239e06784fde03a"
     }
   ]
 }
