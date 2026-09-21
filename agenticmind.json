@@ -16723,6 +16723,30 @@
       "tags": [
         "measured"
       ]
+    },
+    "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it": {
+      "title": "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it"
+    },
+    "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after": {
+      "title": "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after",
+      "supports": [
+        "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation": {
+      "title": "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation"
+    },
+    "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected": {
+      "title": "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected",
+      "supports": [
+        "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -72162,6 +72186,77 @@
         ]
       ],
       "id": "5d31c6d081896998"
+    },
+    {
+      "at": "2026-09-21T05:47:37.732679+00:00",
+      "after": "fa708947965261aedad1fde9c54319487e53018b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after\", \"tags\": [\"measured\"], \"title\": \"the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected\", \"tags\": [\"tested\"], \"title\": \"the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation\", \"fields\": {}}]",
+      "parents": [
+        "5d31c6d081896998"
+      ],
+      "assert": [
+        [
+          "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected",
+          "sort",
+          "prop"
+        ],
+        [
+          "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected",
+          "supports",
+          "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation"
+        ],
+        [
+          "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected",
+          "tags",
+          "tested"
+        ],
+        [
+          "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected",
+          "title",
+          "modelled on operator_word_findings and verified non-vacuous by the real drift it caught before the number was corrected"
+        ],
+        [
+          "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after",
+          "supports",
+          "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it"
+        ],
+        [
+          "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after",
+          "title",
+          "ran m.self.builtins() on 2026-09-21 and read llms.txt:5004; the lane reported zero findings before the check existed and reported this one immediately after"
+        ],
+        [
+          "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation",
+          "title",
+          "the fix is derivation rather than the number: the lane now parses the claim and compares it to the engine's own answer, and reports the claim GOING MISSING as a finding too, so it cannot be deleted to silence the check. That is the shape the operator-word count already had, which is the lane's own precedent for bringing a prose count under derivation"
+        ],
+        [
+          "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it",
+          "title",
+          "the release pass found llms.txt stating 307 registered builtins where the engine answers 314, which is the third time that one sentence has drifted: the notes record it reading 280 against a live 297 before. It is PROSE, so it sat outside the source-table class the lane already derives, and the sentence even names the call that settles it"
+        ]
+      ],
+      "id": "1f5e96a8f8027d8c"
     }
   ]
 }

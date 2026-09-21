@@ -5001,7 +5001,7 @@ a claimant, which runs when the row is performed rather than while it is read.
 provided patterns, and evaluates the selected branch. Empty expressions and
 incompatible patterns select the fallback.
 
-307 builtins are registered; `m.self.builtins()` lists the live union of the
+314 builtins are registered; `m.self.builtins()` lists the live union of the
 functions callable from `&self` and the translator special forms. That live union in full, measured
 2026-09-10 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:

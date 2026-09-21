@@ -1,7 +1,8 @@
 """Purpose: hold check_component_publication to the distinction it exists for.
 
-The checker's value is that it separates three answers: the remote's main
-contains the pin, it does not, or the question could not be asked. Collapsing
+The checker's value is that it separates three answers, per remote: some
+ref of that remote reaches the pin, none does, or the question could not be
+asked. Collapsing
 the third into the second is the defect it shipped with for one commit --
 `merge-base --is-ancestor` fails when EITHER operand is missing, and only the
 remote's head was checked, so an absent pin read as one the remote does not
@@ -15,9 +16,9 @@ Assumes: git is on PATH and can clone a local path; no network is used, and
     no case reads the real tree, so a change to either cannot make this pass
     or fail for a reason that is not about the checker.
 Guarantees:
-  - a pin the remote's main contains is NOT reported
+  - a pin some ref of the remote reaches is NOT reported
     [tested: this file; commit=WORKTREE]
-  - a pin the remote's main does not contain IS reported as unresolvable
+  - a pin no ref of the remote reaches IS reported as unresolvable
     [tested: this file; commit=WORKTREE]
   - a pin this checkout does not hold is reported as UNASKED, not as absent
     [tested: this file; commit=WORKTREE]
@@ -89,8 +90,8 @@ def cases() -> list[tuple[str, str, int, int]]:
     """Each case: what it is for, the marker its finding must carry, and the
     two counts the summary must report."""
     return [
-        ("a pin the remote's main contains is not reported", "", 0, 0),
-        ("a pin the remote's main lacks is unresolvable", "is in none of", 1, 0),
+        ("a pin some ref of the remote reaches is not reported", "", 0, 0),
+        ("a pin no ref of the remote reaches is unresolvable", "is in none of", 1, 0),
         # The closed-world fix: a clone takes EVERY head, so a pin on a branch
         # that is not main is one a fresh clone resolves and must not be
         # reported. Testing ancestry against main alone called it unresolvable.
@@ -121,9 +122,9 @@ def main() -> int:
         _git("config", "user.name", "selftest", cwd=clone)
         _git("config", "user.email", "selftest@example.invalid", cwd=clone)
 
-        if what.startswith("a pin the remote's main contains"):
+        if what.startswith("a pin some ref of the remote reaches"):
             pin = published
-        elif what.startswith("a pin the remote's main lacks"):
+        elif what.startswith("a pin no ref of the remote reaches"):
             # A commit that exists only in the clone, which is the real case.
             pin = _commit(clone, "local-only")
         elif what.startswith("a pin on a non-main remote branch"):

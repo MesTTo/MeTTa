@@ -499,6 +499,14 @@ _OPERATOR_CLAIM = re.compile(
 #: mentions of `S.floordiv` and `S.sub(a, b)` out of the roster.
 _OPERATOR_ROW = re.compile(r"\|\s*`S\.(?P<word>\w+)`\s*\|")
 
+#: The builtin count, which is PROSE and so outside the source-table class
+#: this lane already derives. It went stale twice: the sheet read 280 while
+#: the engine answered 297, and then 307 against 314 [measured 2026-09-21].
+#: A count nobody derives is a count that drifts, and this one names the very
+#: call that would settle it, which is what makes the staleness embarrassing
+#: rather than merely wrong.
+_BUILTIN_COUNT = re.compile(r"(?P<count>\d+) builtins are registered")
+
 _NUMBER_WORDS = {
     "zero": 0,
     "one": 1,
@@ -1076,6 +1084,42 @@ def operator_words() -> dict[str, str]:
     return words
 
 
+def builtin_count_findings(sheet: Path, text: str) -> list[str]:
+    """The sheet's builtin count against the engine's own answer.
+
+    Booting costs about a second and buys a number nothing else checks. The
+    claim going MISSING is a finding too, the same as the operator claim: a
+    count that can be deleted to silence its check was never checked.
+    """
+    if sheet != _ROOT_SHEET:
+        return []
+    match = _BUILTIN_COUNT.search(text)
+    if match is None:
+        return [
+            f"{sheet.relative_to(REPO)}: the builtin-count claim is gone, so the "
+            "number of registered builtins goes unchecked"
+        ]
+    python_path = str(REPO / "extensions" / "python")
+    if python_path not in sys.path:
+        sys.path.insert(0, python_path)
+    try:
+        from metta import MeTTa  # noqa: PLC0415 -- the lane costs nothing until it runs
+        with MeTTa() as session:
+            live = len(session.self.builtins())
+    except Exception as absent:  # noqa: BLE001 -- any failure leaves the count unchecked
+        return [
+            f"{sheet.relative_to(REPO)}: the engine did not boot, so the builtin "
+            f"count went unchecked: {absent}"
+        ]
+    stated = int(match.group("count"))
+    if stated != live:
+        return [
+            f"{sheet.relative_to(REPO)}: the sheet says {stated} builtins are "
+            f"registered and `m.self.builtins()` answers {live}"
+        ]
+    return []
+
+
 def operator_word_findings(sheet: Path, text: str) -> list[str]:
     """The operator-word count and roster against the live `S`."""
     if sheet != _ROOT_SHEET:
@@ -1607,6 +1651,7 @@ def main(argv: list[str] | None = None) -> int:
         findings.extend(library_findings(sheet, text))
         findings.extend(count_findings(sheet, text))
         findings.extend(operator_word_findings(sheet, text))
+        findings.extend(builtin_count_findings(sheet, text))
         findings.extend(near_miss_findings(sheet, text, known))
         findings.extend(method_findings(sheet, text))
         findings.extend(dotted_findings(sheet, text))

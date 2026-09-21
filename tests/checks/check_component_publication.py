@@ -34,8 +34,10 @@ Guarantees:
   - exits 0 always. This is a REPORT lane while the backlog is nonzero, and
     becomes a GATE when it clears, which is this repository's own convention
     for a burn-down surface.
-  - a pin the remote's main does not contain is named with its component,
-    the remote and what that remote's main actually is
+  - a pin no ref of a remote reaches is named with its component and that
+    remote, over EVERY remote the component has rather than only the one
+    .gitmodules declares, because a private mirror and a public one can
+    disagree and which holds a pin is a separate fact per remote
   - a question it could not answer is reported as unanswered, never as a
     pass and never as a failure: an unreachable remote, an absent pin and an
     absent remote head each say so in their own words. merge-base fails when
@@ -107,7 +109,7 @@ def _declared(root: Path) -> list[tuple[str, str]]:
 
 
 def findings(root: Path = ROOT, prefix: str = "", *, remotes: bool | None = None) -> list[str]:
-    """One line per pin the remote's main does not contain, nested ones too.
+    """One line per pin a remote does not carry, over every remote and nested.
 
     `remotes` overrides METTA_CHECK_REMOTES for a caller that knows its own
     answer; the selftest is the one such caller, and it needs BOTH modes.
