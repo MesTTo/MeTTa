@@ -15117,6 +15117,64 @@
       "tags": [
         "tested"
       ]
+    },
+    "the head names read clearly enough to summarise": {
+      "title": "the head names read clearly enough to summarise",
+      "supports": [
+        {
+          "node": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "status": "untried"
+        },
+        {
+          "node": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "relation": "addresses",
+          "target": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        }
+      ]
+    },
+    "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time": {
+      "title": "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time",
+      "supports": [
+        {
+          "node": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "the head names read clearly enough to summarise"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session": {
+      "title": "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session",
+      "supports": [
+        {
+          "node": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "status": "untried"
+        },
+        {
+          "node": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "relation": "addresses",
+          "target": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        }
+      ]
+    },
+    "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass": {
+      "title": "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass",
+      "supports": [
+        {
+          "node": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -17053,6 +17111,22 @@
       "status": "done",
       "addresses": [
         "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+      ]
+    },
+    "write the one-line purpose for each of the 61 libraries by hand from its head names": {
+      "title": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+      "effort": 1,
+      "status": "failed",
+      "addresses": [
+        "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+      ]
+    },
+    "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents": {
+      "title": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
       ]
     }
   },
@@ -65935,6 +66009,177 @@
         ]
       ],
       "id": "689a27ae409a7005"
+    },
+    {
+      "at": "2026-09-21T02:12:02.114971+00:00",
+      "after": "97ff2be5b240b12b23d8b64bef07c3a7ebf50435",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the head names read clearly enough to summarise\", \"tags\": [], \"title\": \"write the one-line purpose for each of the 61 libraries by hand from its head names\", \"fields\": {\"effort\": 1, \"addresses\": [\"the README names 7 of the 61 libraries and shows a usage example for none of the other 54\"]}}, {\"op\": \"status\", \"id\": \"write the one-line purpose for each of the 61 libraries by hand from its head names\", \"because\": \"three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time\", \"tags\": [\"measured\"], \"status\": \"failed\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session\", \"tags\": [], \"title\": \"derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents\", \"fields\": {\"effort\": 1, \"addresses\": [\"the README names 7 of the 61 libraries and shows a usage example for none of the other 54\"]}}, {\"op\": \"status\", \"id\": \"derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents\", \"because\": \"59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "689a27ae409a7005"
+      ],
+      "assert": [
+        [
+          "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session",
+          "supports",
+          {
+            "node": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+            "status": "untried"
+          }
+        ],
+        [
+          "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session",
+          "supports",
+          {
+            "node": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+            "relation": "addresses",
+            "target": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+          }
+        ],
+        [
+          "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session",
+          "title",
+          "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session"
+        ],
+        [
+          "the head names read clearly enough to summarise",
+          "sort",
+          "prop"
+        ],
+        [
+          "the head names read clearly enough to summarise",
+          "supports",
+          {
+            "node": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+            "status": "untried"
+          }
+        ],
+        [
+          "the head names read clearly enough to summarise",
+          "supports",
+          {
+            "node": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+            "relation": "addresses",
+            "target": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+          }
+        ],
+        [
+          "the head names read clearly enough to summarise",
+          "title",
+          "the head names read clearly enough to summarise"
+        ],
+        [
+          "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time",
+          "sort",
+          "prop"
+        ],
+        [
+          "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time",
+          "supersedes",
+          "the head names read clearly enough to summarise"
+        ],
+        [
+          "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time",
+          "supports",
+          {
+            "node": "write the one-line purpose for each of the 61 libraries by hand from its head names",
+            "status": "failed"
+          }
+        ],
+        [
+          "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time",
+          "tags",
+          "measured"
+        ],
+        [
+          "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time",
+          "title",
+          "three of the sixty-one were wrong and shipped: lib_roman was described as roman numerals when it holds tracing helpers and higher-order list operations with no numeral anywhere, lib_measure as instruction counters when it is weighted-superposition normalisation and ranking, and lib_mm2 as the small kernel when it is five operators as a notation over &mork that refuse without the MORK provider; 53 of the libraries state their own Purpose line and reading it was available the whole time"
+        ],
+        [
+          "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass",
+          "supersedes",
+          "a description read off the artefact cannot disagree with it, which is the same derived-over-hand-written rule the annotations and the scratch fixture were fixed under earlier in this session"
+        ],
+        [
+          "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass",
+          "supports",
+          {
+            "node": "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+            "status": "done"
+          }
+        ],
+        [
+          "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass",
+          "tags",
+          "measured"
+        ],
+        [
+          "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass",
+          "title",
+          "59 descriptions replaced, 53 of them read from the library's own Purpose across both halves and 8 verified by reading the file; the README suite's 187 tests still pass"
+        ],
+        [
+          "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "sort",
+          "approach"
+        ],
+        [
+          "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "addresses",
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        ],
+        [
+          "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "effort",
+          1
+        ],
+        [
+          "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "status",
+          "done"
+        ],
+        [
+          "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents",
+          "title",
+          "derive each library's description from the Purpose line in its own source, hand-writing only the eight that carry none and checking each against the file's contents"
+        ],
+        [
+          "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "sort",
+          "approach"
+        ],
+        [
+          "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "addresses",
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        ],
+        [
+          "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "effort",
+          1
+        ],
+        [
+          "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "status",
+          "failed"
+        ],
+        [
+          "write the one-line purpose for each of the 61 libraries by hand from its head names",
+          "title",
+          "write the one-line purpose for each of the 61 libraries by hand from its head names"
+        ]
+      ],
+      "id": "afdd0859eb092b80"
     }
   ]
 }
