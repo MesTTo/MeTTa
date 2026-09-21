@@ -413,7 +413,7 @@ test(an_unreadable_source_refuses_the_view_and_leaves_no_stream) :- with_file(sp
 %csv_with_input then csv_descriptor, no ensure_native_storage_module].
 space_input_failure(File) :-
     make_directory(File),
-    must_throw('csv-space'(File,_),error(_,_)),
+    must_throw('csv-space'(File,_),error(csv_io_error(_,read),context('csv-space',_))),
     no_stream(File).
 
 test(a_failed_append_close_preserves_the_file_and_leaves_no_staging) :- with_file(append_close_failure).
