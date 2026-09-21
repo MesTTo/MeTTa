@@ -12,6 +12,7 @@
 :- use_module(library(prolog_wrap)).
 :- use_module(library(ordsets), [ord_subtract/3]).
 :- use_module(library(process), [process_create/3]).
+:- use_module('../../scratch.pl').
 :- initialization(consult('../../lib/lib_string/lib_string.pl')).
 :- initialization(consult('../../lib/lib_file/lib_file.pl')).
 :- initialization(file_surface_setup).
@@ -45,17 +46,7 @@ release_added(Before) :-
 must_throw(Goal, Expected) :-
     catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
 
-% Fixtures live under TMPDIR when it is set, so a run on this box stays out of
-% the RAM-backed /tmp; the name comes from tmp_file/2 and mkdir owns it.
-fixture(Dir) :-
-    ( getenv('TMPDIR', Parent) -> true ; current_prolog_flag(tmp_dir, Parent) ),
-    tmp_file(file_surface, Temporary), file_base_name(Temporary, Base),
-    directory_file_path(Parent, Base, Dir),
-    make_directory(Dir).
-
-with_fixture(Goal) :-
-    setup_call_cleanup(fixture(Dir), call(Goal, Dir),
-                       delete_directory_and_contents(Dir)).
+with_fixture(Goal) :- with_scratch_directory(file_surface, Goal).
 
 test(lexical_paths) :-
     'path-join'("a", "b.txt", "a/b.txt"),

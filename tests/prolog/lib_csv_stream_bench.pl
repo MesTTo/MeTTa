@@ -13,18 +13,17 @@
 :- use_module('../../lib/lib_csv/lib_csv.pl').
 :- use_module(library(filesex)).
 :- use_module(library(prolog_wrap)).
+:- use_module('scratch.pl').
 :- initialization(main, main).
 
-main :-
-    getenv('TMPDIR', Parent), tmp_file(csv_scaling, Temporary), file_base_name(Temporary, Base),
-    directory_file_path(Parent, Base, Directory),
-    setup_call_cleanup(make_directory(Directory),
-        ( directory_file_path(Directory, records, File),
-          writeln('mode,records,file_bytes,inferences,cpu_seconds,live_global_bytes,local_bytes,checksum'),
-          forall(member(N,[1000,10000,100000]),
-                 ( fixture(File,N), measure(stream,File,N),
-                   measure(materialized,File,N), measure(append,File,N) )) ),
-        delete_directory_and_contents(Directory)).
+main :- with_scratch_directory(csv_scaling, scaling_sweep).
+
+scaling_sweep(Directory) :-
+    directory_file_path(Directory, records, File),
+    writeln('mode,records,file_bytes,inferences,cpu_seconds,live_global_bytes,local_bytes,checksum'),
+    forall(member(N,[1000,10000,100000]),
+           ( fixture(File,N), measure(stream,File,N),
+             measure(materialized,File,N), measure(append,File,N) )).
 
 fixture(File,N) :-
     setup_call_cleanup(open(File,write,Stream,[encoding(utf8),newline(posix)]),

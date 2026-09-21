@@ -26,6 +26,7 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- use_module('../../scratch.pl').
 
 user:'plunit-pi-tag'(X, Y) :- member(X, [a, b, c]), atom_concat(X, '!', Y).
 user:'plunit-pi-is-b'(b).
@@ -724,7 +725,7 @@ test(a_registered_library_path_resolves,
 % .metta imported NOTHING and said so with an empty answer set.
 test(an_unresolvable_library_alias_raises,
      [ cleanup(retractall(user:file_search_path(plunit_lib_alias, _))) ]) :-
-    tmp_dir_of_this_suite(Dir),
+    scratch_parent(Dir),
     register_metta_library_path(plunit_lib_alias, Dir, _),
     % A registered alias, a file that is not under it.
     catch(library(plunit_lib_alias, 'nosuchfile.metta', _), Missing, true),
@@ -735,9 +736,6 @@ test(an_unresolvable_library_alias_raises,
     catch(library(plunit_no_such_alias, 'thing.metta', _), Absent, true),
     assertion(Absent = error(metta_unresolved_library(plunit_no_such_alias,
                                                       'thing.metta', []), _)).
-
-tmp_dir_of_this_suite(Dir) :-
-    ( getenv('TMPDIR', Dir) -> true ; Dir = '/tmp' ).
 
 test(a_library_path_that_is_not_a_directory_is_refused,
      [throws(error(existence_error(directory, '/nonexistent/metta/libdir'), _))]) :-

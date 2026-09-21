@@ -9,6 +9,7 @@
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module('../../../../lib/lib_csv/lib_csv.pl').
 :- use_module('../../../../lib/_support/owned_resources.pl').
+:- use_module('../../scratch.pl').
 :- use_module(library(prolog_wrap)).
 :- use_module(library(thread), [concurrent_maplist/2, concurrent_maplist/3]).
 :- use_module(library(ordsets), [ord_subtract/3]).
@@ -17,7 +18,7 @@
 
 :- begin_tests(lib_csv_surface,
                [setup(metta_space_names(Before)), cleanup(release_added(Before))]).
-:- meta_predicate must_throw(0, ?), with_file(1).
+:- meta_predicate must_throw(0, ?), with_file(1), records_in(1, +).
 
 release_added(Before) :-
     metta_space_names(After), ord_subtract(After, Before, Added),
@@ -26,12 +27,10 @@ release_added(Before) :-
 must_throw(Goal, Expected) :-
     catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
 
-with_file(Goal) :-
-    getenv('TMPDIR', Parent), tmp_file(csv_surface, Temporary), file_base_name(Temporary, Base),
-    directory_file_path(Parent, Base, Directory),
-    setup_call_cleanup(make_directory(Directory),
-        ( directory_file_path(Directory, records, File), call(Goal, File) ),
-        delete_directory_and_contents(Directory)).
+with_file(Goal) :- with_scratch_directory(csv_surface, records_in(Goal)).
+
+records_in(Goal, Directory) :-
+    directory_file_path(Directory, records, File), call(Goal, File).
 
 write_bytes(File, Bytes) :-
     setup_call_cleanup(open(File, write, Stream, [type(binary)]),

@@ -62,6 +62,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A suite fixture resolves its scratch directory whether or not the environment
+  names one. Four suites and one benchmark opened with a bare
+  `getenv('TMPDIR', Parent)`, and getenv/2 FAILS rather than raising when the
+  variable is unset, so the whole test died before reaching its subject and
+  plunit printed `failed` with no error and no clue which goal went. In a shell
+  that does not export TMPDIR, which is the ordinary one, `lib_csv_surface`
+  reported 45 failures and `lib_json_surface` 15, both of them green under
+  `sh tools/check.sh` because the gate exports TMPDIR itself. `scratch_parent/1`
+  and `with_scratch_directory/2` in `tests/prolog/scratch.pl` are now the one
+  place that answers, TMPDIR when set so fixtures stay off a RAM-backed `/tmp`
+  and SWI's `tmp_dir` flag otherwise, and both are total, so a fixture can no
+  longer fail silently.
+
 - A library whose MeTTa half defines a name its own Prolog backing also
   supplies no longer refuses that name's calls with a domain error naming the
   arity it is refusing. Performing a `(= (package backing) (prolog ...))` row

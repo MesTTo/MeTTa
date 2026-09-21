@@ -13,6 +13,7 @@
 :- use_module(library(ordsets), [ord_subtract/3]).
 :- use_module(library(readutil)).
 :- use_module(library(filesex)).
+:- use_module('../../scratch.pl').
 
 :- begin_tests(lib_json_surface,
                [setup(metta_space_names(Before)), cleanup(release_added(Before))]).
@@ -27,11 +28,7 @@ must_throw(Goal, Expected) :-
     catch(Goal, Error, true),
     assertion(nonvar(Error)), assertion(Error = Expected).
 
-with_directory(Goal) :-
-    getenv('TMPDIR', Parent), tmp_file(json_surface, Name), file_base_name(Name, Base),
-    directory_file_path(Parent, Base, Dir),
-    setup_call_cleanup(make_directory(Dir), call(Goal, Dir),
-                       delete_directory_and_contents(Dir)).
+with_directory(Goal) :- with_scratch_directory(json_surface, Goal).
 
 write_bytes(File, Bytes) :-
     setup_call_cleanup(open(File, write, Stream, [type(binary)]),
