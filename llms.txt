@@ -5108,6 +5108,657 @@ across several operations, which is what they are for.
 `website/reference/metta-libraries.md`.
 <!-- end generated library roster -->
 
+<!-- begin generated library glossary -->
+
+#### lib_cli
+
+- `cli-arguments!` (-> Expression) -- The host process argument vector as Strings, preserving numeric spelling, empty tokens and order
+- `cli-help` (-> Atom String) -- Validate the same held declarations as cli-parse and render their aliases, types, literal defaults, metavariables and help
+- `cli-parse` (-> Atom Expression Symbol Expression) -- Parse a held String argument vector into (Pairs Operands), where each pair is (Key Value)
+- `cli-types` (-> Expression) -- The built-in option conversion names, in declaration order
+
+#### lib_combinatorics
+
+- `binomial` (-> Number Number Number) -- The exact number of unordered choices
+- `cartesian-power` (-> Expression Number Expression) -- The Cartesian product of Length copies of Items, retaining literal values and variable sharing
+- `choose2` (-> Expression Expression) -- Choose two positions, the later index varying slowest
+- `choose2l` (-> Expression Expression) -- The existing collected spelling of choose2: collapse its answer stream
+- `chooseK` (-> Expression Number Expression) -- Choose a nonnegative integer Count of the positions, keeping input order
+- `chooseKl` (-> Expression Number Expression) -- The existing collected spelling of chooseK: collapse its answer stream
+- `factorial` (-> Number Number) -- The exact factorial of a nonnegative integer, with zero giving one
+- `permutation-count` (-> Number Number Number) -- How many ordered choices of Chosen items there are among Count of them, exactly: Count falling by one, Chosen times
+- `permutations` (-> Expression Expression) -- Every ordering of the items, one per answer, in the host's own order: the items as given first, then the orderings that swap the latest elements
+- `range-step` (-> Number Number Number Number) -- Answer numbers from From toward the excluded To, moving by a nonzero integer Step
+- `range` (-> Number Number Number) -- Answer numbers from K to the excluded N in unit steps; the unit-stride specialization of range-step
+- `subsets` (-> Expression Expression) -- Every subset, one per answer, each keeping the items' own order: the powerset, so n items give 2^n answers, starting with the whole set and ending with the empty one
+- `takeK` (-> Number Expression Expression) -- The first K items, or the whole expression when it is shorter
+- `tuples` (-> Expression Expression) -- Choose one literal value from every population, the last varying fastest
+
+#### lib_compression
+
+- `archive-entries!` (-> %Undefined% Expression) -- Inspect every entry as (archive-entry Index NameString PropertyPairs), with zero-based ordinals and archive order, retaining duplicate names
+- `archive-extract!` (-> %Undefined% %Undefined% Bool) -- Publish regular files and directories into a missing or empty destination directory
+- `archive-read!` (-> %Undefined% Number Expression) -- Read one regular entry by its zero-based ordinal
+- `compress-bytes` (-> Symbol Number Expression Expression) -- Compress integers 0..255 using gzip or zlib and level 0..9
+- `compress-file!` (-> Symbol Number %Undefined% %Undefined% Bool) -- Stream a file into gzip or zlib and replace Destination after all streams close successfully
+- `compression-formats` (-> Expression) -- Return the byte/file envelope names gzip and zlib
+- `decompress-bytes` (-> Symbol Expression Expression) -- Decode complete gzip or zlib members, concatenating their bytes
+- `decompress-file!` (-> Symbol %Undefined% %Undefined% Bool) -- Stream complete gzip/zlib members into one file, replacing Destination after checksum validation and close
+
+#### lib_crypto
+
+- `crypto-hash-bytes` (-> %Undefined% Expression String) -- Hash an expression of byte integers 0..255 without text transcoding
+- `crypto-hash-file!` (-> %Undefined% %Undefined% String) -- Hash a file's bytes through a bounded buffer
+- `crypto-hash` (-> %Undefined% %Undefined% String) -- Hash UTF-8 text, with the same contract as crypto_hash
+- `crypto-hmac-bytes` (-> %Undefined% Expression Expression String) -- Authenticate raw bytes with a raw byte key; both expressions contain only integers 0..255
+- `crypto-hmac` (-> %Undefined% %Undefined% %Undefined% String) -- Authenticate UTF-8 text with a UTF-8 key and a fixed-output digest
+- `crypto-password-hash` (-> %Undefined% Number String) -- Derive a PBKDF2-SHA512 password record from UTF-8 Password with 16 random salt bytes and 2^Cost iterations
+- `crypto-password-verify` (-> %Undefined% %Undefined% Bool) -- Verify a PBKDF2-SHA512 record, returning True or False for a valid record
+- `crypto-random-bytes` (-> Number Expression) -- Return Count cryptographically secure byte integers
+- `crypto-random-hex` (-> Number String) -- Return secure random hexadecimal, with the same contract as crypto_random_hex
+- `crypto-random-integer` (-> Number Number Number) -- Uniformly sample Lower <= Value < Upper with secure randomness
+- `crypto_hash` (-> %Undefined% %Undefined% String) -- Hash UTF-8 text to lowercase hexadecimal
+- `crypto_random_hex` (-> Number String) -- Return Count secure random bytes as 2*Count lowercase hexadecimal characters
+
+#### lib_csv
+
+- `csv-append!` (-> %Undefined% Expression Bool) -- Append field lists as one atomic file transaction and return True
+- `csv-encode` (-> Expression Expression String) -- Encode field lists as CSV
+- `csv-parse` (-> %Undefined% Expression) -- Parse text into a list of field lists
+- `csv-read!` (-> %Undefined% Expression) -- Stream one field list per answer from a UTF-8 file, preserving order and duplicates
+- `csv-snapshot!` (-> %Undefined% Expression SpaceType) -- Read once into a fresh mutable space of (row Number Field...) atoms
+- `csv-space` (-> %Undefined% Expression SpaceType) -- Return a live read-only space of (row Field...) atoms
+- `csv-write!` (-> %Undefined% Expression Bool) -- Atomically replace a UTF-8 CSV file with field lists and return True
+
+#### lib_database
+
+- `database-add!` (-> %Undefined% Atom Bool) -- Append one held value, retaining duplicate occurrences
+- `database-atoms` (-> %Undefined% Atom) -- Return an expression containing every stored value in insertion order, including duplicates
+- `database-close!` (-> %Undefined% Bool) -- Finish journal, schema and lock cleanup before answering
+- `database-open!` (-> %Undefined% Symbol %Undefined%) -- Open or create a store directory and return an opaque native handle
+- `database-remove!` (-> %Undefined% Atom Bool) -- Remove one alpha-identical held occurrence, returning False if absent
+- `database-sync!` (-> %Undefined% Bool) -- Flush and close the journal stream while retaining the store's lifetime lock
+- `with-database` (-> %Undefined% Symbol Atom %Undefined%) -- Own opening directly, apply held Function to the native handle in the calling module, and yield its answers
+
+#### lib_datastructures
+
+- `ft-back` -- The back element, the tree untouched
+- `ft-concat` -- Both trees' elements, left then right, in O(log n): the operation finger trees exist to make cheap
+- `ft-empty` -- The empty finger tree; every other tree grows from it with ft-push-front and ft-push-back
+- `ft-from-list` -- A finger tree holding the expression's elements in order
+- `ft-front` -- The front element, the tree untouched
+- `ft-is-empty` -- Whether a finger tree holds nothing
+- `ft-pop-back` -- The back element and the remaining tree, as the pair ($x $rest): ft-pop-front's mirror
+- `ft-pop-front` -- The front element and the remaining tree, as the pair ($x $rest)
+- `ft-to-list` -- The elements front to back, as an expression: ft-from-list's inverse
+- `map-empty` (-> Expression) -- The empty sorted map
+- `map-from-pairs` (-> Expression Expression) -- A map holding every (Key Value) pair
+- `map-get-or` (-> %Undefined% %Undefined% %Undefined% %Undefined%) -- The value Key holds, or Default when the key is absent
+- `map-get` (-> %Undefined% %Undefined% %Undefined%) -- The value Key holds
+- `map-has` (-> %Undefined% %Undefined% Bool) -- True when the map holds Key, False otherwise
+- `map-keys` (-> %Undefined% Expression) -- Every key, in the standard order of terms
+- `map-max` (-> %Undefined% Expression) -- The (Key Value) pair with the largest key
+- `map-min` (-> %Undefined% Expression) -- The (Key Value) pair with the smallest key
+- `map-pairs` (-> %Undefined% Expression) -- Every (Key Value) pair, in key order
+- `map-put` (-> %Undefined% %Undefined% %Undefined% Expression) -- The map with Key holding Value, replacing whatever Key held
+- `map-remove` (-> %Undefined% %Undefined% Expression) -- The map without Key
+- `map-size` (-> %Undefined% Number) -- How many keys the map holds
+- `map-values` (-> %Undefined% Expression) -- Every value, in its key's order
+- `pq-empty` (-> Expression) -- The empty priority queue
+- `pq-from-pairs` (-> Expression Expression) -- A queue holding every (Priority Value) pair, repeated priorities included
+- `pq-insert` (-> %Undefined% %Undefined% %Undefined% Expression) -- The queue with Value added at Priority, after existing entries of that priority
+- `pq-merge` (-> (:seg %Undefined%) Expression) -- One queue holding every entry of zero or more queues
+- `pq-min` (-> %Undefined% Expression) -- The (Priority Value) pair at the smallest priority, without removing it
+- `pq-pairs` (-> %Undefined% Expression) -- Every (Priority Value) pair in priority order, which is the sorted sequence the queue exists to produce
+- `pq-pop` (-> %Undefined% Expression) -- The (Priority Value Rest) triple: the first entry at the smallest priority and the queue without that occurrence
+- `pq-remove` (-> %Undefined% %Undefined% %Undefined% Expression) -- The queue without the first entry holding this identical priority and value
+- `pq-size` (-> %Undefined% Number) -- How many entries the queue holds, counting repeated priorities separately
+
+#### lib_datetime
+
+- `date-add` (-> Number Expression %Undefined% Number) -- Add (Years Months Days Hours Minutes Seconds) in Zone's calendar, then normalize overflow
+- `date-field` (-> Expression Symbol %Undefined%) -- Read year, month, day, hour, minute, second, utc_offset, time_zone, daylight_saving, date or time
+- `date-fields` (-> Expression Expression) -- Enumerate (Field Value) pairs from a date record, omitting unknown zone/DST
+- `date-timestamp` (-> Expression Number) -- Convert (date Y M D) at UTC midnight or a full timestamp-date record to Unix seconds
+- `date-weekday` (-> Expression Number) -- Return the weekday of a normalized calendar date: Monday 1 through Sunday 7
+- `date-year-day` (-> Expression Number) -- Return the one-based day of the normalized year, including leap days
+- `day-of-week` (-> Number Symbol) -- Return the UTC weekday name, with the same contract as day_of_week
+- `day_of_week` (-> Number Symbol) -- Return the UTC weekday name in the process locale as a Symbol
+- `format-date` (-> Number %Undefined% Symbol) -- Format Timestamp in UTC as a Symbol, with the same contract as format_date
+- `format-datetime` (-> Number %Undefined% %Undefined% String) -- Format Timestamp as String in UTC, local, or integer seconds west of UTC
+- `format_date` (-> Number %Undefined% Symbol) -- Format Timestamp in UTC using SWI strftime directives; return a Symbol
+- `leap-year` (-> Number Bool) -- Test the proleptic Gregorian leap-year rule, including negative years
+- `month-days` (-> Number Number Number) -- Count days in Month 1 through 12 of the proleptic Gregorian Year
+- `now` (-> Number) -- Read Unix seconds from the system wall clock
+- `parse-date` (-> %Undefined% Number) -- Parse ISO 8601, RFC 1123, RFC 1036 or asctime text, optionally selecting iso_8601, rfc_1123, rfc_1036 or asctime
+- `timestamp-date` (-> Number %Undefined% Expression) -- Convert Unix seconds to (date Y M D H Min S Offset Zone DST)
+
+#### lib_derived
+
+- `once` (-> Atom %Undefined%) -- The first answer of an expression, and no more
+
+#### lib_dict
+
+- `dict-get` (-> SpaceType %Undefined% %Undefined% %Undefined%) -- The key's value, or the supplied default when the key is absent
+- `dict-merge` (-> SpaceType SpaceType SpaceType) -- Put every pair of the second dict into the first, so the second's value wins on a shared key
+- `dict-pop` (-> SpaceType %Undefined% %Undefined%) -- The key's value, removed from the dict
+- `dict-update` (-> SpaceType %Undefined% %Undefined% SpaceType) -- Apply a function to the key's current value and put the result back, answering the dict
+
+#### lib_encoding
+
+- `base64-decode` (-> Symbol String Expression) -- The bytes that base64 spells under the named host decoder policy
+- `base64-encode` (-> Symbol Expression String) -- The bytes as base64 in one of the two RFC 4648 alphabets: `standard`, padded with `=` as mail and JSON carry it, or `url`, which uses `-` and `_` and no padding, as a URL and a file name carry it
+- `hex-decode` (-> String Expression) -- The bytes that hexadecimal spells, in either case
+- `hex-encode` (-> Expression String) -- The bytes as hexadecimal, two lower-case digits each and nothing between them, which is how a hash, a key and a wire dump are all written
+- `utf8-decode` (-> Expression String) -- The text those UTF-8 bytes spell
+- `utf8-encode` (-> String Expression) -- The UTF-8 bytes of the text, as an expression of Numbers from 0 to 255
+
+#### lib_file
+
+- `append-bytes!` (-> %Undefined% Expression Bool) -- Append an expression of integers 0 to 255 to the file at Path, creating it when absent
+- `append-file!` (-> %Undefined% %Undefined% Bool) -- Append UTF-8 text to the file at Path, creating it when absent
+- `copy-dir!` (-> %Undefined% %Undefined% Bool) -- Copy a directory tree to a new path: the contents of Source become the contents of Destination, which must not exist; missing parents of Destination are created
+- `copy-file!` (-> %Undefined% %Undefined% Bool) -- Copy bytes to a destination filename with staged replacement: the copy is written beside the destination, both streams close, and one rename publishes it, so an existing destination is replaced only after the complete copy succeeds
+- `delete-dir!` (-> %Undefined% Bool) -- Remove an empty directory; missing or nonempty directories raise
+- `delete-file!` (-> %Undefined% Bool) -- Remove a regular file; an absent file is already removed and answers True
+- `delete-tree!` (-> %Undefined% Bool) -- Remove whatever is at Path: a directory with everything under it, a file, or a symbolic link, which is unlinked without touching its target
+- `dir-exists` (-> %Undefined% Bool) -- True when a directory exists at the path, following links, False otherwise
+- `dir-glob` (-> %Undefined% %Undefined% Expression String) -- Answer every path under Directory matching a relative pattern of slash-separated components, in depth-first codepoint order
+- `dir-walk` (-> %Undefined% Expression String) -- Answer every descendant of a directory, one full path per answer, depth first with each directory's names in codepoint order
+- `exit!` (-> Number %Undefined%) -- Terminate the entire process with integer status 0 through 255, including an embedding host; not an application-level return, so MeTTa catch does not turn it into a local value
+- `file-close!` (-> Number Bool) -- Close a handle file-open! gave
+- `file-exists` (-> %Undefined% Bool) -- True when a regular file exists at the path, following links, False otherwise
+- `file-get-size!` (-> Number Number) -- Answer the size of the whole file in bytes, not of what is left to read, so seeking does not change the answer; a handle without a file name measures the stream position instead
+- `file-kind` (-> %Undefined% Symbol) -- Classify the entry at Path without following it: link for a symbolic link, dangling or not; directory; file; other for an entry that exists and is none of those, such as a FIFO, socket or device; missing when nothing is observable at the path
+- `file-lines!` (-> %Undefined% Expression) -- The lines of a UTF-8 file as an expression of Strings, split on LF with one terminal empty line omitted; CR and NUL stay data
+- `file-metadata!` (-> %Undefined% %Undefined%) -- Snapshot kind, modified Unix time and file size as queryable atoms in a new space: (kind file|directory), (modified Seconds) and, for a file, (size Bytes)
+- `file-open!` (-> %Undefined% %Undefined% Number) -- Open a file and answer a handle
+- `file-read-bytes!` (-> Number Expression) -- Read the remaining bytes, or at most Count bytes, from a binary handle's cursor as an expression of integers 0 to 255
+- `file-read-exact!` (-> Number Number String) -- Read at most Count characters from a text handle's cursor, HE's contract: a short read near the end of the file is the answer, not an error
+- `file-read-to-string!` (-> Number String) -- Read from the cursor to the end of a text handle as one String
+- `file-seek!` (-> Number Number Bool) -- Move the cursor to a byte offset from the start of the file, so the next read starts there; a negative position moves to the start
+- `file-space!` (-> %Undefined% %Undefined%) -- A file as a SPACE, the mettafied reading of reading a file: its lines become (line Number Text) atoms in a fresh space, so the file is queryable with match instead of being one long string to take apart
+- `file-write!` (-> Number %Undefined% Bool) -- Write text to a text handle and flush, adding no newline
+- `file-write-bytes!` (-> Number Expression Bool) -- Write an expression of integers 0 to 255 to a binary handle and flush
+- `list-dir!` (-> %Undefined% Expression) -- The names in a directory, without 
+- `make-dir!` (-> %Undefined% Bool) -- Create a directory and missing parents; an existing directory succeeds
+- `make-link!` (-> %Undefined% %Undefined% Bool) -- Create a symbolic link at Path holding Target exactly as written; a relative target is read relative to the link's own directory
+- `path-absolute` (-> %Undefined% String) -- Anchor a relative path to the process working directory and normalize it lexically, as CPython's posixpath.abspath does; no links are resolved
+- `path-extension` (-> %Undefined% String) -- Text after the final dot in the filename, without the dot; empty when absent
+- `path-join` (-> %Undefined% %Undefined% String) -- Join lexical paths; an absolute second path replaces the first
+- `path-name` (-> %Undefined% String) -- Lexical final path component
+- `path-normalize` (-> %Undefined% String) -- Collapse repeated separators and dot components and resolve 
+- `path-parent` (-> %Undefined% String) -- Lexical parent directory; a bare filename has parent dot
+- `path-parts` (-> %Undefined% Expression) -- The components of a path as an expression of Strings: \"/\" first for an absolute path, empty and dot components dropped, 
+- `path-relative` (-> %Undefined% %Undefined% String) -- The path from the directory Start to Path, lexically, as CPython's posixpath.relpath does: both are made absolute, the common prefix is dropped, and one 
+- `path-resolve` (-> %Undefined% String) -- The absolute path with every symbolic link on the way replaced by what it points to, as CPython's non-strict posixpath.realpath does: a relative path starts at the process working directory, a link's target is read before any later 
+- `path-stem` (-> %Undefined% String) -- The final path component without its extension, the complement of path-extension: \"a/b.tar.gz\" has stem \"b.tar\", and \".env\" has stem \"\"
+- `read-bytes!` (-> %Undefined% Expression) -- Read a whole file as an expression of integers 0 to 255
+- `read-file!` (-> %Undefined% String) -- Read a whole UTF-8 file as one String without the open/close dance
+- `read-link` (-> %Undefined% String) -- The text a symbolic link holds, exactly as it was written, relative or absolute; a path that is not a link raises with its kind
+- `rename-file!` (-> %Undefined% %Undefined% Bool) -- Rename a file or directory within one filesystem, the host's own rename: a file replaces an existing file and a directory replaces an existing empty directory in one step, so a reader sees the old entry or the new one
+- `replace-file!` (-> %Undefined% %Undefined% Bool) -- Publish a new file at Path by rename: the content is written to a staging file beside the destination, closed, and renamed over Path in one step, so a reader sees the old file or the complete new one and never a partial write
+- `same-file` (-> %Undefined% %Undefined% Bool) -- True when both paths name one physical file or directory, through links, hard links and different spellings; False when they differ or either is missing
+- `stderr!` (-> %Undefined% Bool) -- Write text to stderr and flush, without adding a newline
+- `stderr` (-> Number) -- The handle for standard error, which is 2; (file-write! (stderr) $text) is stderr! reached through the handle surface
+- `stdin-to-string!` (-> String) -- Consume standard input through EOF as UTF-8 text
+- `stdin` (-> Number) -- The handle for standard input, which is 0; every handle operation takes it, so (file-read-to-string! (stdin)) reads standard input through EOF
+- `stdout` (-> Number) -- The handle for standard output, which is 1; (file-write! (stdout) $text) writes without a newline
+- `temp-dir!` (-> %Undefined% String) -- A unique fresh directory in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns it and removes it with delete-dir! or delete-tree!
+- `temp-path!` (-> %Undefined% String) -- A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file from that point (write-file! truncates it, delete-file! ends it)
+- `with-file` (-> %Undefined% %Undefined% %Undefined% %Undefined%) -- Open Path with file-open!'s option letters, apply Function to the handle and answer every result of that application; the handle closes when the answers are exhausted, when the caller stops after one, and when the body raises
+- `with-temp-dir` (-> %Undefined% %Undefined% %Undefined%) -- Mint a fresh directory with temp-dir!, apply Function to its path and answer every result; the directory and everything under it are removed when the answers are exhausted, when the caller stops after one, and when the body raises
+- `write-bytes!` (-> %Undefined% Expression Bool) -- Create or truncate the file at Path in place and write an expression of integers 0 to 255
+- `write-file!` (-> %Undefined% %Undefined% Bool) -- Create or truncate the file at Path in place and write UTF-8 text
+
+#### lib_functional
+
+- `apply-to` (-> %Undefined% Expression %Undefined%) -- Apply Function to zero or more literal argument values
+- `chunk` (-> Expression Number Expression) -- The collection cut into pieces of that size, in order, with a shorter last piece when the size does not divide the length
+- `drop` (-> Expression Number Expression) -- The collection without its first Count elements, and empty when there are fewer than that
+- `flatten-deep` (-> Expression Expression) -- Every level of nesting removed, so the answer holds only the leaves, in order
+- `flatten-once` (-> Expression Expression) -- One level of nesting removed: the elements of every element that is itself a collection, in order, with anything else kept as it is
+- `group-by` (-> %Undefined% Expression Expression) -- Gather items into (Key Members) groups in first-appearance order
+- `partition` (-> %Undefined% Expression Expression) -- Split Items into (Yes No), preserving input order
+- `pipe` (-> Atom %Undefined% %Undefined%) -- Pass Value through a held collection of functions from left to right
+- `repeat` (-> Number Atom %Undefined%) -- Evaluate the held body that many times, answering each result
+- `scan` (-> %Undefined% %Undefined% Expression Expression) -- Every running fold result, beginning with Start
+- `sort-by` (-> %Undefined% Expression Expression) -- Compute a key for each item, sort the groups by term order and concatenate their members
+- `unfold` (-> %Undefined% %Undefined% Expression) -- Grow a collection from a seed
+- `unless` (-> Atom Atom %Undefined%) -- Evaluate the held body when the held condition answers False, and answer nothing when it answers True: if with one arm, read the other way round
+- `unzip` (-> Expression Expression) -- The two collections a zip was made from, as (Lefts Rights)
+- `while` (-> Atom Atom %Undefined%) -- Evaluate the held body while the held condition answers True, answering each body result
+- `window` (-> Expression Number Expression) -- Every run of that many consecutive elements, overlapping by all but one: the sliding window a moving average or a bigram is written over
+- `zip` (-> Expression Expression Expression) -- The pairs of corresponding elements, truncating at the shorter collection, so zipping a long one with a short one answers the short one's length
+
+#### lib_graph
+
+- `graph-add-edges` (-> Expression Expression Expression) -- Add edges written (From To), including their endpoints as vertices
+- `graph-add-vertices` (-> Expression Expression Expression) -- Add vertices, retaining existing edges
+- `graph-closure` (-> Expression Expression) -- The transitive closure: an edge for every path of one or more steps
+- `graph-edges` (-> Expression Expression) -- Every edge as a (From To) pair, ordered by tail and then head
+- `graph-is-acyclic` (-> Expression Bool) -- Whether no vertex reaches itself through one or more edges
+- `graph-is` (-> %Undefined% Bool) -- Whether a finite expression consists of (Vertex Neighbours) rows with canonical vertex and neighbour sets, and every neighbour identical to a vertex
+- `graph-neighbours` (-> Expression %Undefined% Expression) -- The vertex's outgoing neighbours as a set
+- `graph-of` (-> Expression Expression Expression) -- Build canonical (Vertex Neighbours) rows from (From To) edges and extra isolated vertices
+- `graph-reachable` (-> Expression %Undefined% Expression) -- Every reachable vertex, including the origin, as a set
+- `graph-remove-edges` (-> Expression Expression Expression) -- Remove the named edges, retaining every vertex
+- `graph-remove-vertices` (-> Expression Expression Expression) -- Remove vertices and every incident edge
+- `graph-topological-order` (-> Expression Expression) -- Unfold zero-indegree layers and concatenate them
+- `graph-transpose` (-> Expression Expression) -- Reverse every edge, retaining all vertices
+- `graph-union` (-> (:seg Expression) Expression) -- Unite zero or more graphs
+- `graph-vertices` (-> Expression Expression) -- Every vertex in canonical term order
+
+#### lib_http
+
+- `http-header` (-> Expression String %Undefined%) -- Enumerate every matching parsed field, case-insensitively and in received order
+- `http-methods` (-> Expression) -- The installed client's method symbols, including extensions registered with its native method map
+- `http-open!` (-> Symbol String Expression Expression) -- Open (http-response Status Fields Handle)
+- `http-request!` (-> Symbol String Expression Expression) -- Read (http-response Status Fields Bytes) and close its stream before returning
+- `http-server-start!` (-> String Number Atom Expression Expression) -- Listen at Host and Port; zero asks the OS for a free port
+- `http-server-stop!` (-> Expression Bool) -- Finish active requests and release the server's workers, queue and listener
+- `http-server-url` (-> Expression String) -- The server's HTTP origin, with IPv6 brackets when needed and a trailing slash
+- `with-http-server` (-> String Number Atom Expression Atom %Undefined%) -- Apply held Function to the evaluated server value and yield every answer
+- `with-http` (-> Symbol String Expression Atom %Undefined%) -- Apply a held Function to the evaluated streaming response and yield every answer
+
+#### lib_import
+
+- `import_prolog_functions_from_file` -- Consults a Prolog file and registers the named predicates as MeTTa functions
+- `import_prolog_functions_from_module` -- Loads a Prolog module and registers the named predicates as MeTTa functions
+- `imports` -- A live read-only space of (import CanonicalPath) atoms for the destination's committed MeTTa source imports; query with (match (imports &space) (import $path) $path)
+- `unimport!` -- Withdraw exactly one MeTTa source's surviving native atoms and compiled definitions; equal atoms from other owners survive
+
+#### lib_json
+
+- `dict-space` (-> Expression SpaceType) -- Build a fresh object space from (Key Value) pairs
+- `get-keys` (-> SpaceType %Undefined%) -- Enumerate object keys in storage order, preserving duplicates
+- `get-value` (-> SpaceType %Undefined% %Undefined%) -- Enumerate values whose keys unify with Key
+- `json-at` (-> %Undefined% Expression %Undefined%) -- Follow object keys and zero-based array indexes
+- `json-decode` (-> %Undefined% %Undefined%) -- Decode one JSON document
+- `json-encode` (-> %Undefined% String) -- Encode one compact JSON document
+- `json-lines-decode` (-> %Undefined% %Undefined%) -- Enumerate JSON values from LF or CRLF lines
+- `json-lines-encode` (-> Expression String) -- Encode each value as one compact JSON line, ending every record with LF
+- `json-lines-read!` (-> %Undefined% %Undefined%) -- Stream UTF-8 JSON Lines from Path, reading at most one record ahead
+- `json-lines-write!` (-> %Undefined% Expression Bool) -- Atomically replace Path with UTF-8 JSON Lines, serializing one record at a time
+- `json-pretty` (-> %Undefined% Number String) -- Format JSON with a nonnegative target column width
+- `json-read!` (-> %Undefined% %Undefined%) -- Read one UTF-8 JSON file, closing it before creating object spaces
+- `json-write!` (-> %Undefined% %Undefined% Bool) -- Atomically replace Path with one compact UTF-8 JSON document
+
+#### lib_logging
+
+- `log!` (-> String Symbol Atom Expression) -- Send a held payload through print_message/2 when its topic is enabled
+- `log-enabled` (-> String Bool) -- Whether the exact topic is enabled
+- `log-format` (-> String Symbol Atom String) -- The message's diagnostic text, whether or not its topic is enabled
+- `log-levels` (-> Expression) -- The supported host message levels
+- `log-to!` (-> Atom String Symbol Atom Expression) -- Send through the host message mechanism with an explicit MeTTa handler
+- `log-topic!` (-> String Bool Expression) -- Enable or disable this exact topic for every level
+- `log-topics` (-> Expression) -- A sorted snapshot of configured (log-topic Name Enabled) rows
+
+#### lib_markup
+
+- `markup-attribute` (-> Expression Atom String) -- One attribute's value as a String, with no answer when the element does not carry it, which is the shape a lookup has here and in lib_pairs
+- `markup-parse-html` (-> String Expression) -- One HTML document in the same shape
+- `markup-parse-xml` (-> String Expression) -- One XML document as (element Name Attributes Children): the name a Symbol, each attribute an (attr Name Value) row and the children an expression of elements and Strings
+- `markup-select` (-> Expression Atom %Undefined%) -- Every match of the selector, one answer each and in document order
+- `markup-text` (-> Expression String) -- Every text node under the element, in document order, joined: the content a reader sees with the markup taken out
+- `markup-write` (-> Expression String) -- The element as XML text, without the declaration the host writes by default and without layout, so the text is exactly the element's own markup and parses back to it
+
+#### lib_math
+
+- `math-class` (-> Number Symbol) -- The numeric species: integer, rational, or a host float class of zero, subnormal, normal, infinite or nan
+- `math-factor-pairs` (-> Number Expression) -- Stream positive (A B) factor pairs of a positive integer with A<=B, in ascending A order
+- `math-float` (-> Number Number) -- Convert a Number to binary64 by scaling one coordinate by 1.0
+- `math-gcd` (-> Expression Number) -- The nonnegative greatest common divisor of a finite expression of integers
+- `math-integer-root` (-> Number Number Expression) -- Exact (Root Remainder) with Root^Degree+Remainder=Value
+- `math-lcm` (-> Expression Number) -- The nonnegative least common multiple
+- `math-power-mod` (-> Number Number Number Number) -- Compute Base^Exponent modulo a positive Modulus using native modular exponentiation, without constructing the full power
+- `math-ratio` (-> Number Expression) -- The exact (Numerator Denominator) of a finite Number
+- `math-rational` (-> Number Number) -- Construct an exact reduced Number with a positive denominator
+- `math-rationalize` (-> Number Number) -- Preserve exact numbers and approximate finite floats within the host's floating rounding error, often with a much smaller denominator
+- `math-real-functions` (-> Expression) -- The native floating functions provided here as (math-function Name Arity) rows
+- `math-real` (-> Symbol Expression Number) -- Apply one function listed by math-real-functions to its numeric arguments
+- `math-sqrt` (-> Number Number) -- Correctly rounded floating square root of a nonnegative finite Number
+
+#### lib_observe
+
+- `observe-source` (-> SpaceType String String SpaceType) -- Run source with coverage and error diagnostics
+- `trace-source` (-> SpaceType String Atom Number SpaceType) -- Run source in a space and return a space of trace-event atoms
+
+#### lib_package
+
+- `get-property` -- The two-argument package surface answers (get-property perform claims), package keys at a loaded home, and available alternative backing rows
+- `package-load` -- A required packaging library can define this equation to replace the default interpreter
+- `setup!` -- Prepare a package and its requirements explicitly
+
+#### lib_pairs
+
+- `pairs-group` (-> Expression Expression) -- The relation as a multimap: every key once, in the standard order of terms, with every value it has as (Key Values)
+- `pairs-is` (-> %Undefined% Bool) -- Whether the value is a relation: a collection whose every element is a two-element expression
+- `pairs-keys` (-> Expression Expression) -- The key of every pair, in order and with duplicates kept, so the length is the relation's own
+- `pairs-lookup` (-> Expression %Undefined% %Undefined%) -- Every value whose key is identical to Key, in input order
+- `pairs-sort-by-key` (-> Expression Expression) -- The relation ordered by key in the standard order of terms, STABLY: pairs with equal keys keep their relative order, and none is dropped
+- `pairs-sort-by-value` (-> Expression Expression) -- The relation ordered stably by its values in the standard order of terms
+- `pairs-swap` (-> Expression Expression) -- The converse relation with the order kept: every (Key Value) becomes (Value Key) where it stands
+- `pairs-ungroup` (-> Expression Expression) -- The relation a multimap holds: one (Key Value) per value, keys in the multimap's order and values in each group's order
+- `pairs-values` (-> Expression Expression) -- The value of every pair, in order and with duplicates kept
+
+#### lib_parsing
+
+- `grammar-forms` (-> Expression) -- Return the (Name Arity) rows from the same parsing-form metadata that prepares grammars
+- `grammar-is` (-> Atom Bool) -- Whether the held value is a well-formed grammar under parsing-form metadata
+- `grammar-parse-prefix` (-> Atom String Expression) -- Parse a prefix and return (Value UnreadString), one answer per match
+- `grammar-parse` (-> Atom String %Undefined%) -- Parse the whole String with a held grammar
+- `grammar-parser` (-> Atom %Undefined%) -- Prepare a held grammar as an ordinary unary function over a finite expression of input tokens
+
+#### lib_process
+
+- `process-run!` (-> String Expression Expression) -- Run the program with those arguments, wait for it, and answer (process-result Code Output Error): the exit code as a Number, and everything it wrote to its two streams as Strings
+- `process-run-input!` (-> String Expression String Expression) -- The same, with that text written to the program's standard input and the stream closed, which is how a program that reads its input is fed without a temporary file
+- `process-signal!` (-> Number Symbol Bool) -- Send one of the signals this library names: `term` asks a program to stop, `kill` takes it away without asking, `int` is what a terminal's interrupt sends and `hup` is what a closed terminal sends
+- `process-signals` (-> Expression) -- Every signal process-signal! sends, as data: the same list its refusal names
+- `process-start!` (-> String Expression Number) -- Start the program and answer its identifier without waiting
+- `process-status` (-> Number %Undefined%) -- Whether the process is still running, without waiting for it: the Symbol `running` while it is, and its exit code once it is not
+- `process-wait!` (-> Number Number) -- Wait for the process and answer its exit code, or the negative of the signal that ended it
+
+#### lib_random
+
+- `random-bernoulli` (-> Number Expression) -- A Bool sample program with finite Probability in [0,1]
+- `random-beta` (-> Number Number Expression) -- A beta sample program with finite positive Alpha and Beta
+- `random-choice` (-> Atom Expression) -- A sample program that chooses one occurrence uniformly from held, nonempty Items
+- `random-exponential` (-> Number Expression) -- An exponential sample program with a finite positive Rate
+- `random-gamma` (-> Number Number Expression) -- A gamma sample program with finite positive Shape and Scale
+- `random-lognormal` (-> Number Number Expression) -- Exponentiate the program made by random-normal
+- `random-normal` (-> Number Number Expression) -- A normal sample program with finite Mean and nonnegative StandardDeviation
+- `random-pareto` (-> Number Expression) -- A Pareto sample program with finite positive Shape and minimum one
+- `random-sample!` (-> Atom Number Expression) -- Select Count ordered, distinct positions from held Items
+- `random-shuffle!` (-> Atom Expression) -- A permutation of all held occurrences, derived by sampling the population size without replacement
+- `random-triangular` (-> Number Number Number Expression) -- A triangular sample program with finite Low<=Mode<=High
+- `random-uniform` (-> Number Number Expression) -- A uniform sample program between finite Low and High, with Low<=High
+- `random-weibull` (-> Number Number Expression) -- A Weibull sample program with finite positive Scale and Shape
+
+#### lib_reflect
+
+- `arity-of` -- The registered arities for a name, one per solution
+- `atom-replace` (-> Atom Atom %Undefined%) -- Replace exact subterms through a literal (From To) relation
+- `atom-variables` (-> Atom Expression) -- Every written variable once, in first-appearance order, preserving its identity and sharing with the original term
+- `builtins` -- Every builtin name, one per solution
+- `extension-points` -- Every extension point the engine declares, as (name arity kind), one per solution
+- `functions` -- Every function the engine knows, builtin or not
+- `knows?` -- Whether the engine knows a name at all, as True or False
+- `origin-of` (-> Atom Expression) -- The (origin space file line) rows from get-property, one per defining occurrence; an unavailable line is -1
+- `special-forms` -- Every translator special form, one per solution
+- `surface-counts` -- How many builtins, special forms, functions and user functions
+- `surface-json` -- The engine's whole surface as a JSON string, for external tools
+- `user-functions` -- Every function this space defines itself
+
+#### lib_regex
+
+- `re-captures` (-> %Undefined% %Undefined% Expression) -- Return the first match's capture pairs, with the regex_captures contract
+- `re-compile` (-> %Undefined% %Undefined%) -- Compile pattern text to an immutable native regex value accepted by every regex operation
+- `re-count` (-> %Undefined% %Undefined% Number) -- Count matches using re-find's empty-match progression
+- `re-escape` (-> %Undefined% String) -- Quote literal text for a PCRE2 pattern, including whitespace in extended mode and embedded \\E quoting terminators
+- `re-find` (-> %Undefined% %Undefined% String) -- Enumerate every whole match, with the regex_find contract
+- `re-fullmatch` (-> %Undefined% %Undefined% Bool) -- Return whether one match covers all Text
+- `re-match` (-> %Undefined% %Undefined% Bool) -- Return whether Pattern matches anywhere in Text, with the regex_match contract
+- `re-ranges` (-> %Undefined% %Undefined% Expression) -- Enumerate (Start Length) records for whole matches in Unicode characters, starting at zero
+- `re-replace-all` (-> %Undefined% %Undefined% %Undefined% String) -- Replace every match, with the regex_replace_all contract
+- `re-replace` (-> %Undefined% %Undefined% %Undefined% String) -- Replace the first match, with the regex_replace contract
+- `re-scan` (-> %Undefined% %Undefined% Expression) -- Enumerate capture-pair records for every match in order
+- `re-split` (-> %Undefined% %Undefined% Expression) -- Split Text into skipped/matched parts, with the regex_split contract
+- `regex_captures` (-> %Undefined% %Undefined% Expression) -- Return the first match as ((Key Value) ...) pairs
+- `regex_find` (-> %Undefined% %Undefined% String) -- Enumerate every whole match in left-to-right order, preserving repeated and empty answers
+- `regex_match` (-> %Undefined% %Undefined% Bool) -- Return whether Pattern matches anywhere in Text
+- `regex_replace_all` (-> %Undefined% %Undefined% %Undefined% String) -- Replace every match, including empty matches and a nonempty alternative at the same position
+- `regex_replace` (-> %Undefined% %Undefined% %Undefined% String) -- Replace the first match
+- `regex_split` (-> %Undefined% %Undefined% Expression) -- Return alternating skipped and matched Strings, beginning and ending with a skipped part
+
+#### lib_sets
+
+- `set-difference` (-> Expression Expression Expression) -- The elements of the first that the second does not hold
+- `set-disjoint` (-> Expression Expression Bool) -- Whether they share no element
+- `set-insert` (-> Expression %Undefined% Expression) -- The set with the element added, which is the set itself when it was already there
+- `set-intersection` (-> (:seg Expression) Expression) -- The elements every argument holds, once
+- `set-is` (-> %Undefined% Bool) -- Whether the value is a set: an expression in the standard order of terms with no duplicates
+- `set-member` (-> Expression %Undefined% Bool) -- Whether the term belongs to the canonical set
+- `set-of` (-> Expression Expression) -- Canonicalize an expression through unique-atom and sort-atom: each literal term once, in the standard order of terms
+- `set-remove` (-> Expression %Undefined% Expression) -- The set without the element, which is the set itself when it was not there, so removing something absent is not an error
+- `set-subset` (-> Expression Expression Bool) -- Whether every element of the first is in the second
+- `set-symmetric-difference` (-> Expression Expression Expression) -- The elements exactly one of them holds, which is the union of the two differences and the same set whichever way round the arguments go
+- `set-union` (-> (:seg Expression) Expression) -- Every element of any canonical input set, once and in term order
+
+#### lib_socket
+
+- `socket-endpoint` (-> Number Symbol Expression) -- Return (endpoint ipv4|ipv6 NumericHostString Port) for local or peer
+- `socket-kind` (-> Number Symbol) -- Return listener, tcp or udp from the live descriptor
+- `socket-shutdown!` (-> Number Symbol Bool) -- Shut down a TCP connection's read, write or both directions
+- `socket-wait!` (-> Expression %Undefined% Expression) -- Wait for readable sockets using nonnegative finite seconds or infinite
+- `tcp-accept!` (-> Number Number) -- Wait for one connection and return its independent binary File handle
+- `tcp-connect!` (-> Expression Number) -- Connect to (endpoint ipv4|ipv6 HostString Port), resolving Host in that family
+- `tcp-listen!` (-> Expression Number Number) -- Bind and listen at an endpoint, allowing port zero to request a free port
+- `udp-bind!` (-> Expression Number) -- Bind an IPv4 or IPv6 datagram socket, allowing port zero
+- `udp-receive!` (-> Number Expression) -- Wait for (datagram Endpoint Bytes), retaining a complete numeric sender endpoint, empty packets and arbitrary bytes
+- `udp-send!` (-> Number Expression Expression Bool) -- Send one datagram, including an empty one
+- `with-socket` (-> Atom Atom %Undefined%) -- Evaluate held Acquire once and take ownership of its returned socket handle
+
+#### lib_soft
+
+- `soft-symbol?` (-> Atom Bool) -- Tests written symbol representation, regardless of function registration
+
+#### lib_spaces
+
+- `move-atoms` (-> SpaceType SpaceType Atom %Undefined%) -- Add the atoms matching a pattern to another space and remove them from the source; one answer per atom moved
+- `space-copy` (-> SpaceType SpaceType Atom %Undefined%) -- Copy the atoms matching a pattern into another space, leaving the source unchanged; one answer per atom copied
+- `space-drain` (-> SpaceType Atom %Undefined%) -- Remove the atoms matching a pattern and answer each removed atom, so a caller sees what left
+- `space-snapshot` (-> SpaceType SpaceType) -- A fresh space holding a copy of every atom, so what a space holds now survives later writes to it
+- `space-subtract` (-> SpaceType SpaceType %Undefined%) -- Remove from a space every atom another space holds; one answer per atom attempted, including an atom the space did not hold
+
+#### lib_statistics
+
+- `stats-correlation` (-> Expression Expression Number) -- Pearson correlation, correctly rounded into [-1,1] from exact paired moments
+- `stats-covariance` (-> Expression Expression Number Number) -- Paired covariance, dividing the sum of centered products by N-DegreesOfFreedom
+- `stats-geometric-mean` (-> Expression Number) -- Floating geometric mean of nonnegative finite observations
+- `stats-harmonic-mean` (-> Expression Number) -- N divided by the sum of reciprocals, for nonnegative finite observations
+- `stats-mean` (-> Expression Number) -- Arithmetic mean of a nonempty finite expression, with stats-sum's exact accumulation and result type
+- `stats-median` (-> Expression Number) -- Middle observation, or the exact mean of the two middle observations
+- `stats-mode` (-> Atom %Undefined%) -- Every most frequent held term, once, in first-occurrence order
+- `stats-quantile` (-> Expression Number Symbol Number) -- Linearly interpolate sorted observations at Probability in [0,1]
+- `stats-quantiles` (-> Expression Number Symbol Expression) -- The Partitions-1 cut points at i/Partitions, using stats-quantile's inclusive or exclusive interpolation
+- `stats-ranks` (-> Expression Expression) -- One-based numeric ranks in input order
+- `stats-regression` (-> Expression Expression Bool Expression) -- Least-squares (linear-fit Slope Intercept) from finite paired observations
+- `stats-stdev` (-> Expression Number Number) -- Correctly rounded floating square root of the exact variance
+- `stats-sum` (-> Expression Number) -- Sum finite observations exactly before any rounding
+- `stats-variance` (-> Expression Number Number) -- Sum of squared deviations divided by N-DegreesOfFreedom
+- `weighted-subset-mass-independent` (-> Atom Number Expression) -- Exact mass of an independent additive observation, as a reduced (ratio N D)
+- `weighted-subset-posterior-independent` (-> Atom Number Expression) -- Return (subset-posterior Mass ((candidate-posterior ID Ratio) ...)) in candidate order under the mass operation's exact-input contract
+- `ws-add-bernoulli-independent` (-> Expression Number %Undefined%) -- Add one independent Bernoulli trial with finite Probability in [0,1] to every numeric outcome
+- `ws-average-independent` (-> Expression %Undefined%) -- The law of the arithmetic mean of a nonempty expression of mutually independent numeric laws
+- `ws-central-moment` (-> Expression Number %Undefined%) -- The nonnegative integer Degree moment about a numeric law's mean
+- `ws-condition-joint` (-> Expression Atom %Undefined%) -- Condition a joint law of (Pair Input Output) values on the held observed Input, using term identity
+- `ws-deviation` (-> Expression %Undefined%) -- The floating square root of ws-variance, in the outcome's units
+- `ws-map-independent` (-> %Undefined% (:seg Expression) %Undefined%) -- Push a function through zero or more independent finite laws
+- `ws-map` (-> %Undefined% Expression %Undefined%) -- Push a function through one finite law
+- `ws-mass-at-least` (-> Expression Number %Undefined%) -- Inclusive upper-tail probability P(X>=Threshold) of a numeric finite law
+- `ws-mass-at-most` (-> Expression Number %Undefined%) -- Inclusive cumulative probability P(X<=Threshold) of a numeric finite law
+- `ws-median` (-> Expression %Undefined%) -- The finite law's inverse CDF at one half
+- `ws-prob-gt-independent` (-> Expression Expression %Undefined%) -- Strict independent win probability P(X>Y)
+- `ws-quantile` (-> Expression Number %Undefined%) -- The smallest supported value whose cumulative mass reaches the finite Level in (0,1]
+- `ws-sum-independent` (-> Expression Number %Undefined%) -- The law of a total of Count independent draws
+- `ws-support` (-> Expression %Undefined%) -- The law's supported values, once each, in increasing term order
+- `ws-variance` (-> Expression %Undefined%) -- The second central moment of a numeric finite law
+
+#### lib_strategy
+
+- `TP` Type -- The type-preserving strategy scheme: accept a declared arrow with the same input and output sort
+- `TU` (-> Type Type) -- The type-unifying strategy scheme: accept a declared arrow whose output has the supplied sort
+- `all` (-> Atom Atom %Undefined%) -- Apply a strategy to all immediate children
+- `alltd` (-> Atom Atom %Undefined%) -- Return every root rewrite when the strategy has answers; otherwise descend into every child
+- `bottomup` (-> Atom Atom %Undefined%) -- Recursively rewrite children, then their rebuilt parent
+- `choice` (-> Atom (:seg Atom) %Undefined%) -- Use the first strategy with any answers and preserve its whole bag
+- `fail` (-> Atom %Undefined%) -- Decline every term
+- `gtry` (-> Atom Atom %Undefined%) -- The generic try spelling: apply a strategy or preserve the original term when it declines
+- `innermost` (-> Atom Atom %Undefined%) -- Rewrite children before parents and revisit every reduct until no rule applies
+- `one` (-> Atom Atom %Undefined%) -- Apply a strategy at exactly one child position, preserving every successful position as an answer
+- `seq` (-> Atom (:seg Atom) %Undefined%) -- Apply zero or more held strategies from left to right to the final literal term
+- `stratego-all` (-> Atom Atom %Undefined%) -- The Stratego spelling of all: rewrite all immediate children, preserving leaves
+- `stratego-one` (-> Atom Atom %Undefined%) -- The Stratego spelling of one: answer every successful single-child rewrite
+- `strategy-all-tail` (-> Atom Atom %Undefined%) -- Map a strategy over a literal expression through map-atom
+- `strategy-all` (-> Atom Atom %Undefined%) -- Rewrite every immediate child, including an expression's head
+- `strategy-apply` (-> Atom Atom %Undefined%) -- Lower a held strategy application to strategy-eval through the ordinary translator-rule door
+- `strategy-choice-tail` (-> Atom Atom %Undefined%) -- Apply held strategies in order until one has answers, then return that complete bag
+- `strategy-eval` (-> Atom Atom %Undefined%) -- Apply a held rewrite plan or callable value to a literal term
+- `strategy-one` (-> Atom Atom %Undefined%) -- Rewrite exactly one immediate child, answering every successful position from left to right
+- `strategy-repeat` (-> Atom Atom %Undefined%) -- Repeat a rewrite until it declines, retaining every resulting normal form
+- `strategy-typed-apply` (-> Atom Type Atom %Undefined%) -- Apply a strategy when match-types accepts the term's current-space type against the expected sort
+- `strategy-typed-tp` (-> Atom Atom %Undefined%) -- Match a strategy's equal input and output sorts, then apply it when the term fits that sort
+- `strategy-typed-tu` (-> Atom Type Atom %Undefined%) -- Match a strategy's declared output against the requested result sort, then check its input sort and apply it
+- `topdown` (-> Atom Atom %Undefined%) -- Rewrite the root, then recursively visit the children of each result
+- `try` (-> Atom Atom %Undefined%) -- Apply the strategy, or return the original term when it has no answers
+- `◁` (-> Atom Type Atom %Undefined%) -- Apply a declared strategy through TP or TU(ResultSort), filtering its input by the term's type in the current space
+
+#### lib_string
+
+- `number-to-string` (-> Number String) -- Return the host String representation of a Number, including rationals
+- `parse-number` (-> %Undefined% Number) -- Parse the host numeric syntax
+- `string-center` (-> %Undefined% Number %Undefined% String) -- Assign half the missing codepoints to the left; an odd extra character goes on the right
+- `string-chars` (-> %Undefined% Expression) -- Return one-character Strings, preserving Unicode and embedded NUL
+- `string-codes` (-> %Undefined% Expression) -- Return Unicode scalar integers
+- `string-contains` (-> %Undefined% %Undefined% Bool) -- Test the shared search index for a literal occurrence, including an empty Part
+- `string-count` (-> %Undefined% %Undefined% Bool Number) -- Count literal occurrences, nonoverlapping by default
+- `string-dedent` (-> %Undefined% String) -- Remove the common literal space/tab prefix of nonblank LF-separated lines
+- `string-edit-distance` (-> %Undefined% %Undefined% Number) -- Return exact unit-cost Levenshtein distance over Unicode codepoints
+- `string-ends-with` (-> %Undefined% %Undefined% Bool) -- Compare the final codepoint slice with the coerced suffix
+- `string-from-chars` (-> Expression String) -- Join text items with an empty separator
+- `string-from-codes` (-> Expression String) -- Build a String from Unicode scalar integers
+- `string-indent` (-> %Undefined% %Undefined% String) -- Prefix each LF-separated line except lines containing only spaces and tabs
+- `string-index-of` (-> %Undefined% %Undefined% Number) -- Return the first zero-based codepoint index, or -1
+- `string-isub` (-> %Undefined% %Undefined% Expression Number) -- Return SWI's substring-based ontology-label ISub score, preserving complete text
+- `string-join` (-> %Undefined% Expression String) -- Join coerced text parts once with Separator; an empty list produces \"\"
+- `string-last-index-of` (-> %Undefined% %Undefined% Number) -- Return the last zero-based codepoint index, including overlapping matches, or -1
+- `string-length` (-> %Undefined% Number) -- Count Unicode codepoints, including embedded NUL
+- `string-lines` (-> %Undefined% Expression) -- Split at LF and omit one terminal empty component
+- `string-lower` (-> %Undefined% String) -- Apply the host Unicode lowercase mapping and return a String
+- `string-pad-left` (-> %Undefined% Number %Undefined% String) -- Assign all missing padding to the left through the shared MeTTa padding equation
+- `string-pad-right` (-> %Undefined% Number %Undefined% String) -- Assign no padding to the left, using string-pad-left's width and filler rules
+- `string-repeat` (-> %Undefined% Number String) -- Collect a range of text copies and join once
+- `string-replace` (-> %Undefined% %Undefined% %Undefined% String) -- Replace every nonoverlapping literal occurrence
+- `string-similarity` (-> %Undefined% %Undefined% Number) -- Normalize the shared exact edit distance as 1 - distance/max(lengths), in [0,1]
+- `string-slice` (-> %Undefined% Number Number String) -- Return the half-open codepoint interval [From,To)
+- `string-split-exact` (-> %Undefined% %Undefined% Expression) -- Split at nonoverlapping occurrences of the complete, nonempty Separator
+- `string-split` (-> %Undefined% %Undefined% Expression) -- Split on each character in Separators, retaining empty fields
+- `string-starts-with` (-> %Undefined% %Undefined% Bool) -- Test whether the first literal occurrence is at index zero
+- `string-template` (-> %Undefined% Expression String) -- Replace {Name} or {Name,Default} using unique (Name Value) pairs
+- `string-trim` (-> %Undefined% String) -- Remove ASCII space, tab, LF and CR from both ends
+- `string-unlines` (-> Expression String) -- Append LF to every coerced line and concatenate
+- `string-upper` (-> %Undefined% String) -- Apply the host Unicode uppercase mapping and return a String
+- `string-wrap` (-> %Undefined% Number %Undefined% String) -- Greedily wrap words to a positive codepoint width
+
+#### lib_system
+
+- `change-directory!` (-> String Bool) -- Change the process's current directory
+- `env-all` (-> Expression) -- The whole environment as a relation of (Name Value) pairs, names and values both Strings, in the order the host reports
+- `env-get` (-> String String) -- One environment variable's value, with NO answer when it is not set: unset and empty are different states, and a program that defaults one has to be able to tell
+- `env-set!` (-> String String Bool) -- Set the variable for this PROCESS: every space sees it and so does every child process started afterwards
+- `env-unset!` (-> String Bool) -- Remove the variable from this process
+- `platform-info` (-> Symbol %Undefined%) -- What the host says about itself: the architecture, the operating-system family, the SWI-Prolog version as a String and as its three numbers, this process's identifier, how many cores the host reports, whether integers are bounded, and the executable and home directory of the running system
+- `platform-keys` (-> Expression) -- Every key platform-info answers for, as data: the same list its refusal names
+- `working-directory` (-> String) -- The process's current directory, as an absolute path with no trailing separator
+
+#### lib_testing
+
+- `lib_testing` -- Compose finite generators with core assertions
+
+#### lib_thread
+
+- `capture` (-> Atom Atom) -- Hold an expression with its current evaluation space as an evalc value
+- `drop-space` (-> SpaceType Bool) -- Release a space through its scope owner, including owned children and deferred cleanup
+- `scope-defer` (-> %Undefined% Atom Bool) -- Register held cleanup in the current scope; returning its value transfers cleanup and current dependencies to the enclosing scope; outside a scope no cleanup is registered
+- `scope_defer` (-> %Undefined% Atom Bool) -- Native spelling of scope-defer
+- `scope` (-> Atom %Undefined%) -- Join children and release resources created by the body; child failure cancels siblings; returned spaces transfer to the enclosing scope
+- `space_drop` (-> SpaceType Bool) -- Native spelling of drop-space
+
+#### lib_torch
+
+- `torch-add` (-[det,writesState]-> %Undefined% %Undefined% %Undefined%) -- Adds :attr:`other`, scaled by :attr:`alpha`, to :attr:`input`
+- `torch-arange` (-[det,writesState]-> %Undefined% %Undefined%) -- Returns a 1-D tensor of size :math:`\\left\\lceil \\frac{\\text{end} - \\text{start}}{\\text{step}} \\right\\rceil` with values from the interval ``[start, end)`` taken with common difference :attr:`step` beginning from `start`
+- `torch-backward` (-[det,oracleIO]-> %Undefined% %Undefined%) -- Computes the gradient of current tensor wrt graph leaves
+- `torch-div` (-[det,writesState]-> %Undefined% %Undefined% %Undefined%) -- Divides each element of the input ``input`` by the corresponding element of :attr:`other`
+- `torch-grad` (-[det,oracleIO]-> %Undefined% %Undefined%) -- This attribute is ``None`` by default and becomes a Tensor the first time a call to :func:`backward` computes gradients for ``self``
+- `torch-item` (-[det,readOnlyLookup]-> %Undefined% %Undefined%) -- Returns the value of this tensor as a standard Python number
+- `torch-matmul` (-[det,writesState]-> %Undefined% %Undefined% %Undefined%) -- Matrix product of two tensors
+- `torch-mean` (-[det,writesState]-> %Undefined% %Undefined%)
+- `torch-mul` (-[det,writesState]-> %Undefined% %Undefined% %Undefined%) -- Multiplies :attr:`input` by :attr:`other`
+- `torch-ones` (-[det,writesState]-> %Undefined%) -- Returns a tensor filled with the scalar value `1`, with the shape defined by the variable argument :attr:`size`
+- `torch-randn` (-[det,oracleIO]-> %Undefined%) -- Returns a tensor filled with random numbers from a normal distribution with mean `0` and variance `1` (also called the standard normal distribution)
+- `torch-requires-grad` (-[det,writesState]-> %Undefined% %Undefined%) -- Change if autograd should record operations on this tensor: sets this tensor's :attr:`requires_grad` attribute in-place
+- `torch-shape` (-[det,readOnlyLookup]-> %Undefined% %Undefined%) -- Returns the size of the :attr:`self` tensor
+- `torch-sigmoid` (-[det,writesState]-> %Undefined% %Undefined%) -- Alias for :func:`torch.special.expit`
+- `torch-sub` (-[det,writesState]-> %Undefined% %Undefined% %Undefined%) -- Subtracts :attr:`other`, scaled by :attr:`alpha`, from :attr:`input`
+- `torch-sum` (-[det,writesState]-> %Undefined% %Undefined%) -- Returns the sum of all elements in the :attr:`input` tensor
+- `torch-tensor` (-[det,writesState]-> %Undefined% %Undefined%) -- Constructs a tensor with no autograd history (also known as a \"leaf tensor\", see :doc:`/notes/autograd`) by copying :attr:`data`
+- `torch-tolist` (-[det,readOnlyLookup]-> %Undefined% %Undefined%) -- Returns the tensor as a (nested) list
+- `torch-zeros` (-[det,writesState]-> %Undefined%) -- Returns a tensor filled with the scalar value `0`, with the shape defined by the variable argument :attr:`size`
+
+#### lib_unicode
+
+- `unicode-casefold` (-> String String) -- The text case-folded for caseless comparison, which is NOT a lowercasing: it maps to whatever compares equal regardless of case, so German sharp s becomes two letters and the answer may be longer than the input
+- `unicode-codepoint-valid` (-> Number Bool) -- Whether the database ASSIGNS this number a character: in range, not a surrogate half, and not unassigned or a noncharacter
+- `unicode-graphemes` (-> String Expression) -- The user-perceived characters of UAX#29, one string each: a base character with its combining marks is ONE answer, where string-chars answers a code point each
+- `unicode-is` (-> %Undefined% Symbol Bool) -- Whether the character belongs to a class the Unicode database defines: letter, upper, lower, title, digit, number, mark, punctuation, symbol, separator, white-space, control, ascii or assigned
+- `unicode-map` (-> String Expression String) -- The text transformed by a collection of flags in ONE pass, which is the general operation the normalizations and the fold are compositions of: stable, compat, compose, decompose, ignore, rejectna, nlf2ls, nlf2ps, nlf2lf, stripcc, casefold, charbound, lump and stripmark
+- `unicode-normalize` (-> Symbol String String) -- The text in one of the five standard forms: nfc and nfd are the canonical composition and decomposition of UAX#15, nfkc and nfkd their compatibility counterparts, and nfkc-casefold the caseless identifier form of UAX#31
+- `unicode-property` (-> %Undefined% Symbol %Undefined%) -- What the database says about one character: its general category, combining class, bidi class and mirroring, compatibility decomposition type, default ignorability, grapheme boundary class, display width, East-Asian ambiguity, its three single-character case mappings and its Indic conjunct break
+- `unicode-version` (-> String) -- The version of the Unicode database every other answer here comes from
+
+#### lib_uri
+
+- `uri-build` (-> Expression String) -- Compose encoded String pairs
+- `uri-contexts` (-> Expression) -- Encoding contexts: path keeps slash; segment encodes it; query-value protects pair separators and plus; fragment retains its own reserved punctuation
+- `uri-decode` (-> String String) -- Decode percent octets exactly once as strict UTF8
+- `uri-encode` (-> Symbol String String) -- Encode Unicode text as UTF8 percent octets in a context from uri-contexts
+- `uri-normalize` (-> String String) -- Lowercase the scheme and host, decode unreserved percent bytes and uppercase other escape digits
+- `uri-parts` (-> String Expression) -- Encoded String pairs in scheme/authority/path/query/fragment order
+- `uri-query-build` (-> Symbol Expression String) -- Encode String pairs in order using the native query-value safe characters
+- `uri-query-parse` (-> Symbol String Expression) -- Decode an ampersand-separated query into String pairs, preserving order, duplicates and empty values
+- `uri-resolve` (-> String String String) -- Resolve by RFC3986 section5.2
+
+#### lib_uuid
+
+- `uuid-bytes` (-> String Expression) -- The 16 bytes of a UUID in network order
+- `uuid-is` (-> %Undefined% Bool) -- Whether Text is a UUID String with exactly 8-4-4-4-12 hexadecimal digits, accepting either case
+- `uuid-name` (-> Number %Undefined% String String) -- Derive a version 3 (MD5) or version 5 (SHA-1) UUID from a namespace and the complete UTF-8 name
+- `uuid-namespaces` (-> Expression) -- The predefined namespace Symbols accepted by uuid-name
+- `uuid-nil` (-> String) -- The all-zero identifier, distinct from a missing answer
+- `uuid-of-bytes` (-> Expression String) -- Exactly 16 byte integers as a canonical lower-case UUID String
+- `uuid-random!` (-> String) -- Generate a version 4 random identifier
+- `uuid-time!` (-> String) -- Generate a version 1 identifier using the host's OSSP provider
+- `uuid-timestamp` (-> String Number) -- Seconds since the Unix epoch for an RFC version 1 UUID
+- `uuid-variant` (-> String Symbol) -- The layout selected by the variant bits: ncs, rfc, microsoft or future
+- `uuid-version` (-> String Number) -- The four version bits as a Number from 0 to 15
+
+#### lib_vector
+
+- `cosine-of-normalized` (-> Expression Expression Number) -- The dot specialization used for normalized vectors, as an ordinary equation
+- `cosine` (-> Expression Expression Number) -- Return the cosine similarity of equal-dimensional numeric expressions
+- `dot` (-> Expression Expression Number) -- Return the dot product as a float
+- `norm` (-> Expression Number) -- Return the correctly rounded Euclidean length of a numeric expression
+- `random-normal-vector` (-> Number Expression) -- Fold Count fresh positive uniform draws onto Accumulator with cons-atom, then normalize
+- `vector-add` (-> Expression Expression Expression) -- Add equal-dimensional numeric expressions component by component
+- `vector-distance` (-> Expression Expression Number) -- Return the correctly rounded Euclidean distance of equal-dimensional numeric expressions
+- `vector-divide` (-> Expression Expression Expression) -- Divide corresponding components
+- `vector-fill` (-> Number Number Expression) -- Collect Count copies of Value from a MeTTa range
+- `vector-multiply` (-> Expression Expression Expression) -- Multiply corresponding components, with vector-add's exact, floating and dimension rules
+- `vector-normalize` (-> Expression Expression) -- Return floating coordinates in the same direction with unit length, rounding each exact finite ratio once
+- `vector-scale` (-> Expression Number Expression) -- Multiply every component by Factor, with vector-multiply's number rules
+- `vector-subtract` (-> Expression Expression Expression) -- Subtract Right from Left component by component, with vector-add's exact, floating and dimension rules
+
+#### lib_yaml
+
+- `yaml-decode` (-> String %Undefined%) -- One YAML document as a MeTTa value: a mapping becomes a space of (Key Value) atoms, a sequence an expression, a string a String, a number a Number, the booleans True and False, and null Null
+- `yaml-encode` (-> %Undefined% String) -- One YAML document as text: a space becomes a mapping of its (Key Value) atoms, an expression a sequence, a String a string, a Number a number, True and False the booleans and Null the null scalar
+- `yaml-read!` (-> %Undefined% %Undefined%) -- One YAML document read from a file, as yaml-decode answers it
+- `yaml-write!` (-> %Undefined% %Undefined% Bool) -- One YAML document written to a file, published atomically through replace-file!: the destination is replaced only after the whole document is written, so a reader never sees half of one
+<!-- end generated library glossary -->
+
 The standard-library basis includes `lib_builtin_types` for existing callable
 types and `lib_string` for text. The 36 concerns in the library census have
 35 principal library owners: finite distributions and descriptive statistics
