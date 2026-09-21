@@ -15175,6 +15175,195 @@
       "tags": [
         "measured"
       ]
+    },
+    "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working": {
+      "title": "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working"
+    },
+    "queried each through janus in the leaked process on 2026-09-21": {
+      "title": "queried each through janus in the leaked process on 2026-09-21",
+      "supports": [
+        "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator": {
+      "title": "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator"
+    },
+    "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change": {
+      "title": "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change",
+      "supports": [
+        "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists": {
+      "title": "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists"
+    },
+    "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process": {
+      "title": "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process",
+      "supports": [
+        "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took": {
+      "title": "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took",
+      "supports": [
+        {
+          "node": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "status": "untried"
+        },
+        {
+          "node": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "relation": "addresses",
+          "target": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+        }
+      ]
+    },
+    "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end": {
+      "title": "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end",
+      "supports": [
+        {
+          "node": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in": {
+      "title": "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing": {
+      "title": "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing",
+      "supports": [
+        "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+        {
+          "node": "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang": {
+      "title": "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang",
+      "attacks": [
+        "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows": {
+      "title": "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows"
+    },
+    "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full": {
+      "title": "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full",
+      "supports": [
+        "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000": {
+      "title": "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000"
+    },
+    "instrumented the inner worklist drain in _propagate on 2026-09-21": {
+      "title": "instrumented the inner worklist drain in _propagate on 2026-09-21",
+      "supports": [
+        "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are": {
+      "title": "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are"
+    },
+    "ran the whole file with -p no:randomly and the project's config and timed it": {
+      "title": "ran the whole file with -p no:randomly and the project's config and timed it",
+      "supports": [
+        "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes": {
+      "title": "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box": {
+      "title": "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box",
+      "supports": [
+        "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+        {
+          "node": "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first": {
+      "title": "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first",
+      "tags": [
+        "meta-reasoning"
+      ]
+    },
+    "each was overturned by re-measuring through the project's own path": {
+      "title": "each was overturned by re-measuring through the project's own path",
+      "supports": [
+        "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless": {
+      "title": "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless"
+    },
+    "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line": {
+      "title": "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line",
+      "supports": [
+        "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone": {
+      "title": "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone"
+    },
+    "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21": {
+      "title": "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21",
+      "supports": [
+        "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -17127,6 +17316,14 @@
       "status": "done",
       "addresses": [
         "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+      ]
+    },
+    "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it": {
+      "title": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
       ]
     }
   },
@@ -66180,6 +66377,535 @@
         ]
       ],
       "id": "afdd0859eb092b80"
+    },
+    {
+      "at": "2026-09-21T02:14:37.290165+00:00",
+      "after": "c772f9b4f2377dfea2dae2ccadf93e835fef6cd1",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"queried each through janus in the leaked process on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change\", \"tags\": [\"measured\"], \"title\": \"the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process\", \"tags\": [\"measured\"], \"title\": \"the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists\", \"fields\": {}}]",
+      "parents": [
+        "afdd0859eb092b80"
+      ],
+      "assert": [
+        [
+          "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change",
+          "sort",
+          "prop"
+        ],
+        [
+          "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change",
+          "supports",
+          "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator"
+        ],
+        [
+          "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change",
+          "tags",
+          "measured"
+        ],
+        [
+          "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change",
+          "title",
+          "constructed the discriminating case: in the leaked process a fresh space answers (1 2), and the SAME fresh space with (: once (-> Atom %Undefined%)) added answers (1), with no other change"
+        ],
+        [
+          "queried each through janus in the leaked process on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "queried each through janus in the leaked process on 2026-09-21",
+          "supports",
+          "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working"
+        ],
+        [
+          "queried each through janus in the leaked process on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "queried each through janus in the leaked process on 2026-09-21",
+          "title",
+          "queried each through janus in the leaked process on 2026-09-21"
+        ],
+        [
+          "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator",
+          "title",
+          "the cause is that add-translator-rule! registers the rewrite globally while the (: once (-> Atom %Undefined%)) declaration it depends on is a space-local atom: apply_translator_rule_dl branches on type_declaration/2, which reads current_metta_module, and without the declaration it takes translate_args_dl, which EVALUATES the argument before the expansion places it, so superpose runs out and take 1 never receives a generator"
+        ],
+        [
+          "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working",
+          "title",
+          "the cross-space once defect is NOT a home-visibility problem: measured in the leaked state, the rule row is present, its home module is still known, translator_rule_life_check succeeds, the body answers (take 1 probe), the gate mode is fast and once is not cost-ordered, so every part of the rule branch is reachable and working"
+        ],
+        [
+          "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists",
+          "sort",
+          "prop"
+        ],
+        [
+          "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists",
+          "title",
+          "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists"
+        ],
+        [
+          "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process",
+          "sort",
+          "prop"
+        ],
+        [
+          "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process",
+          "supports",
+          "the rule row has a Declarations field that is empty for once, so the place to carry the head's argument types with the rule already exists"
+        ],
+        [
+          "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process",
+          "tags",
+          "measured"
+        ],
+        [
+          "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process",
+          "title",
+          "translator_rules:translator_rule(once, D, H) answered D = [] in the leaked process"
+        ]
+      ],
+      "id": "a09ab9c1a26e5550"
+    },
+    {
+      "at": "2026-09-21T02:29:35.500800+00:00",
+      "after": "c772f9b4f2377dfea2dae2ccadf93e835fef6cd1",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took\", \"tags\": [], \"title\": \"read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it\", \"fields\": {\"effort\": 2, \"addresses\": [\"add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently\"]}}, {\"op\": \"status\", \"id\": \"read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it\", \"because\": \"translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing\", \"tags\": [\"measured\"], \"title\": \"extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}]",
+      "parents": [
+        "a09ab9c1a26e5550"
+      ],
+      "assert": [
+        [
+          "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+          "title",
+          "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in"
+        ],
+        [
+          "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing",
+          "supports",
+          "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in"
+        ],
+        [
+          "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing",
+          "supports",
+          {
+            "node": "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing",
+          "title",
+          "measured 2026-09-21: run alone with -p no:randomly it was killed at 200 seconds both WITH the lowering.pl change and with lowering.pl restored to HEAD, so it is pre-existing; in the gate a pytest-xdist worker sat at 99% CPU on it for 18 minutes with the log not growing"
+        ],
+        [
+          "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took",
+          "sort",
+          "prop"
+        ],
+        [
+          "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took",
+          "supports",
+          {
+            "node": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+            "status": "untried"
+          }
+        ],
+        [
+          "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took",
+          "supports",
+          {
+            "node": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+            "relation": "addresses",
+            "target": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+          }
+        ],
+        [
+          "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took",
+          "title",
+          "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took"
+        ],
+        [
+          "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end",
+          "sort",
+          "prop"
+        ],
+        [
+          "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end",
+          "supersedes",
+          "the rule's body already resolves through RuleModule, so reading its type anywhere else is the same fact with two homes; the calling space keeps precedence where it has a declaration, which makes the change additive and leaves every call that resolves today on the path it already took"
+        ],
+        [
+          "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end",
+          "supports",
+          {
+            "node": "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+            "status": "done"
+          }
+        ],
+        [
+          "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end",
+          "tags",
+          "measured"
+        ],
+        [
+          "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end",
+          "title",
+          "translator_rule_type_chain/3 added in engine/translator/lowering.pl: a fresh space in a process where lib_derived was imported elsewhere now answers (1) where it answered (1 2), the importing space is unchanged at (1), remove-translator-rule! still restores the fused clause, and the shipped swap example 08-derived_forms.metta passes end to end"
+        ],
+        [
+          "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "sort",
+          "approach"
+        ],
+        [
+          "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "addresses",
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+        ],
+        [
+          "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "effort",
+          2
+        ],
+        [
+          "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "status",
+          "done"
+        ],
+        [
+          "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it",
+          "title",
+          "read the rule's declared type from the rule's own home module when the calling space has none, so a globally registered rule carries its argument-evaluation contract with it"
+        ]
+      ],
+      "id": "d964c5a6b734b0e5"
+    },
+    {
+      "at": "2026-09-21T02:41:58.732281+00:00",
+      "after": "8c73165887773c2e61d47981563dc75e6b3e7144",
+      "did": "[{\"op\": \"attack\", \"id\": \"extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in\", \"because\": \"docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang\", \"tags\": [\"source\"]}]",
+      "parents": [
+        "d964c5a6b734b0e5"
+      ],
+      "assert": [
+        [
+          "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang",
+          "sort",
+          "prop"
+        ],
+        [
+          "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang",
+          "attacks",
+          "extensions/python/tests/repository/test_door_rows.py does not terminate, which is what stalled the gate on the door-sync-selftest lane until its gnutimeout would have killed it an hour in"
+        ],
+        [
+          "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang",
+          "tags",
+          "source"
+        ],
+        [
+          "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang",
+          "title",
+          "docs/journal/2026-09-19-what-made-the-door-analysis-slow.md records the file running whole in 157.9 seconds after the singleton-loop grouping landed, against a 392.4s to 128.6s solve; every timeout I judged it by was shorter than that, 150 to 200 seconds of wall with per-test limits of 25, 60, 90 and 120, so I was killing a test that legitimately needs longer and reading my own deadline as a hang"
+        ]
+      ],
+      "id": "68ce6773b4147bf5"
+    },
+    {
+      "at": "2026-09-21T02:41:59.261904+00:00",
+      "after": "8c73165887773c2e61d47981563dc75e6b3e7144",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full\", \"tags\": [\"source\"], \"title\": \"the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"instrumented the inner worklist drain in _propagate on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000\", \"fields\": {}}]",
+      "parents": [
+        "68ce6773b4147bf5"
+      ],
+      "assert": [
+        [
+          "instrumented the inner worklist drain in _propagate on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "instrumented the inner worklist drain in _propagate on 2026-09-21",
+          "supports",
+          "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000"
+        ],
+        [
+          "instrumented the inner worklist drain in _propagate on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "instrumented the inner worklist drain in _propagate on 2026-09-21",
+          "title",
+          "instrumented the inner worklist drain in _propagate on 2026-09-21"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full",
+          "sort",
+          "prop"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full",
+          "supports",
+          "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full",
+          "tags",
+          "source"
+        ],
+        [
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full",
+          "title",
+          "read docs/journal/2026-09-19-what-made-the-door-analysis-slow.md in full"
+        ],
+        [
+          "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows",
+          "title",
+          "the door analysis is an inclusion-based points-to analysis in Andersen's class, and its cost was already diagnosed by profile and fixed on 2026-09-19: five sites handed singletons inside a loop to _protocol, _attribute, _call and _store, which are distributive over a set, so the cost was k*(c+w) where one call with the whole set is c+k*w and the profile said c dominates; grouping the calls plus making Reference a NamedTuple took the solve from 392.4s to 128.6s with byte-identical verdicts over all 227 rows"
+        ],
+        [
+          "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000",
+          "title",
+          "the fact set in that analysis plateaus rather than growing without bound, so it is not an infinite-lattice problem needing a widening operator: measured 1850 facts at 3000 queue pops, 2548 at 12000, 2548 at 15000 and 2563 at 27000"
+        ]
+      ],
+      "id": "a5f23cd7ab819c6b"
+    },
+    {
+      "at": "2026-09-21T03:07:21.771986+00:00",
+      "after": "8c73165887773c2e61d47981563dc75e6b3e7144",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran the whole file with -p no:randomly and the project's config and timed it\", \"tags\": [\"measured\"], \"title\": \"test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box\", \"tags\": [\"measured\"], \"title\": \"the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each was overturned by re-measuring through the project's own path\", \"tags\": [\"measured\", \"meta-reasoning\"], \"title\": \"three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first\", \"fields\": {}}]",
+      "parents": [
+        "a5f23cd7ab819c6b"
+      ],
+      "assert": [
+        [
+          "each was overturned by re-measuring through the project's own path",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was overturned by re-measuring through the project's own path",
+          "supports",
+          "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first"
+        ],
+        [
+          "each was overturned by re-measuring through the project's own path",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was overturned by re-measuring through the project's own path",
+          "title",
+          "each was overturned by re-measuring through the project's own path"
+        ],
+        [
+          "ran the whole file with -p no:randomly and the project's config and timed it",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran the whole file with -p no:randomly and the project's config and timed it",
+          "supports",
+          "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are"
+        ],
+        [
+          "ran the whole file with -p no:randomly and the project's config and timed it",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran the whole file with -p no:randomly and the project's config and timed it",
+          "title",
+          "ran the whole file with -p no:randomly and the project's config and timed it"
+        ],
+        [
+          "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are",
+          "sort",
+          "prop"
+        ],
+        [
+          "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are",
+          "title",
+          "test_door_rows.py does not hang: measured 2026-09-21 it ran 59 tests to completion, exit 0, in 1455.52 seconds under the project's own pytest configuration, whose per-test limit is 900s and whose faulthandler_timeout of 180s only DUMPS a stack and lets the test continue, which is what the two Timeout blocks in the log are"
+        ],
+        [
+          "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+          "title",
+          "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes"
+        ],
+        [
+          "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first",
+          "sort",
+          "prop"
+        ],
+        [
+          "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first",
+          "tags",
+          "meta-reasoning"
+        ],
+        [
+          "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first",
+          "title",
+          "three times this session I read my own deadline or configuration as the system's verdict: 60 csv and json failures that were an unset TMPDIR, 29 dev-typed failures that were my own sweep script omitting what tools/check.sh exports, and a hang that was a 24-minute pass under timeouts I set at 25 to 200 seconds; in all three the project had a recorded number or runner that would have settled it first"
+        ],
+        [
+          "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box",
+          "sort",
+          "prop"
+        ],
+        [
+          "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box",
+          "supports",
+          "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes"
+        ],
+        [
+          "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box",
+          "supports",
+          {
+            "node": "the door analysis is 9.2 times slower than its last recorded measurement: tests/repository/test_door_rows.py ran 157.9 seconds on 2026-09-19 after the singleton-loop grouping landed and runs 1455.5 seconds now, which is why the gate sat on door-sync-selftest for 24 minutes",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box",
+          "tags",
+          "measured"
+        ],
+        [
+          "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box",
+          "title",
+          "157.9s is recorded in docs/journal/2026-09-19-what-made-the-door-analysis-slow.md under 'What it bought'; 1455.52s measured here on 2026-09-21 on an otherwise idle box"
+        ]
+      ],
+      "id": "bfb6b09ff59f4b6b"
+    },
+    {
+      "at": "2026-09-21T03:13:28.518254+00:00",
+      "after": "8c73165887773c2e61d47981563dc75e6b3e7144",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line\", \"tags\": [\"measured\"], \"title\": \"the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone\", \"fields\": {}}]",
+      "parents": [
+        "bfb6b09ff59f4b6b"
+      ],
+      "assert": [
+        [
+          "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21",
+          "supports",
+          "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone"
+        ],
+        [
+          "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21",
+          "title",
+          "counted the modules, read the class declaration and read len(VERDICTS) on 2026-09-21"
+        ],
+        [
+          "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless",
+          "title",
+          "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless"
+        ],
+        [
+          "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone",
+          "sort",
+          "prop"
+        ],
+        [
+          "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone",
+          "title",
+          "the input did not grow: 172 python modules under extensions/python/metta against the 177 the 2026-09-19 journal measured at 392.4s-to-128.6s, Reference is still a NamedTuple, and the shipped verdict table still holds 227 rows, so neither the journal's constant-factor change nor its table has been undone"
+        ],
+        [
+          "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line",
+          "sort",
+          "prop"
+        ],
+        [
+          "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line",
+          "supports",
+          "the door slowdown is not the live re-analysis path: test_namespace_tiers_control_lookup_retained_calls_and_annotations costs 222.6 seconds alone with live() never entered, so orders() found every row in the 227-row shipped table and the cost is in the publish and catalog path regardless"
+        ],
+        [
+          "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line",
+          "tags",
+          "measured"
+        ],
+        [
+          "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line",
+          "title",
+          "wrapped _order.live/1 with a counter and ran that test alone on 2026-09-21; the test passed in 222.60s and printed no counter line"
+        ]
+      ],
+      "id": "c3f5b4018f3cec9d"
     }
   ]
 }
