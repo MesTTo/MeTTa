@@ -16583,6 +16583,40 @@
       "tags": [
         "measured"
       ]
+    },
+    "there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist": {
+      "title": "there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist",
+      "attacks": [
+        "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds"
+      ]
+    },
+    "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says": {
+      "title": "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says"
+    },
+    "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21": {
+      "title": "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21",
+      "supports": [
+        "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason": {
+      "title": "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+      "supports": [
+        {
+          "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds",
+        "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -18404,7 +18438,7 @@
     "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case": {
       "title": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
       "effort": 3,
-      "status": "failed",
+      "status": "unwanted",
       "addresses": [
         "the nine remaining typed failures are one class: the inserted mode-line check raises the SAME type error as the body's own must_be but without the context term, so a test asserting context(norm, _) sees error(type_error(number,bad), B) instead"
       ]
@@ -71624,6 +71658,100 @@
         ]
       ],
       "id": "eef5584a541a3fdd"
+    },
+    {
+      "at": "2026-09-21T05:37:54.003616+00:00",
+      "after": "ee910e47e662b017589bb1a53cd4bcf09d62f9a2",
+      "did": "[{\"op\": \"attack\", \"id\": \"build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds\", \"because\": \"there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist\", \"tags\": []}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case\", \"because\": \"its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "eef5584a541a3fdd"
+      ],
+      "assert": [
+        [
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+          "sort",
+          "prop"
+        ],
+        [
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+          "supersedes",
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds"
+        ],
+        [
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+          "supersedes",
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again"
+        ],
+        [
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+          "supports",
+          {
+            "node": "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+          "tags",
+          "measured"
+        ],
+        [
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason",
+          "title",
+          "its goal is unreachable by construction: stripping the check under -O is the point of the file, so the two builds raise from different predicates with different formals, and no context that mavis attaches can make the terms agree. The cost it was weighed against, nine weakened tests, does not exist either; the one accommodation in the tree is the selftest's own verdict, and its comment already states the right reason"
+        ],
+        [
+          "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21",
+          "supports",
+          "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says"
+        ],
+        [
+          "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21",
+          "title",
+          "read mavis.pl's the/2 and its -O stubs and dev_typed.pl:303-325 on 2026-09-21"
+        ],
+        [
+          "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says",
+          "title",
+          "the two builds CANNOT report the same error term, so the approach is unsatisfiable rather than merely unnecessary: under -O the inserted check is stripped, which is a documented guarantee of the file, so the violation is raised by the unchecked path instead. The selftest measures exactly that, type_error(integer, abc) from mavis against type_error(evaluable, abc/0) from is/2, which differ in the FORMAL part and not only the context; a different predicate reports it, so the context must differ too, which is what dev_typed.pl:316 already says"
+        ],
+        [
+          "there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist",
+          "sort",
+          "prop"
+        ],
+        [
+          "there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist",
+          "attacks",
+          "build_type_assertions/3 knows the Head it is expanding, so the name is available where the assertion is built; the alternative of weakening nine tests to accept either context hides a real difference between the two builds"
+        ],
+        [
+          "there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist",
+          "title",
+          "there are no nine tests: measured 2026-09-21, zero suites under tests/prolog/suites mention optimise, zero mention mavis or a the/2 check, and exactly one site in the tree handles the context difference, dev_typed.pl:316, which is the selftest's own verdict rather than a weakened assertion. The alternative the reason weighs against does not exist"
+        ],
+        [
+          "make mavis's inserted check raise with the predicate's own context, so the two builds report the same error term and a test asserting context needs no build-specific case",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "id": "c9c139c85e4b7a96"
     }
   ]
 }
