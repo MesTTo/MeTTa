@@ -540,9 +540,15 @@ install_exception_observers :-
 %hook clause outlives the whole rest of the process. Nothing hides behind the
 %catch, because the_observer_holds_no_hook_outside_an_observation asks the
 %database whether the clauses are actually gone.
-%This is the one erase in the engine that is NOT host_transactions:try_erase/1,
-%which propagates a raise on purpose. Here a raise has somewhere worse to go
-%than the caller.
+%NOT host_transactions:try_erase/1, which propagates a raise on purpose, and
+%the reason is this site's own rather than a count: the erase runs while the
+%exception observers are being torn down, so a raise here would strand the
+%remaining hooks. The other broad catches are filereader's retirement loop,
+%where the clause carries a prolog_listen/2 callback that can raise for its
+%own reasons; every erase over a table another path can reach is try_erase/1.
+%[The claim here used to be that this was the ONE such erase. It counted
+%wrong: space_hooks and native_matching had four between them, none with a
+%reason of its own, and they became try_erase/1 on 2026-09-21.]
 remove_exception_observers :-
     forall(retract(installed_hook(Reference)),
            catch(erase(Reference), _, true)).

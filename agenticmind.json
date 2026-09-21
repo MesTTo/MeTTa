@@ -16771,6 +16771,186 @@
       "tags": [
         "tested"
       ]
+    },
+    "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python": {
+      "title": "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python"
+    },
+    "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason": {
+      "title": "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason",
+      "supports": [
+        "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy": {
+      "title": "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared": {
+      "title": "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared",
+      "supports": [
+        "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+        {
+          "node": "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass": {
+      "title": "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass"
+    },
+    "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness": {
+      "title": "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness",
+      "supports": [
+        "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity": {
+      "title": "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "ran --version on both on 2026-09-21": {
+      "title": "ran --version on both on 2026-09-21",
+      "supports": [
+        "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six": {
+      "title": "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change": {
+      "title": "recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change",
+      "supports": [
+        "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six"
+      ]
+    },
+    "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first": {
+      "title": "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first"
+    },
+    "read tools/select-python.sh:49 and the symlink on 2026-09-21": {
+      "title": "read tools/select-python.sh:49 and the symlink on 2026-09-21",
+      "supports": [
+        "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree": {
+      "title": "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not": {
+      "title": "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not",
+      "supports": [
+        "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors": {
+      "title": "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors"
+    },
+    "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot": {
+      "title": "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot",
+      "supports": [
+        "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch": {
+      "title": "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch"
+    },
+    "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21": {
+      "title": "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21",
+      "supports": [
+        "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree": {
+      "title": "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one": {
+      "title": "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one",
+      "supports": [
+        "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+        {
+          "node": "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane": {
+      "title": "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane",
+      "supports": [
+        {
+          "node": "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "status": "untried"
+        },
+        {
+          "node": "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "relation": "addresses",
+          "target": "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree"
+        }
+      ]
+    },
+    "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for": {
+      "title": "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for"
+    },
+    "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors": {
+      "title": "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors",
+      "supports": [
+        "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for": {
+      "title": "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for"
+    },
+    "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way": {
+      "title": "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way",
+      "supports": [
+        "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -18779,6 +18959,14 @@
       "status": "unwanted",
       "addresses": [
         "test_door_rows.py has regressed 5.6 times since the door-order table landed: the 2026-09-15 journal records the file at 59 passed in 261.75s and it now costs 1455s, so the cost is an attributable regression after that date rather than the inherent price of the live analysis path"
+      ]
+    },
+    "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py": {
+      "title": "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree"
       ]
     }
   },
@@ -72363,6 +72551,544 @@
         ]
       ],
       "id": "6833cf3f29f5c32d"
+    },
+    {
+      "at": "2026-09-21T05:50:39.071029+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason\", \"tags\": [\"measured\"], \"title\": \"the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python\", \"fields\": {}}]",
+      "parents": [
+        "6833cf3f29f5c32d"
+      ],
+      "assert": [
+        [
+          "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason",
+          "sort",
+          "prop"
+        ],
+        [
+          "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason",
+          "supports",
+          "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python"
+        ],
+        [
+          "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason",
+          "tags",
+          "measured"
+        ],
+        [
+          "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason",
+          "title",
+          "built and inspected both artifacts on 2026-09-21; the wheel job in .github/workflows/checks.yml runs python -m build at the root for the same reason"
+        ],
+        [
+          "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python",
+          "title",
+          "the 0.9.0 artifacts build and are well formed: python -m build from the repository ROOT, where pyproject.toml is a symlink to extensions/python's, produces pymetta-0.9.0.tar.gz and pymetta-0.9.0-py3-none-any.whl, the wheel carrying Version 0.9.0 and _runtime with engine 92 files, lib 206 and extensions 58, shipping extension.pl for the mork and python seats. Building from extensions/python instead fails, because uv reads the directory name and looks for a package called python"
+        ]
+      ],
+      "id": "04aa0dea94c0ba0b"
+    },
+    {
+      "at": "2026-09-21T05:53:33.442784+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared\", \"tags\": [\"measured\"], \"title\": \"0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}]",
+      "parents": [
+        "04aa0dea94c0ba0b"
+      ],
+      "assert": [
+        [
+          "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared",
+          "sort",
+          "prop"
+        ],
+        [
+          "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared",
+          "supports",
+          "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy"
+        ],
+        [
+          "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared",
+          "supports",
+          {
+            "node": "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared",
+          "tags",
+          "measured"
+        ],
+        [
+          "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared",
+          "title",
+          "built the sdist, installed it into a clean venv outside the checkout and read the boot output on 2026-09-21, then downloaded the published 0.8.0 wheel and compared"
+        ],
+        [
+          "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+          "sort",
+          "prop"
+        ],
+        [
+          "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy",
+          "title",
+          "0.9.0 would have shipped a regression 0.8.0 did not have: shim.pl gained two imports spelled relative to itself, and it ships at TWO depths, so ../../../../engine resolves inside the runtime copy and four levels past the package in the metta/_binding copy that runtime.py actually consults. A fresh install printed four ERROR lines at first boot; the published 0.8.0 wheel has zero relative use_module in either copy"
+        ]
+      ],
+      "id": "882e39e7d8b734aa"
+    },
+    {
+      "at": "2026-09-21T05:57:22.356478+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness\", \"tags\": [\"measured\"], \"title\": \"the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ran --version on both on 2026-09-21\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change\", \"tags\": [\"reasoning\"], \"title\": \"I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six\", \"fields\": {}}]",
+      "parents": [
+        "882e39e7d8b734aa"
+      ],
+      "assert": [
+        [
+          "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six",
+          "sort",
+          "prop"
+        ],
+        [
+          "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six",
+          "title",
+          "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six"
+        ],
+        [
+          "ran --version on both on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran --version on both on 2026-09-21",
+          "supports",
+          "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity"
+        ],
+        [
+          "ran --version on both on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran --version on both on 2026-09-21",
+          "title",
+          "ran --version on both on 2026-09-21"
+        ],
+        [
+          "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness",
+          "supports",
+          "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass"
+        ],
+        [
+          "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness",
+          "title",
+          "ran the suite on both hosts on 2026-09-21 after four identical failures had already refuted flakiness and clearing the .qlf set had refuted staleness"
+        ],
+        [
+          "recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change",
+          "supports",
+          "I chased this for six observations before reading the error message, bisecting commits, clearing the qlf set and testing for flakiness first. The error named the predicate and the patched-host list named the defect; reading it first would have cost one observation instead of six"
+        ],
+        [
+          "recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change",
+          "title",
+          "recorded on 2026-09-21 so the ordering lesson survives: read the complete error before attributing to a change"
+        ],
+        [
+          "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass",
+          "title",
+          "the spaces.plt failure was my interpreter, not the tree: bare swipl on this shell's PATH is /usr/bin/swipl, and a_cached_undefined_call_is_rearmed_when_its_equation_arrives is one of the tests that needs the PATCHED host, because it exercises swi-cached-undefined-supervisor. On /usr/bin/swipl one test fails with Unknown procedure 'dt-late'/2; on /home/user/Dev/swipl-patched/bin/swipl all 220 tests and 121 sub-tests pass"
+        ],
+        [
+          "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity",
+          "title",
+          "the two hosts are indistinguishable by version: both answer 'SWI-Prolog version 10.1.14 for x86_64-linux' and differ only in the applied patches. That is the same collision the record already named for the benchmark stamp, where version plus home cannot tell a rebuilt binary from its predecessor, and it is why reading a version string is not a host identity"
+        ]
+      ],
+      "id": "b85f3d791921e18f"
+    },
+    {
+      "at": "2026-09-21T05:57:51.290215+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read tools/select-python.sh:49 and the symlink on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree\", \"fields\": {}}]",
+      "parents": [
+        "b85f3d791921e18f"
+      ],
+      "assert": [
+        [
+          "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree",
+          "title",
+          "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree"
+        ],
+        [
+          "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not",
+          "sort",
+          "prop"
+        ],
+        [
+          "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not",
+          "supports",
+          "I invalidated my own running verification by deleting all 22 .qlf files while engine/test.sh was mid-run, testing a stale-QLF hypothesis against a DIFFERENT question. That run reported 196 failures in 115 units against the earlier run's 0 in 440, and the difference is entirely mine. A long job and a destructive probe must not share a tree"
+        ],
+        [
+          "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not",
+          "tags",
+          "measured"
+        ],
+        [
+          "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not",
+          "title",
+          "observed on 2026-09-21; the earlier plunit-real.log is clean under every failure pattern and the sabotaged one is not"
+        ],
+        [
+          "read tools/select-python.sh:49 and the symlink on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tools/select-python.sh:49 and the symlink on 2026-09-21",
+          "supports",
+          "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first"
+        ],
+        [
+          "read tools/select-python.sh:49 and the symlink on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read tools/select-python.sh:49 and the symlink on 2026-09-21",
+          "title",
+          "read tools/select-python.sh:49 and the symlink on 2026-09-21"
+        ],
+        [
+          "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first",
+          "title",
+          "the gate reaches the patched host through tools/select-python.sh, which prepends the selected prefix's bin to PATH, and .venv-pypetta/bin/swipl is a symlink to /home/user/Dev/swipl-patched/bin/swipl. So a gate run gets the patched interpreter automatically and a bare `swipl` typed by hand does not; every Prolog suite run by hand needs .venv-pypetta/bin on PATH first"
+        ]
+      ],
+      "id": "03da360510df5918"
+    },
+    {
+      "at": "2026-09-21T05:59:54.927870+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot\", \"tags\": [\"measured\"], \"title\": \"the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors\", \"fields\": {}}]",
+      "parents": [
+        "03da360510df5918"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot",
+          "supports",
+          "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors"
+        ],
+        [
+          "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot",
+          "title",
+          "measured 2026-09-21: the engine-registered alias failed in the suite run, and the self-resolving one passes both that suite and the fresh-install boot"
+        ],
+        [
+          "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors",
+          "sort",
+          "prop"
+        ],
+        [
+          "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors",
+          "title",
+          "the alias had to be resolved BY the shim rather than registered by the engine: tests/prolog/suites/host/shared_decode_index.plt consults shim.pl standalone with no engine loaded, so an alias the engine's directive registers does not exist yet and 196 tests failed. Resolving it in shim.pl from its own location, trying ../../../../engine then ../_runtime/engine, serves the checkout, the runtime copy and the copy beside runtime.py alike; that suite now passes 13 tests and 2,052 sub-tests with zero source_sink errors"
+        ]
+      ],
+      "id": "011955d965402854"
+    },
+    {
+      "at": "2026-09-21T06:00:43.235764+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one\", \"tags\": [\"measured\"], \"title\": \"engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane\", \"tags\": [], \"title\": \"have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py\", \"fields\": {\"effort\": 1, \"addresses\": [\"engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree\"]}}]",
+      "parents": [
+        "011955d965402854"
+      ],
+      "assert": [
+        [
+          "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+          "title",
+          "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree"
+        ],
+        [
+          "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one",
+          "supports",
+          "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree"
+        ],
+        [
+          "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one",
+          "supports",
+          {
+            "node": "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one",
+          "title",
+          "measured 2026-09-21: a hand run reported 196 failures the gate's own configuration does not have, and spaces.plt fails one test on the stock host and passes 220 on the patched one"
+        ],
+        [
+          "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21",
+          "supports",
+          "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch"
+        ],
+        [
+          "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21",
+          "title",
+          "read tests/checks/check_host_workarounds.py:232-247 and tools/check.sh:918 on 2026-09-21"
+        ],
+        [
+          "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane",
+          "sort",
+          "prop"
+        ],
+        [
+          "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane",
+          "supports",
+          {
+            "node": "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+            "status": "untried"
+          }
+        ],
+        [
+          "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane",
+          "supports",
+          {
+            "node": "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+            "relation": "addresses",
+            "target": "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree"
+          }
+        ],
+        [
+          "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane",
+          "title",
+          "select-python.sh already prepends the chosen prefix's bin and .venv-pypetta/bin/swipl is a symlink to the patched host, so one source line reuses the mechanism instead of duplicating the host check that already exists as a lane"
+        ],
+        [
+          "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch",
+          "title",
+          "the gate DOES catch a stock host, so the pinning gap is narrower than it looked: check_host_workarounds.py runs each reproduction against the live interpreter, chosen by SWIPL or which swipl, and refuses when a patched defect answers present. A gate run on the stock host fails that lane naming the patch"
+        ],
+        [
+          "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "sort",
+          "approach"
+        ],
+        [
+          "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "addresses",
+          "engine/test.sh invoked by hand takes whatever swipl is on PATH, which on this box is the stock /usr/bin/swipl, so it runs the suites on an unpatched host and reports failures that are about the interpreter rather than the tree"
+        ],
+        [
+          "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "effort",
+          1
+        ],
+        [
+          "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "status",
+          "untried"
+        ],
+        [
+          "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py",
+          "title",
+          "have engine/test.sh select its interpreter the way the gate does, by sourcing tools/select-python.sh, rather than adding a second host probe beside check_host_workarounds.py"
+        ]
+      ],
+      "id": "98f6390c4f15da62"
+    },
+    {
+      "at": "2026-09-21T06:01:09.656216+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors\", \"tags\": [\"measured\"], \"title\": \"the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for\", \"fields\": {}}]",
+      "parents": [
+        "98f6390c4f15da62"
+      ],
+      "assert": [
+        [
+          "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors",
+          "sort",
+          "prop"
+        ],
+        [
+          "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors",
+          "supports",
+          "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for"
+        ],
+        [
+          "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors",
+          "tags",
+          "measured"
+        ],
+        [
+          "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors",
+          "title",
+          "each step measured on 2026-09-21; the outstanding run is at 115 units with zero failures and zero errors"
+        ],
+        [
+          "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for",
+          "title",
+          "the 0.9.0 release path is down to four steps and three are already discharged: version 0.9.0 and the changelog roll are committed, llms.txt is corrected and its builtin count derived, the artifacts build and a fresh install from the sdist boots outside the checkout with zero errors once shim.pl resolved the engine itself. What remains is the full plunit run now in flight on the PATCHED host, a commit of the engine and shim changes it verifies, a rebuild, and the upload the user asked for"
+        ]
+      ],
+      "id": "dc90eafe4a4063d5"
+    },
+    {
+      "at": "2026-09-21T06:01:27.767927+00:00",
+      "after": "278e4d4142562eb2e2ddccfb5a597b5cd1836615",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way\", \"tags\": [\"measured\"], \"title\": \"the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for\", \"fields\": {}}]",
+      "parents": [
+        "dc90eafe4a4063d5"
+      ],
+      "assert": [
+        [
+          "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way",
+          "sort",
+          "prop"
+        ],
+        [
+          "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way",
+          "supports",
+          "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for"
+        ],
+        [
+          "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way",
+          "tags",
+          "measured"
+        ],
+        [
+          "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way",
+          "title",
+          "sampled four sites on 2026-09-21 and found three with no with_mutex in their own clause, which decides nothing either way"
+        ],
+        [
+          "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for",
+          "sort",
+          "prop"
+        ],
+        [
+          "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for",
+          "title",
+          "the erase audit is complete for the spellings that were demonstrably wrong and open for the rest, and the difference is what can be decided without per-site tracing: the four check-then-act sites were racy by construction and are fixed, the four broad catches with no prolog_listen callback are fixed, and the fun_meta bare erases are correct because every writer of both tables holds one mutex, which I enumerated. The remaining bare erases cannot be judged by looking at their own clause, because the mutex may be held by the CALLER as drop_segment_dispatch's is, so they need per-site caller tracing that sampling cannot substitute for"
+        ]
+      ],
+      "id": "3361894689551d11"
     }
   ]
 }

@@ -282,13 +282,17 @@ metta_hook_eval(Space, Slot, Handler, Module, Term, Verdict) :-
                                                          Verdict)))
     ).
 
+%try_erase/1, not catch(_, _, true): these clauses are created with a
+%plain assertz and carry no prolog_listen/2 callback, so the only thing
+%the broad catch can absorb beyond a lost race is a real type_error from
+%a reference that is not a clause, which is a defect worth seeing.
 metta_hook_drop_compiled(Space, Slot) :-
     forall(retract(metta_hook_compiled(Space, Slot, Ref)),
-           catch(erase(Ref), _, true)).
+           host_transactions:try_erase(Ref)).
 
 metta_hook_flush_compiled :-
     forall(retract(metta_hook_compiled(_, _, Ref)),
-           catch(erase(Ref), _, true)).
+           host_transactions:try_erase(Ref)).
 
 metta_space_hooked_add(Space, Term, R, Wrapped) :-
     (   metta_hook_granted_form(Space, Term)

@@ -398,9 +398,13 @@ metta_capacity_count_install(Space) :-
 metta_capacity_count_uninstall(Space) :-
     with_mutex('$metta_capacity_count',
                transaction(( retractall(metta_capacity_count(Space, _)),
+                             %try_erase/1: the hook clause is installed with
+                             %a plain asserta and carries no prolog_listen/2
+                             %callback, so a broad catch could only absorb a
+                             %real type_error beyond the lost race.
                              forall(retract(metta_capacity_remove_hook(Space,
                                                                        Ref)),
-                                    catch(erase(Ref), _, true)) ))).
+                                    host_transactions:try_erase(Ref)) ))).
 
 %A claim-time clause specializes remove_sexp/3 on the ground pool name.
 %First-argument indexing skips it for every unclaimed space, so ordinary
@@ -505,7 +509,7 @@ metta_capacity_count_cleared('&metta') :-
     with_mutex('$metta_capacity_count',
                transaction(( retractall(metta_capacity_count(_, _)),
                              forall(retract(metta_capacity_remove_hook(_, Ref)),
-                                    catch(erase(Ref), _, true)) ))).
+                                    host_transactions:try_erase(Ref)) ))).
 metta_capacity_count_cleared(Space) :-
     (   metta_capacity_count(Space, _)
     ->  with_mutex('$metta_capacity_count',
