@@ -208,9 +208,12 @@ test(append_adds_without_truncating) :-
 
 % A missing file is an ERROR rather than a failure, so it can never be
 % mistaken for an empty file.
-test(reading_a_missing_file_raises) :-
-    catch('read-file!'("/nonexistent/metta/should-not-exist", _),
-          error(existence_error(source_sink, _), _), true).
+%`catch(Goal, Pattern, true)` is not an assertion that Goal throws: it
+%succeeds when Goal succeeds, so this passed whether or not a missing file
+%raised. plunit's throws/1 fails the test when nothing is raised.
+test(reading_a_missing_file_raises,
+     [throws(error('file-not-found'('read-file!', source_sink, _), _))]) :-
+    'read-file!'("/nonexistent/metta/should-not-exist", _).
 
 test(the_handle_surface_reads_and_seeks) :-
     test_path('metta_text_d.txt', Path),
@@ -267,9 +270,9 @@ test(list_dir_finds_a_file_it_just_wrote) :-
     memberchk("metta_text_j.txt", Entries),
     'delete-file!'(Path, true).
 
-test(listing_a_missing_directory_raises) :-
-    catch('list-dir!'("/nonexistent/metta/dir", _),
-          error(existence_error(directory, _), _), true).
+test(listing_a_missing_directory_raises,
+     [throws(error('file-not-found'('list-dir!', directory, _), _))]) :-
+    'list-dir!'("/nonexistent/metta/dir", _).
 
 % The mettafied reading: a file becomes queryable data rather than one string.
 test(file_space_makes_the_lines_matchable) :-

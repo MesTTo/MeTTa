@@ -349,7 +349,7 @@ byte_validation_case(Dir) :-
     directory_files(Dir, Files), msort(Files, Sorted),
     assertion(Sorted == ['.', '..', keep]),
     must_throw('read-bytes!'("/nonexistent/metta/bytes.bin", _),
-               error(existence_error(source_sink, _), _)).
+               error('file-not-found'('read-bytes!', source_sink, _), context('read-bytes!', _))).
 
 % ------------------------------------------------------ publication
 
@@ -846,5 +846,31 @@ file_space_case(Dir) :-
     'file-space!'(Nul, Space2),
     findall(N-T, 'get-atoms'(Space2, [line, N, T]), Rows), msort(Rows, Sorted),
     assertion(Sorted == [1-First, 2-"c"]).
+
+%Each of these contracts promises an error and none was witnessed. read-file!
+%says a missing file "is an error rather than a failure, so it can never be
+%mistaken for an empty file", list-dir! that "a missing directory raises", and
+%delete-dir! that "missing or nonempty directories raise". Writing the
+%witnesses showed the first two raising a bare existence_error while every
+%other refusal in this library is one of library_refusal/1 carrying its caller
+%and a remedy; they route through metta_file_refusal/2 now, and these assert it.
+test(a_contract_that_promises_an_error_names_the_operation_that_refused)
+     :- with_fixture(contract_refusals).
+contract_refusals(Dir) :-
+    directory_file_path(Dir, missing, Missing),
+    directory_file_path(Dir, full, Full), make_directory(Full),
+    directory_file_path(Full, 'a.txt', Inner), 'write-file!'(Inner, "a", true),
+    must_throw('read-file!'(Missing, _),
+               error('file-not-found'('read-file!', source_sink, _), context('read-file!', _))),
+    must_throw('list-dir!'(Missing, _),
+               error('file-not-found'('list-dir!', directory, _), context('list-dir!', _))),
+    must_throw('delete-dir!'(Missing, _),
+               error('file-not-found'('delete-dir!', directory, _), context('delete-dir!', _))),
+    %A nonempty directory reaches SWI as a permission_error, which is why the
+    %refusal reads permission-denied rather than naming emptiness.
+    must_throw('delete-dir!'(Full, _),
+               error('file-permission-denied'('delete-dir!', delete, directory, _),
+                     context('delete-dir!', _))),
+    assertion(exists_directory(Full)).
 
 :- end_tests(lib_file_surface).
