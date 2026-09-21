@@ -343,4 +343,16 @@ concurrent_writers(Dir) :-
 test(missing_file_raises, [throws(error(existence_error(source_sink, _), _))]) :-
     'json-read!'('json-surface-missing-file', _).
 
+
+%json-encode promises that "cyclic objects or expressions raise
+%cyclic_json_value. Non-finite numbers raise", and json-at that a document
+%which is not a container raises; neither was witnessed.
+test(encoding_a_non_finite_number_raises,
+     [throws(error(domain_error(finite_number, _), _))]) :-
+    Infinity is inf, 'json-encode'(Infinity, _).
+
+test(indexing_something_that_is_not_a_container_raises,
+     [throws(error(type_error(json_container, _), _))]) :-
+    'json-at'("notjson", [0], _).
+
 :- end_tests(lib_json_surface).

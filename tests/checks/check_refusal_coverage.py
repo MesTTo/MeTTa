@@ -71,10 +71,24 @@ def _suite_text(root: Path) -> str:
 
 
 def _witnessed(operation: str, suites: str) -> bool:
-    """Any spelling the suites use to assert that this operation refuses."""
+    """Any spelling the suites use to assert that this operation refuses.
+
+    A plunit test carries `throws(...)` in its OPTIONS and calls the operation
+    in its BODY, lines apart, so a single-line window misses it: six witnesses
+    written that way left the count unmoved at 19 [measured 2026-09-21]. The
+    window is the clause, `test(...) ... .`, not the line.
+    """
     name = re.escape(operation)
-    return bool(re.search(r"(?:must_throw|throws)\([^\n]*\'" + name + r"\'", suites)
-                or re.search(REFUSAL_TERM + r"\(\'" + name + r"\'", suites))
+    if re.search(REFUSAL_TERM + r"\(\'" + name + r"\'", suites):
+        return True
+    if re.search(r"must_throw\(\s*\'" + name + r"\'", suites):
+        return True
+    # a whole test clause whose options promise a throw and whose body calls it
+    for clause in re.finditer(r"^test\(.*?(?<!\.)\.\s*$", suites, re.S | re.M):
+        text = clause.group(0)
+        if "throws(" in text and re.search(r"\'" + name + r"\'", text):
+            return True
+    return False
 
 
 def findings(root: Path = ROOT) -> list[str]:

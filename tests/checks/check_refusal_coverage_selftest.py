@@ -44,6 +44,14 @@ def _plant(root: Path, doc: str, suite: str) -> Path:
 
 PROMISED = "%! 'thing-do!'(+A:any) is det.\n%\n% A missing thing raises.\n"
 
+#: How the suites actually write a throws witness: options on one line, the
+#: call on another, at column 0.
+THROWS_CLAUSE = (
+    "test(t,\n"
+    "     [throws(error(_, _))]) :-\n"
+    "    'thing-do!'(X).\n"
+)
+
 
 def cases() -> list[tuple[str, str, str, int]]:
     """Each case: the doc, the suite, what it is for, how many findings it owes."""
@@ -51,8 +59,12 @@ def cases() -> list[tuple[str, str, str, int]]:
         (PROMISED, "    true.\n", "promised and unwitnessed", 1),
         (PROMISED, "    must_throw('thing-do!'(X), error(_, _)).\n",
          "witnessed by must_throw", 0),
-        (PROMISED, "    test(t, [throws(error(_, _))]) :- 'thing-do!'(X).\n",
-         "witnessed by plunit throws", 0),
+        # At column 0 and spanning lines, which is how the suites write it:
+        # the options carry throws(...) and the body calls the operation, so a
+        # single-line window misses it.
+        (PROMISED,
+         THROWS_CLAUSE,
+         "witnessed by plunit throws across lines", 0),
         (PROMISED, "    'thing-not-found'('thing-do!', a, b).\n",
          "witnessed by a named refusal term", 0),
         # The five false positives: prose using `refuses` about a sibling.

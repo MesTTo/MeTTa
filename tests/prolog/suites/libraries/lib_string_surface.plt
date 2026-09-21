@@ -242,4 +242,16 @@ test(repeat_equation_is_callable_data) :-
     once(eval_expr([eval,Recipe],Function)),
     once(eval_expr([Function,"ab",3],Text)), assertion(Text=="ababab").
 
+
+%Two contracts here promise a refusal and nothing held the library to either:
+%string-template says "Missing names raise" and string-split-exact "An empty
+%separator raises" [measured 2026-09-21, the refusal-coverage lane].
+test(a_template_name_with_no_value_raises,
+     [throws(error(existence_error(template_var, 'A'), _))]) :-
+    'string-template'("{A}", [], _).
+
+test(an_empty_separator_raises,
+     [throws(error(domain_error(non_empty_string, ""), _))]) :-
+    'string-split-exact'("", "a,b", _).
+
 :- end_tests(lib_string_surface).

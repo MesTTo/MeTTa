@@ -204,4 +204,10 @@ test(password_verification_rejects_nonrepresentable_iterations) :-
     format(string(Record), '$~s$t=2147483648$~s$~s', [Algorithm, Salt, Digest]),
     must_raise('crypto-password-verify'("fixture", Record, _), error(representation_error(int), _)).
 
+
+%crypto-random-bytes promises that "Negative or unrepresentable sizes raise".
+test(a_negative_byte_count_raises,
+     [throws(error(type_error(nonneg, -1), _))]) :-
+    'crypto-random-bytes'(-1, _).
+
 :- end_tests(lib_crypto_surface).

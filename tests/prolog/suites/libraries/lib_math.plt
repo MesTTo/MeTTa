@@ -146,4 +146,10 @@ test(configured_approximation_refuses_exact_construction) :-
          must_throw('math-rational'(1,3,_),error(representation_error(exact_math_arithmetic),_))),
         (set_prolog_flag(max_rational_size,Size),set_prolog_flag(max_rational_size_action,Action))).
 
+
+%math-sqrt promises a refusal for "A negative or nonfinite" input.
+test(a_negative_root_raises,
+     [throws(error(domain_error(nonnegative_number, -1), _))]) :-
+    'math-sqrt'(-1, _).
+
 :- end_tests(lib_math).
