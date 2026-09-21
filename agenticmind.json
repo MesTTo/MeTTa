@@ -16747,6 +16747,30 @@
       "tags": [
         "tested"
       ]
+    },
+    "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push": {
+      "title": "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push"
+    },
+    "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does": {
+      "title": "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does",
+      "supports": [
+        "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases": {
+      "title": "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases"
+    },
+    "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file": {
+      "title": "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file",
+      "supports": [
+        "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -72257,6 +72281,88 @@
         ]
       ],
       "id": "1f5e96a8f8027d8c"
+    },
+    {
+      "at": "2026-09-21T05:48:15.726637+00:00",
+      "after": "5234feda7d3966e2500fcead1b7defee9c3aa42e",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does\", \"tags\": [\"measured\"], \"title\": \"every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push\", \"fields\": {}}]",
+      "parents": [
+        "1f5e96a8f8027d8c"
+      ],
+      "assert": [
+        [
+          "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push",
+          "sort",
+          "prop"
+        ],
+        [
+          "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push",
+          "title",
+          "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push"
+        ],
+        [
+          "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does",
+          "sort",
+          "prop"
+        ],
+        [
+          "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does",
+          "supports",
+          "every component pin now resolves from its private origin and the only remaining gap is GitHub: after pushing lib, extensions/python and the nested language-feature-examples, every finding the publication check reports names the github remote and none names origin. The nested component was detached at its pin, three commits ahead of origin/main, which is why HEAD:main was the push"
+        ],
+        [
+          "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does",
+          "tags",
+          "measured"
+        ],
+        [
+          "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does",
+          "title",
+          "re-ran the check with METTA_CHECK_REMOTES=1 on 2026-09-21 after the three pushes; six github pairs remain and no origin pair does"
+        ]
+      ],
+      "id": "c6f78ee1eacb5b96"
+    },
+    {
+      "at": "2026-09-21T05:49:54.546307+00:00",
+      "after": "42ed4b1e216bb9cd7e597141bf5bae81ef05ec66",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file\", \"tags\": [\"tested\"], \"title\": \"the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases\", \"fields\": {}}]",
+      "parents": [
+        "c6f78ee1eacb5b96"
+      ],
+      "assert": [
+        [
+          "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file",
+          "sort",
+          "prop"
+        ],
+        [
+          "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file",
+          "supports",
+          "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases"
+        ],
+        [
+          "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file",
+          "tags",
+          "tested"
+        ],
+        [
+          "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file",
+          "title",
+          "added and ran them on 2026-09-21; a green lane is worth what its red is worth, which is this repository's own standard for every other check in that file"
+        ],
+        [
+          "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases",
+          "sort",
+          "prop"
+        ],
+        [
+          "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases",
+          "title",
+          "the builtins check shipped for one commit without a planted case, which the record caught: its only evidence of being able to go red was the real 307-against-314 drift, and that evidence expired the moment the number was corrected. The selftest now plants four faults for it, a zero count, the true count, one short, and the claim deleted, taking the lane from 83 to 87 cases"
+        ]
+      ],
+      "id": "6833cf3f29f5c32d"
     }
   ]
 }

@@ -69,6 +69,7 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     method_findings,
     near_miss_findings,
     omitted_head_findings,
+    builtin_count_findings,
     operator_word_findings,
     operator_words,
     path_findings,
@@ -131,6 +132,10 @@ def _roster(names: list[str], count: int | None = None) -> str:
     listed = ", ".join(f"`{name}`" for name in names)
     total = len(names) if count is None else count
     return f"{total} libraries load with `!(import! ...)`: {listed}. Scored answers"
+
+
+def _builtins(count: int) -> str:
+    return f"{count} builtins are registered; `m.self.builtins()` lists them.\n"
 
 
 def _operators(words: list[str], count: str = "FOURTEEN") -> str:
@@ -745,6 +750,28 @@ def main() -> int:
     expect(
         len(operator_word_findings(SHEET, _operators(live[1:]))) == 1,
         "a word dropped from the table went unreported while the count still agreed",
+    )
+
+    # BUILTINS: the same shape as OPERATORS and for the same reason. The live
+    # number comes out of the lane's OWN message rather than a second boot,
+    # which costs a second and would only ask whether two callers of
+    # m.self.builtins() agree. What is planted here is whether the check can
+    # go red at all, which the real sheet answered once by drifting and will
+    # not answer again now that the number is right.
+    probe = builtin_count_findings(SHEET, _builtins(0))
+    expect(len(probe) == 1, "a builtin count of zero was NOT reported")
+    registered = int(probe[0].rsplit(" ", 1)[1])
+    expect(
+        builtin_count_findings(SHEET, _builtins(registered)) == [],
+        "the true builtin count was reported as a finding",
+    )
+    expect(
+        len(builtin_count_findings(SHEET, _builtins(registered - 1))) == 1,
+        "a builtin count one short of the engine was NOT reported",
+    )
+    expect(
+        len(builtin_count_findings(SHEET, "no claim about builtins here")) == 1,
+        "deleting the builtin claim silenced its check",
     )
     expect(
         any(
