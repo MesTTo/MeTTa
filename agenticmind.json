@@ -16698,6 +16698,31 @@
       "tags": [
         "measured"
       ]
+    },
+    "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither": {
+      "title": "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither"
+    },
+    "listed each component's remotes and re-tested the pin against all of them on 2026-09-21": {
+      "title": "listed each component's remotes and re-tested the pin against all of them on 2026-09-21",
+      "supports": [
+        "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither"
+      ],
+      "tags": [
+        "measured",
+        "user"
+      ]
+    },
+    "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time": {
+      "title": "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time"
+    },
+    "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195": {
+      "title": "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195",
+      "supports": [
+        "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -72061,6 +72086,82 @@
         ]
       ],
       "id": "bdaf33b8afc3f506"
+    },
+    {
+      "at": "2026-09-21T05:45:52.138096+00:00",
+      "after": "682c90c6f796e0f699215b04e0fdf8cc491c496b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"listed each component's remotes and re-tested the pin against all of them on 2026-09-21\", \"tags\": [\"measured\", \"user\"], \"title\": \"the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195\", \"tags\": [\"measured\"], \"title\": \"lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time\", \"fields\": {}}]",
+      "parents": [
+        "bdaf33b8afc3f506"
+      ],
+      "assert": [
+        [
+          "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195",
+          "sort",
+          "prop"
+        ],
+        [
+          "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195",
+          "supports",
+          "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time"
+        ],
+        [
+          "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195",
+          "tags",
+          "measured"
+        ],
+        [
+          "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195",
+          "title",
+          "git rev-list --count origin/main..HEAD read 6 for each before the push on 2026-09-21, and the pushes reported 5db3018..6200454 and bc15f3901..f42863195"
+        ],
+        [
+          "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time",
+          "title",
+          "lib and extensions/python were genuinely on no remote at all until this session pushed them: both were six commits ahead of their private origin/main and both fast-forwarded cleanly, which is this session's own work reaching a remote for the first time"
+        ],
+        [
+          "listed each component's remotes and re-tested the pin against all of them on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "listed each component's remotes and re-tested the pin against all of them on 2026-09-21",
+          "supports",
+          "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither"
+        ],
+        [
+          "listed each component's remotes and re-tested the pin against all of them on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "listed each component's remotes and re-tested the pin against all of them on 2026-09-21",
+          "tags",
+          "user"
+        ],
+        [
+          "listed each component's remotes and re-tested the pin against all of them on 2026-09-21",
+          "title",
+          "listed each component's remotes and re-tested the pin against all of them on 2026-09-21"
+        ],
+        [
+          "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither",
+          "title",
+          "the user was right to challenge my six-unpublished report and my checker was asking a narrower question than it announced: every component carries TWO remotes, a private mirror at /home/user/Dev/PyPeTTa1/components/<name>.git as origin and the GitHub URL that .gitmodules declares, and reading only the declared one reported unpublished about pins that were on their own origin. Per remote, after pushing lib and extensions/python to origin, every top-level component's pin is on origin, five are absent from GitHub, and one nested component is on neither"
+        ]
+      ],
+      "id": "5d31c6d081896998"
     }
   ]
 }

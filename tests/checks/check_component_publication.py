@@ -77,6 +77,23 @@ def _ok(*argv: str, cwd: Path) -> bool:
                           capture_output=True, check=False).returncode == 0
 
 
+def _remotes_of(component: Path, declared: str) -> list[tuple[str, str]]:
+    """Every remote this component has, with the declared URL always among them.
+
+    A component can carry a private mirror beside the public one, and which
+    of them holds a pin is a different fact per remote. Reporting only the
+    declared URL said "unpublished" about pins that were on their own origin.
+    """
+    found = {}
+    for line in _git("remote", "-v", cwd=component).splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[2] == "(fetch)":
+            found[parts[0]] = parts[1]
+    if declared not in found.values():
+        found["declared"] = declared
+    return sorted(found.items())
+
+
 def _declared(root: Path) -> list[tuple[str, str]]:
     """Each component's path and its declared url, from .gitmodules itself."""
     listing = _git("config", "-f", ".gitmodules", "--get-regexp",
@@ -125,35 +142,42 @@ def findings(root: Path = ROOT, prefix: str = "", *, remotes: bool | None = None
             if (component / ".gitmodules").is_file():
                 out.extend(findings(component, shown + "/", remotes=remotes))
             continue
-        # EVERY head the remote advertises, not just main: `git clone` takes
-        # them all, so a pin on any branch is one a fresh clone can resolve
-        # and calling it unresolvable because main lacks it is a closed-world
-        # error. Tags too, since a clone takes those by default as well.
-        listing = _git("ls-remote", "--heads", "--tags", url, cwd=component)
-        heads = [line.split()[0] for line in listing.splitlines() if line.split()]
-        if not heads:
-            out.append(f"{shown}: {url} advertises no refs, or could not be "
-                       f"reached, so pin {sha[:9]} could not be checked")
-            continue
-        # BOTH objects, not just the remote's. merge-base --is-ancestor fails
-        # when either operand is missing, so checking only the head turned an
-        # absent pin into "the remote does not contain it", which is a false
-        # answer to a question this checkout cannot answer at all.
-        if not _ok("cat-file", "-e", sha, cwd=component):
-            out.append(f"{shown}: this checkout does not hold pin {sha[:9]}, so whether "
-                       f"{url}'s main contains it could not be checked")
-            continue
-        held = [h for h in heads if _ok("cat-file", "-e", h, cwd=component)]
-        if not held:
-            out.append(f"{shown}: this checkout holds none of {url}'s {len(heads)} "
-                       f"advertised refs, so pin {sha[:9]} could not be checked")
-            continue
-        if not any(_ok("merge-base", "--is-ancestor", sha, h, cwd=component) for h in held):
-            missing = len(heads) - len(held)
-            unseen = f", and {missing} it does not hold" if missing else ""
-            out.append(f"{shown}: pin {sha[:9]} is in none of the {len(held)} refs "
-                       f"{url} advertises that this checkout holds{unseen}; "
-                       f"a fresh clone cannot resolve it")
+        # EVERY remote this component has, and every head and tag each one
+        # advertises. Two closed-world errors lived here. Asking only the
+        # DECLARED url said "unpublished" about a tree whose every pin was on
+        # its own origin, because a component here carries a private mirror
+        # beside the public one and which holds a pin is a separate fact per
+        # remote. And asking only refs/heads/main called a pin on any other
+        # branch unresolvable, when `git clone` takes every head and tag
+        # [both measured 2026-09-21].
+        for remote, target in _remotes_of(component, url):
+            refs = [line.split()[0]
+                    for line in _git("ls-remote", "--heads", "--tags", target,
+                                     cwd=component).splitlines() if line.split()]
+            if not refs:
+                out.append(f"{shown}: {remote} ({target}) advertises no refs, or could "
+                           f"not be reached, so pin {sha[:9]} could not be checked")
+                continue
+            # BOTH operands, not just the remote's: merge-base --is-ancestor
+            # fails when either is missing, so checking only the refs turned an
+            # absent pin into "the remote does not contain it", a false answer
+            # to a question this checkout cannot answer at all.
+            if not _ok("cat-file", "-e", sha, cwd=component):
+                out.append(f"{shown}: this checkout does not hold pin {sha[:9]}, so "
+                           f"whether {remote} carries it could not be checked")
+                continue
+            held = [h for h in refs if _ok("cat-file", "-e", h, cwd=component)]
+            if not held:
+                out.append(f"{shown}: this checkout holds none of {remote}'s {len(refs)} "
+                           f"advertised refs, so pin {sha[:9]} could not be checked")
+                continue
+            if not any(_ok("merge-base", "--is-ancestor", sha, h, cwd=component)
+                       for h in held):
+                missing = len(refs) - len(held)
+                unseen = f", and {missing} it does not hold" if missing else ""
+                out.append(f"{shown}: pin {sha[:9]} is in none of the {len(held)} refs "
+                           f"{remote} ({target}) advertises that this checkout "
+                           f"holds{unseen}; a clone of {remote} cannot resolve it")
         if (component / ".gitmodules").is_file():
             out.extend(findings(component, shown + "/", remotes=remotes))
     return out
@@ -174,7 +198,11 @@ def main() -> int:
         print(f"  {problem}")
     unanswered = [p for p in problems if any(mark in p for mark in UNANSWERED)]
     unresolvable = len(problems) - len(unanswered)
-    summary = f"component-publication: {unresolvable} pin(s) no fresh clone can resolve"
+    # Component AND remote, because one component can be resolvable from its
+    # private mirror and not from the public one, and calling that "one pin"
+    # loses the half that says where to push.
+    summary = (f"component-publication: {unresolvable} component-remote pair(s) "
+               f"a clone of that remote cannot resolve")
     if unanswered:
         summary += f", {len(unanswered)} question(s) this checkout could not answer"
     print(summary)
