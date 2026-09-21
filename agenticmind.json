@@ -16289,6 +16289,62 @@
       "tags": [
         "measured"
       ]
+    },
+    "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision": {
+      "title": "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision"
+    },
+    "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test": {
+      "title": "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test",
+      "supports": [
+        "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body": {
+      "title": "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1": {
+      "title": "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1",
+      "supports": [
+        "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+        {
+          "node": "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect": {
+      "title": "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect"
+    },
+    "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch": {
+      "title": "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch",
+      "supports": [
+        "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer": {
+      "title": "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers": {
+      "title": "the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers",
+      "supports": [
+        "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer"
+      ]
     }
   },
   "approaches": {
@@ -70531,6 +70587,162 @@
         ]
       ],
       "id": "1f037141618d977c"
+    },
+    {
+      "at": "2026-09-21T05:21:46.257179+00:00",
+      "after": "bdd8f6e2813e147137bea995d3ad11d2cbe7f907",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test\", \"tags\": [\"measured\"], \"title\": \"the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision\", \"fields\": {}}]",
+      "parents": [
+        "1f037141618d977c"
+      ],
+      "assert": [
+        [
+          "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test",
+          "supports",
+          "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision"
+        ],
+        [
+          "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test",
+          "title",
+          "read the complete ai-tmp/core-rows.txt on 2026-09-21, ten rows measured with a pytest plugin counting _core.cache_info() misses and CallGraph._bases per test"
+        ],
+        [
+          "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision",
+          "title",
+          "the door-rows diagnosis is closed and it is the journal's open quadratic, not caching: seven of the nine slow cases have core_miss 0, so they take the cached-core extension path, and they still cost about 63 seconds each with 11.4 million _bases calls, against the 2.57 seconds the 2026-09-15 journal measured for that same extension; the two with core_miss 1 cost 166s and the trigger 242s. So neither cache-key identity nor solve count explains it, and the remaining cure is the recorded one, precision"
+        ]
+      ],
+      "id": "b5eb481979ae7131"
+    },
+    {
+      "at": "2026-09-21T05:26:27.734609+00:00",
+      "after": "bdd8f6e2813e147137bea995d3ad11d2cbe7f907",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1\", \"tags\": [\"measured\"], \"title\": \"components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch\", \"tags\": [\"measured\"], \"title\": \"six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers\", \"tags\": [\"reasoning\"], \"title\": \"provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer\", \"fields\": {}}]",
+      "parents": [
+        "b5eb481979ae7131"
+      ],
+      "assert": [
+        [
+          "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+          "sort",
+          "prop"
+        ],
+        [
+          "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+          "title",
+          "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body"
+        ],
+        [
+          "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer",
+          "sort",
+          "prop"
+        ],
+        [
+          "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer",
+          "title",
+          "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer"
+        ],
+        [
+          "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1",
+          "sort",
+          "prop"
+        ],
+        [
+          "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1",
+          "supports",
+          "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body"
+        ],
+        [
+          "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1",
+          "supports",
+          {
+            "node": "components.sh could not provision a fresh worktree at all, and the message named the wrong problem: update-ref was UNCHECKED, so a pin the remote does not carry printed a git fatal and fell through to the modified-files guard, which reported 'examples has modified tracked files' about files nobody had modified; set -e does not catch it because component() runs inside a `|| exit 1` condition where set -e is disabled for the whole body",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1",
+          "tags",
+          "measured"
+        ],
+        [
+          "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1",
+          "title",
+          "reproduced on 2026-09-21 by running components.sh unmuted in a fresh worktree, which the lane itself mutes with >/dev/null 2>&1"
+        ],
+        [
+          "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect",
+          "title",
+          "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect"
+        ],
+        [
+          "the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers",
+          "supports",
+          "provisioning and publication are independent obligations and the fix keeps them on independent knobs: supplying an unpushed pin from a sibling worktree makes work-in-progress provisionable, and marking it UNPUBLISHED on that component's line keeps a release owing its fresh recursive clone. Choosing either one alone is wrong, since refusing makes every worktree of unpushed work unusable and a silent fallback masks an unpublishable pointer"
+        ],
+        [
+          "the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers",
+          "title",
+          "the record objected that a local object-store fallback would mask an unpublished gitlink against the release rule, which is correct about a SILENT fallback and is what the marker answers"
+        ],
+        [
+          "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch",
+          "supports",
+          "six of the eight component pins are not on their remotes: lib, examples, extensions/python, examples/language-feature-examples, extensions/cmetta and extensions/node, with only ext and extensions/mork published. A fresh recursive clone therefore cannot reproduce this tree, which is a release blocker distinct from the provisioning defect"
+        ],
+        [
+          "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch",
+          "tags",
+          "measured"
+        ],
+        [
+          "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch",
+          "title",
+          "the repaired components.sh names each one on 2026-09-21; git branch -r --contains confirms lib 620045469 and extensions/python f42863195 are on no remote branch"
+        ]
+      ],
+      "id": "1db8add4fec0f46d"
     }
   ]
 }
