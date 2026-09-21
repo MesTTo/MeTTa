@@ -7,7 +7,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
-## [0.9.0] - 2026-09-21
+## [0.9.0] - 2026-09-22
 
 ### Fixed
 
