@@ -14857,6 +14857,266 @@
       "tags": [
         "measured"
       ]
+    },
+    "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect": {
+      "title": "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect"
+    },
+    "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1": {
+      "title": "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1",
+      "supports": [
+        "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run": {
+      "title": "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run",
+      "tags": [
+        "meta-reasoning"
+      ]
+    },
+    "each was contradicted by re-running through the gate's own path": {
+      "title": "each was contradicted by re-running through the gate's own path",
+      "supports": [
+        "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones": {
+      "title": "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones",
+      "supports": [
+        {
+          "node": "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "status": "untried"
+        },
+        {
+          "node": "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "relation": "addresses",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ]
+    },
+    "the two changes are separable by path": {
+      "title": "the two changes are separable by path",
+      "supports": [
+        {
+          "node": "split the two commits by hand with git add -A on a directory",
+          "status": "untried"
+        },
+        {
+          "node": "split the two commits by hand with git add -A on a directory",
+          "relation": "addresses",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ]
+    },
+    "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path": {
+      "title": "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path",
+      "supports": [
+        {
+          "node": "split the two commits by hand with git add -A on a directory",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "the two changes are separable by path"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa": {
+      "title": "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa",
+      "worth": 85,
+      "wanted": true
+    },
+    "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching": {
+      "title": "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching",
+      "supports": [
+        "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the README names 7 of the 61 libraries and shows a usage example for none of the other 54": {
+      "title": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+      "blocks": [
+        "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+      ]
+    },
+    "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/": {
+      "title": "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/",
+      "supports": [
+        "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+        {
+          "node": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+          "relation": "blocks",
+          "target": "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic": {
+      "title": "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic"
+    },
+    "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21": {
+      "title": "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21",
+      "supports": [
+        "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test": {
+      "title": "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test",
+      "supports": [
+        {
+          "node": "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "status": "untried"
+        },
+        {
+          "node": "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "relation": "addresses",
+          "target": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        }
+      ]
+    },
+    "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source": {
+      "title": "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source"
+    },
+    "git grep -ln :seg over lib/ on 2026-09-21 returned nothing": {
+      "title": "git grep -ln :seg over lib/ on 2026-09-21 returned nothing",
+      "supports": [
+        "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)": {
+      "title": "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)",
+      "attacks": [
+        "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently": {
+      "title": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's": {
+      "title": "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's",
+      "supports": [
+        "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+        {
+          "node": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one": {
+      "title": "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one"
+    },
+    "read lib/lib_derived/lib_derived.metta's Assumes block": {
+      "title": "read lib/lib_derived/lib_derived.metta's Assumes block",
+      "supports": [
+        "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)": {
+      "title": "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)"
+    },
+    "measured 2026-09-21 against the shipped library at 6c25b8cbc": {
+      "title": "measured 2026-09-21 against the shipped library at 6c25b8cbc",
+      "supports": [
+        "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library": {
+      "title": "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library"
+    },
+    "read engine/metta/operators.pl:212-217 and measured the cross-space effect": {
+      "title": "read engine/metta/operators.pl:212-217 and measured the cross-space effect",
+      "supports": [
+        "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships": {
+      "title": "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships"
+    },
+    "read engine/translator_rules.pl:143-175 on 2026-09-21": {
+      "title": "read engine/translator_rules.pl:143-175 on 2026-09-21",
+      "supports": [
+        "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is": {
+      "title": "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is"
+    },
+    "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full": {
+      "title": "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full",
+      "supports": [
+        "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit": {
+      "title": "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit",
+      "supports": [
+        {
+          "node": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "status": "untried"
+        },
+        {
+          "node": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "relation": "addresses",
+          "target": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+        }
+      ]
+    },
+    "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware": {
+      "title": "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware",
+      "supports": [
+        {
+          "node": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -16761,6 +17021,38 @@
       "status": "done",
       "addresses": [
         "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+      ]
+    },
+    "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one": {
+      "title": "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "split the two commits by hand with git add -A on a directory": {
+      "title": "split the two commits by hand with git add -A on a directory",
+      "effort": 1,
+      "status": "failed",
+      "addresses": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page": {
+      "title": "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+      "effort": 4,
+      "status": "untried",
+      "addresses": [
+        "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+      ]
+    },
+    "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath": {
+      "title": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
       ]
     }
   },
@@ -64901,6 +65193,748 @@
         ]
       ],
       "id": "12ba7bf843b56b2b"
+    },
+    {
+      "at": "2026-09-21T00:13:39.710208+00:00",
+      "after": "6c25b8cbc835cc9cddd01bd5757fbe0f858a1dd2",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1\", \"tags\": [\"measured\"], \"title\": \"engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each was contradicted by re-running through the gate's own path\", \"tags\": [\"measured\", \"meta-reasoning\"], \"title\": \"the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones\", \"tags\": [], \"title\": \"run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one\", \"fields\": {\"effort\": 1, \"addresses\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the two changes are separable by path\", \"tags\": [], \"title\": \"split the two commits by hand with git add -A on a directory\", \"fields\": {\"effort\": 1, \"addresses\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"status\", \"id\": \"split the two commits by hand with git add -A on a directory\", \"because\": \"git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path\", \"tags\": [\"measured\"], \"status\": \"failed\"}]",
+      "parents": [
+        "12ba7bf843b56b2b"
+      ],
+      "assert": [
+        [
+          "each was contradicted by re-running through the gate's own path",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was contradicted by re-running through the gate's own path",
+          "supports",
+          "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run"
+        ],
+        [
+          "each was contradicted by re-running through the gate's own path",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was contradicted by re-running through the gate's own path",
+          "title",
+          "each was contradicted by re-running through the gate's own path"
+        ],
+        [
+          "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect",
+          "title",
+          "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect"
+        ],
+        [
+          "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path",
+          "sort",
+          "prop"
+        ],
+        [
+          "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path",
+          "supersedes",
+          "the two changes are separable by path"
+        ],
+        [
+          "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path",
+          "supports",
+          {
+            "node": "split the two commits by hand with git add -A on a directory",
+            "status": "failed"
+          }
+        ],
+        [
+          "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path",
+          "tags",
+          "measured"
+        ],
+        [
+          "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path",
+          "title",
+          "git add -A tests/prolog swept vendor/mavis.pl and dev_typed.pl into the scratch commit, so the second commit's message described changes that were not in it, and the same command committed a stray tests/prolog/agenticmind.json created by running the record tool from the wrong directory; both were repaired by git reset --soft to the merge base and staging each commit by explicit path"
+        ],
+        [
+          "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1",
+          "supports",
+          "engine/check.sh is SOURCED by tools/check.sh rather than executed, which its own header states, and tools/check.sh sources tests/checks/gate_scratch.sh at line 146 and tools/select-python.sh at line 159 before reaching it at line 407, so the dev-typed lane does inherit TMPDIR and VIRTUAL_ENV and has no environment defect"
+        ],
+        [
+          "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1",
+          "tags",
+          "measured"
+        ],
+        [
+          "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1",
+          "title",
+          "read engine/check.sh:1-12 and tools/check.sh:146,159,407 on 2026-09-21, then re-ran shim.plt, trailed_scopes.plt and limits.plt with both variables set and all three exited 0 with no failures where my own sweep script had reported 18, 10 and 1"
+        ],
+        [
+          "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run",
+          "tags",
+          "meta-reasoning"
+        ],
+        [
+          "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run",
+          "title",
+          "the 29 dev-typed failures I attributed to suites were produced by a sweep script I wrote by hand that omitted the environment tools/check.sh provides, which is the same mistake as batching suites into one process, omitting VIRTUAL_ENV and omitting TMPDIR: five times in one session a measurement described a configuration the gate does not run"
+        ],
+        [
+          "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones",
+          "sort",
+          "prop"
+        ],
+        [
+          "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones",
+          "supports",
+          {
+            "node": "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+            "status": "untried"
+          }
+        ],
+        [
+          "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones",
+          "supports",
+          {
+            "node": "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+            "relation": "addresses",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones",
+          "title",
+          "the gate is the only invocation that provisions every lane's environment, and five hand-built measurements this session were each about a configuration it does not run, so one correct measurement replaces a queue of wrong ones"
+        ],
+        [
+          "the two changes are separable by path",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two changes are separable by path",
+          "supports",
+          {
+            "node": "split the two commits by hand with git add -A on a directory",
+            "status": "untried"
+          }
+        ],
+        [
+          "the two changes are separable by path",
+          "supports",
+          {
+            "node": "split the two commits by hand with git add -A on a directory",
+            "relation": "addresses",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "the two changes are separable by path",
+          "title",
+          "the two changes are separable by path"
+        ],
+        [
+          "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "sort",
+          "approach"
+        ],
+        [
+          "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "addresses",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "effort",
+          1
+        ],
+        [
+          "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "status",
+          "untried"
+        ],
+        [
+          "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one",
+          "title",
+          "run sh tools/check.sh itself to settle the remaining lanes, rather than hand-running each one"
+        ],
+        [
+          "split the two commits by hand with git add -A on a directory",
+          "sort",
+          "approach"
+        ],
+        [
+          "split the two commits by hand with git add -A on a directory",
+          "addresses",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "split the two commits by hand with git add -A on a directory",
+          "effort",
+          1
+        ],
+        [
+          "split the two commits by hand with git add -A on a directory",
+          "status",
+          "failed"
+        ],
+        [
+          "split the two commits by hand with git add -A on a directory",
+          "title",
+          "split the two commits by hand with git add -A on a directory"
+        ]
+      ],
+      "id": "3c6e60d2941f931a"
+    },
+    {
+      "at": "2026-09-21T01:19:56.840466+00:00",
+      "after": "6c25b8cbc835cc9cddd01bd5757fbe0f858a1dd2",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching\", \"tags\": [\"user\"], \"title\": \"the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa\", \"fields\": {\"worth\": 85}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/\", \"tags\": [\"measured\"], \"title\": \"the README names 7 of the 61 libraries and shows a usage example for none of the other 54\", \"fields\": {\"blocks\": [\"the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test\", \"tags\": [], \"title\": \"write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page\", \"fields\": {\"effort\": 4, \"addresses\": [\"the README names 7 of the 61 libraries and shows a usage example for none of the other 54\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"git grep -ln :seg over lib/ on 2026-09-21 returned nothing\", \"tags\": [\"measured\"], \"title\": \"no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source\", \"fields\": {}}]",
+      "parents": [
+        "3c6e60d2941f931a"
+      ],
+      "assert": [
+        [
+          "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic",
+          "sort",
+          "prop"
+        ],
+        [
+          "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic",
+          "title",
+          "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic"
+        ],
+        [
+          "git grep -ln :seg over lib/ on 2026-09-21 returned nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "git grep -ln :seg over lib/ on 2026-09-21 returned nothing",
+          "supports",
+          "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source"
+        ],
+        [
+          "git grep -ln :seg over lib/ on 2026-09-21 returned nothing",
+          "tags",
+          "measured"
+        ],
+        [
+          "git grep -ln :seg over lib/ on 2026-09-21 returned nothing",
+          "title",
+          "git grep -ln :seg over lib/ on 2026-09-21 returned nothing"
+        ],
+        [
+          "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/",
+          "supports",
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        ],
+        [
+          "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/",
+          "supports",
+          {
+            "node": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+            "relation": "blocks",
+            "target": "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+          }
+        ],
+        [
+          "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/",
+          "tags",
+          "measured"
+        ],
+        [
+          "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/",
+          "title",
+          "grep of README.md on 2026-09-21 found library imports for lib_package, lib_he, lib_string, lib_memo, lib_csv, lib_file and lib_pln only, against 61 directories under lib/"
+        ],
+        [
+          "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source",
+          "sort",
+          "prop"
+        ],
+        [
+          "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source",
+          "title",
+          "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source"
+        ],
+        [
+          "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21",
+          "supports",
+          "a ```metta fence in the README is EXECUTED by the gate: extensions/python/tests/repository/test_readme.py runs each one on a fresh space in its own temporary directory and lets its own !(test ...) judge it, and refuses any fence containing git-import!, https:// or http:// as non-hermetic"
+        ],
+        [
+          "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21",
+          "title",
+          "read extensions/python/tests/repository/test_readme.py:31-88 on 2026-09-21"
+        ],
+        [
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+          "sort",
+          "prop"
+        ],
+        [
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+          "blocks",
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+        ],
+        [
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54",
+          "title",
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        ],
+        [
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa",
+          "sort",
+          "prop"
+        ],
+        [
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa",
+          "title",
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+        ],
+        [
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa",
+          "wanted",
+          true
+        ],
+        [
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa",
+          "worth",
+          85
+        ],
+        [
+          "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test",
+          "sort",
+          "prop"
+        ],
+        [
+          "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test",
+          "supports",
+          {
+            "node": "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+            "status": "untried"
+          }
+        ],
+        [
+          "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test",
+          "supports",
+          {
+            "node": "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+            "relation": "addresses",
+            "target": "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+          }
+        ],
+        [
+          "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test",
+          "title",
+          "the alternative, prose examples, is 61 claims nothing checks, and this repository's law is derived over hand-written; an executed fence is the strongest available form of that because the example IS the test"
+        ],
+        [
+          "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching",
+          "supports",
+          "the README shows a worked example of use for every library in the 61-library pack, and says which libraries need a MeTTa kernel whose syntax is a superset of PeTTa"
+        ],
+        [
+          "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching",
+          "tags",
+          "user"
+        ],
+        [
+          "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching",
+          "title",
+          "the user asked for it directly on 2026-09-21: 'the ilbrary pack you need to show examples of use for each', 'in the readme', and separately that some libraries carry syntax beyond PeTTa such as segment matching"
+        ],
+        [
+          "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "sort",
+          "approach"
+        ],
+        [
+          "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "addresses",
+          "the README names 7 of the 61 libraries and shows a usage example for none of the other 54"
+        ],
+        [
+          "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "effort",
+          4
+        ],
+        [
+          "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "status",
+          "untried"
+        ],
+        [
+          "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page",
+          "title",
+          "write each library's example as its own ```metta fence carrying its own !(test ...), so the gate runs all 61 and a drifted example fails the build instead of merely being wrong on the page"
+        ]
+      ],
+      "id": "fdd98de2817b71ce"
+    },
+    {
+      "at": "2026-09-21T01:20:33.804466+00:00",
+      "after": "6c25b8cbc835cc9cddd01bd5757fbe0f858a1dd2",
+      "did": "[{\"op\": \"attack\", \"id\": \"no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source\", \"because\": \"the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)\", \"tags\": [\"measured\"]}]",
+      "parents": [
+        "fdd98de2817b71ce"
+      ],
+      "assert": [
+        [
+          "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)",
+          "sort",
+          "prop"
+        ],
+        [
+          "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)",
+          "attacks",
+          "no library under lib/ uses the (:seg $x) sequence-variable syntax, so the superset dependency the user described is not segment matching appearing in a library source"
+        ],
+        [
+          "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)",
+          "tags",
+          "measured"
+        ],
+        [
+          "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)",
+          "title",
+          "the grep that produced it ran git grep over 'lib/' from the SUPERPROJECT, and git grep does not descend into a submodule, so it searched nothing; re-running it inside lib/ finds (:seg ...) in thirteen libraries including lib_sets, whose set-union is typed (-> (:seg Expression) Expression), and lib_strategy, whose seq is (-> Atom (:seg Atom) %Undefined%)"
+        ]
+      ],
+      "id": "2a7c3e92574f7139"
+    },
+    {
+      "at": "2026-09-21T01:33:21.914860+00:00",
+      "after": "6c25b8cbc835cc9cddd01bd5757fbe0f858a1dd2",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's\", \"tags\": [\"measured\"], \"title\": \"add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read lib/lib_derived/lib_derived.metta's Assumes block\", \"tags\": [\"source\"], \"title\": \"the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 against the shipped library at 6c25b8cbc\", \"tags\": [\"measured\"], \"title\": \"what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/metta/operators.pl:212-217 and measured the cross-space effect\", \"tags\": [\"measured\"], \"title\": \"this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library\", \"fields\": {}}]",
+      "parents": [
+        "2a7c3e92574f7139"
+      ],
+      "assert": [
+        [
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+          "sort",
+          "prop"
+        ],
+        [
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+          "title",
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+        ],
+        [
+          "measured 2026-09-21 against the shipped library at 6c25b8cbc",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 against the shipped library at 6c25b8cbc",
+          "supports",
+          "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)"
+        ],
+        [
+          "measured 2026-09-21 against the shipped library at 6c25b8cbc",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 against the shipped library at 6c25b8cbc",
+          "title",
+          "measured 2026-09-21 against the shipped library at 6c25b8cbc"
+        ],
+        [
+          "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's",
+          "supports",
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+        ],
+        [
+          "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's",
+          "supports",
+          {
+            "node": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's",
+          "title",
+          "measured 2026-09-21: !(collapse (once (superpose (1 2 3)))) answers (1) in the space that imported lib_derived and (1) again in a fresh space that imports it, but (1 2 3) in a fresh space that never did, in the same process; take 1 stays correct throughout, so the loss is the rule's, not take's"
+        ],
+        [
+          "read engine/metta/operators.pl:212-217 and measured the cross-space effect",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/metta/operators.pl:212-217 and measured the cross-space effect",
+          "supports",
+          "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library"
+        ],
+        [
+          "read engine/metta/operators.pl:212-217 and measured the cross-space effect",
+          "tags",
+          "measured"
+        ],
+        [
+          "read engine/metta/operators.pl:212-217 and measured the cross-space effect",
+          "title",
+          "read engine/metta/operators.pl:212-217 and measured the cross-space effect"
+        ],
+        [
+          "read lib/lib_derived/lib_derived.metta's Assumes block",
+          "sort",
+          "prop"
+        ],
+        [
+          "read lib/lib_derived/lib_derived.metta's Assumes block",
+          "supports",
+          "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one"
+        ],
+        [
+          "read lib/lib_derived/lib_derived.metta's Assumes block",
+          "tags",
+          "source"
+        ],
+        [
+          "read lib/lib_derived/lib_derived.metta's Assumes block",
+          "title",
+          "read lib/lib_derived/lib_derived.metta's Assumes block"
+        ],
+        [
+          "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one",
+          "title",
+          "the globality is intended and documented, so it is not itself the defect: lib_derived.metta's header says add-translator-rule! registers globally, for every space and for the rest of the session, which is what makes this an import decision rather than a per-call one"
+        ],
+        [
+          "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library",
+          "title",
+          "this is the failure engine/metta/operators.pl calls the one thing the superset rule does not allow, a different ANSWER to the same call, and it reaches code that never imported the library"
+        ],
+        [
+          "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)",
+          "sort",
+          "prop"
+        ],
+        [
+          "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)",
+          "title",
+          "what IS violated is lib_derived's own Guarantees line, that once under this rule answers what once answers, measured over 205 corpus files with every answer group identical; a fresh space in the same process answers (1 2 3) where the fused once answers (1)"
+        ]
+      ],
+      "id": "f8e4a446c4ab9fab"
+    },
+    {
+      "at": "2026-09-21T01:38:22.587716+00:00",
+      "after": "60e9df0ce8bf9dbcd5e24bc7d69a189b47b4a45d",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/translator_rules.pl:143-175 on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full\", \"tags\": [\"source\"], \"title\": \"what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit\", \"tags\": [], \"title\": \"pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath\", \"fields\": {\"effort\": 1, \"addresses\": [\"add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently\"]}}, {\"op\": \"status\", \"id\": \"pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath\", \"because\": \"extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "f8e4a446c4ab9fab"
+      ],
+      "assert": [
+        [
+          "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware",
+          "sort",
+          "prop"
+        ],
+        [
+          "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware",
+          "supersedes",
+          "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit"
+        ],
+        [
+          "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware",
+          "supports",
+          {
+            "node": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+            "status": "done"
+          }
+        ],
+        [
+          "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware",
+          "tags",
+          "tested"
+        ],
+        [
+          "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware",
+          "title",
+          "extensions/python/tests/repository/test_translator_rule_scope.py reproduces the leak and the undo in one test and passes, and its Known issue block names the fix site and what to assert once the diversion is space-aware"
+        ],
+        [
+          "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit",
+          "sort",
+          "prop"
+        ],
+        [
+          "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit",
+          "supports",
+          {
+            "node": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+            "status": "untried"
+          }
+        ],
+        [
+          "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit",
+          "supports",
+          {
+            "node": "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+            "relation": "addresses",
+            "target": "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+          }
+        ],
+        [
+          "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit",
+          "title",
+          "lowering.pl:1267 is crossed by every head that compiles, and this repository requires the full benchmark suite with zero regressions before a hot-path change ships, so the repair needs its own differential rather than riding along with a documentation commit"
+        ],
+        [
+          "read engine/translator_rules.pl:143-175 on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/translator_rules.pl:143-175 on 2026-09-21",
+          "supports",
+          "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships"
+        ],
+        [
+          "read engine/translator_rules.pl:143-175 on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/translator_rules.pl:143-175 on 2026-09-21",
+          "title",
+          "read engine/translator_rules.pl:143-175 on 2026-09-21"
+        ],
+        [
+          "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full",
+          "sort",
+          "prop"
+        ],
+        [
+          "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full",
+          "supports",
+          "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is"
+        ],
+        [
+          "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full",
+          "tags",
+          "source"
+        ],
+        [
+          "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full",
+          "title",
+          "read examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta in full"
+        ],
+        [
+          "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships",
+          "sort",
+          "prop"
+        ],
+        [
+          "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships",
+          "title",
+          "the process-wide takeover is documented and intended, not the defect: engine/translator_rules.pl:147-152 says translate_expr_dl/4 consults the rules one line before translate_special_dl/5 so a rule replaces a compiler form for the whole process, and :169-173 says once is deliberately left out of protected_core_head/1 because lib_derived's swap is engine work that ships"
+        ],
+        [
+          "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is",
+          "sort",
+          "prop"
+        ],
+        [
+          "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is",
+          "title",
+          "what is NOT covered anywhere is a second space: 08-derived_forms.metta runs the swap and the swap back in one space and never evaluates once elsewhere while the rule is registered, which is the case where the head is diverted globally but the rewrite resolves only where the equation is"
+        ],
+        [
+          "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "sort",
+          "approach"
+        ],
+        [
+          "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "addresses",
+          "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+        ],
+        [
+          "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "effort",
+          1
+        ],
+        [
+          "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "status",
+          "done"
+        ],
+        [
+          "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath",
+          "title",
+          "pin the cross-space leak with a regression rather than change lowering.pl:1267 in the same breath"
+        ]
+      ],
+      "id": "689a27ae409a7005"
     }
   ]
 }
