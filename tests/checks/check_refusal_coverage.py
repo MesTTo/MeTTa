@@ -1,43 +1,44 @@
-"""Purpose: name every effectful library head the suites exercise and never refuse.
+"""Purpose: name every refusal a library CONTRACT promises and no suite witnesses.
 
-A suite written as prose hides its own gaps. Which operations a library test
-file EXERCISES and which it ever asserts a REFUSAL for are two sets, and the
-difference is invisible while the tests are read one at a time: a missing
-refusal looks exactly like a test nobody wrote. Printed as a table it is one
-line per empty cell.
+A `%!` block that says an operation raises, refuses, or that something "is an
+error" has made a promise. Whether any test holds it to that promise is a
+different question, and the two are never written side by side, so a promise
+nobody witnesses looks exactly like a promise nobody made. Printed as a table
+it is one line per unwitnessed claim.
 
-That difference found a real defect the day this was written. `lib_csv_surface`
-exercised `csv-read!` nine times, `csv-space` four and `csv-append!` eight
-while refusing none of them, against five refusals each for `csv-snapshot!` and
-`csv-write!`. Writing the three missing ones showed `csv-space` accepting a
-DIRECTORY, because its path probe opened the source with a goal of `true` and
-POSIX open(2) on a directory succeeds -- read(2) is what answers EISDIR
-[measured 2026-09-21; fixed in lib_csv.pl by making the probe peek a byte].
+The contract is the right subject, not the operations a suite happens to
+exercise. An exercised head may be total and have no refusal to assert, which
+made the first version of this check report eighteen heads of which most were
+noise; a documented promise is a claim the library itself makes and a missing
+witness is unambiguous.
 
-An effectful head is the subject: a `!` name holds a resource or mutates
-something, so it has a failure path by construction. A total operation has no
-refusal to assert and would be noise here.
+It earns its place by what it found the day it was written. `lib_csv_surface`
+refused none of csv-read!, csv-space or csv-append!, and writing those
+witnesses showed csv-space accepting a DIRECTORY, because its path probe opened
+the source with a goal of `true` and POSIX open(2) on a directory succeeds.
+`lib_file` promised refusals for read-file! and list-dir! that nothing
+asserted, and writing those showed four operations throwing a bare
+existence_error instead of one of library_refusal/1, naming neither the caller
+nor a remedy [measured 2026-09-21; both fixed].
 
-Assumes: run from a checkout; the suites live under
-    tests/prolog/suites/libraries/.
+Assumes: run inside a checkout.
 Guarantees:
-  - a refusal counts wherever it appears inside `must_throw(...)` or a plunit
-    `throws(...)`, including nested in `findall/3` or `let`, because matching
-    only the head of the call under-reported four operations that WERE covered
-    [measured 2026-09-21: 24 reported against 20 real]
+  - a witness counts from ANY suite, because a library's refusal may be
+    asserted by a sibling suite: read-file! is promised in lib_file and
+    witnessed in lib_text.plt, and counting per suite called it unwitnessed
     [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
-  - an operation used fewer than THRESHOLD times is not reported, because one
-    incidental use in a fixture is not evidence the suite owns that operation
+  - a witness counts in either spelling the suites use, `must_throw(...)`,
+    plunit's `throws(...)`, or a named refusal term carrying the operation
+    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
 Fails when: nothing. This reports; the count is the burn-down surface.
 Open Obligations:
-  To Do: gate this at zero once the 20 open cells are closed
+  To Do: gate at zero once the 24 open claims are witnessed
   Hacks: None
   Future Enhancements: None
 """
 
 from __future__ import annotations
 
-import collections
 import re
 import sys
 from pathlib import Path
@@ -45,50 +46,63 @@ from pathlib import Path
 #: Derived, not counted.
 ROOT = next(parent for parent in Path(__file__).resolve().parents
             if (parent / "engine").is_dir() and (parent / "lib").is_dir())
-SUITES = ROOT / "tests" / "prolog" / "suites" / "libraries"
 
-#: An effectful head: `!` is this language's mark for one, so the set needs no
-#: list beside it that would then have to be kept equal by hand.
-EFFECTFUL = re.compile(r"'([a-z][a-z0-9-]*!)'\s*\(")
-REFUSAL = re.compile(r"(?:must_throw|throws)\s*\(")
-NAME = re.compile(r"'([a-z][a-z0-9-]*!)'")
-
-#: Below this a use is incidental setup rather than the suite owning the head.
-THRESHOLD = 3
-
-
-def _refused(text: str) -> set[str]:
-    """Every effectful head named anywhere inside a refusal, brackets balanced."""
-    found: set[str] = set()
-    for opening in REFUSAL.finditer(text):
-        index, depth = opening.end(), 1
-        while index < len(text) and depth:
-            depth += (text[index] == "(") - (text[index] == ")")
-            index += 1
-        found |= set(NAME.findall(text[opening.end():index]))
-    return found
+#: A `%!` block and the comment lines under it: the head it documents, then its
+#: prose.
+BLOCK = re.compile(r"((?:^%!.*\n)+)((?:^%.*\n)*)", re.M)
+HEAD = re.compile(r"^%!\s+\'?([a-z][a-z0-9-]*!?)\'?\(", re.M)
+#: The words a contract uses to promise a refusal OF THE HEAD IT DOCUMENTS.
+#: `refus*` is deliberately absent: the libraries use it about a sibling far
+#: more often than about the documented head, so it reported platform-keys and
+#: process-signals for saying "the same list its refusal names" and
+#: http-methods for "A request refuses a method outside this catalog", none of
+#: which promise anything about the head. `raises` and `is an error` take the
+#: documented head as their subject [measured 2026-09-21: 24 findings with
+#: `refus*`, 19 without, and the five removed were all false].
+PROMISE = re.compile(r"\b(raises?|is an error)\b", re.I)
+#: A refusal term: the library names them for what they refuse.
+REFUSAL_TERM = r"\'[a-z-]*(?:error|refus|not-found|denied|mismatch|exists|overlap)[a-z-]*\'"
 
 
-def findings(suites: Path = SUITES) -> list[str]:
-    """One line per effectful head a suite exercises and never refuses."""
+def _suite_text(root: Path) -> str:
+    """Every suite as one string: a witness anywhere counts."""
+    return " ".join(path.read_text(encoding="utf-8", errors="replace")
+                    for path in sorted((root / "tests" / "prolog" / "suites").glob("*/*.plt")))
+
+
+def _witnessed(operation: str, suites: str) -> bool:
+    """Any spelling the suites use to assert that this operation refuses."""
+    name = re.escape(operation)
+    return bool(re.search(r"(?:must_throw|throws)\([^\n]*\'" + name + r"\'", suites)
+                or re.search(REFUSAL_TERM + r"\(\'" + name + r"\'", suites))
+
+
+def findings(root: Path = ROOT) -> list[str]:
+    """One line per documented refusal that no suite holds the library to."""
+    suites = _suite_text(root)
     out: list[str] = []
-    for suite in sorted(suites.glob("*.plt")):
-        text = suite.read_text(encoding="utf-8", errors="replace")
-        used = collections.Counter(EFFECTFUL.findall(text))
-        refused = _refused(text)
-        for operation, count in sorted(used.items(), key=lambda row: -row[1]):
-            if count >= THRESHOLD and operation not in refused:
-                out.append(f"{suite.name}: {operation} is exercised {count} times "
-                           f"and refused none; its failure path is untested")
+    for library in sorted(root.glob("lib/lib_*/lib_*.pl")):
+        text = library.read_text(encoding="utf-8", errors="replace")
+        seen: set[str] = set()
+        for heads, prose in BLOCK.findall(text):
+            body = " ".join(line.lstrip("% ").rstrip() for line in prose.splitlines())
+            if not PROMISE.search(body):
+                continue
+            for operation in HEAD.findall(heads):
+                if operation in seen or _witnessed(operation, suites):
+                    continue
+                seen.add(operation)
+                out.append(f"{library.parent.name}: {operation} is documented to refuse "
+                           f"and no suite witnesses it -- {body[:70]}")
     return out
 
 
 def main() -> int:
-    """Report the table, and say what an empty cell means."""
+    """Report the table, and say what an unwitnessed promise means."""
     problems = findings()
     for problem in problems:
         print(f"  {problem}")
-    print(f"refusal-coverage: {len(problems)} effectful head(s) with no failure test")
+    print(f"refusal-coverage: {len(problems)} documented refusal(s) with no witness")
     return 0
 
 
