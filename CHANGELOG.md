@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Every refusal the shipped libraries document is now witnessed by a test that
+  runs it. Twelve cases sit in one table in
+  `tests/prolog/suites/libraries/library_refusals.plt` and one law checks them
+  all, so a new documented refusal costs a row rather than a test body. Two
+  promises that trigger only when a host provider is absent are recorded as
+  such and checked in the direction available here, namely that the operation
+  still succeeds, so losing the provider turns the row red instead of leaving
+  the promise silently unchecked.
 - The README shows a worked example of every library in the pack, sixty of them
   as `metta` fences the gate runs on a fresh space, and names the sixteen whose
   own definitions and signatures use sequence variables, `(:seg $rest)`, and so

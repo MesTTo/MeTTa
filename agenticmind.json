@@ -15504,6 +15504,431 @@
       "tags": [
         "measured"
       ]
+    },
+    "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others": {
+      "title": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others",
+      "worth": 95,
+      "wanted": true
+    },
+    "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests": {
+      "title": "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests",
+      "supports": [
+        "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms": {
+      "title": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+      "blocks": [
+        "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+      ]
+    },
+    "each cluster was measured failing together and then fixed by one change on 2026-09-21": {
+      "title": "each cluster was measured failing together and then fixed by one change on 2026-09-21",
+      "supports": [
+        "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+        {
+          "node": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+          "relation": "blocks",
+          "target": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate": {
+      "title": "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the four clusters above each failed as a block and each was cleared by a single change": {
+      "title": "the four clusters above each failed as a block and each was cleared by a single change",
+      "supports": [
+        "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package": {
+      "title": "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package"
+    },
+    "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21": {
+      "title": "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21",
+      "supports": [
+        "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused": {
+      "title": "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused",
+      "supports": [
+        {
+          "node": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "status": "untried"
+        },
+        {
+          "node": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "relation": "addresses",
+          "target": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+        }
+      ]
+    },
+    "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant": {
+      "title": "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant"
+    },
+    "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer": {
+      "title": "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer",
+      "supports": [
+        "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5": {
+      "title": "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+      "blocks": [
+        "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+      ]
+    },
+    "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21": {
+      "title": "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21",
+      "supports": [
+        "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+        {
+          "node": "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+          "relation": "blocks",
+          "target": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see": {
+      "title": "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty": {
+      "title": "the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty",
+      "supports": [
+        "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see"
+      ]
+    },
+    "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell": {
+      "title": "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell",
+      "supports": [
+        {
+          "node": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "status": "untried"
+        },
+        {
+          "node": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "relation": "addresses",
+          "target": "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+        }
+      ]
+    },
+    "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data": {
+      "title": "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data",
+      "supports": [
+        {
+          "node": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do": {
+      "title": "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do"
+    },
+    "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21": {
+      "title": "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21",
+      "supports": [
+        "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised": {
+      "title": "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised"
+    },
+    "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests": {
+      "title": "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests",
+      "supports": [
+        "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "two vacuous assertions were found by hand, so more may exist": {
+      "title": "two vacuous assertions were found by hand, so more may exist",
+      "supports": [
+        {
+          "node": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "status": "untried"
+        },
+        {
+          "node": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "relation": "addresses",
+          "target": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+        }
+      ]
+    },
+    "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text": {
+      "title": "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text",
+      "supports": [
+        {
+          "node": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "two vacuous assertions were found by hand, so more may exist"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it": {
+      "title": "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it",
+      "tags": [
+        "meta-reasoning"
+      ]
+    },
+    "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C": {
+      "title": "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C",
+      "supports": [
+        "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them": {
+      "title": "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them"
+    },
+    "pytest --durations=20 over the whole file on 2026-09-21": {
+      "title": "pytest --durations=20 over the whole file on 2026-09-21",
+      "supports": [
+        "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all": {
+      "title": "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field": {
+      "title": "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field",
+      "supports": [
+        "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+        {
+          "node": "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file": {
+      "title": "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file"
+    },
+    "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored": {
+      "title": "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored",
+      "supports": [
+        "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap": {
+      "title": "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap"
+    },
+    "read the durations by phase and timed both calls inside the body on 2026-09-21": {
+      "title": "read the durations by phase and timed both calls inside the body on 2026-09-21",
+      "supports": [
+        "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each": {
+      "title": "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each"
+    },
+    "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total": {
+      "title": "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total",
+      "supports": [
+        "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing": {
+      "title": "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing"
+    },
+    "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33": {
+      "title": "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33",
+      "supports": [
+        "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share": {
+      "title": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+      "blocks": [
+        "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+      ]
+    },
+    "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it": {
+      "title": "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it",
+      "supports": [
+        "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+        {
+          "node": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+          "relation": "blocks",
+          "target": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it": {
+      "title": "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it",
+      "supports": [
+        {
+          "node": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "status": "untried"
+        },
+        {
+          "node": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "relation": "addresses",
+          "target": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term": {
+      "title": "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term"
+    },
+    "read both assertions on 2026-09-21": {
+      "title": "read both assertions on 2026-09-21",
+      "supports": [
+        "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken": {
+      "title": "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken"
+    },
+    "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term": {
+      "title": "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term",
+      "supports": [
+        "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy": {
+      "title": "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy"
+    },
+    "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law": {
+      "title": "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law",
+      "supports": [
+        "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table": {
+      "title": "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table"
+    },
+    "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21": {
+      "title": "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21",
+      "supports": [
+        "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))": {
+      "title": "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21": {
+      "title": "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21",
+      "supports": [
+        "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction": {
+      "title": "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction",
+      "supports": [
+        {
+          "node": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "status": "untried"
+        },
+        {
+          "node": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "relation": "addresses",
+          "target": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed": {
+      "title": "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed",
+      "supports": [
+        {
+          "node": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction"
+      ]
     }
   },
   "approaches": {
@@ -17464,6 +17889,46 @@
       "status": "done",
       "addresses": [
         "add-translator-rule! registers a rewrite GLOBALLY while the equation it rewrites through is registered in the importing space's module only, so in every other space the rule diverts the head away from the engine's fused clause, finds no equation, and the head silently answers differently"
+      ]
+    },
+    "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it": {
+      "title": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+      "effort": 8,
+      "status": "failed",
+      "addresses": [
+        "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+      ]
+    },
+    "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!": {
+      "title": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+      "effort": 4,
+      "status": "untried",
+      "addresses": [
+        "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+      ]
+    },
+    "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion": {
+      "title": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+      "effort": 2,
+      "status": "unwanted",
+      "addresses": [
+        "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+      ]
+    },
+    "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies": {
+      "title": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+      ]
+    },
+    "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English": {
+      "title": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+      "effort": 8,
+      "status": "unwanted",
+      "addresses": [
+        "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
       ]
     }
   },
@@ -67429,6 +67894,1222 @@
         ]
       ],
       "id": "0950c9cf7159e54a"
+    },
+    {
+      "at": "2026-09-21T04:22:07.683383+00:00",
+      "after": "3e6e50345e64c8252df1d32ed35cc33cb76555fa",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests\", \"tags\": [\"user\"], \"title\": \"the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others\", \"fields\": {\"worth\": 95}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"each cluster was measured failing together and then fixed by one change on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms\", \"fields\": {\"blocks\": [\"the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the four clusters above each failed as a block and each was cleared by a single change\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused\", \"tags\": [], \"title\": \"cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it\", \"fields\": {\"effort\": 8, \"addresses\": [\"the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms\"]}}]",
+      "parents": [
+        "0950c9cf7159e54a"
+      ],
+      "assert": [
+        [
+          "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused",
+          "sort",
+          "prop"
+        ],
+        [
+          "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused",
+          "supports",
+          {
+            "node": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+            "status": "untried"
+          }
+        ],
+        [
+          "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused",
+          "supports",
+          {
+            "node": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+            "relation": "addresses",
+            "target": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+          }
+        ],
+        [
+          "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused",
+          "title",
+          "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused"
+        ],
+        [
+          "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate",
+          "sort",
+          "prop"
+        ],
+        [
+          "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate",
+          "title",
+          "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate"
+        ],
+        [
+          "each cluster was measured failing together and then fixed by one change on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "each cluster was measured failing together and then fixed by one change on 2026-09-21",
+          "supports",
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+        ],
+        [
+          "each cluster was measured failing together and then fixed by one change on 2026-09-21",
+          "supports",
+          {
+            "node": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+            "relation": "blocks",
+            "target": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+          }
+        ],
+        [
+          "each cluster was measured failing together and then fixed by one change on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "each cluster was measured failing together and then fixed by one change on 2026-09-21",
+          "title",
+          "each cluster was measured failing together and then fixed by one change on 2026-09-21"
+        ],
+        [
+          "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21",
+          "supports",
+          "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package"
+        ],
+        [
+          "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21",
+          "title",
+          "read tools/check.sh:69-73 and the header of extensions/python/tools/mutation_score.py on 2026-09-21"
+        ],
+        [
+          "the four clusters above each failed as a block and each was cleared by a single change",
+          "sort",
+          "prop"
+        ],
+        [
+          "the four clusters above each failed as a block and each was cleared by a single change",
+          "supports",
+          "correlated failure is the cheap redundancy detector and this session produced its data for free: tests that always die together are testing one law, which needs no mutation run to see, only the shape of one red gate"
+        ],
+        [
+          "the four clusters above each failed as a block and each was cleared by a single change",
+          "tags",
+          "measured"
+        ],
+        [
+          "the four clusters above each failed as a block and each was cleared by a single change",
+          "title",
+          "the four clusters above each failed as a block and each was cleared by a single change"
+        ],
+        [
+          "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package",
+          "sort",
+          "prop"
+        ],
+        [
+          "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package",
+          "title",
+          "the oracle for a safe cut already exists and is parametrised for exactly this experiment: tools/check.sh's mutation lane takes METTA_MUTATION_TARGET to choose which mutants to test and METTA_MUTATION_TESTS to choose which tests judge them, and extensions/python/tools/mutation_score.py reports the score over the mutants a test actually REACHED rather than over the package"
+        ],
+        [
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+          "sort",
+          "prop"
+        ],
+        [
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+          "blocks",
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        ],
+        [
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms",
+          "title",
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+        ],
+        [
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others",
+          "sort",
+          "prop"
+        ],
+        [
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others",
+          "title",
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        ],
+        [
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others",
+          "wanted",
+          true
+        ],
+        [
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others",
+          "worth",
+          95
+        ],
+        [
+          "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests",
+          "supports",
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        ],
+        [
+          "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests",
+          "tags",
+          "user"
+        ],
+        [
+          "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests",
+          "title",
+          "the user ruled it on 2026-09-21 with the F=ma framing, that testing Kepler's laws and projectile motion beside F=ma adds runtime and no detection power because they all break when F=ma does, and separately that nobody is reading 8,900 tests"
+        ],
+        [
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "sort",
+          "approach"
+        ],
+        [
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "addresses",
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+        ],
+        [
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "effort",
+          8
+        ],
+        [
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "status",
+          "untried"
+        ],
+        [
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "title",
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it"
+        ]
+      ],
+      "id": "dc924849cda4573b"
+    },
+    {
+      "at": "2026-09-21T04:23:46.351678+00:00",
+      "after": "3e6e50345e64c8252df1d32ed35cc33cb76555fa",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer\", \"tags\": [\"measured\"], \"title\": \"the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5\", \"fields\": {\"blocks\": [\"the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty\", \"tags\": [\"reasoning\"], \"title\": \"the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell\", \"tags\": [], \"title\": \"state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!\", \"fields\": {\"effort\": 4, \"addresses\": [\"written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5\"]}}]",
+      "parents": [
+        "dc924849cda4573b"
+      ],
+      "assert": [
+        [
+          "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21",
+          "supports",
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+        ],
+        [
+          "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21",
+          "supports",
+          {
+            "node": "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+            "relation": "blocks",
+            "target": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+          }
+        ],
+        [
+          "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21",
+          "title",
+          "counted every 'csv-...' occurrence in lib_csv_surface.plt against those appearing inside must_throw on 2026-09-21"
+        ],
+        [
+          "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer",
+          "sort",
+          "prop"
+        ],
+        [
+          "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer",
+          "supports",
+          "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant"
+        ],
+        [
+          "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer",
+          "tags",
+          "measured"
+        ],
+        [
+          "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer",
+          "title",
+          "derived the table from the suite by matching each helper's wrap_predicate site on 2026-09-21: creation_failure, write_failure, release_failure, snapshot_close, close_failure, cleanup_outcomes and the two threaded ones, cancel_snapshot and cancel_writer"
+        ],
+        [
+          "the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty",
+          "sort",
+          "prop"
+        ],
+        [
+          "the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty",
+          "supports",
+          "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see"
+        ],
+        [
+          "the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty",
+          "title",
+          "the csv family is 8 rows over 7 slots and collapsing it saves about 40 per cent of the lines, which would not justify the churn on its own; what it buys is that csv-read!, csv-space and csv-append! show up as empty"
+        ],
+        [
+          "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant",
+          "sort",
+          "prop"
+        ],
+        [
+          "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant",
+          "title",
+          "the csv suite's fault-injection family is eight helpers sharing one skeleton -- write the file, optionally capture the space names, wrap a predicate to inject a failure, must_throw the operation, unwrap, then assert the invariants -- and they vary in seven slots: initial text, wrapped target, alias, injection body, operation, expected error and surviving invariant"
+        ],
+        [
+          "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell",
+          "sort",
+          "prop"
+        ],
+        [
+          "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell",
+          "supports",
+          {
+            "node": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+            "status": "untried"
+          }
+        ],
+        [
+          "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell",
+          "supports",
+          {
+            "node": "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+            "relation": "addresses",
+            "target": "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+          }
+        ],
+        [
+          "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell",
+          "title",
+          "the law is already true of all eight, so writing it once loses nothing, and the table is what turns 'nobody wrote that test' into a visible empty cell"
+        ],
+        [
+          "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see",
+          "sort",
+          "prop"
+        ],
+        [
+          "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see",
+          "title",
+          "the value of collapsing an enumeration into a law plus a table is SPANNING rather than line count: a table of injection point against surviving invariant makes an empty cell visible, where eight separate stories make a missing test look exactly like a test nobody wrote, and independence is the only half duplication detectors can see"
+        ],
+        [
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+          "sort",
+          "prop"
+        ],
+        [
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+          "blocks",
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        ],
+        [
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5",
+          "title",
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+        ],
+        [
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "sort",
+          "approach"
+        ],
+        [
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "addresses",
+          "written as eight prose tests rather than as a table, the fault-injection family hides which operations have no failure coverage at all: csv-read! is used 9 times with 0 assertions inside must_throw, csv-space 4 times with 0, and csv-append! 8 times with 1, while csv-snapshot! has 5 and csv-write! 5"
+        ],
+        [
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "effort",
+          4
+        ],
+        [
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "status",
+          "untried"
+        ],
+        [
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!",
+          "title",
+          "state the fault-injection family as one law over a derived table, and fill the three empty cells it exposes with failure coverage for csv-read!, csv-space and csv-append!"
+        ]
+      ],
+      "id": "a5aa4de70d81bfc0"
+    },
+    {
+      "at": "2026-09-21T04:24:36.226771+00:00",
+      "after": "3e6e50345e64c8252df1d32ed35cc33cb76555fa",
+      "did": "[{\"op\": \"status\", \"id\": \"cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it\", \"because\": \"an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data\", \"tags\": [\"source\"], \"status\": \"failed\"}]",
+      "parents": [
+        "a5aa4de70d81bfc0"
+      ],
+      "assert": [
+        [
+          "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data",
+          "sort",
+          "prop"
+        ],
+        [
+          "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data",
+          "supersedes",
+          "a basis owes independence AND spanning, and mutation is the one instrument that measures both: a removal that leaves the score identical removed nothing the suite could detect, and a removal that drops it is refused"
+        ],
+        [
+          "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data",
+          "supports",
+          {
+            "node": "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+            "status": "failed"
+          }
+        ],
+        [
+          "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data",
+          "tags",
+          "source"
+        ],
+        [
+          "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data",
+          "title",
+          "an equal aggregate score does not prove redundancy: mutation_score.py reports one number over the mutants a run REACHED and keeps no per-test kill sets, so two runs can score identically while killing different mutants; a sound pruning oracle needs per-mutant kill-set comparison or leave-one-test-out runs, which is set cover rather than a scalar, and nothing here exposes per-mutant-per-test data"
+        ],
+        [
+          "cut a consequence only when the mutation score over the same target is unchanged without it, so spanning is proved by the score holding and independence by the test's absence not moving it",
+          "status",
+          "failed"
+        ]
+      ],
+      "id": "7d6a8103bd4e7759"
+    },
+    {
+      "at": "2026-09-21T04:38:22.674559+00:00",
+      "after": "58078ac623f29984232c34343a80280a965e6a51",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests\", \"tags\": [\"measured\"], \"title\": \"two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"two vacuous assertions were found by hand, so more may exist\", \"tags\": [], \"title\": \"add a check for catch(Goal, NamedPattern, true) used as a refusal assertion\", \"fields\": {\"effort\": 2, \"addresses\": [\"the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms\"]}}, {\"op\": \"status\", \"id\": \"add a check for catch(Goal, NamedPattern, true) used as a refusal assertion\", \"because\": \"measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "7d6a8103bd4e7759"
+      ],
+      "assert": [
+        [
+          "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do",
+          "title",
+          "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do"
+        ],
+        [
+          "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text",
+          "supersedes",
+          "two vacuous assertions were found by hand, so more may exist"
+        ],
+        [
+          "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text",
+          "supports",
+          {
+            "node": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text",
+          "title",
+          "measured 2026-09-21: 25 uses of catch(_,_,true) across the suites, of which only 6 name a pattern, and of those lib_tabling_policies, hooks and host_transactions BIND the error and assert on it afterwards while lib_thread_scope suppresses import errors inside a forall deliberately; a check flagging all six would report more false positives than findings, and the discriminator that separates them, a ground pattern with nothing following that depends on having caught, is not reliably decidable by text"
+        ],
+        [
+          "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests",
+          "sort",
+          "prop"
+        ],
+        [
+          "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests",
+          "supports",
+          "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised"
+        ],
+        [
+          "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests",
+          "tags",
+          "measured"
+        ],
+        [
+          "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests",
+          "title",
+          "read both clauses; replaced with plunit throws/1, which fails when nothing is raised, and the suite still passes at 58 tests"
+        ],
+        [
+          "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21",
+          "supports",
+          "lib_file defines its refusal vocabulary as a generator, metta_file_refusal/2 mapping any SWI error into one of the nine names in library_refusal/1 with the caller and a remedy attached, and four operations bypassed it: file-open! at lib_file.pl:299, read-file! at 483, read-bytes! at 519 and list-dir! at 699 each threw a bare existence_error naming neither the operation that refused nor what to do"
+        ],
+        [
+          "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21",
+          "title",
+          "read metta_file_refusal/2 and library_refusal/1, then located every bare existence_error site and its owning clause on 2026-09-21"
+        ],
+        [
+          "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised",
+          "sort",
+          "prop"
+        ],
+        [
+          "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised",
+          "title",
+          "two tests named for a refusal asserted nothing: lib_text.plt's reading_a_missing_file_raises and listing_a_missing_directory_raises used catch(Goal, error(Pattern), true), which succeeds when Goal SUCCEEDS, so they passed whether or not the operation raised"
+        ],
+        [
+          "two vacuous assertions were found by hand, so more may exist",
+          "sort",
+          "prop"
+        ],
+        [
+          "two vacuous assertions were found by hand, so more may exist",
+          "supports",
+          {
+            "node": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+            "status": "untried"
+          }
+        ],
+        [
+          "two vacuous assertions were found by hand, so more may exist",
+          "supports",
+          {
+            "node": "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+            "relation": "addresses",
+            "target": "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+          }
+        ],
+        [
+          "two vacuous assertions were found by hand, so more may exist",
+          "title",
+          "two vacuous assertions were found by hand, so more may exist"
+        ],
+        [
+          "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "sort",
+          "approach"
+        ],
+        [
+          "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "addresses",
+          "the suite enumerates consequences: every failure cluster measured this session collapsed to a single cause, 45 lib_csv_surface and 15 lib_json_surface tests to one fixture reading TMPDIR, 18 shim.plt tests to an unset VIRTUAL_ENV, 6 lib_vector typed tests to one annotation restating its own body, and 15 typed failures to 3 mechanisms"
+        ],
+        [
+          "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "effort",
+          2
+        ],
+        [
+          "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "status",
+          "unwanted"
+        ],
+        [
+          "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion",
+          "title",
+          "add a check for catch(Goal, NamedPattern, true) used as a refusal assertion"
+        ]
+      ],
+      "id": "6d0a1fc2f0cd4760"
+    },
+    {
+      "at": "2026-09-21T04:38:43.734603+00:00",
+      "after": "6922f54c9ffe7041ef848acf60caf7adb969f0ae",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C\", \"tags\": [\"measured\", \"meta-reasoning\"], \"title\": \"the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it\", \"fields\": {}}]",
+      "parents": [
+        "6d0a1fc2f0cd4760"
+      ],
+      "assert": [
+        [
+          "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C",
+          "supports",
+          "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it"
+        ],
+        [
+          "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C",
+          "title",
+          "each was observed and corrected on 2026-09-21; the rule is that any read or write naming a submodule path from the superproject sees the POINTER, so the command has to run inside the submodule with git -C"
+        ],
+        [
+          "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it",
+          "tags",
+          "meta-reasoning"
+        ],
+        [
+          "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it",
+          "title",
+          "the submodule gitlink trap cost three separate mistakes in one session and each looked like a different problem: git diff from the parent showed no change to lib/lib_file/lib_file.pl and I read that as the edit not landing, git grep -- 'lib/' searched nothing and I concluded no library used (:seg, and git add -A lib staged the gitlink rather than the file inside so the following git -C lib commit found nothing and the library fix went uncommitted under tests that needed it"
+        ]
+      ],
+      "id": "9858ca4c10917b0a"
+    },
+    {
+      "at": "2026-09-21T04:42:24.120889+00:00",
+      "after": "4cc289cf5bb507bc25260e312ad885643ba4dbff",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"pytest --durations=20 over the whole file on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field\", \"tags\": [\"measured\"], \"title\": \"six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}]",
+      "parents": [
+        "9858ca4c10917b0a"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field",
+          "supports",
+          "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all"
+        ],
+        [
+          "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field",
+          "supports",
+          {
+            "node": "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field",
+          "title",
+          "measured 2026-09-21: the six changes0..changes5 cases of test_door_registration_refuses_mutable_or_untyped_nested_fields each take 64 to 69 seconds, and what they assert is that the registration is refused for a mutable or untyped nested field"
+        ],
+        [
+          "pytest --durations=20 over the whole file on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "pytest --durations=20 over the whole file on 2026-09-21",
+          "supports",
+          "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them"
+        ],
+        [
+          "pytest --durations=20 over the whole file on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "pytest --durations=20 over the whole file on 2026-09-21",
+          "title",
+          "pytest --durations=20 over the whole file on 2026-09-21"
+        ],
+        [
+          "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+          "sort",
+          "prop"
+        ],
+        [
+          "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all",
+          "title",
+          "six cases that assert a registration is REFUSED cost about 65 seconds each, which means the refusal is decided after the expensive work rather than before it: a registration that will be rejected should not pay a door analysis at all"
+        ],
+        [
+          "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them",
+          "sort",
+          "prop"
+        ],
+        [
+          "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them",
+          "title",
+          "the door file's 1455 seconds are concentrated, not spread: the twelve slowest tests are 1284 of them, led by test_nested_door_records_have_declared_types at 241.8s and test_namespace_tiers_control_lookup_retained_calls_and_annotations at 232.6s, and six parametrised cases of ONE test, test_door_registration_refuses_mutable_or_untyped_nested_fields, take about 65 seconds each for 400 seconds between them"
+        ]
+      ],
+      "id": "a549e870baa587f6"
+    },
+    {
+      "at": "2026-09-21T04:48:27.940162+00:00",
+      "after": "4cc289cf5bb507bc25260e312ad885643ba4dbff",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored\", \"tags\": [\"measured\"], \"title\": \"the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the durations by phase and timed both calls inside the body on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total\", \"tags\": [\"measured\"], \"title\": \"the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33\", \"tags\": [\"measured\"], \"title\": \"what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing\", \"fields\": {}}]",
+      "parents": [
+        "a549e870baa587f6"
+      ],
+      "assert": [
+        [
+          "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33",
+          "sort",
+          "prop"
+        ],
+        [
+          "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33",
+          "supports",
+          "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing"
+        ],
+        [
+          "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33",
+          "tags",
+          "measured"
+        ],
+        [
+          "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33",
+          "title",
+          "mapped every measured duration onto its position in the file on 2026-09-21: 0.4s at 0, 2.7s at 5, then 232.6, 69.0, 59.0, 62.9, 67.2, 131.3, 241.8 and 147.8 from position 10 to 30, then 0.8s and 0.9s at 31 and 33"
+        ],
+        [
+          "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total",
+          "supports",
+          "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each"
+        ],
+        [
+          "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total",
+          "title",
+          "measured 2026-09-21 with -k 'every_door_projection or refuses_mutable', ten tests in 3.52 seconds total"
+        ],
+        [
+          "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored",
+          "supports",
+          "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file"
+        ],
+        [
+          "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored",
+          "title",
+          "measured 2026-09-21 with an in-body timing probe over the parametrised family, then restored"
+        ],
+        [
+          "read the durations by phase and timed both calls inside the body on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the durations by phase and timed both calls inside the body on 2026-09-21",
+          "supports",
+          "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap"
+        ],
+        [
+          "read the durations by phase and timed both calls inside the body on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the durations by phase and timed both calls inside the body on 2026-09-21",
+          "title",
+          "read the durations by phase and timed both calls inside the body on 2026-09-21"
+        ],
+        [
+          "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each",
+          "title",
+          "the cost is not accumulated registrations either: with test_every_door_projection_is_current running first, which registers, the nine still cost 0.03 to 0.10 seconds each"
+        ],
+        [
+          "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap",
+          "sort",
+          "prop"
+        ],
+        [
+          "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap",
+          "title",
+          "the cost is not repeated setup: pytest attributes all of it to call and none to setup, and an in-body probe shows the valid registration taking 0.0s, so the registrations fixture and the registration itself are both cheap"
+        ],
+        [
+          "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file",
+          "sort",
+          "prop"
+        ],
+        [
+          "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file",
+          "title",
+          "the nine refusal cases are not intrinsically slow: run alone with -k they pass in 0.80 seconds TOTAL, valid registration 0.0 to 0.4s and refused attempt 0.0s, against 58 to 69 seconds EACH in the full file"
+        ],
+        [
+          "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing",
+          "title",
+          "what remains is that one test poisons the rest: the slow tests are exactly those at or after test_namespace_tiers_control_lookup_retained_calls_and_annotations, which is the only one calling doorfaces.synchronous over every core row, and the two tests at positions 31 and 33 that stay under a second are the two that register nothing"
+        ]
+      ],
+      "id": "91246a8b530009b6"
+    },
+    {
+      "at": "2026-09-21T04:50:40.707149+00:00",
+      "after": "4cc289cf5bb507bc25260e312ad885643ba4dbff",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it\", \"tags\": [\"source\"], \"title\": \"the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share\", \"fields\": {\"blocks\": [\"the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it\", \"tags\": [\"source\"], \"title\": \"write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies\", \"fields\": {\"effort\": 2, \"addresses\": [\"the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read both assertions on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term\", \"fields\": {}}]",
+      "parents": [
+        "91246a8b530009b6"
+      ],
+      "assert": [
+        [
+          "read both assertions on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read both assertions on 2026-09-21",
+          "supports",
+          "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term"
+        ],
+        [
+          "read both assertions on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read both assertions on 2026-09-21",
+          "title",
+          "read both assertions on 2026-09-21"
+        ],
+        [
+          "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it",
+          "supports",
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+        ],
+        [
+          "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it",
+          "supports",
+          {
+            "node": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+            "relation": "blocks",
+            "target": "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+          }
+        ],
+        [
+          "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it",
+          "tags",
+          "source"
+        ],
+        [
+          "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it",
+          "title",
+          "read the fourteen promise sentences on 2026-09-21: the trigger kinds are eight (existence, domain, format, boundary, bound, capability, propagation, state) but the assertion is identical for every one of them, namely that the call raises a term whose functor is in the refusal vocabulary and returns no value beside it"
+        ],
+        [
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it",
+          "supports",
+          {
+            "node": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+            "status": "untried"
+          }
+        ],
+        [
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it",
+          "supports",
+          {
+            "node": "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+            "relation": "addresses",
+            "target": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+          }
+        ],
+        [
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it",
+          "tags",
+          "source"
+        ],
+        [
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it",
+          "title",
+          "tests/prolog/suites/evaluation/bit_shift.plt:68 already does exactly this with test(a_non_integer_operand_refuses, [forall(non_integer_case(Form))]) and 152 suites use forall, so the mechanism is the repository's own rather than invented; the table makes a missing row a visible empty cell where fourteen separate bodies hide it"
+        ],
+        [
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+          "sort",
+          "prop"
+        ],
+        [
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+          "blocks",
+          "the test suite is a BASIS of laws rather than an enumeration of their consequences: every behaviour is still decided by some test, and no test is implied by the others"
+        ],
+        [
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share",
+          "title",
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+        ],
+        [
+          "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term",
+          "sort",
+          "prop"
+        ],
+        [
+          "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term",
+          "title",
+          "the law must assert the refusal NAME and not merely that an error came back: bit_shift.plt asserts Results = [[Error,_,_]], which a file-not-found raised where permission-denied was promised would satisfy, and lib_file_surface.plt's must_throw/2 shows the repository already has the stronger form that pins the full term"
+        ],
+        [
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "sort",
+          "approach"
+        ],
+        [
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "addresses",
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+        ],
+        [
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "effort",
+          2
+        ],
+        [
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "status",
+          "untried"
+        ],
+        [
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies",
+          "title",
+          "write one plunit forall law over a three-column case table of head, triggering goal and expected refusal term, instead of fourteen test bodies"
+        ]
+      ],
+      "id": "b8a11788adbfebae"
+    },
+    {
+      "at": "2026-09-21T04:53:20.824298+00:00",
+      "after": "4cc289cf5bb507bc25260e312ad885643ba4dbff",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term\", \"tags\": [\"measured\"], \"title\": \"ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law\", \"tags\": [\"measured\"], \"title\": \"nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21\", \"tags\": [\"measured\"], \"title\": \"lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table\", \"fields\": {}}]",
+      "parents": [
+        "b8a11788adbfebae"
+      ],
+      "assert": [
+        [
+          "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table",
+          "title",
+          "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table"
+        ],
+        [
+          "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy",
+          "sort",
+          "prop"
+        ],
+        [
+          "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy",
+          "title",
+          "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy"
+        ],
+        [
+          "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term",
+          "supports",
+          "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken"
+        ],
+        [
+          "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term",
+          "title",
+          "ran all twelve goals against the loaded libraries on 2026-09-21 in ai-tmp/probe_refusals.pl and read each thrown term"
+        ],
+        [
+          "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law",
+          "supports",
+          "nine of the ten raising heads throw a raw host error rather than a named refusal: crypto-hash-file! and json-lines-read! both report context(system:open/4) which attributes the failure to SWI rather than to the library head the caller invoked, format-datetime reports context(system:stamp_date_time/3), and crypto-random-integer, crypto-password-verify, parse-date and re-compile throw with an UNBOUND context so no remedy reaches the caller at all; only with-file names its own operation and carries a remedy"
+        ],
+        [
+          "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law",
+          "tags",
+          "measured"
+        ],
+        [
+          "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law",
+          "title",
+          "read the twelve thrown terms measured on 2026-09-21; lib_file is the only library defining library_refusal/1 and routing through metta_file_refusal/2, so the named-refusal discipline is that one library's local convention rather than a repository law"
+        ],
+        [
+          "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken",
+          "sort",
+          "prop"
+        ],
+        [
+          "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken",
+          "title",
+          "ten of the twelve inducible refusal promises do raise, so the documented contracts hold; the two that do not, crypto-password-hash and uuid-time!, SUCCEED here because their refusal is capability-absence and this host has both providers, so those two are not inducible rather than broken"
+        ],
+        [
+          "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21",
+          "supports",
+          "lib_socket does not load at all: its metta_requires(socket) directive fails because the engine declares no platform capability of that name, so the whole library is absent while socket-endpoint and udp-receive! still raise from the handle table"
+        ],
+        [
+          "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21",
+          "title",
+          "the consult printed metta_platform_capability `socket' does not exist and Goal (directive) failed on 2026-09-21"
+        ]
+      ],
+      "id": "2c5d0815ad5cac4c"
+    },
+    {
+      "at": "2026-09-21T04:53:57.958956+00:00",
+      "after": "4cc289cf5bb507bc25260e312ad885643ba4dbff",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21\", \"tags\": [\"source\", \"reasoning\"], \"title\": \"a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\\\C match its own doc line names and I passed \\\".\\\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \\\"{a}\\\" and json-encode (superpose (nan))\", \"fields\": {}}]",
+      "parents": [
+        "2c5d0815ad5cac4c"
+      ],
+      "assert": [
+        [
+          "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))",
+          "sort",
+          "prop"
+        ],
+        [
+          "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))",
+          "title",
+          "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))"
+        ],
+        [
+          "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21",
+          "supports",
+          "a probe that returns no refusal is evidence about the probe until its input is read out of the source: re-ranges needs the byte-oriented \\C match its own doc line names and I passed \".\", and with-temp-dir applies its Function through eval_metta_in_module so a Prolog predicate named as the function is never reached; this is the third time this session after string-template \"{a}\" and json-encode (superpose (nan))"
+        ],
+        [
+          "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21",
+          "title",
+          "read lib_regex.pl:138 and lib_file.pl:461-465 after both probes came back SUCCEEDED on 2026-09-21"
+        ]
+      ],
+      "id": "2e24cd09bea87fe2"
+    },
+    {
+      "at": "2026-09-21T04:56:28.470119+00:00",
+      "after": "4cc289cf5bb507bc25260e312ad885643ba4dbff",
+      "did": "[{\"op\": \"add-approach\", \"id\": null, \"because\": \"prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction\", \"tags\": [\"source\"], \"title\": \"give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English\", \"fields\": {\"effort\": 8, \"addresses\": [\"the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share\"]}}, {\"op\": \"status\", \"id\": \"give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English\", \"because\": \"the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed\", \"tags\": [], \"status\": \"unwanted\"}]",
+      "parents": [
+        "2e24cd09bea87fe2"
+      ],
+      "assert": [
+        [
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction",
+          "sort",
+          "prop"
+        ],
+        [
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction",
+          "supports",
+          {
+            "node": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+            "status": "untried"
+          }
+        ],
+        [
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction",
+          "supports",
+          {
+            "node": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+            "relation": "addresses",
+            "target": "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+          }
+        ],
+        [
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction",
+          "tags",
+          "source"
+        ],
+        [
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction",
+          "title",
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction"
+        ],
+        [
+          "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed",
+          "supersedes",
+          "prose-mining needs a rule about the SUBJECT of a raise verb, which is why with-temp-dir was reported for a promise it never made; structured rows carry the subject by construction"
+        ],
+        [
+          "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed",
+          "supports",
+          {
+            "node": "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed",
+          "title",
+          "the %! block IS the contract and pldoc is SWI's established mechanism, so a declaration beside the prose is a SECOND representation of one fact and drifts; the principled version is declare-once-and-derive-the-prose across 53 libraries, which is a documentation-format redesign rather than a defect fix, and the lane it would replace now reports zero with nine of nine selftests and two measured false-positive classes removed"
+        ],
+        [
+          "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "sort",
+          "approach"
+        ],
+        [
+          "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "addresses",
+          "the fourteen unwitnessed refusal promises would be written as fourteen test bodies that differ only in the input, because each library suite witnesses its own library's refusals and nothing holds the law they all share"
+        ],
+        [
+          "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "effort",
+          8
+        ],
+        [
+          "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "status",
+          "unwanted"
+        ],
+        [
+          "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English",
+          "title",
+          "give the Prolog libraries structured refusal declarations the way extensions/python/tools/refusalsdoc.py already treats Python refusals as catalog rows, so the coverage lane is a set difference over declared data instead of a regex over English"
+        ]
+      ],
+      "id": "f4a47a0f982083d2"
     }
   ]
 }

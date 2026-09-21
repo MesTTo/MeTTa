@@ -67,6 +67,24 @@ def cases() -> list[tuple[str, str, str, int]]:
          "witnessed by plunit throws across lines", 0),
         (PROMISED, "    'thing-not-found'('thing-do!', a, b).\n",
          "witnessed by a named refusal term", 0),
+        # A scope-taking combinator's cleanup sentence: the BODY raises, which
+        # says nothing about the head refusing. with-temp-dir was reported for
+        # exactly this and promises no refusal of its own.
+        ("%! 'with-thing'(+F:any, -A:any) is nondet.\n%\n"
+         "% Apply F and release the thing when the answers are exhausted,\n"
+         "% when the caller stops after one, and when the body raises.\n",
+         "    true.\n", "a body's raise is not a promise by the head", 0),
+        # ...but a head that promises its OWN refusal in the same block keeps
+        # it, which is with-file: the body clause goes, the close clause stays.
+        ("%! 'with-other'(+F:any, -A:any) is nondet.\n%\n"
+         "% Release it when the body raises.\n"
+         "% A close failure raises unless the body already raised.\n",
+         "    true.\n", "a close-failure promise survives the body clause", 1),
+        # A row in the refusal case table is a witness.
+        (PROMISED, "refusal_case('thing-do!', 'thing-do!'(x, _), error(_, _)).\n",
+         "witnessed by a refusal_case row", 0),
+        (PROMISED, "not_inducible('thing-do!', 'thing-do!'(x, _), 'no provider').\n",
+         "witnessed by a not_inducible row", 0),
         # The five false positives: prose using `refuses` about a sibling.
         ("%! 'thing-list'(-L:list) is det.\n%\n% The same list its refusal names.\n",
          "    true.\n", "a sibling's refusal is not a promise", 0),

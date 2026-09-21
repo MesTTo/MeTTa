@@ -28,7 +28,10 @@ Guarantees:
     witnessed in lib_text.plt, and counting per suite called it unwitnessed
     [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
   - a witness counts in either spelling the suites use, `must_throw(...)`,
-    plunit's `throws(...)`, or a named refusal term carrying the operation
+    plunit's `throws(...)`, a named refusal term carrying the operation, or a
+    row in library_refusals.plt's case table
+    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
+  - a raise verb belonging to the caller's body is not a promise by the head
     [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
 Fails when: nothing. This reports; the count is the burn-down surface.
 Open Obligations:
@@ -60,6 +63,15 @@ HEAD = re.compile(r"^%!\s+\'?([a-z][a-z0-9-]*!?)\'?\(", re.M)
 #: documented head as their subject [measured 2026-09-21: 24 findings with
 #: `refus*`, 19 without, and the five removed were all false].
 PROMISE = re.compile(r"\b(raises?|is an error)\b", re.I)
+#: A raise verb whose subject is the CALLER'S body, not the documented head.
+#: A scope-taking combinator describes cleanup that happens "when the body
+#: raises", which promises nothing about the head itself refusing. Stripping
+#: the clause before testing for a promise keeps with-file, whose sentence
+#: "A close failure raises unless the body already raised" still promises one,
+#: and drops with-temp-dir, whose only mention is the body's [measured
+#: 2026-09-21: three mentions in the tree, all in lib_file, and with-temp-dir
+#: was reported as an unwitnessed promise it never made].
+OTHER_ACTOR = re.compile(r"\bthe (?:body|caller)\b[^.;]*?\brais(?:e|es|ed)\b", re.I)
 #: A refusal term: the library names them for what they refuse.
 REFUSAL_TERM = r"\'[a-z-]*(?:error|refus|not-found|denied|mismatch|exists|overlap)[a-z-]*\'"
 
@@ -83,6 +95,12 @@ def _witnessed(operation: str, suites: str) -> bool:
         return True
     if re.search(r"must_throw\(\s*\'" + name + r"\'", suites):
         return True
+    # A row in library_refusals.plt's table: the head is the row's first
+    # argument, and the law runs every row. not_inducible rows count too,
+    # because that suite asserts the head still SUCCEEDS here, so losing the
+    # provider turns the row red rather than leaving the promise unchecked.
+    if re.search(r"(?:refusal_case|not_inducible)\(\s*\'" + name + r"\'", suites):
+        return True
     # a whole test clause whose options promise a throw and whose body calls it
     for clause in re.finditer(r"^test\(.*?(?<!\.)\.\s*$", suites, re.S | re.M):
         text = clause.group(0)
@@ -100,7 +118,7 @@ def findings(root: Path = ROOT) -> list[str]:
         seen: set[str] = set()
         for heads, prose in BLOCK.findall(text):
             body = " ".join(line.lstrip("% ").rstrip() for line in prose.splitlines())
-            if not PROMISE.search(body):
+            if not PROMISE.search(OTHER_ACTOR.sub(" ", body)):
                 continue
             for operation in HEAD.findall(heads):
                 if operation in seen or _witnessed(operation, suites):
