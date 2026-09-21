@@ -17,11 +17,9 @@
 :- use_module(library(random), [random_between/3]).
 :- initialization(consult('../../lib/lib_markup/lib_markup.pl')).
 
-:- begin_tests(lib_markup).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_markup).
 
 % A random element tree, three levels deep at most, with attributes whose names
 % include ones the engine knows as functions, and text with characters the writer

@@ -20,11 +20,9 @@
 :- use_module(library(random), [random_between/3]).
 :- initialization(consult('../../lib/lib_unicode/lib_unicode.pl')).
 
-:- begin_tests(lib_unicode).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_unicode).
 
 % Random text over an alphabet that exercises every form: ASCII letters, a
 % precomposed accented letter and its decomposition, a ligature, a superscript,

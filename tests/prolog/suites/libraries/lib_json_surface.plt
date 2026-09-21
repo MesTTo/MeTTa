@@ -15,18 +15,16 @@
 :- use_module(library(filesex)).
 :- use_module('../../scratch.pl').
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_json_surface,
                [setup(metta_space_names(Before)), cleanup(release_added(Before))]).
 
-:- meta_predicate must_throw(0, ?), with_directory(1).
+:- meta_predicate with_directory(1).
 
 release_added(Before) :-
     metta_space_names(After), ord_subtract(After, Before, Added),
     maplist(spaces:metta_release_space, Added).
-
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true),
-    assertion(nonvar(Error)), assertion(Error = Expected).
 
 with_directory(Goal) :- with_scratch_directory(json_surface, Goal).
 
@@ -342,7 +340,6 @@ concurrent_writers(Dir) :-
 
 test(missing_file_raises, [throws(error(existence_error(source_sink, _), _))]) :-
     'json-read!'('json-surface-missing-file', _).
-
 
 %json-encode promises that "cyclic objects or expressions raise
 %cyclic_json_value. Non-finite numbers raise", and json-at that a document

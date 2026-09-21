@@ -11,14 +11,13 @@
 :- use_module(library(apply), [include/3, foldl/4]).
 :- use_module(library(thread), [concurrent/3]).
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_random, [setup(load_collection_library(lib_random))]).
-:- meta_predicate with_seed(+, 0), must_throw(0, ?).
+:- meta_predicate with_seed(+, 0).
 
 with_seed(Seed, Goal) :-
     setup_call_cleanup(getrand(State),(set_random(seed(Seed)),Goal),setrand(State)).
-
-must_throw(Goal, Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error = Expected).
 
 % Prepare before repeat, including zero repetitions; eval preserves the stream.
 draw(Constructor, Count, Value) :-

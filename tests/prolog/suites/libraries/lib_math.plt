@@ -10,11 +10,9 @@
 :- use_module(library(lists), [member/2]).
 :- load_collection_library(lib_math).
 
-:- begin_tests(lib_math).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_math).
 
 test(gcd_and_lcm_identities) :-
     invoke('math-gcd'([],G0)), assertion(G0 == 0),
@@ -145,7 +143,6 @@ test(configured_approximation_refuses_exact_construction) :-
         (set_prolog_flag(max_rational_size,1),set_prolog_flag(max_rational_size_action,float),
          must_throw('math-rational'(1,3,_),error(representation_error(exact_math_arithmetic),_))),
         (set_prolog_flag(max_rational_size,Size),set_prolog_flag(max_rational_size_action,Action))).
-
 
 %math-sqrt promises a refusal for "A negative or nonfinite" input.
 test(a_negative_root_raises,

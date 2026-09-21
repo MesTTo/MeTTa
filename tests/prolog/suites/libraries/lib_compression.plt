@@ -18,11 +18,11 @@
 :- use_module(library(random), [getrand/1, setrand/1, random_between/3]).
 :- use_module(library(prolog_wrap)).
 
-:- begin_tests(lib_compression).
-:- meta_predicate must_throw(0,?), with_directory(1).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
+:- begin_tests(lib_compression).
+:- meta_predicate with_directory(1).
+
 with_directory(Goal) :-
     setup_call_cleanup('temp-dir!'("compression-suite",Directory),
                        call(Goal,Directory),delete_directory_and_contents(Directory)).

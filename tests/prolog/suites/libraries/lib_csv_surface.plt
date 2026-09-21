@@ -16,16 +16,15 @@
 :- use_module(library(readutil)).
 :- use_module(library(filesex)).
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_csv_surface,
                [setup(metta_space_names(Before)), cleanup(release_added(Before))]).
-:- meta_predicate must_throw(0, ?), with_file(1), records_in(1, +).
+:- meta_predicate with_file(1), records_in(1, +).
 
 release_added(Before) :-
     metta_space_names(After), ord_subtract(After, Before, Added),
     maplist(spaces:metta_release_space, Added).
-
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
 
 with_file(Goal) :- with_scratch_directory(csv_surface, records_in(Goal)).
 

@@ -29,11 +29,11 @@ cli_suite_answer(wrong,_,42).
 cli_suite_answer(cyclic,_,Value) :- Value=[Value].
 'cli-suite-binding'(Original,Text,Text) :- Original=bound.
 
-:- begin_tests(lib_cli).
-:- meta_predicate must_throw(0,?), with_queue(1).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
+:- begin_tests(lib_cli).
+:- meta_predicate with_queue(1).
+
 with_queue(Goal) :-
     setup_call_cleanup(message_queue_create(Queue),call(Goal,Queue),
                        message_queue_destroy(Queue)).

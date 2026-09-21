@@ -41,11 +41,10 @@ http_suite_setup :-
         ('http-server-url'(Child,URL),'http-request!'(get,URL,[],['http-response',201,_,[]])),
         'http-server-stop!'(Child,_)).
 
-:- begin_tests(lib_http).
-:- meta_predicate must_throw(0, ?), with_server(+, 2).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
+:- begin_tests(lib_http).
+:- meta_predicate with_server(+, 2).
 
 with_server(Handler,Goal) :-
     setup_call_cleanup('http-server-start!'("127.0.0.1",0,Handler,[[workers,2]],Server),

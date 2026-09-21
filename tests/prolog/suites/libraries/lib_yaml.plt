@@ -12,11 +12,9 @@
 :- use_module(library(yaml), [yaml_read/2]).
 :- initialization(consult('../../lib/lib_yaml/lib_yaml.pl')).
 
-:- begin_tests(lib_yaml).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_yaml).
 
 % Every scalar shape the host's reader can answer, against what the library makes
 % of it: the library's job over a scalar is the type mapping and nothing else.

@@ -13,10 +13,11 @@
 :- use_module(library(thread), [concurrent/3]).
 :- use_module(library(debug), [debugging/2]).
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_logging).
 :- thread_local observed/3.
 :- multifile user:message_hook/3, user:thread_message_hook/3.
-:- meta_predicate must_throw(0, ?).
 
 % This observer is after the library hook. A True handler consumes before it;
 % a False handler and a default message reach it with their original structure.
@@ -26,9 +27,6 @@ user:message_hook(metta_library_log(_,['log-event',"suite-host",Level,Payload]),
 user:thread_message_hook(metta_library_log(_,['log-event',"suite-before",Level,Payload]),
                          Kind, Lines) :-
     assertz(observed(Level-Payload,Kind,Lines)).
-
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
 
 quiet(Topic) :- 'log-topic!'(Topic,false,_), retractall(observed(_,_,_)).
 

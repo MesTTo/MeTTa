@@ -14,11 +14,9 @@
 :- use_module(library(lists), [member/2, memberchk/2]).
 :- initialization(consult('../../lib/lib_process/lib_process.pl')).
 
-:- begin_tests(lib_process).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_process).
 
 open_streams(Count) :-
     findall(Stream, current_stream(_, _, Stream), Streams),

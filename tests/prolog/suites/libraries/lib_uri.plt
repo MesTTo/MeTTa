@@ -11,10 +11,9 @@
 :- use_module(library(apply), [maplist/2]).
 :- use_module(library(random), [getrand/1, setrand/1, random_between/3]).
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_uri).
-:- meta_predicate must_throw(0, ?).
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true), assertion(nonvar(Error)), assertion(Error=Expected).
 
 test(uri_capability_is_declared) :-
     findall(S,metta_engine:metta_platform_capability(uri,S,_),Sources),

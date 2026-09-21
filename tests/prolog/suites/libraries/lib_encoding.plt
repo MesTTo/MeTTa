@@ -20,11 +20,9 @@
 :- use_module(collection_test_support).
 :- load_collection_library(lib_encoding).
 
-:- begin_tests(lib_encoding, [setup(getrand(State)), cleanup(setrand(State))]).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_encoding, [setup(getrand(State)), cleanup(setrand(State))]).
 
 random_bytes(Bytes) :-
     random_between(0, 12, Length),

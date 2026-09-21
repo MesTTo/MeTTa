@@ -23,13 +23,13 @@ testing_suite_setup :-
 'testing-suite-bag'(Bag,_,Value) :- member(Value,Bag).
 'testing-suite-binding'(Original,[row,Original]) :- Original=bound.
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_testing).
-:- meta_predicate must_throw(0,?), with_queue(1).
+:- meta_predicate with_queue(1).
 
 eval_expr(Expression,Answer) :-
     current_metta_module(Module),eval_metta_in_module(Module,Expression,Answer).
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
 with_queue(Goal) :-
     setup_call_cleanup(message_queue_create(Queue),call(Goal,Queue),
                        message_queue_destroy(Queue)).

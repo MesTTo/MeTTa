@@ -35,16 +35,14 @@ file_surface_setup :-
     assertion(exists_directory(Dir)).
 'scope-remove'(Dir, Dir) :- 'delete-tree!'(Dir, true).
 
+:- use_module('library_assertions.pl', [must_throw/2]).
+
 :- begin_tests(lib_file_surface,
                [setup(metta_space_names(Before)), cleanup(release_added(Before))]).
-:- meta_predicate must_throw(0, ?).
 
 release_added(Before) :-
     metta_space_names(After), ord_subtract(After, Before, Added),
     maplist(spaces:metta_release_space, Added).
-
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
 
 with_fixture(Goal) :- with_scratch_directory(file_surface, Goal).
 

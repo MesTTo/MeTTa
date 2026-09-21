@@ -13,11 +13,9 @@
 :- use_module(library(lists), [member/2, memberchk/2]).
 :- initialization(consult('../../lib/lib_system/lib_system.pl')).
 
-:- begin_tests(lib_system).
-:- meta_predicate must_throw(0, ?).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+:- begin_tests(lib_system).
 
 % env-all rests on library(unix)'s environ/1, which is SWI's ext/clib pack: the
 % census load above the clauses records its absence, and the head refuses by name

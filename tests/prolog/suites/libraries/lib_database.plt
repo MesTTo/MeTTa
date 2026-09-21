@@ -31,11 +31,11 @@ database_suite_setup :-
 seam:pattern_modifier([Marker],_,throw(database_query_cancelled)) :-
     nonvar(Marker),Marker==database_suite_guard.
 
-:- begin_tests(lib_database).
-:- meta_predicate must_throw(0,?), with_directory(1), with_store(+,2), reported_request(+,0).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
+:- begin_tests(lib_database).
+:- meta_predicate with_directory(1), with_store(+,2), reported_request(+,0).
+
 with_directory(Goal) :-
     tmp_file(database_suite,Directory),
     setup_call_cleanup(make_directory(Directory),call(Goal,Directory),

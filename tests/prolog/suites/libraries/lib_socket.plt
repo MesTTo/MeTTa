@@ -38,12 +38,11 @@ socket_suite_setup :-
     'with-socket'(['udp-bind!',[endpoint,ipv4,"127.0.0.1",0]],'socket-suite-open-more',Handle).
 'socket-suite-open-more'(_,Handle) :- 'udp-bind!'([endpoint,ipv4,"127.0.0.1",0],Handle).
 
-:- begin_tests(lib_socket).
-:- meta_predicate must_throw(0,?), with_udp(+,2), with_tcp(+,3), observing_waits(0),
-                  reported_worker(+,0).
+:- use_module('library_assertions.pl', [must_throw/2]).
 
-must_throw(Goal,Expected) :-
-    catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
+:- begin_tests(lib_socket).
+:- meta_predicate with_udp(+,2), with_tcp(+,3), observing_waits(0), reported_worker(+,0).
+
 family(ipv4,"127.0.0.1").
 family(ipv6,"::1").
 handles(Handles) :- findall(H-S,lib_file:metta_file(H,S),Handles).
