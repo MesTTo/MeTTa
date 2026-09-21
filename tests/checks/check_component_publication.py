@@ -8,13 +8,22 @@ gate reads only its exit status, so the fresh-clone obligation was asserted
 and never checked [measured 2026-09-21: six of eight pins were unpublished
 and every lane was green].
 
-It asks the REMOTE what its main points at, rather than the local
-remote-tracking ref, because that ref is a memory and it goes stale in the
-direction that matters. Trusting it here reported two unpublished pins where
-components.sh's own fetch found six: `examples` looked published because this
-checkout's origin/main contained the pin, while the remote's main did not
-[measured 2026-09-21]. For a check whose whole job is to refuse a release,
-under-reporting is the wrong way to be wrong.
+Asking the REMOTE is the authoritative form, because a local
+remote-tracking ref is a memory and goes stale in the direction that matters:
+trusting it reported two unpublished pins where components.sh's own fetch
+found six, since this checkout's origin/main for `examples` contains a pin
+the remote's main does not [measured 2026-09-21].
+
+But the gate is hermetic, and says so: "a gate that reaches the network fails
+for reasons that are not the tree" (tools/check.sh). Reaching out on every
+run would make its duration and its verdict depend on connectivity. So the
+network is a DECLARED phase rather than something this lane does implicitly,
+which is how Bazel, Nix's fixed-output derivations and Go's -mod=readonly all
+draw the same line. Default: the local view, which is sound for the negative
+(a pin on no remote-tracking branch is unpublished however stale the ref is)
+and explicitly UNCONFIRMED for everything else, because not having looked is
+not evidence of publication. `METTA_CHECK_REMOTES=1` asks the remotes and
+gives the authoritative answer; that is what a release run sets.
 
 Assumes: run inside a checkout whose components are themselves checkouts;
     a component that is not one is reported as unknown rather than passed,
@@ -39,12 +48,16 @@ Open Obligations:
 
 from __future__ import annotations
 
+import os
 import subprocess  # nosec B404 # git is the only program run, with fixed argv
 import sys
 from pathlib import Path
 
 ROOT = next(parent for parent in Path(__file__).resolve().parents
             if (parent / "engine").is_dir() and (parent / ".gitmodules").is_file())
+
+#: Whether to ask each remote. Off by default so the gate stays hermetic.
+REMOTES = os.environ.get("METTA_CHECK_REMOTES") == "1"
 
 
 def _git(*argv: str, cwd: Path) -> str:
@@ -74,8 +87,11 @@ def _declared(root: Path) -> list[tuple[str, str]]:
     return out
 
 
-def findings(root: Path = ROOT, prefix: str = "") -> list[str]:
+def findings(root: Path = ROOT, prefix: str = "", *, remotes: bool | None = None) -> list[str]:
     """One line per pin the remote's main does not contain, nested ones too.
+
+    `remotes` overrides METTA_CHECK_REMOTES for a caller that knows its own
+    answer; the selftest is the one such caller, and it needs BOTH modes.
 
     components.sh mounts a component's own components, so a nested pin is
     exactly as unresolvable by a fresh clone; reading only the top level
@@ -94,6 +110,20 @@ def findings(root: Path = ROOT, prefix: str = "") -> list[str]:
             continue
         if not (component / ".git").exists():
             out.append(f"{shown}: not a checkout here, so its pin {sha[:9]} cannot be checked")
+            continue
+        if not (REMOTES if remotes is None else remotes):
+            # Sound hermetically in one direction only: a pin on no
+            # remote-tracking branch cannot be on the remote either, since
+            # those refs only ever record what WAS fetched. The converse does
+            # not hold, so a pin that looks published is reported unconfirmed.
+            if not _git("branch", "-r", "--contains", sha, cwd=component):
+                out.append(f"{shown}: pin {sha[:9]} is on no remote-tracking branch of "
+                           f"{url}; a fresh clone cannot resolve it")
+            else:
+                out.append(f"{shown}: pin {sha[:9]} was not confirmed against {url} "
+                           f"(hermetic run; set METTA_CHECK_REMOTES=1 to ask it)")
+            if (component / ".gitmodules").is_file():
+                out.extend(findings(component, shown + "/", remotes=remotes))
             continue
         advertised = _git("ls-remote", url, "refs/heads/main", cwd=component).split()
         if not advertised:
@@ -117,7 +147,7 @@ def findings(root: Path = ROOT, prefix: str = "") -> list[str]:
             out.append(f"{shown}: pin {sha[:9]} is not in {url}'s main, which is "
                        f"{head[:9]}; a fresh clone cannot resolve it")
         if (component / ".gitmodules").is_file():
-            out.extend(findings(component, shown + "/"))
+            out.extend(findings(component, shown + "/", remotes=remotes))
     return out
 
 
@@ -125,7 +155,8 @@ def findings(root: Path = ROOT, prefix: str = "") -> list[str]:
 #: claim from a pin being absent and must not be counted as one: "I looked and
 #: it is not there" and "I could not look" answer different questions, and
 #: adding them reports a confidence neither earned.
-UNANSWERED = ("could not be checked", "could not be reached", "not a checkout here")
+UNANSWERED = ("could not be checked", "could not be reached", "not a checkout here",
+              "was not confirmed")
 
 
 def main() -> int:

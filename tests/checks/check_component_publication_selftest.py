@@ -136,7 +136,9 @@ def main() -> int:
         # The checker locates its root by markers; hand it the planted one.
         (root / "engine").mkdir(exist_ok=True)
 
-        found = checker.findings(root)
+        # The planted "remotes" are local paths, so asking them costs no
+        # network; the authoritative mode is what these four cases are about.
+        found = checker.findings(root, remotes=True)
         unasked_found = [f for f in found
                          if any(m in f for m in checker.UNANSWERED)]
         got = (len(found) - len(unasked_found), len(unasked_found))
@@ -144,8 +146,24 @@ def main() -> int:
             print(f"  {what}: expected {(unresolvable, unasked)} with '{marker}', "
                   f"got {got}: {found}")
             bad += 1
+    # And the hermetic mode, which is what the gate runs: it must never call
+    # a pin published, so a pin its remote DOES carry still reads unconfirmed.
+    world = SCRATCH / "hermetic"
+    upstream = _repo(world / "upstream")
+    published = _commit(upstream, "second")
+    clone = world / "super" / "part"
+    clone.parent.mkdir(parents=True, exist_ok=True)
+    _git("clone", "--quiet", str(upstream), str(clone), cwd=world)
+    root = _plant(world / "super", str(upstream), published)
+    (root / "engine").mkdir(exist_ok=True)
+    hermetic = checker.findings(root, remotes=False)
+    if not (len(hermetic) == 1 and "was not confirmed" in hermetic[0]):
+        print(f"  a hermetic run must report unconfirmed, not published: {hermetic}")
+        bad += 1
+
     shutil.rmtree(SCRATCH, ignore_errors=True)
-    print(f"component-publication-selftest: {len(cases()) - bad} of {len(cases())} cases hold")
+    total = len(cases()) + 1
+    print(f"component-publication-selftest: {total - bad} of {total} cases hold")
     return 1 if bad else 0
 
 

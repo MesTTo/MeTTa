@@ -16500,6 +16500,53 @@
       "tags": [
         "source"
       ]
+    },
+    "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw": {
+      "title": "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1": {
+      "title": "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1",
+      "supports": [
+        "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed": {
+      "title": "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed"
+    },
+    "built and ran it on 2026-09-21, 5 of 5 cases hold": {
+      "title": "built and ran it on 2026-09-21, 5 of 5 cases hold",
+      "supports": [
+        "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session": {
+      "title": "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21": {
+      "title": "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21",
+      "supports": [
+        "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+        {
+          "node": "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -71309,6 +71356,126 @@
         ]
       ],
       "id": "ae7ec647547a7677"
+    },
+    {
+      "at": "2026-09-21T05:35:47.205971+00:00",
+      "after": "c2ab43ee32bea6f0e4c45869fc28e119c1860fb1",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"built and ran it on 2026-09-21, 5 of 5 cases hold\", \"tags\": [\"tested\"], \"title\": \"the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21\", \"tags\": [\"source\"], \"title\": \"adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}]",
+      "parents": [
+        "ae7ec647547a7677"
+      ],
+      "assert": [
+        [
+          "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw",
+          "sort",
+          "prop"
+        ],
+        [
+          "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw",
+          "title",
+          "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw"
+        ],
+        [
+          "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+          "sort",
+          "prop"
+        ],
+        [
+          "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+          "title",
+          "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session"
+        ],
+        [
+          "built and ran it on 2026-09-21, 5 of 5 cases hold",
+          "sort",
+          "prop"
+        ],
+        [
+          "built and ran it on 2026-09-21, 5 of 5 cases hold",
+          "supports",
+          "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed"
+        ],
+        [
+          "built and ran it on 2026-09-21, 5 of 5 cases hold",
+          "tags",
+          "tested"
+        ],
+        [
+          "built and ran it on 2026-09-21, 5 of 5 cases hold",
+          "title",
+          "built and ran it on 2026-09-21, 5 of 5 cases hold"
+        ],
+        [
+          "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21",
+          "supports",
+          "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session"
+        ],
+        [
+          "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21",
+          "supports",
+          {
+            "node": "adding the SWI build identity to counter_configuration cannot be landed without re-stamping every benchmark ledger: metta_benchmarking.observe_configuration compares the stamp EXACTLY, `if stored != dict(live)` raises, so one new key turns every pin in the tree into a refusal. The 2026-09-19 journal shows that re-stamp is a multi-day exercise over eleven ledgers, and the instruction rows in it need a quiet box this one has not been all session",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21",
+          "tags",
+          "source"
+        ],
+        [
+          "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21",
+          "title",
+          "read ext/metta-benchmarking/metta_benchmarking.py:679-715 on 2026-09-21"
+        ],
+        [
+          "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1",
+          "supports",
+          "I introduced a non-hermetic gate lane and the record caught it: check_component_publication ran git ls-remote per component on every run, while tools/check.sh states that a gate reaching the network fails for reasons that are not the tree, and REPORT lanes run unless GATE_ONLY=1. The network is now a declared phase behind METTA_CHECK_REMOTES=1, which is the line Bazel, Nix's fixed-output derivations and Go's -mod=readonly all draw"
+        ],
+        [
+          "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1",
+          "tags",
+          "measured"
+        ],
+        [
+          "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1",
+          "title",
+          "read tools/check.sh's own no-network comment on 2026-09-21 after the record named the violation; both modes measured, hermetic giving 3 sound negatives and 6 unconfirmed, declared giving the authoritative 6 and 1"
+        ],
+        [
+          "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed",
+          "sort",
+          "prop"
+        ],
+        [
+          "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed",
+          "title",
+          "the hermetic mode is sound in exactly one direction and says so: a pin on no remote-tracking branch cannot be on the remote either, because those refs only record what was fetched, while the converse fails and is reported as unconfirmed rather than published. The selftest's fifth case plants a pin the remote DOES carry and requires the hermetic run to still call it unconfirmed"
+        ]
+      ],
+      "id": "434f38c8b8b20b19"
     }
   ]
 }
