@@ -13,6 +13,10 @@
 %     `exclude(subsumes_term(the(any, _)), ...)` where the pack wrote `=@=`.
 %   - mode_declaration/2 reads the structured comment with string_codes/2
 %     where the pack wrote string_to_list/2.
+%   - type_declaration/3 honours the argument MODE that normalize_args/2 had
+%     already parsed and the pack then discarded, so a `-` argument which is
+%     ground at the call is left to unification rather than type-checked as
+%     though this predicate had produced it.
 %
 %   Its own readme says the repository is archived and points at
 %   https://github.com/GavinMendelGleason/mavis as the current maintainer.
@@ -37,6 +41,8 @@
 
 %%%%%%%%%% vendored mavis.pl %%%%%%%%%%
 :- module(mavis, [ the/2
+                 , the_out/2
+                 , checked_type/2
                  , has_intersection/2
                  , has_subtype/2
                  , known_type/1
@@ -68,10 +74,24 @@ module_wants_mavis(Module) :-
 %	When optimizations are enabled
 %	(=|current_prolog_flag(optimise, true)|=) a macro removes =the=
 %	entirely so that it always succeeds.
+%CHANGED HERE. Which goals ARE inserted checks, and of what type. It sits
+%OUTSIDE the optimise conditional because it describes the SHAPE of an
+%assertion rather than the machinery acting on one, and BOTH builds ask: the
+%development build to exclude the no-op forms, dev_typed.pl in either build to
+%count what a clause gained. Defined only in the development branch it left
+%the optimised selftest with `Unknown procedure: mavis:checked_type/2`
+%[measured 2026-09-21].
+checked_type(Assertion, Type) :-
+    subsumes_term(the(_, _), Assertion), arg(1, Assertion, Type).
+checked_type(Assertion, Type) :-
+    subsumes_term(the_out(_, _), Assertion), arg(1, Assertion, Type).
+
 :- if(current_prolog_flag(optimise,true)).
 
 the(_,_).  % avoid "Exported procedure mavis:the/2 is not defined"
+the_out(_,_).
 user:goal_expansion(the(_,_), true).
+user:goal_expansion(the_out(_,_), true).
 
 :- else.
 
@@ -122,9 +142,32 @@ normalize_args(X0, arg(Mode,Name,Type)) :-
 the(Type, Value) :-
     when(ground(Value), error:must_be(Type, Value)).
 
+%CHANGED HERE. The pack checked an OUTPUT argument exactly like an input,
+%because type_declaration/3 read arg(_,_,Type) and threw away the mode
+%normalize_args/2 had just parsed. A `-` argument already ground at the call is
+%the CALLER's expected value rather than anything this predicate produced, so
+%checking it raises a type error where the predicate would simply have failed
+%to unify -- and supplying an expected value in the output position is how a
+%Prolog suite asserts a result. Two suites did exactly that and got
+%`Type error: SpaceType expected, found impossible` in place of the refusal
+%they were written to observe [measured 2026-09-21:
+%lib_csv_surface:snapshot_failure_and_output_mismatch_release_owned_spaces and
+%lib_json_surface:failed_output_unification_releases_every_decoded_object].
+%An UNBOUND output still gets the coroutine, so the half of the check that was
+%worth having survives: it fires when the predicate binds the value.
+the_out(Type, Value) :-
+    (   ground(Value)
+    ->  true
+    ;   when(ground(Value), error:must_be(Type, Value))
+    ).
+
 % create a the/2 type assertion based on a variable and
 % the declared mode information for that variable.
-type_declaration(Var, arg(_,_,Type), the(Type, Var)).
+type_declaration(Var, arg(Mode,_,Type), Assertion) :-
+    (   Mode == (-)
+    ->  Assertion = the_out(Type, Var)
+    ;   Assertion = the(Type, Var)
+    ).
 
 % convert a clause head into a goal which asserts all types
 % associated with that head.  Slash is '/' for a normal
@@ -174,8 +217,7 @@ build_type_assertions(Slash, Head, TypeGoal) :-
 
 %A the/2 assertion whose type accepts every term, and so decides nothing.
 dropped_total_check(Assertion) :-
-    subsumes_term(the(_, _), Assertion),
-    Assertion = the(Type, _),
+    checked_type(Assertion, Type),
     nonvar(Type),
     total_type(Type).
 

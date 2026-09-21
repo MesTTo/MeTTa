@@ -247,14 +247,19 @@ dev_typed_inserted_checks(Head, Count) :-
     clause(Head, Body),
     dev_typed_leading_checks(Body, 0, Count).
 
+% Whether a goal IS an inserted check is mavis's fact, and checked_type/2 is
+% where it lives. Spelling `subsumes_term(the(_, _), G)` here again was a second
+% copy of it, and it silently under-counted the moment mavis grew the_out/2 for
+% output arguments: this selftest read 1 check where the clause carried 2
+% [measured 2026-09-21].
 dev_typed_leading_checks((First, Rest), Seen, Count) :- !,
-    (   subsumes_term(the(_, _), First)
+    (   mavis:checked_type(First, _)
     ->  Next is Seen + 1,
         dev_typed_leading_checks(Rest, Next, Count)
     ;   Count = Seen
     ).
 dev_typed_leading_checks(Goal, Seen, Count) :-
-    ( subsumes_term(the(_, _), Goal) -> Count is Seen + 1 ; Count = Seen ).
+    ( mavis:checked_type(Goal, _) -> Count is Seen + 1 ; Count = Seen ).
 
 %%%%%%%%%% The selftest %%%%%%%%%%
 

@@ -14548,6 +14548,315 @@
       "tags": [
         "measured"
       ]
+    },
+    "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs": {
+      "title": "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs",
+      "attacks": [
+        "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "every gate lane in tools/check.sh exits 0 on the tree that is released": {
+      "title": "every gate lane in tools/check.sh exits 0 on the tree that is released",
+      "worth": 100,
+      "wanted": true
+    },
+    "the release condition the user set is that all open issues are resolved and the tree is ready to ship": {
+      "title": "the release condition the user set is that all open issues are resolved and the tree is ready to ship",
+      "supports": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic": {
+      "title": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh": {
+      "title": "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh",
+      "supports": [
+        "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+        {
+          "node": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740": {
+      "title": "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740"
+    },
+    "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites": {
+      "title": "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites",
+      "supports": [
+        "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead": {
+      "title": "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead"
+    },
+    "the user's global instructions state it under '## This environment'": {
+      "title": "the user's global instructions state it under '## This environment'",
+      "supports": [
+        "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one": {
+      "title": "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one",
+      "supports": [
+        {
+          "node": "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "status": "untried"
+        },
+        {
+          "node": "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "relation": "addresses",
+          "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        }
+      ]
+    },
+    "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures": {
+      "title": "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures",
+      "tags": [
+        "meta-reasoning"
+      ]
+    },
+    "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls": {
+      "title": "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls",
+      "supports": [
+        "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the failures looked like a typed-build rejection of csv row values": {
+      "title": "the failures looked like a typed-build rejection of csv row values",
+      "supports": [
+        {
+          "node": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "status": "untried"
+        },
+        {
+          "node": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "relation": "addresses",
+          "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        }
+      ]
+    },
+    "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it": {
+      "title": "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it",
+      "supports": [
+        {
+          "node": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "status": "failed"
+        }
+      ],
+      "supersedes": [
+        "the failures looked like a typed-build rejection of csv row values"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path": {
+      "title": "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path"
+    },
+    "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp": {
+      "title": "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp",
+      "supports": [
+        "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid": {
+      "title": "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid"
+    },
+    "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build": {
+      "title": "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build",
+      "supports": [
+        "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling": {
+      "title": "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling",
+      "supports": [
+        {
+          "node": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "status": "untried"
+        },
+        {
+          "node": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "relation": "addresses",
+          "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        }
+      ]
+    },
+    "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp": {
+      "title": "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp",
+      "supports": [
+        {
+          "node": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line": {
+      "title": "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line"
+    },
+    "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them": {
+      "title": "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them",
+      "supports": [
+        "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises": {
+      "title": "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises",
+      "supports": [
+        {
+          "node": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "status": "untried"
+        },
+        {
+          "node": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "relation": "addresses",
+          "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        }
+      ]
+    },
+    "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates": {
+      "title": "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates",
+      "supports": [
+        {
+          "node": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail": {
+      "title": "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail"
+    },
+    "read tests/prolog/suites/libraries/lib_system.plt:44-56": {
+      "title": "read tests/prolog/suites/libraries/lib_system.plt:44-56",
+      "supports": [
+        "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee": {
+      "title": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+      "blocks": [
+        "every gate lane in tools/check.sh exits 0 on the tree that is released"
+      ]
+    },
+    "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)": {
+      "title": "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)",
+      "supports": [
+        "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+        {
+          "node": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+          "relation": "blocks",
+          "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context": {
+      "title": "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context",
+      "supports": [
+        {
+          "node": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "status": "untried"
+        },
+        {
+          "node": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "relation": "addresses",
+          "target": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+        }
+      ]
+    },
+    "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2": {
+      "title": "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2",
+      "supports": [
+        {
+          "node": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "bool is not a type SWI defines": {
+      "title": "bool is not a type SWI defines",
+      "supports": [
+        {
+          "node": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "status": "untried"
+        },
+        {
+          "node": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "relation": "addresses",
+          "target": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+        }
+      ]
+    },
+    "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone": {
+      "title": "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone",
+      "supports": [
+        {
+          "node": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "bool is not a type SWI defines"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -16404,6 +16713,54 @@
       "status": "done",
       "addresses": [
         "the repository README describes this repository's own surfaces and leaves PyMeTTa and TSMeTTa to their own repositories"
+      ]
+    },
+    "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot": {
+      "title": "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+      ]
+    },
+    "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows": {
+      "title": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+      "effort": 1,
+      "status": "failed",
+      "addresses": [
+        "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+      ]
+    },
+    "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename": {
+      "title": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+      ]
+    },
+    "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure": {
+      "title": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+      ]
+    },
+    "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow": {
+      "title": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+      "effort": 2,
+      "status": "done",
+      "addresses": [
+        "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+      ]
+    },
+    "fix the two crypto bool failures by spelling the type the way SWI spells it": {
+      "title": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
       ]
     }
   },
@@ -63658,6 +64015,892 @@
         "focus": "observe the envelopes over twenty full-lane rounds rather than ten, so a concurrent example's tail is inside the recorded extrema"
       },
       "id": "f7cef3ab0a2416c3"
+    },
+    {
+      "at": "2026-09-20T23:46:14.258935+00:00",
+      "after": "5963f75ea990ec5850970eacf68a66295f3df9d3",
+      "did": "[{\"op\": \"attack\", \"id\": \"built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again\", \"because\": \"both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs\", \"tags\": [\"measured\"]}]",
+      "parents": [
+        "f7cef3ab0a2416c3"
+      ],
+      "assert": [
+        [
+          "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs",
+          "sort",
+          "prop"
+        ],
+        [
+          "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs",
+          "attacks",
+          "built and measured: it took the nine failures to SIXTY-SIX. plunit compares an expected error by VARIANCE, not unification, so an unbound context was never going to unify with context(norm,_) as I argued, and the name a mode line carries is the predicate the annotation sits on, which is frequently not the one the body's own must_be names. Reverted; the selftest is green again"
+        ],
+        [
+          "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs",
+          "tags",
+          "measured"
+        ],
+        [
+          "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs",
+          "title",
+          "both halves of that measurement are unsound: the nine came from a stale gate log rather than the tree, and the sixty-six came from running nine suites in ONE process where the lane runs one per process. The variance point about plunit stands on its own, but the numbers that made the change look catastrophic were measuring a configuration the gate never runs"
+        ]
+      ],
+      "id": "43451cda8689b638"
+    },
+    {
+      "at": "2026-09-20T23:57:05.060815+00:00",
+      "after": "5963f75ea990ec5850970eacf68a66295f3df9d3",
+      "did": "[{\"op\": \"add-goal\", \"id\": null, \"because\": \"the release condition the user set is that all open issues are resolved and the tree is ready to ship\", \"tags\": [\"user\"], \"title\": \"every gate lane in tools/check.sh exits 0 on the tree that is released\", \"fields\": {\"worth\": 100}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh\", \"tags\": [\"measured\"], \"title\": \"a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites\", \"tags\": [\"measured\"], \"title\": \"tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the user's global instructions state it under '## This environment'\", \"tags\": [\"user\"], \"title\": \"the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one\", \"tags\": [], \"title\": \"replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot\", \"fields\": {\"effort\": 2, \"addresses\": [\"a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic\"]}}]",
+      "parents": [
+        "43451cda8689b638"
+      ],
+      "assert": [
+        [
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+          "sort",
+          "prop"
+        ],
+        [
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+          "title",
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        ],
+        [
+          "every gate lane in tools/check.sh exits 0 on the tree that is released",
+          "sort",
+          "prop"
+        ],
+        [
+          "every gate lane in tools/check.sh exits 0 on the tree that is released",
+          "title",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "every gate lane in tools/check.sh exits 0 on the tree that is released",
+          "wanted",
+          true
+        ],
+        [
+          "every gate lane in tools/check.sh exits 0 on the tree that is released",
+          "worth",
+          100
+        ],
+        [
+          "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites",
+          "sort",
+          "prop"
+        ],
+        [
+          "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites",
+          "supports",
+          "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740"
+        ],
+        [
+          "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites",
+          "tags",
+          "measured"
+        ],
+        [
+          "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites",
+          "title",
+          "grep -rn getenv( over tests/prolog on 2026-09-21 returned exactly those five TMPDIR sites"
+        ],
+        [
+          "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh",
+          "supports",
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        ],
+        [
+          "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh",
+          "supports",
+          {
+            "node": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh",
+          "title",
+          "measured 2026-09-21: with TMPDIR unset lib_csv_surface reports 45 failures over 25 tests and lib_json_surface 15; with TMPDIR set to a directory both report 0 and exit 0, same tree, same runner sh engine/test.sh"
+        ],
+        [
+          "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740",
+          "title",
+          "tests/prolog carries five hand-written TMPDIR discoveries in three spellings: bare getenv at lib_csv_surface.plt:30, lib_json_surface.plt:31 and lib_csv_stream_bench.pl:19, a tmp_dir-flag fallback at lib_file_surface.plt:51, and a hardcoded /tmp fallback at prolog_interface.plt:740"
+        ],
+        [
+          "the release condition the user set is that all open issues are resolved and the tree is ready to ship",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release condition the user set is that all open issues are resolved and the tree is ready to ship",
+          "supports",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "the release condition the user set is that all open issues are resolved and the tree is ready to ship",
+          "tags",
+          "user"
+        ],
+        [
+          "the release condition the user set is that all open issues are resolved and the tree is ready to ship",
+          "title",
+          "the release condition the user set is that all open issues are resolved and the tree is ready to ship"
+        ],
+        [
+          "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead",
+          "title",
+          "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead"
+        ],
+        [
+          "the user's global instructions state it under '## This environment'",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user's global instructions state it under '## This environment'",
+          "supports",
+          "the repository's standing rule forbids writing scratch to /tmp because /tmp here is a RAM-backed tmpfs that filled to 14GB of 16GB in one session, and requires ai-tmp/ inside the repository instead"
+        ],
+        [
+          "the user's global instructions state it under '## This environment'",
+          "tags",
+          "user"
+        ],
+        [
+          "the user's global instructions state it under '## This environment'",
+          "title",
+          "the user's global instructions state it under '## This environment'"
+        ],
+        [
+          "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one",
+          "sort",
+          "prop"
+        ],
+        [
+          "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one",
+          "supports",
+          {
+            "node": "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+            "status": "untried"
+          }
+        ],
+        [
+          "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one",
+          "supports",
+          {
+            "node": "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+            "relation": "addresses",
+            "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+          }
+        ],
+        [
+          "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one",
+          "title",
+          "three of the five copies get the unset case wrong and the two that handle it disagree on the fallback, so the invariant 'remember TMPDIR may be unset' is being held by hand at five sites; a provided root removes the invariant by construction the way a hermetic build system provides a scratch dir rather than discovering one"
+        ],
+        [
+          "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "sort",
+          "approach"
+        ],
+        [
+          "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "addresses",
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        ],
+        [
+          "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "effort",
+          2
+        ],
+        [
+          "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "status",
+          "untried"
+        ],
+        [
+          "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot",
+          "title",
+          "replace all five hand-written TMPDIR discoveries with one derived scratch-root helper that every suite calls, deriving the root from the repository rather than the ambient environment and hard-erroring with the remedy when it cannot"
+        ]
+      ],
+      "id": "7e848fea39aba157"
+    },
+    {
+      "at": "2026-09-20T23:57:21.932505+00:00",
+      "after": "5963f75ea990ec5850970eacf68a66295f3df9d3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls\", \"tags\": [\"measured\", \"meta-reasoning\"], \"title\": \"every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the failures looked like a typed-build rejection of csv row values\", \"tags\": [], \"title\": \"annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows\", \"fields\": {\"effort\": 1, \"addresses\": [\"a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic\"]}}, {\"op\": \"status\", \"id\": \"annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows\", \"because\": \"the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it\", \"tags\": [\"measured\"], \"status\": \"failed\"}]",
+      "parents": [
+        "7e848fea39aba157"
+      ],
+      "assert": [
+        [
+          "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls",
+          "supports",
+          "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures"
+        ],
+        [
+          "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls",
+          "title",
+          "each was measured and then contradicted by re-running through sh engine/test.sh, which is the single body the plunit lane calls"
+        ],
+        [
+          "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures",
+          "sort",
+          "prop"
+        ],
+        [
+          "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures",
+          "tags",
+          "meta-reasoning"
+        ],
+        [
+          "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures",
+          "title",
+          "every measurement taken this session by hand-writing a suite invocation instead of using the gate's own runner described a configuration the gate does not run: batching nine suites into one process read 66 where one-per-process reads 71, omitting VIRTUAL_ENV added 18 phantom shim.plt failures, and omitting TMPDIR added 60 phantom csv and json failures"
+        ],
+        [
+          "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it",
+          "supersedes",
+          "the failures looked like a typed-build rejection of csv row values"
+        ],
+        [
+          "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it",
+          "supports",
+          {
+            "node": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+            "status": "failed"
+          }
+        ],
+        [
+          "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it",
+          "tags",
+          "measured"
+        ],
+        [
+          "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it",
+          "title",
+          "the count stayed at exactly 45 with and without the annotation, and the same 45 reproduce on the ORDINARY build, so the typed build was never the mechanism; this was the place the behaviour became visible rather than what produced it"
+        ],
+        [
+          "the failures looked like a typed-build rejection of csv row values",
+          "sort",
+          "prop"
+        ],
+        [
+          "the failures looked like a typed-build rejection of csv row values",
+          "supports",
+          {
+            "node": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+            "status": "untried"
+          }
+        ],
+        [
+          "the failures looked like a typed-build rejection of csv row values",
+          "supports",
+          {
+            "node": "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+            "relation": "addresses",
+            "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+          }
+        ],
+        [
+          "the failures looked like a typed-build rejection of csv row values",
+          "title",
+          "the failures looked like a typed-build rejection of csv row values"
+        ],
+        [
+          "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "sort",
+          "approach"
+        ],
+        [
+          "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "addresses",
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        ],
+        [
+          "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "effort",
+          1
+        ],
+        [
+          "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "status",
+          "failed"
+        ],
+        [
+          "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows",
+          "title",
+          "annotate csv-read! output as 'Atom' so the typed build stops rejecting its rows"
+        ]
+      ],
+      "id": "4104b147fe5655f9"
+    },
+    {
+      "at": "2026-09-20T23:58:05.873514+00:00",
+      "after": "5963f75ea990ec5850970eacf68a66295f3df9d3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp\", \"tags\": [\"measured\"], \"title\": \"SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build\", \"tags\": [\"measured\"], \"title\": \"collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling\", \"tags\": [], \"title\": \"resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename\", \"fields\": {\"effort\": 2, \"addresses\": [\"a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic\"]}}]",
+      "parents": [
+        "4104b147fe5655f9"
+      ],
+      "assert": [
+        [
+          "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path",
+          "sort",
+          "prop"
+        ],
+        [
+          "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path",
+          "title",
+          "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path"
+        ],
+        [
+          "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid",
+          "sort",
+          "prop"
+        ],
+        [
+          "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid",
+          "title",
+          "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid"
+        ],
+        [
+          "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp",
+          "supports",
+          "SWI 10.1.14 on this box does NOT initialise the tmp_dir flag from TMPDIR: with TMPDIR set to a directory under the checkout, current_prolog_flag(tmp_dir,D) still answers /tmp and tmp_file/2 still returns a /tmp path"
+        ],
+        [
+          "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp",
+          "title",
+          "measured 2026-09-21 by running swipl with and without TMPDIR set; both answered tmp_dir=/tmp"
+        ],
+        [
+          "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling",
+          "supports",
+          {
+            "node": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+            "status": "untried"
+          }
+        ],
+        [
+          "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling",
+          "supports",
+          {
+            "node": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+            "relation": "addresses",
+            "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+          }
+        ],
+        [
+          "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling",
+          "title",
+          "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling"
+        ],
+        [
+          "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build",
+          "sort",
+          "prop"
+        ],
+        [
+          "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build",
+          "supports",
+          "collapsing the fixtures onto tmp_file/2 alone would move every suite fixture into the RAM-backed /tmp, which is the outcome the comment at lib_file_surface.plt:46-48 documents the getenv as existing to avoid"
+        ],
+        [
+          "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build",
+          "tags",
+          "measured"
+        ],
+        [
+          "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build",
+          "title",
+          "tmp_file/2 derives from tmp_dir, and tmp_dir does not follow TMPDIR on this build"
+        ],
+        [
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "sort",
+          "approach"
+        ],
+        [
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "addresses",
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        ],
+        [
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "effort",
+          2
+        ],
+        [
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "status",
+          "untried"
+        ],
+        [
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "title",
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename"
+        ]
+      ],
+      "id": "82e1d49feafa6fa0"
+    },
+    {
+      "at": "2026-09-21T00:01:02.795445+00:00",
+      "after": "5963f75ea990ec5850970eacf68a66295f3df9d3",
+      "did": "[{\"op\": \"status\", \"id\": \"resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename\", \"because\": \"tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them\", \"tags\": [\"source\"], \"title\": \"the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises\", \"tags\": [], \"title\": \"make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure\", \"fields\": {\"effort\": 1, \"addresses\": [\"a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic\"]}}, {\"op\": \"status\", \"id\": \"make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure\", \"because\": \"tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read tests/prolog/suites/libraries/lib_system.plt:44-56\", \"tags\": [\"source\"], \"title\": \"lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail\", \"fields\": {}}]",
+      "parents": [
+        "82e1d49feafa6fa0"
+      ],
+      "assert": [
+        [
+          "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises",
+          "sort",
+          "prop"
+        ],
+        [
+          "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises",
+          "supports",
+          {
+            "node": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+            "status": "untried"
+          }
+        ],
+        [
+          "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises",
+          "supports",
+          {
+            "node": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+            "relation": "addresses",
+            "target": "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+          }
+        ],
+        [
+          "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises",
+          "title",
+          "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises"
+        ],
+        [
+          "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail",
+          "title",
+          "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail"
+        ],
+        [
+          "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them",
+          "sort",
+          "prop"
+        ],
+        [
+          "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them",
+          "supports",
+          "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line"
+        ],
+        [
+          "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them",
+          "tags",
+          "source"
+        ],
+        [
+          "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them",
+          "title",
+          "read engine/test.sh's load-error scan and observed that the 60 csv and json failures printed no error at all, so the existing catcher could not see them"
+        ],
+        [
+          "read tests/prolog/suites/libraries/lib_system.plt:44-56",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tests/prolog/suites/libraries/lib_system.plt:44-56",
+          "supports",
+          "lib_system.plt:50's bare getenv is not a sixth instance: it sits inside a setup_call_cleanup whose setup calls 'env-set!' on the same name two lines above, so it cannot fail"
+        ],
+        [
+          "read tests/prolog/suites/libraries/lib_system.plt:44-56",
+          "tags",
+          "source"
+        ],
+        [
+          "read tests/prolog/suites/libraries/lib_system.plt:44-56",
+          "title",
+          "read tests/prolog/suites/libraries/lib_system.plt:44-56"
+        ],
+        [
+          "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp",
+          "supersedes",
+          "this is the spelling lib_file_surface.plt:51 already uses and is the only one of the five that is correct, so the fix is to give that one correct copy a single home rather than to invent a sixth spelling"
+        ],
+        [
+          "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp",
+          "supports",
+          {
+            "node": "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+            "status": "done"
+          }
+        ],
+        [
+          "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp",
+          "tags",
+          "measured"
+        ],
+        [
+          "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp",
+          "title",
+          "tests/prolog/scratch.pl now holds scratch_parent/1 and with_scratch_directory/2, and the five sites call them; measured 2026-09-21 in both directions through sh engine/test.sh: with TMPDIR unset lib_csv_surface, lib_json_surface, lib_file_surface and prolog_interface all exit 0 with 0 failures where csv and json previously gave 45 and 15, and with TMPDIR set to a checkout directory all four still exit 0 and scratch_parent answers that directory rather than /tmp"
+        ],
+        [
+          "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates",
+          "supersedes",
+          "a construction that cannot represent the illegal state beats a checker that recognises it, and every component of with_scratch_directory/2 is now det or raising: scratch_parent/1 has an else branch, tmp_file/2 file_base_name/2 and directory_file_path/3 are det, and make_directory/1 raises"
+        ],
+        [
+          "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates",
+          "supports",
+          {
+            "node": "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+            "status": "done"
+          }
+        ],
+        [
+          "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates",
+          "tags",
+          "tested"
+        ],
+        [
+          "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates",
+          "title",
+          "tests/prolog/suites/seams/scratch.plt pins it in 7 cases and all 7 pass with TMPDIR unset, covering the unset parent, the set parent, an empty handover, removal after success, after failure, after an exception and with contents left behind, and asserting that a failing goal still fails and a thrown error still propagates"
+        ],
+        [
+          "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line",
+          "sort",
+          "prop"
+        ],
+        [
+          "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line",
+          "title",
+          "the mechanism is more general than getenv: any plunit fixture goal that FAILS rather than raising makes a test indistinguishable from one whose subject failed, because plunit prints a bare 'failed' either way, while engine/test.sh already fails the lane on any '^ERROR' line"
+        ],
+        [
+          "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "sort",
+          "approach"
+        ],
+        [
+          "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "addresses",
+          "a suite's scratch-directory fixture reads TMPDIR with a bare getenv/2, which FAILS rather than raises when the variable is unset, so every test bodied on it fails instantly with a bare 'failed' and no diagnostic"
+        ],
+        [
+          "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "effort",
+          1
+        ],
+        [
+          "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "status",
+          "done"
+        ],
+        [
+          "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure",
+          "title",
+          "make the fixture total, so setup either succeeds or raises and the existing ^ERROR scan in engine/test.sh catches it, instead of adding a lint that detects one spelling of the failure"
+        ],
+        [
+          "resolve the scratch parent as TMPDIR when set and the tmp_dir flag otherwise, in ONE shared module the suites import, with tmp_file/2 supplying only the unique basename",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "6fb5cc0258c27d03"
+    },
+    {
+      "at": "2026-09-21T00:05:10.982746+00:00",
+      "after": "5963f75ea990ec5850970eacf68a66295f3df9d3",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)\", \"tags\": [\"measured\"], \"title\": \"a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee\", \"fields\": {\"blocks\": [\"every gate lane in tools/check.sh exits 0 on the tree that is released\"]}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context\", \"tags\": [], \"title\": \"declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow\", \"fields\": {\"effort\": 2, \"addresses\": [\"a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee\"]}}, {\"op\": \"status\", \"id\": \"declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow\", \"because\": \"34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"bool is not a type SWI defines\", \"tags\": [], \"title\": \"fix the two crypto bool failures by spelling the type the way SWI spells it\", \"fields\": {\"effort\": 1, \"addresses\": [\"a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee\"]}}, {\"op\": \"status\", \"id\": \"fix the two crypto bool failures by spelling the type the way SWI spells it\", \"because\": \"measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "6fb5cc0258c27d03"
+      ],
+      "assert": [
+        [
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+          "sort",
+          "prop"
+        ],
+        [
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+          "blocks",
+          "every gate lane in tools/check.sh exits 0 on the tree that is released"
+        ],
+        [
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+          "title",
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+        ],
+        [
+          "bool is not a type SWI defines",
+          "sort",
+          "prop"
+        ],
+        [
+          "bool is not a type SWI defines",
+          "supports",
+          {
+            "node": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+            "status": "untried"
+          }
+        ],
+        [
+          "bool is not a type SWI defines",
+          "supports",
+          {
+            "node": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+            "relation": "addresses",
+            "target": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+          }
+        ],
+        [
+          "bool is not a type SWI defines",
+          "title",
+          "bool is not a type SWI defines"
+        ],
+        [
+          "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context",
+          "sort",
+          "prop"
+        ],
+        [
+          "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context",
+          "supports",
+          {
+            "node": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+            "status": "untried"
+          }
+        ],
+        [
+          "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context",
+          "supports",
+          {
+            "node": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+            "relation": "addresses",
+            "target": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+          }
+        ],
+        [
+          "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context",
+          "title",
+          "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context"
+        ],
+        [
+          "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)",
+          "supports",
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+        ],
+        [
+          "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)",
+          "supports",
+          {
+            "node": "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee",
+            "relation": "blocks",
+            "target": "every gate lane in tools/check.sh exits 0 on the tree that is released"
+          }
+        ],
+        [
+          "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)",
+          "title",
+          "measured 2026-09-21: nine typed failures across lib_vector, lib_crypto and lib_file differed from the untyped error in exactly three ways, a lost context(norm,_), a culprit bound where the body leaves it unbound, and a type_error(integer,1.5) replacing the body's domain_error(exit_status,1.5)"
+        ],
+        [
+          "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone",
+          "supersedes",
+          "bool is not a type SWI defines"
+        ],
+        [
+          "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone",
+          "supports",
+          {
+            "node": "fix the two crypto bool failures by spelling the type the way SWI spells it",
+            "status": "done"
+          }
+        ],
+        [
+          "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone",
+          "title",
+          "measured: must_be(bool,true) raises existence_error(type,bool) while must_be(boolean,true) succeeds, and the repository already writes :boolean 49 times against :bool once, so lib_crypto.pl:186 was a typo; crypto went 3 failures to 1 on that change alone"
+        ],
+        [
+          "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2",
+          "sort",
+          "prop"
+        ],
+        [
+          "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2",
+          "supersedes",
+          "dev_typed.pl guarantees the typed build is TRANSPARENT and that a passing suite is what says the annotations are TRUE, so an annotation that changes an observable error is the thing at fault; removing the duplicate leaves one home for the type, which is the body, because that is the copy that runs in production and the copy that carries the context"
+        ],
+        [
+          "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2",
+          "supports",
+          {
+            "node": "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+            "status": "done"
+          }
+        ],
+        [
+          "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2",
+          "tags",
+          "measured"
+        ],
+        [
+          "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2",
+          "title",
+          "34 input annotations relaxed across lib_vector 17, lib_file 14 and lib_crypto 3, each confirmed self-validating by reading its body: vector_input/1 is must_be(list(number),V) at lib_vector.pl:131, known_file/2 raises existence_error(metta_file_handle,H) at lib_file.pl:222, Count and Position hit must_be(integer,_) at lib_file.pl:334,358,400, exit! throws domain_error(exit_status,S) at lib_file.pl:1511, and lib_crypto.pl:47,73,74 are must_be(list(between(0,255)),_); all three suites then ran 0 failures under dev_typed_suites where they had 6, 1 and 2"
+        ],
+        [
+          "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "sort",
+          "approach"
+        ],
+        [
+          "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "addresses",
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+        ],
+        [
+          "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "effort",
+          2
+        ],
+        [
+          "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "status",
+          "done"
+        ],
+        [
+          "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow",
+          "title",
+          "declare a self-validated input as any in the mode line, leaving the body as the single authoritative description of the type, which is the convention csv-read! and read-file! already follow"
+        ],
+        [
+          "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "sort",
+          "approach"
+        ],
+        [
+          "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "addresses",
+          "a PlDoc mode line restating a type the predicate's own body already validates is a second description of one fact, and under the typed build the inserted check fires first and reports a different error from the one the body would raise, breaking dev_typed.pl's stated TRANSPARENCY guarantee"
+        ],
+        [
+          "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "effort",
+          1
+        ],
+        [
+          "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "status",
+          "done"
+        ],
+        [
+          "fix the two crypto bool failures by spelling the type the way SWI spells it",
+          "title",
+          "fix the two crypto bool failures by spelling the type the way SWI spells it"
+        ]
+      ],
+      "id": "12ba7bf843b56b2b"
     }
   ]
 }

@@ -62,6 +62,30 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The development build no longer reports a different refusal from the one a
+  library raises for itself. A PlDoc mode line restating a type the predicate's
+  own body already validates is a second description of one fact, and mavis
+  inserts its check at the head of the clause body, so it ran BEFORE the body
+  and reported instead of it. Fifteen cases across `lib_vector`, `lib_crypto`,
+  `lib_file`, `lib_markup` and `lib_process` saw the difference: a lost
+  `context(norm, _)`, a culprit bound where the body leaves it unbound so a
+  cyclic list is not printed, and `type_error(integer, 1.5)` in place of
+  `exit!`'s `domain_error(exit_status, 1.5)` and its remedy. Those inputs are
+  declared `any` now, leaving the body as the one authoritative description,
+  which is what `csv-read!` and `read-file!` already did.
+
+- An output annotation is checked when the predicate binds the value, not when
+  the caller supplies an expectation. mavis parsed the argument mode and then
+  discarded it, so `-Space:'SpaceType'` was checked exactly like an input and a
+  suite passing an expected value in the output position -- the ordinary way to
+  assert a result -- got `Type error: SpaceType expected, found impossible`
+  instead of the failure-to-unify it was written to observe. An unbound output
+  still gets the coroutine, so the half of the check worth keeping is kept.
+
+- `crypto-password-verify` declared its result as `bool`, which is not a type
+  SWI defines: `must_be(bool, true)` raises `existence_error(type, bool)`. The
+  tree writes `:boolean` 49 times and `:bool` once.
+
 - A suite fixture resolves its scratch directory whether or not the environment
   names one. Four suites and one benchmark opened with a bare
   `getenv('TMPDIR', Parent)`, and getenv/2 FAILS rather than raising when the
