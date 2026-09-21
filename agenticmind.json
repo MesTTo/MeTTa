@@ -16372,6 +16372,41 @@
       "tags": [
         "measured"
       ]
+    },
+    "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release": {
+      "title": "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+      "blocks": [
+        "the full gate exits 0 on the tree that ships as the release"
+      ]
+    },
+    "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED": {
+      "title": "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED",
+      "supports": [
+        "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+        {
+          "node": "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+          "relation": "blocks",
+          "target": "the full gate exits 0 on the tree that ships as the release"
+        }
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does": {
+      "title": "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does",
+      "tags": [
+        "reasoning"
+      ]
+    },
+    "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21": {
+      "title": "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21",
+      "supports": [
+        "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -70846,6 +70881,96 @@
         ]
       ],
       "id": "c83abdee5f70f14a"
+    },
+    {
+      "at": "2026-09-21T05:30:45.060961+00:00",
+      "after": "844f64a5fe7813280de4aa64b2cacf0e7127a794",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED\", \"tags\": [\"measured\"], \"title\": \"six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release\", \"fields\": {\"blocks\": [\"the full gate exits 0 on the tree that ships as the release\"]}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21\", \"tags\": [\"measured\", \"reasoning\"], \"title\": \"I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does\", \"fields\": {}}]",
+      "parents": [
+        "c83abdee5f70f14a"
+      ],
+      "assert": [
+        [
+          "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does",
+          "sort",
+          "prop"
+        ],
+        [
+          "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does",
+          "tags",
+          "reasoning"
+        ],
+        [
+          "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does",
+          "title",
+          "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does"
+        ],
+        [
+          "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED",
+          "supports",
+          "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release"
+        ],
+        [
+          "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED",
+          "supports",
+          {
+            "node": "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+            "relation": "blocks",
+            "target": "the full gate exits 0 on the tree that ships as the release"
+          }
+        ],
+        [
+          "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED",
+          "title",
+          "measured 2026-09-21 by asking each remote for refs/heads/main and testing the pin's ancestry against it; components.sh's own fetch independently marks the same six UNPUBLISHED"
+        ],
+        [
+          "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+          "sort",
+          "prop"
+        ],
+        [
+          "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+          "blocks",
+          "the full gate exits 0 on the tree that ships as the release"
+        ],
+        [
+          "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release",
+          "title",
+          "six component pins are not in their remote's main, so a fresh recursive clone cannot reproduce this tree: lib, examples, extensions/python, extensions/python/examples/language-feature-examples, extensions/cmetta and extensions/node. Pushing them is the user's call and is the last thing standing between this tree and a reproducible release"
+        ],
+        [
+          "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21",
+          "supports",
+          "I asserted a safeguard that did not exist: the commit message said a release still owes its fresh clone and that components.sh piped to grep UNPUBLISHED is the check, while the worktree test discards that output with >/dev/null and the gate reads only exit status, so nothing ran it. The marker is only a safeguard once a lane reads it, which check_component_publication.py now does"
+        ],
+        [
+          "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21",
+          "tags",
+          "measured"
+        ],
+        [
+          "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21",
+          "title",
+          "the record pointed out the fail-open, and reading tests/shell/test_worktree_configuration.sh:69 and the gate's run wrapper confirmed it on 2026-09-21"
+        ]
+      ],
+      "id": "3cdeaee119862f12"
     }
   ]
 }

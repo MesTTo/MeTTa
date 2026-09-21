@@ -36,6 +36,8 @@
 #     so `components.sh | grep UNPUBLISHED` is the check that the pointers
 #     were pushed, and the fallback hides nothing from it.
 #   - a pin that cannot be set refuses, naming the commit and the component.
+#   - a derived root that is not the repository refuses instead of reporting
+#     success over zero components, which is how a wrong root used to pass.
 # Fails when:
 #   - a component repository cannot be fetched, which it reports per component
 #     and exits nonzero for, because a checkout missing a component has no
@@ -164,5 +166,17 @@ populate() {
     done
 }
 
+# populate() returns 0 for a tree that declares no components, which is right
+# for a RECURSIVE call and wrong for this one: at the top level a missing
+# .gitmodules means the derived root is not the repository, and returning 0
+# there is how a wrong root provisions nothing and reports success. The test
+# that found this records the shape -- "it populated nothing here, exited 0"
+# -- and an exit 0 from a provisioning step is the worst answer available,
+# because every suite then passes while testing an empty checkout.
+[ -f "$HERE/.gitmodules" ] || {
+    echo "components.sh: $HERE declares no components (.gitmodules is not there);" >&2
+    echo "  this is not the repository root, so nothing would be provisioned" >&2
+    exit 1
+}
 populate "$HERE" || status=1
 exit "$status"

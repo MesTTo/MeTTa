@@ -453,6 +453,15 @@ run GATE refusal-grounds-selftest "$PY" "$HERE/tests/checks/check_refusal_ground
 # probe opened the source with a goal of `true` and POSIX open(2) on a
 # directory succeeds. REPORT while the twenty open cells burn down.
 run REPORT refusal-coverage "$PY" "$HERE/tests/checks/check_refusal_coverage.py"
+
+# components.sh prints UNPUBLISHED beside a pin it took from a sibling
+# worktree because the remote lacks it, which keeps a worktree of unpushed
+# work provisionable. Nothing read that marker: the worktree test discards its
+# output and this gate reads only exit status, so the fresh-recursive-clone
+# obligation a release owes was asserted and never checked. This asks each
+# remote what its main is and reports a pin that main does not contain.
+# REPORT while the backlog is nonzero, a GATE once the pointers are pushed.
+run REPORT component-publication "$PY" "$HERE/tests/checks/check_component_publication.py"
 run GATE refusal-coverage-selftest "$PY" "$HERE/tests/checks/check_refusal_coverage_selftest.py"
 
 # A suite that loads engine/metta.pl reads the engine's COMPILED artifacts, and
