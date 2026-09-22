@@ -11,6 +11,7 @@ import sys
 import tempfile
 import unittest
 from dataclasses import replace
+from itertools import product
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,12 +37,12 @@ class ManifestTests(unittest.TestCase):
         # spelling of it. This fixture wrote `<root>/check.sh` while
         # `projections()` opened `<root>/tools/check.sh`, so every test here
         # died in setUp with FileNotFoundError once the drivers moved.
-        driver = self.root / model.CHECK_SH
-        driver.parent.mkdir(parents=True, exist_ok=True)
-        driver.write_text(
-            f"authored before\n{model.BEGIN}\n{model.END}\n"
-            f"{model.LANES_BEGIN}\n{model.LANES_END}\nauthored after\n", encoding="utf-8",
-        )
+        for output in model.SHELL_OUTPUTS:
+            driver = self.root / output.path
+            driver.parent.mkdir(parents=True, exist_ok=True)
+            text = driver.read_text(encoding="utf-8") if driver.exists() else "authored before\n"
+            begin, end = output.region
+            driver.write_text(text + f"{begin}\n{end}\nauthored after\n", encoding="utf-8")
         (self.root / model.GUIDE_MD).write_text(
             f"guide before\n{model.DOC_BEGIN}\n{model.DOC_END}\nguide after\n", encoding="utf-8",
         )
@@ -187,6 +188,53 @@ class ManifestTests(unittest.TestCase):
                 result = subprocess.run(["sh", "-c", script, "fixture", selection], capture_output=True, text=True, check=True)
                 self.assertEqual(set(result.stdout.split()), expected)
         subprocess.run(["sh", "-n"], input=model.lanes(rows), text=True, check=True)
+
+    def test_subject_partition_moves_checks_and_witnesses_without_stale_registrations(self) -> None:
+        """Every input/output combination routes once and regeneration clears the old owner."""
+        seat_gate = "extensions/python/check.sh"
+        seat = "extensions/python/"
+        for input_prefix, output_prefix in product(("", seat), repeat=2):
+            with self.subTest(input=input_prefix, output=output_prefix):
+                for name in (input_prefix + "input.txt", output_prefix + "use.txt"):
+                    path = self.root / name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text("fixture\n", encoding="utf-8")
+                self.rows = (replace(self.rows[0], inputs=(input_prefix + "input.txt",),
+                                     outputs=(model.Output(output_prefix + "use.txt"),)), self.rows[1])
+                expected = seat_gate if input_prefix == output_prefix == seat else model.CHECK_SH
+                self.assertEqual(model.gate(self.rows[0]), expected)
+                self.render()
+                rendered = model.projections(self.root, self.rows)
+                self.render()
+                self.assertEqual(model.projections(self.root, self.rows), rendered)
+                self.assertEqual(self.problems(), "")
+                for relative in (model.CHECK_SH, seat_gate):
+                    text = (self.root / relative).read_text(encoding="utf-8")
+                    for name in ("a-use", "a-use-selftest"):
+                        self.assertEqual(text.count(f"run GATE {name} "), int(relative == expected))
+                path = self.root / expected
+                original = path.read_text(encoding="utf-8")
+                path.write_text(original.replace("run GATE a-use ", "run GATE missing "), encoding="utf-8")
+                self.assertIn(f"projection drift: {expected}", self.problems())
+                self.render()
+        # Moving the last component row back must empty its old region too.
+        self.rows = (replace(self.rows[0], inputs=("input.txt",)), self.rows[1])
+        self.render()
+        self.assertNotIn("run GATE a-use ", (self.root / seat_gate).read_text(encoding="utf-8"))
+
+    def test_real_runner_selects_generated_groups_through_each_owner(self) -> None:
+        """The actual sourced runner lists each owned check and witness exactly once."""
+        for owner in (None, "extensions/python"):
+            driver = ROOT / (model.CHECK_SH if owner is None else owner + "/check.sh")
+            rows = [row for row in model.ARTIFACTS if owner is None or model.gate(row) == owner + "/check.sh"]
+            for selection in ("generated-artifacts", "generated-artifacts-selftest", "protocol-sync", "init-stub"):
+                with self.subTest(owner=owner, selection=selection):
+                    selected = rows if selection.startswith("generated-artifacts") else [row for row in rows if row.name == selection]
+                    expected = [f"GATE {row.name}{suffix}" for row in selected
+                                for suffix in (("-selftest",) if selection.endswith("-selftest") else ("", "-selftest"))]
+                    result = subprocess.run(["sh", str(driver), "--list", selection], cwd=ROOT,
+                                            capture_output=True, text=True, check=True)
+                    self.assertCountEqual(result.stdout.splitlines(), expected)
 
     def test_shell_argv_quoting_does_not_execute_metacharacters(self) -> None:
         """Only the interpreter and root slots expand in executable argv."""
