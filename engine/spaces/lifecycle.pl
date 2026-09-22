@@ -1994,7 +1994,7 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
 %`true`, the effect answer of the whole family; see the note above 'println!'/2
 %in engine/metta/runtime.pl for the list and the check that holds it together.
 %The declaration moved with the clause: `add-atom` is typed
-%`(-> SpaceType Atom Bool)` in lib/lib_builtin_types/lib_builtin_types.metta
+%`(-> SpaceType Atom Bool)` in lib/lib_builtin_types/pkg.metta
 %[source: PeTTa@ae66fa8 src/spaces.pl:10,24, both clauses `'add-atom'(Space,
 %Term, true)`; measured 2026-08-29, the unit answer alone was the first
 %difference in 32 of its 157 examples].

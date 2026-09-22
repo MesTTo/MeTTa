@@ -1782,7 +1782,7 @@ test(metta_arity_errors_name_the_operator,
                               none)).
 
 test(builtin_exists_file) :-
-    library('lib_builtin_types.metta', Present),
+    library(lib_builtin_types, Present),
     'exists_file'(Present, Found),
     assertion(Found == true),
     'exists_file'('/nonexistent/metta/definitely-not-here', Missing),
@@ -1810,7 +1810,7 @@ test(builtin_exists_file_reverse_mode) :-
     metta_engine_module(Engine),
     assertion(\+ predicate_property(Engine:exists_file(_), built_in)),
     assertion(Engine:arity(exists_file, 1)),
-    library('lib_builtin_types.metta', Present),
+    library(lib_builtin_types, Present),
     format(string(PresentSource),
            "!(let* (($f \"~w\") ($f (exists_file))) $f)", [Present]),
     process_metta_string(PresentSource, PresentAnswers),
@@ -1866,7 +1866,7 @@ library_declared_row(Name, Type) :-
     clause_property(Ref, file(_)).
 
 test(the_table_is_built_from_the_file_rather_than_written_twice) :-
-    library('lib_builtin_types.metta', Path),
+    library(lib_builtin_types, Path),
     read_file_to_string(Path, Text, []),
     parse_metta_source(Text, Forms),
     findall(Name-Type,

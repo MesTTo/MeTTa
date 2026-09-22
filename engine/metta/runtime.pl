@@ -241,7 +241,7 @@ prolog:error_message(permission_error(register, metta_function, Name)) -->
 %
 %This is upstream PeTTa's answer and it is also what this tree's OWN catalogue
 %already declared: `(: println! (-> %Undefined% Bool))` in
-%lib/lib_builtin_types/lib_builtin_types.metta said Bool while the clause here
+%lib/lib_builtin_types/pkg.metta said Bool while the clause here
 %answered unit, so the two disagreed until now
 %[source: PeTTa@ae66fa8 src/metta.pl:212, `'println!'(Arg, true)`]
 %[tested: spaces_arbitrary_atoms:an_effectful_operation_answers_true;
@@ -379,7 +379,7 @@ test_answer_value(Results, Results).
 %what reaches here is the verdict and never the comparison:
 %`!(assert (== 1 2))` reports `false`, not `(== 1 2)`
 %[measured 2026-09-06 on this tree; the declaration is
-%lib/lib_builtin_types/lib_builtin_types.metta and it is upstream's].
+%lib/lib_builtin_types/pkg.metta and it is upstream's].
 %
 %A form that wants its CALL in the report therefore has to hand it over, which
 %is what the assert family does through assert-answers/5 below; only that

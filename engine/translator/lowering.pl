@@ -950,7 +950,7 @@ reduce([F|Args], Out, Status) :- !,
 %value. Every use of `reduce` in this repository's corpus and libraries passes
 %an expression, so the scalar door is a corner rather than a path
 %[source: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/01-callquoteevalreduce.metta,
-%lib/lib_patrick/lib_patrick.metta:7, which builds its operand with `cons`].
+%lib/lib_patrick/pkg.metta:7, which builds its operand with `cons`].
 %
 %An UNBOUND argument never reaches the absent clause either: the `[_|_]` clause
 %above unifies with it and its cut commits, which is what leaves

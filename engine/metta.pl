@@ -909,16 +909,26 @@
 :- encoding(utf8).
 :- use_module(library(filesex)).
 %A shipped library lives in its own DIRECTORY under lib/, named for the
-%library: lib/lib_memo/lib_memo.metta beside lib/lib_memo/lib_memo.pl and
+%library: lib/lib_memo/pkg.metta beside lib/lib_memo/lib_memo.pl and
 %lib/lib_memo/lib_memo_doc.md. A library is a MeTTa surface, the Prolog it
 %rides on and the prose that explains it, and a flat lib/ scattered those
 %three across an alphabetical listing of nearly sixty files.
 %
-%So a spec with no directory component gets one: `lib_memo` resolves to
-%lib/lib_memo/lib_memo and `lib_builtin_types.metta` to
-%lib/lib_builtin_types/lib_builtin_types.metta. A spec that already names a
-%directory is taken as written, which is what keeps builtin_mods/skel.metta,
-%the engine's own shipped-module spelling, resolving unchanged.
+%So a spec with no directory component names a LIBRARY and reaches its
+%manifest: `lib_memo` resolves to lib/lib_memo/pkg.metta. A spec that already
+%names a directory is taken as written, which is what keeps
+%builtin_mods/skel.metta, the engine's own shipped-module spelling, and
+%_support/collections.metta, the shared source every library may import,
+%resolving unchanged.
+%
+%What it no longer does is INFER a filename from a directory's name. `lib_memo`
+%used to resolve to lib_memo/lib_memo and `lib_conformance.pl` to
+%lib_conformance/lib_conformance.pl, which made a library's entry point's name
+%have to equal its directory's, and which the shipped libraries already spelled
+%two ways: 33 specs wrote the directory out and 12 relied on the match. A bare
+%name carrying an extension is now REFUSED with both spellings named, because
+%there is no honest answer for it: the directory it lives in is exactly the
+%thing the guess was inventing.
 library(X, Path) :- standard_library_path(Base),
                     library_within(X, Relative),
                     directory_file_path(Base, Relative, Path).
@@ -931,12 +941,17 @@ library_within(Spec, Relative) :-
     ( atom(Spec) -> Name = Spec ; atom_string(Name, Spec) ),
     (   sub_atom(Name, _, _, _, '/')
     ->  Relative = Name
-    ;   file_name_extension(Stem, _, Name),
-        directory_file_path(Stem, Name, Relative)
+    ;   file_name_extension(_, Extension, Name), Extension \== ''
+    ->  throw(error(domain_error(library_name, Name),
+                    context(library/2,
+                            'a library is named, not a file: write the path, \c
+                             `(library dir/file.pl)`, or name the library and \c
+                             let its pkg.metta answer')))
+    ;   directory_file_path(Name, 'pkg.metta', Relative)
     ).
 %A named library directory, git-fetched or registered. A library that
 %pip-installs is under neither: standard_library_path/1 is one directory,
-%<src>/../lib, so (library fast.pl) cannot reach a package's own files and a
+%<src>/../lib, so (library pettorch/fast.pl) cannot reach a package's own files and a
 %downstream library has to pass absolute paths, which is what
 %lib/minimal_metta_lib/minimal_metta_lib.py does with os.path.dirname(os.path.abspath(__file__)).
 %
@@ -2265,7 +2280,7 @@ metta_publish_host_tier :-
 %%%% require-extension!: the named refusal for the half that is missing %%%%
 %
 %A `lib/` module that rests on a seat states it here, and the engine answers by
-%NAME when the seat is not there. lib/lib_mm2/lib_mm2.metta is the case: five
+%NAME when the seat is not there. lib/lib_mm2/pkg.metta is the case: five
 %operators over `&mork` calling MORK's own builtins, with no presence check, so
 %on a tree where the FFI was never built each of them failed at call time with
 %nothing naming the cause.
@@ -2464,7 +2479,7 @@ metta_context_head(Head) :- is_list(Head).
 %
 %Without this, `get-type` misreported the engine to every tool that reads it.
 %`!=` IS a builtin, IS registered and IS declared (: != (-> $a $b Bool)) in
-%lib/lib_builtin_types/lib_builtin_types.metta, but with nothing loading that file
+%lib/lib_builtin_types/pkg.metta, but with nothing loading that file
 %`(get-type !=)` answered %Undefined% for an operation that works. Nothing was
 %missing; the type surface was simply not connected, and a reader like the
 %metta-lsp port has no way to tell "this has no type" from "this has a type
@@ -2490,7 +2505,10 @@ metta_context_head(Head) :- is_list(Head).
 :- dynamic seam:builtin_type_declaration/2.
 
 load_builtin_type_surface :-
-    library('lib_builtin_types.metta', Path),
+    % The library NAME rather than a filename: its manifest is the entry
+    % point, and a bare filename is refused now that nothing infers a
+    % directory from one.
+    library(lib_builtin_types, Path),
     exists_file(Path),
     !,
     read_file_to_string(Path, Text, [encoding(utf8)]),

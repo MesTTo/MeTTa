@@ -583,7 +583,7 @@ counterparts of minimal MeTTa's structural instruction set, plus `if`, `case`,
 which.
 
 Every other head stays yours, including ones the compiler also gives a meaning:
-`lib/lib_derived/lib_derived.metta` registers a rule for `once` on purpose, and
+`lib/lib_derived/pkg.metta` registers a rule for `once` on purpose, and
 `examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta`
 swaps it in and back out. A rule that goes ahead of a compiler form or a
 builtin that way is recorded, and the confluence report prints it beside the
@@ -740,7 +740,7 @@ existing library cards and declared argument types before adding a head.
 of existing operations. `lib_string` supplies the shared text boundary.
 
 Keep derived equations, their `(: ...)` types and `(@doc ...)` rows in
-`lib/lib_x/lib_x.metta`. A library made entirely from equations needs no
+`lib/lib_x/pkg.metta`. A library made entirely from equations needs no
 Prolog half. Shared implementation files can live under `lib/_support/`;
 import their existing operations instead of copying validators or algorithms.
 Use the same values across domains: Pairs supplies relations, Graph derives
@@ -1063,7 +1063,7 @@ registration at all.** It follows the same convention, inputs then one output:
 `translatePredicate` is written for its BINDINGS rather than its value: it
 compiles the goal inline and leaves the variables bound for the rest of the
 form, which is why it appears inside a `progn`. Both are live in the tree:
-`lib/lib_tabling/lib_tabling.metta`, `lib/lib_spaces/lib_spaces.metta`,
+`lib/lib_tabling/pkg.metta`, `lib/lib_spaces/pkg.metta`,
 `examples/ch20-extending-the-engine/20-02-metta-written-in-metta/01-callquoteevalreduce.metta`
 and
 `examples/ch20-extending-the-engine/20-03-prolog-underneath/01-translatepredicate.metta`.
@@ -1097,7 +1097,7 @@ just an argument, and a `let` puts a value into it:
 Read that carefully, because the shape is the point. `consult_global/1` has one
 Prolog argument, which the convention makes the OUTPUT slot, so its MeTTa arity
 is zero and it is written `(consult_global)` with nothing in the parentheses.
-The `let` then unifies the path INTO that slot. `lib/lib_import/lib_import.metta`
+The `let` then unifies the path INTO that slot. `lib/lib_import/pkg.metta`
 already relies on this.
 
 The same fact runs the other way. A registered predicate can BIND a caller's
@@ -1308,7 +1308,7 @@ that a program imports with no Python of yours running first.
 from pathlib import Path
 import metta.integrate, torch
 
-Path("lib/lib_torch/lib_torch.metta").write_text(
+Path("lib/lib_torch/pkg.metta").write_text(
     metta.integrate.face(torch, ["matmul", "relu"], purpose="PyTorch through py-call"),
     encoding="utf-8",
 )
@@ -2659,7 +2659,7 @@ it is not, it refuses and the message is TRANSITIVE: it names the extension, why
 that extension is not loaded, and the command that clears it.
 
 ```
-'lib/lib_mm2/lib_mm2.metta': extension mork is required and not loaded:
+'lib/lib_mm2/pkg.metta': extension mork is required and not loaded:
 artefact extensions/mork/mork_ffi/target/release/libmork_ffi.so is absent
 (run extensions/mork/build.sh) (while loading MeTTa file)
 ```
@@ -2670,7 +2670,7 @@ so a require typed at a REPL names only what is missing. A need of kind
 deep is one message; the walk carries a seen list and reports a cycle instead of
 looping.
 
-`lib/lib_mm2/lib_mm2.metta` is the shipped case, five operators over `&mork`
+`lib/lib_mm2/pkg.metta` is the shipped case, five operators over `&mork`
 calling MORK's own builtins. PostgreSQL has the same two-half split and answers
 it the same way: `pg_stat_statements` is a preloaded C module plus a
 per-database `CREATE EXTENSION`, and the second without the first raises
@@ -3891,8 +3891,8 @@ worked instance whose bindings come from a different MeTTa runtime entirely.
 
 **Above unification, scored matching is a library convention.** A scoring
 matcher is a MeTTa function answering `(score value)` pairs, generating
-best-first when the candidate is unbound; `lib/lib_soft/lib_soft.metta` and
-`lib/lib_measure/lib_measure.metta` are that story, in user space on the general
+best-first when the candidate is unbound; `lib/lib_soft/pkg.metta` and
+`lib/lib_measure/pkg.metta` are that story, in user space on the general
 seam, deliberately not in the engine or the Python package. Matchers compose
 through ordinary MeTTa evaluation and nondeterminism, never through new syntax,
 because fixing one notion of closeness in the core would exclude every other.

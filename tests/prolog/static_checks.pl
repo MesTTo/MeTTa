@@ -1109,7 +1109,7 @@ corpus_equation_body(Body) :-
 % the program's own: it resolves in the program's space deliberately, and
 % protecting its name would be refusing the feature. In a compiled body it is
 % indistinguishable from one the translator wrote, so the equations that use
-% the hatch are skipped whole. lib/lib_tabling/lib_tabling.metta is the shipped instance,
+% the hatch are skipped whole. lib/lib_tabling/pkg.metta is the shipped instance,
 % and open_string/2 and load_files/2 reach compiled bodies through it
 % [measured 2026-08-19].
 writes_a_raw_prolog_goal(Form) :-

@@ -4290,7 +4290,7 @@ reads;
 compiler: `metta_special_form_head/1`, every head the translator gives special
 meaning, so a linter, a completion list or the Python MeTTa.builtins() call asks
 a question instead of reading the compiler's clause table. That read was what the
-Python shim and lib/lib_reflect/lib_reflect.metta both did, and both answered short and
+Python shim and lib/lib_reflect/pkg.metta both did, and both answered short and
 silently the moment the translator became a module of its own, and
 `recompile_function_impl/1` rebuilds one function after a dispatch decision,
 with `recompile_function_impl_in/2` naming the module to rebuild it in;
@@ -4459,8 +4459,8 @@ row, and a bare `!(git-import! url)` with no revision is not a pin.
 
 `metta.importing.install(space=None, *, path=None)` makes a `.metta` file a
 Python module: it appends a `sys.meta_path` finder, so `import lib_dict` finds
-`lib_dict.metta`, its `.metta.gz` form, or a directory named for it holding
-that same file, and loads it into `space` with the engine's own `import!`. `path` names directories
+a file of that name, its `.metta.gz` form, or a directory of that name holding
+a `pkg.metta`, and loads it into `space` with the engine's own `import!`. `path` names directories
 searched before `sys.path`, one bare directory allowed; `space` defaults to the
 ambient one and is resolved AT INSTALL, so one finder names one space for its
 whole life. The module carries the heads the FILE declares as attributes, each
@@ -4985,20 +4985,29 @@ file's. `(package requires)` names a library and `&catalogs` says where it
 lives, so a requirement resolves by matching rather than by a resolver, and one
 no catalog holds refuses by name. Adding a catalog is adding a row.
 
-`pkg.metta` is the file a DIRECTORY is imported through, and the standard way
-an external package is reached: `!(import! &self ./greeter)` loads
-`greeter/pkg.metta`, so the importer names the directory and never an entry
-point inside it. A git requirement enters its checkout the same way. The name
-is a convention rather than the package's own, which is what `Cargo.toml`,
-`go.mod` and `package.json` are and for the same reason: a checkout previously
-had to carry a file named after its REPOSITORY, so renaming the repository
-broke every importer.
+`pkg.metta` is the file a DIRECTORY is entered through, and the ONE way a
+package is reached: `!(import! &self ./greeter)` loads `greeter/pkg.metta` and
+`!(import! &self (library lib_json))` loads `lib/lib_json/pkg.metta`, so an
+importer names the package and never an entry point inside it. A git
+requirement enters its checkout the same way. The name is a convention rather
+than the package's own, which is what `Cargo.toml`, `go.mod` and
+`package.json` are, and for the same reason: an entry point named after its
+directory means renaming the directory breaks every importer.
 
-It is the LAST candidate the resolver tries, after `<name>.metta` and
-`<name>.metta.gz`, so a file beside the directory still wins. `import!` and
-`unimport!` enumerate it from one predicate, because a directory imported
-through its manifest is withdrawn by the name that imported it
-[tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/14-package_manifest.metta].
+NOTHING infers a filename from a directory's name. A bare spec carrying an
+extension, `(library lib_regex.pl)`, is REFUSED with both correct spellings
+named, because the directory it lives in is exactly what the guess was
+inventing. Write the path, `(library lib_regex/lib_regex.pl)`, or name the
+package and let its manifest answer. A backing row names its file plainly,
+`(prolog "lib_regex.pl" (...))`, resolved beside the manifest carrying it, the
+base `Cargo.toml`'s `path` uses.
+
+A file still beats a directory: `<name>.metta` and `<name>.metta.gz` are tried
+first, so a module beside a package of the same name wins. `import!` and
+`unimport!` enumerate the manifest from one predicate, because a directory
+imported through its manifest is withdrawn by the name that imported it
+[tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/14-package_manifest.metta,
+tests/prolog/suites/seams/packages.plt].
 
 Dispatch is unification. `(perform <row>)` evaluates in `&metta` against a
 claim, `(= (perform (<token> ...)) ...)`, that a seat, library or program adds

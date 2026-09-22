@@ -197,7 +197,10 @@ metta_reference_background(Home, Path, manifest(Forms, Signatures)) :-
     ( current_transaction(_)
     -> throw(error(metta_wait_in_transaction('background library load'), none))
     ; true ),
-    library('lib_thread.pl', ThreadLibrary), use_module(ThreadLibrary, []),
+    % The path spelled out: this wants one Prolog file inside the library,
+    % not the library's manifest, and nothing infers the directory from a
+    % filename any more.
+    library('lib_thread/lib_thread.pl', ThreadLibrary), use_module(ThreadLibrary, []),
     metta_reference_admission_scope(Home, background, enabled),
     retractall(metta_reference_manifest_head(Home, _, _)),
     retractall(metta_reference_manifest_row(Home, _)),

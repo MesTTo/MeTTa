@@ -88,7 +88,7 @@ library_engine_name(Name) :- translator:metta_special_form(Name).
 % The shipped compatibility library is held to its vendored upstream model.
 % Every other library keeps the engine's existing meaning at its old arities.
 library_meaning_reference(File, Forms) :-
-    same_file(File, '../../lib/lib_he/lib_he.metta'), !,
+    same_file(File, '../../lib/lib_he/pkg.metta'), !,
     library_source_forms('../conformance/petta/lib/lib_he.metta', Forms).
 library_meaning_reference(_, []).
 

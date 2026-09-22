@@ -3,11 +3,11 @@
 %
 % A library used to CALL the importer:
 %
-%     !(import_prolog_functions_from_file (library lib_x.pl) (head ...))
+%     !(import_prolog_functions_from_file (library lib_x/lib_x.pl) (head ...))
 %
 % and now DESCRIBES what backs its heads:
 %
-%     (= (package backing) (prolog (library lib_x.pl) (head ...)))
+%     (= (package backing) (prolog "lib_x.pl" (head ...)))
 %
 % The difference is that the row is data any implementation can read, decide
 % whether it can perform, and refuse by name when it cannot, where the call was
@@ -33,9 +33,11 @@
 %   - a row reaches its claimant as DATA, so a one-name list is a list and not
 %     a nullary call to the name in it
 %     [tested: packages:a_backing_row_reaches_its_claimant_as_data]
-%   - the claimant resolves its own locator, so `(library x.pl)` in a row
-%     reaches the importer as the path it names
-%     [tested: packages:a_backing_row_resolves_its_library_locator]
+%   - the claimant resolves its own locator, and the two shapes differ only
+%     in the base: `(library dir/x.pl)` is under the library root and a plain
+%     `"x.pl"` is beside the manifest carrying it
+%     [tested: packages:a_backing_row_resolves_its_library_locator,
+%     packages:a_plain_backing_locator_resolves_beside_its_own_manifest]
 %   - a row performs for the file that carries it and for no other load into
 %     the same space
 %     [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it]
@@ -150,7 +152,7 @@ test(a_backing_row_reaches_its_claimant_as_data) :-
     catch('import!'('&self', Path, _), error(Formal, _), true),
     Formal = existence_error(procedure, packages_declared_name).
 
-%The claimant's half of the same law. The mask hands `(library x.pl)` over as
+%The claimant's half of the same law. The mask hands `"x.pl"` over as
 %the two-element list it is, and only the claimant knows that is a locator, so
 %the claim evaluates it and the engine never does. Without that the importer
 %consults `library` and `x.pl` as two separate files and the refusal names
@@ -159,13 +161,39 @@ test(a_backing_row_reaches_its_claimant_as_data) :-
 %observable, since the refusal quotes the path it tried.
 test(a_backing_row_resolves_its_library_locator) :-
     package_fixture(locator,
-                    '(= (package backing) (prolog (library packages_no_such_library.pl) \c
+                    '(= (package backing) (prolog (library \c
+                     packages_no_such_library/packages_no_such_library.pl) \c
                      (packages_locator_double)))\n',
                     Path),
     catch('import!'('&self', Path, _), error(Formal, _), true),
     Formal = existence_error(source_sink, Tried),
     sub_atom(Tried, _, _, _,
              'packages_no_such_library/packages_no_such_library.pl').
+
+%The OTHER locator shape, and the one every shipped row uses since the
+%manifest became the entry point: a plain filename, resolved beside the
+%manifest that carries it rather than under the library root. That is what
+%makes a row portable with its own directory, and it is the same base
+%Cargo.toml's `path` and package.json's `main` resolve against.
+%
+%The two shapes differ in exactly one thing, the base they resolve against,
+%so the pair above and here is the whole of it: `(library dir/file.pl)` is
+%<library root>/dir/file.pl and "file.pl" is <this manifest's directory>/file.pl.
+test(a_plain_backing_locator_resolves_beside_its_own_manifest) :-
+    package_fixture(plainloc,
+                    '(= (package backing) (prolog "packages_no_plain_library.pl" \c
+                     (packages_plain_double)))\n',
+                    Path),
+    catch('import!'('&self', Path, _), error(Formal, _), true),
+    Formal = existence_error(source_sink, Tried),
+    file_directory_name(Path, Directory),
+    directory_file_path(Directory, 'packages_no_plain_library.pl', Beside),
+    % Normalised before comparing: the fixture's own path reaches here with the
+    % suite's `../../../..` still in it, and the resolver answers the canonical
+    % form, so a string comparison of the two fails on spelling rather than on
+    % the directory they both name.
+    absolute_file_name(Beside, Expected, [access(none)]),
+    Tried == Expected.
 
 %Law 14 performs a file's rows AT ONCE, when the file carrying them loads, and
 %the rows of one file are no part of the next load into the same space. This
@@ -178,7 +206,7 @@ test(a_backing_row_resolves_its_library_locator) :-
 %imports instead of on its own [measured 2026-09-19].
 test(a_backing_row_performs_only_for_the_file_that_carries_it) :-
     package_fixture(refusing,
-                    '(= (package backing) (prolog (library packages_no_second_library.pl) \c
+                    '(= (package backing) (prolog "packages_no_second_library.pl" \c
                      (packages_refusing_double)))\n',
                     Refusing),
     catch('import!'('&self', Refusing, _),
@@ -361,7 +389,7 @@ test(a_requirement_loads_before_the_file_that_declares_it,
     % Native clauses have process lifetime. A fresh space must receive the
     % required source's declarations and callable heads even if another test
     % or importing home already loaded its Prolog artifact.
-    library('lib_regex.pl', Native), use_module(Native, []),
+    library('lib_regex/lib_regex.pl', Native), use_module(Native, []),
     \+ 'get-atoms'(Space, [':', regex_match, _]),
     package_fixture(requires, '(= (package requires) lib_regex) ; not ~w~n', Path),
     'import!'(Space, Path, true),

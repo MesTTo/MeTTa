@@ -846,7 +846,7 @@ superpose(L,X) :- member(X,L).
 empty(_) :- fail.
 
 %%% Lists / Tuples: %%%
-%The tail's declared type is Expression [source: lib/lib_builtin_types/lib_builtin_types.metta,
+%The tail's declared type is Expression [source: lib/lib_builtin_types/pkg.metta,
 %(: cons-atom (-> Atom Expression Atom))], and this engine refuses a tail that
 %is not one rather than building a term it could not print
 %[source: tests/regression/instruction_interp.metta, which pins native
@@ -900,7 +900,7 @@ empty(_) :- fail.
 %vanishing: (chain (decons-atom ()) $l TEMPLATE) never runs its template and
 %the branch after it is unreachable. That cost the specification's own Turing
 %machine both of its blank-cell arms and mm-switch its "no case matched" arm,
-%and nothing in either program said why [source: lib/minimal_metta_lib/minimal_metta_lib.metta,
+%and nothing in either program said why [source: lib/minimal_metta_lib/pkg.metta,
 %recorded there as C1b and C1d].
 %
 %The shape is the reference implementation's, because MeTTa had no considered
