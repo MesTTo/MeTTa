@@ -80,3 +80,25 @@ where the load happens. With the old cleanup restored as a negative control in
 a scratch worktree, the same file fails the six original tests and that new
 one: nothing in this unit failed while the leak was live, so the leak was only
 ever readable off its victims three units and 1,600 lines further down.
+
+Measured, and still open: there is a THIRD consumer. `engine/bench.pl`'s
+translate case reads `lib/lib_pln/pkg.metta` through `bench_text/2`, which
+resolves one path and follows nothing, then requires exactly 49 function names.
+That file is an 11-line manifest now whose only equation sits on the reserved
+head `package`, so `metta_bench:bench_setup_translate/1` throws
+`error(domain_error(bench_workload,[package]), context(bench_setup/2,
+'lib/lib_pln/pkg.metta no longer defines 49 function names'))` [measured
+2026-09-23 by loading the module and calling it at 348c664c0 with `lib`
+629c86c]. `engine/check.sh` runs that case through `check_engine_bench`, so it
+is a blocking lane rather than a quiet one, which is the one respect in which
+this consumer is better off than the other two: both of those lost their rows
+in silence.
+
+It wants its own commit, and not because of its size. The repair has to pick
+the workload's source, re-derive the 49, and re-pin the workload digest in
+`engine/bench-baseline.json`, which is a benchmark obligation with its own
+evidence; folding it in here would leave neither change verifiable on its own.
+`684cf1560` landed the shape it should take while this was being written:
+`builtin_type_surface_forms/1` resolves the library directory and parses every
+`.metta` in it, and it deliberately names no filename, so a fourth home for the
+`pkg.metta`/`lib.metta` pair never has to be kept in step.
