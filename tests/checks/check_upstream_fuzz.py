@@ -17,6 +17,26 @@ pin, and this records the miss against the census and moves on rather than
 calling it a divergence: `!(unify $x c a no)` answers itself there and answers
 `a` here, and that is this tree having more, not upstream being wrong.
 
+ARBITER, not oracle, and one class shows the difference. Arithmetic over a
+ONE-ELEMENT EXPRESSION is answered there by SWI's own `is/2` rather than by
+MeTTa: `!(/ (cons 0 ()) 1)` answers `0` and `!(/ (cons a ()) (+ 0 8))` answers
+`12.125`, which is 97/8 for the character code of `a`. The mechanism is the
+host's legacy arithmetic, measured directly [measured 2026-09-22: `X is
+"a"/8` is 12.125 and `X is [0]/1` is 0 under SWI 10.1.14, while `X is a/8`
+raises type_error(evaluable, a/0)], so a one-element expression reaches `is/2`
+as a list or a one-character string and evaluates to its element or its code
+point.
+
+This engine answers `(Error (/ (0) 1) (BadArgType 1 Number (Number)))`, and
+that is the right answer: a one-element expression is not the atom it wraps,
+which examples/ch09-types/21-a_librarys_declared_types.metta states outright
+and examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta
+tests on both sides. So an `error-on-one` whose reference answer is a number
+and whose program divides or multiplies a one-element expression is THIS
+class, and the design wins over the lane, per the ruling that upstream governs
+semantics but a liked design governs upstream. Triage it as decided rather
+than re-deriving it; two of 200 programs at seed 0 were this and nothing else.
+
 REPORT, not GATE. It generates fresh programs, so what it finds moves run to
 run, and a lane that blocks a push on a newly drawn program blocks it on the
 draw rather than on the change. A finding is a Markdown file carrying the
