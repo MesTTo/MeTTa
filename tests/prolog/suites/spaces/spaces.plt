@@ -3684,6 +3684,11 @@ test(clearing_a_world_for_release_frees_its_children_first) :-
     spaces:space_equation_home(Child, '&plunit_world3'),
     spaces:metta_clear_space_for_release('&plunit_world3'),
     assertion(\+ spaces:space_equation_home(_, '&plunit_world3')),
-    assertion(\+ spaces:native_storage_module_cache(Child, _)).
+    assertion(\+ spaces:native_storage_module_cache(Child, _)),
+    %A clear is preliminary; the retirement is what gives the name back. Left
+    %cleared and unreleased this world keeps a live module for whatever runs
+    %next, which is the contamination the suite beside it avoids the same way.
+    spaces:metta_release_space('&plunit_world3'),
+    assertion(\+ spaces:space_equation_home('&plunit_world3', _)).
 
 :- end_tests(space_worlds).
