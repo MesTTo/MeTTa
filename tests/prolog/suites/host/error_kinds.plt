@@ -22,6 +22,10 @@
 %   - a stack ceiling is the one that was IN FORCE, read from the ball, not
 %     the flag's current value
 %     [tested: the_stack_ceiling_is_the_one_the_ball_recorded]
+%   - EVERY declared platform capability classifies with field values a wire
+%     can carry, which the fixture's one ball per kind cannot reach: three of
+%     them name a LIST of libraries rather than one
+%     [tested: every_declared_platform_capability_crosses_as_atomics]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -87,6 +91,22 @@ test(every_declared_kind_classifies_from_its_own_ball,
     pairs_keys_values(Carried, Names, Values),
     msort(Carried, Sorted),
     assertion(Sorted == Expected).
+
+%The fixture carries ONE ball per kind, so it reaches one shape of a field
+%that has two. A platform requirement is library(thread) for most capabilities
+%and a LIST for markup, persistency and fast-cache, and a list took a
+%different branch of the reducer. Driving every capability the engine declares
+%covers both, and covers a capability added later that nobody remembers to
+%plant. The law is what a wire carries: atomics, so a compound that reached a
+%field unreduced is caught here rather than at a seat's crossing.
+test(every_declared_platform_capability_crosses_as_atomics,
+     [ forall(metta_engine:metta_platform_capability(Capability, Requires, Costs)) ]) :-
+    Ball = error(metta_platform_required('(probe)', Capability,
+                                         Requires, Costs), none),
+    metta_host_error_kind(Ball, Kind, Fields),
+    assertion(Kind == platform),
+    pairs_values(Fields, Values),
+    assertion(forall(member(Value, Values), atomic(Value))).
 
 %A clean result above says nothing unless the check can go red, so the syntax
 %envelope is checked against the restraint row and has to fail.

@@ -40,6 +40,7 @@ word; `tests/data/error-kinds.json` records what it spells and why.
 | `type` | `CastError` | `TypeError` | `CastError` | none |
 | `assertion` | `AssertionFailure` | `AssertionFailure` | `AssertionError` | `operation` |
 | `capability` | `SpaceCapabilityError` | `SpaceCapabilityError` | `CapabilityError` | `space` `operation` `capability` |
+| `platform` | `PlatformCapabilityError` | `PlatformCapabilityError` | `PlatformCapabilityError` | `operation` `capability` `requires` `costs` |
 | `operation` | `MettaOperationError` | `MettaOperationError` | `OperationError` | `operation` `kind` `expected` `culprit` |
 | `stack` | `StackLimitError` | `StackLimitError` | `StackLimitError` | `limit` |
 | `source` | `SourceNotFound` | `SourceNotFound` | `SourceNotFoundError` | `source` |
@@ -146,6 +147,16 @@ Raised as `SpaceCapabilityError`, off a ball whose own shape names the refusal.
 An LSP `quickfix` at rustc's `maybe`, whose act is `(edit (grants <space> <capability>))`.
 
 On TypeScript this is `CapabilityError`: the package namespace already says space, so the Space prefix would be said twice.
+
+### `platform`
+
+Raised as `PlatformCapabilityError`, off a ball whose own shape names the refusal.
+
+**Ground.** metta-law: HostLaws: engine/metta.pl metta_require_platform/2 -- a form that cannot work without a platform capability refuses before it tries, naming what this build would have to be made with
+
+**Remedy.** build this deployment with `<requires>`, which is what the `<capability>` capability needs; without it `<costs>`
+
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
 ### `operation`
 

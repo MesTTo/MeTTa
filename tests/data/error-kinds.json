@@ -85,6 +85,14 @@
    "node": {"error": "CapabilityError", "code": "ERR_METTA_CAPABILITY", "attributes": {"space": "space", "operation": "operation", "capability": "capability"},
             "why": "the package namespace already says space, so the Space prefix would be said twice"}
   },
+  "platform": {
+   "origin": "term",
+   "fields": ["operation", "capability", "requires", "costs"],
+   "ball": "error(metta_platform_required('(hyperpose ((+ 1 2)))', concurrency, library(thread), 'this build evaluates on one thread'), none)",
+   "expects": {"operation": "(hyperpose ((+ 1 2)))", "capability": "concurrency", "requires": "library(thread)", "costs": "this build evaluates on one thread"},
+   "python": {"error": "PlatformCapabilityError", "attributes": {"operation": "operation", "capability": "capability", "requires": "requires", "costs": "costs"}},
+   "node": {"error": "PlatformCapabilityError", "code": "ERR_METTA_CAPABILITY", "attributes": {"operation": "operation", "capability": "capability", "requires": "requires", "costs": "costs"}}
+  },
   "operation": {
    "origin": "term",
    "fields": ["operation", "kind", "expected", "culprit"],

@@ -9,6 +9,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `platform` is a refusal kind of its own, so a form refused for want of a
+  platform capability arrives as `PlatformCapabilityError` carrying the four
+  parts the engine names: the form, the capability, what this build would have
+  to be made with, and what its absence costs. `metta_platform_required/4` was
+  decided by no clause of `metta_host_error_kind/3` and fell to the catch-all,
+  so every seat lost all four and a caller matching `ERR_METTA_CAPABILITY` in
+  the browser was handed `ERR_METTA_ENGINE` with only the sentence.
+
+  It is a separate kind from `capability` rather than a second reading of it,
+  because the repair differs and the remedy does with it: a space capability
+  is granted, a platform one is built, and `capability`'s own quickfix
+  `(grants <space> <capability>)` would have rendered against a `<space>` hole
+  nothing fills, offering to grant `library(thread)` to nothing. The
+  requirement crosses as Prolog writes it, `library(thread)`, and not as
+  MeTTa: `swrite/2` refuses that term outright because `(library thread)`
+  reads back as a two-element expression, and `use_module((library thread))`
+  is not something a reader could act on. A capability naming several
+  libraries, as `markup`, `persistency` and `fast-cache` do, joins them into
+  one sentence, and `error_kinds.plt` drives every declared capability rather
+  than one planted ball, because a fixture carrying one ball per kind reaches
+  only one of a field's two shapes.
+
 - `pkg.metta` is the file a DIRECTORY is imported through, and the standard way
   an external package is reached: `!(import! &self ./greeter)` loads
   `greeter/pkg.metta`, so an importer names the directory and never an entry

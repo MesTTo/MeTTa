@@ -3043,6 +3043,15 @@ metta_refusal_declaration(
     [remedy, "grant <capability> to <space>, which <operation> needs",
      quickfix, maybe, [edit, [grants, '<space>', '<capability>']]]).
 metta_refusal_declaration(
+    platform, 'PlatformCapabilityError',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta.pl metta_require_platform/2 -- a form that cannot \c
+      work without a platform capability refuses before it tries, naming what \c
+      this build would have to be made with"],
+    [remedy, "build this deployment with <requires>, which is what the \c
+      <capability> capability needs; without it <costs>",
+     quickfix, prose]).
+metta_refusal_declaration(
     operation, 'MettaOperationError',
     [ground, arbiter,
      "upstream PeTTa at the parity pin: \c

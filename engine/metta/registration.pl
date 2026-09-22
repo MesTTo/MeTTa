@@ -422,6 +422,8 @@ metta_host_error_kind_row(value,           signal,  []).
 metta_host_error_kind_row(type,            signal,  []).
 metta_host_error_kind_row(assertion,       term,    [operation]).
 metta_host_error_kind_row(capability,      term,    [space, operation, capability]).
+metta_host_error_kind_row(platform,        term,    [operation, capability,
+                                                     requires, costs]).
 metta_host_error_kind_row(operation,       term,    [operation, kind, expected, culprit]).
 metta_host_error_kind_row(stack,           term,    [limit]).
 metta_host_error_kind_row(source,          term,    [source]).
@@ -452,6 +454,19 @@ metta_host_error_kind(Ball, capability,
                       [space-Space, operation-Operation, capability-Capability]) :-
     metta_host_space_capability_error(Ball, Space, Operation, Capability),
     !.
+%A capability the BUILD has not got, which is a different act from the one
+%above: that one is repaired by granting a capability to a space, this one by
+%building the deployment with what Requires names, and Requires and Costs have
+%no analogue in the space case. Folding the two together would render the
+%capability row's own quickfix, (grants <space> <capability>), against a
+%<space> hole nothing fills, offering to grant library(thread) to nothing.
+metta_host_error_kind(error(metta_platform_required(Form, Capability,
+                                                    Requires0, Costs), _),
+                      platform,
+                      [operation-Form, capability-Capability,
+                       requires-Requires, costs-Costs]) :-
+    !,
+    metta_host_platform_requirement_text(Requires0, Requires).
 metta_host_error_kind(Ball, operation, Fields) :-
     metta_host_operation_error(Ball, Operation, Formal, Expected, Culprit),
     !,
@@ -464,6 +479,22 @@ metta_host_error_kind(error(existence_error(source_sink, Source), _), source,
                       [source-Source]) :-
     !.
 metta_host_error_kind(_, engine, []).
+
+%A capability's requirement is a SWI LIBRARY SPEC, library(thread) or a list
+%of them, and it is not MeTTa: swrite/2 refuses it outright because (library
+%thread) would read back as a two-element expression, and `use_module((library
+%thread))` is not something a reader could act on. So it crosses as Prolog
+%writes it, which is both the spelling engine/metta.pl's own error message
+%already prints with ~w and the one a person types into a build. A list joins
+%into one sentence rather than crossing as a list, because the remedy's
+%<requires> hole is prose and a bracketed list reads as data there.
+metta_host_platform_requirement_text(Specs, Text) :-
+    is_list(Specs),
+    !,
+    maplist(term_string, Specs, Texts),
+    atomic_list_concat(Texts, ', ', Text).
+metta_host_platform_requirement_text(Spec, Text) :-
+    term_string(Spec, Text).
 
 %The envelope's own kind and payload. Detail is left UNBOUND where the ball
 %carries none, the absence marker metta_host_operation_error/5 already uses,
