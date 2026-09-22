@@ -50,17 +50,22 @@ ROOT = Path(__file__).resolve().parent.parent
 TOOL = ROOT / "tools" / "pending-publishers.py"
 
 #: The distributions and the files they build, as the real tree spells them.
-#: pymetta/pymetta_host is the near-miss the glob has to survive: one name is
-#: a prefix of the other, separated only by the character the glob anchors on.
+#: pymetta/pymetta_unpublished is the near-miss the glob has to survive: one
+#: name is a prefix of the other, separated only by the character the glob
+#: anchors on, which is exactly how `pymetta-*` once swallowed a sibling.
 TREE = {
     "pymetta": ["pymetta-0.9.0.tar.gz", "pymetta-0.9.0-py3-none-any.whl"],
-    "pymetta-host": ["pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl"],
+    "pymetta-unpublished": ["pymetta_unpublished-0.9.0-py3-none-any.whl"],
     "metta-arrays": ["metta_arrays-0.9.0.tar.gz"],
     "metta-pyarrow": ["metta_pyarrow-0.9.0.tar.gz"],
     "metta-nanoarrow": ["metta_nanoarrow-0.9.0-py3-none-any.whl"],
 }
-#: Never built by the release; see build-distributions.sh.
-NO_PRODUCER = "pymetta-host"
+#: A distribution present in the directory that the release does NOT publish,
+#: so the partition must leave its files to neither job. The name is fictional
+#: on purpose: this used to be pymetta-host, which the release could not build
+#: and now can, and a fixture naming a real distribution encodes a fact that
+#: goes stale under it.
+NO_PRODUCER = "pymetta-unpublished"
 
 
 def load():

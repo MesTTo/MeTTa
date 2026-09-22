@@ -33,8 +33,16 @@ set -eu
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
-# The one definition of "a distribution this repository releases". Both the
-# build below and --list read it, so they cannot disagree.
+# TWO PRODUCERS, named apart. members() is what `python -m build` makes, and
+# the loop below walks exactly it. released() is what the RELEASE publishes,
+# which is members plus the host bundle: that one is built by
+# tools/pymetta-host/run.sh in a manylinux container from a swipl-devel tree
+# fetch-source.sh clones and patches, so it is not a build target here, and
+# it is still a distribution this repository ships.
+#
+# Conflating them is what left pymetta-host out of every plan: it is skipped
+# here for a real reason, and the planner read this list and concluded the
+# project did not exist.
 members() {
     printf 'pymetta\n'
     for member in "$HERE"/ext/*/; do
@@ -46,10 +54,18 @@ members() {
     done
 }
 
-# Answered before the interpreter search, so a caller that only wants the
-# names is not refused by a machine that cannot build.
-if [ "${1:-}" = --list ]; then
+released() {
     members
+    [ -f "$HERE/ext/pymetta-host/pyproject.toml" ] && printf 'pymetta-host\n'
+    return 0
+}
+
+# Answered before the interpreter search, so a caller that only wants the
+# names is not refused by a machine that cannot build. --list answers the
+# RELEASE set, because every caller of it so far asks what gets published
+# rather than what this script builds.
+if [ "${1:-}" = --list ]; then
+    released
     exit 0
 fi
 

@@ -117,6 +117,29 @@ jobs:
           name: distributions
           path: dist/
 
+  # The host bundle, which `python -m build` cannot make: it is a patched
+  # SWI-Prolog compiled inside quay.io/pypa/manylinux_2_28_x86_64, one wheel
+  # per interpreter. It used to need a swipl-devel checkout someone had
+  # prepared by hand, so the release shipped 17 distributions of 18;
+  # tools/pymetta-host/fetch-source.sh clones it at the pinned commit and
+  # applies the nineteen patches this repository already carried, so the
+  # runner needs nothing but Docker, which ubuntu-latest has.
+  #
+  # Its own job because it takes tens of minutes and shares nothing with the
+  # sdist/wheel builds; the two run in parallel and meet at the upload.
+  host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build the host bundle inside manylinux
+        run: sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: host-distributions
+          path: ai-tmp/host-build/dist/
+
   # WHICH DISTRIBUTIONS HAVE NO PYPI PROJECT YET.
   #
   # A project that does not exist cannot be published by the `publish` job
@@ -164,7 +187,7 @@ jobs:
   # publisher has not been registered yet fails only its own job, and that
   # failure is the accurate signal that it is still waiting for a slot.
   bootstrap:
-    needs: [build, plan]
+    needs: [build, host, plan]
     if: needs.plan.outputs.bootstrap != '[]'
     runs-on: ubuntu-latest
     strategy:
@@ -178,6 +201,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: distributions
+          path: staged/
+      - uses: actions/download-artifact@v4
+        with:
+          name: host-distributions
           path: staged/
       - name: Keep only this project's own files
         # The OIDC token a pending publisher mints is scoped to that project
@@ -202,7 +229,7 @@ jobs:
   # a file PyPI already holds; it does not cover one we are not allowed to
   # send.
   publish:
-    needs: [build, plan]
+    needs: [build, host, plan]
     if: needs.plan.outputs.steady != ''
     runs-on: ubuntu-latest
     environment: pypi
@@ -212,6 +239,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: distributions
+          path: staged/
+      - uses: actions/download-artifact@v4
+        with:
+          name: host-distributions
           path: staged/
       - name: Keep only the projects that already exist
         run: |
