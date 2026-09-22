@@ -687,6 +687,25 @@ def derive_complaints() -> tuple[list[str], int]:
         if inside & set(seen.values()):
             found.append("--derive pinned a submodule file to the submodule's own commit")
 
+        # The WRITE path, which is not the reporting path: --derive carries a
+        # commit per site where --commit carries one for the sweep, so a
+        # correct report says nothing about which oid reaches which file.
+        written = run(root, "--derive")
+        for where, expected in wanted.items():
+            checked += 1
+            body = (root / where).read_text(encoding="utf-8")
+            if f"commit={expected}" not in body:
+                found.append(
+                    f"--derive reported {where} correctly but wrote "
+                    f"{body.strip()[:90]!r}, which does not carry {expected[:9]}"
+                )
+        checked += 1
+        if written.returncode != 0:
+            found.append(f"--derive exited {written.returncode}: {written.stderr.strip()[:160]}")
+        checked += 1
+        if run(root, "--check", "--derive").returncode != 0:
+            found.append("--check still reports a pin after --derive wrote every one")
+
         # An uncommitted line has no tree that produced it, and is refused
         # rather than pinned to whatever commit happens to be current.
         checked += 1
