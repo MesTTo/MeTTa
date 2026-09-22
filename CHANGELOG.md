@@ -24,10 +24,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   two halves, which must partition the release: the token an environment
   mints is scoped to the projects its publisher covers, so a file belonging
   to a project that does not exist is a 403 that fails every upload behind
-  it. `tools/pending_publishers_selftest.py` holds the filename globs that
-  realise the split to an equality rather than mere disjointness, after a
-  weaker version of it passed a mutant where `pymetta-*` swallowed
-  `pymetta_host-*`.
+  it. `tools/pending_publishers_selftest.py` is a new gate
+  lane over that split. It calls the planner rather than restating its
+  answer, sweeps all 16 existence oracles over a planted tree rather than
+  one chosen case, counts the questions the planner asks so that one ask
+  per distribution is enforced, and holds the filename globs to an equality
+  rather than mere disjointness. Each of those replaced a weaker check that
+  a mutant had passed.
 
 - `tools/pending-publishers.py` prints the pending Trusted Publishers PyPI
   still needs, deriving the project list from `build-distributions.sh --list`
