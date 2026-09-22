@@ -306,6 +306,12 @@
             process_metta_string/3,
             parse_metta_source/2,
             parse_metta_source_summary/4,
+            % The package-row surface: the laws recognise a row, read the
+            % digest that decides whether a load is current, and run the
+            % loader's own text for the claims they register.
+            metta_source_digest/2,
+            package_row/3,
+            process_loader_string/3,
             metta_reference_lazy_reader/2,
             metta_reference_source_reader/2,
             read_source_text/2,

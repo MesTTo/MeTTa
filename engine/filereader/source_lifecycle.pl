@@ -15,6 +15,10 @@
 %   stored, so a later load into the same space re-performs none of them
 %   [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it;
 %   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% Guarantees: source_package_occurrence/5 answers the stored reference for each
+%   of those rows, which is what distinguishes equal rows owned by different
+%   loads [tested: packages:a_manifest_row_does_not_reach_the_importing_space;
+%   commit=WORKTREE].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: every source retirement restores surviving function registrations
@@ -1383,10 +1387,42 @@ replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
 %decode, not the enumeration.
 :- export(source_package_row/4).
 source_package_row(CanonPath, Space, Kind, Payload) :-
+    source_package_occurrence(CanonPath, Space, Kind, Payload, _).
+
+%The same join, answering the OCCURRENCE beside the payload, so a caller that
+%must retire a row names the exact clause this load asserted rather than
+%matching an equal atom another load owns. Nine libraries in one space store
+%nine identical `(= (package requires) "lib.metta")` rows, and only the
+%reference tells them apart [measured 2026-09-23].
+:- export(source_package_occurrence/5).
+source_package_occurrence(CanonPath, Space, Kind, Payload, Ref) :-
     metta_source_load(CanonPath, Space, LoadId, _),
     package_row_reference(Space, LoadId, Ref),
     spaces:stored_atom_of_ref(Ref, Space, Row, _),
     package_row(Row, Kind, Payload).
+
+%Retire the package rows one load stored: the ATOM and its JOURNAL row
+%together, because either alone is incoherent. An erased reference left in the
+%journal fails source_load_receipt_current/4's `forall`, so that load's receipt
+%is stale for ever and the file reloads on every import; a journal row dropped
+%without the erase leaves an atom in the space that no load owns.
+%
+%metta_remove_atom_reference/1 rather than a retract, for two reasons the
+%funnel already holds: withdrawal preserves EQUAL atoms owned by other loads,
+%and nine libraries in one space store nine identical
+%`(= (package requires) "lib.metta")` rows that only the reference tells apart;
+%and the funnel uncompiles the equation, invalidates dependents and notifies
+%subscribers, where a retract would leave `(package requires)` callable with no
+%atom behind it.
+%
+%Time: O(p) removals and O(p) retracts, p = package rows this load stored. A
+%load carrying none enumerates nothing.
+:- export(retire_source_package_rows/2).
+retire_source_package_rows(CanonPath, Space) :-
+    findall(Ref, source_package_occurrence(CanonPath, Space, _, _, Ref), Refs),
+    forall(member(Ref, Refs),
+           ( spaces:metta_remove_atom_reference(Ref),
+             retractall(source_load_assertion(_, stored, Ref)) )).
 
 %Candidates by HEAD SYMBOL, then the load's journal for ownership. This is the
 %answer engine/spaces/native_matching.pl already reached for the same question

@@ -22,7 +22,16 @@
 % Generic native shadow restoration and shared-source retirement remain open;
 % docs/record/package-laws-6-13.md records their executable counterexamples.
 
-:- module(packages, ['setup!'/2, 'get-property'/3, 'package-prolog'/3]).
+%Two surfaces, not one list: the three MeTTa operations the laws publish, and
+%the five entry points the ENGINE calls to sequence a load. The engine performs
+%`requires` before any packaging library merges, so it holds those five by name
+%rather than reaching into this module's body
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 3].
+:- module(packages,
+          [ 'setup!'/2, 'get-property'/3, 'package-prolog'/3,
+            package_context/3, package_load/3, package_loading/3,
+            package_register_claims/0, package_require/3
+          ]).
 :- set_module(base(metta_engine)).
 :- use_module(library(error)).
 :- use_module(library(lists)).

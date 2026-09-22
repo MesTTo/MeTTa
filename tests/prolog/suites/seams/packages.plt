@@ -491,4 +491,43 @@ test(the_package_head_is_internal_in_every_space) :-
     forall(member(Space, ['&self', '&metta', 'a-space-that-was-never-made']),
            metta_engine:metta_reference_internal(Space, package)).
 
+%Law 1's CONSEQUENCE, which nothing asserted. The case above tests that
+%metta_reference_internal/2 HOLDS for `package`, which is the clause existing;
+%it never asks whether an importer comes back clean. The reservation was built
+%by halves: the NAME is hidden from faces, exports and doors, while the ROW was
+%stored by the loader and compiled by store_metta_equation/6, and internal-ness
+%is consulted at neither. While a pkg.metta carried
+%`!(import_prolog_functions_from_file ...)` directives the gap was unreachable,
+%because a directive stores no atom; migrating the manifests to equations made
+%it live [measured 2026-09-23: importing lib_spaces and lib_uuid into `&self`
+%left 27 atoms where the shipped ruling for spaces_removeallatoms derives 26,
+%nine of them identical `(= (package requires) "lib.metta")` rows whose subject
+%is the file that carried them and is unrecoverable once merged, and
+%`!(package requires)` answered their union instead of refusing].
+%
+%ONE assertion over any key and TWO packages rather than a case per key: the
+%law reserves the HEAD, so a row of any key from any number of packages is the
+%same claim, and the second package is what makes the surviving rows
+%indistinguishable. One performs (`requires`) and one is inert (`version`), so
+%neither the performing path nor a key with no machinery behind it is the
+%reason the space is clean.
+test(a_manifest_row_does_not_reach_the_importing_space) :-
+    package_fixture(no_leak_performed,
+        '(= (package version) "1.0.0")\n(= (package requires) lib_pairs)\n', One),
+    package_fixture(no_leak_inert, '(= (package version) "2.0.0")\n', Two),
+    'import!'('&self', One, _),
+    'import!'('&self', Two, _),
+    \+ spaces:metta_space_pair('&self', ['=', [package, _], _], _, _),
+    findall(Answer, eval([package, version], Answer), Answers),
+    Answers == [[package, version]],
+    %Retiring the rows retracts their JOURNAL rows with them. Left behind, an
+    %erased reference fails this receipt's own `forall` over the load's stored
+    %references, and a stale receipt reloads the file on every later import.
+    %The journal keys on the CANONICAL path, and package_fixture/3 builds one
+    %through `../../../../ai-tmp`, so the receipt must be asked for the name
+    %the loader recorded rather than the name the fixture wrote.
+    forall(member(Manifest, [One, Two]),
+           ( absolute_file_name(Manifest, Canonical),
+             filereader:source_load_receipt_current(Canonical, '&self', _, _) )).
+
 :- end_tests(packages).

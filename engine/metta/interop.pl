@@ -13,6 +13,12 @@
 %   packages:a_backing_row_performs_only_for_the_file_that_carries_it;
 %   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
+% Guarantees: a package row is performed by the load that carried it and then
+%   retired from every space but that path's own library home, so an importer
+%   holds no `(package ...)` atom and no callable `(package ...)` equation
+%   [tested: packages:a_manifest_row_does_not_reach_the_importing_space;
+%   commit=WORKTREE].
+%
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their
 %   loaded host source, independently of the MeTTa source that imported them
@@ -2026,14 +2032,46 @@ seam:kind(metta_reference_register_prolog/4, service).
 seam:kind(record_extension_membership/2, service).
 
 % Time: one indexed source/package join plus O(p) rows, p = package rows in
-% this load. A file with no package rows never decodes its other atoms.
+% this load, and O(p) removals after they are performed. A file with no package
+% rows never decodes its other atoms and retires nothing.
 metta_perform_package_rows(CanonPath, Space) :-
     findall(Kind-Written,
             filereader:source_package_row(CanonPath, Space, Kind, Written), Rows),
     ( Rows == [] -> true
     ; packages:package_context(CanonPath, Space,
           metta_engine:(metta_perform_package_requires(CanonPath, Space, Rows),
-                        packages:package_load(CanonPath, Space, Rows))) ).
+                        packages:package_load(CanonPath, Space, Rows))),
+      metta_retire_package_rows(CanonPath, Space) ).
+
+%A package row's scope is its LOAD, not the space it loaded into. The join
+%above already computes that scope to READ the rows; the same scope decides
+%whether they remain. Law 1 says the loader grades them internal "so they never
+%merge into an importer", and a manifest describes ITSELF, so a row left behind
+%is one library's requirement sitting where the next importer reads it as its
+%own [source: docs/journal/2026-09-09-packages-are-equations.md, law 1].
+%
+%The reservation was implemented by halves. metta_reference_internal/2 hides
+%the NAME, which is what a face, an export and a door consult, and nothing
+%consults it when an atom is stored: `get-atoms` enumerates raw stored atoms by
+%contract, so grading cannot reach this and the row has to leave the importer's
+%storage. Until the manifests became equations the gap was unreachable, because
+%a pkg.metta carrying `!(import! ...)` directives stored nothing
+%[measured 2026-09-23: importing lib_spaces and lib_uuid into `&self` left 27
+%atoms where the ruling derives 26, nine of them identical `requires` rows, and
+%`!(package requires)` answered the union across every manifest].
+%
+%KEPT at the library's own home, the one reader that should still see a row:
+%`(get-property lib version)` reads them there, and for a `from` reference the
+%home IS the space the manifest loaded into.
+%
+%Time: one home lookup, then the O(p) retirement in
+%filereader:retire_source_package_rows/2. No read outside this load pays
+%anything.
+metta_retire_package_rows(CanonPath, Space) :-
+    (   metta_reference_library_home(Space, CanonPath)
+    ->  true
+    ;   filereader:retire_source_package_rows(CanonPath, Space)
+    ).
 
 metta_perform_package_requires(CanonPath, Space, Rows) :-
     forall((member(requires-Written, Rows),

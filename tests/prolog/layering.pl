@@ -361,8 +361,6 @@ reaches(filereader, identity, 'captures portable image identity and advances the
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
 reaches(filereader, materialize, 'source prefixes and completed loads prepare counted relations inside their rollback boundary').
 reaches(filereader, ext_points, 'a completed source batch announces its compile-time analysis boundary').
-reaches(filereader, packages, 'a load asks whether a space is foreign, and \c
-    the catalog the package laws publish is one').
 reaches(filereader, parser, 'reading a source file is parsing it').
 reaches(filereader, spaces, 'a load writes atoms and compiles equations into a space').
 reaches(filereader, support_graph, 'a load records what its assertions support so a reload can invalidate them').
@@ -407,9 +405,28 @@ reaches(metta, translator, 'a runnable form is compiled before it runs').
 reaches(metta, translator_rules, 'add-translator-rule! is the rule registry\'s door').
 reaches(metta, type_rules, 'every type question resolves through the typing-rule registry').
 reaches(parser, metta, 'refuses an unbound input in the core\'s error vocabulary').
+
+reaches(packages, spaces, 'a package row is an ATOM, so the laws read a \c
+    home\'s rows, write what a performed row produced, and release a home when \c
+    the claims it held retire').
+reaches(packages, metta, 'the laws run inside the engine they extend: \c
+    normalising a computed row evaluates it, and resolving a requirement \c
+    reaches import!\'s own resolvers rather than a second copy of them').
+reaches(packages, filereader, 'the row a law performs is one the loader \c
+    recognised, journalled and can withdraw, so a package row\'s lifetime is \c
+    its source load\'s').
+reaches(packages, owned_resources, 'a claim\'s handle is released in reverse \c
+    on every outcome, which is that helper\'s whole job').
+reaches(packages, parser, 'a refusal names the row it refused, and naming a \c
+    term is writing it').
+reaches(packages, source_loading, 'performing a backing loads a host \c
+    artifact, whose printed failures the loader collects').
 reaches(qlf_boot, identity, 'validates actor and generation before engine initialization').
 reaches(qlf_boot, source_loading, 'boot reports errors SWI prints while replaying the engine artifact').
 reaches(spaces, identity, 'normalizes and orders occurrence tokens through the process identity owner').
+reaches(spaces, packages, 'the catalog is a FOREIGN space the laws publish, so \c
+    every space operation on it dispatches here, and releasing a space retires \c
+    the claims that space held').
 reaches(spaces, host_listeners, 'the receipt engine\'s frame and marker listeners are registered through the one door').
 reaches(spaces, ext_points, 'announces function changes and asks whether an atom hook is installed').
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').
@@ -447,6 +464,9 @@ reaches(translator, specializer, 'a higher-order call may specialize').
 reaches(translator, translator_rules, 'the shipped rule set is the compiler\'s own first tier').
 reaches(translator, type_rules, 'a compile-time type check resolves through the typing-rule registry').
 reaches(translator, host_transactions, 'the self tier and the idle translation-cache hooks are installed clauses released by reference').
+reaches(translator, packages, 'indexing builtin masks, result finality and \c
+    call-site type chains reads the type declarations a package\'s claimed \c
+    builtins publish').
 reaches(source_observation, filereader, 'observes source execution, file identities and completed answers').
 reaches(source_observation, metta, 'resolves the execution module for an observed space').
 reaches(source_observation, source_positions, 'maps parsed source to side-table positions').
@@ -489,8 +509,19 @@ reaches(type_rules, translator, 'a changed typing rule clears the translation ca
 %   implementation files. ext_points declares those callbacks and has no
 %   outgoing engine calls of its own. It and the tracer consumer leave the
 %   component.
+%
+%   It grew by one on 2026-09-23, when the package laws moved out of
+%   lib/lib_package into engine/packages.pl. Nothing about the calls changed;
+%   what changed is that they became engine calls the contract measures. The
+%   cycle is genuine rather than an artifact of the move: the laws read the
+%   spaces a row names and evaluate a computed body through the core, and
+%   metta and spaces each reach back, the first to sequence a load and the
+%   second because the catalog is a foreign space the laws publish.
+%   Untangling it means the laws reading rows from something other than the
+%   space the loader wrote them to, which is the same question law 7's home
+%   answers.
 
-tangle([duals, filereader, materialize, metta, parser,
+tangle([duals, filereader, materialize, metta, packages, parser,
         source_positions, spaces, specializer,
         support_graph, translator, translator_rules, type_rules]).
 

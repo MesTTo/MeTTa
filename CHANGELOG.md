@@ -189,6 +189,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A package manifest no longer merges into the program that imports it. Law 1
+  reserves the `package` head and grades a row internal "so they never merge
+  into an importer", but the reservation only ever hid the NAME, which a face,
+  an export and a door consult; nothing consulted it when the loader stored the
+  atom, and `get-atoms` enumerates raw stored atoms by contract. While a
+  `pkg.metta` carried `!(import_prolog_functions_from_file ...)` directives the
+  gap was unreachable, because a directive stores nothing. Migrating the
+  manifests to equations made it live: importing `lib_spaces` and `lib_uuid`
+  into `&self` left 27 atoms where 26 belong, nine of them identical
+  `(= (package requires) "lib.metta")` rows whose subject is the file that
+  carried them and is unrecoverable once merged, and `!(package requires)`
+  answered their union instead of refusing.
+
+  A package row's scope is its LOAD, not the space it loaded into. The journal
+  join the loader already uses to READ a file's own rows now decides whether
+  they remain: the rows are performed, then retired from every space except
+  that path's own library home, which is where `(get-property lib version)`
+  reads them. The atom and its journal row go together, because an erased
+  reference left in the journal fails the load receipt's own check and the file
+  would reload on every later import.
+
+
 - The release build no longer dies on a directory under `ext/` that is not a
   package. `tools/build-distributions.sh` globbed `ext/*/` and handed every
   match to `python -m build`, which refuses `ext/__pycache__` with "does not
