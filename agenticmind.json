@@ -22980,6 +22980,45 @@
           "status": "untried"
         }
       ]
+    },
+    "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer": {
+      "title": "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer"
+    },
+    "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing": {
+      "title": "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing",
+      "supports": [
+        "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this": {
+      "title": "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this"
+    },
+    "four observations that could not come back negative, then one that could": {
+      "title": "four observations that could not come back negative, then one that could",
+      "supports": [
+        "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands": {
+      "title": "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands",
+      "supports": [
+        {
+          "node": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -25658,7 +25697,7 @@
     "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest": {
       "title": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
       "effort": 1,
-      "status": "untried"
+      "status": "unwanted"
     }
   },
   "format": 2,
@@ -97232,6 +97271,110 @@
         ]
       ],
       "id": "e0cac30dd77e27f3"
+    },
+    {
+      "at": "2026-09-22T08:36:29.640461+00:00",
+      "after": "8b7757959034f273eb68cec90924391122c1ed11",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing\", \"tags\": [\"measured\"], \"title\": \"MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"four observations that could not come back negative, then one that could\", \"tags\": [\"measured\"], \"title\": \"the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest\", \"because\": \"REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "e0cac30dd77e27f3"
+      ],
+      "assert": [
+        [
+          "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer",
+          "title",
+          "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer"
+        ],
+        [
+          "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands",
+          "sort",
+          "prop"
+        ],
+        [
+          "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands",
+          "supersedes",
+          "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite"
+        ],
+        [
+          "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands",
+          "supports",
+          {
+            "node": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands",
+          "tags",
+          "measured"
+        ],
+        [
+          "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands",
+          "title",
+          "REVERSED on evidence: the suite is 543/543 green once the Python seat's class walk is guarded, so the work verifies on the same standard the node seat's did and the reason for excluding it no longer stands"
+        ],
+        [
+          "four observations that could not come back negative, then one that could",
+          "sort",
+          "prop"
+        ],
+        [
+          "four observations that could not come back negative, then one that could",
+          "supports",
+          "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this"
+        ],
+        [
+          "four observations that could not come back negative, then one that could",
+          "tags",
+          "measured"
+        ],
+        [
+          "four observations that could not come back negative, then one that could",
+          "title",
+          "four observations that could not come back negative, then one that could"
+        ],
+        [
+          "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this",
+          "sort",
+          "prop"
+        ],
+        [
+          "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this",
+          "title",
+          "the methodological lesson is the one the standing rules already state: build the trace before the fix. I guarded grounded_type_names/2, then grounded_algebra_type/3, then checked grounded_extra_type/2, each time reasoning about which seam COULD throw, and each attempt taught nothing because the throw was in a seam I had not looked at. One probe writing the raising goal to user_error settled it immediately, and the repository already had engine/source_observation.pl with prolog_exception_hook/5 for exactly this"
+        ],
+        [
+          "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing",
+          "supports",
+          "MEASURED: the C seat's suite is 543 checks, 0 failures, exit 0 through its canonical clean runner once seam:grounded_class_type/2 guards on python_object_blob/1. The failure was never in the C seat's work: the Python seat's class walk had NO ownership guard at all, and since it is the ELSE arm of metta_grounded_type/2 it runs for every grounded value no bridge named a type for, so a cmetta_object blob reached py_call and raised domain_error(py_term, <CAccount>), which the engine deliberately does not catch, so it escaped before the C seat's own clause of that multifile seam could answer"
+        ],
+        [
+          "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing",
+          "tags",
+          "measured"
+        ],
+        [
+          "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing",
+          "title",
+          "traced by printing the raising goal from inside metta_grounded_type/2, which named the class arm in one run after three reasoned patches had each changed nothing"
+        ],
+        [
+          "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "id": "088bbb102eb0f9af"
     }
   ]
 }
