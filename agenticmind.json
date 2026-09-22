@@ -23093,6 +23093,104 @@
       "tags": [
         "source"
       ]
+    },
+    "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'": {
+      "title": "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+    },
+    "measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name": {
+      "title": "measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name",
+      "supports": [
+        "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+      ]
+    },
+    "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended": {
+      "title": "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended",
+      "supports": [
+        {
+          "node": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "status": "untried"
+        },
+        {
+          "node": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "relation": "addresses",
+          "target": "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+        }
+      ]
+    },
+    "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed": {
+      "title": "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed",
+      "supports": [
+        {
+          "node": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35": {
+      "title": "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35"
+    },
+    "dir(metta.lib) still answered 35 after the roster answered 61": {
+      "title": "dir(metta.lib) still answered 35 after the roster answered 61",
+      "supports": [
+        "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30": {
+      "title": "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30"
+    },
+    "a recall warned that parity requires a different substring from the one the split test reads": {
+      "title": "a recall warned that parity requires a different substring from the one the split test reads",
+      "supports": [
+        "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0": {
+      "title": "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0"
+    },
+    "measured after the rename, since the Makefile reads both files": {
+      "title": "measured after the rename, since the Makefile reads both files",
+      "supports": [
+        "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts": {
+      "title": "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts"
+    },
+    "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims": {
+      "title": "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims",
+      "supports": [
+        "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing": {
+      "title": "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing"
+    },
+    "measured by removing the guards and re-running, which produced a byte-identical failure message": {
+      "title": "measured by removing the guards and re-running, which produced a byte-identical failure message",
+      "supports": [
+        "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -25785,6 +25883,14 @@
       "title": "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
       "effort": 2,
       "status": "unwanted"
+    },
+    "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory": {
+      "title": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+      ]
     }
   },
   "format": 2,
@@ -97685,6 +97791,294 @@
         ]
       ],
       "id": "914844313a511b51"
+    },
+    {
+      "at": "2026-09-22T08:56:08.824033+00:00",
+      "after": "e60e1ca65a3e23d47f3ba5110c40b8e3e0c1b82f",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name\", \"tags\": [], \"title\": \"the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended\", \"tags\": [], \"title\": \"name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory\", \"fields\": {\"effort\": 1, \"addresses\": [\"the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'\"]}}, {\"op\": \"status\", \"id\": \"name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory\", \"because\": \"roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"dir(metta.lib) still answered 35 after the roster answered 61\", \"tags\": [\"measured\"], \"title\": \"I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35\", \"fields\": {}}]",
+      "parents": [
+        "914844313a511b51"
+      ],
+      "assert": [
+        [
+          "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35",
+          "sort",
+          "prop"
+        ],
+        [
+          "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35",
+          "title",
+          "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35"
+        ],
+        [
+          "dir(metta.lib) still answered 35 after the roster answered 61",
+          "sort",
+          "prop"
+        ],
+        [
+          "dir(metta.lib) still answered 35 after the roster answered 61",
+          "supports",
+          "I fixed roster() and declared the defect closed while __dir__ still had it, and only a recall naming extensions/python/metta/_atoms/library.py:192-208 caught the third site. Two of three is the shape to watch: the same wrong idea was written in three places and fixing the two I had read left the third answering 35"
+        ],
+        [
+          "dir(metta.lib) still answered 35 after the roster answered 61",
+          "tags",
+          "measured"
+        ],
+        [
+          "dir(metta.lib) still answered 35 after the roster answered 61",
+          "title",
+          "dir(metta.lib) still answered 35 after the roster answered 61"
+        ],
+        [
+          "measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name",
+          "supports",
+          "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+        ],
+        [
+          "measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name",
+          "title",
+          "measured 2026-09-22: the surviving 36 are exactly those with a lib_<name>.pl half, whose filename still carries the name"
+        ],
+        [
+          "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed",
+          "supersedes",
+          "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended"
+        ],
+        [
+          "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed",
+          "supports",
+          {
+            "node": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+            "status": "done"
+          }
+        ],
+        [
+          "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed",
+          "tags",
+          "measured"
+        ],
+        [
+          "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed",
+          "title",
+          "roster() answers 61, dir(metta.lib) answers 60 with the 61st being `import`, a Python keyword that was always bracket-only; the phrasebook generator went from refusing to 0 findings and test_phrasebook plus test_documentation from 6 failures to 131 passed"
+        ],
+        [
+          "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended",
+          "sort",
+          "prop"
+        ],
+        [
+          "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended",
+          "supports",
+          {
+            "node": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+            "status": "untried"
+          }
+        ],
+        [
+          "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended",
+          "supports",
+          {
+            "node": "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+            "relation": "addresses",
+            "target": "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+          }
+        ],
+        [
+          "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended",
+          "title",
+          "the comment above __dir__'s loop already stated the rule the code did not follow, and the module's Assumes still described lib/*/lib_*.metta, which is the sentence that made the defect look intended"
+        ],
+        [
+          "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'",
+          "title",
+          "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+        ],
+        [
+          "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "sort",
+          "approach"
+        ],
+        [
+          "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "addresses",
+          "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+        ],
+        [
+          "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "effort",
+          1
+        ],
+        [
+          "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "status",
+          "done"
+        ],
+        [
+          "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory",
+          "title",
+          "name a library by its directory in all three, since that is what the rename settled: nothing infers a filename from a directory's name, so the name comes from the directory"
+        ]
+      ],
+      "id": "420a034302536704"
+    },
+    {
+      "at": "2026-09-22T08:57:14.898080+00:00",
+      "after": "e60e1ca65a3e23d47f3ba5110c40b8e3e0c1b82f",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"a recall warned that parity requires a different substring from the one the split test reads\", \"tags\": [\"measured\"], \"title\": \"the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured after the rename, since the Makefile reads both files\", \"tags\": [\"measured\"], \"title\": \"the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims\", \"tags\": [\"measured\"], \"title\": \"the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts\", \"fields\": {}}]",
+      "parents": [
+        "420a034302536704"
+      ],
+      "assert": [
+        [
+          "a recall warned that parity requires a different substring from the one the split test reads",
+          "sort",
+          "prop"
+        ],
+        [
+          "a recall warned that parity requires a different substring from the one the split test reads",
+          "supports",
+          "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30"
+        ],
+        [
+          "a recall warned that parity requires a different substring from the one the split test reads",
+          "tags",
+          "measured"
+        ],
+        [
+          "a recall warned that parity requires a different substring from the one the split test reads",
+          "title",
+          "a recall warned that parity requires a different substring from the one the split test reads"
+        ],
+        [
+          "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims",
+          "sort",
+          "prop"
+        ],
+        [
+          "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims",
+          "supports",
+          "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts"
+        ],
+        [
+          "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims",
+          "tags",
+          "measured"
+        ],
+        [
+          "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims",
+          "title",
+          "each is committed with its own evidence, and the evidence gate exits 0 with 0 unbacked tags over 8987 claims"
+        ],
+        [
+          "measured after the rename, since the Makefile reads both files",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured after the rename, since the Makefile reads both files",
+          "supports",
+          "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0"
+        ],
+        [
+          "measured after the rename, since the Makefile reads both files",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured after the rename, since the Makefile reads both files",
+          "title",
+          "measured after the rename, since the Makefile reads both files"
+        ],
+        [
+          "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0",
+          "sort",
+          "prop"
+        ],
+        [
+          "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0",
+          "title",
+          "the C seat's docs and version targets pass over the renamed CAPABILITIES.md, its rewritten README link and its edited llms.txt: every mt_ name in README.md and llms.txt is in the header, and mt_version() agrees at 1.0.0"
+        ],
+        [
+          "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30",
+          "sort",
+          "prop"
+        ],
+        [
+          "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30",
+          "title",
+          "the examples origins prose is hand-written but held by a check that RECOMPUTES all three numbers, and example_origins.py owns the same wording, so the hand edit had to match the generator exactly or one consumer would pass while another broke. Verified rather than assumed: the generator is idempotent over the edited README and test_example_parity passes 30 of 30"
+        ],
+        [
+          "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts",
+          "title",
+          "the release tree at e60e1ca65 carries: the platform refusal kind across the engine and both seats; the Node seat's 15 pins and the C seat's 51 resolved to superproject commits; both agents' status reports removed or renamed out of the published packages; the Python class-walk ownership guard that made the C suite 543/543; the library roster and namespace repaired in three places; four stale pkg.metta paths; about 25 lint findings; two absolute workspace paths; and the examples origins counts"
+        ]
+      ],
+      "id": "32758088c9cb806c"
+    },
+    {
+      "at": "2026-09-22T09:12:38.319351+00:00",
+      "after": "e60e1ca65a3e23d47f3ba5110c40b8e3e0c1b82f",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured by removing the guards and re-running, which produced a byte-identical failure message\", \"tags\": [\"measured\"], \"title\": \"the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing\", \"fields\": {}}]",
+      "parents": [
+        "32758088c9cb806c"
+      ],
+      "assert": [
+        [
+          "measured by removing the guards and re-running, which produced a byte-identical failure message",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured by removing the guards and re-running, which produced a byte-identical failure message",
+          "supports",
+          "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing"
+        ],
+        [
+          "measured by removing the guards and re-running, which produced a byte-identical failure message",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured by removing the guards and re-running, which produced a byte-identical failure message",
+          "title",
+          "measured by removing the guards and re-running, which produced a byte-identical failure message"
+        ],
+        [
+          "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing",
+          "title",
+          "the 01-identity twin's 2892 inferences against a pinned 2870 is NOT mine: with all three ownership guards removed the twin costs 2892, the same number, so the guards price at zero there. It is the recorded twins baseline red, 22 inferences over on 2870, and the user ruled it not worth chasing"
+        ]
+      ],
+      "id": "d8471a4debad5086"
     }
   ]
 }
