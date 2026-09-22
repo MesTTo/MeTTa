@@ -23589,6 +23589,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace": {
+      "title": "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace"
+    },
+    "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133": {
+      "title": "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133",
+      "supports": [
+        "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this": {
+      "title": "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this"
+    },
+    "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught": {
+      "title": "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught",
+      "supports": [
+        "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes": {
+      "title": "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes"
+    },
+    "read the comment in .github/workflows/publish.yml": {
+      "title": "read the comment in .github/workflows/publish.yml",
+      "supports": [
+        "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -99715,6 +99751,107 @@
         ]
       ],
       "id": "ff3d44aa5a440a15"
+    },
+    {
+      "at": "2026-09-22T10:05:00.535625+00:00",
+      "after": "f5d8bb133614a9ebca2a41025938c409786e5929",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133\", \"tags\": [\"measured\"], \"title\": \"I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught\", \"tags\": [\"measured\"], \"title\": \"a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read the comment in .github/workflows/publish.yml\", \"tags\": [\"source\"], \"title\": \"the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes\", \"fields\": {}}]",
+      "parents": [
+        "ff3d44aa5a440a15"
+      ],
+      "assert": [
+        [
+          "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace",
+          "sort",
+          "prop"
+        ],
+        [
+          "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace",
+          "title",
+          "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace"
+        ],
+        [
+          "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this",
+          "sort",
+          "prop"
+        ],
+        [
+          "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this",
+          "title",
+          "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this"
+        ],
+        [
+          "read the comment in .github/workflows/publish.yml",
+          "sort",
+          "prop"
+        ],
+        [
+          "read the comment in .github/workflows/publish.yml",
+          "supports",
+          "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes"
+        ],
+        [
+          "read the comment in .github/workflows/publish.yml",
+          "tags",
+          "source"
+        ],
+        [
+          "read the comment in .github/workflows/publish.yml",
+          "title",
+          "read the comment in .github/workflows/publish.yml"
+        ],
+        [
+          "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught",
+          "sort",
+          "prop"
+        ],
+        [
+          "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught",
+          "supports",
+          "a mutation table living in the file it mutates always matches itself, because every pattern in the table is also a string literal in the file, and no anchor fixes it. The sweep now mutates only the region above the table, which is the right cut: the table is data ABOUT the code above it and only that code is the subject. Its own staleness check is what surfaced this"
+        ],
+        [
+          "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught",
+          "tags",
+          "measured"
+        ],
+        [
+          "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught",
+          "title",
+          "the first two anchors both reported 2 matches; splitting at the marker gives 6 of 6 caught"
+        ],
+        [
+          "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes",
+          "title",
+          "the release must not be cut until the gate is green on the tree being released, which is publish.yml's own stated rule: a tag is pushed at a commit whose checks already passed, and the workflow deliberately does not re-run them because that would publish a different tree than the one that went green. So arming the three pending publishers is as far as this can go before the gate finishes"
+        ],
+        [
+          "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133",
+          "sort",
+          "prop"
+        ],
+        [
+          "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133",
+          "supports",
+          "I lost a CHANGELOG hunk from two separate commits the same way: the edit anchored on a pattern beginning with the line's leading spaces, the real line began with other text, the assertion failed, and the commit ran anyway. `set -e` did not stop the second one. The fix that works is && chaining between the edit and the commit, and anchoring on distinctive inner text rather than on leading whitespace"
+        ],
+        [
+          "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133",
+          "tags",
+          "measured"
+        ],
+        [
+          "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133",
+          "title",
+          "0c6a7a033 and 7daeddd00 both shipped without their changelog hunk; repaired by 9ece844c3 and f5d8bb133"
+        ]
+      ],
+      "id": "75d2cb87d745cd7e"
     }
   ]
 }
