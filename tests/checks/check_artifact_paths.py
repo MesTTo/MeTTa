@@ -43,14 +43,44 @@ Open Obligations:
 from __future__ import annotations
 
 import ast
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OPT_OUT = "artifact-path-created"
-# .mutmut/ is the mutation lane's workspace of copied test files, whose relative
-# paths resolve only from their originals.
-SKIP_PARTS = ("/ai-tmp/", "/.claude/", "/node_modules/", "/build/", "/.git/", "/.mutmut/")
+
+
+def ignored(root: Path, sources: list[Path]) -> set[Path]:
+    """Which of these git treats as ignored, and so as not this tree's content.
+
+    Asked rather than listed. A hand-written skip list held `/ai-tmp/`,
+    `/.claude/`, `/node_modules/`, `/build/`, `/.git/` and `/.mutmut/`, and
+    went stale the moment a battery tree appeared beside them: `ai-battery-2`
+    and `ai-battery-3` are ignored by .gitignore and were walked anyway, so the
+    lane reported their copies' relative paths as unresolved. Every name on
+    that list is already an ignore rule, which makes the list a second
+    description of one fact.
+
+    A root that is not a repository ignores nothing, which is the answer the
+    selftest needs: it plants its fixture in a temporary tree and expects the
+    walk to reach it.
+
+    Time: one `git check-ignore` over the whole batch, against one substring
+    test per path per pattern.
+    """
+    if not (root / ".git").exists():
+        # Not a repository, so it has no ignore rules and nothing is skipped.
+        # This is the selftest's case: it plants its fixture in a temporary
+        # tree that happens to sit under ai-tmp/, and the old skip list got
+        # this right by testing names RELATIVE to the root under examination.
+        return set()
+    answer = subprocess.run(
+        ["git", "-C", str(root), "check-ignore", "--stdin", "-z"],
+        input="\0".join(str(source) for source in sources),
+        capture_output=True, text=True, check=False,
+    )
+    return {Path(name) for name in answer.stdout.split("\0") if name}
 
 
 def folded(node: ast.BinOp, source: Path) -> Path | None:
@@ -79,12 +109,10 @@ def folded(node: ast.BinOp, source: Path) -> Path | None:
 def findings(root: Path) -> list[str]:
     """Every folded path that does not exist and did not opt out."""
     out: list[str] = []
-    for source in sorted(root.rglob("*.py")):
-        # Relative to the root, so a checkout that itself sits under one of
-        # these names does not skip its whole tree. The selftest's fixture
-        # lives in ai-tmp/ and caught exactly that.
-        relative = f"/{source.relative_to(root)}"
-        if any(part in relative for part in SKIP_PARTS):
+    sources = sorted(root.rglob("*.py"))
+    skipped = ignored(root, sources)
+    for source in sources:
+        if source in skipped or ".git" in source.parts:
             continue
         try:
             text = source.read_text(encoding="utf-8")
