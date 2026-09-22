@@ -1528,9 +1528,64 @@ resolve_metta_import_path(File, CanonPath) :-
     import_file_string(File, SFile),
     metta_module_path(SFile, Base, Relative),
     ensure_metta_ext(Relative, RequestedPath),
-    ( resolve_existing_import_path(Base, RequestedPath, CanonPath)
-      -> true
-       ; throw_missing_import(File) ).
+    (   resolve_existing_import_path(Base, RequestedPath, CanonPath)
+    ->  true
+    ;   resolve_package_manifest(Base, Relative, CanonPath)
+    ->  true
+    ;   throw_missing_import(File) ).
+
+%A DIRECTORY imports through its `pkg.metta`, the package manifest, and that
+%is the STANDARD way an external package is reached.
+%
+%Named by CONVENTION rather than after the thing it describes, which is what
+%Cargo.toml, go.mod, package.json and flake.nix all are and for this reason: a
+%git dependency previously had to carry a file named after its REPOSITORY,
+%`repos/lib_json/lib_json.metta`, so renaming the repository broke every
+%importer and a checkout directory that did not match the remote's name
+%resolved to nothing.
+%
+%One rule here rather than one per requirement kind. A git checkout, a
+%package-relative path and a `&catalogs` entry all reach this resolver, so all
+%three inherit the manifest without any of them naming it.
+%
+%Tried AFTER the file candidates, so a plain `<name>.metta` beside a `<name>/`
+%still wins. That ordering is the journal's one stated rule for this resolver,
+%"a file on the search path wins over a package's advertisement of the same
+%name" [source: docs/journal/2026-09-07-a-metta-file-is-a-python-module.md],
+%and putting the manifest first broke it: with both present the manifest
+%answered where the file should have.
+%
+%So this is purely ADDITIVE. The same journal decided a directory would also
+%offer `<name>/<name>.metta`, and that candidate was never built here --
+%`!(import! &self "./named")` with `named/named.metta` present answers
+%`source_sink "./named" does not exist` [measured 2026-09-22] -- so before
+%this, importing a directory through `import!` did not work at all, and after
+%it a directory imports exactly when it carries a manifest.
+resolve_package_manifest(Base, Relative, CanonPath) :-
+    package_manifest_candidate(read, Base, Relative, Manifest),
+    exists_file(Manifest),
+    absolute_file_name(Manifest, CanonPath, [access(read), file_errors(fail)]),
+    !.
+
+%The manifest a directory is entered through, ENUMERATED rather than resolved,
+%because import! and unimport! choose from the candidates differently and must
+%choose from the SAME candidates: import! takes the first that exists and
+%unimport! the first that was recorded, and where the two sets disagree a
+%directory import cannot be undone by the name that made it.
+%
+%Access is a parameter because the two callers genuinely differ. import! needs
+%the directory readable now. unimport! must work AFTER deletion, since the
+%recorded path is an identity rather than a file it reopens, which is why it
+%passes `none` and accepts a directory that is no longer there.
+package_manifest_candidate(Access, Base, Relative, Manifest) :-
+    (   Root = '.'
+    ;   Root = Base
+    ),
+    catch(absolute_file_name(Relative, Directory,
+                             [relative_to(Root), file_type(directory),
+                              access(Access), file_errors(fail)]),
+          _, fail),
+    directory_file_path(Directory, 'pkg.metta', Manifest).
 
 %`include` PASTES a module's source into the space that included it and
 %answers what its LAST directive answered, where import! gives the file its
@@ -1659,7 +1714,14 @@ resolve_unimport_path(Space, File, CanonPath) :-
             ( member(Root, ['.', Base]),
               absolute_file_name(Requested, Path,
                                  [relative_to(Root), access(none), file_errors(error)]) ),
-            Candidates),
+            Files),
+    % The same directory manifests import! would have taken, from the same
+    % enumerator, appended in the same order: file forms first, manifest last.
+    % Without them a directory imported through its pkg.metta could not be
+    % unimported by the name that imported it.
+    findall(Manifest, package_manifest_candidate(none, Base, Relative, Manifest),
+            Manifests),
+    append(Files, Manifests, Candidates),
     (   member(Recorded, Candidates), imported_metta_source(Space, Recorded)
     ->  CanonPath = Recorded
     ;   Candidates = [CanonPath|_]

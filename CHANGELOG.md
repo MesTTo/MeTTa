@@ -7,6 +7,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `pkg.metta` is the file a DIRECTORY is imported through, and the standard way
+  an external package is reached: `!(import! &self ./greeter)` loads
+  `greeter/pkg.metta`, so an importer names the directory and never an entry
+  point inside it. A git requirement enters its checkout the same way, where it
+  previously had to find a file named after the REPOSITORY, so renaming a
+  repository broke every importer and a checkout whose directory did not match
+  the remote's name resolved to nothing. The name is a convention rather than
+  the package's own, which is what `Cargo.toml`, `go.mod` and `package.json`
+  are.
+
+  It is the LAST candidate the resolver tries, after `<name>.metta` and
+  `<name>.metta.gz`, so a file beside the directory still wins. Importing a
+  directory did not work at all before this: the 2026-09-07 journal records
+  "Decided: a directory searched offers four candidates" including
+  `<name>/<name>.metta`, and two of the four were never built, so
+  `!(import! &self "./named")` with `named/named.metta` present answered
+  `source_sink "./named" does not exist`. `import!` and `unimport!` enumerate
+  the manifest from one predicate, because a directory imported through its
+  manifest is withdrawn by the name that imported it.
+
+
 ## [0.9.0] - 2026-09-22
 
 ### Fixed
