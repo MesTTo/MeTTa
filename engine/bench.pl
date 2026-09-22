@@ -133,7 +133,7 @@ bench_whole_process(boot).
 % The corpus text the cases read. engine/bench.py digests exactly this list
 % into the baseline's configuration stamp.
 bench_source('tests/data/prelude-spec.metta').
-bench_source('lib/lib_pln/pkg.metta').
+bench_source('lib/lib_pln/lib.metta').
 bench_source('examples/ch18-performance/18-01-larger-workloads/01-scale.metta').
 bench_source('examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta').
 bench_source('examples/ch09-types/24-sorted_constructors.metta').
@@ -256,7 +256,7 @@ bench_setup_parse(Text) :-
 
 bench_setup_translate(Names) :-
     bench_boot_quiet,
-    bench_text('lib/lib_pln/pkg.metta', Text),
+    bench_text('lib/lib_pln/lib.metta', Text),
     parse_metta_source(Text, Forms),
     findall(Name, member(parsed(function, _, [=, [Name|_], _]), Forms), Found),
     sort(Found, Names),
@@ -268,7 +268,7 @@ bench_setup_translate(Names) :-
     ->  true
     ;   throw(error(domain_error(bench_workload, Names),
                     context(bench_setup/2,
-                            'lib/lib_pln/pkg.metta no longer \c
+                            'lib/lib_pln/lib.metta no longer \c
                              defines 49 function names')))
     ),
     process_metta_string(Text, _, '&bench-pln').
