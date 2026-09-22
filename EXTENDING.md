@@ -1305,9 +1305,9 @@ freed when SWI garbage-collects the handle; without one, every handle leaks.
 ## 4. Declaring a library: what every seat owes
 
 A seat is a host reaching the engine, and each one documents its own reach:
-[the Python seat](extensions/python/README.md) for `@m.op` and its effect
-decorators, [the C seat](extensions/cmetta/README.md) for the foreign
-interface, [the TypeScript seat](extensions/node/README.md) for the in-process
+[the Python seat](../extensions/python/) for `@m.op` and its effect
+decorators, [the C seat](../extensions/cmetta/) for the foreign
+interface, [the TypeScript seat](../extensions/node/) for the in-process
 Node build. This section is what they have in common, which is everything a
 library must DECLARE about itself before the engine will register it.
 
