@@ -59,6 +59,10 @@ DRAIN=${DRAIN:-0}
 #: A gap between uploads. Nothing requires it; it keeps one burst from looking
 #: like a scripted flood to any limiter this does not know about.
 GAP=${GAP:-20}
+#: The index whose JSON API answers the existence question. TestPyPI is the
+#: other real value; a host that cannot answer is how the refusal below is
+#: exercised.
+INDEX=${INDEX:-https://pypi.org}
 
 publish=0
 [ "${1:-}" = "--publish" ] && publish=1
@@ -75,18 +79,30 @@ projects() {
 
 # Existence is a GET, which costs nothing against the creation budget, so the
 # set of projects still to create is read rather than remembered.
-exists() {
-    [ "$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/$1/json")" = 200 ]
+#
+# Only 404 means absent. Treating everything-but-200 as absent is fail-open in
+# the one direction that costs something: a 429, a 502 or a DNS failure would
+# read as "this project does not exist" and send a creation attempt against a
+# budget that takes an hour to refill. Every other status is UNKNOWN and stops
+# the run.
+status_of() {
+    curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$INDEX/pypi/$1/json"
 }
 
 new=""
 for name in $(projects); do
-    if exists "$name"; then
-        printf '  %-24s on PyPI already\n' "$name"
-    else
-        printf '  %-24s NOT on PyPI\n' "$name"
-        new="$new $name"
-    fi
+    # Asked ONCE and decided from that answer, so the status the refusal names
+    # is the status that refused rather than a second call's.
+    code=$(status_of "$name")
+    case "$code" in
+        200) printf '  %-24s on PyPI already\n' "$name" ;;
+        404) printf '  %-24s NOT on PyPI\n' "$name"; new="$new $name" ;;
+        *)   printf '%s answered %s for %s, which says neither present nor absent.\n' \
+                 "$INDEX" "$code" "$name" >&2
+             printf 'Stopping rather than risk a creation attempt on a project that may\n' >&2
+             printf 'already exist, against a budget that takes an hour to refill.\n' >&2
+             exit 1 ;;
+    esac
 done
 set -- $new
 printf '%s project(s) to create\n' "$#"
