@@ -20,7 +20,7 @@
 % source order chooses a backing when several claimed rows cover the same head.
 % Open Obligations: Python manifest.py has not adopted the bootable-door protocol.
 % Generic native shadow restoration and shared-source retirement remain open;
-% docs/record/lib-package-laws-6-13.md records their executable counterexamples.
+% docs/record/package-laws-6-13.md records their executable counterexamples.
 
 :- module(packages, ['setup!'/2, 'get-property'/3, 'package-prolog'/3]).
 :- set_module(base(metta_engine)).

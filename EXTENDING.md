@@ -837,7 +837,7 @@ and result variables. Create the lazy input list inside a worker that passes
 its tail onward; capturing the list in the cleanup goal retains consumed
 input. `lib_csv:csv_stream_rows/6` and its streaming benchmark demonstrate
 that boundary. For a deterministic constructor whose cleanup must retain both
-an operation error and a release error, `lib/_support/owned_resources.pl`
+an operation error and a release error, `engine/owned_resources.pl`
 captures the outcome before invoking the owner's cleanup. It refuses a
 nondeterministic goal; streaming readers use the native cleanup scope.
 

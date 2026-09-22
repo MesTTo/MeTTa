@@ -5787,7 +5787,7 @@ Derived operations are stored MeTTa equations that callers can match and
 reconstruct; native halves own their host services, maintained algorithms
 and resource boundaries. `EXTENDING.md` describes how to author both halves.
 
-`lib_package` is the prelude package interpreter. Package equations are an
+`engine/packages.pl` is the engine's package interpreter. Package equations are an
 argument record: `requires` runs first, then a required library's `package-load`
 equation may interpret the canonical path, home and rows. The default validates
 backing coverage and contracts, registers heads at home, and validates boot

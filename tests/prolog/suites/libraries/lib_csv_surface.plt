@@ -8,7 +8,7 @@
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module('../../../../lib/lib_csv/lib_csv.pl').
-:- use_module('../../../../lib/_support/owned_resources.pl').
+:- use_module('../../../../engine/owned_resources.pl').
 :- use_module('../../scratch.pl').
 :- use_module(library(prolog_wrap)).
 :- use_module(library(thread), [concurrent_maplist/2, concurrent_maplist/3]).

@@ -74,7 +74,7 @@ pypi.txt
 # Notes about the tools and environment this repository uses but does not own.
 ai-notes/
 
-# Catalog runtime state, written where a program that imports lib_package runs.
+# Catalog runtime state, written where a program using the package doors runs.
 catalog/
 
 # Gate worktrees. A gate reading the checkout being edited returns a verdict
