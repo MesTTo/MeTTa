@@ -1,5 +1,7 @@
-"""Purpose: hold check_host_bundle to the parser it depends on and the three
-rules it enforces.
+"""Purpose: hold check_host_bundle to its parser and its three rules.
+
+The parser is what it depends on and the rules are what it enforces, and both
+can go wrong independently, which is why the cases cover each separately.
 
 The parser is the risk. It reads ELF by hand rather than through patchelf or
 pyelftools, because the check has to run in CI, cross-arch, and inside a
@@ -44,7 +46,7 @@ import check_host_bundle as checker
 
 
 def build_elf(needed: tuple[str, ...] = (), runpath: str | None = None,
-              soname: str | None = None, wide: bool = True,
+              soname: str | None = None, *, wide: bool = True,
               little: bool = True) -> bytes:
     """The smallest ELF carrying a dynamic section, as bytes.
 

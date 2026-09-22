@@ -70,16 +70,20 @@ def wrapped(text: str) -> str:
 def cases() -> list[tuple[str, dict[str, str], int, str]]:
     """Each case: what it is for, the pages, the exit wanted, text the output must carry."""
     every = {name: wrapped(GOOD) for name in FRONT_PAGES}
-    drifted = dict(every); drifted["extensions/node/README.md"] = wrapped(DRIFTED)
-    absent = dict(every); absent["extensions/cmetta/README.md"] = "# Page\n\nno block\n"
+    drifted = dict(every)
+    drifted["extensions/node/README.md"] = wrapped(DRIFTED)
+    absent = dict(every)
+    absent["extensions/cmetta/README.md"] = "# Page\n\nno block\n"
     twice = dict(every)
     twice["extensions/python/README.md"] = wrapped(GOOD) + wrapped(GOOD)
     reversed_markers = dict(every)
     reversed_markers["extensions/node/README.md"] = f"# Page\n\n{CLOSE}{GOOD}{OPEN}\n"
-    extra = dict(every); extra["lib/README.md"] = wrapped(DRIFTED)
+    extra = dict(every)
+    extra["lib/README.md"] = wrapped(DRIFTED)
     # Nested, not at a repository root: the glob that answered this before
     # reached one level down and could not see it.
-    nested = dict(every); nested["lib/lib_random/README.md"] = wrapped(DRIFTED)
+    nested = dict(every)
+    nested["lib/lib_random/README.md"] = wrapped(DRIFTED)
     return [
         ("every copy agreeing", every, 0, "0 defect(s)"),
         ("one copy reworded", drifted, 1, "differs from README.md"),

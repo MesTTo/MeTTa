@@ -108,7 +108,6 @@ from __future__ import annotations
 
 import argparse
 import ast
-import json
 import re
 import subprocess
 import sys
@@ -839,7 +838,7 @@ def main(argv: list[str] | None = None) -> int:
         # or nothing, which is what lets a failed run be re-run rather than
         # unpicked.
         chosen = {
-            (path, line): (fixed if fixed else provenance(path, line))
+            (path, line): (fixed or provenance(path, line))
             for path, items, _ in pins
             for _at, line, _reason in items
         }

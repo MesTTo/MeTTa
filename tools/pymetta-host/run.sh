@@ -12,7 +12,11 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
 PKG=$REPO/ext/pymetta-host
 OUT=${OUT:-$REPO/ai-tmp/host-build}
-SRC=${SRC:-/home/user/Dev/swipl-devel}
+# The swipl-devel checkout this builds the host from. No default: an absolute
+# path works only on the machine it was written on and this repository may be
+# published, so the caller names it and an unset SRC refuses by name rather
+# than mounting whatever sits at someone else's path.
+: "${SRC:?name the swipl-devel checkout to build from, e.g. SRC=../swipl-devel}"
 IMAGE=quay.io/pypa/manylinux_2_28_x86_64:latest
 
 TAGS=$(python3 - "$PKG/pyproject.toml" <<'PY'

@@ -26,8 +26,8 @@
 #     answer to "which host", and check_host_workarounds.py already owns the
 #     question of whether the one on PATH is patched.
 #
-#     A VERSION cannot tell the two apart. /usr/bin/swipl and
-#     /home/user/Dev/swipl-patched/bin/swipl both report
+#     A VERSION cannot tell the two apart. The stock host on PATH and the
+#     patched one the venv selects both report
 #     "SWI-Prolog version 10.1.14 for x86_64-linux" [measured 2026-09-22], so
 #     only a patch reproduction distinguishes them, which is what that lane
 #     runs.

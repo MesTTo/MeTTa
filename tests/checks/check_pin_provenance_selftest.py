@@ -663,11 +663,11 @@ def derive_complaints() -> tuple[list[str], int]:
             "lib/libx/vendor/extra.h": r3,
         }
         done = run(root, "--check", "--derive")
-        seen = dict(
-            (line.split(":", 1)[0], line.rsplit(" ", 1)[1])
+        seen = {
+            line.split(":", 1)[0]: line.rsplit(" ", 1)[1]
             for line in done.stdout.splitlines()
             if "would pin to" in line
-        )
+        }
         for where, expected in wanted.items():
             checked += 1
             got = seen.get(where)

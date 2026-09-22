@@ -100,7 +100,7 @@ INTERPRETERS = frozenset({"ld-linux-x86-64.so.2", "ld-linux-aarch64.so.1"})
 
 
 def derived_allowlist(policy: str = POLICY) -> frozenset[str] | None:
-    """auditwheel's own allowlist for `policy`, or None if it is not installed."""
+    """Auditwheel's own allowlist for `policy`, or None if it is not installed."""
     try:
         import auditwheel
     except ImportError:
@@ -129,6 +129,7 @@ class Dynamic:
     __slots__ = ("needed", "runpath", "soname")
 
     def __init__(self, needed: list[str], runpath: str | None, soname: str | None) -> None:
+        """Carry the three fields a dynamic section answers with."""
         self.needed, self.runpath, self.soname = needed, runpath, soname
 
 
@@ -291,7 +292,7 @@ def _bindings(directory: Path, root: Path) -> dict[str, str]:
     return env
 
 
-def _references(path: Path, root: Path, env: dict[str, str]) -> list[str]:
+def _references(path: Path, env: dict[str, str]) -> list[str]:
     """The paths this file claims exist, fully expanded and normalised.
 
     Partial evaluation: a token still holding a free variable is a claim about
@@ -386,7 +387,7 @@ def findings(root: Path) -> list[str]:
         if path.suffix not in {".cmake", ".pc"}:
             continue
         env = _bindings(path.parent, root)
-        for target in _references(path, root, env):
+        for target in _references(path, env):
             if target in present or (path.name, target) in seen:
                 continue
             seen.add((path.name, target))

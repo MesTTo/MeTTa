@@ -1646,7 +1646,9 @@ def pinnable(path: Path) -> frozenset[int]:
     definition in the module that owns it rather than splitting the grammar
     readers across both.
     """
-    from pin_provenance import sites  # noqa: PLC0415  -- see the docstring
+    # Deferred: see the docstring. Importing at module scope would make the
+    # two checkers import each other, and this one is the gate.
+    from pin_provenance import sites
 
     return frozenset(line for _at, line, reason in sites(path, _text(path)) if reason is None)
 
