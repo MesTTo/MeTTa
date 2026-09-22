@@ -50,6 +50,11 @@
 %     translator_literal_type_checks:an_untracked_clause_retains_static_and_intrinsic_contracts,
 %     translator_literal_type_checks:a_stale_transaction_keeps_the_dynamic_contract;
 %     commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+%   - the builtin-type import this suite makes is undone through the engine's
+%     own source withdrawal, so no type declaration it loaded reaches a later
+%     unit, whatever the library's files are called [tested:
+%     translator_evaluation_errors:the_builtin_type_import_leaves_nothing_behind;
+%     commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -1990,21 +1995,55 @@ test(quote_keeps_an_invalid_builtin_call_inert) :-
     call_goals_in_(Self, Goals),
     Out == ['+', 1, undefined_sym].
 
-cleanup_builtin_type_declarations(Path, ParsedForms) :-
-    forall(member(parsed(expression, _, Term), ParsedForms),
-           remove_sexp('&self', Term)),
-    retractall(filereader:compiled_metta_source(Path)),
-    retractall(imported_metta_source('&self', Path)),
-    retractall(import_life('&self', Path, _)).
+%Every source imported into &self, as the ENGINE records them. The undo below
+%withdraws whatever the load added to this set, rather than naming a file.
+%metta_import_record/2 rather than imported_metta_source/2: the record is the
+%live view, requiring the marker, a loaded lifetime AND a
+%filereader:metta_source_load/4 ownership journal, so every path it yields is
+%one metta_unimport/2 can withdraw. A bare marker left by a cleared space has
+%no journal and would answer permission_error(unimport, unjournalled_source).
+imported_self_sources(Paths) :-
+    findall(Path, metta_import_record('&self', Path), Paths).
+
+%Undo the load by asking the engine what it loaded.
+%
+%This removed the forms parsed out of the one file it was given, which was the
+%same set only while that file HELD the declarations. lib_builtin_types/pkg.metta
+%is a manifest now: it carries an `(import! &self (library ...))` and nothing
+%else, so parsing it yields zero expression forms while the load asserts the
+%whole type surface from lib.metta beside it, and the forall removed nothing.
+%Two hundred type declarations then stayed in &self for the rest of the
+%process, which put three later units into a typed-dispatch configuration they
+%are not written for: translator_rule_matching, translator_rule_module_home
+%and rule_gate_swap failed six tests between them and this test passed
+%[measured 2026-09-23: type declarations read 47 before the load and 247
+%after, and 247 after the old cleanup against 44 after this one, which is the
+%count the suite was green on before the split].
+%
+%metta_unimport/2 withdraws a source through its own ownership journal
+%(filereader:withdraw_source_load/3), so it removes the atoms THAT load stored
+%rather than every atom the file's text names. Three rows the process already
+%had still go, `get-type`, `and-then` and `or-else`: this library declares each
+%of them too, so the load owns the one stored row and the withdrawal takes it.
+%That is the same 44 the old cleanup reached under the pre-split library, so
+%the count here is the one this suite has always run on [measured 2026-09-23:
+%47 rows before the load and 44 after, by either route].
+%
+%It does not cascade, because a nested import is a load of its own that a
+%program may also have made for itself; that is why the set comes from the
+%import registry and not from the one path this test names.
+cleanup_builtin_type_import(Before) :-
+    imported_self_sources(After),
+    subtract(After, Before, Added),
+    forall(member(Path, Added), metta_unimport('&self', Path)).
 
 %Loading the engine's own declaration file must not mask a refusal into an
 %empty answer: each of the three still answers, and each answers what its own
 %operation says.
 test(builtin_type_import_keeps_runtime_refusals_visible) :-
-    once(( absolute_file_name('../../lib/lib_builtin_types/pkg.metta', Path,
-                              [access(read)]),
-           filereader:read_metta_source(Path, Source),
-           parse_metta_source(Source, ParsedForms) )),
+    once(absolute_file_name('../../lib/lib_builtin_types/pkg.metta', Path,
+                            [access(read)])),
+    imported_self_sources(Before),
     setup_call_cleanup(
         once(load_metta_file(Path, _)),
         once(( findall(A, compiled_arithmetic_refusal(A), Arithmetic),
@@ -2026,7 +2065,37 @@ test(builtin_type_import_keeps_runtime_refusals_visible) :-
                %do not SWALLOW the runtime answer, whatever that answer is.
                compiled_answers(['min-atom', 5], Minimum),
                Minimum == [[]] )),
-        cleanup_builtin_type_declarations(Path, ParsedForms)).
+        cleanup_builtin_type_import(Before)).
+
+%The balance of that load and its undo, asserted where it happens. Nothing in
+%this unit failed while it was broken: the manifest split left 200 type
+%declarations in &self and all six failures landed in translator_rule_matching,
+%translator_rule_module_home and rule_gate_swap, three units and 1,600 lines
+%further down, each of which passes on its own. A leak is only ever read off
+%its victims until something asks the question here.
+test(the_builtin_type_import_leaves_nothing_behind) :-
+    once(absolute_file_name('../../lib/lib_builtin_types/pkg.metta', Path,
+                            [access(read)])),
+    imported_self_sources(Before),
+    findall(Name, type_declaration(Name, _), NamesBefore),
+    setup_call_cleanup(
+        once(load_metta_file(Path, _)),
+        ( imported_self_sources(During),
+          subtract(During, Before, Added),
+          %More than the one path this test names: the manifest imports
+          %lib.metta beside it, so a cleanup written around a single file is
+          %the wrong shape whatever it then does with it.
+          assertion(Added \== []),
+          findall(N, type_declaration(N, _), NamesDuring),
+          subtract(NamesDuring, NamesBefore, Gained),
+          assertion(Gained \== []) ),
+        cleanup_builtin_type_import(Before)),
+    imported_self_sources(After),
+    subtract(After, Before, StillImported),
+    assertion(StillImported == []),
+    findall(N, type_declaration(N, _), NamesAfter),
+    subtract(NamesAfter, NamesBefore, Left),
+    assertion(Left == []).
 
 :- end_tests(translator_evaluation_errors).
 
