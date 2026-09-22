@@ -23673,6 +23673,30 @@
       "tags": [
         "source"
       ]
+    },
+    "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests": {
+      "title": "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests"
+    },
+    "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one": {
+      "title": "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one",
+      "supports": [
+        "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions": {
+      "title": "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions"
+    },
+    "the second run, with nothing writing, verified clean and ran": {
+      "title": "the second run, with nothing writing, verified clean and ran",
+      "supports": [
+        "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -100042,6 +100066,77 @@
         ]
       ],
       "id": "949c458163c43e8f"
+    },
+    {
+      "at": "2026-09-22T10:10:12.144250+00:00",
+      "after": "7d71d7b269b9ae5b3459c4e491437f00cc2ce88a",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one\", \"tags\": [\"measured\"], \"title\": \"re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the second run, with nothing writing, verified clean and ran\", \"tags\": [\"measured\"], \"title\": \"battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions\", \"fields\": {}}]",
+      "parents": [
+        "949c458163c43e8f"
+      ],
+      "assert": [
+        [
+          "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions",
+          "sort",
+          "prop"
+        ],
+        [
+          "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions",
+          "title",
+          "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions"
+        ],
+        [
+          "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests",
+          "sort",
+          "prop"
+        ],
+        [
+          "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests",
+          "title",
+          "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests"
+        ],
+        [
+          "the second run, with nothing writing, verified clean and ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "the second run, with nothing writing, verified clean and ran",
+          "supports",
+          "battery.sh refused the first run rather than reporting a verdict: verify found agenticmind.json and a .agenticmind lock had drifted between the rsync and the check, because my own record writes were racing the snapshot. That refusal is the tool working, and the lesson is to leave the record quiescent while a battery provisions"
+        ],
+        [
+          "the second run, with nothing writing, verified clean and ran",
+          "tags",
+          "measured"
+        ],
+        [
+          "the second run, with nothing writing, verified clean and ran",
+          "title",
+          "the second run, with nothing writing, verified clean and ran"
+        ],
+        [
+          "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one",
+          "sort",
+          "prop"
+        ],
+        [
+          "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one",
+          "supports",
+          "re-verified through tools/battery.sh, the repository's only battery provisioner: sixteen lanes green on a filesystem snapshot of revision 7d71d7b26 that the tool verified byte-identical before running. publish-selftest 0 defects over 13 cases, pending-publishers-selftest 16 oracles 0 defects, pending-publishers-mutants 6 of 6 caught, plus llms, script-refs, gate-layout, artifact-paths, no-hardcoded-integration, reference, scratch-retention and filesizes selftests"
+        ],
+        [
+          "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one",
+          "tags",
+          "measured"
+        ],
+        [
+          "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one",
+          "title",
+          "the worktree-provisioned run agreed, but green from an instrument the repository forbids is not evidence, so it was re-run through the sanctioned one"
+        ]
+      ],
+      "id": "fcd2aaea7eb03088"
     }
   ]
 }
