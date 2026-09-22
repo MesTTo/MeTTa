@@ -407,7 +407,12 @@ test(catalog_aliases_with_different_digests_refuse) :-
 lp_git_seed(Path, Url, Revision) :-
     file_directory_name(Path, Directory), gensym(lp_git_repository_, Name),
     directory_file_path(Directory, Name, Repository), make_directory(Repository),
-    file_name_extension(Name, metta, File), directory_file_path(Repository, File, Source),
+    % A checkout is entered through pkg.metta, like every other package. This
+    % seeded <repository-name>.metta, which package_checkout_entry/4 accepted
+    % as a second candidate until the manifest became the one way in; it now
+    % throws existence_error(package_manifest, _) and both git tests failed
+    % on a fixture rather than on the behaviour they name.
+    File = 'pkg.metta', directory_file_path(Repository, File, Source),
     lp_write(Source, "(= (lp-git-value) 42)"),
     lp_process(path(git), ['-C',Repository,init,'-q'], _),
     lp_process(path(git), ['-C',Repository,add,'--',File], _),
