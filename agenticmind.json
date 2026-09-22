@@ -22673,6 +22673,63 @@
           "target": "nothing exercises the LIST branch of a platform requirement, and three declared capabilities take one: markup is [library(sgml), library(sgml_write), library(xpath)], and persistency and fast-cache are pairs"
         }
       ]
+    },
+    "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations": {
+      "title": "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations"
+    },
+    "recorded by the node surface agent in its own report before that report was removed from the published package": {
+      "title": "recorded by the node surface agent in its own report before that report was removed from the published package",
+      "supports": [
+        "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence": {
+      "title": "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence"
+    },
+    "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead": {
+      "title": "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead",
+      "supports": [
+        "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents": {
+      "title": "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents"
+    },
+    "recorded by the node surface agent": {
+      "title": "recorded by the node surface agent",
+      "supports": [
+        "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law": {
+      "title": "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law"
+    },
+    "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library": {
+      "title": "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library",
+      "supports": [
+        "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published": {
+      "title": "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published",
+      "supports": [
+        {
+          "node": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "status": "untried"
+        }
+      ]
     }
   },
   "approaches": {
@@ -25326,6 +25383,11 @@
       "addresses": [
         "nothing exercises the LIST branch of a platform requirement, and three declared capabilities take one: markup is [library(sgml), library(sgml_write), library(xpath)], and persistency and fast-cache are pairs"
       ]
+    },
+    "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead": {
+      "title": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+      "effort": 1,
+      "status": "untried"
     }
   },
   "format": 2,
@@ -95984,6 +96046,175 @@
         ]
       ],
       "id": "1634470096147ee5"
+    },
+    {
+      "at": "2026-09-22T08:12:11.782370+00:00",
+      "after": "0cd329450bdddc8df57e71947b4112bddbbcd5ed",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"recorded by the node surface agent in its own report before that report was removed from the published package\", \"tags\": [\"source\"], \"title\": \"TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead\", \"tags\": [\"source\"], \"title\": \"a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"recorded by the node surface agent\", \"tags\": [\"source\"], \"title\": \"WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library\", \"tags\": [\"source\"], \"title\": \"no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published\", \"tags\": [], \"title\": \"remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead\", \"fields\": {\"effort\": 1}}]",
+      "parents": [
+        "1634470096147ee5"
+      ],
+      "assert": [
+        [
+          "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations",
+          "sort",
+          "prop"
+        ],
+        [
+          "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations",
+          "title",
+          "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations"
+        ],
+        [
+          "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents",
+          "sort",
+          "prop"
+        ],
+        [
+          "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents",
+          "title",
+          "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents"
+        ],
+        [
+          "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence",
+          "sort",
+          "prop"
+        ],
+        [
+          "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence",
+          "title",
+          "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence"
+        ],
+        [
+          "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law",
+          "sort",
+          "prop"
+        ],
+        [
+          "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law",
+          "title",
+          "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law"
+        ],
+        [
+          "recorded by the node surface agent",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded by the node surface agent",
+          "supports",
+          "WebAssembly cannot suspend a native transaction or snapshot through a yielding callback, so closed transactions, temporary facts and observation snapshots refuse an async host guard while ordinary solves accept one; native thread concurrency needs a different engine build, and host promises, async iterators and independently owned worker engines are the TypeScript equivalents"
+        ],
+        [
+          "recorded by the node surface agent",
+          "tags",
+          "source"
+        ],
+        [
+          "recorded by the node surface agent",
+          "title",
+          "recorded by the node surface agent"
+        ],
+        [
+          "recorded by the node surface agent in its own report before that report was removed from the published package",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded by the node surface agent in its own report before that report was removed from the published package",
+          "supports",
+          "TypeScript reified worlds were deliberately NOT built: Python's reification, successor evaluation, diff and conflict-checked commit live in its own binding (_history/world.py, _binding/worlds.pl) and the shared engine publishes no host service for the model, so a second implementation would be a divergence rather than parity; m.world() stays a mutable draft and tsmetta/saga supplies declared host compensations"
+        ],
+        [
+          "recorded by the node surface agent in its own report before that report was removed from the published package",
+          "tags",
+          "source"
+        ],
+        [
+          "recorded by the node surface agent in its own report before that report was removed from the published package",
+          "title",
+          "recorded by the node surface agent in its own report before that report was removed from the published package"
+        ],
+        [
+          "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library",
+          "supports",
+          "no pandas door, Python table wrapper, GraphQL framework or third-party integration roster was ported to TypeScript: JavaScript records, TableSource.rows(table, constraints) and typed arrays already carry the host shapes, and a package registers against the declared extension points from its own manifest, which is the no-hardcoded-integration law"
+        ],
+        [
+          "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library",
+          "tags",
+          "source"
+        ],
+        [
+          "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library",
+          "title",
+          "recorded by the node surface agent, and it agrees with the 2026-09-07 ruling that pymetta names no third-party library"
+        ],
+        [
+          "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead",
+          "sort",
+          "prop"
+        ],
+        [
+          "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead",
+          "supports",
+          "a TypeScript assumption scope spanning arbitrary JavaScript was refused: it would need a published exact-occurrence-removal service, the internal spaces:metta_remove_occurrence/3 was not bypassed, and removal BY VALUE was rejected because it can consume a pre-existing equal occurrence"
+        ],
+        [
+          "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead",
+          "tags",
+          "source"
+        ],
+        [
+          "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead",
+          "title",
+          "recorded by the node surface agent; the native snapshot gives exact rollback for a closed computation, which is what shipped instead"
+        ],
+        [
+          "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published",
+          "sort",
+          "prop"
+        ],
+        [
+          "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published",
+          "supports",
+          {
+            "node": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+            "status": "untried"
+          }
+        ],
+        [
+          "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published",
+          "title",
+          "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published"
+        ],
+        [
+          "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "sort",
+          "approach"
+        ],
+        [
+          "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "effort",
+          1
+        ],
+        [
+          "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "status",
+          "untried"
+        ],
+        [
+          "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "title",
+          "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead"
+        ]
+      ],
+      "id": "df25c9d5494be0ad"
     }
   ]
 }
