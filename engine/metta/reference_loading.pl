@@ -83,7 +83,11 @@ metta_reference_source_path(Source, Path) :-
 %A leading `.` cannot begin a library name, so this needs no filesystem probe
 %and no ambiguity: the two spellings are disjoint by shape.
 metta_reference_source_is_path(Source) :-
-    ( atom(Source) -> Text = Source ; string(Source) -> atom_string(Text, Source) ; fail ),
+    (   atom(Source)
+    ->  Text = Source
+    ;   string(Source)
+    ->  atom_string(Text, Source)
+    ),
     ( sub_atom(Text, 0, _, _, './') ; sub_atom(Text, 0, _, _, '../') ), !.
 
 metta_reference_read_manifest(Home, Path, manifest(Forms, Signatures)) :-

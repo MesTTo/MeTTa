@@ -70,12 +70,12 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     method_findings,
     near_miss_findings,
     omitted_head_findings,
-    shipped_libraries,
     operator_word_findings,
     operator_words,
     path_findings,
     refresh_source_claims,
     return_findings,
+    shipped_libraries,
 )
 
 SHEET = REPO / "llms.txt"

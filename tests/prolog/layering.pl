@@ -361,6 +361,8 @@ reaches(filereader, identity, 'captures portable image identity and advances the
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
 reaches(filereader, materialize, 'source prefixes and completed loads prepare counted relations inside their rollback boundary').
 reaches(filereader, ext_points, 'a completed source batch announces its compile-time analysis boundary').
+reaches(filereader, packages, 'a load asks whether a space is foreign, and \c
+    the catalog the package laws publish is one').
 reaches(filereader, parser, 'reading a source file is parsing it').
 reaches(filereader, spaces, 'a load writes atoms and compiles equations into a space').
 reaches(filereader, support_graph, 'a load records what its assertions support so a reload can invalidate them').
@@ -387,6 +389,10 @@ reaches(materialize, translator_rules, 'rewritten match calls and evaluated resu
 reaches(materialize, host_transactions, 'discarding an image\'s dispatch rows releases clause references another transaction may already have erased').
 reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exists').
 reaches(metta, materialize, 'effect classification retains operation identity and user transactions own image publication').
+reaches(metta, packages, 'the engine fixes four things about a package and \c
+    the laws implement the rest, so it performs requires, registers the \c
+    claims and reads the seam rows the laws contribute for setup!, \c
+    get-property and package-prolog').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
 reaches(metta, host_transactions, 'reference reconciliation runs after the native transaction returns').
 reaches(metta, identity, 'property declaration precedence follows occurrence generation and actor').
