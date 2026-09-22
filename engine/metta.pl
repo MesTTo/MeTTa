@@ -184,10 +184,14 @@
 %     family builds @doc-formal answers from that scoped type and prose
 %     [tested 2026-08-20:
 %     extensions/python/tests/repository/test_doc_family.py::test_the_doc_family_answers_what_upstream_answers].
-%   - seam:builtin_type_declaration/2 rows are the union of lib_builtin_types.metta
-%     and the prelude's, with each row written once and evicted only by the
-%     register that wrote it [tested 2026-08-19:
-%     metta_builtin_type_surface:a_shared_declaration_is_evicted_only_from_the_register_that_wrote_it].
+%   - seam:builtin_type_declaration/2 rows are the union of the
+%     lib_builtin_types library's rows and the prelude's, with each row written
+%     once and evicted only by the register that wrote it [tested 2026-08-19:
+%     metta_builtin_type_surface:a_shared_declaration_is_evicted_only_from_the_register_that_wrote_it],
+%     and every row the library ships is in them, read from the library's
+%     directory rather than through builtin_type_surface_forms/1 [tested:
+%     metta_builtin_type_surface:every_row_the_library_ships_reaches_the_shipped_tables;
+%     commit=WORKTREE].
 %   - External Prolog libraries extend seam:builtin_type_declaration/2 without
 %     replacing the engine's rows, and unloading retires only their own clauses
 %     [tested: test_a_library_types_its_own_blob_without_destroying_the_table;
@@ -2512,7 +2516,7 @@ metta_context_head(Head) :- is_list(Head).
 %
 %Without this, `get-type` misreported the engine to every tool that reads it.
 %`!=` IS a builtin, IS registered and IS declared (: != (-> $a $b Bool)) in
-%lib/lib_builtin_types/pkg.metta, but with nothing loading that file
+%lib/lib_builtin_types/lib.metta, but with nothing loading that file
 %`(get-type !=)` answered %Undefined% for an operation that works. Nothing was
 %missing; the type surface was simply not connected, and a reader like the
 %metta-lsp port has no way to tell "this has no type" from "this has a type
@@ -2531,27 +2535,42 @@ metta_context_head(Head) :- is_list(Head).
 %before reaching here, so `(: + (-> Foo Bar))` written by a program is
 %answered ahead of the engine's and this only ever fills a gap.
 %
-%ONE SOURCE OF TRUTH: the facts are built by parsing lib_builtin_types.metta
-%at boot, so the file a program can still import explicitly and the table the
-%engine answers from cannot drift apart.
+%ONE SOURCE OF TRUTH: the facts are built by parsing every .metta of the
+%lib_builtin_types library at boot, so the source a program can still import
+%explicitly and the table the engine answers from cannot drift apart.
 :- multifile seam:builtin_type_declaration/2.
 :- dynamic seam:builtin_type_declaration/2.
 
-load_builtin_type_surface :-
-    % The library NAME rather than a filename: its manifest is the entry
-    % point, and a bare filename is refused now that nothing infers a
-    % directory from one.
+%WHICH FILES the surface is read from, as one rule with one home. The test
+%that holds the registered table to its file re-stated this rule instead of
+%asking for it, and when the rule changed underneath it the test went on
+%reading the manifest alone: its file side emptied and it reported the
+%prelude's 47 rows against the registered 250, a red saying nothing about the
+%engine [measured 2026-09-23: lib/lib_builtin_types/lib.metta carries 203
+%(: ...) rows and pkg.metta carries none]. A caller asks this predicate now,
+%so a further split of the source, or another move of the entry point, moves
+%one clause [tested:
+%metta_builtin_type_surface:the_table_is_built_from_the_file_rather_than_written_twice].
+%
+%The library NAME rather than a filename: its manifest is the entry point, and
+%a bare filename is refused now that nothing infers a directory from one.
+%
+%EVERY .metta of the library, not just the file the name resolves to. That
+%resolves to the MANIFEST, which says what the library depends on and where
+%its source is; the (: ...) and (cost ...) rows live in the source beside it.
+%This read follows no imports, so reading only the manifest loaded an empty
+%surface and every builtin silently lost its cost row -- 195 heads with none,
+%which only a library card noticed. Reading the directory survives a further
+%split of the source, where naming lib.metta here would be a third home for
+%that filename.
+%
+%An absent library answers no forms rather than failing, which is what lets
+%the one caller below stay a single clause: the foralls it drives are vacuous
+%and the boot still indexes its masks.
+builtin_type_surface_forms(Forms) :-
     library(lib_builtin_types, Path),
     exists_file(Path),
     !,
-    % EVERY .metta of the library, not just the file the name resolves to.
-    % That resolves to the MANIFEST, which says what the library depends on
-    % and where its source is; the (: ...) and (cost ...) rows live in the
-    % source beside it. This read follows no imports, so reading only the
-    % manifest loaded an empty surface and every builtin silently lost its
-    % cost row -- 195 heads with none, which only a library card noticed.
-    % Reading the directory survives a further split of the source, where
-    % naming lib.metta here would be a third home for that filename.
     file_directory_name(Path, Directory),
     directory_file_path(Directory, '*.metta', Pattern),
     expand_file_name(Pattern, Sources),
@@ -2560,7 +2579,11 @@ load_builtin_type_surface :-
               read_file_to_string(Source, Text, [encoding(utf8)]),
               parse_metta_source(Text, Parsed),
               member(Form, Parsed) ),
-            Forms),
+            Forms).
+builtin_type_surface_forms([]).
+
+load_builtin_type_surface :-
+    builtin_type_surface_forms(Forms),
     forall(( member(parsed(expression, _, [':', Name, Type]), Forms),
              atom(Name) ),
            ( seam:builtin_type_declaration(Name, Type)
@@ -2580,7 +2603,6 @@ load_builtin_type_surface :-
     %against each other and an empty index is a silent loss: a constructor like
     %Error would quietly evaluate the argument it exists to carry.
     index_builtin_masks.
-load_builtin_type_surface :- index_builtin_masks.
 
 %A shipped cost row lands in '&metta' through add_sexp/3, the door every
 %native catalog write passes, so the kind check that refuses a program's

@@ -21,6 +21,13 @@
 %     metta_effects:the_host_repeatability_question_fails_closed,
 %     metta_effects:the_host_repeatability_question_preserves_inference_limits;
 %     commit=6917bef7ca902671999eafcae3a7a86db8f69723].
+%   - every declaration and cost row the lib_builtin_types library ships
+%     reaches the shipped tables, read from the library's own directory rather
+%     than from engine/metta.pl's builtin_type_surface_forms/1, so a source set
+%     that silently shrank is a failure here and not a silence in the identity
+%     that rests on that predicate [tested:
+%     metta_builtin_type_surface:every_row_the_library_ships_reaches_the_shipped_tables;
+%     commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -1827,11 +1834,11 @@ test(builtin_exists_file_reverse_mode) :-
         MissingAnswers),
     assertion(MissingAnswers == []).
 
-%The table has exactly two legitimate sources: the file, and the engine
-%prelude's declarations. Stated as a SET identity rather than as
-%file + ledger == table, because the two sources are allowed to OVERLAP and
+%The table has exactly two legitimate sources: the lib_builtin_types library,
+%and the engine prelude's declarations. Stated as a SET identity rather than as
+%library + ledger == table, because the two sources are allowed to OVERLAP and
 %the arithmetic identity silently forbade it. get-type is written in both,
-%once for the type surface the file is and once so the call site honours its
+%once for the type surface the library is and once so the call site honours its
 %Atom mask, and counting rows read that legitimate overlap as a double write.
 %The set identity says the same no-foreign-rows thing without the assumption,
 %and the row-count pair says the no-double-writes half directly instead of
@@ -1865,21 +1872,36 @@ library_declared_row(Name, Type) :-
     clause(seam:builtin_type_declaration(Name, Type), true, Ref),
     clause_property(Ref, file(_)).
 
+%WHICH files the library's surface is read from is the engine's rule, and this
+%asks for it rather than keeping a second copy: builtin_type_surface_forms/1 is
+%the one load_builtin_type_surface/0 drives. It stays private and is reached
+%through its module, the spelling suites/spaces/catalog.plt uses for
+%spaces:metta_cost_row/4, because a reader does not join a public export list
+%to be tested.
+%
+%The copy this replaces named the library and read the single file that
+%resolved, which since a bare name began resolving to the manifest was
+%pkg.metta alone -- no (: ...) rows at all, so the library side emptied and
+%this reported the prelude's 47 rows against the registered 250
+%[measured 2026-09-23]. What the identity below tests is
+%untouched by that: the rows are still re-derived from the sources and compared
+%against what the engine REGISTERED, and `InLibrary \== []` still fails if the
+%surface ever reads an empty source set again, which is the regression that
+%cost 195 heads their cost rows [source: engine/metta.pl,
+%builtin_type_surface_forms/1].
 test(the_table_is_built_from_the_file_rather_than_written_twice) :-
-    library(lib_builtin_types, Path),
-    read_file_to_string(Path, Text, []),
-    parse_metta_source(Text, Forms),
+    metta_engine:builtin_type_surface_forms(Forms),
     findall(Name-Type,
             ( member(parsed(expression, _, [':', Name, Type]), Forms),
               atom(Name) ),
-            InFile),
+            InLibrary),
     findall(Name-Type, prelude_type_declaration(Name, Type), FromPrelude),
     findall(Name-Type, seam:builtin_type_declaration(Name, Type), Everything),
     findall(Name-Type,
             ( seam:builtin_type_declaration(Name, Type),
               \+ library_declared_row(Name, Type) ),
             Registered),
-    append(InFile, FromPrelude, Sources),
+    append(InLibrary, FromPrelude, Sources),
     canonical_rows(Sources, ExpectedRows),
     canonical_rows(Registered, RegisteredRows),
     assertion(ExpectedRows == RegisteredRows),
@@ -1889,8 +1911,66 @@ test(the_table_is_built_from_the_file_rather_than_written_twice) :-
     canonical_rows(Everything, DistinctRows),
     length(DistinctRows, DistinctCount),
     assertion(RowCount == DistinctCount),
-    InFile \== [],
+    InLibrary \== [],
     FromPrelude \== [].
+
+%The identity above asks the engine WHICH sources the table is built from, so
+%one thing it can no longer see is a source set that silently shrank: both of
+%its sides would shrink together and it would pass. That rule gets its own
+%test, and this one reads the library's DIRECTORY rather than asking the
+%engine what it read, so the two statements are independent and a drift
+%between them is a red here rather than a silence there. It is the 4bcb4182d
+%regression written down: a manifest read alone left 195 heads with no cost
+%row, and only a library card noticed.
+%
+%An independent enumeration is the shape this tree already uses for the same
+%job: library_metta_source/1 and library_source_forms/2 in
+%tests/prolog/library_surface.pl walk the shipped libraries rather than asking
+%what was read. That file also measured what naming ONE file costs -- its
+%compatibility exemption said pkg.metta, the manifest split moved the source to
+%lib.metta, and the exemption failed open into 78 findings against a library
+%[source: tests/prolog/library_surface.pl, compatibility_library_source/1,
+%measured 2026-09-22]. The enumeration here is FLAT because the engine's rule
+%is flat; a library that grows a subdirectory is a change to that rule, to be
+%made there and followed here.
+%
+%Cost rows are checked beside declarations because they are the half that went
+%missing, and because a cost row is the one shipped claim with no other reader
+%-- explain and the Python docstring answer from &metta, so a row that never
+%loaded is a claim nobody sees.
+%Time: parses the library's sources once, about 203 declarations and 195 cost
+%rows against 250 registered rows, each probed by memberchk over a sorted
+%list. The parse dominates; the membership work is under 5e4 unifications.
+test(every_row_the_library_ships_reaches_the_shipped_tables) :-
+    library(lib_builtin_types, Manifest),
+    file_directory_name(Manifest, Directory),
+    directory_file_path(Directory, '*.metta', Pattern),
+    expand_file_name(Pattern, Sources),
+    %An empty source set is the failure this test exists for, so it is named
+    %here rather than left to make every row below vacuously present.
+    assertion(Sources \== []),
+    findall(Name-Type, seam:builtin_type_declaration(Name, Type), Registered),
+    canonical_rows(Registered, RegisteredRows),
+    findall(Source-Form,
+            ( member(Source, Sources),
+              read_file_to_string(Source, Text, [encoding(utf8)]),
+              parse_metta_source(Text, Parsed),
+              member(Form, Parsed),
+              shipped_row_unreached(Form, RegisteredRows) ),
+            Unreached),
+    assertion(Unreached == []).
+
+%A row the library ships is unreached when its declaration is absent from the
+%registered table, or the head its cost claim names carries no cost row. The
+%cost clause repeats ensure_shipped_cost_row/2's own guard on the witness:
+%a row outside that shape throws at boot, so it cannot be here to miss.
+shipped_row_unreached(parsed(expression, _, [':', Name, Type]), RegisteredRows) :-
+    atom(Name),
+    canonical_row(Name-Type, Row),
+    \+ memberchk(Row, RegisteredRows).
+shipped_row_unreached(parsed(expression, _, [cost, [Head|_]|_]), _) :-
+    atom(Head),
+    \+ spaces:metta_cost_row(Head, _, _, _).
 
 %The overlap the row above allows is real and has a mechanism: a row the
 %prelude found already written stays out of its eviction ledger, so a program
