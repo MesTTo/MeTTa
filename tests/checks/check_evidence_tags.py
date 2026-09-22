@@ -361,6 +361,14 @@ CLAIM_SOURCES = (
     # would ever resolve them", the same way metta_py.py was found;
     # commit=c6ed562a1a6f964aba906206f2558489b107dc24].
     "tools/*.sh",
+    # And the Python beside them. The host-bundle build put canonicalise.py and
+    # relocate.py under tools/pymetta-host/, where the .sh globs above could not
+    # reach them, so four pins in files the gate never opened would have stayed
+    # unresolvable [measured 2026-09-22: pin_provenance reported both as
+    # "OUTSIDE the evidence gate's globs", the third time that net has named a
+    # new file class before anyone noticed it].
+    "tools/*.py",
+    "tools/*/*.py",
     "engine/*.sh",
     "extensions/*/*.sh",
     "extensions/*/tests/*.sh",
