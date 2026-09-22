@@ -23,8 +23,8 @@ because a depth threshold would be a guess at the same question.
 
 The derivation is checked too, and by its RESULT rather than its spelling. Checking
 the marker cannot work: `.git` is a correct seat marker and was still the wrong one
-at 29 sites, because this superproject mounts eight submodules and every one of them
-has a `.git`, so a walk looking for it stops at the nearest component instead of
+at 29 sites, because every submodule this superproject mounts has a `.git` of its
+own, so a walk looking for that marker stops at the nearest component instead of
 reaching the tree that holds `engine/` and `lib/`. What separates a right root from a
 wrong one is the only thing that must differ: the path it goes on to name. A module
 binding `ROOT = <derivation>` and then `SEAT = ROOT / "extensions/python"` names

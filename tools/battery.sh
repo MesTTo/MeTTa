@@ -15,9 +15,9 @@
 # Owns resources: the battery directory, its ai-tmp/battery.pid occupancy
 #   record and its ai-tmp/battery.provenance. A tree whose recorded PID no
 #   longer answers `kill -0` is free whatever the file says.
-# Decides: batteries are FILESYSTEM snapshots, not git worktrees. This repo
-#   has eight submodules (engine, lib, examples, ext, extensions/{python,
-#   cmetta,node,mork}); `git worktree add` on the superproject does not
+# Decides: batteries are FILESYSTEM snapshots, not git worktrees. Every
+#   submodule this repo mounts, whatever .gitmodules currently lists, is a
+#   checkout of its own; `git worktree add` on the superproject does not
 #   materialise a submodule's worktree and `git stash create` does not capture
 #   one, so the documented worktree recipe cannot produce a faithful copy here
 #   and produced four mismatched A/B comparisons before this existed
