@@ -116,6 +116,41 @@ done
 set -- $new
 printf '%s project(s) to create\n' "$#"
 
+# Checked while REPORTING too, so the rule can be verified without spending
+# anything. It sat after the reporting exit, and proving it worked therefore
+# took a --publish run that spent an attempt on a shut window.
+#
+# A project's release is its whole set, not any one file. metta-arrays went
+# out on 2026-09-21 as a wheel with NO sdist, which nothing noticed until an
+# upload to it on 2026-09-22 printed "Skipping ... already exist" for the
+# wheel and then uploaded the tar.gz: a release nobody can build from source,
+# and unfixable in place because PyPI does not accept a replacement file.
+#
+# What the set should be is DERIVED from the wheels rather than listed. A
+# wheel tagged py3-none-any is pure Python, and a pure distribution owes an
+# sdist; one carrying a platform tag is a binary build, for which an sdist is
+# optional and the wheels are per-interpreter. So the rule reads the artifacts
+# and needs no per-project table to go stale.
+missing=""
+for name in "$@"; do
+    stem=$(echo "$name" | tr '-' '_')
+    wheels=$(find "$DIST" -maxdepth 1 -name "$stem-*.whl" 2>/dev/null | wc -l)
+    sdists=$(find "$DIST" -maxdepth 1 -name "$stem-*.tar.gz" 2>/dev/null | wc -l)
+    pure=$(find "$DIST" -maxdepth 1 -name "$stem-*-py3-none-any.whl" 2>/dev/null | wc -l)
+    if [ "$wheels" -eq 0 ] && [ "$sdists" -eq 0 ]; then
+        missing="$missing $name(nothing)"
+    elif [ "$wheels" -gt 0 ] && [ "$wheels" -eq "$pure" ] && [ "$sdists" -eq 0 ]; then
+        missing="$missing $name(pure wheel, no sdist)"
+    fi
+done
+if [ -n "$missing" ]; then
+    printf 'publish-new-projects: %s does not hold a complete release for:%s\n' "$DIST" "$missing" >&2
+    printf 'Build them first. A run that starts without them spends one creation\n' >&2
+    printf 'attempt per project before reaching the first gap, and a project created\n' >&2
+    printf 'from an incomplete set cannot be repaired: PyPI refuses a replacement file.\n' >&2
+    exit 1
+fi
+
 if [ "$publish" -eq 0 ]; then
     printf 'reporting only; pass --publish to spend one attempt on each\n'
     exit 0
@@ -127,20 +162,6 @@ fi
 # missing wheel costs a creation budget rather than a message: twine fails
 # locally on a path that is not there, which is safe but only after the
 # projects before it are gone from the budget.
-missing=""
-for name in $@; do
-    # shellcheck disable=SC2086  -- the glob is the point
-    set +f
-    found=$(ls $DIST/$(echo "$name" | tr '-' '_')-* 2>/dev/null | wc -l)
-    [ "$found" -eq 0 ] && missing="$missing $name"
-done
-if [ -n "$missing" ]; then
-    printf 'publish-new-projects: no artifact in %s for:%s\n' "$DIST" "$missing" >&2
-    printf 'Build them first; a run that starts without them spends one creation\n' >&2
-    printf 'attempt per project before reaching the first one that is not there.\n' >&2
-    exit 1
-fi
-
 if [ "$DRAIN" -gt 0 ]; then
     printf '%s waiting %ss for the creation window to drain\n' "$(date -Is)" "$DRAIN"
     sleep "$DRAIN"
@@ -166,5 +187,6 @@ for name in $ordered; do
         printf '%s  FAILED  %s, not a rate limit; see %s\n' "$(date -Is)" "$name" "$log"
         exit 1
     fi
-    sleep "$GAP"
+    # Between uploads, not after the last one.
+    [ "$name" = "${ordered##* }" ] || sleep "$GAP"
 done
