@@ -167,6 +167,29 @@ if [ -n "$missing" ]; then
     exit 1
 fi
 
+# A version this repository does not publish, stated here because nothing
+# else on this path reads one. The release policy lived only in the head of
+# whoever ran the tool, and an upload cannot be taken back: PyPI never frees a
+# version once used, so a mistake here is permanent and a refusal afterwards
+# is worthless. Read off the ARTIFACT rather than a manifest, because the
+# filename is what gets uploaded and a manifest can disagree with what was
+# built.
+REFUSED_VERSION=1.0.0
+refused=""
+for name in "$@"; do
+    stem=$(echo "$name" | tr '-' '_')
+    for artifact in "$DIST/$stem-$REFUSED_VERSION"-*.whl "$DIST/$stem-$REFUSED_VERSION.tar.gz"; do
+        [ -e "$artifact" ] && refused="$refused $(basename "$artifact")"
+    done
+done
+if [ -n "$refused" ]; then
+    printf 'publish-new-projects: %s is not a version this repository publishes,\n' "$REFUSED_VERSION" >&2
+    printf 'and these artifacts carry it:%s\n' "$refused" >&2
+    printf 'Set the version and rebuild. This refuses BEFORE any attempt because an\n' >&2
+    printf 'upload cannot be undone: PyPI never frees a version once it is taken.\n' >&2
+    exit 1
+fi
+
 if [ "$publish" -eq 0 ]; then
     printf 'reporting only; pass --publish to spend one attempt on each\n'
     exit 0

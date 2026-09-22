@@ -23203,6 +23203,56 @@
       "tags": [
         "measured"
       ]
+    },
+    "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken": {
+      "title": "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+    },
+    "the user stated the rule on 2026-09-22 and the tool that performs releases did not know it": {
+      "title": "the user stated the rule on 2026-09-22 and the tool that performs releases did not know it",
+      "supports": [
+        "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+      ]
+    },
+    "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version": {
+      "title": "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version",
+      "supports": [
+        {
+          "node": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "status": "untried"
+        },
+        {
+          "node": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "relation": "addresses",
+          "target": "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+        }
+      ]
+    },
+    "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create": {
+      "title": "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create",
+      "supports": [
+        {
+          "node": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers": {
+      "title": "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers"
+    },
+    "measured; the 429 is from upload.pypi.org and no local publisher process is running": {
+      "title": "measured; the 429 is from upload.pypi.org and no local publisher process is running",
+      "supports": [
+        "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -25902,6 +25952,14 @@
       "status": "done",
       "addresses": [
         "the pkg.metta rename broke the Python library discovery in THREE places, all of which identified a library by its FILE rather than its DIRECTORY: _library_source_files kept an entry whose entry.stem started with lib_, roster() keyed on path.stem, and _LibraryNamespace.__dir__ took entry.stem[4:]. roster() answered 36 of 61 and dir(metta.lib) answered 35, so the 25 pure-MeTTa libraries were unreachable and metta.library.face('lib_strategy') raised 'not a shipped library'"
+      ]
+    },
+    "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent": {
+      "title": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
       ]
     }
   },
@@ -98132,6 +98190,152 @@
         ]
       ],
       "id": "f8976c877e3a0c51"
+    },
+    {
+      "at": "2026-09-22T09:26:42.704259+00:00",
+      "after": "eda23c6e8b8efa7e7bcd1ca76e40432beb81162a",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"the user stated the rule on 2026-09-22 and the tool that performs releases did not know it\", \"tags\": [], \"title\": \"the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version\", \"tags\": [], \"title\": \"refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent\", \"fields\": {\"effort\": 1, \"addresses\": [\"the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken\"]}}, {\"op\": \"status\", \"id\": \"refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent\", \"because\": \"publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"measured; the 429 is from upload.pypi.org and no local publisher process is running\", \"tags\": [\"measured\"], \"title\": \"PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers\", \"fields\": {}}]",
+      "parents": [
+        "f8976c877e3a0c51"
+      ],
+      "assert": [
+        [
+          "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers",
+          "sort",
+          "prop"
+        ],
+        [
+          "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers",
+          "title",
+          "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers"
+        ],
+        [
+          "measured; the 429 is from upload.pypi.org and no local publisher process is running",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured; the 429 is from upload.pypi.org and no local publisher process is running",
+          "supports",
+          "PyPI's project-creation window is still shut after five spaced attempts today at 14:29, 14:30, 15:05, 17:40 and 19:24, the last spending exactly one attempt before stopping. The limiter counts ATTEMPTS, so each of those pushed its expiry out, and about 190 attempts on 2026-09-21 put it deep. No further attempt should be made for a long quiet period; the repository already has Trusted Publishing configured in .github/workflows/publish.yml with id-token: write, which is the route worth checking against PyPI's own documentation on pending publishers"
+        ],
+        [
+          "measured; the 429 is from upload.pypi.org and no local publisher process is running",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured; the 429 is from upload.pypi.org and no local publisher process is running",
+          "title",
+          "measured; the 429 is from upload.pypi.org and no local publisher process is running"
+        ],
+        [
+          "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create",
+          "sort",
+          "prop"
+        ],
+        [
+          "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create",
+          "supersedes",
+          "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version"
+        ],
+        [
+          "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create",
+          "supports",
+          {
+            "node": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+            "status": "done"
+          }
+        ],
+        [
+          "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create",
+          "tags",
+          "tested"
+        ],
+        [
+          "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create",
+          "title",
+          "publish_selftest is 0 defects over 12 cases and the new case reports exit 0, wanted 1 with the refusal removed; the real dist, which is 0.9.0 throughout, still reports 14 projects to create"
+        ],
+        [
+          "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version",
+          "sort",
+          "prop"
+        ],
+        [
+          "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version",
+          "supports",
+          {
+            "node": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+            "status": "untried"
+          }
+        ],
+        [
+          "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version",
+          "supports",
+          {
+            "node": "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+            "relation": "addresses",
+            "target": "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+          }
+        ],
+        [
+          "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version",
+          "title",
+          "the filename is what gets uploaded and a manifest can disagree with what was built; refusing after an upload is worthless because PyPI never frees a version"
+        ],
+        [
+          "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken",
+          "title",
+          "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+        ],
+        [
+          "the user stated the rule on 2026-09-22 and the tool that performs releases did not know it",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user stated the rule on 2026-09-22 and the tool that performs releases did not know it",
+          "supports",
+          "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+        ],
+        [
+          "the user stated the rule on 2026-09-22 and the tool that performs releases did not know it",
+          "title",
+          "the user stated the rule on 2026-09-22 and the tool that performs releases did not know it"
+        ],
+        [
+          "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "sort",
+          "approach"
+        ],
+        [
+          "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "addresses",
+          "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+        ],
+        [
+          "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "effort",
+          1
+        ],
+        [
+          "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "status",
+          "done"
+        ],
+        [
+          "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent",
+          "title",
+          "refuse the version in the publisher, read off the ARTIFACT filename and before any attempt is spent"
+        ]
+      ],
+      "id": "019066c56c7cf7df"
     }
   ]
 }

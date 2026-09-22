@@ -168,5 +168,17 @@ elif [ "$first" = "$second" ]; then
     failures=$((failures + 1))
 fi
 
-printf 'publish-selftest: %s defect(s) over 11 cases, every refusal the tool can make\n' "$failures"
+# A version this repository does not publish. Read off the ARTIFACT, so it
+# fires on what would actually be uploaded rather than on a manifest that can
+# disagree. Planted on pymetta-host because by here every other project is in
+# the shared fixture index, so it is the only one still to create and the only
+# one whose artifacts the check reads.
+mkdir -p "$FIXTURE/badversion"
+cp "$FIXTURE/dist"/* "$FIXTURE/badversion/" 2>/dev/null
+cp "$FIXTURE/dist"/pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl \
+   "$FIXTURE/badversion/pymetta_host-1.0.0-cp312-cp312-manylinux_2_28_x86_64.whl" 2>/dev/null
+case_is "an artifact carrying the refused version" 1 "1.0.0 is not a version" \
+    env DIST="$FIXTURE/badversion" INDEX="$LOCAL" sh "$TOOL"
+
+printf 'publish-selftest: %s defect(s) over 12 cases, every refusal the tool can make\n' "$failures"
 [ "$failures" -eq 0 ]
