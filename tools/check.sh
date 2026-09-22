@@ -731,6 +731,14 @@ run GATE battery-selftest sh "$HERE/tools/battery_selftest.sh"
 # reaches PyPI and nothing is uploaded.
 run GATE publish-selftest sh "$HERE/tools/publish_selftest.sh"
 
+# Each repository is published and read on its own, so each front page tells a
+# newcomer what MeTTa is rather than assuming they came through another. That
+# duplication is deliberate and still duplication: the root page and
+# lib/README.md described lib_crypto two different ways because nothing
+# compared them. These compare.
+run GATE shared-intro "$PY" "$HERE/tests/checks/check_shared_intro.py"
+run GATE shared-intro-selftest "$PY" "$HERE/tests/checks/check_shared_intro_selftest.py"
+
 # b54dea73 renamed the chapter-19 C artifacts on 2026-08-27 and left THREE
 # consumers holding the old directory. Each was found separately by somebody
 # noticing a test skip -- test_benchmarks.py and benchmarks/configuration.py
