@@ -180,5 +180,12 @@ cp "$FIXTURE/dist"/pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl \
 case_is "an artifact carrying the refused version" 1 "1.0.0 is not a version" \
     env DIST="$FIXTURE/badversion" INDEX="$LOCAL" sh "$TOOL"
 
-printf 'publish-selftest: %s defect(s) over 12 cases, every refusal the tool can make\n' "$failures"
+mkdir -p "$FIXTURE/badzip"
+cp "$FIXTURE/dist"/* "$FIXTURE/badzip/" 2>/dev/null
+cp "$FIXTURE/dist"/pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl \
+   "$FIXTURE/badzip/pymetta_host-1.0.0.zip" 2>/dev/null
+case_is "a refused version in an extension no list names" 1 "1.0.0 is not a version" \
+    env DIST="$FIXTURE/badzip" INDEX="$LOCAL" sh "$TOOL"
+
+printf 'publish-selftest: %s defect(s) over 13 cases, every refusal the tool can make\n' "$failures"
 [ "$failures" -eq 0 ]

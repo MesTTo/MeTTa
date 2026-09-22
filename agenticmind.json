@@ -23253,6 +23253,18 @@
       "tags": [
         "measured"
       ]
+    },
+    "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version": {
+      "title": "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version"
+    },
+    "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed": {
+      "title": "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed",
+      "supports": [
+        "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -98336,6 +98348,47 @@
         ]
       ],
       "id": "019066c56c7cf7df"
+    },
+    {
+      "at": "2026-09-22T09:27:39.276795+00:00",
+      "after": "f942a35cb99df429d05aa72b5385d1589388ef8b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed\", \"tags\": [\"measured\"], \"title\": \"my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version\", \"fields\": {}}]",
+      "parents": [
+        "019066c56c7cf7df"
+      ],
+      "assert": [
+        [
+          "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed",
+          "sort",
+          "prop"
+        ],
+        [
+          "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed",
+          "supports",
+          "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version"
+        ],
+        [
+          "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed",
+          "tags",
+          "measured"
+        ],
+        [
+          "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed",
+          "title",
+          "a guard deciding fewer cases than the action it guards is the spanning failure: the missing case looks exactly like a case nobody needed"
+        ],
+        [
+          "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version",
+          "title",
+          "my first version guard had a hole that made it worse than none: it listed .whl and .tar.gz while the upload hands twine the whole glob $DIST/<stem>-*, so a 1.0.0.zip would have uploaded past a guard that read as complete. It now reads the upload's own glob, and the .zip case reports exit 0, wanted 1 against the extension-list version"
+        ]
+      ],
+      "id": "978fcf712c9412e1"
     }
   ]
 }

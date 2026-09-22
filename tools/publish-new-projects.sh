@@ -178,8 +178,13 @@ REFUSED_VERSION=1.0.0
 refused=""
 for name in "$@"; do
     stem=$(echo "$name" | tr '-' '_')
-    for artifact in "$DIST/$stem-$REFUSED_VERSION"-*.whl "$DIST/$stem-$REFUSED_VERSION.tar.gz"; do
-        [ -e "$artifact" ] && refused="$refused $(basename "$artifact")"
+    for artifact in "$DIST/$stem"-*; do
+        [ -e "$artifact" ] || continue
+        base=$(basename "$artifact")
+        case "$base" in
+            "$stem-$REFUSED_VERSION"-*|"$stem-$REFUSED_VERSION".*)
+                refused="$refused $base" ;;
+        esac
     done
 done
 if [ -n "$refused" ]; then
