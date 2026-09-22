@@ -2915,9 +2915,23 @@ metta_host_clear_generated(retirement, _).
 %phase inside a transaction would abolish them through the shadow repair at
 %some later removal, with their reference wrappers still standing; the
 %completion unwraps first.
+%The owned children go FIRST, inside the releasing mark, which is what
+%metta_release_space_/2 already does for a release the engine drives itself.
+%Without it this door cleared the parent while its children were still live,
+%and a child's `super` was recompiled against a world that had just lost the
+%definition it names: loading
+%examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/04-super.metta
+%through the Python seat answered its ten groups and then raised
+%`super/1: metta_super_definition store/2 does not exist`, so the parity lane
+%read the engine exiting 0 and the seat exiting 1 on one example of 361
+%[measured 2026-09-23: the release plan for &pyspace_1 reads
+%[&metta-space-1, &metta-space-2, &pyspace_1], children before their owner, and
+%this door cleared &pyspace_1 alone].
 metta_clear_space_for_release(Space) :-
     metta_prepare_space_release(Space),
-    with_metta_space_releasing(Space, metta_host_clear_space(Space, retirement)).
+    with_metta_space_releasing(Space,
+        ( metta_release_owned_children(Space),
+          metta_host_clear_space(Space, retirement) )).
 
 metta_host_clear_foreign_storage(Space) :-
     clear_foreign_atoms(Space),

@@ -189,6 +189,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Clearing a space for release frees its owned children first, so a host that
+  closes a world no longer raises out of it. `metta_release_space/1` already
+  released the children inside the releasing mark and then cleared, with the
+  reason written beside it: recompiling a dying `super` user resolves it inside
+  a half-dead world. `metta_clear_space_for_release/1`, which is the door a host
+  comes in by, cleared alone. So a space holding `(= (f $x) ... (super (f $x)))`
+  in a child of the space being released had that child recompiled against a
+  parent which had just lost the definition, and the host received
+  `super/1: metta_super_definition f/2 does not exist`. The engine's own lane
+  never saw it, because a process that exits releases nothing.
+
+
 - The stranger fixture that proves a library nobody has heard of can extend the
   C seat is compiled again. It still spoke the pre-ABI-1 provider: text
   callbacks returning `bool` and an indexed `atom_at`, where ABI 1 takes

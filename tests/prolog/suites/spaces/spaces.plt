@@ -3664,4 +3664,26 @@ test(a_context_close_takes_its_world_with_it) :-
     assertion(\+ spaces:space_equation_home('&plunit_world2', _)),
     assertion(\+ spaces:native_storage_module_cache(Child, _)).
 
+%The same world, closed through the door a HOST comes in by. metta_release_space/1
+%above frees the owned children inside the releasing mark and then clears;
+%metta_clear_space_for_release/1 cleared alone, so a child's `super` was
+%recompiled against a parent that had just lost the definition it names and the
+%existence error came back through the host. The Python seat reaches this door
+%from Space.__exit__ through metta_py_clear_for_release/1, which is why the
+%parity lane saw the engine exit 0 and the seat exit 1 on
+%examples/ch19-spaces-backed-by-anything/19-01-spaces-of-your-own/04-super.metta.
+test(clearing_a_world_for_release_frees_its_children_first) :-
+    metta_declare_space_equation_home('&plunit_world3', '&self'),
+    process_metta_string("(= (plunit-w3-store $x) (held $x))", _,
+                         '&plunit_world3'),
+    process_metta_string("!(bind! &plunit-w3-child (new-space))", _,
+                         '&plunit_world3'),
+    process_metta_string(
+        "!(add-atom &plunit-w3-child (= (plunit-w3-store $a) (super (plunit-w3-store $a))))",
+        _, '&plunit_world3'),
+    spaces:space_equation_home(Child, '&plunit_world3'),
+    spaces:metta_clear_space_for_release('&plunit_world3'),
+    assertion(\+ spaces:space_equation_home(_, '&plunit_world3')),
+    assertion(\+ spaces:native_storage_module_cache(Child, _)).
+
 :- end_tests(space_worlds).
