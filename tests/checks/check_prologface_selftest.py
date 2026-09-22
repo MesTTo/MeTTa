@@ -166,7 +166,12 @@ class PrologFaceTests(unittest.TestCase):
         self.face.write_text("edited", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "changed during generation"):
             model.write_projection(self.face, "old", "new")
-        with patch.object(model.os, "replace", side_effect=OSError("replacement refused")), self.assertRaises(OSError):
+        # `os` directly, not through prologface: the module writes with
+        # pathlib's Path.replace and never names os itself, so reaching the
+        # global through it was an alias that kept an import ruff reports as
+        # unused. pathlib calls os.replace, so patching it here is the same
+        # interception with nothing in between.
+        with patch.object(os, "replace", side_effect=OSError("replacement refused")), self.assertRaises(OSError):
             model.write_projection(self.face, "edited", "new")
         self.assertEqual(self.face.read_text(encoding="utf-8"), "edited")
         self.assertEqual(list(self.root.glob(".prologface-*")), [])
