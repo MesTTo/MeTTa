@@ -605,8 +605,7 @@ clear_native_atoms_stored(Space) :-
     ),
     metta_prune_arrow_products(Space),
     metta_capacity_count_cleared(Space),
-    retractall(import_life(Space, _, _)),
-    retractall(import_nested_source(Space, _, _)),
+    metta_forget_space_imports(Space),
     (   SupportModule \== none
     ->  support_graph:support_clear_module(SupportModule)
     ;   true

@@ -2935,8 +2935,7 @@ metta_clear_space_for_release(Space) :-
 
 metta_host_clear_foreign_storage(Space) :-
     clear_foreign_atoms(Space),
-    retractall(import_life(Space, _, _)),
-    retractall(import_nested_source(Space, _, _)),
+    metta_forget_space_imports(Space),
     forget_space_source_loads(Space).
 
 %The equations above come out one per stored (= ...) atom, through

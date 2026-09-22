@@ -189,6 +189,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A released space leaves no import bookkeeping behind. `engine/spaces` only
+  SEES the core's import tables, so a `retractall` there created a local
+  predicate and cleared nothing; releasing a space now calls the core's own
+  `metta_forget_space_imports/1`. Anonymous space names are recycled, so what
+  was left standing was read by whichever space drew that name next.
+
 - A re-import rebuilds a library whose equations were removed. `import!` of
   `(library L)` resolves to `L/pkg.metta`, and that manifest's own receipt
   stays current however much of `L/lib.metta` is taken out of the space, so

@@ -1775,6 +1775,17 @@ capture_import_state(Space, CanonPath, Terms) :-
               Term = import_nested_source(Space, Enclosing, CanonPath)
             ), Terms).
 
+%A space's import bookkeeping goes with the space, and both tables are the
+%core's, so the clear lives HERE rather than in engine/spaces. A retractall
+%from a module that only SEES a name creates a local predicate and silently
+%clears nothing: import_nested_source/3 was cleared that way until the
+%layering lane named it, which left an anonymous space's edges standing for
+%the next space to draw that recycled name
+%[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named].
+metta_forget_space_imports(Space) :-
+    retractall(import_life(Space, _, _)),
+    retractall(import_nested_source(Space, _, _)).
+
 clear_import_state(Space, CanonPath) :-
     retractall(imported_metta_source(Space, CanonPath)),
     retractall(import_life(Space, CanonPath, _)),

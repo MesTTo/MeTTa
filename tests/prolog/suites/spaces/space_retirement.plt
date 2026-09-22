@@ -375,4 +375,20 @@ test(a_committed_release_retires_the_receivers_binding_at_completion,
     retire_notes(Notes), assertion(Notes == [retired]),
     assertion(\+ eval_metta_in_module(Module, ['imported-answer'], 5)).
 
+%An anonymous space name is RECYCLED, so bookkeeping left behind is read by
+%whichever space draws that name next. import_nested_source/3 is the core's
+%table and engine/spaces only SEES the name, so the retractall that used to
+%sit here created a local spaces:import_nested_source/3 and cleared nothing;
+%metta_forget_space_imports/1 is the core's own clear and this fails without
+%it.
+test(a_released_space_leaves_no_import_bookkeeping_behind,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Home),
+    'import!'(Home, [library, lib_thread], _),
+    findall(N, metta_engine:import_nested_source(Home, _, N), Before),
+    assertion(Before \== []),
+    transaction(metta_release_space(Home, plunit_space_retirement:retire_note)),
+    findall(N, metta_engine:import_nested_source(Home, _, N), After),
+    assertion(After == []).
+
 :- end_tests(space_retirement).

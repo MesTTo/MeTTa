@@ -778,6 +778,7 @@
             metta_discharge_coverage/1,
             metta_evaluation_fuel/1,
             metta_extension_info/3,
+            metta_forget_space_imports/1,
             metta_extension_member/2,
             metta_file_export/2,
             metta_fuel_exhausted/1,
