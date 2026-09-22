@@ -189,6 +189,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The stranger fixture that proves a library nobody has heard of can extend the
+  C seat is compiled again. It still spoke the pre-ABI-1 provider: text
+  callbacks returning `bool` and an indexed `atom_at`, where ABI 1 takes
+  `const mt_atom *`, returns `mt_status`, and reads a store through
+  `match(user, pattern, limit, &iterator)`. It also registered `solar_double`
+  and called `(solar-double 21)`, which worked only under the automatic
+  underscore-to-hyphen conversion that same break removed. `cmetta.h` said both
+  things at once, "exact engine name; no identifier conversion" on the field
+  and `car_atom` publishes `car-atom` over `mt_def`; the second is now what
+  MIGRATION.md says it is.
+
+
 - A package manifest no longer merges into the program that imports it. Law 1
   reserves the `package` head and grades a row internal "so they never merge
   into an importer", but the reservation only ever hid the NAME, which a face,

@@ -75,37 +75,66 @@ typedef struct store
   size_t count;
 } store_t;
 
-static bool store_add(void *user, const char *atom)
+static mt_status store_add(void *user, const mt_atom *atom)
 { store_t *store = user;
-  if ( store->count == CAPACITY ) return false;
-  if ( !(store->atoms[store->count] = strdup(atom)) ) return false;
-  store->count++;
-  return true;
+  char *text;
+  if ( store->count == CAPACITY ) return MT_LIMIT;
+  if ( !(text = mt_show_dup(atom)) ) return mt_error();
+  store->atoms[store->count++] = text;
+  return MT_OK;
 }
 
-static bool store_remove(void *user, const char *atom)
+/* `removed` is the answer; MT_OK says the provider ran, not that it found
+   something. A store that refused to look would say so with a status. */
+static mt_status store_remove(void *user, const mt_atom *atom, bool *removed)
 { store_t *store = user;
+  const char *text = mt_show(atom);
   size_t at;
+
+  *removed = false;
+  if ( !text ) return mt_error();
   for (at = 0; at < store->count; at++)
-    if ( strcmp(store->atoms[at], atom) == 0 )
-    { free(store->atoms[at]);
+    if ( strcmp(store->atoms[at], text) == 0 )
+    { mt_free(store->atoms[at]);
       memmove(&store->atoms[at], &store->atoms[at + 1],
               (store->count - at - 1) * sizeof(*store->atoms));
       store->count--;
-      return true;
+      *removed = true;
+      return MT_OK;
     }
-  return false;
+  return MT_OK;
 }
 
-static const char *store_atom_at(void *user, size_t index)
-{ store_t *store = user;
-  return index < store->count ? store->atoms[index] : NULL;
+/* A cursor over what this library holds. The whole store is offered and the
+   engine does the matching: a provider MAY narrow on `pattern` and stop at
+   `limit` when its own index makes that cheaper, and this one has eight slots
+   and no index, so reading them all is the cheaper answer. */
+typedef struct cursor
+{ store_t *store;
+  size_t   index;
+} cursor_t;
+
+static mt_status store_next(void *state, mt_atom **answer)
+{ cursor_t *cursor = state;
+  if ( cursor->index == cursor->store->count ) return MT_DONE;
+  *answer = mt_parse(cursor->store->atoms[cursor->index++]);
+  return *answer ? MT_ROW : mt_error();
 }
 
-static bool store_clear(void *user)
+static mt_status store_match(void *user, const mt_atom *pattern, size_t limit,
+                             mt_iterator *answers)
+{ cursor_t *cursor = mt_calloc(1, sizeof(*cursor));
+  (void)pattern; (void)limit;
+  if ( !cursor ) return MT_NOMEM;
+  cursor->store = user;
+  *answers = (mt_iterator){cursor, store_next, mt_free};
+  return MT_OK;
+}
+
+static mt_status store_clear(void *user)
 { store_t *store = user;
-  while ( store->count ) free(store->atoms[--store->count]);
-  return true;
+  while ( store->count ) mt_free(store->atoms[--store->count]);
+  return MT_OK;
 }
 
 static void store_release(void *user)
@@ -157,14 +186,16 @@ bool mt_extension_init(metta *runtime)
   provider.user = opened;
   provider.add = store_add;
   provider.remove = store_remove;
-  provider.atom_at = store_atom_at;
+  provider.match = store_match;
   provider.clear = store_clear;
   provider.release = store_release;
   if ( !mt_provider_open(runtime, "&stars", provider) ) return false;
 
   if ( !mt_repr(runtime, "star", star_text, NULL) ) return false;
 
-  if ( !mt_def(runtime, (mt_op){ .name = "solar_double", .arity = 1,
+  /* ABI 1 publishes the name EXACTLY, so the MeTTa spelling is written here
+     rather than derived from the C identifier beside it. */
+  if ( !mt_def(runtime, (mt_op){ .name = "solar-double", .arity = 1,
                                  .effect = MT_PURE, .fn = solar_double }) )
     return false;
 
