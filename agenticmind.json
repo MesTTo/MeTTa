@@ -23191,6 +23191,18 @@
       "tags": [
         "measured"
       ]
+    },
+    "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written": {
+      "title": "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written"
+    },
+    "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers": {
+      "title": "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers",
+      "supports": [
+        "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -98079,6 +98091,47 @@
         ]
       ],
       "id": "d8471a4debad5086"
+    },
+    {
+      "at": "2026-09-22T09:18:02.081167+00:00",
+      "after": "196d7e7b4ec6adb778af26da0edcd40dbe844921",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers\", \"tags\": [\"measured\"], \"title\": \"I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written\", \"fields\": {}}]",
+      "parents": [
+        "d8471a4debad5086"
+      ],
+      "assert": [
+        [
+          "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written",
+          "sort",
+          "prop"
+        ],
+        [
+          "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written",
+          "title",
+          "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written"
+        ],
+        [
+          "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers",
+          "sort",
+          "prop"
+        ],
+        [
+          "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers",
+          "supports",
+          "I reverted a generator regression with  and it took four unrelated meta_predicate moves with it, then I wrote a commit message claiming they had landed. The blunt revert is the mistake: only the files the generator rewrote should have been restored, and the claim should have been checked before it was written"
+        ],
+        [
+          "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers",
+          "tags",
+          "measured"
+        ],
+        [
+          "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers",
+          "title",
+          "git reported nothing to commit in lib, which is what exposed it; the declarations were back below their callers"
+        ]
+      ],
+      "id": "f8976c877e3a0c51"
     }
   ]
 }
