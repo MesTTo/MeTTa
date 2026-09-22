@@ -15,6 +15,10 @@ Guarantees:
   - a library carrying the backing row is NOT reported
     [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - `lib_import` is exempt [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
+  - a manifest of package rows is NOT reported, and one holding any other
+    form IS, whichever form it is: the rule decides `import!`, `bind!` and an
+    equation on another head by one clause rather than by a banned list
+    [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - an empty roster is refused [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
 Fails when: run against a directory it did not write. It asserts on its fixture.
 Open Obligations:
@@ -34,9 +38,11 @@ ROOT = next(parent for parent in Path(__file__).resolve().parents
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_package_backings import (  # noqa: E402  -- the path is installed above
+    MANIFEST,
     _seat_set,
     disagreements,
     findings,
+    manifest_findings,
 )
 
 MAKES_THE_CALL = '!(import_prolog_functions_from_file (library a.pl) (a-head))\n'
@@ -51,6 +57,37 @@ ONLY_MENTIONS_IT = (
 IN_A_STRING = '(= (doc) "see !(import_prolog_functions_from_file f (h))")\n'
 
 CARRIES_THE_ROW = '(= (package backing) (prolog (library a.pl) (a-head)))\n'
+
+
+#: What a migrated manifest looks like: requirements as data, a comment above
+#: them, and nothing that asks the engine to do anything.
+DESCRIBES = (
+    '; a comment is not a form and cannot be reported\n'
+    '(= (package requires) lib_other)\n'
+    '(= (package requires) "lib.metta")\n'
+)
+
+#: The three shapes the rule must refuse. They are listed HERE, in the test,
+#: precisely because the pass itself must not list them: a pass enumerating
+#: banned instructions leaves every unlisted one undecided, so what is checked
+#: is that three unrelated forms are refused by the one clause.
+INSTRUCTS = {
+    "lib_imports": '!(import! &self (library lib_other))\n',
+    "lib_binds": '!(bind! &x (new-space))\n',
+    "lib_defines": '(= (my-own-head $x) $x)\n',
+}
+
+
+def check_manifests(scratch: Path) -> None:
+    """A manifest of rows passes; a manifest holding any other form is caught."""
+    with tempfile.TemporaryDirectory(dir=scratch) as directory:
+        libraries = Path(directory)
+        planted = {"lib_describes": DESCRIBES, **INSTRUCTS}
+        for name, body in planted.items():
+            (libraries / name).mkdir()
+            (libraries / name / MANIFEST).write_text(body, encoding="utf-8")
+        reported = {line.split("/")[1] for line in manifest_findings(libraries)}
+    assert reported == set(INSTRUCTS), f"expected {set(INSTRUCTS)}, got {reported}"
 
 
 def main() -> int:
@@ -83,6 +120,7 @@ def main() -> int:
         "the seat's set was not read as a literal"
     assert _seat_set("NOTHING_HERE = 1") == frozenset(), \
         "a file without the binding did not read as empty"
+    check_manifests(scratch)
     with tempfile.TemporaryDirectory(dir=scratch) as empty:
         try:
             findings(Path(empty))
@@ -92,8 +130,9 @@ def main() -> int:
             message = "an empty roster was accepted"
             raise AssertionError(message)
     print("package-backings selftest: a library making the call is found; a comment, a string, "
-          "a backing row and lib_import are not; an empty roster is refused; "
-          "and the reserved head agrees across the engine boundary")
+          "a backing row and lib_import are not; a manifest of package rows passes while an "
+          "import!, a bind! and a foreign equation are each refused by the one clause; "
+          "an empty roster is refused; and the reserved head agrees across the engine boundary")
     return 0
 
 

@@ -214,6 +214,25 @@ metta_reference_internal(Space, Name) :-
     metta_reference_manifest_row(Space, [internal|Names]),
     memberchk(Name, Names), !.
 
+%A specializer residue is not a name anybody wrote. `string-pad_Spec_[lambda_14]`
+%records one call site's bound arguments and is stored as an ordinary equation
+%so the engine can call it, which is why every door enumerating a space's
+%equation heads reported it as part of the program's own face
+%[measured 2026-09-22: importing lib_doc and lib_json, `(collapse
+%(undocumented))` answered three `string-pad_Spec_[lambda_N]` residues beside
+%the program's names; the doors' own comment claimed no generated name stores
+%an equation atom here, and these do].
+%
+%The specializer already keeps the registry of the names it minted, so this
+%asks that rather than matching the `_Spec_` spelling: the spelling is built in
+%one place, and a guard repeating it here would be a second description of the
+%naming scheme that falls out of step the first time it changes
+%[source: engine/specializer.pl:ho_specialization/3, asserted beside every name
+%the specializer creates].
+metta_reference_internal(Space, Name) :-
+    space_module(Space, Module),
+    specializer:ho_specialization(Module, _, Name), !.
+
 metta_reference_row_head([=, [Name|_], _], Name) :- atom(Name), !.
 metta_reference_row_head([=, Name, _], Name) :- atom(Name), !.
 metta_reference_row_head([':', Name, _], Name) :- atom(Name), !.

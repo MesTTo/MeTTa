@@ -756,16 +756,36 @@ documented(Name) :- current_metta_space(Space),
                     'documented-space'(Space, Name).
 
 'documented-space'(Space, Name) :- 'get-atoms'(Space, Doc),
-                                   doc_shape(Name, Doc).
+                                   doc_shape(Name, Doc),
+                                   metta_face_name(Space, Name).
 
-%The library's exact semantics: every head of an equation THE SPACE
-%HOLDS, once each. Enumerating the space's own atoms is what excludes
-%builtins, engine-generated lambdas, and registered operations without
-%any filter list: none of them stores an equation atom here.
+%A name the space PRESENTS, which is what all three doors below report and is
+%therefore written once rather than three times.
+%
+%The comment this replaces said enumerating the space's own atoms excluded
+%"builtins, engine-generated lambdas, and registered operations without any
+%filter list: none of them stores an equation atom here". Two kinds do.
+%A manifest's `(= (package requires) lib_x)` rows store equations on the
+%reserved head, and the specializer stores its `name_Spec_[key]` residues as
+%ordinary equations; both were reported as undocumented names of the importing
+%program [measured 2026-09-22: importing lib_doc and lib_json, `(collapse
+%(undocumented))` answered `(package string-pad_Spec_[lambda_14] ...)`].
+%
+%The reference grading already decides this and is the one authority for it,
+%so the doors ask it rather than carrying a filter list that would fall out of
+%step with it [source: engine/metta/references.pl:metta_reference_internal/2,
+%whose first clause reserves `package` in every space per law 1 of
+%docs/journal/2026-09-09-packages-are-equations.md].
+metta_face_name(Space, Name) :-
+    atom(Name),
+    \+ metta_reference_internal(Space, Name).
+
+%The library's exact semantics: every head of an equation THE SPACE HOLDS that
+%the space also presents, once each.
 'defined-name'(Name) :- current_metta_space(Space),
                         distinct(Name,
                                  ( get_native_atom(Space, [=, [Name|_], _]),
-                                   atom(Name) )).
+                                   metta_face_name(Space, Name) )).
 
 undocumented(Name) :- current_metta_space(Space),
                       'undocumented-space'(Space, Name).
@@ -773,7 +793,7 @@ undocumented(Name) :- current_metta_space(Space),
 'undocumented-space'(Space, Name) :-
     distinct(Name,
              ( get_native_atom(Space, [=, [Name|_], _]),
-               atom(Name) )),
+               metta_face_name(Space, Name) )),
     \+ 'get-doc-space'(Space, Name, _).
 
 %%% Time Retrieval: %%%

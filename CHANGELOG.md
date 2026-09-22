@@ -9,6 +9,35 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A shipped library's `pkg.metta` describes its requirements rather than
+  instructing an engine to import them. Where the manifest held
+  `!(import! &self (library lib_crypto))` it now holds
+  `(= (package requires) lib_crypto)`, one row per requirement, and the
+  library's own source is the path-shaped row `(= (package requires)
+  "lib.metta")`. The rows are recognised structurally, with no evaluation, so
+  a MeTTa implementation that is not this one reads a manifest by matching
+  atoms, performs the requirements it can resolve, and refuses the rest by
+  name. The instruction form could only be read by something that already
+  implemented `import!`, `&self` and `(library ...)` resolution.
+
+  A requirement naming a library resolves through the catalogs in force and
+  one shaped like a path resolves beside the manifest, so the kind of
+  requirement is the value's own shape and needs no second key to record it.
+
+  `check_package_backings` now refuses any manifest form that is not a package
+  equation. The rule is stated that way rather than as a list of banned
+  instructions, because a list leaves every unlisted form undecided.
+
+- `defined-name`, `documented` and `undocumented` report only the names a
+  space presents. They enumerated every equation head a space held, on the
+  stated ground that generated names store no equation atom; two kinds do.
+  A manifest's package rows and the specializer's `name_Spec_[key]` residues
+  were both reported as undocumented names of the importing program. All
+  three doors now ask the reference grading, which is already the single
+  authority for what a space presents, and the specializer's own registry
+  answers for its residues rather than a guard repeating the `_Spec_`
+  spelling.
+
 - The publish workflow can now create a PyPI project that does not exist yet.
   A trusted publisher cannot be attached to a missing project, so PyPI's
   answer is a *pending* publisher, which creates the project on first use and

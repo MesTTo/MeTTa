@@ -34,6 +34,10 @@ Guarantees:
     [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - `lib_import` is exempt, being where the operation is defined
     [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
+  - a manifest holding any form that is not a package equation is reported,
+    which is the rule rather than a list of banned instructions: `import!`,
+    `bind!` and every other form are refused by the same clause
+    [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - an empty roster is refused, because a pass that found nothing to check
     reads exactly like a pass that checked everything
     [tested: tests/checks/check_package_backings_selftest.py; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
@@ -100,6 +104,41 @@ def findings(libraries: Path) -> list[str]:
     return out
 
 
+#: The one file a library is entered through, and the only one this rule binds.
+#: A git checkout resolves through the same name
+#: [source: lib/lib_package/lib_package.pl:package_checkout_entry/4].
+MANIFEST = "pkg.metta"
+
+#: A package row, recognised the way the engine recognises it: the head is two
+#: constants, `=` then `(package <key>)`. Recognising before matching is what
+#: stops `(= ($x backing) ...)` reading as a package row
+#: [source: engine/filereader/source_lifecycle.pl:package_row/3].
+PACKAGE_ROW = re.compile(r"^\(\s*=\s*\(\s*package\s+([A-Za-z_][\w-]*)\s*\)")
+
+
+def manifest_findings(libraries: Path) -> list[str]:
+    """Each manifest form that instructs instead of describing.
+
+    A manifest is an argument record, so every form in it is an equation on the
+    reserved head. Stating it that way decides every form rather than the ones
+    someone thought to ban: an `!(import! ...)` dependency, a `!(bind! ...)`, an
+    equation on another head and a bare atom are each refused by this clause,
+    and a reader that is not this engine can apply the same test
+    [source: docs/journal/2026-09-09-packages-are-equations.md, laws 1 and 10].
+    """
+    out: list[str] = []
+    for manifest in sorted(libraries.glob(f"*/{MANIFEST}")):
+        for form in positioned_forms(manifest.read_text(encoding="utf-8")):
+            if PACKAGE_ROW.match(form.text.strip()):
+                continue
+            shown = " ".join(form.text.split())[:60]
+            out.append(f"lib/{manifest.parent.name}/{MANIFEST}:{form.line}: "
+                       f"{shown!r} instructs rather than describes; a manifest holds "
+                       f"only (= (package <key>) <value>) rows, which another "
+                       f"implementation can read without evaluating them")
+    return out
+
+
 #: Where each side writes the reserved head down. The engine fixes it as law 1,
 #: so that one library's package rows are never read as its importer's own; the
 #: Python declarations reader runs with NO engine and cannot ask, so it carries
@@ -148,8 +187,8 @@ def disagreements() -> list[str]:
 
 
 def main() -> int:
-    """Report every library still making the call, and any reserved head only one side knows."""
-    problems = findings(LIBRARIES) + disagreements()
+    """Report every library still instructing the engine, and any reserved head only one side knows."""
+    problems = findings(LIBRARIES) + manifest_findings(LIBRARIES) + disagreements()
     for problem in problems:
         print(f"  {problem}")
     print(f"package-backings: {len(problems)} finding(s)")
