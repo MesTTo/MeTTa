@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `tools/pending-publishers.py` prints the pending Trusted Publishers PyPI
+  still needs, deriving the project list from `build-distributions.sh --list`
+  and the four constant form fields from `publish.yml` and the git remote, so
+  a row cannot name a workflow the release does not run or a distribution
+  nothing builds. It prints PyPI's two limits beside the list: three pending
+  publishers per user at once, and only one per `(owner, repository,
+  workflow, environment)`, which together mean a set of distributions sharing
+  one workflow is registered one at a time rather than in a batch.
+
 - `platform` is a refusal kind of its own, so a form refused for want of a
   platform capability arrives as `PlatformCapabilityError` carrying the four
   parts the engine names: the form, the capability, what this build would have
@@ -69,6 +78,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `libswipl` borrowed `libgmp` from the host.
 
 ### Fixed
+
+- The release build no longer dies on a directory under `ext/` that is not a
+  package. `tools/build-distributions.sh` globbed `ext/*/` and handed every
+  match to `python -m build`, which refuses `ext/__pycache__` with "does not
+  appear to be a Python project" and, under `set -e`, aborted the whole build
+  before most distributions were made. It survived review because a fresh CI
+  checkout has no `__pycache__`, so the local build broke where the runner
+  passed. A member is now a directory carrying a `pyproject.toml`, which is
+  structural rather than a list of names to skip.
+
+- The publish job no longer fails a release because some distributions are
+  already on PyPI. `pypa/gh-action-pypi-publish` ran with no `skip-existing`,
+  so the first file PyPI already held failed the upload and every
+  distribution after it was never sent. With 5 of the 18 published, a re-run
+  would have died on `pymetta-0.9.0` before reaching any of the 13 missing.
 
 - `metta.Space()` raised `AttributeError: module 'os' has no attribute
   'register_at_fork'` on Windows. `import metta` succeeded, so the failure

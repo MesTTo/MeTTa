@@ -23265,6 +23265,226 @@
       "tags": [
         "measured"
       ]
+    },
+    "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked": {
+      "title": "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked"
+    },
+    "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22": {
+      "title": "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22",
+      "supports": [
+        "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under": {
+      "title": "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under"
+    },
+    "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22": {
+      "title": "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22",
+      "supports": [
+        "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass": {
+      "title": "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass"
+    },
+    "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration": {
+      "title": "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration",
+      "supports": [
+        "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's": {
+      "title": "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's",
+      "supports": [
+        {
+          "node": "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "status": "untried"
+        }
+      ]
+    },
+    "it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder": {
+      "title": "it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder",
+      "supports": [
+        {
+          "node": "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+          "status": "untried"
+        }
+      ]
+    },
+    "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip": {
+      "title": "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip",
+      "attacks": [
+        "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass"
+      ]
+    },
+    "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path": {
+      "title": "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path",
+      "supports": [
+        "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it": {
+      "title": "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it"
+    },
+    "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22": {
+      "title": "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22",
+      "supports": [
+        "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0": {
+      "title": "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0"
+    },
+    "curl of pypi.org/pypi/<name>/json per name, 200 versus 404": {
+      "title": "curl of pypi.org/pypi/<name>/json per name, 200 versus 404",
+      "supports": [
+        "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify": {
+      "title": "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify"
+    },
+    "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner": {
+      "title": "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner",
+      "supports": [
+        "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify": {
+      "title": "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify",
+      "supports": [
+        {
+          "node": "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "status": "untried"
+        },
+        {
+          "node": "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "relation": "addresses",
+          "target": "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+        }
+      ]
+    },
+    "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer": {
+      "title": "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer",
+      "supports": [
+        {
+          "node": "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's"
+      ]
+    },
+    "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3": {
+      "title": "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3"
+    },
+    "read warehouse main accounts/views.py:1901-1908 on 2026-09-22": {
+      "title": "read warehouse main accounts/views.py:1901-1908 on 2026-09-22",
+      "supports": [
+        "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time": {
+      "title": "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time"
+    },
+    "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers": {
+      "title": "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers",
+      "supports": [
+        "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused": {
+      "title": "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused"
+    },
+    "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row": {
+      "title": "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row",
+      "supports": [
+        "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot": {
+      "title": "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot",
+      "attacks": [
+        "PyPI's project-creation limiter counts ATTEMPTS, not successes. warehouse sets project.create.user to 20 per hour and project.create.ip to 40 per hour, only four projects were ever created from here, and the endpoint still answers 429 whose HTML title reads 'Too many new projects created' rather than a generic throttle; the retry cycle spent about 190 attempts and every one pushed the window's expiry further out"
+      ]
+    },
+    "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22": {
+      "title": "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22",
+      "supports": [
+        "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside": {
+      "title": "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside"
+    },
+    "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped": {
+      "title": "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped",
+      "supports": [
+        "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'": {
+      "title": "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'"
+    },
+    "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move": {
+      "title": "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move",
+      "supports": [
+        "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects": {
+      "title": "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects",
+      "supports": [
+        {
+          "node": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "status": "untried"
+        },
+        {
+          "node": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "relation": "addresses",
+          "target": "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+        }
+      ]
     }
   },
   "approaches": {
@@ -25972,6 +26192,32 @@
       "status": "done",
       "addresses": [
         "the release rule that this repository never publishes 1.0.0 was enforced by nothing: publish-new-projects.sh reads no version at all, so an artifact built as 1.0.0 would upload with nobody asked, and a PyPI upload cannot be undone because a version is never freed once taken"
+      ]
+    },
+    "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use": {
+      "title": "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+      "effort": 2,
+      "status": "unwanted"
+    },
+    "ask PyPI's admins for a temporary lift on the new-project limit for this account": {
+      "title": "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+      "effort": 1,
+      "status": "untried"
+    },
+    "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand": {
+      "title": "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+      "effort": 2,
+      "status": "untried",
+      "addresses": [
+        "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+      ]
+    },
+    "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments": {
+      "title": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+      "effort": 1,
+      "status": "untried",
+      "addresses": [
+        "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
       ]
     }
   },
@@ -98389,6 +98635,691 @@
         ]
       ],
       "id": "978fcf712c9412e1"
+    },
+    {
+      "at": "2026-09-22T09:28:10.220476+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22\", \"tags\": [\"source\"], \"title\": \"a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22\", \"tags\": [\"source\"], \"title\": \"PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration\", \"tags\": [\"assumed\"], \"title\": \"whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's\", \"tags\": [], \"title\": \"register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use\", \"fields\": {\"effort\": 2}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder\", \"tags\": [], \"title\": \"ask PyPI's admins for a temporary lift on the new-project limit for this account\", \"fields\": {\"effort\": 1}}]",
+      "parents": [
+        "978fcf712c9412e1"
+      ],
+      "assert": [
+        [
+          "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under",
+          "sort",
+          "prop"
+        ],
+        [
+          "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under",
+          "title",
+          "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under"
+        ],
+        [
+          "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked",
+          "sort",
+          "prop"
+        ],
+        [
+          "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked",
+          "title",
+          "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked"
+        ],
+        [
+          "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22",
+          "sort",
+          "prop"
+        ],
+        [
+          "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22",
+          "supports",
+          "PyPI's pending publishers do create a project on first OIDC use, and Trusted Publisher REGISTRATION has its own separate bucket of 100 per user or IP per 24 hours, which fourteen is far under"
+        ],
+        [
+          "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22",
+          "tags",
+          "source"
+        ],
+        [
+          "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22",
+          "title",
+          "docs.pypi.org/trusted-publishers/creating-a-project-through-oidc and its troubleshooting page, read 2026-09-22"
+        ],
+        [
+          "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22",
+          "sort",
+          "prop"
+        ],
+        [
+          "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22",
+          "supports",
+          "a discuss.python.org thread from a user publishing a 23-package monorepo in lockstep is our situation exactly: four projects created, then blocked by 'too many new projects created' for 12+ hours, and their resolution was doing them by hand over several days. Ours is four created and fourteen blocked"
+        ],
+        [
+          "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22",
+          "tags",
+          "source"
+        ],
+        [
+          "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22",
+          "title",
+          "https://discuss.python.org/t/request-temporary-new-project-rate-limit-lift-on-pypi-for-a-coordinated-monorepo-release-user-pace/108030, read 2026-09-22"
+        ],
+        [
+          "it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder",
+          "sort",
+          "prop"
+        ],
+        [
+          "it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder",
+          "supports",
+          {
+            "node": "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+            "status": "untried"
+          }
+        ],
+        [
+          "it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder",
+          "title",
+          "it is the documented remedy for exactly this case and the one the matching monorepo thread was pointed to; it needs the account holder"
+        ],
+        [
+          "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration",
+          "sort",
+          "prop"
+        ],
+        [
+          "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration",
+          "supports",
+          "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass"
+        ],
+        [
+          "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration",
+          "tags",
+          "assumed"
+        ],
+        [
+          "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration",
+          "title",
+          "no PyPI document found states the two buckets are independent for the CREATE path, only for publisher registration"
+        ],
+        [
+          "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's",
+          "sort",
+          "prop"
+        ],
+        [
+          "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's",
+          "supports",
+          {
+            "node": "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+            "status": "untried"
+          }
+        ],
+        [
+          "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's",
+          "title",
+          "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's"
+        ],
+        [
+          "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass",
+          "sort",
+          "prop"
+        ],
+        [
+          "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass",
+          "title",
+          "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass"
+        ],
+        [
+          "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+          "sort",
+          "approach"
+        ],
+        [
+          "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+          "effort",
+          1
+        ],
+        [
+          "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+          "status",
+          "untried"
+        ],
+        [
+          "ask PyPI's admins for a temporary lift on the new-project limit for this account",
+          "title",
+          "ask PyPI's admins for a temporary lift on the new-project limit for this account"
+        ],
+        [
+          "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "sort",
+          "approach"
+        ],
+        [
+          "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "effort",
+          2
+        ],
+        [
+          "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "status",
+          "untried"
+        ],
+        [
+          "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "title",
+          "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use"
+        ]
+      ],
+      "id": "09f4410bd18d5998"
+    },
+    {
+      "at": "2026-09-22T09:44:21.274257+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path\", \"tags\": [\"source\"], \"title\": \"warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22\", \"tags\": [\"source\"], \"title\": \"PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it\", \"fields\": {}}]",
+      "parents": [
+        "09f4410bd18d5998"
+      ],
+      "assert": [
+        [
+          "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it",
+          "sort",
+          "prop"
+        ],
+        [
+          "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it",
+          "title",
+          "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it"
+        ],
+        [
+          "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22",
+          "sort",
+          "prop"
+        ],
+        [
+          "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22",
+          "supports",
+          "PyPI exposes NO API route for trusted-publisher management: warehouse/routes.py carries only manage.account.publishing, manage.organization.publishing and manage.project.settings.publishing, all HTML management views, so registering a pending publisher is a browser form submission and nothing else reaches it"
+        ],
+        [
+          "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22",
+          "tags",
+          "source"
+        ],
+        [
+          "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22",
+          "title",
+          "grepped the whole route table at pypi/warehouse main for 'publishing' and 'pending' on 2026-09-22"
+        ],
+        [
+          "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path",
+          "sort",
+          "prop"
+        ],
+        [
+          "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path",
+          "supports",
+          "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip"
+        ],
+        [
+          "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path",
+          "tags",
+          "source"
+        ],
+        [
+          "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path",
+          "title",
+          "read both files at pypi/warehouse main on 2026-09-22; this replaces the recorded speculation with the code path"
+        ],
+        [
+          "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip",
+          "sort",
+          "prop"
+        ],
+        [
+          "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip",
+          "title",
+          "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip"
+        ]
+      ],
+      "id": "ec402044429cc49c"
+    },
+    {
+      "at": "2026-09-22T09:45:43.317638+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"curl of pypi.org/pypi/<name>/json per name, 200 versus 404\", \"tags\": [\"measured\"], \"title\": \"exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner\", \"tags\": [\"source\"], \"title\": \"pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify\", \"tags\": [], \"title\": \"register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand\", \"fields\": {\"effort\": 2, \"addresses\": [\"PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut\"]}}, {\"op\": \"attack\", \"id\": \"whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass\", \"because\": \"warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip\", \"tags\": []}]",
+      "parents": [
+        "ec402044429cc49c"
+      ],
+      "assert": [
+        [
+          "curl of pypi.org/pypi/<name>/json per name, 200 versus 404",
+          "sort",
+          "prop"
+        ],
+        [
+          "curl of pypi.org/pypi/<name>/json per name, 200 versus 404",
+          "supports",
+          "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0"
+        ],
+        [
+          "curl of pypi.org/pypi/<name>/json per name, 200 versus 404",
+          "tags",
+          "measured"
+        ],
+        [
+          "curl of pypi.org/pypi/<name>/json per name, 200 versus 404",
+          "title",
+          "curl of pypi.org/pypi/<name>/json per name, 200 versus 404"
+        ],
+        [
+          "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0",
+          "sort",
+          "prop"
+        ],
+        [
+          "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0",
+          "title",
+          "exactly 14 of the 19 built distribution names are absent from PyPI, measured by the JSON API on 2026-09-22: the 13 metta-graphql, metta-live, metta-nanoarrow, metta-numpy, metta-otel, metta-pandas, metta-polars, metta-pyarrow, metta-pydantic, metta-remote, metta-sqlite, metta-tables, metta-websocket, plus pymetta-host. The five that exist are pymetta, metta-arrays, metta-benchmarking, metta-duckdb and metta-faiss, all at 0.9.0"
+        ],
+        [
+          "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify",
+          "sort",
+          "prop"
+        ],
+        [
+          "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify",
+          "title",
+          "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify"
+        ],
+        [
+          "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner",
+          "supports",
+          "pymetta-host cannot be built by publish.yml and so must get NO pending publisher: tools/pymetta-host/run.sh requires SRC naming a swipl-devel checkout and deliberately refuses a default because an absolute path only works on the machine it was written on, and the tree it needs is the PATCHED swipl-devel carrying the host-workarounds ledger's entries, which is not in the repository. A pending publisher for it would be a publisher no workflow can ever reify"
+        ],
+        [
+          "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner",
+          "tags",
+          "source"
+        ],
+        [
+          "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner",
+          "title",
+          "read tools/pymetta-host/run.sh lines 1-40; the blocker is the unreproducible input, not a missing container on the runner"
+        ],
+        [
+          "warehouse's pending-publisher path SKIPS the project-creation ratelimiter for a personal account: oidc/views.py:233-239 calls create_project with ratelimited=(pending_publisher.organization_id is not None), which is False when no organization owns it, and packaging/services.py:542-546 builds the identity limiter only `if ratelimited` and calls _check_ratelimits only when it is not None. So an OIDC upload through a pending publisher never consults project.create.user or project.create.ip",
+          "attacks",
+          "whether an OIDC upload through a pending publisher escapes the project.create limiter is UNESTABLISHED. The only person who raised it said so as explicit speculation, and that thread ended in manual uploads over days. So the pending-publisher route is worth trying but must not be reported as a known bypass"
+        ],
+        [
+          "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify",
+          "sort",
+          "prop"
+        ],
+        [
+          "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify",
+          "supports",
+          {
+            "node": "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+            "status": "untried"
+          }
+        ],
+        [
+          "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify",
+          "supports",
+          {
+            "node": "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+            "relation": "addresses",
+            "target": "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+          }
+        ],
+        [
+          "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify",
+          "title",
+          "warehouse's pending-publisher path calls create_project with ratelimited=False for a personal account, so it consults project.create zero times; deriving the list from the builder is what stops a publisher being created for pymetta-host, which nothing can reify"
+        ],
+        [
+          "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "sort",
+          "approach"
+        ],
+        [
+          "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "addresses",
+          "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+        ],
+        [
+          "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "effort",
+          2
+        ],
+        [
+          "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "status",
+          "untried"
+        ],
+        [
+          "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand",
+          "title",
+          "register thirteen pending Trusted Publishers, one per distribution the release workflow actually builds, deriving the list from build-distributions.sh rather than writing fourteen by hand"
+        ]
+      ],
+      "id": "14edf23c49f2069c"
+    },
+    {
+      "at": "2026-09-22T09:45:50.552373+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"status\", \"id\": \"register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use\", \"because\": \"superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer\", \"tags\": [], \"status\": \"unwanted\"}]",
+      "parents": [
+        "14edf23c49f2069c"
+      ],
+      "assert": [
+        [
+          "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer",
+          "sort",
+          "prop"
+        ],
+        [
+          "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer",
+          "supersedes",
+          "the repository already carries .github/workflows/publish.yml with id-token: write and pypa/gh-action-pypi-publish, so the CI half exists; registration is a separate 100-per-24h bucket. It needs a PyPI login, which is the user's"
+        ],
+        [
+          "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer",
+          "supports",
+          {
+            "node": "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer",
+          "title",
+          "superseded by the thirteen-publisher form: pymetta-host is one of the fourteen and tools/pymetta-host/run.sh cannot run on a GitHub runner, so its publisher could never reify and registering it would create a state with no producer"
+        ],
+        [
+          "register fourteen pending Trusted Publishers on the PyPI account and let the existing publish.yml create the projects on first use",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "id": "82edac9a872008bf"
+    },
+    {
+      "at": "2026-09-22T09:52:44.350096+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read warehouse main accounts/views.py:1901-1908 on 2026-09-22\", \"tags\": [\"source\"], \"title\": \"PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers\", \"tags\": [\"measured\"], \"title\": \"PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row\", \"tags\": [\"measured\"], \"title\": \"every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22\", \"tags\": [\"source\"], \"title\": \"the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot\", \"fields\": {}}]",
+      "parents": [
+        "82edac9a872008bf"
+      ],
+      "assert": [
+        [
+          "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time",
+          "sort",
+          "prop"
+        ],
+        [
+          "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time",
+          "title",
+          "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time"
+        ],
+        [
+          "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3",
+          "sort",
+          "prop"
+        ],
+        [
+          "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3",
+          "title",
+          "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3"
+        ],
+        [
+          "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused",
+          "sort",
+          "prop"
+        ],
+        [
+          "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused",
+          "title",
+          "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused"
+        ],
+        [
+          "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row",
+          "sort",
+          "prop"
+        ],
+        [
+          "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row",
+          "supports",
+          "every guard in _add_pending_oidc_publisher returns self.default_response, which is HTTP 200 rendering the normal page, and puts the reason in a session flash. So a refused registration is indistinguishable from a successful one by status code, and the twelve batched POSTs that reported 200 with no form errors had all been refused"
+        ],
+        [
+          "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row",
+          "tags",
+          "measured"
+        ],
+        [
+          "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row",
+          "title",
+          "my batch read only in-form error divs and the informational callout, missed the notification-bar flash, and reported twelve successes that were twelve refusals; the live table showed one row"
+        ],
+        [
+          "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers",
+          "sort",
+          "prop"
+        ],
+        [
+          "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers",
+          "supports",
+          "PyPI allows only ONE pending publisher per (repository, owner, workflow_filename, environment) tuple, across DIFFERENT project names: the DB unique constraint excludes project_name, and the UniqueViolation handler flashes 'A pending trusted publisher matching this configuration has already been registered for a different project name'. All thirteen of our projects share (MesTTo, MeTTa, publish.yml, pypi), so at most one of them can be pending at a time"
+        ],
+        [
+          "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers",
+          "tags",
+          "measured"
+        ],
+        [
+          "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers",
+          "title",
+          "observed that exact error on the live page after registering metta-graphql, and confirmed the constraint in warehouse main accounts/views.py's UniqueViolation block which spells out what it covers"
+        ],
+        [
+          "read warehouse main accounts/views.py:1901-1908 on 2026-09-22",
+          "sort",
+          "prop"
+        ],
+        [
+          "read warehouse main accounts/views.py:1901-1908 on 2026-09-22",
+          "supports",
+          "PyPI caps a user at THREE pending trusted publishers at once: accounts/views.py _add_pending_oidc_publisher refuses with 'You can't register more than 3 pending trusted publishers at once.' when len(user.pending_oidc_publishers) >= 3"
+        ],
+        [
+          "read warehouse main accounts/views.py:1901-1908 on 2026-09-22",
+          "tags",
+          "source"
+        ],
+        [
+          "read warehouse main accounts/views.py:1901-1908 on 2026-09-22",
+          "title",
+          "read warehouse main accounts/views.py:1901-1908 on 2026-09-22"
+        ],
+        [
+          "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22",
+          "sort",
+          "prop"
+        ],
+        [
+          "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22",
+          "supports",
+          "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot"
+        ],
+        [
+          "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22",
+          "tags",
+          "source"
+        ],
+        [
+          "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22",
+          "title",
+          "read warehouse main rate_limiting/__init__.py:47 and packaging/services.py:448-495 on 2026-09-22"
+        ],
+        [
+          "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot",
+          "sort",
+          "prop"
+        ],
+        [
+          "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot",
+          "title",
+          "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot"
+        ]
+      ],
+      "id": "d6c9a07cc3f40360"
+    },
+    {
+      "at": "2026-09-22T09:52:46.585101+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"attack\", \"id\": \"PyPI's project-creation limiter counts ATTEMPTS, not successes. warehouse sets project.create.user to 20 per hour and project.create.ip to 40 per hour, only four projects were ever created from here, and the endpoint still answers 429 whose HTML title reads 'Too many new projects created' rather than a generic throttle; the retry cycle spent about 190 attempts and every one pushed the window's expiry further out\", \"because\": \"the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot\", \"tags\": []}]",
+      "parents": [
+        "d6c9a07cc3f40360"
+      ],
+      "assert": [
+        [
+          "the recorded claim that every refused PyPI project-creation attempt pushes the window's expiry further out is REFUTED by source: project.create uses limits' MovingWindowRateLimiter, _check_ratelimits calls only .test(), and _hit_ratelimits (the only .hit() call) runs after that test passes, so an attempt refused at the limiter records nothing. Refused attempts therefore do not extend the window, and only the four successful creations ever consumed a slot",
+          "attacks",
+          "PyPI's project-creation limiter counts ATTEMPTS, not successes. warehouse sets project.create.user to 20 per hour and project.create.ip to 40 per hour, only four projects were ever created from here, and the endpoint still answers 429 whose HTML title reads 'Too many new projects created' rather than a generic throttle; the retry cycle spent about 190 attempts and every one pushed the window's expiry further out"
+        ]
+      ],
+      "id": "815c0ca01d9a6518"
+    },
+    {
+      "at": "2026-09-22T09:53:53.468721+00:00",
+      "after": "a802d225053660619aba8fae56de7849be2941c3",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped\", \"tags\": [\"measured\"], \"title\": \"measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move\", \"tags\": [\"source\"], \"title\": \"the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects\", \"tags\": [], \"title\": \"ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments\", \"fields\": {\"effort\": 1, \"addresses\": [\"PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut\"]}}]",
+      "parents": [
+        "815c0ca01d9a6518"
+      ],
+      "assert": [
+        [
+          "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move",
+          "sort",
+          "prop"
+        ],
+        [
+          "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move",
+          "supports",
+          "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'"
+        ],
+        [
+          "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move",
+          "tags",
+          "source"
+        ],
+        [
+          "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move",
+          "title",
+          "composed from the three warehouse constraints read today; the cost is what makes an admin limit-lift the cheaper first move"
+        ],
+        [
+          "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside",
+          "title",
+          "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside"
+        ],
+        [
+          "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped",
+          "supports",
+          "measured 2026-09-22T19:53 AEST: one upload attempt (pymetta-host) still answers 429 and the tool stopped by design, about 14 hours after the bulk of the 2026-09-21 attempts and 29 minutes after the previous one. This UNDERCUTS the source-derived prediction that refused attempts record nothing and the window should therefore have drained: warehouse main says .hit() runs only after .test() passes, so either the deployed code differs or an account-level override is in force (project_create_ratelimit_count and project_create_ratelimit_period are admin-settable per user). Which one cannot be distinguished from outside"
+        ],
+        [
+          "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped",
+          "title",
+          "ran tools/publish-new-projects.sh --publish; it spent exactly one attempt and stopped"
+        ],
+        [
+          "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects",
+          "supports",
+          {
+            "node": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+            "status": "untried"
+          }
+        ],
+        [
+          "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects",
+          "supports",
+          {
+            "node": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+            "relation": "addresses",
+            "target": "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+          }
+        ],
+        [
+          "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects",
+          "title",
+          "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects"
+        ],
+        [
+          "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'",
+          "title",
+          "the pending-publisher route is the only PROVEN bypass of project.create, but it cannot carry thirteen projects in one sitting: three pending at once, and one per (owner, repository, workflow, environment). With a single publish.yml and a single pypi environment that is ONE at a time; giving each distribution its own environment name raises it to three at a time, so ceil(13/3) = 5 release rounds, and it would also invalidate the trusted publishers already configured for the five existing projects against environment 'pypi'"
+        ],
+        [
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "sort",
+          "approach"
+        ],
+        [
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "addresses",
+          "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
+        ],
+        [
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "effort",
+          1
+        ],
+        [
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "status",
+          "untried"
+        ],
+        [
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "title",
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments"
+        ]
+      ],
+      "id": "dd3240ca2431ec05"
     }
   ]
 }

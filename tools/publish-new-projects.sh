@@ -14,14 +14,37 @@
 #   needs no project-creation budget at all.
 # Decides: the drain wait and the gap between uploads, below.
 #
-# WHY A TOOL RATHER THAN A COMMAND. PyPI's project-creation limiter counts
-# ATTEMPTS, not successes: warehouse sets project.create.user to "20 per hour"
-# and project.create.ip to "40 per hour" [source: warehouse/config.py,
-# PROJECT_CREATE_USER_RATELIMIT_STRING]. A loop that retries the whole set on
-# failure therefore spends its budget on requests that cannot succeed AND
-# pushes the window's expiry out, which is how one session spent about 190
-# attempts on 2026-09-21 and kept the window permanently shut while only four
-# projects had ever been created.
+# WHY A TOOL RATHER THAN A COMMAND. warehouse sets project.create.user to
+# "20 per hour" and project.create.ip to "40 per hour" [source:
+# warehouse/config.py, PROJECT_CREATE_USER_RATELIMIT_STRING]. One session
+# spent about 190 attempts on 2026-09-21, and the window was still shut 14
+# hours later with only four projects ever created.
+#
+# WHY IT STAYS SHUT IS NOT SETTLED, and the honest version matters because a
+# wrong model produces a wrong wait. This file used to say each refused
+# attempt pushes the expiry out. warehouse main contradicts that: the limiter
+# is a MovingWindowRateLimiter, _check_ratelimits calls only .test(), and the
+# sole .hit() runs only after that test passes, so a refused attempt should
+# record nothing and the window should have drained [source: warehouse main
+# rate_limiting/__init__.py and packaging/services.py, read 2026-09-22]. It
+# had not. Either the deployed code differs from main, or an account-level
+# override is in force, since project_create_ratelimit_count and
+# project_create_ratelimit_period are admin-settable per user. Neither is
+# distinguishable from outside, so do not trust a predicted drain time.
+#
+# THE POLICY BELOW IS RIGHT UNDER EITHER MODEL, which is why it did not
+# change: one attempt per project, stop at the first 429 rather than burning
+# the rest. Under the old model that avoids deepening the hole; under the new
+# one it avoids marching through thirteen requests that cannot succeed.
+# Fourteen projects is under the twenty a clean window allows, so one pass
+# lands everything once the window is genuinely open.
+#
+# THE ROUTE THAT NEVER TOUCHES THIS LIMITER is a pending Trusted Publisher:
+# warehouse creates the project with ratelimited=False for a personal
+# account, so project.create is not consulted [source: warehouse
+# oidc/views.py and packaging/services.py]. It is not a drop-in replacement,
+# because PyPI allows three pending publishers at once and only one per
+# (owner, repository, workflow, environment); see tools/pending-publishers.py.
 #
 # So: wait for the window to drain, then one attempt per project, and STOP at
 # the first 429 rather than burning the rest. Fourteen projects is under the
@@ -225,7 +248,9 @@ for name in $ordered; do
         printf '%s  ok      %s\n' "$(date -Is)" "$name"
     elif grep -qE '429|Too Many Requests|Too many new projects' "$log"; then
         printf '%s  429     %s: the window is shut. Stopping, because every further\n' "$(date -Is)" "$name"
-        printf '           attempt fails AND pushes the expiry out. Re-run with DRAIN=3900.\n'
+        printf '           attempt fails. Re-run later with DRAIN=3900, or see\n'
+        printf '           tools/pending-publishers.py for the route that skips\n'
+        printf '           the project-creation limiter entirely.\n'
         exit 2
     else
         printf '%s  FAILED  %s, not a rate limit; see %s\n' "$(date -Is)" "$name" "$log"

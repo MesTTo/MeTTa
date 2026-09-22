@@ -129,3 +129,13 @@ jobs:
           name: distributions
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # dist/ carries every distribution this repository releases and
+          # their versions move INDEPENDENTLY, so a release normally includes
+          # files PyPI already has. twine fails the whole upload on the first
+          # such file, and the distributions after it never go out. That is
+          # the tree's state right now: 5 of the 18 are published and a re-run
+          # of this job would die on pymetta-0.9.0 before reaching any of the
+          # 13 that are missing. Skipping a filename PyPI already holds is
+          # also the only safe reading, because a version is never freed.
+          skip-existing: true
