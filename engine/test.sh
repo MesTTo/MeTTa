@@ -18,9 +18,19 @@
 #   This form is shorter than that one and gets all six.
 #
 # Assumes:
-#   - swipl on PATH. This suite drives the engine directly and needs no host,
-#     no janus and no Python, which is why it is the one component test.sh that
-#     takes no interpreter.
+#   - swipl on PATH, and tools/select-python.sh sourced below is what puts the
+#     PATCHED one there. It selects an interpreter, and prepending that venv's
+#     bin/ carries its `swipl` symlink with it, so a developer typing
+#     `sh engine/test.sh` runs the same host the gate does. Relying on that is
+#     deliberate rather than incidental: a second probe here would be a second
+#     answer to "which host", and check_host_workarounds.py already owns the
+#     question of whether the one on PATH is patched.
+#
+#     A VERSION cannot tell the two apart. /usr/bin/swipl and
+#     /home/user/Dev/swipl-patched/bin/swipl both report
+#     "SWI-Prolog version 10.1.14 for x86_64-linux" [measured 2026-09-22], so
+#     only a patch reproduction distinguishes them, which is what that lane
+#     runs.
 # Guarantees:
 #   - the gate's `plunit` lane and a developer typing `sh engine/test.sh` run
 #     ONE body. Everything that makes the run trustworthy lives here: the
