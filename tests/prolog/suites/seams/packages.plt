@@ -38,9 +38,12 @@
 %     `"x.pl"` is beside the manifest carrying it
 %     [tested: packages:a_backing_row_resolves_its_library_locator,
 %     packages:a_plain_backing_locator_resolves_beside_its_own_manifest]
-%   - neither shape can leave the library root: a `..` path SEGMENT is
-%     refused by name, while a doubled dot INSIDE a name still resolves
+%   - neither shape can leave the library root, through the two-argument
+%     door or the three-argument one that joins to a git-fetched root: a
+%     `..` path SEGMENT is refused by name, while a doubled dot INSIDE a
+%     name still resolves
 %     [tested: packages:a_library_spec_cannot_walk_out_of_the_library_root,
+%     packages:a_fetched_library_spec_cannot_walk_out_either,
 %     packages:a_doubled_dot_inside_a_name_is_not_an_escape]
 %   - a row performs for the file that carries it and for no other load into
 %     the same space
@@ -221,6 +224,24 @@ test(a_library_spec_cannot_walk_out_of_the_library_root) :-
                    error(Formal, _),
                    Outcome = refused(Formal)),
              Outcome == refused(domain_error(library_name, Spec)) )).
+
+%The THREE-argument door is the other route and the worse one: its first
+%clause joins the caller's Y to a GIT-FETCHED library's root, which is
+%third-party content. Guarding only library/2 left this open, and only
+%re-reading the neighbourhood after the first fix found it.
+test(a_fetched_library_spec_cannot_walk_out_either) :-
+    setup_call_cleanup(
+        assertz(metta_engine:git_library_path(packages_fetched_probe,
+                                              '/tmp/packages-probe-root')),
+        forall(member(Y-Want, ['fast.pl'-resolved,
+                               '../../../../etc/passwd'-refused,
+                               'a/../../b'-refused]),
+               ( catch(( metta_engine:library(packages_fetched_probe, Y, _),
+                         Outcome = resolved ),
+                       error(domain_error(library_name, _), _),
+                       Outcome = refused),
+                 Outcome == Want )),
+        retract(metta_engine:git_library_path(packages_fetched_probe, _))).
 
 %The guard tests a path SEGMENT, never a substring, because a doubled dot is
 %a legal thing to have in a filename. The substring version is the obvious

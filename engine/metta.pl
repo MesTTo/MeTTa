@@ -940,7 +940,7 @@ library(X, Path) :- standard_library_path(Base),
 library_within(Spec, Relative) :-
     ( atom(Spec) -> Name = Spec ; atom_string(Name, Spec) ),
     (   sub_atom(Name, _, _, _, '/')
-    ->  refuse_escaping_library_spec(Name),
+    ->  refuse_escaping_library_spec(Name, library/2),
         Relative = Name
     ;   file_name_extension(_, Extension, Name), Extension \== ''
     ->  throw(error(domain_error(library_name, Name),
@@ -965,11 +965,11 @@ library_within(Spec, Relative) :-
 %
 %Absolute paths are deliberately NOT refused here; the comment above records
 %why a downstream library has to pass one.
-refuse_escaping_library_spec(Name) :-
+refuse_escaping_library_spec(Name, Culprit) :-
     split_string(Name, "/", "", Segments),
     (   memberchk("..", Segments)
     ->  throw(error(domain_error(library_name, Name),
-                    context(library/2,
+                    context(Culprit,
                             'a library spec cannot walk out of the library \c
                              root with `..`: name the library and let its \c
                              pkg.metta answer, or pass an absolute path')))
@@ -990,9 +990,15 @@ refuse_escaping_library_spec(Name) :-
 %registered here. So a package registers its directory once and
 %(library pettorch fast.pl) resolves
 %[tested: a_registered_library_path_resolves].
+%The two-argument form is not the only door: Y arrives here from a caller
+%too, and the git branch below joins it to a FETCHED library's root, which is
+%third-party content and the worse of the two routes. Guarded on both clauses
+%rather than once around them, because the first cuts.
 library(X, Y, Path) :- git_library_path(X, Base), !,
+                       refuse_escaping_library_spec(Y, library/3),
                        directory_file_path(Base, Y, Path).
-library(X, Y, Path) :- Spec =.. [X, Y],
+library(X, Y, Path) :- refuse_escaping_library_spec(Y, library/3),
+                       Spec =.. [X, Y],
                        (   absolute_file_name(Spec, Resolved,
                                               [access(read), file_errors(fail)])
                        ->  Path = Resolved

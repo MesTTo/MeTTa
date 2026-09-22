@@ -23915,6 +23915,18 @@
       "tags": [
         "measured"
       ]
+    },
+    "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites": {
+      "title": "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites"
+    },
+    "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite": {
+      "title": "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite",
+      "supports": [
+        "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -100995,6 +101007,50 @@
         "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
       },
       "id": "388317efc3d92812"
+    },
+    {
+      "at": "2026-09-22T10:29:33.616628+00:00",
+      "after": "206bf15b8a4728b456c36aced65f9660c8134774",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite\", \"tags\": [\"measured\"], \"title\": \"the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites\", \"fields\": {}}]",
+      "parents": [
+        "388317efc3d92812"
+      ],
+      "assert": [
+        [
+          "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite",
+          "sort",
+          "prop"
+        ],
+        [
+          "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite",
+          "supports",
+          "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites"
+        ],
+        [
+          "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite",
+          "tags",
+          "measured"
+        ],
+        [
+          "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite",
+          "title",
+          "probed library/3 with an asserted git_library_path before and after; the mutant removing the /3 guard now fails the suite"
+        ],
+        [
+          "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites",
+          "sort",
+          "prop"
+        ],
+        [
+          "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites",
+          "title",
+          "the first containment fix was INCOMPLETE and I shipped it as done: it guarded library/2 only, while library/3 joins the caller's Y to a git-fetched library's root and escaped the same way, measured at /tmp/fake-lib-root/../../../../etc/passwd. That is the worse route, because a fetched root holds third-party content. Guarding one door and not reading the neighbourhood is the mistake; the guard now has one definition and three call sites"
+        ]
+      ],
+      "telemetry": {
+        "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
+      },
+      "id": "d8675a9b5879cf75"
     }
   ]
 }
