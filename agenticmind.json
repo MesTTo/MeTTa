@@ -23970,6 +23970,54 @@
       "tags": [
         "measured"
       ]
+    },
+    "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass": {
+      "title": "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass"
+    },
+    "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig": {
+      "title": "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig",
+      "supports": [
+        "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it": {
+      "title": "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it"
+    },
+    "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language": {
+      "title": "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language",
+      "supports": [
+        "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here": {
+      "title": "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here"
+    },
+    "probed with a planted pair under a 90s timeout; the run completed": {
+      "title": "probed with a planted pair under a 90s timeout; the run completed",
+      "supports": [
+        "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?": {
+      "title": "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?"
+    },
+    "printed all four spellings from dist after writing the wrong pair into the page": {
+      "title": "printed all four spellings from dist after writing the wrong pair into the page",
+      "supports": [
+        "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -101231,6 +101279,137 @@
         ]
       ],
       "id": "1b133ce9ddd29589"
+    },
+    {
+      "at": "2026-09-22T10:44:10.376488+00:00",
+      "after": "6f572a6a5b404a0c36e3108f2ee5d1f779c3d90b",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig\", \"tags\": [\"measured\"], \"title\": \"fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language\", \"tags\": [\"measured\"], \"title\": \"TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"probed with a planted pair under a 90s timeout; the run completed\", \"tags\": [\"measured\"], \"title\": \"an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"printed all four spellings from dist after writing the wrong pair into the page\", \"tags\": [\"measured\"], \"title\": \"I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\\\"assertEqual\\\"] answers assert-equal, and the CALL form fn(\\\"assertEqual\\\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?\", \"fields\": {}}]",
+      "parents": [
+        "1b133ce9ddd29589"
+      ],
+      "assert": [
+        [
+          "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?",
+          "sort",
+          "prop"
+        ],
+        [
+          "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?",
+          "title",
+          "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?"
+        ],
+        [
+          "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it",
+          "sort",
+          "prop"
+        ],
+        [
+          "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it",
+          "title",
+          "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it"
+        ],
+        [
+          "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here",
+          "sort",
+          "prop"
+        ],
+        [
+          "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here",
+          "title",
+          "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here"
+        ],
+        [
+          "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass",
+          "sort",
+          "prop"
+        ],
+        [
+          "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass",
+          "title",
+          "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass"
+        ],
+        [
+          "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig",
+          "sort",
+          "prop"
+        ],
+        [
+          "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig",
+          "supports",
+          "fn.x is RESOLVED: 267 heads are ordinary properties, 251 from the engine's catalog and 16 operator words, so fn.add, fn.carAtom, fn.gte, fn.match, fn.superpose, fn.getState, fn.progn and fn.addAtom all compile under the package's own tsconfig with noUncheckedIndexedAccess on. The index signature remains for the rest, where Name | undefined is honest. Whole project typechecks, 689 of 689 node tests pass"
+        ],
+        [
+          "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig",
+          "tags",
+          "measured"
+        ],
+        [
+          "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig",
+          "title",
+          "generated heads.ts from fngen.py, typed fn as SymFactory & Record<Head, Name>, and compiled the documented spellings in a lab extending the package tsconfig"
+        ],
+        [
+          "printed all four spellings from dist after writing the wrong pair into the page",
+          "sort",
+          "prop"
+        ],
+        [
+          "printed all four spellings from dist after writing the wrong pair into the page",
+          "supports",
+          "I got the exact-door rule backwards in the README and only a runtime probe caught it: bracket access goes through the SAME name map as a property, so fn[\"assertEqual\"] answers assert-equal, and the CALL form fn(\"assertEqual\") is the only exact door. Bracket looks general because it works for names the map leaves alone, like prime?"
+        ],
+        [
+          "printed all four spellings from dist after writing the wrong pair into the page",
+          "tags",
+          "measured"
+        ],
+        [
+          "printed all four spellings from dist after writing the wrong pair into the page",
+          "title",
+          "printed all four spellings from dist after writing the wrong pair into the page"
+        ],
+        [
+          "probed with a planted pair under a 90s timeout; the run completed",
+          "sort",
+          "prop"
+        ],
+        [
+          "probed with a planted pair under a 90s timeout; the run completed",
+          "supports",
+          "an import cycle does NOT hang this engine: A imports B imports A completes rather than recursing, measured directly through import!/3. CeTTa carries an import_cycle fixture for the class and it is already covered here"
+        ],
+        [
+          "probed with a planted pair under a 90s timeout; the run completed",
+          "tags",
+          "measured"
+        ],
+        [
+          "probed with a planted pair under a 90s timeout; the run completed",
+          "title",
+          "probed with a planted pair under a 90s timeout; the run completed"
+        ],
+        [
+          "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language",
+          "supports",
+          "TypeScript cannot express a TOTAL open string index: thirteen shapes were measured and all widen under noUncheckedIndexedAccess, including a template-literal key, a mapped type with -?, NonNullable values, Required<Record<..>>, Lowercase<string> keys and a get-method intersection. Only an explicit property escapes. Python has no such flag, which is why its seat never hits this: __getattr__ returning AtomT is total by declaration and mypy honours it"
+        ],
+        [
+          "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language",
+          "tags",
+          "measured"
+        ],
+        [
+          "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language",
+          "title",
+          "the user asked how Python handles it, and namespace.py:163 is the answer; the flag is the difference, not the language"
+        ]
+      ],
+      "id": "dc3a3aa0faabc2ff"
     }
   ]
 }
