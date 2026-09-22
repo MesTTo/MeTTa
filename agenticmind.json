@@ -22866,6 +22866,120 @@
       "tags": [
         "tested"
       ]
+    },
+    "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record": {
+      "title": "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record"
+    },
+    "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited": {
+      "title": "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited",
+      "supports": [
+        "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach": {
+      "title": "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach"
+    },
+    "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877": {
+      "title": "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877",
+      "supports": [
+        "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims": {
+      "title": "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims"
+    },
+    "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged": {
+      "title": "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged",
+      "supports": [
+        "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail": {
+      "title": "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail"
+    },
+    "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary": {
+      "title": "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary",
+      "supports": [
+        "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration": {
+      "title": "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration"
+    },
+    "both readings rested on the same void measurement": {
+      "title": "both readings rested on the same void measurement",
+      "supports": [
+        "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug": {
+      "title": "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug"
+    },
+    "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place": {
+      "title": "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place",
+      "supports": [
+        "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object": {
+      "title": "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object"
+    },
+    "measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation": {
+      "title": "measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation",
+      "supports": [
+        "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object"
+      ]
+    },
+    "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))": {
+      "title": "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))"
+    },
+    "each was checked and each predicted a change that did not occur": {
+      "title": "each was checked and each predicted a change that did not occur",
+      "supports": [
+        "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further": {
+      "title": "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further"
+    },
+    "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing": {
+      "title": "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing",
+      "supports": [
+        "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further"
+      ],
+      "tags": [
+        "assumed"
+      ]
+    },
+    "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite": {
+      "title": "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite",
+      "supports": [
+        {
+          "node": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "status": "untried"
+        }
+      ]
     }
   },
   "approaches": {
@@ -25540,6 +25654,11 @@
       "addresses": [
         "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
       ]
+    },
+    "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest": {
+      "title": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+      "effort": 1,
+      "status": "untried"
     }
   },
   "format": 2,
@@ -96755,6 +96874,364 @@
         ]
       ],
       "id": "6ff06128dce9b635"
+    },
+    {
+      "at": "2026-09-22T08:20:11.784169+00:00",
+      "after": "8b48d9a43d108646d7cd2bbe59f32668befe79d7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited\", \"tags\": [\"measured\"], \"title\": \"the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record\", \"fields\": {}}]",
+      "parents": [
+        "6ff06128dce9b635"
+      ],
+      "assert": [
+        [
+          "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited",
+          "sort",
+          "prop"
+        ],
+        [
+          "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited",
+          "supports",
+          "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record"
+        ],
+        [
+          "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited",
+          "tags",
+          "measured"
+        ],
+        [
+          "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited",
+          "title",
+          "checked each path on 2026-09-22; no deletion commit exists for them, so they were untracked ai- scratch files that did not survive. That file is the user's workspace notes outside any git repo, so the stale pointers are reported rather than edited"
+        ],
+        [
+          "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record",
+          "sort",
+          "prop"
+        ],
+        [
+          "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record",
+          "title",
+          "the four ledgers /home/user/Dev/PyPeTTa1/CLAUDE.md names under Ledgers are all absent from the tree: ai-code-organisation-and-fixes.md, ai-api-review-plan.md, ai-todo.md and ai-janus-research.md, and so is ai-llms-and-algebra-audit.md which the release section calls the audit record"
+        ]
+      ],
+      "id": "5356773884db1dbd"
+    },
+    {
+      "at": "2026-09-22T08:21:49.848794+00:00",
+      "after": "8b48d9a43d108646d7cd2bbe59f32668befe79d7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877\", \"tags\": [\"measured\"], \"title\": \"the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach\", \"fields\": {}}]",
+      "parents": [
+        "5356773884db1dbd"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877",
+          "supports",
+          "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach"
+        ],
+        [
+          "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877",
+          "title",
+          "measured 2026-09-22 against the live engine and the checker's own count derivation at tests/checks/check_llms_names.py:877"
+        ],
+        [
+          "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach",
+          "sort",
+          "prop"
+        ],
+        [
+          "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach",
+          "title",
+          "the llms.txt release pass over roster counts is clean: 61 libraries matches lib/lib_*/, 20 chapters matches examples/ch*/, 314 builtins matches m.self.builtins(), and 366 executable programs matches the lane's own derivation, which excludes symlinks and _fixtures -- 390 .metta files minus the 24 under _fixtures. The three that WERE stale (thirteen kinds, nine title-only remedies) are PROSE, anchored to no table row and derived by nothing, which is the class CLAUDE.md names as the one the lane cannot reach"
+        ]
+      ],
+      "id": "8069115bd6c308c6"
+    },
+    {
+      "at": "2026-09-22T08:23:12.834199+00:00",
+      "after": "8b48d9a43d108646d7cd2bbe59f32668befe79d7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged\", \"tags\": [\"measured\"], \"title\": \"the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims\", \"fields\": {}}]",
+      "parents": [
+        "8069115bd6c308c6"
+      ],
+      "assert": [
+        [
+          "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged",
+          "supports",
+          "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims"
+        ],
+        [
+          "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged",
+          "tags",
+          "measured"
+        ],
+        [
+          "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged",
+          "title",
+          "measured 2026-09-22 against the live classes through inspect.signature, and each non-matching case was read in context before being judged"
+        ],
+        [
+          "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims",
+          "sort",
+          "prop"
+        ],
+        [
+          "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims",
+          "title",
+          "the llms.txt release pass is done over all four classes the lane cannot reach: CLOSED SETS is now covered by the lane itself; the COUNTS class holds (61 libraries, 20 chapters, 314 builtins, 366 programs all match live) while three PROSE counts were stale and are fixed; the prose contract for the capability classes is updated in both seats; and six documented constructors were compared against live signatures with no mismatch, Answer, Drift, RemoteSpace and MeTTa exactly and Symbol, Grounded and SpaceMachine descriptive or positional rather than signature claims"
+        ]
+      ],
+      "id": "c5b1b7cbba4b644c"
+    },
+    {
+      "at": "2026-09-22T08:31:48.816125+00:00",
+      "after": "8b48d9a43d108646d7cd2bbe59f32668befe79d7",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary\", \"tags\": [\"measured\"], \"title\": \"I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"both readings rested on the same void measurement\", \"tags\": [\"assumed\"], \"title\": \"so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place\", \"tags\": [\"tested\"], \"title\": \"the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug\", \"fields\": {}}]",
+      "parents": [
+        "c5b1b7cbba4b644c"
+      ],
+      "assert": [
+        [
+          "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail",
+          "sort",
+          "prop"
+        ],
+        [
+          "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail",
+          "title",
+          "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail"
+        ],
+        [
+          "both readings rested on the same void measurement",
+          "sort",
+          "prop"
+        ],
+        [
+          "both readings rested on the same void measurement",
+          "supports",
+          "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration"
+        ],
+        [
+          "both readings rested on the same void measurement",
+          "tags",
+          "assumed"
+        ],
+        [
+          "both readings rested on the same void measurement",
+          "title",
+          "both readings rested on the same void measurement"
+        ],
+        [
+          "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place",
+          "sort",
+          "prop"
+        ],
+        [
+          "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place",
+          "supports",
+          "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug"
+        ],
+        [
+          "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place",
+          "tags",
+          "tested"
+        ],
+        [
+          "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place",
+          "title",
+          "engine/metta/types.pl's no-catch paragraph states the rule, and the Python seat's own type tests still pass 49 of 49 with the guard in place"
+        ],
+        [
+          "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary",
+          "sort",
+          "prop"
+        ],
+        [
+          "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary",
+          "supports",
+          "I ran `make test` for the C seat twice and both results are VOID: the test binary bakes MT_ENGINE_PATH at build time and make does not clean, so both runs measured a binary the agent had built against its own engine copy under extensions/cmetta/ai-battery-1/ai-tmp/parity-engine, not this worktree. extensions/cmetta/test.sh is the one entry point and cleans first, and says why in its own Guarantees: a stale binary from an older source passes a suite the current source would fail"
+        ],
+        [
+          "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary",
+          "tags",
+          "measured"
+        ],
+        [
+          "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary",
+          "title",
+          "read extensions/cmetta/test.sh:11-14 after the identical failure survived a fix that provably could not have been reached by the stale binary"
+        ],
+        [
+          "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration",
+          "sort",
+          "prop"
+        ],
+        [
+          "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration",
+          "title",
+          "so the claim that cmetta's work fails 2 of 543 checks is WITHDRAWN pending a clean run; what was measured was a stale binary against a stale engine copy, and the same reasoning withdraws my inference that the agent's own green run came from an isolated configuration"
+        ],
+        [
+          "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug",
+          "sort",
+          "prop"
+        ],
+        [
+          "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug",
+          "title",
+          "the ownership guard on seam:grounded_type_names/2 and seam:grounded_algebra_type/3 stands on its own evidence regardless: both seams take an ARBITRARY grounded value from the engine and claimed it on py_is_object/1 alone, where seam:host_object/1 and the already-fixed grounded_text, grounted_structure and grounded_length seams all conjoin python_object_blob/1, and the engine's own rule is that a bridge whose clause THROWS rather than fails is the registrant's bug"
+        ]
+      ],
+      "id": "de9afd9a5c47f1e9"
+    },
+    {
+      "at": "2026-09-22T08:32:35.571067+00:00",
+      "after": "8b48d9a43d108646d7cd2bbe59f32668befe79d7",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation\", \"tags\": [], \"title\": \"the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"each was checked and each predicted a change that did not occur\", \"tags\": [\"measured\"], \"title\": \"the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing\", \"tags\": [\"assumed\"], \"title\": \"what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite\", \"tags\": [], \"title\": \"keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest\", \"fields\": {\"effort\": 1}}]",
+      "parents": [
+        "de9afd9a5c47f1e9"
+      ],
+      "assert": [
+        [
+          "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing",
+          "sort",
+          "prop"
+        ],
+        [
+          "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing",
+          "supports",
+          "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further"
+        ],
+        [
+          "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing",
+          "tags",
+          "assumed"
+        ],
+        [
+          "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing",
+          "title",
+          "I have been eliminating candidates by patching rather than by observing the goal that throws, which is the wrong order and is why four fixes changed nothing"
+        ],
+        [
+          "each was checked and each predicted a change that did not occur",
+          "sort",
+          "prop"
+        ],
+        [
+          "each was checked and each predicted a change that did not occur",
+          "supports",
+          "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))"
+        ],
+        [
+          "each was checked and each predicted a change that did not occur",
+          "tags",
+          "measured"
+        ],
+        [
+          "each was checked and each predicted a change that did not occur",
+          "title",
+          "each was checked and each predicted a change that did not occur"
+        ],
+        [
+          "measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation",
+          "sort",
+          "prop"
+        ],
+        [
+          "measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation",
+          "supports",
+          "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object"
+        ],
+        [
+          "measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation",
+          "title",
+          "measured 2026-09-22 by the canonical runner which cleans first, exit 2, so the earlier stale-binary reading is not the explanation"
+        ],
+        [
+          "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object",
+          "sort",
+          "prop"
+        ],
+        [
+          "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object",
+          "title",
+          "the C seat's new test_native_object_types_reach_engine_dispatch fails 2 of 543 checks from a CLEAN build through extensions/cmetta/test.sh, with janus:py_call/3 raising Domain error: py_term expected, found <CAccount> on get-type and get-type-space over an mt_object"
+        ],
+        [
+          "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))",
+          "sort",
+          "prop"
+        ],
+        [
+          "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))",
+          "title",
+          "the root cause is UNESTABLISHED. Eliminated: a stale binary (a clean test.sh run reproduces it); the ownership seam grounded_type_names/2 (guarded now, no change); grounded_algebra_type/3 (guarded, no change); the declaration seam grounded_extra_type/2 (already conjoined python_object_blob/1 before I looked); a stale engine copy (ENGINE_PATH resolves to this worktree); and an absent C answer (cmetta does register seam:grounded_class_type/2 on blob(Obj, cmetta_object))"
+        ],
+        [
+          "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite",
+          "sort",
+          "prop"
+        ],
+        [
+          "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite",
+          "supports",
+          {
+            "node": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+            "status": "untried"
+          }
+        ],
+        [
+          "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite",
+          "title",
+          "the work has a reproducible failure in its own new feature whose cause is unestablished, and the release gate is already running on the tree without it; shipping unverified work would be worse than shipping without it, and the node seat's work is included precisely because it does verify at 689/689 plus a green browser suite"
+        ],
+        [
+          "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further",
+          "sort",
+          "prop"
+        ],
+        [
+          "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further",
+          "title",
+          "what remains unchecked is whether python_object_blob/1 answers TRUE for a cmetta_object blob, and whether the py_call that throws is on the get-type path at all rather than reported as a stale last-error by the C harness; settling either needs a TRACE of the raising goal, which the next session should build before changing anything further"
+        ],
+        [
+          "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "sort",
+          "approach"
+        ],
+        [
+          "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "effort",
+          1
+        ],
+        [
+          "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "status",
+          "untried"
+        ],
+        [
+          "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
+          "title",
+          "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest"
+        ]
+      ],
+      "id": "e0cac30dd77e27f3"
     }
   ]
 }
