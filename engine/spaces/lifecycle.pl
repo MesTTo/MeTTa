@@ -2622,7 +2622,7 @@ announce_function_changed(Module, FAtom) :- prepare_specialization_invalidation(
 %`!(f (+ 1 2))` answered `(g 3)` where writing the declaration first answers
 %`(g (+ 1 2))` [tested:
 %spaces_late_type_declaration:a_late_type_declaration_repairs_its_call_sites;
-%commit=WORKTREE].
+%commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 %
 %ONLY when that result view actually MOVED, and the narrowness is the point.
 %Re-translating an equation loses which declared arrow it was compiled under,

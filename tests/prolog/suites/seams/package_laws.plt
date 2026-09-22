@@ -7,7 +7,7 @@
 % Guarantees: native overloads repair self-calls under eager and deferred
 % loading, including alias-aware dependency recording [tested:
 % a_backing_row_registers_before_the_equations_calling_it_translate;
-% commit=WORKTREE].
+% commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/metta.pl').

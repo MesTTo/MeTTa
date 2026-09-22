@@ -9,7 +9,7 @@
 % deferred equations untranslated; asking whether a head is loaded cannot
 % define it.
 % [tested: package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
-% commit=WORKTREE].
+% commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 % Owns resources: package_acquired/5 records live answers until reverse release
 % on withdrawal, replacement, failed activation, space release or process exit.
 % Artifact streams, metadata spaces, directory locks and staged files close on
@@ -632,7 +632,7 @@ package_perform_row(_, _, Row, Row).
 % current_predicate/2 keeps this ownership query observational even though
 % later registration now repairs arity-dependent bodies [tested:
 % package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
-% commit=WORKTREE].
+% commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 package_head_source(Module, Head, File) :-
     current_predicate(_, Module:Head),
     predicate_property(Module:Head, file(File)).

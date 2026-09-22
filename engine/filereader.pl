@@ -287,7 +287,7 @@
 %   overload registration repairs an eagerly compiled body in ordinary and
 %   alias-aware scopes [tested:
 %   package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
-%   commit=WORKTREE].
+%   commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 
 %The loader's surface: what the engine core asks of it, what a write records
 %with it, the host services a binding calls, and the parser doors it publishes
@@ -1809,7 +1809,7 @@ record_translated_supports(Module, Ref, [=, [Reserved|_], Body]) :-
 % overload registered later. The support graph visits each node once even
 % when the view leads back to this compiled function.
 % [tested: package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
-% commit=WORKTREE].
+% commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 % Dependency discovery: O(b + c log c) time and O(c) temporary space,
 % b = body nodes, c = called-symbol occurrences; one edge per distinct name.
 record_translated_supports(Module, Ref, [=, [G|_], Body]) :-
@@ -1998,7 +1998,7 @@ support_function_node(F, Node) :-
 % arriving after `(= (f $x) (g $x))` must rebuild f's clause or its answer
 % keeps re-entering evaluation
 % [tested: spaces_late_type_declaration:a_late_type_declaration_repairs_its_call_sites;
-% commit=WORKTREE].
+% commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
 %
 %Every module holding compiled equations of F, which support_function_module/2
 %enumerates exactly: the function node is published once per compiled form.
