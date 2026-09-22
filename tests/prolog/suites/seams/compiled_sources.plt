@@ -88,7 +88,7 @@ test(the_boot_governs_the_sources_its_patterns_name) :-
     atom_concat(Root, '/engine/metta/interop.pl', Unit),
     atom_concat(Root, '/lib/lib_datetime/deeper/lib_datetime.pl', Deeper),
     atom_concat(Root, '/tests/fixtures/no_autoload_boot.pl', Outside),
-    atom_concat(Root, '/lib/lib_datetime/lib_datetime.metta', Program),
+    atom_concat(Root, '/lib/lib_datetime/pkg.metta', Program),
     assertion(metta_qlf_boot:qlf_governed_source(Library)),
     assertion(metta_qlf_boot:qlf_governed_source(Dotted)),
     assertion(metta_qlf_boot:qlf_governed_source(Umbrella)),

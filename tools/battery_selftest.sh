@@ -213,6 +213,22 @@ else
     failures=$((failures + 1))
 fi
 
+# A battery a COMPONENT holds is not part of a snapshot. ai-tmp/ covers the
+# trees this script makes, and a component's own ai-battery-N sits outside it:
+# one such copy, 127 MB of a stale engine, was being rsynced into every
+# provision, and a stale engine inside a battery is a tree a reader or a path
+# walk finds and believes. Asserted on the TREE rather than on verify's exit,
+# because the copy is silent: it drifts nothing, it just should not be there.
+mkdir -p "$FIXTURE/src/component/ai-battery-9"
+printf 'stale\n' > "$FIXTURE/src/component/ai-battery-9/engine.pl"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+if [ -e "$TREE/component/ai-battery-9" ]; then
+    echo "  FAIL a component's own battery was copied into the snapshot"
+    failures=$((failures + 1))
+else
+    echo "  ok   a component's own battery stayed out of the snapshot"
+fi
+
 rm -rf "$TREE"
 [ "$failures" -eq 0 ] || { echo "battery selftest: $failures case(s) failed"; exit 1; }
 echo "battery selftest: every planted drift was refused, no excluded write was,"

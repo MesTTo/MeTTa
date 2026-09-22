@@ -23019,6 +23019,68 @@
       "tags": [
         "measured"
       ]
+    },
+    "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import": {
+      "title": "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+    },
+    "the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three": {
+      "title": "the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three",
+      "supports": [
+        "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+      ]
+    },
+    "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf": {
+      "title": "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf",
+      "supports": [
+        {
+          "node": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "status": "untried"
+        },
+        {
+          "node": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "relation": "addresses",
+          "target": "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+        }
+      ]
+    },
+    "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before": {
+      "title": "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before",
+      "supports": [
+        {
+          "node": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf"
+      ],
+      "tags": [
+        "tested"
+      ]
+    },
+    "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern": {
+      "title": "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern",
+      "supports": [
+        {
+          "node": "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+          "status": "untried"
+        }
+      ]
+    },
+    "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar": {
+      "title": "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar",
+      "supports": [
+        {
+          "node": "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -25697,6 +25759,19 @@
     "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest": {
       "title": "keep the C seat's parity work OUT of the 0.9.0 release, at its recorded pointer c1dd3e2d5, and ship the rest",
       "effort": 1,
+      "status": "unwanted"
+    },
+    "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all": {
+      "title": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+      ]
+    },
+    "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout": {
+      "title": "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+      "effort": 2,
       "status": "unwanted"
     }
   },
@@ -97375,6 +97450,188 @@
         ]
       ],
       "id": "088bbb102eb0f9af"
+    },
+    {
+      "at": "2026-09-22T08:44:26.972206+00:00",
+      "after": "3da7067cc8513160342683ed69bfa15ea99598af",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three\", \"tags\": [], \"title\": \"the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf\", \"tags\": [], \"title\": \"correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all\", \"fields\": {\"effort\": 1, \"addresses\": [\"the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import\"]}}, {\"op\": \"status\", \"id\": \"correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all\", \"because\": \"translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before\", \"tags\": [\"tested\"], \"status\": \"done\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern\", \"tags\": [], \"title\": \"add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout\", \"fields\": {\"effort\": 2}}, {\"op\": \"status\", \"id\": \"add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout\", \"because\": \"the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar\", \"tags\": [\"source\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "088bbb102eb0f9af"
+      ],
+      "assert": [
+        [
+          "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf",
+          "sort",
+          "prop"
+        ],
+        [
+          "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf",
+          "supports",
+          {
+            "node": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+            "status": "untried"
+          }
+        ],
+        [
+          "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf",
+          "supports",
+          {
+            "node": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+            "relation": "addresses",
+            "target": "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+          }
+        ],
+        [
+          "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf",
+          "title",
+          "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf"
+        ],
+        [
+          "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern",
+          "sort",
+          "prop"
+        ],
+        [
+          "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern",
+          "supports",
+          {
+            "node": "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+            "status": "untried"
+          }
+        ],
+        [
+          "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern",
+          "title",
+          "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern"
+        ],
+        [
+          "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import",
+          "title",
+          "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+        ],
+        [
+          "the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three",
+          "sort",
+          "prop"
+        ],
+        [
+          "the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three",
+          "supports",
+          "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+        ],
+        [
+          "the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three",
+          "title",
+          "the release gate's prolog lane reported translator_evaluation_errors failing with source_sink '../../lib/lib_builtin_types/lib_builtin_types.metta' does not exist, and a sweep for the pattern found the other three"
+        ],
+        [
+          "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar",
+          "sort",
+          "prop"
+        ],
+        [
+          "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar",
+          "supersedes",
+          "it would be a derivable rule with no new exceptions, since repos/lib_json/lib_json.metta in interop.pl is deliberate history under a different prefix and compiled_sources.plt's lib_datetime/deeper/lib_datetime.pl is a .pl the boot glob must NOT govern"
+        ],
+        [
+          "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar",
+          "supports",
+          {
+            "node": "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar",
+          "tags",
+          "source"
+        ],
+        [
+          "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar",
+          "title",
+          "the two LIVE sites already fail loudly, which is how they were found, so the lane would duplicate a working signal; the other two are comments with no runtime effect. check_example_references.py deliberately reads only prose and comment lines in .md/.py/.sh/.txt because a path in code may be a temporary a test is about to write, and all four sites are .plt, so extending it would break the restriction that protects compiled_sources.plt's intentionally absent path. Machinery for one completed migration is the speculative case the rules bar"
+        ],
+        [
+          "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before",
+          "sort",
+          "prop"
+        ],
+        [
+          "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before",
+          "supersedes",
+          "a suffix swap would have been wrong for lib_import, whose directory holds only lib_import.pl and lib_import.qlf"
+        ],
+        [
+          "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before",
+          "supports",
+          {
+            "node": "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+            "status": "done"
+          }
+        ],
+        [
+          "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before",
+          "tags",
+          "tested"
+        ],
+        [
+          "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before",
+          "title",
+          "translator.plt passes 209 tests +85 sub-tests and compiled_sources.plt passes 9, both red before"
+        ],
+        [
+          "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+          "sort",
+          "approach"
+        ],
+        [
+          "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+          "effort",
+          2
+        ],
+        [
+          "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+          "status",
+          "unwanted"
+        ],
+        [
+          "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout",
+          "title",
+          "add a lane refusing any tracked reference to the removed lib/<name>/<name>.metta layout"
+        ],
+        [
+          "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "sort",
+          "approach"
+        ],
+        [
+          "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "addresses",
+          "the pkg.metta migration left four references to the removed lib/<name>/<name>.metta layout: two LIVE, translator.plt's absolute_file_name over lib_builtin_types and compiled_sources.plt's atom_concat over lib_datetime, and two in comments, metta.plt naming lib_derived and prolog_interface.plt naming lib_import"
+        ],
+        [
+          "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "effort",
+          1
+        ],
+        [
+          "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "status",
+          "done"
+        ],
+        [
+          "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all",
+          "title",
+          "correct all four by naming the file that ships: pkg.metta for the three libraries that have one, and lib_import.pl for lib_import, which is Prolog-only and has no pkg.metta at all"
+        ]
+      ],
+      "id": "a633d2de99aeb77f"
     }
   ]
 }

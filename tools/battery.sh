@@ -134,6 +134,7 @@ snapshot() {
           ${caches:+--filter="P .mypy_cache/"} \
           ${caches:+--filter="P .ruff_cache/"} \
           --exclude=ai-tmp/ --exclude='ai-tmp-*' \
+          --exclude='ai-battery-*' \
           --exclude=node_modules --exclude='.venv*' \
           "$@"
 }
