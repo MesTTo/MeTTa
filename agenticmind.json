@@ -23790,6 +23790,95 @@
       "tags": [
         "source"
       ]
+    },
+    "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there": {
+      "title": "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+    },
+    "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93": {
+      "title": "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93",
+      "supports": [
+        "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses": {
+      "title": "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses"
+    },
+    "ran the same probe twice with the flag flipped, and read tsconfig.json": {
+      "title": "ran the same probe twice with the flag flipped, and read tsconfig.json",
+      "supports": [
+        "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working": {
+      "title": "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working"
+    },
+    "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed": {
+      "title": "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed",
+      "supports": [
+        "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set": {
+      "title": "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set",
+      "supports": [
+        {
+          "node": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "status": "untried"
+        },
+        {
+          "node": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "relation": "addresses",
+          "target": "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+        }
+      ]
+    },
+    "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism": {
+      "title": "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism"
+    },
+    "compiled both doors side by side; only the fn line errored": {
+      "title": "compiled both doors side by side; only the fn line errored",
+      "supports": [
+        "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this": {
+      "title": "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this",
+      "supports": [
+        {
+          "node": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside": {
+      "title": "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside"
+    },
+    "the roster approach was recorded and then withdrawn once words.ts was read": {
+      "title": "the roster approach was recorded and then withdrawn once words.ts was read",
+      "supports": [
+        "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -26537,6 +26626,14 @@
       "title": "adopt vercel-labs/scriptc to compile the TypeScript surface ahead of time to native or WebAssembly",
       "effort": 3,
       "status": "unwanted"
+    },
+    "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined": {
+      "title": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+      "effort": 3,
+      "status": "unwanted",
+      "addresses": [
+        "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+      ]
     }
   },
   "format": 2,
@@ -100495,6 +100592,269 @@
         "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
       },
       "id": "35e29a906386ce05"
+    },
+    {
+      "at": "2026-09-22T10:21:04.289555+00:00",
+      "after": "752db09f9811cf577a7cb852c2a3206cc7f2e903",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93\", \"tags\": [\"measured\"], \"title\": \"SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ran the same probe twice with the flag flipped, and read tsconfig.json\", \"tags\": [\"measured\"], \"title\": \"the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\\\"parent\\\") rather than the property form every example uses\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed\", \"tags\": [\"measured\"], \"title\": \"TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\\\"prime?\\\") keeps working\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set\", \"tags\": [], \"title\": \"generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined\", \"fields\": {\"effort\": 3, \"addresses\": [\"SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there\"]}}]",
+      "parents": [
+        "35e29a906386ce05"
+      ],
+      "assert": [
+        [
+          "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there",
+          "sort",
+          "prop"
+        ],
+        [
+          "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there",
+          "title",
+          "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+        ],
+        [
+          "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working",
+          "sort",
+          "prop"
+        ],
+        [
+          "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working",
+          "title",
+          "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working"
+        ],
+        [
+          "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93",
+          "sort",
+          "prop"
+        ],
+        [
+          "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93",
+          "supports",
+          "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+        ],
+        [
+          "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93",
+          "tags",
+          "measured"
+        ],
+        [
+          "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93",
+          "title",
+          "probed both calls under a tsconfig extending the package's own; extensions/node/src/factories.ts:93"
+        ],
+        [
+          "ran the same probe twice with the flag flipped, and read tsconfig.json",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran the same probe twice with the flag flipped, and read tsconfig.json",
+          "supports",
+          "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses"
+        ],
+        [
+          "ran the same probe twice with the flag flipped, and read tsconfig.json",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran the same probe twice with the flag flipped, and read tsconfig.json",
+          "title",
+          "ran the same probe twice with the flag flipped, and read tsconfig.json"
+        ],
+        [
+          "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses",
+          "sort",
+          "prop"
+        ],
+        [
+          "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses",
+          "title",
+          "the S/V/fn typing flaw bites only a consumer who opts into noUncheckedIndexedAccess, which is NOT part of --strict: measured with the flag true the call errors and with it false it compiles clean. The package enables it for itself, and its own typecheck passes only because tsconfig.json covers src/, where the code uses the call form S(\"parent\") rather than the property form every example uses"
+        ],
+        [
+          "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set",
+          "sort",
+          "prop"
+        ],
+        [
+          "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set",
+          "supports",
+          {
+            "node": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+            "status": "untried"
+          }
+        ],
+        [
+          "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set",
+          "supports",
+          {
+            "node": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+            "relation": "addresses",
+            "target": "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+          }
+        ],
+        [
+          "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set",
+          "title",
+          "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set"
+        ],
+        [
+          "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed",
+          "supports",
+          "TypeScript offers no way to declare a string index signature that survives noUncheckedIndexedAccess: a value type of NonNullable<T> and a mapped type with -? were both measured and both still widen. The only shape that works is an EXPLICIT property, verified: `Factory & { readonly [K in Known]: Name<K> }` makes f.add(1,2) compile while f.somethingElse stays Name | undefined and the call form f(\"prime?\") keeps working"
+        ],
+        [
+          "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed",
+          "tags",
+          "measured"
+        ],
+        [
+          "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed",
+          "title",
+          "three candidate declarations compiled under a scratch tsconfig with the flag on; only the explicit-property overlay passed"
+        ],
+        [
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "sort",
+          "approach"
+        ],
+        [
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "addresses",
+          "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+        ],
+        [
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "effort",
+          3
+        ],
+        [
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "status",
+          "untried"
+        ],
+        [
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "title",
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined"
+        ]
+      ],
+      "telemetry": {
+        "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
+      },
+      "id": "3edfae95667a4b06"
+    },
+    {
+      "at": "2026-09-22T10:22:28.192988+00:00",
+      "after": "752db09f9811cf577a7cb852c2a3206cc7f2e903",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"compiled both doors side by side; only the fn line errored\", \"tags\": [\"measured\"], \"title\": \"the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism\", \"fields\": {}}, {\"op\": \"status\", \"id\": \"generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined\", \"because\": \"it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the roster approach was recorded and then withdrawn once words.ts was read\", \"tags\": [\"measured\"], \"title\": \"I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside\", \"fields\": {}}]",
+      "parents": [
+        "3edfae95667a4b06"
+      ],
+      "assert": [
+        [
+          "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside",
+          "sort",
+          "prop"
+        ],
+        [
+          "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside",
+          "title",
+          "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside"
+        ],
+        [
+          "compiled both doors side by side; only the fn line errored",
+          "sort",
+          "prop"
+        ],
+        [
+          "compiled both doors side by side; only the fn line errored",
+          "supports",
+          "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism"
+        ],
+        [
+          "compiled both doors side by side; only the fn line errored",
+          "tags",
+          "measured"
+        ],
+        [
+          "compiled both doors side by side; only the fn line errored",
+          "title",
+          "compiled both doors side by side; only the fn line errored"
+        ],
+        [
+          "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this",
+          "sort",
+          "prop"
+        ],
+        [
+          "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this",
+          "supersedes",
+          "this is the generated-symbol-roster pattern Prisma, gql.tada and typed-scss-modules all use: derive the known keys from the authority and keep an open index only for genuinely dynamic ones. The repo already generates vocabularies.ts under a vocab-sync lane and fn.py under fn-sync, so the authority and the gating pattern both exist. It cannot be the WHOLE type, because fn mints arbitrary heads and m.op registers new ones at run time, so it is an overlay rather than a closed set"
+        ],
+        [
+          "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this",
+          "supports",
+          {
+            "node": "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this",
+          "tags",
+          "measured"
+        ],
+        [
+          "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this",
+          "title",
+          "it would be a second mechanism beside one that already works: words.ts is a typed door for exactly the heads a roster would have covered, and it compiles clean under the flag. The README now names both doors instead. A roster would still be the answer if the typed door's coverage turned out too narrow, which is the condition that would reopen this"
+        ],
+        [
+          "the roster approach was recorded and then withdrawn once words.ts was read",
+          "sort",
+          "prop"
+        ],
+        [
+          "the roster approach was recorded and then withdrawn once words.ts was read",
+          "supports",
+          "I nearly built a generated head roster with its own sync lane for a problem src/words.ts already solves, and only found it by grepping for an existing list before writing the generator. The rule that caught it is the repository's own: use the mechanism that exists rather than routing around it, and the check that surfaced it was looking for prior art INSIDE the repository before looking outside"
+        ],
+        [
+          "the roster approach was recorded and then withdrawn once words.ts was read",
+          "tags",
+          "measured"
+        ],
+        [
+          "the roster approach was recorded and then withdrawn once words.ts was read",
+          "title",
+          "the roster approach was recorded and then withdrawn once words.ts was read"
+        ],
+        [
+          "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism",
+          "sort",
+          "prop"
+        ],
+        [
+          "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism",
+          "title",
+          "the typed door for the common heads ALREADY SHIPS: src/words.ts exports ordinary functions, (a: Term, b: Term) => Atom, for the operators and capitalised control forms, re-exported from the package index. Measured in one file under the package's own tsconfig, add(1,2), gte(V.age,18) and If(...) all compile clean while fn.add(1,2) on the line below raises TS18048. So the S/V/fn widening is a DOCUMENTATION gap, not a missing mechanism"
+        ],
+        [
+          "generate a roster of known heads as explicit properties on fn, keeping the index signature for the rest, so a documented call compiles under noUncheckedIndexedAccess while an unknown head stays honestly Name | undefined",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "telemetry": {
+        "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
+      },
+      "id": "a20640bfe2e299ac"
     }
   ]
 }
