@@ -23625,6 +23625,42 @@
       "tags": [
         "source"
       ]
+    },
+    "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed": {
+      "title": "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed"
+    },
+    "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran": {
+      "title": "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran",
+      "supports": [
+        "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session": {
+      "title": "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session"
+    },
+    "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds": {
+      "title": "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds",
+      "supports": [
+        "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits": {
+      "title": "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits"
+    },
+    "two targeted runs in wt-battery-4 at that revision, both exit 0": {
+      "title": "two targeted runs in wt-battery-4 at that revision, both exit 0",
+      "supports": [
+        "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -99852,6 +99888,107 @@
         ]
       ],
       "id": "75d2cb87d745cd7e"
+    },
+    {
+      "at": "2026-09-22T10:08:31.595013+00:00",
+      "after": "e19ff7125b2cb31e68f8323c3cb83448716c2e41",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran\", \"tags\": [\"measured\"], \"title\": \"a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds\", \"tags\": [\"measured\"], \"title\": \"my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"two targeted runs in wt-battery-4 at that revision, both exit 0\", \"tags\": [\"measured\"], \"title\": \"eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits\", \"fields\": {}}]",
+      "parents": [
+        "75d2cb87d745cd7e"
+      ],
+      "assert": [
+        [
+          "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed",
+          "title",
+          "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed"
+        ],
+        [
+          "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran",
+          "sort",
+          "prop"
+        ],
+        [
+          "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran",
+          "supports",
+          "a battery worktree made with `git checkout --detach` keeps whatever commit its SUBMODULES already had, because that command does not touch them. wt-battery-4's ext/ sat at d1bd2ba9a while the tree recorded d49a0d120, so it had no pymetta-host, and three publish-selftest cases that plant on it went red against code that was fine. `git submodule update --init --recursive` in the battery fixed it and all twelve lanes then passed"
+        ],
+        [
+          "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran",
+          "tags",
+          "measured"
+        ],
+        [
+          "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran",
+          "title",
+          "compared ls ext/ across the trees, read the recorded pointer with git ls-tree, and re-ran"
+        ],
+        [
+          "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits",
+          "sort",
+          "prop"
+        ],
+        [
+          "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits",
+          "title",
+          "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits"
+        ],
+        [
+          "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session",
+          "sort",
+          "prop"
+        ],
+        [
+          "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session",
+          "title",
+          "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session"
+        ],
+        [
+          "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds",
+          "supports",
+          "my battery occupancy check read the pidfile with `head -1 | tr -dc 0-9`, which concatenates the PID with every digit of the revision SHA on the same line and yields a number no process owns, so it reported the tree running the release gate as FREE. Reusing it would have destroyed a gate that had been running for hours. `awk 'NR==1{print $1}'` is the fix; the family is the same as the ${sha#[+-U]} bracket-range error earlier this session"
+        ],
+        [
+          "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds",
+          "tags",
+          "measured"
+        ],
+        [
+          "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds",
+          "title",
+          "the pidfile reads '3987281 eda23c6e8...' and kill -0 on that PID succeeds"
+        ],
+        [
+          "two targeted runs in wt-battery-4 at that revision, both exit 0",
+          "sort",
+          "prop"
+        ],
+        [
+          "two targeted runs in wt-battery-4 at that revision, both exit 0",
+          "supports",
+          "eighteen lanes are green on e19ff7125, the tree carrying all of this session's work: script-refs, script-refs-selftest, gate-layout-selftest, publish-selftest, pending-publishers-selftest, pending-publishers-mutants, artifact-paths, artifact-paths-selftest, no-hardcoded-integration, no-hardcoded-integration-selftest, scratch-retention, filesizes-selftest, llms, llms-selftest, reference and reference-selftest. The full gate is still running separately on eda23c6e8, which predates these commits"
+        ],
+        [
+          "two targeted runs in wt-battery-4 at that revision, both exit 0",
+          "tags",
+          "measured"
+        ],
+        [
+          "two targeted runs in wt-battery-4 at that revision, both exit 0",
+          "title",
+          "two targeted runs in wt-battery-4 at that revision, both exit 0"
+        ]
+      ],
+      "id": "ebf35e20aa4dd221"
     }
   ]
 }
