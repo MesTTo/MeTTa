@@ -24,7 +24,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   two halves, which must partition the release: the token an environment
   mints is scoped to the projects its publisher covers, so a file belonging
   to a project that does not exist is a 403 that fails every upload behind
-  it. `tools/pending_publishers_selftest.py` is a new gate
+  it. The matrix carries at most three rows, because a fourth cannot have a
+  pending publisher and its job would fail the OIDC exchange rather than
+  tell anyone anything, and `--json-plan` answers in every state including
+  the one where nothing is missing — which is when the workflow reads it and
+  the release has succeeded.
+
+  `tools/pending_publishers_selftest.py` is a new gate
   lane over that split. It calls the planner rather than restating its
   answer, sweeps all 16 existence oracles over a planted tree rather than
   one chosen case, counts the questions the planner asks so that one ask
