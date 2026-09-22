@@ -44,6 +44,15 @@ def plant(root: Path, bodies: dict[str, str]) -> None:
     tools.mkdir(parents=True, exist_ok=True)
     (tools / "check_shared_intro.py").write_text(
         (HERE / "check_shared_intro.py").read_text(encoding="utf-8"), encoding="utf-8")
+    # A repository, because the checker asks git which files carry the marker
+    # rather than globbing for them. An unplanted tree would answer nothing and
+    # every case would pass for the wrong reason.
+    for command in (
+        ["git", "init", "-q"],
+        ["git", "add", "-A"],
+        ["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "fixture"],
+    ):
+        subprocess.run(command, cwd=root, check=True, capture_output=True)
 
 
 def run(root: Path) -> subprocess.CompletedProcess[str]:
@@ -68,6 +77,9 @@ def cases() -> list[tuple[str, dict[str, str], int, str]]:
     reversed_markers = dict(every)
     reversed_markers["extensions/node/README.md"] = f"# Page\n\n{CLOSE}{GOOD}{OPEN}\n"
     extra = dict(every); extra["lib/README.md"] = wrapped(DRIFTED)
+    # Nested, not at a repository root: the glob that answered this before
+    # reached one level down and could not see it.
+    nested = dict(every); nested["lib/lib_random/README.md"] = wrapped(DRIFTED)
     return [
         ("every copy agreeing", every, 0, "0 defect(s)"),
         ("one copy reworded", drifted, 1, "differs from README.md"),
@@ -75,6 +87,7 @@ def cases() -> list[tuple[str, dict[str, str], int, str]]:
         ("the block opened twice", twice, 1, "2 opening"),
         ("the markers the wrong way round", reversed_markers, 1, "comes before"),
         ("a page outside the list drifting", extra, 1, "lib/README.md"),
+        ("a NESTED page drifting", nested, 1, "lib/lib_random/README.md"),
     ]
 
 

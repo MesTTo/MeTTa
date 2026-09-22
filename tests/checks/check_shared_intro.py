@@ -40,6 +40,7 @@ Open Obligations:
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -61,13 +62,29 @@ BLOCK = re.compile(re.escape(OPEN) + r"\n(.*?)" + re.escape(CLOSE), re.DOTALL)
 
 
 def carriers() -> list[Path]:
-    """Every tracked README that could hold the block: the front pages and each repository root."""
-    found = list(dict.fromkeys(
-        [ROOT / name for name in FRONT_PAGES]
-        + sorted(ROOT.glob("*/README.md"))
-        + sorted(ROOT.glob("extensions/*/README.md"))
-    ))
-    return [path for path in found if path.is_file()]
+    """Every tracked file that holds the opening marker, plus the front pages.
+
+    Asked of git rather than globbed. A fixed set of globs answered only the
+    repository roots one level down, so a marked page anywhere else -- and
+    lib/lib_random/README.md is a real one -- was invisible to a check whose
+    whole promise is that a copy cannot drift quietly. `git grep` also reads
+    the TRACKED set across submodules, which is the same set every other walk
+    in this tree uses, and it returns the carriers rather than every README to
+    be opened and tested one by one.
+    """
+    # Markdown only. The marker is a string literal in THIS file and in its
+    # self-test, so a search over every tracked file reports the checker as a
+    # page whose block is malformed -- the same shape as pin_provenance
+    # rewriting its own pin template, and the same answer: a token inside code
+    # that matches the token is not an instance of it. The block never lives
+    # anywhere but a page.
+    listing = subprocess.run(
+        ["git", "grep", "-l", "--recurse-submodules", "-F", OPEN, "--", "*.md"],
+        cwd=ROOT, capture_output=True, text=True, check=False,
+    )
+    found = [ROOT / name for name in listing.stdout.split("\n") if name]
+    found += [ROOT / name for name in FRONT_PAGES]
+    return [path for path in dict.fromkeys(found) if path.is_file()]
 
 
 def findings() -> list[str]:
