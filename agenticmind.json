@@ -23661,6 +23661,18 @@
       "tags": [
         "measured"
       ]
+    },
+    "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh": {
+      "title": "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh"
+    },
+    "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it": {
+      "title": "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it",
+      "supports": [
+        "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -99989,6 +100001,47 @@
         ]
       ],
       "id": "ebf35e20aa4dd221"
+    },
+    {
+      "at": "2026-09-22T10:09:12.299129+00:00",
+      "after": "8679d07a54ddde2461ee0854bc615356b7a36dc9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it\", \"tags\": [\"source\"], \"title\": \"I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh\", \"fields\": {}}]",
+      "parents": [
+        "ebf35e20aa4dd221"
+      ],
+      "assert": [
+        [
+          "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh",
+          "sort",
+          "prop"
+        ],
+        [
+          "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh",
+          "title",
+          "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh"
+        ],
+        [
+          "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it",
+          "sort",
+          "prop"
+        ],
+        [
+          "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it",
+          "supports",
+          "I provisioned a battery by hand with git checkout --detach plus git submodule update, which is precisely the method tools/battery.sh's header forbids: it says batteries are FILESYSTEM snapshots rather than git worktrees, that it is the ONLY provisioner of a battery, and that the worktree recipe cannot produce a faithful copy here because git worktree add does not materialise any of the eight submodules' working trees. The recorded cost of getting this wrong is 169 phantom failures against a 4-failure baseline on 2026-09-19. My run went green, but green from the wrong instrument is not evidence, so it is being re-run through tools/battery.sh"
+        ],
+        [
+          "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it",
+          "tags",
+          "source"
+        ],
+        [
+          "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it",
+          "title",
+          "read tools/battery.sh lines 1-40 after the record surfaced the earlier incident; the repository has a mechanism and I routed around it"
+        ]
+      ],
+      "id": "949c458163c43e8f"
     }
   ]
 }
