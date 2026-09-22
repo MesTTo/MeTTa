@@ -731,6 +731,17 @@ run GATE battery-selftest sh "$HERE/tools/battery_selftest.sh"
 # reaches PyPI and nothing is uploaded.
 run GATE publish-selftest sh "$HERE/tools/publish_selftest.sh"
 
+# The publish workflow splits dist/ between two jobs, because the token each
+# environment mints is scoped to the projects its publisher covers: a file
+# handed to the wrong job is a 403 that fails every upload behind it, and
+# skip-existing does not cover that. The split lives in the planner's Python
+# and in two shell globs in the workflow, which cannot see each other. This
+# sweeps every existence oracle over a planted tree and holds the globs to an
+# equality, after a weaker version passed a mutant where `pymetta-*` matched
+# `pymetta_host-*`.
+run GATE pending-publishers-selftest "$PY" \
+    "$HERE/tools/pending_publishers_selftest.py"
+
 # Each repository is published and read on its own, so each front page tells a
 # newcomer what MeTTa is rather than assuming they came through another. That
 # duplication is deliberate and still duplication: the root page and

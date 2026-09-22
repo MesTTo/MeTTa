@@ -131,12 +131,39 @@ def on_pypi(name: str) -> bool:
         raise SystemExit(f"pypi.org unreachable for {name}: {error.reason}")
 
 
+def plan(every, exists, shared):
+    """The partition, as a pure function of the inputs.
+
+    Split out from main so a test can supply its own distributions and its own
+    existence oracle and check the REAL rule. A test that restates the two
+    lists is only checking itself, which is what the first version of
+    pending_publishers_selftest.py did.
+    """
+    # ONE question per distribution, answered into a snapshot before
+    # anything is derived from it. Asking twice, once for each half, lets a
+    # project created between the two asks land in both halves or in
+    # neither, and the halves must partition: the publish job's token cannot
+    # upload a project the bootstrap job is creating. Memoising the oracle
+    # would fix the symptom in the caller and leave the next caller to
+    # rediscover it.
+    seen = {name: exists(name) for name in every}
+    missing = [name for name in every if not seen[name]]
+    present = [name for name in every if seen[name]]
+    return {
+        "bootstrap": [
+            {"project": n, "stem": filename_stem(n),
+             "environment": bootstrap_environment(n), **shared}
+            for n in missing
+        ],
+        "steady": [filename_stem(n) for n in present],
+    }
+
+
 def main() -> int:
     shared = constants()
     every = distributions()
-    exists = {name: on_pypi(name) for name in every}
-    missing = [name for name in every if not exists[name]]
-    present = [name for name in every if exists[name]]
+    computed = plan(every, on_pypi, shared)
+    missing = [row["project"] for row in computed["bootstrap"]]
     if not missing:
         print("every distribution this repository releases already exists on PyPI")
         return 0
@@ -146,25 +173,13 @@ def main() -> int:
         # pending publisher can create, and `steady` is every distribution
         # that has one, which the ordinary publisher uploads. Emitting them
         # together is what keeps them complementary; computed separately they
-        # could both claim a project, or neither.
-        print(json.dumps({
-            "bootstrap": [
-                {"project": n, "stem": filename_stem(n),
-                 "environment": bootstrap_environment(n), **shared}
-                for n in missing
-            ],
-            "steady": [filename_stem(n) for n in present],
-        }))
+        # could both claim a project, or neither. One line, because a workflow
+        # reads this through $GITHUB_OUTPUT, which is line-oriented.
+        print(json.dumps(computed))
         return 0
 
     if "--json" in sys.argv:
-        # One line, because a workflow reads this into a matrix through
-        # $GITHUB_OUTPUT, which is line-oriented.
-        print(json.dumps([
-            {"project": n, "stem": filename_stem(n),
-             "environment": bootstrap_environment(n), **shared}
-            for n in missing
-        ]))
+        print(json.dumps(computed["bootstrap"]))
         return 0
     print(f"{len(missing)} distributions have no PyPI project yet.")
     print("Register pending publishers at")
