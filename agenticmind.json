@@ -24018,6 +24018,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it": {
+      "title": "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it"
+    },
+    "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree": {
+      "title": "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree",
+      "supports": [
+        "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second": {
+      "title": "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second"
+    },
+    "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14": {
+      "title": "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14",
+      "supports": [
+        "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards": {
+      "title": "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards"
+    },
+    "ran the pattern scan over the file with code fences excluded": {
+      "title": "ran the pattern scan over the file with code fences excluded",
+      "supports": [
+        "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -101410,6 +101446,107 @@
         ]
       ],
       "id": "dc3a3aa0faabc2ff"
+    },
+    {
+      "at": "2026-09-22T10:47:29.512787+00:00",
+      "after": "0de9854e490acb30d48fc025a141e4aee88ead65",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree\", \"tags\": [\"measured\"], \"title\": \"pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14\", \"tags\": [\"measured\"], \"title\": \"I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"ran the pattern scan over the file with code fences excluded\", \"tags\": [\"measured\"], \"title\": \"the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards\", \"fields\": {}}]",
+      "parents": [
+        "dc3a3aa0faabc2ff"
+      ],
+      "assert": [
+        [
+          "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second",
+          "sort",
+          "prop"
+        ],
+        [
+          "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second",
+          "title",
+          "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second"
+        ],
+        [
+          "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it",
+          "sort",
+          "prop"
+        ],
+        [
+          "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it",
+          "title",
+          "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it"
+        ],
+        [
+          "ran the pattern scan over the file with code fences excluded",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran the pattern scan over the file with code fences excluded",
+          "supports",
+          "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards"
+        ],
+        [
+          "ran the pattern scan over the file with code fences excluded",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran the pattern scan over the file with code fences excluded",
+          "title",
+          "ran the pattern scan over the file with code fences excluded"
+        ],
+        [
+          "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree",
+          "sort",
+          "prop"
+        ],
+        [
+          "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree",
+          "supports",
+          "pymetta-host is RESOLVED and the earlier claim that its input was unreproducible is REFUTED: the nineteen patches were committed in tests/checks/host_workarounds all along, and only the step that applies them was missing. The full container build ran here from a repo-only state and produced all three wheels, cp312 cp313 cp314, each passing check_host_bundle at 1233 files and 71 ELF objects. publish.yml now builds it in its own job, and build-distributions.sh separates members() from released() so the planner counts it"
+        ],
+        [
+          "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree",
+          "tags",
+          "measured"
+        ],
+        [
+          "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree",
+          "title",
+          "sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh exited 0 with SWI-Prolog 10.1.14 compiled from the fetched tree"
+        ],
+        [
+          "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14",
+          "sort",
+          "prop"
+        ],
+        [
+          "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14",
+          "supports",
+          "I concluded pymetta-host was unbuildable by reading run.sh's SRC refusal and stopping there, without checking whether the patches it needed were in the tree. They were, in a directory a gate already reads. The general shape: a refusal message explains what the code will not do, never what the repository does or does not hold, and I treated the first as evidence for the second"
+        ],
+        [
+          "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14",
+          "tags",
+          "measured"
+        ],
+        [
+          "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14",
+          "title",
+          "tests/checks/host_workarounds holds nineteen .patch files and all nineteen apply cleanly to a pristine V10.1.14"
+        ],
+        [
+          "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards",
+          "sort",
+          "prop"
+        ],
+        [
+          "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards",
+          "title",
+          "the TSMeTTa README carries NO banned vocabulary: a scan for fifteen patterns, the hedges, the intensifiers, the hype words, em dashes and pseudo-clefts, found zero across 185 prose lines. Its density is structural rather than lexical, and the one clear MDL win found was an enumeration of four exits that is one rule: every exit of a withFacts snapshot discards"
+        ]
+      ],
+      "id": "a84b0370501b2087"
     }
   ]
 }
