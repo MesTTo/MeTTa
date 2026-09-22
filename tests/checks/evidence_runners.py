@@ -138,6 +138,7 @@ def _component_runners() -> tuple[str, ...]:
         "engine/check.sh",
         "engine/test.sh",
         "engine/bench.sh",
+        "ext/check.sh",
         "extensions/*/check.sh",
         "extensions/*/test.sh",
         "extensions/*/bench.sh",

@@ -83,6 +83,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from evidence_runners import gate_scripts  # noqa: E402  -- installed above
 from gate_layout import CHECK as _CHECK  # noqa: E402  -- installed above
 
 sys.path.insert(0, str(ROOT / "extensions/python/tools"))
@@ -178,9 +179,14 @@ def _answer_above(lines: list[str], line: int) -> str | None:
 
 
 def _lane_names() -> set[str]:
-    """Every lane check.sh runs, read from the script itself."""
-    text = CHECK.read_text(encoding="utf-8")
-    return set(re.findall(r"^run\s+(?:GATE|REPORT)\s+(\S+)", text, re.MULTILINE))
+    """Every lane the umbrella and its component scripts register."""
+    return {
+        name
+        for script in gate_scripts()
+        for name in re.findall(
+            r"^run\s+(?:GATE|REPORT)\s+(\S+)", script.read_text(encoding="utf-8"), re.MULTILINE
+        )
+    }
 
 
 def _seam_points() -> set[str]:
