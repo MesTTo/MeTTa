@@ -162,12 +162,14 @@ Open Obligations:
 from __future__ import annotations
 
 import ast
+import json
 import os
 import re
 import subprocess
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 
 from evidence_runners import ROOT, Execution, executed, gate_scripts, owned, prolog_loads, tracked
@@ -1590,6 +1592,65 @@ COMMIT = re.compile(r"\bcommit=([0-9a-zA-Z]+)")
 PLACEHOLDER = "WORKTREE"
 
 
+@cache
+def hash_chained(path: Path) -> bool:
+    """Whether this file is a record whose entries hash over the ones before them.
+
+    An agenticmind record stores every log entry beside `after`, the id of the
+    entry before it, so rewriting one byte in place breaks the chain and the
+    WHOLE record stops reading rather than the line that moved. pin_provenance
+    therefore declines it, and this is the same decision read from the same
+    place, because the two halves disagreeing about what a placeholder IS is
+    the failure the PLACEHOLDER comment above already names in its other form:
+    the pass declined 93 occurrences here while RELEASE=1 counted them and
+    refused a release nothing could ever make pinnable.
+
+    Nor is a pin owed there. A claim in that record is never edited, only
+    attacked, so `commit=WORKTREE` inside a reason is an account of what was
+    believed when the reason was given, rather than a source pin awaiting
+    resolution.
+
+    Keyed on the SHAPE rather than the filename, because this tree has
+    submodules and each can carry its own record, while a file that merely
+    shares the name is not one.
+    """
+    try:
+        loaded = json.loads(_text(path))
+    except (ValueError, RecursionError, OSError):
+        return False
+    log = loaded.get("log") if isinstance(loaded, dict) else None
+    return (isinstance(log, list) and bool(log) and isinstance(log[0], dict)
+            and "after" in log[0] and "id" in log[0])
+
+
+@cache
+def pinnable(path: Path) -> frozenset[int]:
+    """The lines of this file where a placeholder is a pin the release must resolve.
+
+    RELEASE=1 refuses a tree whose evidence still names an uncommitted
+    worktree, and the question of which occurrences ARE evidence is lexical:
+    one inside a string literal belongs to code that emits or matches pins,
+    and one inside a hash-chained record is an account of what was believed
+    rather than a source pin. pin_provenance decides that per file class and
+    is the only place it is decided, so this asks it rather than keeping a
+    second model.
+
+    A second model is what was here, and it had already desynchronised twice:
+    the pass declined 93 occurrences while RELEASE=1 counted them, so a
+    release was refused over 91 placeholders that no run of the pass could
+    ever have resolved -- 85 in the record and one in the regex of the very
+    checker that matches pins.
+
+    Imported inside the function because pin_provenance imports this module
+    for the globs and the placeholder word. Deferring the one edge keeps the
+    definition in the module that owns it rather than splitting the grammar
+    readers across both.
+    """
+    from pin_provenance import sites  # noqa: PLC0415  -- see the docstring
+
+    return frozenset(line for _at, line, reason in sites(path, _text(path)) if reason is None)
+
+
 def commit_problems(sites: list[tuple[Path, int, str, str]]) -> tuple[list[str], int]:
     """Check every pinned object ID, and count the WORKTREE placeholders.
 
@@ -1605,7 +1666,7 @@ def commit_problems(sites: list[tuple[Path, int, str, str]]) -> tuple[list[str],
     for path, line, tag, body in sites:
         for oid in COMMIT.findall(body):
             if oid == PLACEHOLDER:
-                placeholders += 1
+                placeholders += 1 if line in pinnable(path) else 0
                 continue
             wanted.setdefault(oid, []).append(f"{path.relative_to(ROOT)}:{line}: {tag}")
     problems = []

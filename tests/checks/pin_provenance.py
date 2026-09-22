@@ -126,6 +126,7 @@ from check_evidence_tags import (  # noqa: E402  -- HERE must be on the path fir
     PROVENANCE_SOURCES,
     ROOT,
     SOURCES,
+    hash_chained,
     owned,
 )
 
@@ -461,20 +462,9 @@ UNPINNABLE_REASON = (
 )
 
 
-def _hash_chained(text: str) -> bool:
-    """Whether this is a record whose entries hash over the entries before them."""
-    try:
-        loaded = json.loads(text)
-    except (ValueError, RecursionError):
-        return False
-    log = loaded.get("log") if isinstance(loaded, dict) else None
-    return (isinstance(log, list) and bool(log) and isinstance(log[0], dict)
-            and "after" in log[0] and "id" in log[0])
-
-
 def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
     """Every placeholder in one file as (offset, line, reason it is declined)."""
-    if _hash_chained(text):
+    if hash_chained(path):
         return [(m.start(), text.count("\n", 0, m.start()) + 1, UNPINNABLE_REASON)
                 for m in TOKEN.finditer(text)]
     grammar = _grammar(path)

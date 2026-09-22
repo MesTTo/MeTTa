@@ -73,10 +73,15 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 sys.path.insert(0, str(HERE))
-from check_evidence_tags import PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
+from check_evidence_tags import CLAIM, PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
 from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
 from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
 from gate_layout import CHECK, TEST  # noqa: E402  -- HERE must be on the path first
+
+#: Any evidence tag in a copied checker, read with the gate's OWN pattern. A
+#: second spelling of it here missed `[tested 2026-08-18: ...]`, where the tag
+#: is followed by a date rather than a colon, and left twenty-three of the
+#: copies' claims standing: the same "one authority" this file is about.
 
 #: The pytest collector's own anchor, READ from the collector rather than
 #: restated here. Two self-tests plant it into a fixture tree and both used to
@@ -448,6 +453,20 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         text = (HERE / module).read_text(encoding="utf-8")
         if MUTATION is not None and MUTATION["module"] == module:
             text = text.replace(MUTATION["old"], MUTATION["new"])
+        # Every tag in the copy is spent, because the copy is the checker the
+        # fixture RUNS rather than anything the fixture is making a claim
+        # about, and its tags name tests, paths and commits that only the real
+        # repository has. The header above says this file lives at
+        # tools/checks "because its own SOURCES reads tests/*.py"; that made
+        # correctness depend on a directory no glob happened to reach, and on
+        # 2026-09-22 `tools/*/*.py` was added so the host-bundle scripts
+        # beside tools/*.sh would be read at all. The copies then reported
+        # fourteen unresolvable pins, and once those were spent, twenty-odd
+        # citations to tests that are real in the tree this was taken from and
+        # absent from the one it is planted in. Spending the tags ends the
+        # dependence on where the copy sits rather than moving it to the next
+        # directory the globs have not grown into yet.
+        text = CLAIM.sub("(spent: a copy, not a claim about this tree)", text)
         (tools / module).write_text(text, encoding="utf-8")
 
     lines = ["% Purpose: fixtures for check_evidence_selftest.py.", "% Guarantees:"]
