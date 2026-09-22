@@ -723,6 +723,14 @@ run GATE package-backings-selftest "$PY" "$HERE/tests/checks/check_package_backi
 # ran one revision's Python tree against another revision's engine.
 run GATE battery-selftest sh "$HERE/tools/battery_selftest.sh"
 
+# The publisher creates PyPI projects, and a project created from an
+# incomplete set is the one mistake in this tree with no undo: PyPI refuses a
+# replacement for a filename it already holds, and metta-arrays went out as a
+# wheel with no sdist before anyone was checking. Every refusal it can make
+# runs here against a local http.server standing in for the index, so nothing
+# reaches PyPI and nothing is uploaded.
+run GATE publish-selftest sh "$HERE/tools/publish_selftest.sh"
+
 # b54dea73 renamed the chapter-19 C artifacts on 2026-08-27 and left THREE
 # consumers holding the old directory. Each was found separately by somebody
 # noticing a test skip -- test_benchmarks.py and benchmarks/configuration.py

@@ -137,9 +137,16 @@ for name in "$@"; do
     wheels=$(find "$DIST" -maxdepth 1 -name "$stem-*.whl" 2>/dev/null | wc -l)
     sdists=$(find "$DIST" -maxdepth 1 -name "$stem-*.tar.gz" 2>/dev/null | wc -l)
     pure=$(find "$DIST" -maxdepth 1 -name "$stem-*-py3-none-any.whl" 2>/dev/null | wc -l)
+    # Total over (wheels, sdists, all-pure). The sdist-with-no-wheel row was
+    # the one nobody wrote: it matched neither refusal and passed, which is
+    # what a missing rule looks like from the outside. Every distribution here
+    # is built wheel-and-sdist by the same workflow, so no wheel is a gap
+    # whatever the sdist says.
     if [ "$wheels" -eq 0 ] && [ "$sdists" -eq 0 ]; then
         missing="$missing $name(nothing)"
-    elif [ "$wheels" -gt 0 ] && [ "$wheels" -eq "$pure" ] && [ "$sdists" -eq 0 ]; then
+    elif [ "$wheels" -eq 0 ]; then
+        missing="$missing $name(sdist, no wheel)"
+    elif [ "$wheels" -eq "$pure" ] && [ "$sdists" -eq 0 ]; then
         missing="$missing $name(pure wheel, no sdist)"
     fi
 done
