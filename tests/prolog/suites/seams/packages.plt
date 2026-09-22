@@ -530,4 +530,26 @@ test(a_manifest_row_does_not_reach_the_importing_space) :-
            ( absolute_file_name(Manifest, Canonical),
              filereader:source_load_receipt_current(Canonical, '&self', _, _) )).
 
+%A manifest validates its OWN stored atoms, and a requirement's equations are
+%not among them, so before currency became transitive this manifest answered
+%current however much of the required file had been taken out of the space:
+%the second import! answered True and rebuilt nothing, and the equation stayed
+%gone for the rest of the process. Deleting the
+%import_nested_sources_current/2 conjunct in import_cache_current/2 fails this
+%test at its last line and leaves the other 28 passing.
+test(a_removed_equation_comes_back_when_its_manifest_is_imported_again) :-
+    package_fixture(nested_content, '(= (nested-probe) 42)\n', Content),
+    file_base_name(Content, ContentName),
+    format(atom(ManifestBody), '(= (package requires) "~w")\n', [ContentName]),
+    package_fixture(nested_manifest, ManifestBody, Manifest),
+    'import!'('&self', Manifest, _),
+    findall(A, eval(['nested-probe'], A), Before),
+    Before == [42],
+    eval(['remove-atom', '&self', ['=', ['nested-probe'], 42]], _),
+    findall(A, eval(['nested-probe'], A), Removed),
+    Removed \== [42],
+    'import!'('&self', Manifest, _),
+    findall(A, eval(['nested-probe'], A), After),
+    After == [42].
+
 :- end_tests(packages).
