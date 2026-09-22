@@ -62,11 +62,29 @@ metta_reference_home(Path, Home) :-
         ; atom_concat('&library:', Path, Prefix0), atom_concat(Prefix0, '#', Prefix),
           gensym(Prefix, Home), assertz(metta_reference_library_home(Home, Path)) )).
 
+%A `from` source is a LIBRARY NAME or a PATH, and the spec says which: one
+%written `./x` or `../x` is a path and resolves the way any import does, while
+%anything else names a library and is joined to the library root.
+%
+%Without that split every source went through library/2, so the only way to
+%reach a file outside `lib/` was to walk out of the root with `..` and let the
+%join undo it -- which the containment guard then refused, taking two shipped
+%examples with it [measured 2026-09-22: ch20-04's 12-reference_maps.metta and
+%13-reference_loading.metta both named their own `_fixtures/` that way]. The
+%guard is right that a NAME may not escape; a path was never a name.
 metta_reference_source_path(Source, Path) :-
-    ( nonvar(Source), Source = [library|_]
-    -> resolve_module_form(Source, File)
-    ; library(Source, File) ),
+    (   nonvar(Source), Source = [library|_]
+    ->  resolve_module_form(Source, File)
+    ;   metta_reference_source_is_path(Source)
+    ->  File = Source
+    ;   library(Source, File) ),
     resolve_metta_import_path(File, Path).
+
+%A leading `.` cannot begin a library name, so this needs no filesystem probe
+%and no ambiguity: the two spellings are disjoint by shape.
+metta_reference_source_is_path(Source) :-
+    ( atom(Source) -> Text = Source ; string(Source) -> atom_string(Text, Source) ; fail ),
+    ( sub_atom(Text, 0, _, _, './') ; sub_atom(Text, 0, _, _, '../') ), !.
 
 metta_reference_read_manifest(Home, Path, manifest(Forms, Signatures)) :-
     filereader:read_source_text(Path, Source),

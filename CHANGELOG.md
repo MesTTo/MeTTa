@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A `from` source is a library name or a path, and the spelling decides: one
+  written `./x` or `../x` resolves the way any import does, anything else names
+  a library and is joined to the library root. Every source went through the
+  library route before, so the only way to reach a file outside `lib/` was to
+  walk out of the root with `..` and let the join undo it. The containment
+  guard refuses that walk, which took two shipped examples with it; they name
+  their own `./_fixtures/` now. A `..` that does not START a spec is still a
+  name and still guarded.
+
 - The fence gate runs the authoring guides, not only the READMEs. Thirty MeTTa
   examples in `EXTENDING.md` had never been executed by anything; three of them
   did not work. One taught `!(import_prolog_functions_from_file (library

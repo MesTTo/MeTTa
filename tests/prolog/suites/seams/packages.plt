@@ -225,6 +225,17 @@ test(a_library_spec_cannot_walk_out_of_the_library_root) :-
                    Outcome = refused(Formal)),
              Outcome == refused(domain_error(library_name, Spec)) )).
 
+%A `from` source is a NAME or a PATH and the spelling decides, so the guard
+%above binds names without stopping a program naming a file beside itself. The
+%last case is the one that matters: a `..` that does not START the spec is
+%still a name, so it still takes the guarded route rather than slipping into
+%the path one.
+test(a_from_spec_is_a_path_only_when_it_says_so) :-
+    forall(member(Spec, ['./fixtures/x', '../fixtures/x', "./fixtures/x"]),
+           metta_engine:metta_reference_source_is_path(Spec)),
+    forall(member(Spec, [lib_json, 'builtin_mods/skel.pl', 'nested/../escape.metta']),
+           \+ metta_engine:metta_reference_source_is_path(Spec)).
+
 %The THREE-argument door is the other route and the worse one: its first
 %clause joins the caller's Y to a GIT-FETCHED library's root, which is
 %third-party content. Guarding only library/2 left this open, and only

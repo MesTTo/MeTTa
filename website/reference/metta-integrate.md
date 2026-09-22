@@ -169,27 +169,36 @@ def face(
 
 > Selected callables of any module as MeTTa SOURCE, in one call.
 >
->     source = metta.integrate.face(
->         math, ["sqrt", "gcd"], purpose="Arithmetic from the C library"
->     )
->     Path("lib/lib_math/pkg.metta").write_text(source, encoding="utf-8")
+>         source = metta.integrate.face(
+>             math, ["sqrt", "gcd"], purpose="Arithmetic from the C library"
+>         )
+>         Path("lib/lib_math/lib.metta").write_text(source, encoding="utf-8")
+>         Path("lib/lib_math/pkg.metta").write_text(
+>             '(= (package requires) "lib.metta")
+> ', encoding="utf-8"
+>         )
 >
-> module_ops is this act at run time: the same names, the same reachable
-> arities, the same map from a Python annotation to a MeTTa type. This
-> writes them out instead, as one arrow, one `(@doc ...)` atom and one
-> `py-call` equation per call form, so a MeTTa program imports the library
-> with no Python running first.
+>     The face is the library's SOURCE and goes in `lib.metta`. Beside it,
+>     `pkg.metta` is the manifest, and writing it is what makes the directory a
+>     library the engine can resolve by name: without it the face is a file
+>     nothing imports.
 >
-> names is the selection and None takes the module whole; rename is the
-> `as` of the import it renders. A name whose signature neither the runtime
-> nor the docstring answers is refused: `signatures` declares it, one
-> Python signature line per call form. `effects` reviews a derived effect
-> class where the signature cannot show it, one (name, class, reason)
-> triple, random construction being the standing example.
+>     module_ops is this act at run time: the same names, the same reachable
+>     arities, the same map from a Python annotation to a MeTTa type. This
+>     writes them out instead, as one arrow, one `(@doc ...)` atom and one
+>     `py-call` equation per call form, so a MeTTa program imports the library
+>     with no Python running first.
 >
-> The answer carries the header those arguments make, and
-> `extensions/python/tools/facegen.py` reads that header back to regenerate
-> the file, so a face stays checkable against the module it was read from.
+>     names is the selection and None takes the module whole; rename is the
+>     `as` of the import it renders. A name whose signature neither the runtime
+>     nor the docstring answers is refused: `signatures` declares it, one
+>     Python signature line per call form. `effects` reviews a derived effect
+>     class where the signature cannot show it, one (name, class, reason)
+>     triple, random construction being the standing example.
+>
+>     The answer carries the header those arguments make, and
+>     `extensions/python/tools/facegen.py` reads that header back to regenerate
+>     the file, so a face stays checkable against the module it was read from.
 
 ## `facts`
 

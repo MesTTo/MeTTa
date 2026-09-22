@@ -57,5 +57,5 @@ Three packages live in their own repositories beside this one, docs and
 tests included; each builds on the public surface documented here.
 `pettorch` is the PyTorch integration, `pettaprove` is soft unification
 and goal-directed soft proving (the engine-side equations stay here as
-`lib/lib_soft/pkg.metta`), and `pettagrapher` draws terms, spaces, proofs,
+`lib/lib_soft/lib.metta`), and `pettagrapher` draws terms, spaces, proofs,
 and reductions as self-contained pages.
