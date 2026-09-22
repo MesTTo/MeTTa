@@ -940,7 +940,8 @@ library(X, Path) :- standard_library_path(Base),
 library_within(Spec, Relative) :-
     ( atom(Spec) -> Name = Spec ; atom_string(Name, Spec) ),
     (   sub_atom(Name, _, _, _, '/')
-    ->  Relative = Name
+    ->  refuse_escaping_library_spec(Name),
+        Relative = Name
     ;   file_name_extension(_, Extension, Name), Extension \== ''
     ->  throw(error(domain_error(library_name, Name),
                     context(library/2,
@@ -949,6 +950,32 @@ library_within(Spec, Relative) :-
                              let its pkg.metta answer')))
     ;   directory_file_path(Name, 'pkg.metta', Relative)
     ).
+%A spec is joined to the library root verbatim, so a `..` SEGMENT walks out
+%of it: `(library '../../../../etc/passwd')` resolved to
+%<lib>/../../../../etc/passwd before this existed, and a manifest is data a
+%library ships rather than something the engine wrote. Nothing shipped uses
+%one -- every spec is a bare name or a single dir/file.pl -- so refusing
+%costs nothing and the bare-name form is already how a sibling library is
+%reached.
+%
+%The test is on a SEGMENT, not a substring, because a doubled dot is a legal
+%thing to have in a filename: `foo..bar.metta` is a real name and must still
+%resolve. A substring test refuses it, which is the obvious version of this
+%guard and the wrong one.
+%
+%Absolute paths are deliberately NOT refused here; the comment above records
+%why a downstream library has to pass one.
+refuse_escaping_library_spec(Name) :-
+    split_string(Name, "/", "", Segments),
+    (   memberchk("..", Segments)
+    ->  throw(error(domain_error(library_name, Name),
+                    context(library/2,
+                            'a library spec cannot walk out of the library \c
+                             root with `..`: name the library and let its \c
+                             pkg.metta answer, or pass an absolute path')))
+    ;   true
+    ).
+
 %A named library directory, git-fetched or registered. A library that
 %pip-installs is under neither: standard_library_path/1 is one directory,
 %<src>/../lib, so (library pettorch/fast.pl) cannot reach a package's own files and a

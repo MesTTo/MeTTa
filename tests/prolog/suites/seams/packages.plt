@@ -38,6 +38,10 @@
 %     `"x.pl"` is beside the manifest carrying it
 %     [tested: packages:a_backing_row_resolves_its_library_locator,
 %     packages:a_plain_backing_locator_resolves_beside_its_own_manifest]
+%   - neither shape can leave the library root: a `..` path SEGMENT is
+%     refused by name, while a doubled dot INSIDE a name still resolves
+%     [tested: packages:a_library_spec_cannot_walk_out_of_the_library_root,
+%     packages:a_doubled_dot_inside_a_name_is_not_an_escape]
 %   - a row performs for the file that carries it and for no other load into
 %     the same space
 %     [tested: packages:a_backing_row_performs_only_for_the_file_that_carries_it]
@@ -194,6 +198,42 @@ test(a_plain_backing_locator_resolves_beside_its_own_manifest) :-
     % the directory they both name.
     absolute_file_name(Beside, Expected, [access(none)]),
     Tried == Expected.
+
+%A spec is joined to the library root verbatim, so before the guard existed a
+%`..` SEGMENT walked straight out of it: (library '../../../../etc/passwd')
+%resolved to <lib>/../../../../etc/passwd. A manifest is data a library ships,
+%so the spec is not always something this engine wrote.
+%
+%Nothing shipped uses one. Every spec in the tree is a bare name or a single
+%dir/file.pl, which is why refusing costs nothing: reaching a SIBLING library
+%is what the bare-name form already does.
+%The outcome is named on BOTH paths on purpose. Catching into a bare Formal
+%and then unifying it makes the check vacuous: when nothing throws, Formal is
+%unbound and the unification BINDS it rather than testing it, so the test
+%passes with the guard deleted. This one did, and only the mutation run said
+%so.
+test(a_library_spec_cannot_walk_out_of_the_library_root) :-
+    forall(member(Spec, ['../../../../etc/passwd',
+                         '../shared/Helper.metta',
+                         'nested/../../escape.metta']),
+           ( catch(( metta_engine:library(Spec, Resolved),
+                     Outcome = resolved(Resolved) ),
+                   error(Formal, _),
+                   Outcome = refused(Formal)),
+             Outcome == refused(domain_error(library_name, Spec)) )).
+
+%The guard tests a path SEGMENT, never a substring, because a doubled dot is
+%a legal thing to have in a filename. The substring version is the obvious
+%one to write and it refuses these, which is how it would be found: by a
+%library that simply could not be loaded any more.
+test(a_doubled_dot_inside_a_name_is_not_an_escape) :-
+    metta_engine:standard_library_path(Base),
+    forall(member(Spec-Tail, ['permissive names/foo..bar.metta'
+                                  -'permissive names/foo..bar.metta',
+                              'a/b..c/d.metta'-'a/b..c/d.metta']),
+           ( metta_engine:library(Spec, Path),
+             directory_file_path(Base, Tail, Expected),
+             Path == Expected )).
 
 %Law 14 performs a file's rows AT ONCE, when the file carrying them loads, and
 %the rows of one file are no part of the next load into the same space. This

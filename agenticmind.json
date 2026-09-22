@@ -23879,6 +23879,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote": {
+      "title": "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote"
+    },
+    "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation": {
+      "title": "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation",
+      "supports": [
+        "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written": {
+      "title": "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written"
+    },
+    "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite": {
+      "title": "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite",
+      "supports": [
+        "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with ==": {
+      "title": "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with =="
+    },
+    "the guard-removed mutant exited 0 against the first version and exits 1 against the second": {
+      "title": "the guard-removed mutant exited 0 against the first version and exits 1 against the second",
+      "supports": [
+        "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with =="
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -100855,6 +100891,110 @@
         "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
       },
       "id": "a20640bfe2e299ac"
+    },
+    {
+      "at": "2026-09-22T10:27:55.061331+00:00",
+      "after": "79838753d66907d730c15a35d3921bfd337dae33",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation\", \"tags\": [\"measured\"], \"title\": \"library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite\", \"tags\": [\"source\"], \"title\": \"the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the guard-removed mutant exited 0 against the first version and exits 1 against the second\", \"tags\": [\"measured\"], \"title\": \"my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with ==\", \"fields\": {}}]",
+      "parents": [
+        "a20640bfe2e299ac"
+      ],
+      "assert": [
+        [
+          "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote",
+          "sort",
+          "prop"
+        ],
+        [
+          "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote",
+          "title",
+          "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote"
+        ],
+        [
+          "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with ==",
+          "sort",
+          "prop"
+        ],
+        [
+          "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with ==",
+          "title",
+          "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with =="
+        ],
+        [
+          "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation",
+          "sort",
+          "prop"
+        ],
+        [
+          "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation",
+          "supports",
+          "library/2 joined a slashed spec to the library root verbatim, so a `..` path segment walked out of it: (library '../../../../etc/passwd') resolved to <lib>/../../../../etc/passwd, measured. A manifest is data a library ships, so the spec is not always something this engine wrote"
+        ],
+        [
+          "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation",
+          "tags",
+          "measured"
+        ],
+        [
+          "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation",
+          "title",
+          "probed library/2 directly against five specs before any change; engine/metta.pl library_within/2 took any Name containing / as Relative with no normalisation"
+        ],
+        [
+          "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite",
+          "sort",
+          "prop"
+        ],
+        [
+          "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite",
+          "supports",
+          "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written"
+        ],
+        [
+          "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite",
+          "tags",
+          "source"
+        ],
+        [
+          "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite",
+          "title",
+          "read zariuq/CeTTa at cetta-shared-opt-audit-20260807; the substring mutant now fails the suite"
+        ],
+        [
+          "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written",
+          "sort",
+          "prop"
+        ],
+        [
+          "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written",
+          "title",
+          "the containment guard must test a path SEGMENT and never a substring, because a doubled dot is a legal filename: foo..bar.metta and a/b..c/d.metta must still resolve. CeTTa's own fixture tests/support/import_pkg/'permissive names'/foo..bar.metta is exactly that case, and reading it is what stopped the obvious substring version being written"
+        ],
+        [
+          "the guard-removed mutant exited 0 against the first version and exits 1 against the second",
+          "sort",
+          "prop"
+        ],
+        [
+          "the guard-removed mutant exited 0 against the first version and exits 1 against the second",
+          "supports",
+          "my first two containment tests PASSED with the guard deleted, because catching into a bare Formal and then unifying it is vacuous: when nothing throws, Formal is unbound and `Formal = domain_error(...)` BINDS it instead of testing it. Only the mutation run said so. The outcome is now named on both paths, resolved(R) or refused(F), and compared with =="
+        ],
+        [
+          "the guard-removed mutant exited 0 against the first version and exits 1 against the second",
+          "tags",
+          "measured"
+        ],
+        [
+          "the guard-removed mutant exited 0 against the first version and exits 1 against the second",
+          "title",
+          "the guard-removed mutant exited 0 against the first version and exits 1 against the second"
+        ]
+      ],
+      "telemetry": {
+        "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
+      },
+      "id": "388317efc3d92812"
     }
   ]
 }
