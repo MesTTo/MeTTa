@@ -63,32 +63,35 @@ jobs:
           if "## Lint a space" not in catalogue or "operation-crossing-in-loop" not in catalogue:
               raise SystemExit(f"lint catalogue is absent from {raw}")
           PY
-      - name: Build the source archive and the wheel
+      - name: Build every distribution
+        # pymetta and the packages under ext/ are all their own distributions,
+        # and before this the workflow published only pymetta, so releasing
+        # them was seventeen twine invocations by hand. They ride the same
+        # dist/ directory and therefore the same publish step.
+        #
+        # The loop lives in tools/build-distributions.sh rather than here, so
+        # that a release can be built locally by the same code that builds it
+        # on the runner. It was four lines of YAML, and reproducing them by
+        # hand is how a dist/ gets staged with `cp` from wherever the last
+        # build happened to leave things.
+        #
+        # It reads the member list from the directory, so a package added
+        # under ext/ is released with no edit anywhere. Their versions are
+        # deliberately INDEPENDENT of pymetta's: an integration releasing on
+        # its own is the shape Airflow's providers have, which is the
+        # precedent the extras are modelled on, so the tag check below names
+        # pymetta's own archive rather than whatever is in dist/.
+        #
+        # ext/pymetta-host is skipped BY NAME in that script. It carries a
+        # patched SWI-Prolog built inside quay.io/pypa/manylinux_2_28_x86_64,
+        # one wheel per interpreter, which is tools/pymetta-host/run.sh and
+        # needs a container this runner does not have.
+        #
+        # CHECK_PY names the interpreter that just received `build`, rather
+        # than letting the script's own search pick a different python3.
         run: |
           python -m pip install --upgrade pip build
-          python -m build
-      - name: Build every extension distribution
-        # The seventeen packages under ext/ are their own distributions, and
-        # before this the workflow published only pymetta, so releasing them
-        # was seventeen twine invocations by hand. They ride the same dist/
-        # directory and therefore the same publish step.
-        #
-        # Derived from the directory the way checks.yml's build loop is, so a
-        # package added under ext/ is released with no edit here. Their
-        # versions are deliberately INDEPENDENT of pymetta's: an integration
-        # releasing on its own is the shape Airflow's providers have, which is
-        # the precedent the extras are modelled on, so the tag check below
-        # names pymetta's own archive rather than whatever is in dist/.
-        #
-        # ext/pymetta-host is NOT here. It carries a patched SWI-Prolog built
-        # inside quay.io/pypa/manylinux_2_28_x86_64, one wheel per interpreter,
-        # which is tools/pymetta-host/run.sh and needs a container this runner
-        # does not have.
-        run: |
-          set -eu
-          for member in ext/metta-*; do
-              python -m build --outdir dist "$member"
-          done
+          CHECK_PY=$(command -v python) sh tools/build-distributions.sh
           ls -la dist/
 
       - name: The tag and the packaged version must agree
