@@ -581,7 +581,12 @@ def line_continuation_complaints() -> list[str]:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         build(root, PYTEST_ANCHOR)
-        (root / "check.sh").write_text(
+        # build() plants the root driver at CHECK, which is tools/check.sh, so
+        # the variant under test has to overwrite THAT path. Written to a bare
+        # root check.sh it landed where the gate never looks, tools/check.sh
+        # kept the unmodified text, and the continuation case this function
+        # names was never parsed.
+        (root / CHECK).write_text(
             CHECK_SH.replace(
                 "run GATE checked sh -c \"cd '$HERE' && '$PY' tests/checked.py\"",
                 "run GATE checked \\\n    sh -c \"cd '$HERE' && '$PY' tests/checked.py\"",

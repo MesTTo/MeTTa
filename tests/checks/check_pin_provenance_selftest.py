@@ -380,7 +380,7 @@ def build(root: Path) -> str:
             ),
             encoding="utf-8",
         )
-    (root / "check.sh").write_text("# a gate script the runner model expects\n")
+    (root / "tools" / "check.sh").write_text("# a gate script the runner model expects\n")
     # engine/*.sh is one of the pass's globs, so the shell plant below is only
     # reached when the fixture writes it before the loop that writes the rest.
     for name, lines, _rewritten, _declined in PLANTS:
@@ -618,7 +618,7 @@ def derive_complaints() -> tuple[list[str], int]:
                 ),
                 encoding="utf-8",
             )
-        (root / "check.sh").write_text("# a gate script the runner model expects\n")
+        (root / "tools" / "check.sh").write_text("# a gate script the runner model expects\n")
         (root / "probe.py").write_text(f'"""Purpose: p.\n\nGuarantees: r [{TAG} {WHEN}: a case; {WORD}]\n"""\n')
         _git(root, "init", "-q")
         _git(root, "add", "-A")
