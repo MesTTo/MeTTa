@@ -39,6 +39,25 @@ projects=$(for m in "$ROOT"/ext/*/pyproject.toml; do
     [ -f "$m" ] && sed -n 's/^name *= *"\([^"]*\)".*/\1/p' "$m" | head -1
 done)
 
+# Three cases below plant on pymetta-host specifically, because by then it is
+# the only project still to create. If ext/ is missing it -- which happens in
+# a worktree whose submodule pointer was never updated -- those cases run
+# against a fixture with nothing in it and report the TOOL as broken. That
+# cost a real diagnosis: "exit 0, wanted 1" says nothing about a stale
+# submodule. Refuse here instead, naming the cause.
+# $projects is NEWLINE-separated, so a space-delimited pattern never matches
+# it; the unquoted expansion collapses the newlines to spaces first. The
+# first version of this guard fired in a tree that does have pymetta-host.
+case " $(echo $projects) " in
+    *" pymetta-host "*) ;;
+    *)
+        printf 'publish-selftest: ext/ names no pymetta-host, so the fixture\n' >&2
+        printf '  cannot plant the three cases that need it. This is usually a\n' >&2
+        printf '  worktree whose submodules were never updated; run\n' >&2
+        printf '  git submodule update --init --recursive here.\n' >&2
+        exit 1 ;;
+esac
+
 # A complete release for each: a pure wheel plus an sdist, except the one
 # binary distribution, whose platform wheels owe no sdist. Empty files are
 # enough, because nothing here uploads.
