@@ -23697,6 +23697,51 @@
       "tags": [
         "measured"
       ]
+    },
+    "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main": {
+      "title": "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+      "supports": [
+        {
+          "node": "one codex-as-mcp genius per surface, each confined to its own submodule, carrying the measured gap and the rule that language capabilities transfer while host-ecosystem ones do not",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the two submodules are separate repositories in separate directories so concurrent edits cannot collide on files, and confining each to its own and keeping the superproject pointer bumps with the orchestrator removes the one place they would have conflicted",
+        "launched 2026-09-22T16:29 as job_20260922T162925AEST_b096af8d for extensions/node and job_20260922T162925AEST_c4a4110e for extensions/cmetta, both completion_mode=implementation"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over": {
+      "title": "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over",
+      "supports": [
+        {
+          "node": "defer the release gate until both surface agents land, and verify meanwhile only the lanes they do not own",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "user 2026-09-22: be careful not to interfere with their work; the battery snapshots the WORKING tree, so any run now captures extensions/node and extensions/cmetta mid-edit, and a submodule checkout from a second worktree would also write into the shared .git/modules those agents are using",
+        "both agents are running at about 2320s on their first turn, and both have been steered with the evidence gate's actual rule, that a tested: citation must name a case a runner executes, which the C seat is currently failing thirteen times"
+      ]
+    },
+    "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open": {
+      "title": "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+      "supports": [
+        {
+          "node": "gate the RELEASE tree while agents hold two submodules, by provisioning a battery and then restoring those two to their recorded pointers inside the battery only",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the agents' work is entirely UNCOMMITTED, so the superproject's recorded pointers already name the pre-agent state and the release tree is well defined without them; battery.sh rsyncs the working tree and carries their dirty files in, and a checkout inside the BATTERY drops exactly those while writing nothing to their trees",
+        "measured 2026-09-22: battery 15 at 26b85ac46, its node went from 22 dirty to 0 at ec3a0dd59 and its cmetta from 27 to 0 at c1dd3e2d5, both the superproject's recorded pointers, while the sources stayed at 22 and 28 dirty; the gate is running there"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -26283,7 +26328,7 @@
     "one codex-as-mcp genius per surface, each confined to its own submodule, carrying the measured gap and the rule that language capabilities transfer while host-ecosystem ones do not": {
       "title": "one codex-as-mcp genius per surface, each confined to its own submodule, carrying the measured gap and the rule that language capabilities transfer while host-ecosystem ones do not",
       "effort": 8,
-      "status": "active",
+      "status": "done",
       "creates": [
         "the TypeScript and C surfaces carry every capability that belongs to the LANGUAGE rather than to Python's ecosystem, each in its own host idiom"
       ]
@@ -26306,7 +26351,7 @@
     },
     "defer the release gate until both surface agents land, and verify meanwhile only the lanes they do not own": {
       "title": "defer the release gate until both surface agents land, and verify meanwhile only the lanes they do not own",
-      "status": "active",
+      "status": "done",
       "creates": [
         "a release verdict that is about the release tree rather than about two half-finished submodules"
       ]
@@ -26314,7 +26359,7 @@
     "gate the RELEASE tree while agents hold two submodules, by provisioning a battery and then restoring those two to their recorded pointers inside the battery only": {
       "title": "gate the RELEASE tree while agents hold two submodules, by provisioning a battery and then restoring those two to their recorded pointers inside the battery only",
       "effort": 1,
-      "status": "active",
+      "status": "done",
       "addresses": [
         "a complete release verdict is UNREACHABLE while the two agents hold extensions/node and extensions/cmetta, shown by exhausting the routes rather than assumed: every route either skips two seats silently or writes into repositories the agents are using"
       ]
@@ -100137,6 +100182,126 @@
         ]
       ],
       "id": "fcd2aaea7eb03088"
+    },
+    {
+      "at": "2026-09-22T10:10:55.237130+00:00",
+      "after": "ff6e950b464d6434538d2f0145b920ce65db1523",
+      "did": "[{\"op\": \"status\", \"id\": \"one codex-as-mcp genius per surface, each confined to its own submodule, carrying the measured gap and the rule that language capabilities transfer while host-ecosystem ones do not\", \"because\": \"both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main\", \"tags\": [\"measured\"], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"defer the release gate until both surface agents land, and verify meanwhile only the lanes they do not own\", \"because\": \"both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over\", \"tags\": [], \"status\": \"done\"}, {\"op\": \"status\", \"id\": \"gate the RELEASE tree while agents hold two submodules, by provisioning a battery and then restoring those two to their recorded pointers inside the battery only\", \"because\": \"carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "fcd2aaea7eb03088"
+      ],
+      "assert": [
+        [
+          "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over",
+          "sort",
+          "prop"
+        ],
+        [
+          "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over",
+          "supersedes",
+          "user 2026-09-22: be careful not to interfere with their work; the battery snapshots the WORKING tree, so any run now captures extensions/node and extensions/cmetta mid-edit, and a submodule checkout from a second worktree would also write into the shared .git/modules those agents are using"
+        ],
+        [
+          "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over",
+          "supersedes",
+          "both agents are running at about 2320s on their first turn, and both have been steered with the evidence gate's actual rule, that a tested: citation must name a case a runner executes, which the C seat is currently failing thirteen times"
+        ],
+        [
+          "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over",
+          "supports",
+          {
+            "node": "defer the release gate until both surface agents land, and verify meanwhile only the lanes they do not own",
+            "status": "done"
+          }
+        ],
+        [
+          "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over",
+          "title",
+          "both landed, and the full gate was launched afterwards on eda23c6e8 in wt-battery-1 where it is still running; the deferral it describes is over"
+        ],
+        [
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+          "sort",
+          "prop"
+        ],
+        [
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+          "supersedes",
+          "the two submodules are separate repositories in separate directories so concurrent edits cannot collide on files, and confining each to its own and keeping the superproject pointer bumps with the orchestrator removes the one place they would have conflicted"
+        ],
+        [
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+          "supersedes",
+          "launched 2026-09-22T16:29 as job_20260922T162925AEST_b096af8d for extensions/node and job_20260922T162925AEST_c4a4110e for extensions/cmetta, both completion_mode=implementation"
+        ],
+        [
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+          "supports",
+          {
+            "node": "one codex-as-mcp genius per surface, each confined to its own submodule, carrying the measured gap and the rule that language capabilities transfer while host-ecosystem ones do not",
+            "status": "done"
+          }
+        ],
+        [
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+          "tags",
+          "measured"
+        ],
+        [
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main",
+          "title",
+          "both surface agents finished and their work is committed and pushed: extensions/node at 49fd2af with 689/689 plus browser 24/24 and tsc clean, extensions/cmetta at c4b4246 with 543/543 exit 0 where it had been 543/2. Every component pointer is recorded in the superproject and reachable from github/main"
+        ],
+        [
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+          "sort",
+          "prop"
+        ],
+        [
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+          "supersedes",
+          "the agents' work is entirely UNCOMMITTED, so the superproject's recorded pointers already name the pre-agent state and the release tree is well defined without them; battery.sh rsyncs the working tree and carries their dirty files in, and a checkout inside the BATTERY drops exactly those while writing nothing to their trees"
+        ],
+        [
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+          "supersedes",
+          "measured 2026-09-22: battery 15 at 26b85ac46, its node went from 22 dirty to 0 at ec3a0dd59 and its cmetta from 27 to 0 at c1dd3e2d5, both the superproject's recorded pointers, while the sources stayed at 22 and 28 dirty; the gate is running there"
+        ],
+        [
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+          "supports",
+          {
+            "node": "gate the RELEASE tree while agents hold two submodules, by provisioning a battery and then restoring those two to their recorded pointers inside the battery only",
+            "status": "done"
+          }
+        ],
+        [
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+          "tags",
+          "measured"
+        ],
+        [
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open",
+          "title",
+          "carried out: wt-battery-1 holds eda23c6e8 with both submodules at their recorded pointers and has reached 55 lanes, pytest at 98 per cent. The VERDICT is not this approach's business and belongs to the goal that the full gate exits 0 on the released tree, which stays open"
+        ],
+        [
+          "defer the release gate until both surface agents land, and verify meanwhile only the lanes they do not own",
+          "status",
+          "done"
+        ],
+        [
+          "gate the RELEASE tree while agents hold two submodules, by provisioning a battery and then restoring those two to their recorded pointers inside the battery only",
+          "status",
+          "done"
+        ],
+        [
+          "one codex-as-mcp genius per surface, each confined to its own submodule, carrying the measured gap and the rule that language capabilities transfer while host-ecosystem ones do not",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "cdfcacb93fca5d2e"
     }
   ]
 }
