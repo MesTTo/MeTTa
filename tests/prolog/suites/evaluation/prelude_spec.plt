@@ -21,7 +21,7 @@
 %     answers [tested: prelude_spec:every_head_agrees_with_its_spec_equation,
 %     prelude_spec:a_spec_expansion_evaluates_to_the_engines_answers].
 %   - the engine's shipped register and the fixture are the same 41 equations,
-%     47 declarations, 43 documents, 4 cost claims and 8 rule registrations
+%     47 declarations, 47 documents, 4 cost claims and 8 rule registrations
 %     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture].
 %   - the comparison can fail: a planted wrong equation is reported
 %     [tested: prelude_spec_selftest:a_planted_divergence_is_reported].

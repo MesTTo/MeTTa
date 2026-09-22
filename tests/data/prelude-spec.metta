@@ -507,6 +507,10 @@
 (@doc rename (@desc "Uses the first matching (old new) pair, or keeps the head; partial application is a from map"))
 (@doc qualified (@desc "Builds a prefix map using the library name and a dot"))
 (@doc get-property (@desc "Answers visibility, defining origins and declared effect, cost, deprecation and documentation properties, one per answer"))
+(@doc get-property (@desc "The two-argument package surface answers (get-property perform claims), package keys at a loaded home, and available alternative backing rows") (@params ((@param "perform, a home space, or a loaded package path") (@param "claims, available, or a package key"))) (@return "One property value per answer"))
+(@doc setup! (@desc "Prepare a package and its requirements explicitly. Reuse setup only while its performed rows and backing artifacts remain current; publish performed.metta and the transitive lock.metta under an OS directory lock") (@params ((@param "Package path or (library Name)"))) (@return "Bool"))
+(@doc package-load (@desc "A required packaging library defines this equation to replace the engine's default package interpreter. Arguments are the canonical source path, home space and the source's own package rows; requires have already loaded under the engine's ceiling and budget") (@params ((@param "Canonical path") (@param "Home space") (@param "Package argument rows"))) (@return "Any successful result"))
+(@doc package-prolog (@desc "The claimant the engine registers for a (prolog <file> (heads)) backing row. A seat claims its own token the same way, by adding a (= (perform (<token> ...)) ...) equation to the seam space") (@params ((@param "Artifact the row names") (@param "Heads the row claims"))) (@return "Bool"))
 (@doc owned-record-read (@desc "Validates a ground @owned-record key and returns zero or one complete native value rows in an expression; retired owners and malformed occurrences are refused") (@params ((@param "Ground @owned-record declaration, held as data"))) (@return "Expression containing zero or one complete value rows"))
 (@doc assert-answers
   (@desc "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess")
@@ -625,7 +629,7 @@
   (@params ((@param "The name to look up")))
   (@return "unit"))
 (@doc documented
-  (@desc "Every name the CURRENT SPACE documents, one per solution; program-scoped on purpose, so the engine's own vocabulary does not bury yours")
+  (@desc "Every name the CURRENT SPACE documents and presents, one per solution; program-scoped on purpose, so the engine's own vocabulary does not bury yours")
   (@params ())
   (@return "A name"))
 (@doc documented-space
@@ -633,11 +637,11 @@
   (@params ((@param "Space to select")))
   (@return "A name"))
 (@doc defined-name
-  (@desc "Every function name the current space defines, builtins excluded, once each")
+  (@desc "Every function name the current space defines and presents, once each; builtins and names the space keeps internal are not part of its face")
   (@params ())
   (@return "A name"))
 (@doc undocumented
-  (@desc "Every defined name in the current space with no documentation anywhere; the gap worth closing")
+  (@desc "Every name the current space presents with no documentation anywhere; the gap worth closing. A name the space keeps internal, the reserved package head included, is not reported")
   (@params ())
   (@return "A name"))
 (@doc undocumented-space
