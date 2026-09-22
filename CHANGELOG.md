@@ -9,6 +9,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The publish workflow can now create a PyPI project that does not exist yet.
+  A trusted publisher cannot be attached to a missing project, so PyPI's
+  answer is a *pending* publisher, which creates the project on first use and
+  — for an account that is not an organization — does so without consulting
+  the project-creation limiter at all. Two measured limits shape it: one
+  pending publisher per `(owner, repository, workflow, environment)` across
+  different project names, and three pending at a time. So each new project
+  is registered against its own environment, `pypi-<project>`, and a new
+  `bootstrap` matrix job presents one claim set per project in a single run,
+  three landing per round.
+
+  `plan` computes the split once and `bootstrap` and `publish` consume the
+  two halves, which must partition the release: the token an environment
+  mints is scoped to the projects its publisher covers, so a file belonging
+  to a project that does not exist is a 403 that fails every upload behind
+  it. `tools/pending_publishers_selftest.py` holds the filename globs that
+  realise the split to an equality rather than mere disjointness, after a
+  weaker version of it passed a mutant where `pymetta-*` swallowed
+  `pymetta_host-*`.
+
 - `tools/pending-publishers.py` prints the pending Trusted Publishers PyPI
   still needs, deriving the project list from `build-distributions.sh --list`
   and the four constant form fields from `publish.yml` and the git remote, so

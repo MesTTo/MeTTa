@@ -26,11 +26,15 @@ limit that waiting clears:
     workflow_filename, environment). The DB unique constraint excludes
     project_name, so a second row with the same four values is refused even
     for a different project [source: the same file's UniqueViolation handler]
-Every row below shares one workflow and one environment, so exactly one of
-them is registerable at a time unless each is given a DISTINCT environment
-name, which the publishing workflow would then have to use. That is why this
-prints the limits beside the list rather than a list that looks actionable in
-one sitting.
+Both limits are MEASURED here, not just read: registering a second row with
+the shared (MesTTo, MeTTa, publish.yml, pypi) tuple was refused, a distinct
+environment made it register, and the fourth was refused at the cap.
+
+So each row takes its OWN environment, named pypi-<project>. That is what
+makes the tuples distinct, and it is the rule publish.yml's bootstrap job
+implements: a project not yet on PyPI is created by that job in its own
+environment, and a project already on PyPI is published by the steady-state
+job in the shared one. Three per round, because of the cap.
 
 A refused registration is HTTP 200 rendering the normal page with the reason
 in a session flash, so "it returned 200" is not evidence that it worked; read
@@ -43,6 +47,9 @@ Guarantees:
     [source: .github/workflows/publish.yml; commit=WORKTREE]
   - the projects are exactly those build-distributions.sh --list names
     [tested: this tool against that script; commit=WORKTREE]
+  - --json-plan's `bootstrap` and `steady` partition that set, so the
+    publish workflow's two jobs cannot both claim a project or miss one
+    [tested: this tool; commit=WORKTREE]
   - a name already on PyPI is omitted, because a pending publisher is refused
     for an existing project [source: warehouse oidc/views.py:218-224]
 Fails when: pypi.org is unreachable; it reports the name and exits nonzero
@@ -56,7 +63,6 @@ Open Obligations:
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import sys
 import urllib.error
@@ -68,23 +74,37 @@ WORKFLOW = ROOT / ".github" / "workflows" / "publish.yml"
 BUILDER = ROOT / "tools" / "build-distributions.sh"
 
 
+def bootstrap_environment(project: str) -> str:
+    """The environment a not-yet-existing project is created under.
+
+    Uniform in the project name with no special case, because PyPI's pending
+    publishers are unique on (owner, repository, workflow, environment) and
+    every project here shares the first three. Stripping a common prefix
+    would be a rule with an exception; this one is total.
+    """
+    return f"pypi-{project}"
+
+
+def filename_stem(project: str) -> str:
+    """How the project name appears in a distribution filename.
+
+    Emitted so the workflow does not re-derive it: packaging normalises the
+    hyphens in a project name to underscores in the built filenames, and a
+    second copy of that rule in YAML is one that can drift.
+    """
+    return project.replace("-", "_")
+
+
 def constants() -> dict[str, str]:
-    """The four fields every row shares, read from the workflow and the remote."""
-    text = WORKFLOW.read_text(encoding="utf-8")
-    environment = re.search(r"^\s*environment:\s*(\S+)\s*$", text, re.M)
-    if environment is None:
-        raise SystemExit(f"{WORKFLOW} declares no environment for the publish job")
+    """The fields every row shares, read from the workflow and the remote."""
     url = subprocess.run(
         ["git", "-C", str(ROOT), "remote", "get-url", "origin"],
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     owner, repository = url.removesuffix(".git").split("/")[-2:]
-    return {
-        "owner": owner,
-        "repository": repository,
-        "workflow": WORKFLOW.name,
-        "environment": environment.group(1),
-    }
+    if not WORKFLOW.is_file():
+        raise SystemExit(f"{WORKFLOW} is missing; the workflow name cannot be read")
+    return {"owner": owner, "repository": repository, "workflow": WORKFLOW.name}
 
 
 def distributions() -> list[str]:
@@ -113,25 +133,52 @@ def on_pypi(name: str) -> bool:
 
 def main() -> int:
     shared = constants()
-    missing = [name for name in distributions() if not on_pypi(name)]
+    every = distributions()
+    exists = {name: on_pypi(name) for name in every}
+    missing = [name for name in every if not exists[name]]
+    present = [name for name in every if exists[name]]
     if not missing:
         print("every distribution this repository releases already exists on PyPI")
         return 0
+    if "--json-plan" in sys.argv:
+        # Both halves from ONE pass over PyPI, and they PARTITION the release:
+        # `bootstrap` is every distribution with no project yet, which only a
+        # pending publisher can create, and `steady` is every distribution
+        # that has one, which the ordinary publisher uploads. Emitting them
+        # together is what keeps them complementary; computed separately they
+        # could both claim a project, or neither.
+        print(json.dumps({
+            "bootstrap": [
+                {"project": n, "stem": filename_stem(n),
+                 "environment": bootstrap_environment(n), **shared}
+                for n in missing
+            ],
+            "steady": [filename_stem(n) for n in present],
+        }))
+        return 0
+
     if "--json" in sys.argv:
-        print(json.dumps([{"project": n, **shared} for n in missing], indent=2))
+        # One line, because a workflow reads this into a matrix through
+        # $GITHUB_OUTPUT, which is line-oriented.
+        print(json.dumps([
+            {"project": n, "stem": filename_stem(n),
+             "environment": bootstrap_environment(n), **shared}
+            for n in missing
+        ]))
         return 0
     print(f"{len(missing)} distributions have no PyPI project yet.")
     print("Register pending publishers at")
     print("  https://pypi.org/manage/account/publishing/\n")
     print("  PyPI allows 3 pending publishers at once, and only one per")
-    print("  (owner, repository, workflow, environment). These rows share all")
-    print("  four, so they go ONE at a time unless each takes its own")
-    print("  environment name. See the module docstring.\n")
+    print("  (owner, repository, workflow, environment), both measured. So")
+    print("  register at most the first THREE below, run the release, and")
+    print("  repeat: reified publishers stop counting against the cap.\n")
     for field, value in shared.items():
         print(f"  {field:<12} {value}   (same for every row)")
-    print("\nPyPI Project Name, one per row:")
-    for name in missing:
-        print(f"  {name}")
+    print("\nPyPI Project Name, and the environment that row must carry:")
+    for index, name in enumerate(missing):
+        mark = "  <- this round" if index < 3 else ""
+        print(f"  {name:<22} {bootstrap_environment(name)}{mark}")
     return 0
 
 

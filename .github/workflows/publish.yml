@@ -117,8 +117,93 @@ jobs:
           name: distributions
           path: dist/
 
-  publish:
+  # WHICH DISTRIBUTIONS HAVE NO PYPI PROJECT YET.
+  #
+  # A project that does not exist cannot be published by the `publish` job
+  # below, because a trusted publisher cannot be attached to a project that
+  # is not there. PyPI's answer is a PENDING publisher, which creates the
+  # project on first use and, for an account that is not an organization,
+  # does so with ratelimited=False -- it never consults the project-creation
+  # limiter that has blocked every upload attempt here since 2026-09-21
+  # [source: warehouse oidc/views.py and packaging/services.py].
+  #
+  # PyPI allows only ONE pending publisher per
+  # (owner, repository, workflow, environment), across different project
+  # names, and at most THREE pending at a time. Both are measured, not read.
+  # So each new project is registered against its OWN environment, named
+  # pypi-<project>, and this job presents one claim set per project in a
+  # single run. Three land per round; reified publishers stop counting
+  # against the cap, so the next round registers the next three.
+  #
+  # tools/pending-publishers.py prints exactly what to register and emits
+  # this matrix, so the environment a row is registered under and the
+  # environment this job presents come from one function rather than two
+  # places that can drift.
+  plan:
     needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      bootstrap: ${{ steps.plan.outputs.bootstrap }}
+      steady: ${{ steps.plan.outputs.steady }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - id: plan
+        # One pass over PyPI for both halves, so they cannot disagree about
+        # which job owns a project.
+        run: |
+          plan=$(python tools/pending-publishers.py --json-plan)
+          printf 'bootstrap=%s\n' "$(printf '%s' "$plan" | jq -c .bootstrap)" >> "$GITHUB_OUTPUT"
+          printf 'steady=%s\n' "$(printf '%s' "$plan" | jq -r '.steady | join(" ")')" >> "$GITHUB_OUTPUT"
+          python tools/pending-publishers.py
+
+  # One job per project PyPI does not have, each in its own environment so
+  # its pending publisher matches. fail-fast is off because a project whose
+  # publisher has not been registered yet fails only its own job, and that
+  # failure is the accurate signal that it is still waiting for a slot.
+  bootstrap:
+    needs: [build, plan]
+    if: needs.plan.outputs.bootstrap != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.plan.outputs.bootstrap) }}
+    environment: ${{ matrix.target.environment }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: staged/
+      - name: Keep only this project's own files
+        # The OIDC token a pending publisher mints is scoped to that project
+        # alone, so uploading the whole directory would 403 on the first file
+        # belonging to anything else. `stem` comes from the planner rather
+        # than being re-derived here, because "hyphens become underscores in
+        # a built filename" is a packaging rule and a second copy of it in
+        # YAML is one that can drift.
+        run: |
+          mkdir -p dist
+          mv staged/${{ matrix.target.stem }}-* dist/
+          ls -la dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  # The other half of the partition: every distribution PyPI already has a
+  # project for. It must be a half rather than the whole directory, because
+  # the token this environment mints is scoped to the projects its publisher
+  # covers, and a file belonging to a project that does not exist yet is a
+  # 403 that fails the upload for everything behind it. skip-existing covers
+  # a file PyPI already holds; it does not cover one we are not allowed to
+  # send.
+  publish:
+    needs: [build, plan]
+    if: needs.plan.outputs.steady != ''
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -127,7 +212,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: distributions
-          path: dist/
+          path: staged/
+      - name: Keep only the projects that already exist
+        run: |
+          mkdir -p dist
+          for stem in ${{ needs.plan.outputs.steady }}; do
+            mv staged/"$stem"-* dist/
+          done
+          ls -la dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           # dist/ carries every distribution this repository releases and
