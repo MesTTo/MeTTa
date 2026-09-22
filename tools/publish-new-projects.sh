@@ -8,6 +8,7 @@
 #   - spends at most ONE upload attempt per project, and stops at the first 429
 #   - the project list is read from the tree and from PyPI, never from a file
 #     somebody has to keep up to date
+#   - a verdict's cited upload log is never overwritten by a later run
 # Fails when: a project already exists. Then this is the wrong tool and the
 #   publish workflow is the right one: it uploads from GitHub with OIDC and
 #   needs no project-creation budget at all.
@@ -33,6 +34,13 @@
 # so the stop-on-429 rule did nothing and two more attempts went out before
 # anyone noticed. Match the status line.
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+# One log per RUN, not one per project. A verdict reads "see <log>", and a
+# name reused across runs means the next attempt overwrites the evidence the
+# last verdict pointed at: the 2026-09-22 14:29 failure cannot be read now
+# because a 17:40 attempt rewrote its log, and the two failed for different
+# reasons. The PID rather than the clock alone, because two runs inside one
+# second would otherwise share a stamp; uniqueness by shape, not by luck.
+RUN=${RUN:-$(date -u +%Y%m%dT%H%M%SZ).$$}
 # The same interpreter every other lane runs under, taken from $PY, which is
 # what select-python.sh is documented to set and leaves EMPTY when it finds
 # nothing. A bare `python3` fallback here was /usr/bin/python3, which carries
@@ -115,6 +123,7 @@ for name in $(projects); do
 done
 set -- $new
 printf '%s project(s) to create\n' "$#"
+printf 'run %s; an upload log of this run is ai-tmp/upload.%s.<project>.log\n' "$RUN" "$RUN"
 
 # Checked while REPORTING too, so the rule can be verified without spending
 # anything. It sat after the reporting exit, and proving it worked therefore
@@ -182,7 +191,7 @@ for name in "$@"; do [ "$name" = pymetta-host ] && ordered="pymetta-host"; done
 for name in "$@"; do [ "$name" = pymetta-host ] || ordered="$ordered $name"; done
 
 for name in $ordered; do
-    log="$HERE/ai-tmp/upload.$name.log"
+    log="$HERE/ai-tmp/upload.$RUN.$name.log"
     if $PYTHON -m twine upload --non-interactive --disable-progress-bar \
             --skip-existing "$DIST/$(echo "$name" | tr '-' '_')"-* > "$log" 2>&1; then
         printf '%s  ok      %s\n' "$(date -Is)" "$name"

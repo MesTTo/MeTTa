@@ -154,5 +154,19 @@ case_is "platform wheels without an sdist" 0 "1 project(s) to create" \
 case_is "a complete set, reporting" 0 "reporting only" \
     env DIST="$FIXTURE/dist" INDEX="$LOCAL" sh "$TOOL"
 
-printf 'publish-selftest: %s defect(s) over 10 cases, every refusal the tool can make\n' "$failures"
+# Two runs must not share an upload log path, or a verdict's cited evidence is
+# overwritten by whatever ran next. The upload loop itself cannot be reached
+# from here without defeating the index guard that stops a test publishing, so
+# the assertion is on the stamp the report prints, which is what names the log.
+first=$(env DIST="$FIXTURE/dist" INDEX="$LOCAL" sh "$TOOL" | sed -n 's/^run \([^;]*\);.*/\1/p')
+second=$(env DIST="$FIXTURE/dist" INDEX="$LOCAL" sh "$TOOL" | sed -n 's/^run \([^;]*\);.*/\1/p')
+if [ -z "$first" ]; then
+    printf '  two runs share no log path: the report named no run stamp at all\n'
+    failures=$((failures + 1))
+elif [ "$first" = "$second" ]; then
+    printf '  two runs share no log path: both runs stamped %s\n' "$first"
+    failures=$((failures + 1))
+fi
+
+printf 'publish-selftest: %s defect(s) over 11 cases, every refusal the tool can make\n' "$failures"
 [ "$failures" -eq 0 ]

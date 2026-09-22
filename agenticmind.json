@@ -22774,6 +22774,98 @@
       "tags": [
         "source"
       ]
+    },
+    "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean": {
+      "title": "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean",
+      "supports": [
+        {
+          "node": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded": {
+      "title": "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded",
+      "supports": [
+        {
+          "node": "resolve the node agent's 15 pins by recording the superproject pointer bump FIRST and rewriting the pins against the commit that bump produced, the WORKTREE placeholder pattern one rung up",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "a node commit cannot name the superproject commit that records it, the same self-reference the WORKTREE placeholder already solves within one repository; pin_provenance.py --derive climbs rungs transitively and computes the carrier"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts": {
+      "title": "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts"
+    },
+    "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection": {
+      "title": "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection",
+      "supports": [
+        "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier": {
+      "title": "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier"
+    },
+    "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line": {
+      "title": "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line",
+      "supports": [
+        "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites": {
+      "title": "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+    },
+    "the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons": {
+      "title": "the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons",
+      "supports": [
+        "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+      ]
+    },
+    "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log": {
+      "title": "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log",
+      "supports": [
+        {
+          "node": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "status": "untried"
+        },
+        {
+          "node": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "relation": "addresses",
+          "target": "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+        }
+      ]
+    },
+    "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect": {
+      "title": "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect",
+      "supports": [
+        {
+          "node": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log"
+      ],
+      "tags": [
+        "tested"
+      ]
     }
   },
   "approaches": {
@@ -25418,7 +25510,7 @@
     "resolve the node agent's 15 pins by recording the superproject pointer bump FIRST and rewriting the pins against the commit that bump produced, the WORKTREE placeholder pattern one rung up": {
       "title": "resolve the node agent's 15 pins by recording the superproject pointer bump FIRST and rewriting the pins against the commit that bump produced, the WORKTREE placeholder pattern one rung up",
       "effort": 2,
-      "status": "untried"
+      "status": "done"
     },
     "assert the property over every declared metta_platform_capability rather than planting one list case: each must classify as kind platform with every field value atomic, which is what a wire can carry": {
       "title": "assert the property over every declared metta_platform_capability rather than planting one list case: each must classify as kind platform with every field value atomic, which is what a wire can carry",
@@ -25431,7 +25523,7 @@
     "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead": {
       "title": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
       "effort": 1,
-      "status": "untried"
+      "status": "done"
     },
     "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts": {
       "title": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
@@ -25439,6 +25531,14 @@
       "status": "done",
       "addresses": [
         "nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic"
+      ]
+    },
+    "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names": {
+      "title": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
       ]
     }
   },
@@ -96391,6 +96491,270 @@
         ]
       ],
       "id": "b7833d29af2278a5"
+    },
+    {
+      "at": "2026-09-22T08:16:22.853136+00:00",
+      "after": "ee29813e2677eb935c12c004e27ca51dc8e1f8c9",
+      "did": "[{\"op\": \"status\", \"id\": \"remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead\", \"because\": \"removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean\", \"tags\": [\"source\"], \"status\": \"done\"}]",
+      "parents": [
+        "b7833d29af2278a5"
+      ],
+      "assert": [
+        [
+          "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean",
+          "sort",
+          "prop"
+        ],
+        [
+          "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean",
+          "supersedes",
+          "the agent committed a 186-line AI status report into a repository that publishes to npm; nothing references it, its API content is already in README.md and llms.txt, and its central narrative is a blocker that no longer exists, while CLAUDE.md rules that nothing naming an AI agent belongs inside a repository that may be published"
+        ],
+        [
+          "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean",
+          "supports",
+          {
+            "node": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+            "status": "done"
+          }
+        ],
+        [
+          "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean",
+          "tags",
+          "source"
+        ],
+        [
+          "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean",
+          "title",
+          "removed in node commit d0fce40 and recorded in the superproject at 94e5fc7eb; its six boundary decisions are four claims in this record, and the node tree is clean"
+        ],
+        [
+          "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "c73b59b3daa226fe"
+    },
+    {
+      "at": "2026-09-22T08:16:24.017922+00:00",
+      "after": "ee29813e2677eb935c12c004e27ca51dc8e1f8c9",
+      "did": "[{\"op\": \"status\", \"id\": \"resolve the node agent's 15 pins by recording the superproject pointer bump FIRST and rewriting the pins against the commit that bump produced, the WORKTREE placeholder pattern one rung up\", \"because\": \"pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "c73b59b3daa226fe"
+      ],
+      "assert": [
+        [
+          "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded",
+          "sort",
+          "prop"
+        ],
+        [
+          "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded",
+          "supersedes",
+          "a node commit cannot name the superproject commit that records it, the same self-reference the WORKTREE placeholder already solves within one repository; pin_provenance.py --derive climbs rungs transitively and computes the carrier"
+        ],
+        [
+          "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded",
+          "supports",
+          {
+            "node": "resolve the node agent's 15 pins by recording the superproject pointer bump FIRST and rewriting the pins against the commit that bump produced, the WORKTREE placeholder pattern one rung up",
+            "status": "done"
+          }
+        ],
+        [
+          "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded",
+          "tags",
+          "measured"
+        ],
+        [
+          "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded",
+          "title",
+          "pin_provenance --derive resolved 15 pins to 94e5fc7eb and left 104 hash-chained occurrences alone; check_evidence_tags now reports 0 commit=WORKTREE placeholders awaiting a pin and no finding naming a commit in the node object store, where it reported fifteen. Every remaining unresolvable pin is in extensions/cmetta, whose agent is still running and whose pointer is deliberately unrecorded"
+        ],
+        [
+          "resolve the node agent's 15 pins by recording the superproject pointer bump FIRST and rewriting the pins against the commit that bump produced, the WORKTREE placeholder pattern one rung up",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "e4add484fbfaaf38"
+    },
+    {
+      "at": "2026-09-22T08:18:39.205894+00:00",
+      "after": "ee29813e2677eb935c12c004e27ca51dc8e1f8c9",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection\", \"tags\": [\"measured\"], \"title\": \"the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line\", \"tags\": [\"measured\"], \"title\": \"I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier\", \"fields\": {}}, {\"op\": \"add-issue\", \"id\": null, \"because\": \"the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons\", \"tags\": [], \"title\": \"the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log\", \"tags\": [], \"title\": \"stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names\", \"fields\": {\"effort\": 1, \"addresses\": [\"the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites\"]}}, {\"op\": \"status\", \"id\": \"stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names\", \"because\": \"publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect\", \"tags\": [\"tested\"], \"status\": \"done\"}]",
+      "parents": [
+        "e4add484fbfaaf38"
+      ],
+      "assert": [
+        [
+          "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier",
+          "sort",
+          "prop"
+        ],
+        [
+          "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier",
+          "title",
+          "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier"
+        ],
+        [
+          "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect",
+          "sort",
+          "prop"
+        ],
+        [
+          "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect",
+          "supersedes",
+          "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log"
+        ],
+        [
+          "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect",
+          "supports",
+          {
+            "node": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+            "status": "done"
+          }
+        ],
+        [
+          "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect",
+          "tags",
+          "tested"
+        ],
+        [
+          "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect",
+          "title",
+          "publish_selftest is 0 defects over 11 cases, and with the stamp forced to a constant the new case reports both runs stamped fixed and the suite reads 1 defect"
+        ],
+        [
+          "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection",
+          "sort",
+          "prop"
+        ],
+        [
+          "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection",
+          "supports",
+          "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts"
+        ],
+        [
+          "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection",
+          "tags",
+          "measured"
+        ],
+        [
+          "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection",
+          "title",
+          "read ai-tmp/upload.pymetta-host.log, written 17:40:33; the upload failed with 429, not with a tag rejection"
+        ],
+        [
+          "the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons",
+          "sort",
+          "prop"
+        ],
+        [
+          "the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons",
+          "supports",
+          "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+        ],
+        [
+          "the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons",
+          "title",
+          "the 2026-09-22 14:29 failure cannot be read any more: a 17:40 attempt rewrote its log and the two runs failed for different reasons"
+        ],
+        [
+          "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log",
+          "sort",
+          "prop"
+        ],
+        [
+          "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log",
+          "supports",
+          {
+            "node": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+            "status": "untried"
+          }
+        ],
+        [
+          "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log",
+          "supports",
+          {
+            "node": "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+            "relation": "addresses",
+            "target": "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+          }
+        ],
+        [
+          "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log",
+          "title",
+          "the clock alone collides for two runs inside one second, so the PID makes the stamp unique by shape rather than by luck; the upload loop cannot be reached from the selftest without defeating the index guard that stops a test publishing, so the assertion is on the printed stamp, which is what names the log"
+        ],
+        [
+          "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites",
+          "sort",
+          "prop"
+        ],
+        [
+          "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites",
+          "title",
+          "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+        ],
+        [
+          "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts",
+          "sort",
+          "prop"
+        ],
+        [
+          "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts",
+          "title",
+          "the record's claim that PyPI refuses the pymetta-host wheels for carrying a linux_x86_64 tag is REFUTED: the artefact uploaded on 2026-09-22 is pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl, which is the tag PyPI accepts"
+        ],
+        [
+          "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line",
+          "sort",
+          "prop"
+        ],
+        [
+          "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line",
+          "supports",
+          "I proposed that the publisher misclassifies a 429 from twine's output and keeps burning attempts, and BOTH halves were wrong: the detector greps the log for 429 and exits 2, the other branch exits 1, so neither continues. The evidence I used was a log written at 17:40 cited by a verdict from 14:29, three hours earlier"
+        ],
+        [
+          "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line",
+          "tags",
+          "measured"
+        ],
+        [
+          "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line",
+          "title",
+          "the script's own header already records that a previous detector matched the response's HTML title instead of the status line, which is what produced the two 14:30 failures, and that it was fixed to match the status line"
+        ],
+        [
+          "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "sort",
+          "approach"
+        ],
+        [
+          "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "addresses",
+          "the publisher names each upload log ai-tmp/upload.<project>.log, reused by every run, so a verdict that reads 'see <log>' points at a file the next attempt overwrites"
+        ],
+        [
+          "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "effort",
+          1
+        ],
+        [
+          "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "status",
+          "done"
+        ],
+        [
+          "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names",
+          "title",
+          "stamp the upload log with a per-run identifier that includes the PID, and print that stamp in the report so a reader can find the log a verdict names"
+        ]
+      ],
+      "id": "6ff06128dce9b635"
     }
   ]
 }
