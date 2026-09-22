@@ -2001,7 +2001,7 @@ importer_helper_impl(Space, File) :-
 % [source: docs/journal/2026-09-09-packages-are-equations.md,
 % "the package is an argument record and the engine knows four things";
 % commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
-:- use_module('../../lib/lib_package/lib_package').
+:- use_module('../packages').
 
 % The prelude uses the engine's bounded evaluator, seam dispatch, source
 % locators and load policy. Publish these through the ordinary service seam;
@@ -2031,18 +2031,18 @@ metta_perform_package_rows(CanonPath, Space) :-
     findall(Kind-Written,
             filereader:source_package_row(CanonPath, Space, Kind, Written), Rows),
     ( Rows == [] -> true
-    ; lib_package:package_context(CanonPath, Space,
+    ; packages:package_context(CanonPath, Space,
           metta_engine:(metta_perform_package_requires(CanonPath, Space, Rows),
-                        lib_package:package_load(CanonPath, Space, Rows))) ).
+                        packages:package_load(CanonPath, Space, Rows))) ).
 
 metta_perform_package_requires(CanonPath, Space, Rows) :-
     forall((member(requires-Written, Rows),
             metta_package_normalise(Space, Written, Required)),
-           lib_package:package_require(CanonPath, Space, Required)).
+           packages:package_require(CanonPath, Space, Required)).
 
 % Compilation chooses the seam's equation; execution carries the caller's
 % home. evalc alone would replace both contexts and lose native ownership.
-% [tested: lib_package:backing_lives_and_retires_in_its_home; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% [tested: package_laws:backing_lives_and_retires_in_its_home; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 metta_package_perform(Home, Expression, Result) :-
     space_module('&metta', Seam), space_module(Home, Module),
     with_metta_module(Seam,
@@ -2054,7 +2054,7 @@ metta_package_perform(Home, Expression, Result) :-
 :- meta_predicate metta_package_loading(+, +, 0),
                   metta_package_reload(1, +, +).
 metta_package_loading(Path, Space, Goal) :-
-    lib_package:package_loading(Path, Space, Goal).
+    packages:package_loading(Path, Space, Goal).
 
 metta_package_reload(LoadInto, Path, Space) :-
     metta_package_loading(Path, Space,
@@ -2123,7 +2123,7 @@ metta_package_claimed(Row) :-
 % Admit nondeterministic reads and the conservatively classified read forms.
 % Inspect every operation in a computed body, so a write nested in match is
 % still refused. Host calls retain the effect declared by their own seat.
-% [tested: lib_package:space_read_bodies_cannot_hide_state_writes; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% [tested: package_laws:space_read_bodies_cannot_hide_state_writes; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 metta_package_ceiling(nondeterministicReadOnly).
 
 metta_package_reads_runtime('get-property').
@@ -2243,4 +2243,4 @@ metta_package_budget_refusal(Formal, Budget) :-
 metta_loader_source("(: perform (-> Atom %Undefined%))").
 
 metta_register_loader_claims :-
-    lib_package:package_register_claims.
+    packages:package_register_claims.

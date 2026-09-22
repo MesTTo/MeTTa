@@ -6,7 +6,7 @@
 % this battery's ai-tmp/package-mutations. No source file is edited.
 
 :- module(package_mutations, [main/0]).
-:- user:ensure_loaded('../../prolog/suites/seams/lib_package.plt').
+:- user:ensure_loaded('../../prolog/suites/seams/package_laws.plt').
 :- user:ensure_loaded('../../prolog/suites/seams/packages.plt').
 :- use_module(library(prolog_wrap)).
 :- use_module(library(process)).
@@ -33,8 +33,8 @@ main_checked(Status) :-
     ; throw(error(domain_error(mutation_arguments, Arguments), none)) ).
 
 coverage :-
-    forall(plunit:current_test(lib_package, Name, _, _, _),
-           ( witness(lib_package, Name, _) -> true
+    forall(plunit:current_test(package_laws, Name, _, _, _),
+           ( witness(package_laws, Name, _) -> true
            ; throw(error(existence_error(disabling_mutation, Name), none)) )),
     forall(witness(Unit, Name, _),
            ( plunit:current_test(Unit, Name, _, _, _) -> true
@@ -62,102 +62,102 @@ install(Mutation) :-
     -> wrap_predicate(Head, package_mutation, Wrapped, Body)
     ; throw(error(existence_error(package_mutation, Mutation), none)) ).
 
-replacement(no_coverage, lib_package:package_coverage(_,_,_,_,_), _, true).
+replacement(no_coverage, packages:package_coverage(_,_,_,_,_), _, true).
 %The guard removed, leaving the question that RESOLVES its head. Asking
 %whether a head is already loaded then defines it, because resolving an
 %undefined predicate fires the undefined-procedure hook and the engine
 %answers that by translating the name -- from inside the registration that
 %has not yet recorded the arity the equation's own body calls.
 replacement(resolving_head_source,
-            lib_package:package_head_source(Module, Head, File), _,
+            packages:package_head_source(Module, Head, File), _,
             predicate_property(Module:Head, file(File))).
-replacement(no_claim_bootstrap, lib_package:package_register_claims, Wrapped,
+replacement(no_claim_bootstrap, packages:package_register_claims, Wrapped,
             (nb_current('$package_mutant_claims_ready',true) -> true
             ; call(Wrapped), nb_setval('$package_mutant_claims_ready',true))).
-replacement(no_selection, lib_package:package_head_seen(_,_), _, fail).
-replacement(perform_available, lib_package:package_perform_rows(Path,Space,_,Selections), Wrapped,
+replacement(no_selection, packages:package_head_seen(_,_), _, fail).
+replacement(perform_available, packages:package_perform_rows(Path,Space,_,Selections), Wrapped,
             (forall(member(available(Row),Selections),
-                    lib_package:package_perform(Path,Space,backing,Row)), call(Wrapped))).
+                    packages:package_perform(Path,Space,backing,Row)), call(Wrapped))).
 replacement(no_home, metta_engine:metta_package_perform(_,Expression,Result), _,
             metta_engine:evalc(Expression, '&metta', Result)).
-replacement(no_pattern, lib_package:package_heads_pattern(_,_,Names), _, Names=[]).
-replacement(no_arrow_check, lib_package:package_agree_type(_,_,_), _, true).
-replacement(no_equation_collision, lib_package:package_source_equation(_,_,_,_), _, fail).
-replacement(no_merge, lib_package:package_merge_answer(_,_,_), _, true).
-replacement(no_installed_heads, lib_package:package_installed_heads(_,_), _, true).
+replacement(no_pattern, packages:package_heads_pattern(_,_,Names), _, Names=[]).
+replacement(no_arrow_check, packages:package_agree_type(_,_,_), _, true).
+replacement(no_equation_collision, packages:package_source_equation(_,_,_,_), _, fail).
+replacement(no_merge, packages:package_merge_answer(_,_,_), _, true).
+replacement(no_installed_heads, packages:package_installed_heads(_,_), _, true).
 replacement(no_receipts, spaces:metta_add_atom(_Space,Row,Result), Wrapped,
             (nonvar(Row), Row=[performed,_,_] -> Result=true ; call(Wrapped))).
 replacement(no_available, spaces:metta_add_atom(_Space,Row,Result), Wrapped,
             (nonvar(Row), Row=[available,_] -> Result=true ; call(Wrapped))).
-replacement(no_release, lib_package:package_release_loads(_,_), _, true).
-replacement(no_boot_validation, lib_package:package_validate_boots(_,_), _, true).
-replacement(no_failure_cleanup, lib_package:package_loading(_,_,Goal), _, call(Goal)).
-replacement(no_eager_admission, lib_package:package_boot_admission(_,_,_), _, true).
-replacement(no_manifest_admission, lib_package:package_manifest(_,_,_,_,_,Goal), _, call(Goal)).
-replacement(import_runs_setup, lib_package:package_default(Path,Space,Rows), Wrapped,
-            (lib_package:package_prepare(Path,Space,Rows), call(Wrapped))).
-replacement(no_version_check, lib_package:package_versions(_), _, true).
-replacement(no_requires, lib_package:package_require(_,_,_), _, true).
+replacement(no_release, packages:package_release_loads(_,_), _, true).
+replacement(no_boot_validation, packages:package_validate_boots(_,_), _, true).
+replacement(no_failure_cleanup, packages:package_loading(_,_,Goal), _, call(Goal)).
+replacement(no_eager_admission, packages:package_boot_admission(_,_,_), _, true).
+replacement(no_manifest_admission, packages:package_manifest(_,_,_,_,_,Goal), _, call(Goal)).
+replacement(import_runs_setup, packages:package_default(Path,Space,Rows), Wrapped,
+            (packages:package_prepare(Path,Space,Rows), call(Wrapped))).
+replacement(no_version_check, packages:package_versions(_), _, true).
+replacement(no_requires, packages:package_require(_,_,_), _, true).
 replacement(no_internal, metta_engine:metta_reference_internal(_Space,Name), Wrapped,
             (Name==package -> fail ; call(Wrapped))).
-replacement(no_setup_remedy, lib_package:package_native_path(_,_,Locator,_), _,
+replacement(no_setup_remedy, packages:package_native_path(_,_,Locator,_), _,
             throw(error(existence_error(source_sink,Locator),context(package,missing)))).
-replacement(no_claim_reflection, lib_package:'get-property'(Subject,Key,_), Wrapped,
+replacement(no_claim_reflection, packages:'get-property'(Subject,Key,_), Wrapped,
             (Subject==perform, Key==claims -> fail ; call(Wrapped))).
-replacement(no_interpreter, lib_package:package_load(Path,Space,Rows), _,
-            lib_package:package_default(Path,Space,Rows)).
-replacement(no_setup_reuse, lib_package:package_setup_current(_,_,_,_,_,_), _, fail).
-replacement(stale_receipt, lib_package:package_setup_current(_,_,_,Receipt,_,Performed), _,
-            (exists_file(Receipt), lib_package:package_read_rows(Receipt,Performed))).
-replacement(no_artifact_check, lib_package:package_setup_artifacts(_,_,_), _, true).
-replacement(no_setup, lib_package:'setup!'(_,Result), _, Result=true).
-replacement(no_lock_rows, lib_package:package_collect_requirement(_,_), _, true).
-replacement(release_dependencies, lib_package:package_loading_finish(_Path,_Space,_Before,Outcome), Wrapped,
-            (call(Wrapped), (Outcome==exit -> true ; lib_package:package_close_all))).
+replacement(no_interpreter, packages:package_load(Path,Space,Rows), _,
+            packages:package_default(Path,Space,Rows)).
+replacement(no_setup_reuse, packages:package_setup_current(_,_,_,_,_,_), _, fail).
+replacement(stale_receipt, packages:package_setup_current(_,_,_,Receipt,_,Performed), _,
+            (exists_file(Receipt), packages:package_read_rows(Receipt,Performed))).
+replacement(no_artifact_check, packages:package_setup_artifacts(_,_,_), _, true).
+replacement(no_setup, packages:'setup!'(_,Result), _, Result=true).
+replacement(no_lock_rows, packages:package_collect_requirement(_,_), _, true).
+replacement(release_dependencies, packages:package_loading_finish(_Path,_Space,_Before,Outcome), Wrapped,
+            (call(Wrapped), (Outcome==exit -> true ; packages:package_close_all))).
 replacement(no_withdrawal, filereader:withdraw_source_load(_,_,Count), _, Count=0).
 replacement(first_answer_only, metta_engine:metta_package_reduce(_,_,_,_), Wrapped, once(Wrapped)).
 replacement(no_reads_ceiling, metta_engine:metta_package_refuse_above_ceiling(_,_), _, true).
 replacement(no_read_forms, metta_engine:metta_package_reads_runtime(_), _, fail).
-replacement(no_directory_lock, lib_package:package_with_directory_lock(_,Goal), _, call(Goal)).
+replacement(no_directory_lock, packages:package_with_directory_lock(_,Goal), _, call(Goal)).
 replacement(no_catalog_add, seam:foreign_add(Space,_), Wrapped,
             (Space=='&catalogs' -> true ; call(Wrapped))).
-replacement(refuse_equal_alias, lib_package:package_same_identity(Name,_,_,_), _,
+replacement(refuse_equal_alias, packages:package_same_identity(Name,_,_,_), _,
             throw(error(permission_error(resolve,package_identity,Name),none))).
-replacement(no_identity_check, lib_package:package_same_identity(_,_,_,_), _, true).
-replacement(no_pin_check, lib_package:package_check_pin(_,_), _, true).
-replacement(no_pending_requirements, lib_package:package_pending_requirement(_,_), _, fail).
-replacement(no_export_boundary, lib_package:package_native_manifest(File,Declared,Inferred), _,
+replacement(no_identity_check, packages:package_same_identity(_,_,_,_), _, true).
+replacement(no_pin_check, packages:package_check_pin(_,_), _, true).
+replacement(no_pending_requirements, packages:package_pending_requirement(_,_), _, fail).
+replacement(no_export_boundary, packages:package_native_manifest(File,Declared,Inferred), _,
             (Declared=[], package_mutations:infer_every_arity(File,Inferred))).
-replacement(no_native_admission, lib_package:package_native_admission(_,_,_,_,_), _, true).
-replacement(no_native_reuse, lib_package:package_open_head(_,_,Row,Name,Arity), _,
+replacement(no_native_admission, packages:package_native_admission(_,_,_,_,_), _, true).
+replacement(no_native_reuse, packages:package_open_head(_,_,Row,Name,Arity), _,
             (Row=[Token|_],metta_engine:metta_host_open_function(Name,Token,Arity))).
-replacement(import_every_native_head, lib_package:package_load_native(File,Owner), _,
+replacement(import_every_native_head, packages:package_load_native(File,Owner), _,
             (metta_engine:current_metta_space(Home),metta_engine:space_module(Home,Module),
              load_files(Module:File,[if(changed)]),
              (source_file_property(File,module(Owner)) -> true ; Owner=Module))).
 replacement(process_registration, metta_engine:metta_reference_register_prolog(Home,_,Name,Arity), Wrapped,
             (Home=='&self' -> metta_engine:register_process_function(Name,[Arity]) ; call(Wrapped))).
-replacement(no_declared_contracts, lib_package:package_native_exports(_,Names), _, Names=[]).
-replacement(first_contract_only, lib_package:package_native_manifest(File,Declared,Inferred), _,
+replacement(no_declared_contracts, packages:package_native_exports(_,Names), _, Names=[]).
+replacement(first_contract_only, packages:package_native_manifest(File,Declared,Inferred), _,
             (package_mutations:infer_every_arity(File,[First|_]),Declared=[First],Inferred=[])).
-replacement(no_generic_contracts, lib_package:package_contract(_,_,Row,_,_,_), Wrapped,
+replacement(no_generic_contracts, packages:package_contract(_,_,Row,_,_,_), Wrapped,
             (Row=[Token|_],Token=='lp-contract-symbol' -> fail ; call(Wrapped))).
-replacement(empty_generic_signature, lib_package:package_contract(_,_,Row,Pattern,Names,Contracts), Wrapped,
+replacement(empty_generic_signature, packages:package_contract(_,_,Row,Pattern,Names,Contracts), Wrapped,
             (Row=[Token|_],Token\==prolog,var(Pattern)
              -> Pattern=[],Names=[],Contracts=[] ; call(Wrapped))).
-replacement(no_contract_requirement, lib_package:package_contract(_,_,Row,Pattern,Names,Contracts), Wrapped,
+replacement(no_contract_requirement, packages:package_contract(_,_,Row,Pattern,Names,Contracts), Wrapped,
             (Row=[Token|_], Token\==prolog -> Names=Pattern, Contracts=[] ; call(Wrapped))).
-replacement(no_backing_shape, lib_package:package_backing_info(_,_,Row,Info), _,
+replacement(no_backing_shape, packages:package_backing_info(_,_,Row,Info), _,
             Info=info(Row,unclaimed,[],[])).
 
 % Discard export declarations while retaining the artifact's actual clauses.
 % The witness then observes the internal arity that an unrestricted scan leaks.
 infer_every_arity(File, Inferred) :-
     setup_call_cleanup(open(File,read,Stream),
-        lib_package:package_native_terms(Stream,[],_,[],Heads),close(Stream)),
+        packages:package_native_terms(Stream,[],_,[],Heads),close(Stream)),
     sort(Heads,Inferred).
 
-witness(lib_package, Name, Mutation) :- group(Mutation, Names), member(Name, Names).
+witness(package_laws, Name, Mutation) :- group(Mutation, Names), member(Name, Names).
 witness(packages, an_uncovered_backing_without_a_claimant_refuses, no_coverage).
 witness(packages, a_row_that_answers_nothing_refuses_by_name, no_backing_shape).
 witness(packages, a_backing_row_installs_the_head_its_artifact_exports, no_home).

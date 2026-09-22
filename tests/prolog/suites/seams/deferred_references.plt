@@ -76,7 +76,7 @@ test(a_name_no_row_licenses_is_reported) :-
     Unexpected = [(zzz_absent_module:zzz_absent_name/1)-_].
 
 test(a_licensed_name_from_its_own_file_is_not_reported) :-
-    a_clause_in('lib/lib_package/lib_package.pl', Ref),
+    a_clause_in('engine/packages.pl', Ref),
     licensed(PI),
     unexpected_sites([PI-[clause_term_position(Ref, _)]], Unexpected),
     Unexpected == [].

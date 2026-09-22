@@ -103,7 +103,7 @@
 %     with           8776      202            12
 %
 % 17 suites improve and none regresses. Every one of the 150 was a MeTTa name
-% and not one of the 12 is -- 9 are `string' in suites/seams/lib_package.plt --
+% and not one of the 12 is -- 9 are `string' in suites/seams/package_laws.plt --
 % so what is left are ordinary SWI type errors of the kind a mode line is FOR,
 % findings this uncovered rather than residue it left.
 %

@@ -18,7 +18,8 @@ admitting it is hand-kept. Nine checks cover both directions of each promise:
               node_modules/, and any directory carrying its own .git (another
               checkout) never answer a claim. This is the "real file tree"
               half.
-  LIBRARIES   the roster sentence's names and its count equal `lib/lib_*/`.
+  LIBRARIES   the roster sentence's names and its count equal the
+              directories under `lib/` that hold a `pkg.metta` manifest.
               The count is stated twice, in the sources table and in the
               roster, and both are read.
   COUNTS      every explicit source-table count is derived from the path or
@@ -181,7 +182,7 @@ def _own_components() -> frozenset[str]:
     A component holds a `.git` exactly as a foreign checkout does, so the bare
     marker test below called all eight of this superproject's submodules
     foreign and hid everything inside them. Every glob naming one then reported
-    that it named nothing: `engine/metta/*.pl`, `lib/lib_*/`,
+    that it named nothing: `engine/metta/*.pl`, `lib/*/`,
     `extensions/python/metta/*.py` and nine more
     [measured 2026-09-20: twelve of the lane's thirty-three findings].
 
@@ -304,7 +305,7 @@ _ROSTER = re.compile(
     re.DOTALL,
 )
 #: The same count where the sources table states it a second time.
-_TABLE_COUNT = re.compile(r"\|\s*`lib/lib_\*/`\s*\|\s*(?P<count>\d+) MeTTa libraries")
+_TABLE_COUNT = re.compile(r"\|\s*`lib/\*/`\s*\|\s*(?P<count>\d+) MeTTa libraries")
 ROSTER_BEGIN = "<!-- begin generated library roster -->"
 ROSTER_END = "<!-- end generated library roster -->"
 
@@ -359,7 +360,7 @@ _CAPABILITY_ROSTER = re.compile(
 _COUNT_CLAIMS = (
     (
         "Prolog library halves",
-        re.compile(r"\| `lib/lib_\*/` \|[^\n]*?all (?P<count>\d+) shipped Prolog halves"),
+        re.compile(r"\| `lib/\*/` \|[^\n]*?all (?P<count>\d+) shipped Prolog halves"),
         "prolog_library_halves",
     ),
     (
@@ -931,7 +932,7 @@ def refresh_source_claims(text: str, root: Path = REPO) -> str:
     [tested: tests/checks/check_llms_selftest.py; commit=9b22993447a5ddba93643895e3025661ba9f693e].
     """
     counts = source_counts(root)
-    shipped = sorted(path.name for path in (root / "lib").glob("lib_*") if path.is_dir())
+    shipped = shipped_libraries(root)
     changes = []
     for label, pattern, key in _COUNT_CLAIMS:
         match = pattern.search(text)
@@ -992,12 +993,28 @@ def count_findings(
     return findings
 
 
+#: A directory is a library because it holds a MANIFEST, not because of how its
+#: name begins. The prefix rule was wrong in both directions: it hid
+#: `minimal_metta_lib`, which ships and imports like any other, and it listed
+#: `lib_gitimport`, a Prolog-only backing service with no manifest that nothing
+#: can import. The engine decides the same way
+#: [source: engine/packages.pl:package_checkout_entry/4, which enters a
+#: checkout through its pkg.metta and only that].
+MANIFEST = "pkg.metta"
+
+
+def shipped_libraries(root: Path = REPO) -> list[str]:
+    """Every directory under lib/ that a manifest makes importable, sorted."""
+    return sorted(path.parent.name for path in (root / "lib").glob(f"*/{MANIFEST}"))
+
+
 def library_vocabulary(root: Path = REPO) -> dict[str, str]:
     """Every clause head a shipped library defines, mapped to its library."""
     heads: dict[str, str] = {}
-    for path in sorted((root / "lib").glob("lib_*/*.metta")):
-        for match in _LIBRARY_HEAD.finditer(path.read_text(encoding="utf-8")):
-            heads.setdefault(match.group(1), path.parent.name)
+    for name in shipped_libraries(root):
+        for path in sorted((root / "lib" / name).glob("*.metta")):
+            for match in _LIBRARY_HEAD.finditer(path.read_text(encoding="utf-8")):
+                heads.setdefault(match.group(1), path.parent.name)
     return heads
 
 
@@ -1180,7 +1197,7 @@ def path_findings(sheet: Path, text: str) -> list[str]:
 def library_findings(sheet: Path, text: str) -> list[str]:
     """The roster's names and both statements of its count, against `lib/`."""
     findings: list[str] = []
-    shipped = {path.name for path in sorted((REPO / "lib").glob("lib_*")) if path.is_dir()}
+    shipped = set(shipped_libraries())
     roster = _ROSTER.search(text)
     if roster is None and sheet == REPO / "llms.txt":
         # Absence is a finding for the sheet that HAS a roster and a skip for
@@ -1195,7 +1212,9 @@ def library_findings(sheet: Path, text: str) -> list[str]:
             f"so its {len(shipped)} names go unchecked"
         )
     if roster is not None:
-        named = set(re.findall(r"`(lib_\w+)`", roster.group("names")))
+        # Any backticked name, because a library is a directory with a
+        # manifest and `minimal_metta_lib` has one without the prefix.
+        named = set(re.findall(r"`(\w+)`", roster.group("names")))
         line = _line_of(text, roster.start())
         findings.extend(
             f"{sheet.relative_to(REPO)}:{line}: the roster omits `{missing}`, which lib/ ships"

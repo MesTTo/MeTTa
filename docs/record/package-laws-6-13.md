@@ -1,6 +1,6 @@
 # Package lifecycle library
 
-`lib/lib_package` implements the default package interpreter. The engine reads
+`lib/package_laws` implements the default package interpreter. The engine reads
 only the current source's package argument record, performs requirements first,
 dispatches `perform` by unification, and enforces normalization's reads ceiling
 and inference budget. A required library can replace `package-load`. The
@@ -29,14 +29,14 @@ approach a31.2 without editing that file.
 The existence claim is discharged through the ordinary import, replacement,
 withdrawal and setup doors. Counterexamples exercise validation before effects,
 selection, source ownership, failed activation and failed cleanup. The MeTTa
-fixture `lib/lib_package/fixtures/policy.metta` predicts selection, receipt
+fixture `tests/data/package_laws/policy.metta` predicts selection, receipt
 multiplicity and reverse retirement; its tests cover four claimant combinations
 and 36 lifecycle length/failure-position combinations. The mutation runner
 requires a disabling mutation for every library test and refuses nonexistent
 witnesses. Whole-gate attribution requires identical unrelated source bytes,
 Git identities and build configuration in the candidate and control.
 
-The latest focused run passed all 22 `packages` tests and 69 `lib_package`
+The latest focused run passed all 22 `packages` tests and 69 `package_laws`
 tests, followed by all 78 disabling mutations. The consolidated module's
 result is `ai-tmp/ai-package-consolidation-tests.log`. Its first surface
 invocation used the wrong working directory and raised
@@ -148,7 +148,7 @@ kept running the old contract code. Moving those units beside the umbrella
 made freshness work, but the library-surface gate loaded them independently
 and reported weak-import overrides. Included clauses had also escaped that
 gate's source attribution; the full scan exposed six unpublished engine calls.
-Consolidating the units into `lib_package.pl` gives compilation and surface
+Consolidating the units into `package_laws.pl` gives compilation and surface
 checking the same source boundary. Their six engine services are published
 through the existing seam.
 
@@ -228,7 +228,7 @@ The following pytest invocation initially used a wrong path and raised
 `ERROR: file or directory not found: tests/ch17_concurrency/test_async_scheduler.py`;
 the corrected path is `tests/ch17_concurrency_and_the_loop/test_async_scheduler.py`.
 An earlier freshness invocation raised
-`FileNotFoundError: .../lib/lib_package/support/catalog.pl` because the battery
+`FileNotFoundError: .../engine/support/catalog.pl` because the battery
 had current source bytes but a stale Git index. Aligning its own detached HEAD
 and all eight component indexes to the provisioned revisions repaired that
 test setup; the source files were unchanged by the identity repair.
@@ -241,7 +241,7 @@ warnings, and jscpd reports zero clones. The complete result is
 `ai-tmp/ai-package-mutations-78.log`.
 Whole-gate results from batteries without their own Git identity are invalid.
 An earlier control also retained a stale detached HEAD and an empty
-`lib_package` directory after an orphan QLF prevented removal; it cannot
+`package_laws` directory after an orphan QLF prevented removal; it cannot
 supply the required comparison. Batteries 11 and 12 run plain `sh tools/check.sh`
 from an earlier frozen candidate/control pair; they are diagnostic runs, not
 the final comparison for the consolidated implementation. Both detached HEADs and all eight
@@ -346,7 +346,7 @@ duplicate_builtin_implementation_key('get-property'/1)
 existence_error(procedure,metta_engine:replacing_previous_load_/4)
 existence_error(procedure,metta_engine:package_argument_type/2)
 forall/2: Unknown procedure: filereader:package_loader_source/1
-Unknown procedure: lib_package:debug/3
+Unknown procedure: packages:debug/3
 plunit_packages:'unit body'/2: Unknown procedure: plunit_packages:packages_undepended_double/2
 ```
 

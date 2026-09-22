@@ -553,15 +553,15 @@ run GATE plunit check_plunit
 # bites: a law's test can keep passing for a reason unrelated to the law once
 # the implementation moves under it.
 #
-# tests/data/lib_package/mutations.pl disables one package policy at a time and
+# tests/data/package_laws/mutations.pl disables one package policy at a time and
 # reruns the witnesses assigned to it, in a child process each, requiring the
 # unmutated control to exit 0 and the mutant to exit 1. Its coverage/0 refuses
-# the run outright when a lib_package test has no mutation assigned or a
+# the run outright when a package_laws test has no mutation assigned or a
 # mutation names a test that does not exist, so the pairing cannot rot in
 # either direction.
 #
 # The harness has been complete since 2026-09-20 and NOTHING RAN IT, which is
-# what the evidence lane reported: lib_package.plt cited it as the backing for
+# what the evidence lane reported: package_laws.plt cited it as the backing for
 # its guarantees while no runner executed it, so the citation was a claim about
 # a file nobody had run. This is the same shape as the evidence-mutations GATE
 # above, one mutant per rule plus an unmutated control, applied to the package
@@ -570,7 +570,7 @@ run GATE plunit check_plunit
 # mutant=1, 156 child processes inside 34s including the battery's own
 # provisioning, because each child loads the engine from its warm .qlf].
 check_package_mutations() {
-    cd "$HERE/tests/data/lib_package" || return 1
+    cd "$HERE/tests/data/package_laws" || return 1
     bounded swipl -q mutations.pl < /dev/null
 }
 run GATE package-mutations check_package_mutations

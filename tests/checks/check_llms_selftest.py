@@ -70,6 +70,7 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     method_findings,
     near_miss_findings,
     omitted_head_findings,
+    shipped_libraries,
     operator_word_findings,
     operator_words,
     path_findings,
@@ -125,7 +126,8 @@ CLOSED_VALUES = {
 
 
 def _shipped() -> list[str]:
-    return sorted(path.name for path in (REPO / "lib").glob("lib_*") if path.is_dir())
+    """The checker's own roster, not a second copy of the rule that names it."""
+    return shipped_libraries(REPO)
 
 
 def _roster(names: list[str], count: int | None = None) -> str:
@@ -301,7 +303,7 @@ def main() -> int:
         "a glob into a mounted component was reported",
     )
     expect(
-        path_findings(SHEET, "the libraries are `lib/lib_*/`") == [],
+        path_findings(SHEET, "the libraries are `lib/*/`") == [],
         "a glob naming the library directories was reported",
     )
     # A path the tree deliberately does not hold is a claim about what a BUILD
@@ -377,7 +379,7 @@ def main() -> int:
         ),
         "a roster count disagreeing with lib/ was NOT reported",
     )
-    table = f"| `lib/lib_*/` | {len(shipped) - 1} MeTTa libraries loaded with x |"
+    table = f"| `lib/*/` | {len(shipped) - 1} MeTTa libraries loaded with x |"
     expect(
         any("sources table says" in finding for finding in library_findings(SHEET, table)),
         "a sources-table count disagreeing with lib/ was NOT reported",

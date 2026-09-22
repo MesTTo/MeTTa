@@ -2,11 +2,11 @@
 % Assumes: run in a provisioned battery; source fixtures and
 %   generated artifacts belong to that battery's ai-tmp directory.
 % Guarantees: each observation reports the result, including named refusals.
-%   [tested: lib_package; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+%   [tested: package_laws; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: fixture streams close on every exit. Each probe runs in this
 %   diagnostic process; its claims and native spaces disappear on process exit.
 
-:- module(lib_package_boundary, [main/0]).
+:- module(package_laws_boundary, [main/0]).
 :- ensure_loaded('../../../engine/qlf_boot.pl').
 :- use_module('../../../engine/metta.pl').
 :- use_module(library(filesex)).
@@ -71,18 +71,18 @@ main :-
     observe(relative_requirement_import, 'import!'('&self', Relative, _)),
     answers(perform_claims, ['get-property', perform, claims]),
     fixture('native.pl',
-        "lib_package_boundary_double(Input, Result) :- Result is 2 * Input.\n",
+        "package_laws_boundary_double(Input, Result) :- Result is 2 * Input.\n",
         Artifact),
     atom_string(Artifact, ArtifactString),
     format(string(Backing),
-        '(= (package backing) (prolog ~q (lib_package_boundary_double)))~n',
+        '(= (package backing) (prolog ~q (package_laws_boundary_double)))~n',
         [ArtifactString]),
     fixture('native.metta', Backing, Native),
     metta_engine:metta_reference_home(Native, Home),
     observe(native_home_import, metta_engine:importer_helper(Home, Native)),
     observe(backing_registered_in_home,
         metta_engine:metta_reference_prolog_head(Home,
-            lib_package_boundary_double, 2)),
-    answers(native_before_unimport, [evalc, [lib_package_boundary_double, 21], Home]),
+            package_laws_boundary_double, 2)),
+    answers(native_before_unimport, [evalc, [package_laws_boundary_double, 21], Home]),
     observe(native_unimport, metta_unimport(Home, Native)),
-    answers(native_after_unimport, [evalc, [lib_package_boundary_double, 21], Home]).
+    answers(native_after_unimport, [evalc, [package_laws_boundary_double, 21], Home]).

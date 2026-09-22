@@ -26,7 +26,6 @@ beside its definitions.
 | lib_encoding | 6 | 6 |
 | lib_file | 55 | 55 |
 | lib_functional | 17 | 17 |
-| lib_gitimport | 0 | 0 |
 | lib_graph | 15 | 15 |
 | lib_he | 18 | 0 |
 | lib_http | 9 | 9 |
@@ -40,7 +39,6 @@ beside its definitions.
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
-| lib_package | 3 | 3 |
 | lib_pairs | 9 | 9 |
 | lib_parsing | 5 | 5 |
 | lib_patrick | 4 | 0 |
@@ -70,12 +68,13 @@ beside its definitions.
 | lib_vector | 13 | 13 |
 | lib_yaml | 4 | 4 |
 | lib_zar | 4 | 0 |
+| minimal_metta_lib | 10 | 0 |
 
 ## lib_cli
 
 ### `cli-arguments!`
 
-*pkg.metta:11*
+*lib.metta:11*
 
 ```metta
 (: cli-arguments! (-> Expression))
@@ -87,7 +86,7 @@ Returns: Arguments
 
 ### `cli-help`
 
-*pkg.metta:17*
+*lib.metta:17*
 
 ```metta
 (: cli-help (-> Atom String))
@@ -101,7 +100,7 @@ Returns: Help
 
 ### `cli-parse`
 
-*pkg.metta:23*
+*lib.metta:23*
 
 ```metta
 (: cli-parse (-> Atom Expression Symbol Expression))
@@ -117,7 +116,7 @@ Returns: Parsed
 
 ### `cli-types`
 
-*pkg.metta:29*
+*lib.metta:29*
 
 ```metta
 (: cli-types (-> Expression))
@@ -131,7 +130,7 @@ Returns: Types
 
 ### `range`
 
-*pkg.metta:13*
+*lib.metta:13*
 
 ```metta
 (: range (-> Number Number Number))
@@ -146,7 +145,7 @@ Returns: Value
 
 ### `choose2`
 
-*pkg.metta:25*
+*lib.metta:25*
 
 ```metta
 (: choose2 (-> Expression Expression))
@@ -160,7 +159,7 @@ Returns: Pair
 
 ### `choose2l`
 
-*pkg.metta:32*
+*lib.metta:32*
 
 ```metta
 (: choose2l (-> Expression Expression))
@@ -174,7 +173,7 @@ Returns: Pairs
 
 ### `chooseK`
 
-*pkg.metta:50*
+*lib.metta:50*
 
 ```metta
 (: chooseK (-> Expression Number Expression))
@@ -189,7 +188,7 @@ Returns: Choice
 
 ### `chooseKl`
 
-*pkg.metta:57*
+*lib.metta:57*
 
 ```metta
 (: chooseKl (-> Expression Number Expression))
@@ -204,7 +203,7 @@ Returns: Choices
 
 ### `takeK`
 
-*pkg.metta:70*
+*lib.metta:70*
 
 ```metta
 (: takeK (-> Number Expression Expression))
@@ -219,7 +218,7 @@ Returns: Prefix
 
 ### `range-step`
 
-*pkg.metta:84*
+*lib.metta:84*
 
 ```metta
 (: range-step (-> Number Number Number Number))
@@ -235,7 +234,7 @@ Returns: Value
 
 ### `tuples`
 
-*pkg.metta:96*
+*lib.metta:96*
 
 ```metta
 (: tuples (-> Expression Expression))
@@ -249,7 +248,7 @@ Returns: Tuple
 
 ### `cartesian-power`
 
-*pkg.metta:110*
+*lib.metta:110*
 
 ```metta
 (: cartesian-power (-> Expression Number Expression))
@@ -264,7 +263,7 @@ Returns: Tuple
 
 ### `permutations`
 
-*pkg.metta:122*
+*lib.metta:122*
 
 ```metta
 (: permutations (-> Expression Expression))
@@ -278,7 +277,7 @@ Returns: Permutation
 
 ### `subsets`
 
-*pkg.metta:135*
+*lib.metta:135*
 
 ```metta
 (: subsets (-> Expression Expression))
@@ -292,7 +291,7 @@ Returns: Subset
 
 ### `permutation-count`
 
-*pkg.metta:148*
+*lib.metta:148*
 
 ```metta
 (: permutation-count (-> Number Number Number))
@@ -307,7 +306,7 @@ Returns: Result
 
 ### `factorial`
 
-*pkg.metta:156*
+*lib.metta:156*
 
 ```metta
 (: factorial (-> Number Number))
@@ -321,7 +320,7 @@ Returns: Result
 
 ### `binomial`
 
-*pkg.metta:166*
+*lib.metta:166*
 
 ```metta
 (: binomial (-> Number Number Number))
@@ -338,7 +337,7 @@ Returns: Result
 
 ### `archive-entries!`
 
-*pkg.metta:11*
+*lib.metta:11*
 
 ```metta
 (: archive-entries! (-> %Undefined% Expression))
@@ -352,7 +351,7 @@ Returns: Entries
 
 ### `archive-extract!`
 
-*pkg.metta:17*
+*lib.metta:17*
 
 ```metta
 (: archive-extract! (-> %Undefined% %Undefined% Bool))
@@ -367,7 +366,7 @@ Returns: Done
 
 ### `archive-read!`
 
-*pkg.metta:23*
+*lib.metta:23*
 
 ```metta
 (: archive-read! (-> %Undefined% Number Expression))
@@ -382,7 +381,7 @@ Returns: Bytes
 
 ### `compress-bytes`
 
-*pkg.metta:29*
+*lib.metta:29*
 
 ```metta
 (: compress-bytes (-> Symbol Number Expression Expression))
@@ -398,7 +397,7 @@ Returns: Compressed
 
 ### `compress-file!`
 
-*pkg.metta:35*
+*lib.metta:35*
 
 ```metta
 (: compress-file! (-> Symbol Number %Undefined% %Undefined% Bool))
@@ -415,7 +414,7 @@ Returns: Done
 
 ### `compression-formats`
 
-*pkg.metta:41*
+*lib.metta:41*
 
 ```metta
 (: compression-formats (-> Expression))
@@ -427,7 +426,7 @@ Returns: Formats
 
 ### `decompress-bytes`
 
-*pkg.metta:47*
+*lib.metta:47*
 
 ```metta
 (: decompress-bytes (-> Symbol Expression Expression))
@@ -442,7 +441,7 @@ Returns: Bytes
 
 ### `decompress-file!`
 
-*pkg.metta:53*
+*lib.metta:53*
 
 ```metta
 (: decompress-file! (-> Symbol %Undefined% %Undefined% Bool))
@@ -460,7 +459,7 @@ Returns: Done
 
 ### `crypto-hash`
 
-*pkg.metta:12*
+*lib.metta:12*
 
 ```metta
 (: crypto-hash (-> %Undefined% %Undefined% String))
@@ -475,7 +474,7 @@ Returns: Hex
 
 ### `crypto-hash-bytes`
 
-*pkg.metta:18*
+*lib.metta:18*
 
 ```metta
 (: crypto-hash-bytes (-> %Undefined% %Undefined% String))
@@ -490,7 +489,7 @@ Returns: Hex
 
 ### `crypto-hash-file!`
 
-*pkg.metta:24*
+*lib.metta:24*
 
 ```metta
 (: crypto-hash-file! (-> %Undefined% %Undefined% String))
@@ -505,7 +504,7 @@ Returns: Hex
 
 ### `crypto-hmac`
 
-*pkg.metta:30*
+*lib.metta:30*
 
 ```metta
 (: crypto-hmac (-> %Undefined% %Undefined% %Undefined% String))
@@ -521,7 +520,7 @@ Returns: Hex
 
 ### `crypto-hmac-bytes`
 
-*pkg.metta:36*
+*lib.metta:36*
 
 ```metta
 (: crypto-hmac-bytes (-> %Undefined% %Undefined% %Undefined% String))
@@ -537,7 +536,7 @@ Returns: Hex
 
 ### `crypto-password-hash`
 
-*pkg.metta:43*
+*lib.metta:43*
 
 ```metta
 (: crypto-password-hash (-> %Undefined% Number String))
@@ -556,7 +555,7 @@ Returns: Record
 
 ### `crypto-password-verify`
 
-*pkg.metta:49*
+*lib.metta:49*
 
 ```metta
 (: crypto-password-verify (-> %Undefined% %Undefined% Bool))
@@ -571,7 +570,7 @@ Returns: Matches
 
 ### `crypto-random-bytes`
 
-*pkg.metta:55*
+*lib.metta:55*
 
 ```metta
 (: crypto-random-bytes (-> Number Expression))
@@ -585,7 +584,7 @@ Returns: Bytes
 
 ### `crypto-random-hex`
 
-*pkg.metta:61*
+*lib.metta:61*
 
 ```metta
 (: crypto-random-hex (-> Number String))
@@ -599,7 +598,7 @@ Returns: Hex
 
 ### `crypto-random-integer`
 
-*pkg.metta:67*
+*lib.metta:67*
 
 ```metta
 (: crypto-random-integer (-> Number Number Number))
@@ -614,7 +613,7 @@ Returns: Value
 
 ### `crypto_hash`
 
-*pkg.metta:73*
+*lib.metta:73*
 
 ```metta
 (: crypto_hash (-> %Undefined% %Undefined% String))
@@ -629,7 +628,7 @@ Returns: Hex
 
 ### `crypto_random_hex`
 
-*pkg.metta:79*
+*lib.metta:79*
 
 ```metta
 (: crypto_random_hex (-> Number String))
@@ -645,7 +644,7 @@ Returns: Hex
 
 ### `csv-append!`
 
-*pkg.metta:14*
+*lib.metta:14*
 
 ```metta
 (: csv-append! (-> %Undefined% Expression Bool))
@@ -665,7 +664,7 @@ Returns: Written
 
 ### `csv-encode`
 
-*pkg.metta:21*
+*lib.metta:21*
 
 ```metta
 (: csv-encode (-> Expression Expression String))
@@ -684,7 +683,7 @@ Returns: Text
 
 ### `csv-parse`
 
-*pkg.metta:28*
+*lib.metta:28*
 
 ```metta
 (: csv-parse (-> %Undefined% Expression))
@@ -703,7 +702,7 @@ Returns: Rows
 
 ### `csv-read!`
 
-*pkg.metta:35*
+*lib.metta:35*
 
 ```metta
 (: csv-read! (-> %Undefined% Expression))
@@ -722,7 +721,7 @@ Returns: Fields
 
 ### `csv-snapshot!`
 
-*pkg.metta:42*
+*lib.metta:42*
 
 ```metta
 (: csv-snapshot! (-> %Undefined% Expression SpaceType))
@@ -741,7 +740,7 @@ Returns: Space
 
 ### `csv-space`
 
-*pkg.metta:49*
+*lib.metta:49*
 
 ```metta
 (: csv-space (-> %Undefined% Expression SpaceType))
@@ -760,7 +759,7 @@ Returns: Space
 
 ### `csv-write!`
 
-*pkg.metta:56*
+*lib.metta:56*
 
 ```metta
 (: csv-write! (-> %Undefined% Expression Bool))
@@ -782,7 +781,7 @@ Returns: Written
 
 ### `database-add!`
 
-*pkg.metta:11*
+*lib.metta:11*
 
 ```metta
 (: database-add! (-> %Undefined% Atom Bool))
@@ -797,7 +796,7 @@ Returns: Done
 
 ### `database-atoms`
 
-*pkg.metta:17*
+*lib.metta:17*
 
 ```metta
 (: database-atoms (-> %Undefined% Atom))
@@ -811,7 +810,7 @@ Returns: Rows
 
 ### `database-close!`
 
-*pkg.metta:23*
+*lib.metta:23*
 
 ```metta
 (: database-close! (-> %Undefined% Bool))
@@ -825,7 +824,7 @@ Returns: Done
 
 ### `database-open!`
 
-*pkg.metta:29*
+*lib.metta:29*
 
 ```metta
 (: database-open! (-> %Undefined% Symbol %Undefined%))
@@ -840,7 +839,7 @@ Returns: Handle
 
 ### `database-remove!`
 
-*pkg.metta:35*
+*lib.metta:35*
 
 ```metta
 (: database-remove! (-> %Undefined% Atom Bool))
@@ -855,7 +854,7 @@ Returns: Removed
 
 ### `database-sync!`
 
-*pkg.metta:41*
+*lib.metta:41*
 
 ```metta
 (: database-sync! (-> %Undefined% Bool))
@@ -869,7 +868,7 @@ Returns: Done
 
 ### `with-database`
 
-*pkg.metta:47*
+*lib.metta:47*
 
 ```metta
 (: with-database (-> %Undefined% Symbol Atom %Undefined%))
@@ -887,7 +886,7 @@ Returns: Answer
 
 ### `ft-empty`
 
-*pkg.metta:57*
+*lib.metta:57*
 
 The empty finger tree; every other tree grows from it with ft-push-front and ft-push-back.
 
@@ -895,7 +894,7 @@ Returns: FTEmpty
 
 ### `ft-is-empty`
 
-*pkg.metta:62*
+*lib.metta:62*
 
 Whether a finger tree holds nothing.
 
@@ -905,7 +904,7 @@ Returns: True or False
 
 ### `ft-pop-front`
 
-*pkg.metta:91*
+*lib.metta:91*
 
 The front element and the remaining tree, as the pair ($x $rest). Popping the empty tree has no answer.
 
@@ -915,7 +914,7 @@ Returns: ($front $rest)
 
 ### `ft-pop-back`
 
-*pkg.metta:112*
+*lib.metta:112*
 
 The back element and the remaining tree, as the pair ($x $rest): ft-pop-front's mirror.
 
@@ -925,7 +924,7 @@ Returns: ($back $rest)
 
 ### `ft-front`
 
-*pkg.metta:131*
+*lib.metta:131*
 
 The front element, the tree untouched.
 
@@ -935,7 +934,7 @@ Returns: the first element
 
 ### `ft-back`
 
-*pkg.metta:138*
+*lib.metta:138*
 
 The back element, the tree untouched.
 
@@ -945,7 +944,7 @@ Returns: the last element
 
 ### `ft-from-list`
 
-*pkg.metta:148*
+*lib.metta:148*
 
 A finger tree holding the expression's elements in order.
 
@@ -955,7 +954,7 @@ Returns: a finger tree
 
 ### `ft-to-list`
 
-*pkg.metta:158*
+*lib.metta:158*
 
 The elements front to back, as an expression: ft-from-list's inverse.
 
@@ -965,7 +964,7 @@ Returns: an expression
 
 ### `ft-concat`
 
-*pkg.metta:209*
+*lib.metta:209*
 
 Both trees' elements, left then right, in O(log n): the operation finger trees exist to make cheap.
 
@@ -976,7 +975,7 @@ Returns: one finger tree
 
 ### `map-empty`
 
-*pkg.metta:220*
+*lib.metta:220*
 
 ```metta
 (: map-empty (-> Expression))
@@ -988,7 +987,7 @@ Returns: Map
 
 ### `map-from-pairs`
 
-*pkg.metta:230*
+*lib.metta:230*
 
 ```metta
 (: map-from-pairs (-> Expression Expression))
@@ -1002,7 +1001,7 @@ Returns: Map
 
 ### `map-get`
 
-*pkg.metta:238*
+*lib.metta:238*
 
 ```metta
 (: map-get (-> %Undefined% %Undefined% %Undefined%))
@@ -1017,7 +1016,7 @@ Returns: Value
 
 ### `map-get-or`
 
-*pkg.metta:248*
+*lib.metta:248*
 
 ```metta
 (: map-get-or (-> %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -1033,7 +1032,7 @@ Returns: Value
 
 ### `map-has`
 
-*pkg.metta:256*
+*lib.metta:256*
 
 ```metta
 (: map-has (-> %Undefined% %Undefined% Bool))
@@ -1048,7 +1047,7 @@ Returns: Answer
 
 ### `map-keys`
 
-*pkg.metta:263*
+*lib.metta:263*
 
 ```metta
 (: map-keys (-> %Undefined% Expression))
@@ -1062,7 +1061,7 @@ Returns: Keys
 
 ### `map-max`
 
-*pkg.metta:272*
+*lib.metta:272*
 
 ```metta
 (: map-max (-> %Undefined% Expression))
@@ -1076,7 +1075,7 @@ Returns: Pair
 
 ### `map-min`
 
-*pkg.metta:281*
+*lib.metta:281*
 
 ```metta
 (: map-min (-> %Undefined% Expression))
@@ -1090,7 +1089,7 @@ Returns: Pair
 
 ### `map-pairs`
 
-*pkg.metta:288*
+*lib.metta:288*
 
 ```metta
 (: map-pairs (-> %Undefined% Expression))
@@ -1104,7 +1103,7 @@ Returns: Pairs
 
 ### `map-put`
 
-*pkg.metta:298*
+*lib.metta:298*
 
 ```metta
 (: map-put (-> %Undefined% %Undefined% %Undefined% Expression))
@@ -1120,7 +1119,7 @@ Returns: Result
 
 ### `map-remove`
 
-*pkg.metta:308*
+*lib.metta:308*
 
 ```metta
 (: map-remove (-> %Undefined% %Undefined% Expression))
@@ -1135,7 +1134,7 @@ Returns: Result
 
 ### `map-size`
 
-*pkg.metta:315*
+*lib.metta:315*
 
 ```metta
 (: map-size (-> %Undefined% Number))
@@ -1149,7 +1148,7 @@ Returns: Size
 
 ### `map-values`
 
-*pkg.metta:322*
+*lib.metta:322*
 
 ```metta
 (: map-values (-> %Undefined% Expression))
@@ -1163,7 +1162,7 @@ Returns: Values
 
 ### `pq-empty`
 
-*pkg.metta:329*
+*lib.metta:329*
 
 ```metta
 (: pq-empty (-> Expression))
@@ -1175,7 +1174,7 @@ Returns: Queue
 
 ### `pq-from-pairs`
 
-*pkg.metta:340*
+*lib.metta:340*
 
 ```metta
 (: pq-from-pairs (-> Expression Expression))
@@ -1189,7 +1188,7 @@ Returns: Queue
 
 ### `pq-insert`
 
-*pkg.metta:349*
+*lib.metta:349*
 
 ```metta
 (: pq-insert (-> %Undefined% %Undefined% %Undefined% Expression))
@@ -1205,7 +1204,7 @@ Returns: Result
 
 ### `pq-merge`
 
-*pkg.metta:360*
+*lib.metta:360*
 
 ```metta
 (: pq-merge (-> (:seg %Undefined%) Expression))
@@ -1219,7 +1218,7 @@ Returns: Result
 
 ### `pq-min`
 
-*pkg.metta:369*
+*lib.metta:369*
 
 ```metta
 (: pq-min (-> %Undefined% Expression))
@@ -1233,7 +1232,7 @@ Returns: Pair
 
 ### `pq-pairs`
 
-*pkg.metta:376*
+*lib.metta:376*
 
 ```metta
 (: pq-pairs (-> %Undefined% Expression))
@@ -1247,7 +1246,7 @@ Returns: Pairs
 
 ### `pq-pop`
 
-*pkg.metta:386*
+*lib.metta:386*
 
 ```metta
 (: pq-pop (-> %Undefined% Expression))
@@ -1261,7 +1260,7 @@ Returns: Answer
 
 ### `pq-remove`
 
-*pkg.metta:398*
+*lib.metta:398*
 
 ```metta
 (: pq-remove (-> %Undefined% %Undefined% %Undefined% Expression))
@@ -1277,7 +1276,7 @@ Returns: Result
 
 ### `pq-size`
 
-*pkg.metta:405*
+*lib.metta:405*
 
 ```metta
 (: pq-size (-> %Undefined% Number))
@@ -1295,7 +1294,7 @@ Undocumented: `FTDeep`, `FTEmpty`, `FTSingle`, `FTree`, `add-unique-or-fail`, `d
 
 ### `date-add`
 
-*pkg.metta:10*
+*lib.metta:10*
 
 ```metta
 (: date-add (-> Number Expression %Undefined% Number))
@@ -1311,7 +1310,7 @@ Returns: Shifted
 
 ### `date-field`
 
-*pkg.metta:16*
+*lib.metta:16*
 
 ```metta
 (: date-field (-> Expression Symbol %Undefined%))
@@ -1326,7 +1325,7 @@ Returns: Value
 
 ### `date-fields`
 
-*pkg.metta:22*
+*lib.metta:22*
 
 ```metta
 (: date-fields (-> Expression Expression))
@@ -1340,7 +1339,7 @@ Returns: Pair
 
 ### `date-timestamp`
 
-*pkg.metta:28*
+*lib.metta:28*
 
 ```metta
 (: date-timestamp (-> Expression Number))
@@ -1354,7 +1353,7 @@ Returns: Timestamp
 
 ### `date-weekday`
 
-*pkg.metta:34*
+*lib.metta:34*
 
 ```metta
 (: date-weekday (-> Expression Number))
@@ -1368,7 +1367,7 @@ Returns: Day
 
 ### `date-year-day`
 
-*pkg.metta:40*
+*lib.metta:40*
 
 ```metta
 (: date-year-day (-> Expression Number))
@@ -1382,7 +1381,7 @@ Returns: Day
 
 ### `day-of-week`
 
-*pkg.metta:46*
+*lib.metta:46*
 
 ```metta
 (: day-of-week (-> Number Symbol))
@@ -1396,7 +1395,7 @@ Returns: Day
 
 ### `day_of_week`
 
-*pkg.metta:52*
+*lib.metta:52*
 
 ```metta
 (: day_of_week (-> Number Symbol))
@@ -1410,7 +1409,7 @@ Returns: Day
 
 ### `format-date`
 
-*pkg.metta:58*
+*lib.metta:58*
 
 ```metta
 (: format-date (-> Number %Undefined% Symbol))
@@ -1425,7 +1424,7 @@ Returns: Formatted
 
 ### `format-datetime`
 
-*pkg.metta:64*
+*lib.metta:64*
 
 ```metta
 (: format-datetime (-> Number %Undefined% %Undefined% String))
@@ -1441,7 +1440,7 @@ Returns: Text
 
 ### `format_date`
 
-*pkg.metta:70*
+*lib.metta:70*
 
 ```metta
 (: format_date (-> Number %Undefined% Symbol))
@@ -1456,7 +1455,7 @@ Returns: Formatted
 
 ### `leap-year`
 
-*pkg.metta:76*
+*lib.metta:76*
 
 ```metta
 (: leap-year (-> Number Bool))
@@ -1470,7 +1469,7 @@ Returns: Leap
 
 ### `month-days`
 
-*pkg.metta:82*
+*lib.metta:82*
 
 ```metta
 (: month-days (-> Number Number Number))
@@ -1485,7 +1484,7 @@ Returns: Days
 
 ### `now`
 
-*pkg.metta:88*
+*lib.metta:88*
 
 ```metta
 (: now (-> Number))
@@ -1497,7 +1496,7 @@ Returns: Timestamp
 
 ### `parse-date`
 
-*pkg.metta:95*
+*lib.metta:95*
 
 ```metta
 (: parse-date (-> %Undefined% Number))
@@ -1516,7 +1515,7 @@ Returns: Timestamp
 
 ### `timestamp-date`
 
-*pkg.metta:101*
+*lib.metta:101*
 
 ```metta
 (: timestamp-date (-> Number %Undefined% Expression))
@@ -1533,7 +1532,7 @@ Returns: Parts
 
 ### `once`
 
-*pkg.metta:41*
+*lib.metta:41*
 
 ```metta
 (: once (-> Atom %Undefined%))
@@ -1549,7 +1548,7 @@ Returns: Its first answer
 
 ### `dict-get`
 
-*pkg.metta:116*
+*lib.metta:114*
 
 ```metta
 (: dict-get (-> SpaceType %Undefined% %Undefined% %Undefined%))
@@ -1565,7 +1564,7 @@ Returns: the value or the default
 
 ### `dict-update`
 
-*pkg.metta:120*
+*lib.metta:118*
 
 ```metta
 (: dict-update (-> SpaceType %Undefined% %Undefined% SpaceType))
@@ -1581,7 +1580,7 @@ Returns: the dict
 
 ### `dict-merge`
 
-*pkg.metta:124*
+*lib.metta:122*
 
 ```metta
 (: dict-merge (-> SpaceType SpaceType SpaceType))
@@ -1596,7 +1595,7 @@ Returns: the dict written into
 
 ### `dict-pop`
 
-*pkg.metta:128*
+*lib.metta:126*
 
 ```metta
 (: dict-pop (-> SpaceType %Undefined% %Undefined%))
@@ -1615,7 +1614,7 @@ Undocumented: `dict-has`, `dict-pairs`, `dict-put`, `dict-remove`, `dict-remove-
 
 ### `base64-decode`
 
-*pkg.metta:15*
+*lib.metta:15*
 
 ```metta
 (: base64-decode (-> Symbol String Expression))
@@ -1630,7 +1629,7 @@ Returns: Bytes
 
 ### `base64-encode`
 
-*pkg.metta:21*
+*lib.metta:21*
 
 ```metta
 (: base64-encode (-> Symbol Expression String))
@@ -1645,7 +1644,7 @@ Returns: Text
 
 ### `utf8-decode`
 
-*pkg.metta:27*
+*lib.metta:27*
 
 ```metta
 (: utf8-decode (-> Expression String))
@@ -1659,7 +1658,7 @@ Returns: Text
 
 ### `utf8-encode`
 
-*pkg.metta:33*
+*lib.metta:33*
 
 ```metta
 (: utf8-encode (-> String Expression))
@@ -1673,7 +1672,7 @@ Returns: Bytes
 
 ### `hex-encode`
 
-*pkg.metta:44*
+*lib.metta:41*
 
 ```metta
 (: hex-encode (-> Expression String))
@@ -1687,7 +1686,7 @@ Returns: Text
 
 ### `hex-decode`
 
-*pkg.metta:52*
+*lib.metta:49*
 
 ```metta
 (: hex-decode (-> String Expression))
@@ -1703,7 +1702,7 @@ Returns: Bytes
 
 ### `append-bytes!`
 
-*pkg.metta:21*
+*lib.metta:19*
 
 ```metta
 (: append-bytes! (-> %Undefined% Expression Bool))
@@ -1718,7 +1717,7 @@ Returns: Done
 
 ### `append-file!`
 
-*pkg.metta:27*
+*lib.metta:25*
 
 ```metta
 (: append-file! (-> %Undefined% %Undefined% Bool))
@@ -1733,7 +1732,7 @@ Returns: Done
 
 ### `copy-dir!`
 
-*pkg.metta:33*
+*lib.metta:31*
 
 ```metta
 (: copy-dir! (-> %Undefined% %Undefined% Bool))
@@ -1748,7 +1747,7 @@ Returns: Done
 
 ### `copy-file!`
 
-*pkg.metta:39*
+*lib.metta:37*
 
 ```metta
 (: copy-file! (-> %Undefined% %Undefined% Bool))
@@ -1763,7 +1762,7 @@ Returns: Done
 
 ### `delete-dir!`
 
-*pkg.metta:45*
+*lib.metta:43*
 
 ```metta
 (: delete-dir! (-> %Undefined% Bool))
@@ -1777,7 +1776,7 @@ Returns: Done
 
 ### `delete-file!`
 
-*pkg.metta:51*
+*lib.metta:49*
 
 ```metta
 (: delete-file! (-> %Undefined% Bool))
@@ -1791,7 +1790,7 @@ Returns: Done
 
 ### `delete-tree!`
 
-*pkg.metta:57*
+*lib.metta:55*
 
 ```metta
 (: delete-tree! (-> %Undefined% Bool))
@@ -1805,7 +1804,7 @@ Returns: Done
 
 ### `dir-exists`
 
-*pkg.metta:63*
+*lib.metta:61*
 
 ```metta
 (: dir-exists (-> %Undefined% Bool))
@@ -1819,7 +1818,7 @@ Returns: Answer
 
 ### `dir-glob`
 
-*pkg.metta:70*
+*lib.metta:68*
 
 ```metta
 (: dir-glob (-> %Undefined% %Undefined% Expression String))
@@ -1839,7 +1838,7 @@ Returns: Path
 
 ### `dir-walk`
 
-*pkg.metta:77*
+*lib.metta:75*
 
 ```metta
 (: dir-walk (-> %Undefined% Expression String))
@@ -1858,7 +1857,7 @@ Returns: Entry
 
 ### `exit!`
 
-*pkg.metta:83*
+*lib.metta:81*
 
 ```metta
 (: exit! (-> %Undefined% %Undefined%))
@@ -1872,7 +1871,7 @@ Returns: Never
 
 ### `file-close!`
 
-*pkg.metta:89*
+*lib.metta:87*
 
 ```metta
 (: file-close! (-> %Undefined% Bool))
@@ -1886,7 +1885,7 @@ Returns: Done
 
 ### `file-exists`
 
-*pkg.metta:95*
+*lib.metta:93*
 
 ```metta
 (: file-exists (-> %Undefined% Bool))
@@ -1900,7 +1899,7 @@ Returns: Answer
 
 ### `file-get-size!`
 
-*pkg.metta:101*
+*lib.metta:99*
 
 ```metta
 (: file-get-size! (-> %Undefined% Number))
@@ -1914,7 +1913,7 @@ Returns: Size
 
 ### `file-kind`
 
-*pkg.metta:107*
+*lib.metta:105*
 
 ```metta
 (: file-kind (-> %Undefined% Symbol))
@@ -1928,7 +1927,7 @@ Returns: Kind
 
 ### `file-lines!`
 
-*pkg.metta:113*
+*lib.metta:111*
 
 ```metta
 (: file-lines! (-> %Undefined% Expression))
@@ -1942,7 +1941,7 @@ Returns: Lines
 
 ### `file-metadata!`
 
-*pkg.metta:119*
+*lib.metta:117*
 
 ```metta
 (: file-metadata! (-> %Undefined% %Undefined%))
@@ -1956,7 +1955,7 @@ Returns: Space
 
 ### `file-open!`
 
-*pkg.metta:125*
+*lib.metta:123*
 
 ```metta
 (: file-open! (-> %Undefined% %Undefined% Number))
@@ -1971,7 +1970,7 @@ Returns: Handle
 
 ### `file-read-bytes!`
 
-*pkg.metta:132*
+*lib.metta:130*
 
 ```metta
 (: file-read-bytes! (-> %Undefined% %Undefined% Expression))
@@ -1990,7 +1989,7 @@ Returns: Bytes
 
 ### `file-read-exact!`
 
-*pkg.metta:138*
+*lib.metta:136*
 
 ```metta
 (: file-read-exact! (-> %Undefined% %Undefined% String))
@@ -2005,7 +2004,7 @@ Returns: Content
 
 ### `file-read-to-string!`
 
-*pkg.metta:144*
+*lib.metta:142*
 
 ```metta
 (: file-read-to-string! (-> %Undefined% String))
@@ -2019,7 +2018,7 @@ Returns: Content
 
 ### `file-seek!`
 
-*pkg.metta:150*
+*lib.metta:148*
 
 ```metta
 (: file-seek! (-> %Undefined% %Undefined% Bool))
@@ -2034,7 +2033,7 @@ Returns: Done
 
 ### `file-space!`
 
-*pkg.metta:156*
+*lib.metta:154*
 
 ```metta
 (: file-space! (-> %Undefined% %Undefined%))
@@ -2048,7 +2047,7 @@ Returns: Space
 
 ### `file-write!`
 
-*pkg.metta:162*
+*lib.metta:160*
 
 ```metta
 (: file-write! (-> %Undefined% %Undefined% Bool))
@@ -2063,7 +2062,7 @@ Returns: Done
 
 ### `file-write-bytes!`
 
-*pkg.metta:168*
+*lib.metta:166*
 
 ```metta
 (: file-write-bytes! (-> %Undefined% Expression Bool))
@@ -2078,7 +2077,7 @@ Returns: Done
 
 ### `list-dir!`
 
-*pkg.metta:174*
+*lib.metta:172*
 
 ```metta
 (: list-dir! (-> %Undefined% Expression))
@@ -2092,7 +2091,7 @@ Returns: Entries
 
 ### `make-dir!`
 
-*pkg.metta:180*
+*lib.metta:178*
 
 ```metta
 (: make-dir! (-> %Undefined% Bool))
@@ -2106,7 +2105,7 @@ Returns: Done
 
 ### `make-link!`
 
-*pkg.metta:186*
+*lib.metta:184*
 
 ```metta
 (: make-link! (-> %Undefined% %Undefined% Bool))
@@ -2121,7 +2120,7 @@ Returns: Done
 
 ### `path-absolute`
 
-*pkg.metta:192*
+*lib.metta:190*
 
 ```metta
 (: path-absolute (-> %Undefined% String))
@@ -2135,7 +2134,7 @@ Returns: Absolute
 
 ### `path-extension`
 
-*pkg.metta:198*
+*lib.metta:196*
 
 ```metta
 (: path-extension (-> %Undefined% String))
@@ -2149,7 +2148,7 @@ Returns: Extension
 
 ### `path-join`
 
-*pkg.metta:204*
+*lib.metta:202*
 
 ```metta
 (: path-join (-> %Undefined% %Undefined% String))
@@ -2164,7 +2163,7 @@ Returns: Path
 
 ### `path-name`
 
-*pkg.metta:210*
+*lib.metta:208*
 
 ```metta
 (: path-name (-> %Undefined% String))
@@ -2178,7 +2177,7 @@ Returns: Name
 
 ### `path-normalize`
 
-*pkg.metta:216*
+*lib.metta:214*
 
 ```metta
 (: path-normalize (-> %Undefined% String))
@@ -2192,7 +2191,7 @@ Returns: Normalized
 
 ### `path-parent`
 
-*pkg.metta:222*
+*lib.metta:220*
 
 ```metta
 (: path-parent (-> %Undefined% String))
@@ -2206,7 +2205,7 @@ Returns: Parent
 
 ### `path-parts`
 
-*pkg.metta:228*
+*lib.metta:226*
 
 ```metta
 (: path-parts (-> %Undefined% Expression))
@@ -2220,7 +2219,7 @@ Returns: Parts
 
 ### `path-relative`
 
-*pkg.metta:234*
+*lib.metta:232*
 
 ```metta
 (: path-relative (-> %Undefined% %Undefined% String))
@@ -2235,7 +2234,7 @@ Returns: Relative
 
 ### `path-resolve`
 
-*pkg.metta:240*
+*lib.metta:238*
 
 ```metta
 (: path-resolve (-> %Undefined% String))
@@ -2249,7 +2248,7 @@ Returns: Resolved
 
 ### `path-stem`
 
-*pkg.metta:246*
+*lib.metta:244*
 
 ```metta
 (: path-stem (-> %Undefined% String))
@@ -2263,7 +2262,7 @@ Returns: Stem
 
 ### `read-bytes!`
 
-*pkg.metta:252*
+*lib.metta:250*
 
 ```metta
 (: read-bytes! (-> %Undefined% Expression))
@@ -2277,7 +2276,7 @@ Returns: Bytes
 
 ### `read-file!`
 
-*pkg.metta:258*
+*lib.metta:256*
 
 ```metta
 (: read-file! (-> %Undefined% String))
@@ -2291,7 +2290,7 @@ Returns: Content
 
 ### `read-link`
 
-*pkg.metta:264*
+*lib.metta:262*
 
 ```metta
 (: read-link (-> %Undefined% String))
@@ -2305,7 +2304,7 @@ Returns: Target
 
 ### `rename-file!`
 
-*pkg.metta:270*
+*lib.metta:268*
 
 ```metta
 (: rename-file! (-> %Undefined% %Undefined% Bool))
@@ -2320,7 +2319,7 @@ Returns: Done
 
 ### `replace-file!`
 
-*pkg.metta:276*
+*lib.metta:274*
 
 ```metta
 (: replace-file! (-> %Undefined% %Undefined% Bool))
@@ -2335,7 +2334,7 @@ Returns: Done
 
 ### `same-file`
 
-*pkg.metta:282*
+*lib.metta:280*
 
 ```metta
 (: same-file (-> %Undefined% %Undefined% Bool))
@@ -2350,7 +2349,7 @@ Returns: Answer
 
 ### `stderr`
 
-*pkg.metta:288*
+*lib.metta:286*
 
 ```metta
 (: stderr (-> Number))
@@ -2362,7 +2361,7 @@ Returns: Handle
 
 ### `stderr!`
 
-*pkg.metta:294*
+*lib.metta:292*
 
 ```metta
 (: stderr! (-> %Undefined% Bool))
@@ -2376,7 +2375,7 @@ Returns: Done
 
 ### `stdin`
 
-*pkg.metta:300*
+*lib.metta:298*
 
 ```metta
 (: stdin (-> Number))
@@ -2388,7 +2387,7 @@ Returns: Handle
 
 ### `stdin-to-string!`
 
-*pkg.metta:306*
+*lib.metta:304*
 
 ```metta
 (: stdin-to-string! (-> String))
@@ -2400,7 +2399,7 @@ Returns: Content
 
 ### `stdout`
 
-*pkg.metta:312*
+*lib.metta:310*
 
 ```metta
 (: stdout (-> Number))
@@ -2412,7 +2411,7 @@ Returns: Handle
 
 ### `temp-dir!`
 
-*pkg.metta:318*
+*lib.metta:316*
 
 ```metta
 (: temp-dir! (-> %Undefined% String))
@@ -2426,7 +2425,7 @@ Returns: Path
 
 ### `temp-path!`
 
-*pkg.metta:324*
+*lib.metta:322*
 
 ```metta
 (: temp-path! (-> %Undefined% String))
@@ -2440,7 +2439,7 @@ Returns: Path
 
 ### `with-file`
 
-*pkg.metta:330*
+*lib.metta:328*
 
 ```metta
 (: with-file (-> %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -2456,7 +2455,7 @@ Returns: Answer
 
 ### `with-temp-dir`
 
-*pkg.metta:336*
+*lib.metta:334*
 
 ```metta
 (: with-temp-dir (-> %Undefined% %Undefined% %Undefined%))
@@ -2471,7 +2470,7 @@ Returns: Answer
 
 ### `write-bytes!`
 
-*pkg.metta:342*
+*lib.metta:340*
 
 ```metta
 (: write-bytes! (-> %Undefined% Expression Bool))
@@ -2486,7 +2485,7 @@ Returns: Done
 
 ### `write-file!`
 
-*pkg.metta:348*
+*lib.metta:346*
 
 ```metta
 (: write-file! (-> %Undefined% %Undefined% Bool))
@@ -2503,7 +2502,7 @@ Returns: Done
 
 ### `while`
 
-*pkg.metta:46*
+*lib.metta:44*
 
 ```metta
 (: while (-> Atom Atom %Undefined%))
@@ -2518,7 +2517,7 @@ Returns: each body result
 
 ### `repeat`
 
-*pkg.metta:50*
+*lib.metta:48*
 
 ```metta
 (: repeat (-> Number Atom %Undefined%))
@@ -2533,7 +2532,7 @@ Returns: each body result
 
 ### `unless`
 
-*pkg.metta:54*
+*lib.metta:52*
 
 ```metta
 (: unless (-> Atom Atom %Undefined%))
@@ -2548,7 +2547,7 @@ Returns: the body's answers, or none
 
 ### `zip`
 
-*pkg.metta:66*
+*lib.metta:64*
 
 ```metta
 (: zip (-> Expression Expression Expression))
@@ -2563,7 +2562,7 @@ Returns: Pairs
 
 ### `unzip`
 
-*pkg.metta:79*
+*lib.metta:77*
 
 ```metta
 (: unzip (-> Expression Expression))
@@ -2577,7 +2576,7 @@ Returns: Sides
 
 ### `drop`
 
-*pkg.metta:91*
+*lib.metta:89*
 
 ```metta
 (: drop (-> Expression Number Expression))
@@ -2592,7 +2591,7 @@ Returns: Rest
 
 ### `chunk`
 
-*pkg.metta:107*
+*lib.metta:105*
 
 ```metta
 (: chunk (-> Expression Number Expression))
@@ -2607,7 +2606,7 @@ Returns: Chunks
 
 ### `window`
 
-*pkg.metta:123*
+*lib.metta:121*
 
 ```metta
 (: window (-> Expression Number Expression))
@@ -2622,7 +2621,7 @@ Returns: Windows
 
 ### `flatten-once`
 
-*pkg.metta:134*
+*lib.metta:132*
 
 ```metta
 (: flatten-once (-> Expression Expression))
@@ -2636,7 +2635,7 @@ Returns: Flat
 
 ### `flatten-deep`
 
-*pkg.metta:146*
+*lib.metta:144*
 
 ```metta
 (: flatten-deep (-> Expression Expression))
@@ -2650,7 +2649,7 @@ Returns: Flat
 
 ### `partition`
 
-*pkg.metta:159*
+*lib.metta:157*
 
 ```metta
 (: partition (-> %Undefined% Expression Expression))
@@ -2665,7 +2664,7 @@ Returns: Sides
 
 ### `unfold`
 
-*pkg.metta:172*
+*lib.metta:170*
 
 ```metta
 (: unfold (-> %Undefined% %Undefined% Expression))
@@ -2680,7 +2679,7 @@ Returns: Items
 
 ### `group-by`
 
-*pkg.metta:195*
+*lib.metta:193*
 
 ```metta
 (: group-by (-> %Undefined% Expression Expression))
@@ -2695,7 +2694,7 @@ Returns: Groups
 
 ### `sort-by`
 
-*pkg.metta:205*
+*lib.metta:203*
 
 ```metta
 (: sort-by (-> %Undefined% Expression Expression))
@@ -2710,7 +2709,7 @@ Returns: Sorted
 
 ### `scan`
 
-*pkg.metta:217*
+*lib.metta:215*
 
 ```metta
 (: scan (-> %Undefined% %Undefined% Expression Expression))
@@ -2726,7 +2725,7 @@ Returns: Running
 
 ### `pipe`
 
-*pkg.metta:227*
+*lib.metta:225*
 
 ```metta
 (: pipe (-> Atom %Undefined% %Undefined%))
@@ -2741,7 +2740,7 @@ Returns: Result
 
 ### `apply-to`
 
-*pkg.metta:237*
+*lib.metta:235*
 
 ```metta
 (: apply-to (-> %Undefined% Expression %Undefined%))
@@ -2758,7 +2757,7 @@ Returns: Result
 
 ### `graph-add-edges`
 
-*pkg.metta:20*
+*lib.metta:18*
 
 ```metta
 (: graph-add-edges (-> Expression Expression Expression))
@@ -2773,7 +2772,7 @@ Returns: Bigger
 
 ### `graph-add-vertices`
 
-*pkg.metta:32*
+*lib.metta:30*
 
 ```metta
 (: graph-add-vertices (-> Expression Expression Expression))
@@ -2788,7 +2787,7 @@ Returns: Bigger
 
 ### `graph-closure`
 
-*pkg.metta:50*
+*lib.metta:48*
 
 ```metta
 (: graph-closure (-> Expression Expression))
@@ -2802,7 +2801,7 @@ Returns: Closure
 
 ### `graph-edges`
 
-*pkg.metta:57*
+*lib.metta:55*
 
 ```metta
 (: graph-edges (-> Expression Expression))
@@ -2816,7 +2815,7 @@ Returns: Edges
 
 ### `graph-is`
 
-*pkg.metta:78*
+*lib.metta:76*
 
 ```metta
 (: graph-is (-> %Undefined% Bool))
@@ -2830,7 +2829,7 @@ Returns: Answer
 
 ### `graph-is-acyclic`
 
-*pkg.metta:86*
+*lib.metta:84*
 
 ```metta
 (: graph-is-acyclic (-> Expression Bool))
@@ -2844,7 +2843,7 @@ Returns: Answer
 
 ### `graph-neighbours`
 
-*pkg.metta:99*
+*lib.metta:97*
 
 ```metta
 (: graph-neighbours (-> Expression %Undefined% Expression))
@@ -2859,7 +2858,7 @@ Returns: Neighbours
 
 ### `graph-of`
 
-*pkg.metta:117*
+*lib.metta:115*
 
 ```metta
 (: graph-of (-> Expression Expression Expression))
@@ -2874,7 +2873,7 @@ Returns: Graph
 
 ### `graph-reachable`
 
-*pkg.metta:126*
+*lib.metta:124*
 
 ```metta
 (: graph-reachable (-> Expression %Undefined% Expression))
@@ -2889,7 +2888,7 @@ Returns: Reachable
 
 ### `graph-remove-edges`
 
-*pkg.metta:139*
+*lib.metta:137*
 
 ```metta
 (: graph-remove-edges (-> Expression Expression Expression))
@@ -2904,7 +2903,7 @@ Returns: Smaller
 
 ### `graph-remove-vertices`
 
-*pkg.metta:155*
+*lib.metta:153*
 
 ```metta
 (: graph-remove-vertices (-> Expression Expression Expression))
@@ -2919,7 +2918,7 @@ Returns: Smaller
 
 ### `graph-topological-order`
 
-*pkg.metta:176*
+*lib.metta:174*
 
 ```metta
 (: graph-topological-order (-> Expression Expression))
@@ -2933,7 +2932,7 @@ Returns: Order
 
 ### `graph-transpose`
 
-*pkg.metta:186*
+*lib.metta:184*
 
 ```metta
 (: graph-transpose (-> Expression Expression))
@@ -2947,7 +2946,7 @@ Returns: Transposed
 
 ### `graph-union`
 
-*pkg.metta:198*
+*lib.metta:196*
 
 ```metta
 (: graph-union (-> (:seg Expression) Expression))
@@ -2961,7 +2960,7 @@ Returns: Union
 
 ### `graph-vertices`
 
-*pkg.metta:205*
+*lib.metta:203*
 
 ```metta
 (: graph-vertices (-> Expression Expression))
@@ -2977,7 +2976,7 @@ Returns: Vertices
 
 ### `http-header`
 
-*pkg.metta:12*
+*lib.metta:10*
 
 ```metta
 (: http-header (-> Expression String %Undefined%))
@@ -2992,7 +2991,7 @@ Returns: Value
 
 ### `http-methods`
 
-*pkg.metta:18*
+*lib.metta:16*
 
 ```metta
 (: http-methods (-> Expression))
@@ -3004,7 +3003,7 @@ Returns: Methods
 
 ### `http-open!`
 
-*pkg.metta:24*
+*lib.metta:22*
 
 ```metta
 (: http-open! (-> Symbol String Expression Expression))
@@ -3020,7 +3019,7 @@ Returns: Response
 
 ### `http-request!`
 
-*pkg.metta:30*
+*lib.metta:28*
 
 ```metta
 (: http-request! (-> Symbol String Expression Expression))
@@ -3036,7 +3035,7 @@ Returns: Response
 
 ### `http-server-start!`
 
-*pkg.metta:36*
+*lib.metta:34*
 
 ```metta
 (: http-server-start! (-> String Number Atom Expression Expression))
@@ -3053,7 +3052,7 @@ Returns: Server
 
 ### `http-server-stop!`
 
-*pkg.metta:42*
+*lib.metta:40*
 
 ```metta
 (: http-server-stop! (-> Expression Bool))
@@ -3067,7 +3066,7 @@ Returns: Done
 
 ### `http-server-url`
 
-*pkg.metta:48*
+*lib.metta:46*
 
 ```metta
 (: http-server-url (-> Expression String))
@@ -3081,7 +3080,7 @@ Returns: URL
 
 ### `with-http`
 
-*pkg.metta:54*
+*lib.metta:52*
 
 ```metta
 (: with-http (-> Symbol String Expression Atom %Undefined%))
@@ -3098,7 +3097,7 @@ Returns: Answer
 
 ### `with-http-server`
 
-*pkg.metta:60*
+*lib.metta:58*
 
 ```metta
 (: with-http-server (-> String Number Atom Expression Atom %Undefined%))
@@ -3118,7 +3117,7 @@ Returns: Answer
 
 ### `import_prolog_functions_from_file`
 
-*pkg.metta:45*
+*lib.metta:45*
 
 Consults a Prolog file and registers the named predicates as MeTTa functions
 
@@ -3129,7 +3128,7 @@ Returns: unit
 
 ### `import_prolog_functions_from_module`
 
-*pkg.metta:50*
+*lib.metta:50*
 
 Loads a Prolog module and registers the named predicates as MeTTa functions
 
@@ -3140,7 +3139,7 @@ Returns: unit
 
 ### `imports`
 
-*pkg.metta:56*
+*lib.metta:56*
 
 A live read-only space of (import CanonicalPath) atoms for the destination's committed MeTTa source imports; query with (match (imports &space) (import $path) $path)
 
@@ -3150,7 +3149,7 @@ Returns: Space
 
 ### `unimport!`
 
-*pkg.metta:60*
+*lib.metta:60*
 
 Withdraw exactly one MeTTa source's surviving native atoms and compiled definitions; equal atoms from other owners survive. Repeats return true and deleted source paths work. Nested imports remain independently imported. Does not reverse external I/O or unload host modules
 
@@ -3165,7 +3164,7 @@ Undocumented: `consult_global`, `static-import!`, `use-module!`, `use_module_glo
 
 ### `dict-space`
 
-*pkg.metta:17*
+*lib.metta:15*
 
 ```metta
 (: dict-space (-> Expression SpaceType))
@@ -3179,7 +3178,7 @@ Returns: Space
 
 ### `get-keys`
 
-*pkg.metta:23*
+*lib.metta:21*
 
 ```metta
 (: get-keys (-> SpaceType %Undefined%))
@@ -3193,7 +3192,7 @@ Returns: Key
 
 ### `get-value`
 
-*pkg.metta:29*
+*lib.metta:27*
 
 ```metta
 (: get-value (-> SpaceType %Undefined% %Undefined%))
@@ -3208,7 +3207,7 @@ Returns: Value
 
 ### `json-at`
 
-*pkg.metta:35*
+*lib.metta:33*
 
 ```metta
 (: json-at (-> %Undefined% Expression %Undefined%))
@@ -3223,7 +3222,7 @@ Returns: Found
 
 ### `json-decode`
 
-*pkg.metta:41*
+*lib.metta:39*
 
 ```metta
 (: json-decode (-> %Undefined% %Undefined%))
@@ -3237,7 +3236,7 @@ Returns: Value
 
 ### `json-encode`
 
-*pkg.metta:47*
+*lib.metta:45*
 
 ```metta
 (: json-encode (-> %Undefined% String))
@@ -3251,7 +3250,7 @@ Returns: Text
 
 ### `json-lines-decode`
 
-*pkg.metta:53*
+*lib.metta:51*
 
 ```metta
 (: json-lines-decode (-> %Undefined% %Undefined%))
@@ -3265,7 +3264,7 @@ Returns: Value
 
 ### `json-lines-encode`
 
-*pkg.metta:59*
+*lib.metta:57*
 
 ```metta
 (: json-lines-encode (-> Expression String))
@@ -3279,7 +3278,7 @@ Returns: Text
 
 ### `json-lines-read!`
 
-*pkg.metta:65*
+*lib.metta:63*
 
 ```metta
 (: json-lines-read! (-> %Undefined% %Undefined%))
@@ -3293,7 +3292,7 @@ Returns: Value
 
 ### `json-lines-write!`
 
-*pkg.metta:71*
+*lib.metta:69*
 
 ```metta
 (: json-lines-write! (-> %Undefined% Expression Bool))
@@ -3308,7 +3307,7 @@ Returns: Written
 
 ### `json-pretty`
 
-*pkg.metta:78*
+*lib.metta:76*
 
 ```metta
 (: json-pretty (-> %Undefined% Number String))
@@ -3329,7 +3328,7 @@ Returns: Text
 
 ### `json-read!`
 
-*pkg.metta:84*
+*lib.metta:82*
 
 ```metta
 (: json-read! (-> %Undefined% %Undefined%))
@@ -3343,7 +3342,7 @@ Returns: Value
 
 ### `json-write!`
 
-*pkg.metta:90*
+*lib.metta:88*
 
 ```metta
 (: json-write! (-> %Undefined% %Undefined% Bool))
@@ -3360,7 +3359,7 @@ Returns: Written
 
 ### `log!`
 
-*pkg.metta:12*
+*lib.metta:12*
 
 ```metta
 (: log! (-> String Symbol Atom Expression))
@@ -3376,7 +3375,7 @@ Returns: Unit
 
 ### `log-enabled`
 
-*pkg.metta:18*
+*lib.metta:18*
 
 ```metta
 (: log-enabled (-> String Bool))
@@ -3390,7 +3389,7 @@ Returns: Enabled
 
 ### `log-format`
 
-*pkg.metta:24*
+*lib.metta:24*
 
 ```metta
 (: log-format (-> String Symbol Atom String))
@@ -3406,7 +3405,7 @@ Returns: Text
 
 ### `log-levels`
 
-*pkg.metta:30*
+*lib.metta:30*
 
 ```metta
 (: log-levels (-> Expression))
@@ -3418,7 +3417,7 @@ Returns: Levels
 
 ### `log-to!`
 
-*pkg.metta:36*
+*lib.metta:36*
 
 ```metta
 (: log-to! (-> Atom String Symbol Atom Expression))
@@ -3435,7 +3434,7 @@ Returns: Unit
 
 ### `log-topic!`
 
-*pkg.metta:42*
+*lib.metta:42*
 
 ```metta
 (: log-topic! (-> String Bool Expression))
@@ -3450,7 +3449,7 @@ Returns: Unit
 
 ### `log-topics`
 
-*pkg.metta:48*
+*lib.metta:48*
 
 ```metta
 (: log-topics (-> Expression))
@@ -3464,7 +3463,7 @@ Returns: Topics
 
 ### `markup-attribute`
 
-*pkg.metta:35*
+*lib.metta:35*
 
 ```metta
 (: markup-attribute (-> %Undefined% Atom String))
@@ -3479,7 +3478,7 @@ Returns: Value
 
 ### `markup-parse-html`
 
-*pkg.metta:41*
+*lib.metta:41*
 
 ```metta
 (: markup-parse-html (-> %Undefined% Expression))
@@ -3493,7 +3492,7 @@ Returns: Element
 
 ### `markup-parse-xml`
 
-*pkg.metta:47*
+*lib.metta:47*
 
 ```metta
 (: markup-parse-xml (-> %Undefined% Expression))
@@ -3507,7 +3506,7 @@ Returns: Element
 
 ### `markup-select`
 
-*pkg.metta:53*
+*lib.metta:53*
 
 ```metta
 (: markup-select (-> %Undefined% Atom %Undefined%))
@@ -3522,7 +3521,7 @@ Returns: Selected
 
 ### `markup-text`
 
-*pkg.metta:59*
+*lib.metta:59*
 
 ```metta
 (: markup-text (-> %Undefined% String))
@@ -3536,7 +3535,7 @@ Returns: Text
 
 ### `markup-write`
 
-*pkg.metta:65*
+*lib.metta:65*
 
 ```metta
 (: markup-write (-> %Undefined% String))
@@ -3552,7 +3551,7 @@ Returns: Text
 
 ### `math-gcd`
 
-*pkg.metta:13*
+*lib.metta:11*
 
 ```metta
 (: math-gcd (-> Expression Number))
@@ -3566,7 +3565,7 @@ Returns: Divisor
 
 ### `math-lcm`
 
-*pkg.metta:23*
+*lib.metta:21*
 
 ```metta
 (: math-lcm (-> Expression Number))
@@ -3580,7 +3579,7 @@ Returns: Multiple
 
 ### `math-factor-pairs`
 
-*pkg.metta:42*
+*lib.metta:40*
 
 ```metta
 (: math-factor-pairs (-> Number Expression))
@@ -3594,7 +3593,7 @@ Returns: Pair
 
 ### `math-float`
 
-*pkg.metta:49*
+*lib.metta:47*
 
 ```metta
 (: math-float (-> Number Number))
@@ -3608,7 +3607,7 @@ Returns: Float
 
 ### `math-class`
 
-*pkg.metta:61*
+*lib.metta:59*
 
 ```metta
 (: math-class (-> Number Symbol))
@@ -3622,7 +3621,7 @@ Returns: Class
 
 ### `math-integer-root`
 
-*pkg.metta:67*
+*lib.metta:65*
 
 ```metta
 (: math-integer-root (-> Number Number Expression))
@@ -3637,7 +3636,7 @@ Returns: RootAndRemainder
 
 ### `math-power-mod`
 
-*pkg.metta:73*
+*lib.metta:71*
 
 ```metta
 (: math-power-mod (-> Number Number Number Number))
@@ -3653,7 +3652,7 @@ Returns: Result
 
 ### `math-ratio`
 
-*pkg.metta:79*
+*lib.metta:77*
 
 ```metta
 (: math-ratio (-> Number Expression))
@@ -3667,7 +3666,7 @@ Returns: Parts
 
 ### `math-rational`
 
-*pkg.metta:85*
+*lib.metta:83*
 
 ```metta
 (: math-rational (-> Number Number))
@@ -3686,7 +3685,7 @@ Returns: Value
 
 ### `math-rationalize`
 
-*pkg.metta:91*
+*lib.metta:89*
 
 ```metta
 (: math-rationalize (-> Number Number))
@@ -3700,7 +3699,7 @@ Returns: Rational
 
 ### `math-real`
 
-*pkg.metta:97*
+*lib.metta:95*
 
 ```metta
 (: math-real (-> Symbol Expression Number))
@@ -3715,7 +3714,7 @@ Returns: Result
 
 ### `math-real-functions`
 
-*pkg.metta:103*
+*lib.metta:101*
 
 ```metta
 (: math-real-functions (-> Expression))
@@ -3727,7 +3726,7 @@ Returns: Functions
 
 ### `math-sqrt`
 
-*pkg.metta:109*
+*lib.metta:107*
 
 ```metta
 (: math-sqrt (-> Number Number))
@@ -3743,7 +3742,7 @@ Returns: Root
 
 ### `trace-source`
 
-*pkg.metta:6*
+*lib.metta:5*
 
 ```metta
 (: trace-source (-> SpaceType String Atom Number SpaceType))
@@ -3760,7 +3759,7 @@ Returns: a space of (trace-event seq time depth kind term answer) and (trace-sto
 
 ### `observe-source`
 
-*pkg.metta:16*
+*lib.metta:15*
 
 ```metta
 (: observe-source (-> SpaceType String String SpaceType))
@@ -3774,46 +3773,11 @@ Run source with coverage and error diagnostics. Source coordinates are one-based
 
 Returns: a queryable space of observation-status, observation-answer, observation-exception, source-coverage, source-coverage-unavailable, source-function-unavailable, source-error, source-frame, and source-frame-unavailable atoms
 
-## lib_package
-
-### `setup!`
-
-*pkg.metta:7*
-
-Prepare a package and its requirements explicitly. Reuse setup only while its performed rows and backing artifacts remain current; publish performed.metta and the transitive lock.metta under an OS directory lock.
-
-1. Package path or (library Name)
-
-Returns: Bool
-
-### `package-load`
-
-*pkg.metta:12*
-
-A required packaging library can define this equation to replace the default interpreter. Arguments are the canonical source path, home space and the source's own package rows. Requires have already loaded under the engine's ceiling and budget.
-
-1. Canonical path
-2. Home space
-3. Package argument rows
-
-Returns: Any successful result
-
-### `get-property`
-
-*pkg.metta:17*
-
-The two-argument package surface answers (get-property perform claims), package keys at a loaded home, and available alternative backing rows. The one-argument head reflection surface remains available.
-
-1. perform, a home space, or a loaded package path
-2. claims, available, or a package key
-
-Returns: One property value per answer
-
 ## lib_pairs
 
 ### `pairs-group`
 
-*pkg.metta:18*
+*lib.metta:16*
 
 ```metta
 (: pairs-group (-> Expression Expression))
@@ -3827,7 +3791,7 @@ Returns: Groups
 
 ### `pairs-is`
 
-*pkg.metta:32*
+*lib.metta:30*
 
 ```metta
 (: pairs-is (-> %Undefined% Bool))
@@ -3841,7 +3805,7 @@ Returns: Answer
 
 ### `pairs-keys`
 
-*pkg.metta:39*
+*lib.metta:37*
 
 ```metta
 (: pairs-keys (-> Expression Expression))
@@ -3855,7 +3819,7 @@ Returns: Keys
 
 ### `pairs-lookup`
 
-*pkg.metta:49*
+*lib.metta:47*
 
 ```metta
 (: pairs-lookup (-> Expression %Undefined% %Undefined%))
@@ -3870,7 +3834,7 @@ Returns: Value
 
 ### `pairs-sort-by-key`
 
-*pkg.metta:58*
+*lib.metta:56*
 
 ```metta
 (: pairs-sort-by-key (-> Expression Expression))
@@ -3884,7 +3848,7 @@ Returns: Sorted
 
 ### `pairs-sort-by-value`
 
-*pkg.metta:67*
+*lib.metta:65*
 
 ```metta
 (: pairs-sort-by-value (-> Expression Expression))
@@ -3898,7 +3862,7 @@ Returns: Sorted
 
 ### `pairs-swap`
 
-*pkg.metta:77*
+*lib.metta:75*
 
 ```metta
 (: pairs-swap (-> Expression Expression))
@@ -3912,7 +3876,7 @@ Returns: Swapped
 
 ### `pairs-ungroup`
 
-*pkg.metta:90*
+*lib.metta:88*
 
 ```metta
 (: pairs-ungroup (-> Expression Expression))
@@ -3926,7 +3890,7 @@ Returns: Pairs
 
 ### `pairs-values`
 
-*pkg.metta:97*
+*lib.metta:95*
 
 ```metta
 (: pairs-values (-> Expression Expression))
@@ -3942,7 +3906,7 @@ Returns: Values
 
 ### `grammar-parser`
 
-*pkg.metta:26*
+*lib.metta:24*
 
 ```metta
 (: grammar-parser (-> Atom %Undefined%))
@@ -3956,7 +3920,7 @@ Returns: Parser function
 
 ### `grammar-parse`
 
-*pkg.metta:37*
+*lib.metta:35*
 
 ```metta
 (: grammar-parse (-> Atom String %Undefined%))
@@ -3971,7 +3935,7 @@ Returns: Value
 
 ### `grammar-parse-prefix`
 
-*pkg.metta:50*
+*lib.metta:48*
 
 ```metta
 (: grammar-parse-prefix (-> Atom String Expression))
@@ -3986,7 +3950,7 @@ Returns: Value and remainder
 
 ### `grammar-is`
 
-*pkg.metta:61*
+*lib.metta:59*
 
 ```metta
 (: grammar-is (-> Atom Bool))
@@ -4000,7 +3964,7 @@ Returns: Boolean
 
 ### `grammar-forms`
 
-*pkg.metta:72*
+*lib.metta:70*
 
 ```metta
 (: grammar-forms (-> Expression))
@@ -4014,7 +3978,7 @@ Returns: Grammar forms
 
 ### `process-run!`
 
-*pkg.metta:31*
+*lib.metta:31*
 
 ```metta
 (: process-run! (-> %Undefined% %Undefined% Expression))
@@ -4029,7 +3993,7 @@ Returns: Result
 
 ### `process-run-input!`
 
-*pkg.metta:37*
+*lib.metta:37*
 
 ```metta
 (: process-run-input! (-> %Undefined% %Undefined% %Undefined% Expression))
@@ -4045,7 +4009,7 @@ Returns: Result
 
 ### `process-signal!`
 
-*pkg.metta:43*
+*lib.metta:43*
 
 ```metta
 (: process-signal! (-> %Undefined% Symbol Bool))
@@ -4060,7 +4024,7 @@ Returns: Done
 
 ### `process-signals`
 
-*pkg.metta:49*
+*lib.metta:49*
 
 ```metta
 (: process-signals (-> Expression))
@@ -4072,7 +4036,7 @@ Returns: Signals
 
 ### `process-start!`
 
-*pkg.metta:55*
+*lib.metta:55*
 
 ```metta
 (: process-start! (-> %Undefined% %Undefined% Number))
@@ -4087,7 +4051,7 @@ Returns: Process
 
 ### `process-status`
 
-*pkg.metta:61*
+*lib.metta:61*
 
 ```metta
 (: process-status (-> %Undefined% %Undefined%))
@@ -4101,7 +4065,7 @@ Returns: Status
 
 ### `process-wait!`
 
-*pkg.metta:67*
+*lib.metta:67*
 
 ```metta
 (: process-wait! (-> %Undefined% Number))
@@ -4117,7 +4081,7 @@ Returns: Code
 
 ### `random-choice`
 
-*pkg.metta:20*
+*lib.metta:18*
 
 ```metta
 (: random-choice (-> Atom Expression))
@@ -4131,7 +4095,7 @@ Returns: Program
 
 ### `random-sample!`
 
-*pkg.metta:43*
+*lib.metta:41*
 
 ```metta
 (: random-sample! (-> Atom Number Expression))
@@ -4146,7 +4110,7 @@ Returns: Sample
 
 ### `random-shuffle!`
 
-*pkg.metta:51*
+*lib.metta:49*
 
 ```metta
 (: random-shuffle! (-> Atom Expression))
@@ -4160,7 +4124,7 @@ Returns: Shuffled
 
 ### `random-uniform`
 
-*pkg.metta:62*
+*lib.metta:60*
 
 ```metta
 (: random-uniform (-> Number Number Expression))
@@ -4175,7 +4139,7 @@ Returns: Program
 
 ### `random-normal`
 
-*pkg.metta:73*
+*lib.metta:71*
 
 ```metta
 (: random-normal (-> Number Number Expression))
@@ -4190,7 +4154,7 @@ Returns: Program
 
 ### `random-lognormal`
 
-*pkg.metta:82*
+*lib.metta:80*
 
 ```metta
 (: random-lognormal (-> Number Number Expression))
@@ -4205,7 +4169,7 @@ Returns: Program
 
 ### `random-exponential`
 
-*pkg.metta:94*
+*lib.metta:92*
 
 ```metta
 (: random-exponential (-> Number Expression))
@@ -4219,7 +4183,7 @@ Returns: Program
 
 ### `random-triangular`
 
-*pkg.metta:115*
+*lib.metta:113*
 
 ```metta
 (: random-triangular (-> Number Number Number Expression))
@@ -4235,7 +4199,7 @@ Returns: Program
 
 ### `random-gamma`
 
-*pkg.metta:128*
+*lib.metta:126*
 
 ```metta
 (: random-gamma (-> Number Number Expression))
@@ -4250,7 +4214,7 @@ Returns: Program
 
 ### `random-beta`
 
-*pkg.metta:139*
+*lib.metta:137*
 
 ```metta
 (: random-beta (-> Number Number Expression))
@@ -4265,7 +4229,7 @@ Returns: Program
 
 ### `random-bernoulli`
 
-*pkg.metta:152*
+*lib.metta:150*
 
 ```metta
 (: random-bernoulli (-> Number Expression))
@@ -4279,7 +4243,7 @@ Returns: Program
 
 ### `random-pareto`
 
-*pkg.metta:164*
+*lib.metta:162*
 
 ```metta
 (: random-pareto (-> Number Expression))
@@ -4293,7 +4257,7 @@ Returns: Program
 
 ### `random-weibull`
 
-*pkg.metta:178*
+*lib.metta:176*
 
 ```metta
 (: random-weibull (-> Number Number Expression))
@@ -4310,31 +4274,31 @@ Returns: Program
 
 ### `builtins`
 
-*pkg.metta:43*
+*lib.metta:39*
 
 Every builtin name, one per solution
 
 ### `special-forms`
 
-*pkg.metta:46*
+*lib.metta:42*
 
 Every translator special form, one per solution. These are compiled rather than called, so they are in no registry
 
 ### `functions`
 
-*pkg.metta:50*
+*lib.metta:46*
 
 Every function the engine knows, builtin or not
 
 ### `user-functions`
 
-*pkg.metta:53*
+*lib.metta:49*
 
 Every function this space defines itself
 
 ### `arity-of`
 
-*pkg.metta:56*
+*lib.metta:52*
 
 The registered arities for a name, one per solution
 
@@ -4344,7 +4308,7 @@ Returns: an arity
 
 ### `knows?`
 
-*pkg.metta:62*
+*lib.metta:58*
 
 Whether the engine knows a name at all, as True or False
 
@@ -4354,7 +4318,7 @@ Returns: True or False
 
 ### `origin-of`
 
-*pkg.metta:70*
+*lib.metta:66*
 
 ```metta
 (: origin-of (-> Atom Expression))
@@ -4364,7 +4328,7 @@ The (origin space file line) rows from get-property, one per defining occurrence
 
 ### `extension-points`
 
-*pkg.metta:82*
+*lib.metta:78*
 
 Every extension point the engine declares, as (name arity kind), one per solution
 
@@ -4372,7 +4336,7 @@ Returns: (name arity kind)
 
 ### `surface-counts`
 
-*pkg.metta:87*
+*lib.metta:83*
 
 How many builtins, special forms, functions and user functions
 
@@ -4380,7 +4344,7 @@ Returns: ((key count) ...)
 
 ### `surface-json`
 
-*pkg.metta:94*
+*lib.metta:90*
 
 The engine's whole surface as a JSON string, for external tools
 
@@ -4388,7 +4352,7 @@ Returns: a JSON string
 
 ### `atom-variables`
 
-*pkg.metta:115*
+*lib.metta:111*
 
 ```metta
 (: atom-variables (-> Atom Expression))
@@ -4402,7 +4366,7 @@ Returns: Variables
 
 ### `atom-replace`
 
-*pkg.metta:125*
+*lib.metta:121*
 
 ```metta
 (: atom-replace (-> Atom Atom %Undefined%))
@@ -4421,7 +4385,7 @@ Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engin
 
 ### `re-captures`
 
-*pkg.metta:12*
+*lib.metta:12*
 
 ```metta
 (: re-captures (-> %Undefined% %Undefined% Expression))
@@ -4436,7 +4400,7 @@ Returns: Groups
 
 ### `re-compile`
 
-*pkg.metta:18*
+*lib.metta:18*
 
 ```metta
 (: re-compile (-> %Undefined% %Undefined%))
@@ -4450,7 +4414,7 @@ Returns: Compiled
 
 ### `re-count`
 
-*pkg.metta:24*
+*lib.metta:24*
 
 ```metta
 (: re-count (-> %Undefined% %Undefined% Number))
@@ -4465,7 +4429,7 @@ Returns: Count
 
 ### `re-escape`
 
-*pkg.metta:30*
+*lib.metta:30*
 
 ```metta
 (: re-escape (-> %Undefined% String))
@@ -4479,7 +4443,7 @@ Returns: Pattern
 
 ### `re-find`
 
-*pkg.metta:36*
+*lib.metta:36*
 
 ```metta
 (: re-find (-> %Undefined% %Undefined% String))
@@ -4494,7 +4458,7 @@ Returns: Match
 
 ### `re-fullmatch`
 
-*pkg.metta:42*
+*lib.metta:42*
 
 ```metta
 (: re-fullmatch (-> %Undefined% %Undefined% Bool))
@@ -4509,7 +4473,7 @@ Returns: Answer
 
 ### `re-match`
 
-*pkg.metta:48*
+*lib.metta:48*
 
 ```metta
 (: re-match (-> %Undefined% %Undefined% Bool))
@@ -4524,7 +4488,7 @@ Returns: Answer
 
 ### `re-ranges`
 
-*pkg.metta:54*
+*lib.metta:54*
 
 ```metta
 (: re-ranges (-> %Undefined% %Undefined% Expression))
@@ -4539,7 +4503,7 @@ Returns: Range
 
 ### `re-replace`
 
-*pkg.metta:60*
+*lib.metta:60*
 
 ```metta
 (: re-replace (-> %Undefined% %Undefined% %Undefined% String))
@@ -4555,7 +4519,7 @@ Returns: Replaced
 
 ### `re-replace-all`
 
-*pkg.metta:66*
+*lib.metta:66*
 
 ```metta
 (: re-replace-all (-> %Undefined% %Undefined% %Undefined% String))
@@ -4571,7 +4535,7 @@ Returns: Replaced
 
 ### `re-scan`
 
-*pkg.metta:72*
+*lib.metta:72*
 
 ```metta
 (: re-scan (-> %Undefined% %Undefined% Expression))
@@ -4586,7 +4550,7 @@ Returns: Groups
 
 ### `re-split`
 
-*pkg.metta:78*
+*lib.metta:78*
 
 ```metta
 (: re-split (-> %Undefined% %Undefined% Expression))
@@ -4601,7 +4565,7 @@ Returns: Parts
 
 ### `regex_captures`
 
-*pkg.metta:84*
+*lib.metta:84*
 
 ```metta
 (: regex_captures (-> %Undefined% %Undefined% Expression))
@@ -4616,7 +4580,7 @@ Returns: Groups
 
 ### `regex_find`
 
-*pkg.metta:90*
+*lib.metta:90*
 
 ```metta
 (: regex_find (-> %Undefined% %Undefined% String))
@@ -4631,7 +4595,7 @@ Returns: Match
 
 ### `regex_match`
 
-*pkg.metta:96*
+*lib.metta:96*
 
 ```metta
 (: regex_match (-> %Undefined% %Undefined% Bool))
@@ -4646,7 +4610,7 @@ Returns: Answer
 
 ### `regex_replace`
 
-*pkg.metta:102*
+*lib.metta:102*
 
 ```metta
 (: regex_replace (-> %Undefined% %Undefined% %Undefined% String))
@@ -4662,7 +4626,7 @@ Returns: Replaced
 
 ### `regex_replace_all`
 
-*pkg.metta:108*
+*lib.metta:108*
 
 ```metta
 (: regex_replace_all (-> %Undefined% %Undefined% %Undefined% String))
@@ -4678,7 +4642,7 @@ Returns: Replaced
 
 ### `regex_split`
 
-*pkg.metta:114*
+*lib.metta:114*
 
 ```metta
 (: regex_split (-> %Undefined% %Undefined% Expression))
@@ -4695,7 +4659,7 @@ Returns: Parts
 
 ### `set-difference`
 
-*pkg.metta:17*
+*lib.metta:17*
 
 ```metta
 (: set-difference (-> Expression Expression Expression))
@@ -4710,7 +4674,7 @@ Returns: Rest
 
 ### `set-disjoint`
 
-*pkg.metta:25*
+*lib.metta:25*
 
 ```metta
 (: set-disjoint (-> Expression Expression Bool))
@@ -4725,7 +4689,7 @@ Returns: Answer
 
 ### `set-insert`
 
-*pkg.metta:32*
+*lib.metta:32*
 
 ```metta
 (: set-insert (-> Expression %Undefined% Expression))
@@ -4740,7 +4704,7 @@ Returns: Bigger
 
 ### `set-intersection`
 
-*pkg.metta:45*
+*lib.metta:45*
 
 ```metta
 (: set-intersection (-> (:seg Expression) Expression))
@@ -4754,7 +4718,7 @@ Returns: Common
 
 ### `set-is`
 
-*pkg.metta:56*
+*lib.metta:56*
 
 ```metta
 (: set-is (-> %Undefined% Bool))
@@ -4768,7 +4732,7 @@ Returns: Answer
 
 ### `set-member`
 
-*pkg.metta:65*
+*lib.metta:65*
 
 ```metta
 (: set-member (-> Expression %Undefined% Bool))
@@ -4783,7 +4747,7 @@ Returns: Answer
 
 ### `set-of`
 
-*pkg.metta:74*
+*lib.metta:74*
 
 ```metta
 (: set-of (-> Expression Expression))
@@ -4797,7 +4761,7 @@ Returns: Set
 
 ### `set-remove`
 
-*pkg.metta:81*
+*lib.metta:81*
 
 ```metta
 (: set-remove (-> Expression %Undefined% Expression))
@@ -4812,7 +4776,7 @@ Returns: Smaller
 
 ### `set-subset`
 
-*pkg.metta:89*
+*lib.metta:89*
 
 ```metta
 (: set-subset (-> Expression Expression Bool))
@@ -4827,7 +4791,7 @@ Returns: Answer
 
 ### `set-symmetric-difference`
 
-*pkg.metta:99*
+*lib.metta:99*
 
 ```metta
 (: set-symmetric-difference (-> Expression Expression Expression))
@@ -4842,7 +4806,7 @@ Returns: Either
 
 ### `set-union`
 
-*pkg.metta:109*
+*lib.metta:109*
 
 ```metta
 (: set-union (-> (:seg Expression) Expression))
@@ -4858,7 +4822,7 @@ Returns: Union
 
 ### `socket-endpoint`
 
-*pkg.metta:12*
+*lib.metta:12*
 
 ```metta
 (: socket-endpoint (-> Number Symbol Expression))
@@ -4873,7 +4837,7 @@ Returns: Endpoint
 
 ### `socket-kind`
 
-*pkg.metta:18*
+*lib.metta:18*
 
 ```metta
 (: socket-kind (-> Number Symbol))
@@ -4887,7 +4851,7 @@ Returns: Kind
 
 ### `socket-shutdown!`
 
-*pkg.metta:24*
+*lib.metta:24*
 
 ```metta
 (: socket-shutdown! (-> Number Symbol Bool))
@@ -4902,7 +4866,7 @@ Returns: Done
 
 ### `socket-wait!`
 
-*pkg.metta:30*
+*lib.metta:30*
 
 ```metta
 (: socket-wait! (-> Expression %Undefined% Expression))
@@ -4917,7 +4881,7 @@ Returns: Ready
 
 ### `tcp-accept!`
 
-*pkg.metta:36*
+*lib.metta:36*
 
 ```metta
 (: tcp-accept! (-> Number Number))
@@ -4931,7 +4895,7 @@ Returns: Handle
 
 ### `tcp-connect!`
 
-*pkg.metta:42*
+*lib.metta:42*
 
 ```metta
 (: tcp-connect! (-> Expression Number))
@@ -4945,7 +4909,7 @@ Returns: Handle
 
 ### `tcp-listen!`
 
-*pkg.metta:48*
+*lib.metta:48*
 
 ```metta
 (: tcp-listen! (-> Expression Number Number))
@@ -4960,7 +4924,7 @@ Returns: Handle
 
 ### `udp-bind!`
 
-*pkg.metta:54*
+*lib.metta:54*
 
 ```metta
 (: udp-bind! (-> Expression Number))
@@ -4974,7 +4938,7 @@ Returns: Handle
 
 ### `udp-receive!`
 
-*pkg.metta:60*
+*lib.metta:60*
 
 ```metta
 (: udp-receive! (-> Number Expression))
@@ -4988,7 +4952,7 @@ Returns: Datagram
 
 ### `udp-send!`
 
-*pkg.metta:66*
+*lib.metta:66*
 
 ```metta
 (: udp-send! (-> Number Expression Expression Bool))
@@ -5004,7 +4968,7 @@ Returns: Done
 
 ### `with-socket`
 
-*pkg.metta:72*
+*lib.metta:72*
 
 ```metta
 (: with-socket (-> Atom Atom %Undefined%))
@@ -5021,7 +4985,7 @@ Returns: Answer
 
 ### `soft-symbol?`
 
-*pkg.metta:33*
+*lib.metta:32*
 
 ```metta
 (: soft-symbol? (-> Atom Bool))
@@ -5039,7 +5003,7 @@ Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-
 
 ### `space-copy`
 
-*pkg.metta:80*
+*lib.metta:80*
 
 ```metta
 (: space-copy (-> SpaceType SpaceType Atom %Undefined%))
@@ -5055,7 +5019,7 @@ Returns: the destination write's verdict, once per atom
 
 ### `move-atoms`
 
-*pkg.metta:84*
+*lib.metta:84*
 
 ```metta
 (: move-atoms (-> SpaceType SpaceType Atom %Undefined%))
@@ -5071,7 +5035,7 @@ Returns: the removal's verdict, once per atom
 
 ### `space-drain`
 
-*pkg.metta:88*
+*lib.metta:88*
 
 ```metta
 (: space-drain (-> SpaceType Atom %Undefined%))
@@ -5086,7 +5050,7 @@ Returns: each removed atom
 
 ### `space-snapshot`
 
-*pkg.metta:92*
+*lib.metta:92*
 
 ```metta
 (: space-snapshot (-> SpaceType SpaceType))
@@ -5100,7 +5064,7 @@ Returns: the new space
 
 ### `space-subtract`
 
-*pkg.metta:96*
+*lib.metta:96*
 
 ```metta
 (: space-subtract (-> SpaceType SpaceType %Undefined%))
@@ -5119,7 +5083,7 @@ Undocumented: `find`, `match-count`, `migrateAtoms`, `remove-all-atoms`, `succee
 
 ### `weighted-subset-mass-independent`
 
-*pkg.metta:30*
+*lib.metta:27*
 
 ```metta
 (: weighted-subset-mass-independent (-> Atom Number Expression))
@@ -5134,7 +5098,7 @@ Returns: Exact mass
 
 ### `weighted-subset-posterior-independent`
 
-*pkg.metta:53*
+*lib.metta:50*
 
 ```metta
 (: weighted-subset-posterior-independent (-> Atom Number Expression))
@@ -5149,7 +5113,7 @@ Returns: Mass and exact marginals
 
 ### `stats-correlation`
 
-*pkg.metta:184*
+*lib.metta:181*
 
 ```metta
 (: stats-correlation (-> Expression Expression Number))
@@ -5164,7 +5128,7 @@ Returns: Correlation
 
 ### `stats-covariance`
 
-*pkg.metta:190*
+*lib.metta:187*
 
 ```metta
 (: stats-covariance (-> Expression Expression Number Number))
@@ -5180,7 +5144,7 @@ Returns: Covariance
 
 ### `stats-geometric-mean`
 
-*pkg.metta:196*
+*lib.metta:193*
 
 ```metta
 (: stats-geometric-mean (-> Expression Number))
@@ -5194,7 +5158,7 @@ Returns: Mean
 
 ### `stats-harmonic-mean`
 
-*pkg.metta:202*
+*lib.metta:199*
 
 ```metta
 (: stats-harmonic-mean (-> Expression Number))
@@ -5208,7 +5172,7 @@ Returns: Mean
 
 ### `stats-mean`
 
-*pkg.metta:208*
+*lib.metta:205*
 
 ```metta
 (: stats-mean (-> Expression Number))
@@ -5222,7 +5186,7 @@ Returns: Mean
 
 ### `stats-median`
 
-*pkg.metta:214*
+*lib.metta:211*
 
 ```metta
 (: stats-median (-> Expression Number))
@@ -5236,7 +5200,7 @@ Returns: Median
 
 ### `stats-mode`
 
-*pkg.metta:220*
+*lib.metta:217*
 
 ```metta
 (: stats-mode (-> Atom %Undefined%))
@@ -5250,7 +5214,7 @@ Returns: Mode
 
 ### `stats-quantile`
 
-*pkg.metta:226*
+*lib.metta:223*
 
 ```metta
 (: stats-quantile (-> Expression Number Symbol Number))
@@ -5266,7 +5230,7 @@ Returns: Value
 
 ### `stats-quantiles`
 
-*pkg.metta:232*
+*lib.metta:229*
 
 ```metta
 (: stats-quantiles (-> Expression Number Symbol Expression))
@@ -5282,7 +5246,7 @@ Returns: Cuts
 
 ### `stats-ranks`
 
-*pkg.metta:238*
+*lib.metta:235*
 
 ```metta
 (: stats-ranks (-> Expression Expression))
@@ -5296,7 +5260,7 @@ Returns: Ranks
 
 ### `stats-regression`
 
-*pkg.metta:244*
+*lib.metta:241*
 
 ```metta
 (: stats-regression (-> Expression Expression Bool Expression))
@@ -5312,7 +5276,7 @@ Returns: Fit
 
 ### `stats-stdev`
 
-*pkg.metta:250*
+*lib.metta:247*
 
 ```metta
 (: stats-stdev (-> Expression Number Number))
@@ -5327,7 +5291,7 @@ Returns: Deviation
 
 ### `stats-sum`
 
-*pkg.metta:256*
+*lib.metta:253*
 
 ```metta
 (: stats-sum (-> Expression Number))
@@ -5341,7 +5305,7 @@ Returns: Total
 
 ### `stats-variance`
 
-*pkg.metta:262*
+*lib.metta:259*
 
 ```metta
 (: stats-variance (-> Expression Number Number))
@@ -5356,7 +5320,7 @@ Returns: Variance
 
 ### `ws-map-independent`
 
-*pkg.metta:287*
+*lib.metta:284*
 
 ```metta
 (: ws-map-independent (-> %Undefined% (:seg Expression) %Undefined%))
@@ -5371,7 +5335,7 @@ Returns: Law or refusal
 
 ### `ws-map`
 
-*pkg.metta:294*
+*lib.metta:291*
 
 ```metta
 (: ws-map (-> %Undefined% Expression %Undefined%))
@@ -5386,7 +5350,7 @@ Returns: Law or refusal
 
 ### `ws-mass-at-least`
 
-*pkg.metta:302*
+*lib.metta:299*
 
 ```metta
 (: ws-mass-at-least (-> Expression Number %Undefined%))
@@ -5401,7 +5365,7 @@ Returns: Mass or refusal
 
 ### `ws-mass-at-most`
 
-*pkg.metta:310*
+*lib.metta:307*
 
 ```metta
 (: ws-mass-at-most (-> Expression Number %Undefined%))
@@ -5416,7 +5380,7 @@ Returns: Mass or refusal
 
 ### `ws-prob-gt-independent`
 
-*pkg.metta:319*
+*lib.metta:316*
 
 ```metta
 (: ws-prob-gt-independent (-> Expression Expression %Undefined%))
@@ -5431,7 +5395,7 @@ Returns: Probability or refusal
 
 ### `ws-condition-joint`
 
-*pkg.metta:334*
+*lib.metta:331*
 
 ```metta
 (: ws-condition-joint (-> Expression Atom %Undefined%))
@@ -5446,7 +5410,7 @@ Returns: Conditional law or refusal
 
 ### `ws-average-independent`
 
-*pkg.metta:346*
+*lib.metta:343*
 
 ```metta
 (: ws-average-independent (-> Expression %Undefined%))
@@ -5460,7 +5424,7 @@ Returns: Mean law or refusal
 
 ### `ws-add-bernoulli-independent`
 
-*pkg.metta:357*
+*lib.metta:354*
 
 ```metta
 (: ws-add-bernoulli-independent (-> Expression Number %Undefined%))
@@ -5475,7 +5439,7 @@ Returns: Law or refusal
 
 ### `ws-central-moment`
 
-*pkg.metta:374*
+*lib.metta:371*
 
 ```metta
 (: ws-central-moment (-> Expression Number %Undefined%))
@@ -5490,7 +5454,7 @@ Returns: Moment or refusal
 
 ### `ws-variance`
 
-*pkg.metta:381*
+*lib.metta:378*
 
 ```metta
 (: ws-variance (-> Expression %Undefined%))
@@ -5504,7 +5468,7 @@ Returns: Variance or refusal
 
 ### `ws-deviation`
 
-*pkg.metta:390*
+*lib.metta:387*
 
 ```metta
 (: ws-deviation (-> Expression %Undefined%))
@@ -5518,7 +5482,7 @@ Returns: Deviation or refusal
 
 ### `ws-quantile`
 
-*pkg.metta:404*
+*lib.metta:401*
 
 ```metta
 (: ws-quantile (-> Expression Number %Undefined%))
@@ -5533,7 +5497,7 @@ Returns: Value or refusal
 
 ### `ws-median`
 
-*pkg.metta:411*
+*lib.metta:408*
 
 ```metta
 (: ws-median (-> Expression %Undefined%))
@@ -5547,7 +5511,7 @@ Returns: Value or refusal
 
 ### `ws-support`
 
-*pkg.metta:422*
+*lib.metta:419*
 
 ```metta
 (: ws-support (-> Expression %Undefined%))
@@ -5561,7 +5525,7 @@ Returns: Support or refusal
 
 ### `ws-sum-independent`
 
-*pkg.metta:437*
+*lib.metta:434*
 
 ```metta
 (: ws-sum-independent (-> Expression Number %Undefined%))
@@ -5578,7 +5542,7 @@ Returns: Total law or refusal
 
 ### `strategy-eval`
 
-*pkg.metta:69*
+*lib.metta:67*
 
 ```metta
 (: strategy-eval (-> Atom Atom %Undefined%))
@@ -5593,7 +5557,7 @@ Returns: Rewritten term
 
 ### `strategy-choice-tail`
 
-*pkg.metta:82*
+*lib.metta:80*
 
 ```metta
 (: strategy-choice-tail (-> Atom Atom %Undefined%))
@@ -5608,7 +5572,7 @@ Returns: First nonempty answer bag
 
 ### `strategy-all`
 
-*pkg.metta:90*
+*lib.metta:88*
 
 ```metta
 (: strategy-all (-> Atom Atom %Undefined%))
@@ -5623,7 +5587,7 @@ Returns: Rebuilt term
 
 ### `strategy-all-tail`
 
-*pkg.metta:98*
+*lib.metta:96*
 
 ```metta
 (: strategy-all-tail (-> Atom Atom %Undefined%))
@@ -5638,7 +5602,7 @@ Returns: Rebuilt expression
 
 ### `strategy-one`
 
-*pkg.metta:108*
+*lib.metta:106*
 
 ```metta
 (: strategy-one (-> Atom Atom %Undefined%))
@@ -5653,7 +5617,7 @@ Returns: One-position rewrite
 
 ### `strategy-apply`
 
-*pkg.metta:116*
+*lib.metta:114*
 
 ```metta
 (: strategy-apply (-> Atom Atom %Undefined%))
@@ -5668,7 +5632,7 @@ Returns: Every rewrite
 
 ### `fail`
 
-*pkg.metta:123*
+*lib.metta:121*
 
 ```metta
 (: fail (-> Atom %Undefined%))
@@ -5682,7 +5646,7 @@ Returns: No answer
 
 ### `seq`
 
-*pkg.metta:127*
+*lib.metta:125*
 
 ```metta
 (: seq (-> Atom (:seg Atom) %Undefined%))
@@ -5697,7 +5661,7 @@ Returns: Every composed rewrite
 
 ### `choice`
 
-*pkg.metta:134*
+*lib.metta:132*
 
 ```metta
 (: choice (-> Atom (:seg Atom) %Undefined%))
@@ -5712,7 +5676,7 @@ Returns: First nonempty answer bag
 
 ### `try`
 
-*pkg.metta:141*
+*lib.metta:139*
 
 ```metta
 (: try (-> Atom Atom %Undefined%))
@@ -5727,7 +5691,7 @@ Returns: Rewrite or original
 
 ### `gtry`
 
-*pkg.metta:147*
+*lib.metta:145*
 
 ```metta
 (: gtry (-> Atom Atom %Undefined%))
@@ -5742,7 +5706,7 @@ Returns: Rewrite or original
 
 ### `strategy-repeat`
 
-*pkg.metta:153*
+*lib.metta:151*
 
 ```metta
 (: strategy-repeat (-> Atom Atom %Undefined%))
@@ -5757,7 +5721,7 @@ Returns: Normal form
 
 ### `all`
 
-*pkg.metta:159*
+*lib.metta:157*
 
 ```metta
 (: all (-> Atom Atom %Undefined%))
@@ -5772,7 +5736,7 @@ Returns: Rebuilt term
 
 ### `one`
 
-*pkg.metta:165*
+*lib.metta:163*
 
 ```metta
 (: one (-> Atom Atom %Undefined%))
@@ -5787,7 +5751,7 @@ Returns: One-position rewrite
 
 ### `topdown`
 
-*pkg.metta:171*
+*lib.metta:169*
 
 ```metta
 (: topdown (-> Atom Atom %Undefined%))
@@ -5802,7 +5766,7 @@ Returns: Preorder rewrite
 
 ### `bottomup`
 
-*pkg.metta:177*
+*lib.metta:175*
 
 ```metta
 (: bottomup (-> Atom Atom %Undefined%))
@@ -5817,7 +5781,7 @@ Returns: Postorder rewrite
 
 ### `innermost`
 
-*pkg.metta:183*
+*lib.metta:181*
 
 ```metta
 (: innermost (-> Atom Atom %Undefined%))
@@ -5832,7 +5796,7 @@ Returns: Normal form
 
 ### `alltd`
 
-*pkg.metta:189*
+*lib.metta:187*
 
 ```metta
 (: alltd (-> Atom Atom %Undefined%))
@@ -5847,7 +5811,7 @@ Returns: Topmost rewrites
 
 ### `stratego-all`
 
-*pkg.metta:195*
+*lib.metta:193*
 
 ```metta
 (: stratego-all (-> Atom Atom %Undefined%))
@@ -5862,7 +5826,7 @@ Returns: Rebuilt term
 
 ### `stratego-one`
 
-*pkg.metta:201*
+*lib.metta:199*
 
 ```metta
 (: stratego-one (-> Atom Atom %Undefined%))
@@ -5877,7 +5841,7 @@ Returns: One-position rewrite
 
 ### `TP`
 
-*pkg.metta:211*
+*lib.metta:209*
 
 ```metta
 (: TP Type)
@@ -5887,7 +5851,7 @@ The type-preserving strategy scheme: accept a declared arrow with the same input
 
 ### `TU`
 
-*pkg.metta:212*
+*lib.metta:210*
 
 ```metta
 (: TU (-> Type Type))
@@ -5901,7 +5865,7 @@ Returns: Strategy scheme
 
 ### `◁`
 
-*pkg.metta:224*
+*lib.metta:222*
 
 ```metta
 (: ◁ (-> Atom Type Atom %Undefined%))
@@ -5917,7 +5881,7 @@ Returns: Typed rewrite
 
 ### `strategy-typed-tp`
 
-*pkg.metta:234*
+*lib.metta:232*
 
 ```metta
 (: strategy-typed-tp (-> Atom Atom %Undefined%))
@@ -5932,7 +5896,7 @@ Returns: Typed rewrite
 
 ### `strategy-typed-tu`
 
-*pkg.metta:243*
+*lib.metta:241*
 
 ```metta
 (: strategy-typed-tu (-> Atom Type Atom %Undefined%))
@@ -5948,7 +5912,7 @@ Returns: Typed rewrite
 
 ### `strategy-typed-apply`
 
-*pkg.metta:257*
+*lib.metta:255*
 
 ```metta
 (: strategy-typed-apply (-> Atom Type Atom %Undefined%))
@@ -5966,7 +5930,7 @@ Returns: Typed rewrite
 
 ### `string-contains`
 
-*pkg.metta:13*
+*lib.metta:12*
 
 ```metta
 (: string-contains (-> %Undefined% %Undefined% Bool))
@@ -5981,7 +5945,7 @@ Returns: Answer
 
 ### `string-starts-with`
 
-*pkg.metta:20*
+*lib.metta:19*
 
 ```metta
 (: string-starts-with (-> %Undefined% %Undefined% Bool))
@@ -5996,7 +5960,7 @@ Returns: Answer
 
 ### `string-ends-with`
 
-*pkg.metta:31*
+*lib.metta:30*
 
 ```metta
 (: string-ends-with (-> %Undefined% %Undefined% Bool))
@@ -6011,7 +5975,7 @@ Returns: Answer
 
 ### `string-from-chars`
 
-*pkg.metta:38*
+*lib.metta:37*
 
 ```metta
 (: string-from-chars (-> Expression String))
@@ -6025,7 +5989,7 @@ Returns: Text
 
 ### `string-repeat`
 
-*pkg.metta:50*
+*lib.metta:49*
 
 ```metta
 (: string-repeat (-> %Undefined% Number String))
@@ -6040,7 +6004,7 @@ Returns: Text
 
 ### `string-pad-left`
 
-*pkg.metta:58*
+*lib.metta:57*
 
 ```metta
 (: string-pad-left (-> %Undefined% Number %Undefined% String))
@@ -6056,7 +6020,7 @@ Returns: Text
 
 ### `string-pad-right`
 
-*pkg.metta:66*
+*lib.metta:65*
 
 ```metta
 (: string-pad-right (-> %Undefined% Number %Undefined% String))
@@ -6072,7 +6036,7 @@ Returns: Text
 
 ### `string-center`
 
-*pkg.metta:74*
+*lib.metta:73*
 
 ```metta
 (: string-center (-> %Undefined% Number %Undefined% String))
@@ -6088,7 +6052,7 @@ Returns: Text
 
 ### `string-similarity`
 
-*pkg.metta:84*
+*lib.metta:83*
 
 ```metta
 (: string-similarity (-> %Undefined% %Undefined% Number))
@@ -6103,7 +6067,7 @@ Returns: Score
 
 ### `number-to-string`
 
-*pkg.metta:96*
+*lib.metta:95*
 
 ```metta
 (: number-to-string (-> Number String))
@@ -6117,7 +6081,7 @@ Returns: Out
 
 ### `parse-number`
 
-*pkg.metta:102*
+*lib.metta:101*
 
 ```metta
 (: parse-number (-> %Undefined% Number))
@@ -6131,7 +6095,7 @@ Returns: Number
 
 ### `string-chars`
 
-*pkg.metta:108*
+*lib.metta:107*
 
 ```metta
 (: string-chars (-> %Undefined% Expression))
@@ -6145,7 +6109,7 @@ Returns: Chars
 
 ### `string-codes`
 
-*pkg.metta:114*
+*lib.metta:113*
 
 ```metta
 (: string-codes (-> %Undefined% Expression))
@@ -6159,7 +6123,7 @@ Returns: Codes
 
 ### `string-count`
 
-*pkg.metta:121*
+*lib.metta:120*
 
 ```metta
 (: string-count (-> %Undefined% %Undefined% Bool Number))
@@ -6179,7 +6143,7 @@ Returns: Count
 
 ### `string-dedent`
 
-*pkg.metta:127*
+*lib.metta:126*
 
 ```metta
 (: string-dedent (-> %Undefined% String))
@@ -6193,7 +6157,7 @@ Returns: Out
 
 ### `string-edit-distance`
 
-*pkg.metta:133*
+*lib.metta:132*
 
 ```metta
 (: string-edit-distance (-> %Undefined% %Undefined% Number))
@@ -6208,7 +6172,7 @@ Returns: Distance
 
 ### `string-from-codes`
 
-*pkg.metta:139*
+*lib.metta:138*
 
 ```metta
 (: string-from-codes (-> Expression String))
@@ -6222,7 +6186,7 @@ Returns: Out
 
 ### `string-indent`
 
-*pkg.metta:145*
+*lib.metta:144*
 
 ```metta
 (: string-indent (-> %Undefined% %Undefined% String))
@@ -6237,7 +6201,7 @@ Returns: Out
 
 ### `string-index-of`
 
-*pkg.metta:151*
+*lib.metta:150*
 
 ```metta
 (: string-index-of (-> %Undefined% %Undefined% Number))
@@ -6252,7 +6216,7 @@ Returns: Index
 
 ### `string-isub`
 
-*pkg.metta:158*
+*lib.metta:157*
 
 ```metta
 (: string-isub (-> %Undefined% %Undefined% Expression Number))
@@ -6272,7 +6236,7 @@ Returns: Score
 
 ### `string-join`
 
-*pkg.metta:164*
+*lib.metta:163*
 
 ```metta
 (: string-join (-> %Undefined% Expression String))
@@ -6287,7 +6251,7 @@ Returns: Out
 
 ### `string-last-index-of`
 
-*pkg.metta:170*
+*lib.metta:169*
 
 ```metta
 (: string-last-index-of (-> %Undefined% %Undefined% Number))
@@ -6302,7 +6266,7 @@ Returns: Index
 
 ### `string-length`
 
-*pkg.metta:176*
+*lib.metta:175*
 
 ```metta
 (: string-length (-> %Undefined% Number))
@@ -6316,7 +6280,7 @@ Returns: Length
 
 ### `string-lines`
 
-*pkg.metta:182*
+*lib.metta:181*
 
 ```metta
 (: string-lines (-> %Undefined% Expression))
@@ -6330,7 +6294,7 @@ Returns: Lines
 
 ### `string-lower`
 
-*pkg.metta:188*
+*lib.metta:187*
 
 ```metta
 (: string-lower (-> %Undefined% String))
@@ -6344,7 +6308,7 @@ Returns: Out
 
 ### `string-replace`
 
-*pkg.metta:194*
+*lib.metta:193*
 
 ```metta
 (: string-replace (-> %Undefined% %Undefined% %Undefined% String))
@@ -6360,7 +6324,7 @@ Returns: Out
 
 ### `string-slice`
 
-*pkg.metta:200*
+*lib.metta:199*
 
 ```metta
 (: string-slice (-> %Undefined% Number Number String))
@@ -6376,7 +6340,7 @@ Returns: Out
 
 ### `string-split`
 
-*pkg.metta:206*
+*lib.metta:205*
 
 ```metta
 (: string-split (-> %Undefined% %Undefined% Expression))
@@ -6391,7 +6355,7 @@ Returns: Parts
 
 ### `string-split-exact`
 
-*pkg.metta:212*
+*lib.metta:211*
 
 ```metta
 (: string-split-exact (-> %Undefined% %Undefined% Expression))
@@ -6406,7 +6370,7 @@ Returns: Parts
 
 ### `string-template`
 
-*pkg.metta:218*
+*lib.metta:217*
 
 ```metta
 (: string-template (-> %Undefined% Expression String))
@@ -6421,7 +6385,7 @@ Returns: Out
 
 ### `string-trim`
 
-*pkg.metta:224*
+*lib.metta:223*
 
 ```metta
 (: string-trim (-> %Undefined% String))
@@ -6435,7 +6399,7 @@ Returns: Out
 
 ### `string-unlines`
 
-*pkg.metta:230*
+*lib.metta:229*
 
 ```metta
 (: string-unlines (-> Expression String))
@@ -6449,7 +6413,7 @@ Returns: Out
 
 ### `string-upper`
 
-*pkg.metta:236*
+*lib.metta:235*
 
 ```metta
 (: string-upper (-> %Undefined% String))
@@ -6463,7 +6427,7 @@ Returns: Out
 
 ### `string-wrap`
 
-*pkg.metta:243*
+*lib.metta:242*
 
 ```metta
 (: string-wrap (-> %Undefined% Number %Undefined% String))
@@ -6485,7 +6449,7 @@ Returns: Out
 
 ### `change-directory!`
 
-*pkg.metta:25*
+*lib.metta:25*
 
 ```metta
 (: change-directory! (-> String Bool))
@@ -6499,7 +6463,7 @@ Returns: Done
 
 ### `env-all`
 
-*pkg.metta:31*
+*lib.metta:31*
 
 ```metta
 (: env-all (-> Expression))
@@ -6511,7 +6475,7 @@ Returns: Variables
 
 ### `env-get`
 
-*pkg.metta:37*
+*lib.metta:37*
 
 ```metta
 (: env-get (-> String String))
@@ -6525,7 +6489,7 @@ Returns: Value
 
 ### `env-set!`
 
-*pkg.metta:43*
+*lib.metta:43*
 
 ```metta
 (: env-set! (-> String String Bool))
@@ -6540,7 +6504,7 @@ Returns: Done
 
 ### `env-unset!`
 
-*pkg.metta:49*
+*lib.metta:49*
 
 ```metta
 (: env-unset! (-> String Bool))
@@ -6554,7 +6518,7 @@ Returns: Done
 
 ### `platform-info`
 
-*pkg.metta:55*
+*lib.metta:55*
 
 ```metta
 (: platform-info (-> Symbol %Undefined%))
@@ -6568,7 +6532,7 @@ Returns: Value
 
 ### `platform-keys`
 
-*pkg.metta:61*
+*lib.metta:61*
 
 ```metta
 (: platform-keys (-> Expression))
@@ -6580,7 +6544,7 @@ Returns: Keys
 
 ### `working-directory`
 
-*pkg.metta:67*
+*lib.metta:67*
 
 ```metta
 (: working-directory (-> String))
@@ -6594,7 +6558,7 @@ Returns: Path
 
 ### `lib_testing`
 
-*pkg.metta:8*
+*lib.metta:6*
 
 Compose finite generators with core assertions. (forall (range 0 4) (|-> ($x) (test (>= $x 0) True))) checks four inputs. Use assertEqualToResult for an entire answer bag, retaining duplicates; forall itself asks whether the predicate has a True answer. foldall counts with (|-> ($value $count) (+ $count 1)). once commits to the first answer of a filtered generator. range excludes its upper bound; cartesian-power supplies lists of a chosen length. Quote runnable expressions when they are data, use index-atom to select them, and request fresh variables explicitly with copy_term. No specialized test-forall or witness operation is needed.
 
@@ -6602,7 +6566,7 @@ Compose finite generators with core assertions. (forall (range 0 4) (|-> ($x) (t
 
 ### `scope`
 
-*pkg.metta:208*
+*lib.metta:207*
 
 ```metta
 (: scope (-> Atom %Undefined%))
@@ -6616,7 +6580,7 @@ Returns: each body answer
 
 ### `capture`
 
-*pkg.metta:209*
+*lib.metta:208*
 
 ```metta
 (: capture (-> Atom Atom))
@@ -6630,7 +6594,7 @@ Returns: (evalc expression space)
 
 ### `scope-defer`
 
-*pkg.metta:210*
+*lib.metta:209*
 
 ```metta
 (: scope-defer (-> %Undefined% Atom Bool))
@@ -6650,7 +6614,7 @@ Returns: True
 
 ### `scope_defer`
 
-*pkg.metta:211*
+*lib.metta:210*
 
 ```metta
 (: scope_defer (-> %Undefined% Atom Bool))
@@ -6670,7 +6634,7 @@ Returns: True
 
 ### `drop-space`
 
-*pkg.metta:212*
+*lib.metta:211*
 
 ```metta
 (: drop-space (-> SpaceType Bool))
@@ -6684,7 +6648,7 @@ Returns: True
 
 ### `space_drop`
 
-*pkg.metta:213*
+*lib.metta:212*
 
 ```metta
 (: space_drop (-> SpaceType Bool))
@@ -6702,7 +6666,7 @@ Undocumented: `after`, `await`, `await-atom`, `cancel`, `channel`, `channel-clos
 
 ### `torch-tensor`
 
-*pkg.metta:31*
+*lib.metta:31*
 
 ```metta
 (: torch-tensor (-[det,writesState]-> %Undefined% %Undefined%))
@@ -6716,7 +6680,7 @@ Returns: %Undefined%
 
 ### `torch-zeros`
 
-*pkg.metta:39*
+*lib.metta:39*
 
 ```metta
 (: torch-zeros (-[det,writesState]-> %Undefined%))
@@ -6749,7 +6713,7 @@ Returns: %Undefined%
 
 ### `torch-ones`
 
-*pkg.metta:51*
+*lib.metta:51*
 
 ```metta
 (: torch-ones (-[det,writesState]-> %Undefined%))
@@ -6782,7 +6746,7 @@ Returns: %Undefined%
 
 ### `torch-randn`
 
-*pkg.metta:63*
+*lib.metta:63*
 
 ```metta
 (: torch-randn (-[det,oracleIO]-> %Undefined%))
@@ -6815,7 +6779,7 @@ Returns: %Undefined%
 
 ### `torch-arange`
 
-*pkg.metta:73*
+*lib.metta:73*
 
 ```metta
 (: torch-arange (-[det,writesState]-> %Undefined% %Undefined%))
@@ -6839,7 +6803,7 @@ Returns: %Undefined%
 
 ### `torch-matmul`
 
-*pkg.metta:79*
+*lib.metta:79*
 
 ```metta
 (: torch-matmul (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
@@ -6854,7 +6818,7 @@ Returns: %Undefined%
 
 ### `torch-add`
 
-*pkg.metta:83*
+*lib.metta:83*
 
 ```metta
 (: torch-add (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
@@ -6869,7 +6833,7 @@ Returns: %Undefined%
 
 ### `torch-sub`
 
-*pkg.metta:87*
+*lib.metta:87*
 
 ```metta
 (: torch-sub (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
@@ -6884,7 +6848,7 @@ Returns: %Undefined%
 
 ### `torch-mul`
 
-*pkg.metta:91*
+*lib.metta:91*
 
 ```metta
 (: torch-mul (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
@@ -6899,7 +6863,7 @@ Returns: %Undefined%
 
 ### `torch-div`
 
-*pkg.metta:95*
+*lib.metta:95*
 
 ```metta
 (: torch-div (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
@@ -6914,7 +6878,7 @@ Returns: %Undefined%
 
 ### `torch-sum`
 
-*pkg.metta:99*
+*lib.metta:99*
 
 ```metta
 (: torch-sum (-[det,writesState]-> %Undefined% %Undefined%))
@@ -6928,7 +6892,7 @@ Returns: %Undefined%
 
 ### `torch-mean`
 
-*pkg.metta:103*
+*lib.metta:103*
 
 ```metta
 (: torch-mean (-[det,writesState]-> %Undefined% %Undefined%))
@@ -6942,7 +6906,7 @@ Returns: %Undefined%
 
 ### `torch-sigmoid`
 
-*pkg.metta:110*
+*lib.metta:110*
 
 ```metta
 (: torch-sigmoid (-[det,writesState]-> %Undefined% %Undefined%))
@@ -6956,7 +6920,7 @@ Returns: %Undefined%
 
 ### `torch-item`
 
-*pkg.metta:114*
+*lib.metta:114*
 
 ```metta
 (: torch-item (-[det,readOnlyLookup]-> %Undefined% %Undefined%))
@@ -6968,7 +6932,7 @@ Returns the value of this tensor as a standard Python number. This only works fo
 
 ### `torch-tolist`
 
-*pkg.metta:118*
+*lib.metta:118*
 
 ```metta
 (: torch-tolist (-[det,readOnlyLookup]-> %Undefined% %Undefined%))
@@ -6980,7 +6944,7 @@ Returns the tensor as a (nested) list. For scalars, a standard Python number is 
 
 ### `torch-shape`
 
-*pkg.metta:122*
+*lib.metta:122*
 
 ```metta
 (: torch-shape (-[det,readOnlyLookup]-> %Undefined% %Undefined%))
@@ -6994,7 +6958,7 @@ Returns: %Undefined%
 
 ### `torch-requires-grad`
 
-*pkg.metta:127*
+*lib.metta:127*
 
 ```metta
 (: torch-requires-grad (-[det,writesState]-> %Undefined% %Undefined%))
@@ -7013,7 +6977,7 @@ Returns: %Undefined%
 
 ### `torch-backward`
 
-*pkg.metta:136*
+*lib.metta:136*
 
 ```metta
 (: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined%))
@@ -7045,7 +7009,7 @@ Computes the gradient of current tensor wrt graph leaves.
 
 ### `torch-grad`
 
-*pkg.metta:144*
+*lib.metta:144*
 
 ```metta
 (: torch-grad (-[det,oracleIO]-> %Undefined% %Undefined%))
@@ -7061,7 +7025,7 @@ Undocumented: `torch-relu`
 
 ### `unicode-casefold`
 
-*pkg.metta:29*
+*lib.metta:29*
 
 ```metta
 (: unicode-casefold (-> String String))
@@ -7075,7 +7039,7 @@ Returns: Folded
 
 ### `unicode-codepoint-valid`
 
-*pkg.metta:35*
+*lib.metta:35*
 
 ```metta
 (: unicode-codepoint-valid (-> Number Bool))
@@ -7089,7 +7053,7 @@ Returns: Answer
 
 ### `unicode-graphemes`
 
-*pkg.metta:41*
+*lib.metta:41*
 
 ```metta
 (: unicode-graphemes (-> String Expression))
@@ -7103,7 +7067,7 @@ Returns: Graphemes
 
 ### `unicode-is`
 
-*pkg.metta:47*
+*lib.metta:47*
 
 ```metta
 (: unicode-is (-> %Undefined% Symbol Bool))
@@ -7118,7 +7082,7 @@ Returns: Answer
 
 ### `unicode-map`
 
-*pkg.metta:53*
+*lib.metta:53*
 
 ```metta
 (: unicode-map (-> String Expression String))
@@ -7133,7 +7097,7 @@ Returns: Mapped
 
 ### `unicode-normalize`
 
-*pkg.metta:59*
+*lib.metta:59*
 
 ```metta
 (: unicode-normalize (-> Symbol String String))
@@ -7148,7 +7112,7 @@ Returns: Normalized
 
 ### `unicode-property`
 
-*pkg.metta:65*
+*lib.metta:65*
 
 ```metta
 (: unicode-property (-> %Undefined% Symbol %Undefined%))
@@ -7163,7 +7127,7 @@ Returns: Value
 
 ### `unicode-version`
 
-*pkg.metta:71*
+*lib.metta:71*
 
 ```metta
 (: unicode-version (-> String))
@@ -7177,7 +7141,7 @@ Returns: Version
 
 ### `uri-build`
 
-*pkg.metta:11*
+*lib.metta:11*
 
 ```metta
 (: uri-build (-> Expression String))
@@ -7191,7 +7155,7 @@ Returns: URI
 
 ### `uri-contexts`
 
-*pkg.metta:17*
+*lib.metta:17*
 
 ```metta
 (: uri-contexts (-> Expression))
@@ -7203,7 +7167,7 @@ Returns: Contexts
 
 ### `uri-decode`
 
-*pkg.metta:23*
+*lib.metta:23*
 
 ```metta
 (: uri-decode (-> String String))
@@ -7217,7 +7181,7 @@ Returns: Text
 
 ### `uri-encode`
 
-*pkg.metta:29*
+*lib.metta:29*
 
 ```metta
 (: uri-encode (-> Symbol String String))
@@ -7232,7 +7196,7 @@ Returns: Encoded
 
 ### `uri-normalize`
 
-*pkg.metta:35*
+*lib.metta:35*
 
 ```metta
 (: uri-normalize (-> String String))
@@ -7246,7 +7210,7 @@ Returns: Normalized
 
 ### `uri-parts`
 
-*pkg.metta:41*
+*lib.metta:41*
 
 ```metta
 (: uri-parts (-> String Expression))
@@ -7260,7 +7224,7 @@ Returns: Parts
 
 ### `uri-query-build`
 
-*pkg.metta:47*
+*lib.metta:47*
 
 ```metta
 (: uri-query-build (-> Symbol Expression String))
@@ -7275,7 +7239,7 @@ Returns: Query
 
 ### `uri-query-parse`
 
-*pkg.metta:53*
+*lib.metta:53*
 
 ```metta
 (: uri-query-parse (-> Symbol String Expression))
@@ -7290,7 +7254,7 @@ Returns: Pairs
 
 ### `uri-resolve`
 
-*pkg.metta:59*
+*lib.metta:59*
 
 ```metta
 (: uri-resolve (-> String String String))
@@ -7307,7 +7271,7 @@ Returns: Absolute
 
 ### `uuid-is`
 
-*pkg.metta:14*
+*lib.metta:14*
 
 ```metta
 (: uuid-is (-> %Undefined% Bool))
@@ -7321,7 +7285,7 @@ Returns: Valid
 
 ### `uuid-random!`
 
-*pkg.metta:20*
+*lib.metta:20*
 
 ```metta
 (: uuid-random! (-> String))
@@ -7333,7 +7297,7 @@ Returns: UUID
 
 ### `uuid-time!`
 
-*pkg.metta:26*
+*lib.metta:26*
 
 ```metta
 (: uuid-time! (-> String))
@@ -7345,7 +7309,7 @@ Returns: UUID
 
 ### `uuid-timestamp`
 
-*pkg.metta:32*
+*lib.metta:32*
 
 ```metta
 (: uuid-timestamp (-> String Number))
@@ -7359,7 +7323,7 @@ Returns: Timestamp
 
 ### `uuid-name`
 
-*pkg.metta:44*
+*lib.metta:40*
 
 ```metta
 (: uuid-name (-> Number %Undefined% String String))
@@ -7375,7 +7339,7 @@ Returns: UUID
 
 ### `uuid-namespaces`
 
-*pkg.metta:71*
+*lib.metta:67*
 
 ```metta
 (: uuid-namespaces (-> Expression))
@@ -7387,7 +7351,7 @@ Returns: Namespaces
 
 ### `uuid-nil`
 
-*pkg.metta:78*
+*lib.metta:74*
 
 ```metta
 (: uuid-nil (-> String))
@@ -7399,7 +7363,7 @@ Returns: UUID
 
 ### `uuid-bytes`
 
-*pkg.metta:85*
+*lib.metta:81*
 
 ```metta
 (: uuid-bytes (-> String Expression))
@@ -7413,7 +7377,7 @@ Returns: Bytes
 
 ### `uuid-of-bytes`
 
-*pkg.metta:95*
+*lib.metta:91*
 
 ```metta
 (: uuid-of-bytes (-> Expression String))
@@ -7427,7 +7391,7 @@ Returns: UUID
 
 ### `uuid-version`
 
-*pkg.metta:115*
+*lib.metta:111*
 
 ```metta
 (: uuid-version (-> String Number))
@@ -7441,7 +7405,7 @@ Returns: Version
 
 ### `uuid-variant`
 
-*pkg.metta:122*
+*lib.metta:118*
 
 ```metta
 (: uuid-variant (-> String Symbol))
@@ -7457,7 +7421,7 @@ Returns: Variant
 
 ### `cosine-of-normalized`
 
-*pkg.metta:12*
+*lib.metta:10*
 
 ```metta
 (: cosine-of-normalized (-> Expression Expression Number))
@@ -7472,7 +7436,7 @@ Returns: Product
 
 ### `vector-fill`
 
-*pkg.metta:25*
+*lib.metta:23*
 
 ```metta
 (: vector-fill (-> Number Number Expression))
@@ -7487,7 +7451,7 @@ Returns: Vector
 
 ### `random-normal-vector`
 
-*pkg.metta:47*
+*lib.metta:45*
 
 ```metta
 (: random-normal-vector (-> Number Expression))
@@ -7506,7 +7470,7 @@ Returns: Vector
 
 ### `cosine`
 
-*pkg.metta:59*
+*lib.metta:57*
 
 ```metta
 (: cosine (-> %Undefined% %Undefined% Number))
@@ -7521,7 +7485,7 @@ Returns: Similarity
 
 ### `dot`
 
-*pkg.metta:65*
+*lib.metta:63*
 
 ```metta
 (: dot (-> %Undefined% %Undefined% Number))
@@ -7536,7 +7500,7 @@ Returns: Product
 
 ### `norm`
 
-*pkg.metta:71*
+*lib.metta:69*
 
 ```metta
 (: norm (-> %Undefined% Number))
@@ -7550,7 +7514,7 @@ Returns: Length
 
 ### `vector-add`
 
-*pkg.metta:77*
+*lib.metta:75*
 
 ```metta
 (: vector-add (-> %Undefined% %Undefined% Expression))
@@ -7565,7 +7529,7 @@ Returns: Vector
 
 ### `vector-distance`
 
-*pkg.metta:83*
+*lib.metta:81*
 
 ```metta
 (: vector-distance (-> %Undefined% %Undefined% Number))
@@ -7580,7 +7544,7 @@ Returns: Distance
 
 ### `vector-divide`
 
-*pkg.metta:89*
+*lib.metta:87*
 
 ```metta
 (: vector-divide (-> %Undefined% %Undefined% Expression))
@@ -7595,7 +7559,7 @@ Returns: Vector
 
 ### `vector-multiply`
 
-*pkg.metta:95*
+*lib.metta:93*
 
 ```metta
 (: vector-multiply (-> %Undefined% %Undefined% Expression))
@@ -7610,7 +7574,7 @@ Returns: Vector
 
 ### `vector-normalize`
 
-*pkg.metta:101*
+*lib.metta:99*
 
 ```metta
 (: vector-normalize (-> %Undefined% Expression))
@@ -7624,7 +7588,7 @@ Returns: Unit
 
 ### `vector-scale`
 
-*pkg.metta:107*
+*lib.metta:105*
 
 ```metta
 (: vector-scale (-> %Undefined% %Undefined% Expression))
@@ -7639,7 +7603,7 @@ Returns: Scaled
 
 ### `vector-subtract`
 
-*pkg.metta:113*
+*lib.metta:111*
 
 ```metta
 (: vector-subtract (-> %Undefined% %Undefined% Expression))
@@ -7656,7 +7620,7 @@ Returns: Vector
 
 ### `yaml-read!`
 
-*pkg.metta:36*
+*lib.metta:33*
 
 ```metta
 (: yaml-read! (-> %Undefined% %Undefined%))
@@ -7670,7 +7634,7 @@ Returns: the document's value
 
 ### `yaml-write!`
 
-*pkg.metta:40*
+*lib.metta:37*
 
 ```metta
 (: yaml-write! (-> %Undefined% %Undefined% Bool))
@@ -7685,7 +7649,7 @@ Returns: True
 
 ### `yaml-decode`
 
-*pkg.metta:52*
+*lib.metta:49*
 
 ```metta
 (: yaml-decode (-> String %Undefined%))
@@ -7699,7 +7663,7 @@ Returns: Value
 
 ### `yaml-encode`
 
-*pkg.metta:58*
+*lib.metta:55*
 
 ```metta
 (: yaml-encode (-> %Undefined% String))

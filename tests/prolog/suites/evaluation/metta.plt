@@ -1860,7 +1860,7 @@ canonical_rows(Rows, Canonical) :-
 %edit here: a row the file or the prelude registered was ASSERTED and has no
 %source file, and a library's row is a compiled clause that names one
 %[measured 2026-09-20: 'setup!' and 'package-prolog' answer
-%lib/lib_package/lib_package.pl, and `if` answers no file].
+%engine/packages.pl, and `if` answers no file].
 library_declared_row(Name, Type) :-
     clause(seam:builtin_type_declaration(Name, Type), true, Ref),
     clause_property(Ref, file(_)).

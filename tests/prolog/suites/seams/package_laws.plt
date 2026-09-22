@@ -1,19 +1,22 @@
 % Purpose: prove package laws 6-13 through the ordinary load and setup doors.
 % Guarantees: effects, callable results, files and source retirement are the
 % observations; mutations.pl disables each subject and reruns its witnesses.
-% [tested: tests/data/lib_package/mutations.pl; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% [tested: tests/data/package_laws/mutations.pl; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: fixtures stay under this battery's ai-tmp; each home and its
 % source lifetime are independent of the other test cases.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/metta.pl').
-:- use_module('../../../data/lib_package/support.pl').
+:- use_module('../../../data/package_laws/support.pl').
 :- use_module(library(filesex)).
 :- prolog_load_context(directory, Here),
-   directory_file_path(Here, '../../../../ai-tmp/lib-package-laws', Scratch),
+   directory_file_path(Here, '../../../../ai-tmp/package-laws', Scratch),
    assertz(lp_scratch(Scratch)).
+:- prolog_load_context(directory, Here),
+   directory_file_path(Here, '../../../data/package_laws', Data),
+   assertz(lp_data(Data)).
 
-:- begin_tests(lib_package, [setup(lp_install)]).
+:- begin_tests(package_laws, [setup(lp_install)]).
 
 lp_package(Name, Text, Path, Home) :-
     lp_scratch(Scratch), gensym(Name, Unique),
@@ -35,8 +38,13 @@ lp_import(Path, Home) :- once(metta_engine:importer_helper(Home, Path)).
 lp_answers(Home, Expression, Answers) :- findall(V, eval([evalc, Expression, Home], V), Answers).
 lp_events(Events) :- findall(E, lp_event(E), Events).
 
+%The executable MeTTa statement of the policy engine/packages.pl implements.
+%It moved out of the library tree with the laws themselves, so it is resolved
+%from this file's own directory: library/2 answers only for installed
+%libraries, and the package laws are no longer one.
 lp_policy(Home) :-
-    metta_engine:library('lib_package/fixtures/policy.metta', Path),
+    lp_data(Data), directory_file_path(Data, 'policy.metta', Raw),
+    absolute_file_name(Raw, Path),
     metta_engine:metta_reference_home(Path, Home), lp_import(Path, Home).
 
 :- meta_predicate lp_throws(0, ?).
@@ -125,7 +133,7 @@ test(contracts_refuse_before_native_directives) :-
     lp_adjacent(Path, 'native.pl',
         ":- module(lp_native_contract, [lp_native_contract/2]).\n\c
          :- metta_export(\"(: lp_native_contract (-> Number Number))\").\n\c
-         :- lib_package_support:lp_acquire(native_directive, _).\n\c
+         :- package_laws_support:lp_acquire(native_directive, _).\n\c
          lp_native_contract(X,X).", _),
     lp_throws(lp_import(Path, Home), type_error(package_backing_arrow(lp_native_contract, _), _)),
     lp_events([]).
@@ -233,14 +241,14 @@ test(pending_requirements_expose_cycles_outside_their_transaction) :-
     lp_package(pending,"(= (package requires) \"child.metta\")",Path,Home),
     lp_adjacent(Path,'child.metta',"(= (package boot) (lp-wait pending_cycle))",Child),
     message_queue_create(Ready),message_queue_create(Continue),
-    assertz(lib_package_support:lp_gate(pending_cycle,Ready,Continue),Gate),
+    assertz(package_laws_support:lp_gate(pending_cycle,Ready,Continue),Gate),
     setup_call_cleanup(
         thread_create(transaction(lp_import(Path,Home)),Worker,[]),
         (thread_get_message(Ready,entered),
-         lp_throws(lib_package:package_check_cycle(Child,Path),permission_error(load,package_cycle,_))),
+         lp_throws(packages:package_check_cycle(Child,Path),permission_error(load,package_cycle,_))),
         (thread_send_message(Continue,continue),thread_join(Worker,Status),erase(Gate),
          message_queue_destroy(Ready),message_queue_destroy(Continue))),
-    Status == true,\+ lib_package:package_pending_requirement(Path,_).
+    Status == true,\+ packages:package_pending_requirement(Path,_).
 
 test(missing_artifact_names_setup_as_the_remedy) :-
     lp_package(missing, "(= (package backing) (prolog \"absent.pl\" (lp_missing)))", Path, Home),
@@ -276,29 +284,29 @@ lp_setup_fixture(Name, Text, Path, Home, Output) :-
 
 test(setup_receipts_reuse_unchanged_work) :-
     lp_setup_fixture(reuse, "ready", Path, _, Output),
-    lib_package:'setup!'(Path, true), lib_package:'setup!'(Path, true),
+    packages:'setup!'(Path, true), packages:'setup!'(Path, true),
     lp_events([prepare(Output, "ready")]),
     file_directory_name(Path, Directory), directory_file_path(Directory, 'performed.metta', Receipt),
-    lib_package:package_read_rows(Receipt, [[performed, ['lp-prepare', Output, "ready"], done]]).
+    packages:package_read_rows(Receipt, [[performed, ['lp-prepare', Output, "ready"], done]]).
 
 test(changed_setup_rows_invalidate_receipts) :-
     lp_setup_fixture(changed, "first", Path, _, Output),
-    lib_package:'setup!'(Path, true),
+    packages:'setup!'(Path, true),
     format(string(Next), '(= (package setup) (lp-prepare ~q "second"))', [Output]),
-    lp_write(Path, Next), lib_package:'setup!'(Path, true),
+    lp_write(Path, Next), packages:'setup!'(Path, true),
     lp_events([prepare(Output,"first"), prepare(Output,"second")]).
 
 test(missing_backing_artifacts_invalidate_receipts) :-
     lp_setup_fixture(artifact, "lp_setup_artifact(42).", Path, _, Output),
     format(string(Source), '(= (package setup) (lp-prepare ~q "lp_setup_artifact(42)."))\n\c
                            (= (package backing) (prolog ~q (lp_setup_artifact)))', [Output,Output]),
-    lp_write(Path, Source), lib_package:'setup!'(Path, true), delete_file(Output),
-    lib_package:'setup!'(Path, true),
+    lp_write(Path, Source), packages:'setup!'(Path, true), delete_file(Output),
+    packages:'setup!'(Path, true),
     lp_events([prepare(Output,_), prepare(Output,_)]), exists_file(Output).
 
 test(failed_setup_does_not_publish_a_receipt) :-
     lp_setup_fixture(setup_fail, "fail", Path, _, _),
-    lp_throws(lib_package:'setup!'(Path, _), lp_prepare_failed),
+    lp_throws(packages:'setup!'(Path, _), lp_prepare_failed),
     file_directory_name(Path, Directory), directory_file_path(Directory, 'performed.metta', Receipt),
     \+ exists_file(Receipt).
 
@@ -306,9 +314,9 @@ test(setup_lock_contains_transitive_resolved_requirements) :-
     lp_package(lock, "(= (package requires) \"dependency.metta\")", Path, _),
     lp_adjacent(Path, 'dependency.metta', "(= (package requires) \"leaf.metta\")", Dependency),
     lp_adjacent(Path, 'leaf.metta', "(= (package version) \"1\")", Leaf),
-    lib_package:'setup!'(Path, true),
+    packages:'setup!'(Path, true),
     file_directory_name(Path, Directory), directory_file_path(Directory, 'lock.metta', Lock),
-    lib_package:package_read_rows(Lock, Rows),
+    packages:package_read_rows(Lock, Rows),
     memberchk([requires,"dependency.metta",Dependency], Rows),
     memberchk([requires,"leaf.metta",Leaf], Rows).
 
@@ -361,15 +369,15 @@ test(setup_dependencies_supply_computed_rows_without_booting) :-
                               (= (package boot) (lp-resource must_not_boot ()))', [Output]),
     lp_adjacent(Path, 'dependency.metta', Dependency, _),
     lp_write(Path, "(= (package requires) \"dependency.metta\")\n(= (package setup) (lp-setup-row))"),
-    lib_package:'setup!'(Path, true), lp_events([prepare(Output,"prepared")]).
+    packages:'setup!'(Path, true), lp_events([prepare(Output,"prepared")]).
 
 test(duplicate_setup_rows_remain_distinct_and_invalidate_on_removal) :-
     lp_setup_fixture(duplicates, "twice", Path, _, Output),
     read_file_to_string(Path, One, []), string_concat(One, "\n", Line),
     string_concat(Line, One, Two), lp_write(Path, Two),
-    lib_package:'setup!'(Path, true), lib_package:'setup!'(Path, true),
+    packages:'setup!'(Path, true), packages:'setup!'(Path, true),
     lp_events([prepare(Output,"twice"), prepare(Output,"twice")]),
-    lp_write(Path, One), lib_package:'setup!'(Path, true),
+    lp_write(Path, One), packages:'setup!'(Path, true),
     lp_events([prepare(Output,"twice"), prepare(Output,"twice"), prepare(Output,"twice")]).
 
 test(setup_holds_an_os_lock_until_its_claimant_finishes) :-
@@ -428,8 +436,8 @@ test(setup_pins_git_and_a_fresh_import_spawns_nothing) :-
     format(string(Source), '(= (package requires) (git ~q ~q))', [Url,Sha]), lp_write(Path, Source),
     eval(['setup!',Path],true),
     file_directory_name(Path, Directory), directory_file_path(Directory,'lock.metta',Lock),
-    lib_package:package_read_rows(Lock, Rows), memberchk([requires,[git,Url,Sha],Locked],Rows), exists_file(Locked),
-    source_file(lib_package_support:lp_install, Support),
+    packages:package_read_rows(Lock, Rows), memberchk([requires,[git,Url,Sha],Locked],Rows), exists_file(Locked),
+    source_file(package_laws_support:lp_install, Support),
     format(atom(Goal),
         'use_module(~q),use_module(library(prolog_wrap)),use_module(library(process)),filereader:metta_host_set_silent(true),wrap_predicate(process:process_create(A,B,C),forbid_spawn,_,throw(error(unexpected_package_spawn,A-B-C))),metta_engine:''import!''(''&self'',~q,_),findall(V,metta_engine:eval([''lp-git-value''],V),Vs),writeln(Vs)',
         [Support,Path]),
@@ -487,7 +495,7 @@ test(native_names_owned_by_a_requirement_refuse_before_directives) :-
         "(= (package backing) (prolog \"first.pl\" (lp_native_taken)))",_),
     lp_adjacent(Path,'first.pl',"lp_native_taken(42).",First),
     lp_adjacent(Path,'second.pl',
-        ":- lib_package_support:lp_acquire(forbidden_directive,_).\nlp_native_taken(43).",_),
+        ":- package_laws_support:lp_acquire(forbidden_directive,_).\nlp_native_taken(43).",_),
     lp_throws(lp_import(Path,Home),metta_name_owned_by_source(lp_native_taken,First)),
     lp_events([]),lp_answers(Home,[lp_native_taken],[42]).
 
@@ -592,10 +600,10 @@ test(setup_reuses_receipts_with_multiple_answers) :-
     filereader:process_loader_string(
         "(= (perform (lp-many-setup)) (superpose ((lp_acquire setup_first) (lp_acquire setup_second))))",_,'&metta'),
     lp_package(many_setup,"(= (package setup) (lp-many-setup))",Path,_),
-    lib_package:'setup!'(Path,true),lib_package:'setup!'(Path,true),
+    packages:'setup!'(Path,true),packages:'setup!'(Path,true),
     lp_events([acquire(setup_first),acquire(setup_second)]),
     file_directory_name(Path,Directory),directory_file_path(Directory,'performed.metta',Receipt),
-    lib_package:package_read_rows(Receipt,
+    packages:package_read_rows(Receipt,
         [[performed,['lp-many-setup'],[handle,setup_first]],[performed,['lp-many-setup'],[handle,setup_second]]]).
 
 test(space_read_bodies_cannot_hide_state_writes) :-
@@ -664,4 +672,4 @@ test(a_backing_row_registers_before_the_equations_calling_it_translate) :-
     lp_import(Path, Home),
     lp_answers(Home, ['lp-native-pair', 41], [42]).
 
-:- end_tests(lib_package).
+:- end_tests(package_laws).

@@ -538,9 +538,8 @@ portable over that wire today. That is a real limit rather than a rounding
 of one, and it is written down here so a binding does not discover it by
 storing an atom that never comes back.
 
-Running the corpus against the TypeScript reference server, which shares no
-code with this package, turned up three divergences on first contact and all
-three are pinned in
+The corpus run against the TypeScript reference server, which shares no code
+with this package, holds three divergences, each pinned in
 `extensions/python/tests/ch21_another_language_at_the_seam/test_codec_typescript.py`.
 Two share one cause: `isWireAtom` validates the `g` tag with `case "g": return
 true`, so `["g", 1]` and `["g", {"a": 1}]` are both stored there and both
@@ -598,22 +597,20 @@ exercises the table's miss path and its hit path, so the per-construction
 figure is about half that. That seat runs SWI compiled to WebAssembly, so read
 both as that runtime's numbers rather than as native ones.
 
-**Inferences cannot decide a codec change, and this is where that bites
-hardest.** Foreign code retires no inferences at all, so a codec moved from
-Prolog into C looks free on the counter every other part of this engine is
-measured by. A C wire encoder in this tree measured 526x faster on inferences
-while CPU time said it was 1.8x SLOWER. The two wire rows above therefore pin
+**Inferences cannot decide a codec change.** Foreign code retires no
+inferences at all, so a codec moved from Prolog into C reads as free on the
+counter every other part of this engine is measured by: a C wire encoder here
+scores 526x on inferences and 1.8x SLOWER on CPU time, for the same work. The two wire rows above therefore pin
 instructions and leave inferences null, because the engine is never asked; the
 `host-op` row, whose cost is genuinely split across the boundary, pins both and
 lets them decide different halves, at 40.61 inferences and about 449,008
 instructions per yield over 2,000 yields. If you are changing a codec, measure
 retired instructions or CPU seconds and pair them, as DEVELOPING.md requires.
 
-Two cheaper things are worth knowing before optimising the walk. A refusal
-costs nothing, so validating a payload's class is not a reason to skip
-validation. And the corpus is the cheap way to find a divergence: running it
-against the TypeScript reference server turned up three on first contact, which
-is less work than discovering them from a stored atom that never came back.
+Two things are cheaper than they look. A refusal costs nothing, so a
+payload's class is always worth validating. And the corpus is the cheap way to
+find a divergence: it is what pins the three above, against a stored atom that
+never comes back as the alternative.
 
 ## Related pages
 

@@ -9,6 +9,35 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Package handling is the engine's. `lib_package` was never importable the way
+  a program imports `lib_json`: the engine loaded it at boot by reaching across
+  the library repository's boundary, so an engine could not read a manifest
+  without that repository beside it. It is `engine/packages.pl` now, with
+  `engine/owned_resources.pl` for the cleanup combinator it and three libraries
+  share. `setup!`, `get-property`, `package-load` and `package-prolog` are
+  documented by the prelude, and a required packaging library still replaces the
+  default through `package-load`, so what changed is which one is the floor.
+
+  Asking what libraries exist no longer requires importing one:
+  `(match &catalogs (package $name $path) $name)` answers at boot.
+
+- A directory under `lib/` is a library because it holds a manifest, not because
+  its name begins with `lib_`. The prefix was wrong in both directions: it hid
+  `minimal_metta_lib`, which ships and imports like any other, and it listed
+  `lib_gitimport`, a Prolog-only backing service with no manifest that
+  `!(import! &self (library lib_gitimport))` refuses outright. The roster, the
+  `llms` lane, the refusal-coverage lane and `metta.lib`'s dotted access all
+  decide it the same way now, and the roster is 60 rather than 61.
+
+  `check_refusal_coverage` reads 39 shipped Prolog halves where the prefix glob
+  read 35, having never looked at `skel.pl`, `minimal_metta_lib.pl` or the two
+  `_support` modules.
+
+- The Python chapter of `EXTENDING.md` moved to the seat that owns it, as
+  `extensions/python/EXTENDING.md`. Section 4 is now what every seat owes a
+  library declaration whichever host wrote it, and each seat's guide covers its
+  own reach.
+
 - A shipped library's `pkg.metta` describes its requirements rather than
   instructing an engine to import them. Where the manifest held
   `!(import! &self (library lib_crypto))` it now holds

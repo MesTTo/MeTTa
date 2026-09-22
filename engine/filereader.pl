@@ -1784,7 +1784,7 @@ stored_equation_source(Space, Original, Resolved, StoredRef) :-
 % has no edge here either. That is the same residual the narrowed walk carried
 % for these rows, so nothing regresses, and it is narrow: a declaration row --
 % every `prolog`, `git` and `library` row shipped today -- names heads and
-% calls nothing. Closing it wants the row GRAMMAR, which lives in lib_package
+% calls nothing. Closing it wants the row GRAMMAR, which lives in packages.pl
 % rather than here; until the engine can ask which payload positions a claim
 % reads, this exemption is as tight as the engine can state.
 % Recognised rather than unified into, which is the rule package_row/3 in

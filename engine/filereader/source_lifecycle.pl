@@ -1348,8 +1348,8 @@ metta_source_changed(CanonPath) :-
 %Hooking a single door left the others silently unperformed, which is how a
 %face loaded with `load` answered its own head unreduced while the same file
 %imported answered normally. A failed activation restores the preceding source;
-%lib_package compensates external acquisitions outside Prolog's transaction.
-%[tested: lib_package:failed_replacement_preserves_the_previous_source_and_handles;
+%packages.pl compensates external acquisitions outside Prolog's transaction.
+%[tested: package_laws:failed_replacement_preserves_the_previous_source_and_handles;
 %commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 %
 %The PATH travels with the space, because the rows performed are this file's

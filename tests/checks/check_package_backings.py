@@ -106,7 +106,7 @@ def findings(libraries: Path) -> list[str]:
 
 #: The one file a library is entered through, and the only one this rule binds.
 #: A git checkout resolves through the same name
-#: [source: lib/lib_package/lib_package.pl:package_checkout_entry/4].
+#: [source: engine/packages.pl:package_checkout_entry/4].
 MANIFEST = "pkg.metta"
 
 #: A package row, recognised the way the engine recognises it: the head is two

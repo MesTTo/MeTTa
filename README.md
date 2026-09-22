@@ -97,9 +97,11 @@ Everything the engine knows about itself is atoms you can query, including what
 each library is and where it came from.
 
 ```metta
-!(import! &self (library lib_package))
-!(test (size-atom (collapse (match &catalogs (package $name $path) $name))) 61)
+!(test (size-atom (collapse (match &catalogs (package $name $path) $name))) 60)
 ```
+
+Nothing is imported first. Package handling is the engine's, not a library's,
+so the catalog is there at boot.
 
 # The language
 

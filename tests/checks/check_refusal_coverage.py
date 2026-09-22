@@ -113,7 +113,11 @@ def findings(root: Path = ROOT) -> list[str]:
     """One line per documented refusal that no suite holds the library to."""
     suites = _suite_text(root)
     out: list[str] = []
-    for library in sorted(root.glob("lib/lib_*/lib_*.pl")):
+    # Every shipped Prolog half, which is not the same as every `lib_*.pl`
+    # under a `lib_*` directory: that spelling never saw skel.pl,
+    # minimal_metta_lib.pl or the two _support modules, all four of
+    # which ship and can document a refusal.
+    for library in sorted(root.glob("lib/*/*.pl")):
         text = library.read_text(encoding="utf-8", errors="replace")
         seen: set[str] = set()
         for heads, prose in BLOCK.findall(text):

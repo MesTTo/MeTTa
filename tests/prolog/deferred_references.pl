@@ -76,8 +76,8 @@
 %   cannot be resolved where it is used, and that claim has to be argued.
 
 deferred_reference(lib_file:metta_staged_publish/2,
-                   ['lib/lib_package/lib_package.pl'],
-                   'lib_package is the bootstrap prelude: (package requires) runs \c
+                   ['engine/packages.pl'],
+                   'package_laws is the bootstrap prelude: (package requires) runs \c
                     before any packaging library is merged, so the bootstrap \c
                     bottoms out at a library that requires nothing, and the \c
                     engine boot loads it eagerly at engine/metta/interop.pl. It \c
@@ -90,7 +90,7 @@ deferred_reference(lib_file:metta_staged_publish/2,
                     unregistered_builtin_implementation(lib_file:\'append-file!\'/3) \c
                     and memory-scale-gate on the boot cost, because a library \c
                     loaded while the engine is coming up registers its builtins \c
-                    too early. Deferring lib_package itself instead would move \c
+                    too early. Deferring package_laws itself instead would move \c
                     the count from this one name to the five interop.pl already \c
                     calls qualified.').
 

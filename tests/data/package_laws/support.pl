@@ -1,11 +1,11 @@
 % Purpose: supply observable claimant effects for package lifecycle tests.
 % Guarantees: events record actual acquisition, release and preparation calls;
 % preparation writes both its artifact and a persistent invocation counter.
-% [tested: lib_package; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% [tested: package_laws; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: file streams close on all outcomes; events belong to the test
 % process and survive source rollback so compensation remains observable.
 % Guarded by: lp_events serializes event writes from concurrent setup threads.
-:- module(lib_package_support,
+:- module(package_laws_support,
           [lp_acquire/2, lp_release/3, lp_prepare/3, lp_return_space/2,
            lp_probe_lock/2, lp_process/3, lp_event/1, lp_reset/0, lp_install/0,
            lp_wait/2, lp_gate/3]).
