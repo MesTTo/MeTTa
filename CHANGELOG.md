@@ -29,6 +29,59 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the manifest from one predicate, because a directory imported through its
   manifest is withdrawn by the name that imported it.
 
+- `mypy-win32` and `mypy-darwin` gate lanes type-check the same files as if on
+  Windows and macOS. typeshed marks every POSIX-only name with
+  `sys.platform != "win32"`, so this asks whether a platform-only call sits on
+  a path a platform without it can reach, with no hand-written list of such
+  names. Fifteen sites were runtime-correct but guarded with `os.name`, which
+  mypy does not narrow where it does narrow `sys.platform`.
+
+- A `host-bundle` gate lane reads the dynamic section of every ELF a
+  relocatable bundle ships and holds it to three rules: one file per shared
+  object, an RPATH that resolves from the position the file occupies, and a
+  path named by a `.pc` or `.cmake` that exists. It parses ELF directly rather
+  than shelling out, so it runs in CI, cross-architecture, and inside a
+  container that cannot execute what it is checking. An import-level test sees
+  none of this: the bundle it was written for answered `6*7 = 42` and reported
+  SWI 10.1.14 in the same install whose `bin/swipl` could not start and whose
+  `libswipl` borrowed `libgmp` from the host.
+
+### Fixed
+
+- `metta.Space()` raised `AttributeError: module 'os' has no attribute
+  'register_at_fork'` on Windows. `import metta` succeeded, so the failure
+  arrived at the first usable operation rather than at the import: `Space()`
+  reaches `metta._spaces.execution`, which imports `metta._binding.runtime`,
+  which registered a fork handler at module scope. `register_at_fork` exists on
+  exactly the platforms that have `os.fork`, so where it is absent there is no
+  inherited engine to poison and the registration is vacuous rather than
+  unavailable; it is now guarded on that precondition
+  [measured 2026-09-22, Windows 11 26200, CPython 3.12.10].
+
+### Changed
+
+- The `engine` extra partitions by platform. Where a `pymetta-host` wheel
+  exists it carries the PATCHED SWI the engine needs, so nothing has to be
+  installed by hand; elsewhere `janus-swi` binds whatever SWI the reader
+  supplies. The rows must partition rather than overlap, because `pymetta-host`
+  vendors its bridge and refuses to run beside a foreign `janus_swi`, and PEP
+  508's marker grammar has no `not`, so the complement is spelled as the `or`
+  of the negated halves.
+
+- The publish workflow releases every distribution under `ext/`, not just
+  `pymetta`. They build into the same `dist/` and so ride the same publish
+  step, derived from the directory the way the checks workflow's build loop is,
+  so a package added under `ext/` is released with no edit. `pymetta-host` is
+  excluded and the step says why: its wheels carry a patched SWI-Prolog built
+  inside a manylinux container. The tag check now names `pymetta`'s own
+  archive, having globbed `dist/*.tar.gz` when that matched exactly one file.
+
+- `metta-benchmarking` declares `Operating System :: POSIX :: Linux` and its
+  instruction-count path refuses with the reason named rather than raising
+  `AttributeError` on `os.POSIX_SPAWN_DUP2`. It measures through `perf stat`,
+  and `perf_event_open` is a Linux syscall with no macOS or Windows
+  equivalent, so a portable spawn would leave nothing to run. The load probe
+  answers 0.0 off Linux, where there is no such kernel statistic.
 
 ## [0.9.0] - 2026-09-22
 

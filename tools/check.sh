@@ -48,6 +48,7 @@
 #                                            closed-sets-selftest
 #                                            host-workarounds
 #                                            host-workarounds-selftest
+#                                            host-bundle host-bundle-selftest
 #                                            cumulative-syntax
 #                                            cumulative-syntax-selftest
 #                                            parity twins twins-selftest
@@ -62,6 +63,7 @@
 #                                            corpus-coverage-selftest
 #                                            generated-artifacts
 #                                            init-stub mypy-root-impl
+#                                            mypy-win32 mypy-darwin
 #                                            mypy-algebra-surface
 #                                            scratch-retention
 #                                            process-bounds reaping
@@ -929,6 +931,19 @@ run GATE closed-sets "$PY" "$HERE/tests/checks/check_closed_sets.py"
 run GATE closed-sets-selftest "$PY" "$HERE/tests/checks/check_closed_sets_selftest.py"
 run GATE host-workarounds "$PY" "$HERE/tests/checks/check_host_workarounds.py"
 run GATE host-workarounds-selftest "$PY" "$HERE/tests/checks/check_host_workarounds_selftest.py"
+
+# A wheel cannot carry a symlink, so every alias in a staged tree reaches the
+# user as a full copy, and a copy of a position-dependent ELF carries an RPATH
+# for a directory it is no longer in. That shipped: pymetta-host imported
+# cleanly, answered 6*7=42 and reported SWI 10.1.14 in the same install whose
+# bin/swipl could not start and whose libswipl borrowed libgmp from the host.
+# An import-level test sees none of it, so this reads the dynamic section of
+# every shipped ELF instead. The wheels are a build artefact rather than a
+# repository one, so with none present the lane is vacuously true and
+# assemble.sh is what gates the ones it builds.
+run GATE host-bundle "$PY" "$HERE/tests/checks/check_host_bundle.py" \
+    $(ls "$HERE"/ext/pymetta-host/dist/*.whl 2>/dev/null)
+run GATE host-bundle-selftest "$PY" "$HERE/tests/checks/check_host_bundle_selftest.py"
 
 # A GATE by the 2026-09-08 layout ruling, refined on 2026-09-15: mixed,
 # recursive and undeclared open boundaries must be resolved at their bodies.

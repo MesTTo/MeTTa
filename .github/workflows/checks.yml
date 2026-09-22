@@ -524,12 +524,20 @@ jobs:
         #
         # Derived from the directory, so a package added under ext/ is built
         # here with no edit: the members are what the workspace glob matches.
+        #
+        # The FULL build rather than --wheel, and installed FROM THE SOURCE
+        # ARCHIVE, for the reason the root package's own two steps give: `build`
+        # with no flag makes the sdist and then the wheel from it, which is the
+        # path PyPI takes, and `--wheel` alone once passed while the full build
+        # died on a MANIFEST.in that carried five fewer resources than the
+        # wheel mapped in. These are published as sdists too, so this is what
+        # keeps a published sdist one that installs.
         run: |
           set -eu
           for member in ext/metta-*; do
-              python -m build --wheel --outdir dist/ext "$member"
+              python -m build --outdir dist/ext "$member"
           done
-          /tmp/wheeltest/bin/pip install --no-deps dist/ext/*.whl
+          /tmp/wheeltest/bin/pip install --no-deps --no-binary :all: dist/ext/*.tar.gz
           cd /tmp
           /tmp/wheeltest/bin/python -c "
           import os
