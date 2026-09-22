@@ -70,7 +70,7 @@ ASSIGNMENT = re.compile(
 #: before the `$`, so `WRAPPER="sh $ROOT/bounded.sh"` -- the wrapper under test
 #: in the reaping lane -- was invisible to the one check written to find
 #: exactly that [measured 2026-09-21: the lane failed twelve of its thirteen
-#: cases while this passed; commit=WORKTREE].
+#: cases while this passed; commit=8fbca56df2f4ea8aa8db822792dd8757014998eb].
 REFERENCE = re.compile(r'\$\{?(\w+)\}?/([A-Za-z0-9_./-]+\.sh)')
 
 
@@ -81,7 +81,7 @@ REFERENCE = re.compile(r'\$\{?(\w+)\}?/([A-Za-z0-9_./-]+\.sh)')
 #: not in recognising a reference, but in knowing where its variable points,
 #: and an unresolvable base SKIPS silently while a wrong one would be loud
 #: [measured 2026-09-21: engine/bench.sh carried three stale references and
-#: extensions/node/bench.sh two while this reported 0 findings; commit=WORKTREE].
+#: extensions/node/bench.sh two while this reported 0 findings; commit=54fedcb0e19bc3e3d7ebf90dfb50bcac9fce5d32].
 DERIVED_DIRNAME = re.compile(r'^(\w+)=\$\(\s*dirname(?:\s+--)?\s+"\$(\w+)"\s*\)', re.MULTILINE)
 DERIVED_CD = re.compile(
     r'^(\w+)=\$\(\s*(?:\w+=\S*\s+)*cd(?:\s+--)?\s+"\$(\w+)([^"]*)"\s*&&\s*pwd\s*\)',

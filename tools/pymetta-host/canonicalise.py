@@ -33,11 +33,11 @@ Assumes: patchelf on PATH, which the manylinux image installs; a tree already
     staged, not a live install.
 Guarantees:
   - no symlink remains under the root
-    [tested: tests/checks/check_host_bundle_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_host_bundle_selftest.py; commit=1d2bc5c2612f21832d19f1aef2d181bd7ffc9ede]
   - nothing names a collapsed alias, in an ELF or in a .pc or .cmake
-    [tested: tests/checks/check_host_bundle_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_host_bundle_selftest.py; commit=1d2bc5c2612f21832d19f1aef2d181bd7ffc9ede]
   - no .pc or .cmake names the build prefix
-    [tested: tests/checks/check_host_bundle_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_host_bundle_selftest.py; commit=1d2bc5c2612f21832d19f1aef2d181bd7ffc9ede]
 Fails when: an alias family outside a and b appears. That is deliberate: the
     alternative is shipping a copy nobody decided to make.
 Decides: the surviving name is the shortest in the chain, and the relocatable

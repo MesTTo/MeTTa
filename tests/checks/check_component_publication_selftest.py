@@ -17,15 +17,15 @@ Assumes: git is on PATH and can clone a local path; no network is used, and
     or fail for a reason that is not about the checker.
 Guarantees:
   - a pin some ref of the remote reaches is NOT reported
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=1f017a6668fed402a0c56ec4dc29f42399839572]
   - a pin no ref of the remote reaches IS reported as unresolvable
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=1f017a6668fed402a0c56ec4dc29f42399839572]
   - a pin this checkout does not hold is reported as UNASKED, not as absent
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=1f017a6668fed402a0c56ec4dc29f42399839572]
   - a remote that cannot be reached is reported as UNASKED
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=1f017a6668fed402a0c56ec4dc29f42399839572]
   - the summary counts the two kinds separately
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=1f017a6668fed402a0c56ec4dc29f42399839572]
 Fails when: nothing about the real tree. It is a unit test of the checker.
 Open Obligations:
   To Do: None

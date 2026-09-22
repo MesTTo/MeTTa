@@ -5,12 +5,12 @@
 % Guarantees:
 %   - scratch_parent/1 is det and cannot fail, so a fixture built on it cannot
 %     produce the vacuous "failed" a bare getenv/2 gives when TMPDIR is unset
-%     [tested: tests/prolog/suites/seams/scratch.plt; commit=WORKTREE]
+%     [tested: tests/prolog/suites/seams/scratch.plt; commit=2e54536e7b10e2e396a45e846c757258de0cd4b9]
 %   - the parent is TMPDIR when the environment sets it, keeping fixtures off
 %     a RAM-backed /tmp, and SWI's tmp_dir flag otherwise
 %     [measured 2026-09-21: with TMPDIR pointed at a checkout directory,
 %      current_prolog_flag(tmp_dir, D) still answered /tmp, so tmp_dir does
-%      NOT track TMPDIR on this build and cannot stand in for it; commit=WORKTREE]
+%      NOT track TMPDIR on this build and cannot stand in for it; commit=2e54536e7b10e2e396a45e846c757258de0cd4b9]
 % Owns resources: with_scratch_directory/2 creates the directory and deletes it
 %   with its contents on success, failure or exception.
 

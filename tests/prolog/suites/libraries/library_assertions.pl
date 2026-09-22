@@ -7,7 +7,7 @@
 %     - every suite runs in its own swipl process, so this module replaces
 %       twenty identical top-level definitions that never collided
 %       [source: engine/check.sh:366 loops `for suite in suites/*/*.plt`
-%        and runs one swipl per suite; commit=WORKTREE]
+%        and runs one swipl per suite; commit=a6fe346c7bd065451d8fd1c085a54cc7ce97a63f]
 % Guarantees:
 %     - must_throw/2 fails its test when the goal succeeds, when it fails
 %       without throwing, and when the thrown term does not unify with the
@@ -15,7 +15,7 @@
 %       library_refusals.plt:the_assertion_sees_a_planted_success,
 %       library_refusals.plt:the_assertion_sees_a_planted_failure,
 %       library_refusals.plt:the_assertion_sees_a_planted_mismatch;
-%       commit=WORKTREE]
+%       commit=d278051543e0d67f4b363df29e27e94e1b5f283f]
 %     - the goal is called in its CALLER's module, so a suite naming a library
 %       predicate unqualified reaches the same predicate it reached when the
 %       definition was local to the suite [source: meta_predicate 0 below]

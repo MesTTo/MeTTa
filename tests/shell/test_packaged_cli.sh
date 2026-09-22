@@ -16,15 +16,15 @@
 #   - no boot writes to stderr. Every other claim here is about a VALUE, and a
 #     failed use_module directive leaves every value right while the install is
 #     broken, which is how the 0.9.0 shim.pl regression passed this file
-#     [tested: sh tools/check.sh packaged; commit=WORKTREE].
+#     [tested: sh tools/check.sh packaged; commit=1c8dde7ea24138f482c3e834b8a8152efd613cf8].
 #   - every shipped module imports with no component root above the install,
 #     which is what an ordinary pip install is. `import metta` succeeding says
 #     nothing about the other 184 [tested: sh tools/check.sh packaged;
-#     commit=WORKTREE].
+#     commit=1c8dde7ea24138f482c3e834b8a8152efd613cf8].
 #   - the runtime tree is checked against setup.py's RUNTIME_RESOURCES rather
 #     than a list repeated here, so an entry added to the map is covered
 #     without editing this file [tested: sh tools/check.sh packaged;
-#     commit=WORKTREE].
+#     commit=1c8dde7ea24138f482c3e834b8a8152efd613cf8].
 #   - the installed CLI carries the filter surface: `run` names --json and the
 #     standard-input operand, `doc` names --infer. Their BEHAVIOUR needs the
 #     engine extra, which this dependency-free install does not have, and is

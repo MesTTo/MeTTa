@@ -27,13 +27,13 @@ Assumes: nothing executable. The dynamic section is read, never run, so this
 Guarantees:
   - every NEEDED entry of every shipped ELF resolves, from that ELF's own
     position, to a file inside the bundle or to a library the manylinux policy
-    lets a wheel rely on [tested: check_host_bundle_selftest.py; commit=WORKTREE]
+    lets a wheel rely on [tested: check_host_bundle_selftest.py; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
   - no two shipped ELVES hold the same content, so an alias chain flattened
     into copies is reported rather than shipped; identical data files are not
     a finding, since neither the soname nor the position hazard reaches them
-    [tested: check_host_bundle_selftest.py; commit=WORKTREE]
+    [tested: check_host_bundle_selftest.py; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
   - a path named by a shipped .cmake or .pc file exists
-    [tested: check_host_bundle_selftest.py; commit=WORKTREE]
+    [tested: check_host_bundle_selftest.py; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
 Fails when: the bundle relies on a system library outside the manylinux
     allowlist by design. There is no allowlist knob, deliberately: the escape
     is to vendor the library, which is what the bundle is for.

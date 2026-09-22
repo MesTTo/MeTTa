@@ -16,15 +16,15 @@ Assumes: nothing about any real tree or any installed binary; every case is
     built in a temporary directory from bytes this file writes.
 Guarantees:
   - what the builder puts in, the parser reads back, for 32- and 64-bit and
-    both byte orders [tested: this file; commit=WORKTREE]
+    both byte orders [tested: this file; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
   - an unresolvable NEEDED is reported and a resolvable one is not
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
   - a name on the manylinux allowlist is not reported
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
   - equal content at two paths is reported once
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
   - a .pc naming a path that does not exist is reported, one that does is not
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=d6439e73cf9bbc3fdb8edd474d6a3047f65b6ff1]
 Open Obligations:
   To Do: None
   Hacks: None

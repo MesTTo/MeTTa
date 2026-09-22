@@ -13,13 +13,13 @@ Assumes: nothing about the real tree. Each case plants a repository of its
     git what the files are and a walked directory would not exercise that.
 Guarantees:
   - a prose reference to an absent example is reported, or the check could not
-    fail at all [tested: this file; commit=WORKTREE]
+    fail at all [tested: this file; commit=d18df0bd652cb0abedea0ac466ec6e4d3f4688b9]
   - a reference inside a SUBMODULE's files is read, which a bare `git ls-files`
-    at the superproject root would miss [tested: this file; commit=WORKTREE]
+    at the superproject root would miss [tested: this file; commit=d18df0bd652cb0abedea0ac466ec6e4d3f4688b9]
   - a path in a string literal is not a claim, and a path in a comment is
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=d18df0bd652cb0abedea0ac466ec6e4d3f4688b9]
   - a github blob URL resolves against the repository root, not the page's
-    directory [tested: this file; commit=WORKTREE]
+    directory [tested: this file; commit=d18df0bd652cb0abedea0ac466ec6e4d3f4688b9]
 Fails when: git is absent, which it refuses on rather than skipping.
 Owns resources: one temporary directory per case, removed by the context
     manager; abandonment leaves it for the OS to reap.

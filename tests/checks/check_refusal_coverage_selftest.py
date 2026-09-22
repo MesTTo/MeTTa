@@ -10,10 +10,10 @@ Assumes: nothing about the real tree; each case plants its own library and
     reason that is not about the checker.
 Guarantees:
   - a promise about the documented head is reported when nothing witnesses it,
-    or the check could not fail at all [tested: this file; commit=WORKTREE]
-  - a witness in ANY suite counts [tested: this file; commit=WORKTREE]
+    or the check could not fail at all [tested: this file; commit=9f6d98fcb24cd65e09a6b5a6eeb79826365361d7]
+  - a witness in ANY suite counts [tested: this file; commit=9f6d98fcb24cd65e09a6b5a6eeb79826365361d7]
   - `refuses` in prose about a sibling is not a promise
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=e8180b7cdd1ba6fe43edde1a9f885191fd9b8570]
 Open Obligations:
   To Do: None
   Hacks: None

@@ -26,13 +26,13 @@ Guarantees:
   - a witness counts from ANY suite, because a library's refusal may be
     asserted by a sibling suite: read-file! is promised in lib_file and
     witnessed in lib_text.plt, and counting per suite called it unwitnessed
-    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=9f6d98fcb24cd65e09a6b5a6eeb79826365361d7]
   - a witness counts in either spelling the suites use, `must_throw(...)`,
     plunit's `throws(...)`, a named refusal term carrying the operation, or a
     row in library_refusals.plt's case table
-    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=a6fe346c7bd065451d8fd1c085a54cc7ce97a63f]
   - a raise verb belonging to the caller's body is not a promise by the head
-    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_refusal_coverage_selftest.py; commit=e8180b7cdd1ba6fe43edde1a9f885191fd9b8570]
 Fails when: nothing. This reports; the count is the burn-down surface.
 Open Obligations:
   To Do: gate at zero once the 24 open claims are witnessed

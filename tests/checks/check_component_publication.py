@@ -34,12 +34,12 @@ Assumes: run inside a checkout whose components are themselves checkouts;
 Guarantees:
   - exits 0 always. This is a REPORT lane while the backlog is nonzero, and
     becomes a GATE when it clears, which is this repository's own convention
-    for a burn-down surface [tested: tests/checks/check_component_publication_selftest.py; commit=WORKTREE]
+    for a burn-down surface [tested: tests/checks/check_component_publication_selftest.py; commit=d278051543e0d67f4b363df29e27e94e1b5f283f]
   - a pin no ref of a remote reaches is named with its component and that
     remote, over EVERY remote the component has rather than only the one
     .gitmodules declares, because a private mirror and a public one can
-    disagree and which holds a pin is a separate fact per remote [tested: tests/checks/check_component_publication_selftest.py; commit=WORKTREE]
-  - [tested: tests/checks/check_component_publication_selftest.py; commit=WORKTREE] a question it could not answer is reported as unanswered, never as a
+    disagree and which holds a pin is a separate fact per remote [tested: tests/checks/check_component_publication_selftest.py; commit=d278051543e0d67f4b363df29e27e94e1b5f283f]
+  - [tested: tests/checks/check_component_publication_selftest.py; commit=d278051543e0d67f4b363df29e27e94e1b5f283f] a question it could not answer is reported as unanswered, never as a
     pass and never as a failure: an unreachable remote, an absent pin and an
     absent remote head each say so in their own words. merge-base fails when
     EITHER operand is missing, so both are checked; testing only the head

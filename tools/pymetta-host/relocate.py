@@ -19,7 +19,7 @@ Assumes: patchelf on PATH, and one directory holding the bundle's shared
     libraries.
 Guarantees:
   - every ELF under the root can reach that directory from wherever it sits
-    [tested: tests/checks/check_host_bundle_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_host_bundle_selftest.py; commit=1d2bc5c2612f21832d19f1aef2d181bd7ffc9ede]
 Fails when: the tree holds no libswipl at all, which means the home was never
     staged; it says so rather than raising StopIteration from a bare next().
 Open Obligations:
