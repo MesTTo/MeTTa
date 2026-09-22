@@ -74,8 +74,15 @@ metta.space().run(sys.stdin.read())
 """
 
 
+#: The prose pages whose MeTTa fences a reader will copy. A README is the tour
+#: and an EXTENDING.md is the authoring guide, and both are read the same way,
+#: so both are run. Thirty fences in the root EXTENDING.md had never been
+#: executed by anything when this was widened.
+PAGES = ("*README.md", "README.md", "*EXTENDING.md", "EXTENDING.md")
+
+
 def readmes() -> list[str]:
-    """Every README this repository or one of its components TRACKS.
+    """Every prose page this repository or one of its components TRACKS.
 
     Asked of git rather than globbed: `extensions/node/_runtime/` and
     `extensions/cmetta/build/install-check/` each carry a copy of the library
@@ -87,7 +94,7 @@ def readmes() -> list[str]:
         if component and not (directory / ".git").exists():
             continue
         listed = subprocess.run(
-            ["git", "-C", str(directory), "ls-files", "*README.md", "README.md"],
+            ["git", "-C", str(directory), "ls-files", *PAGES],
             capture_output=True, text=True, check=False,
         ).stdout.split()
         found += [f"{component}/{path}" if component else path for path in listed]
@@ -105,6 +112,32 @@ def fences() -> list[tuple[str, int, str]]:
         for index, body in enumerate(re.findall(r"```metta\n(.*?)```", text, re.DOTALL)):
             out.append((rel, index, body))
     return out
+
+
+#: A comment long enough to be a sentence rather than a label. The two shortest
+#: real refusal messages in these pages are longer than this; `; 42` and
+#: `; one` are not claims about anything.
+CLAIM_FLOOR = 24
+
+
+def refusal_claims(body: str) -> list[str]:
+    """Each comment in a fence that offers itself as the refusal it demonstrates.
+
+    A page showing a guard writes the engine's own message underneath the form,
+    which is doctest's shape and is already how these pages are written:
+
+        !(add-translator-rule! if)
+        ; No permission to register metta_protected_core `if'
+
+    So the expectation is READ rather than marked, and a fence that raises must
+    have named what it raises: the negative examples are checked instead of
+    skipped, and a refusal message that changes turns the page red rather than
+    leaving it quietly stale.
+    """
+    return [stripped.lstrip(";").strip()
+            for line in body.splitlines()
+            if (stripped := line.strip()).startswith(";")
+            and len(stripped.lstrip(";").strip()) >= CLAIM_FLOOR]
 
 
 def run_one(item: tuple[str, int, str]) -> str | None:
@@ -128,7 +161,14 @@ def run_one(item: tuple[str, int, str]) -> str | None:
         )
     if finished.returncode == 0:
         return None
-    last = [line for line in (finished.stderr or "").strip().splitlines() if line.strip()]
+    # Only a FAILING fence consults its own comments. A fence that ran has
+    # nothing to excuse, and its comments are answers rather than claims:
+    # reading them the same way reported five library READMEs for showing
+    # `; (("001" "a") ("001" "a"))` as the result it is.
+    stderr = finished.stderr or ""
+    if any(claim in stderr for claim in refusal_claims(body)):
+        return None
+    last = [line for line in stderr.strip().splitlines() if line.strip()]
     return (f"{rel} fence {index} does not run on a fresh space: "
             f"{last[-1][:200] if last else 'no output'}")
 
@@ -145,7 +185,7 @@ def main() -> int:
         print(f"  {problem}")
     pages = len({rel for rel, _, _ in items})
     print(f"readme-fences: {len(problems)} finding(s) over {len(items)} metta "
-          f"fence(s) in {pages} component README(s)")
+          f"fence(s) in {pages} component page(s)")
     return 1 if problems else 0
 
 

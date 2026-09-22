@@ -9,6 +9,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The fence gate runs the authoring guides, not only the READMEs. Thirty MeTTa
+  examples in `EXTENDING.md` had never been executed by anything; three of them
+  did not work. One taught `!(import_prolog_functions_from_file (library
+  lib_mine.pl) ...)`, an instruction the package-backings lane refuses in a
+  spelling the engine refuses too; one called a predicate no example defines;
+  one loaded a file the page never writes. All three are shipped libraries now,
+  so the page runs what it shows.
+
+  A page demonstrating a refusal writes the engine's message under the form,
+  which is doctest's shape and already the house style. The gate reads that
+  rather than taking a marker: a fence that fails passes only when one of its
+  own comments is the message it failed with, so a refusal that changes turns
+  the page red instead of leaving it quietly stale.
+
 - Package handling is the engine's. `lib_package` was never importable the way
   a program imports `lib_json`: the engine loaded it at boot by reaching across
   the library repository's boundary, so an engine could not read a manifest

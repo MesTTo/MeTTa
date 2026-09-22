@@ -666,9 +666,19 @@ A predicate follows the compiled calling convention, inputs then one output,
 and is registered from MeTTa:
 
 ```metta
-!(import! &self (library lib_import))
-!(import_prolog_functions_from_file (library lib_mine.pl) (my-op other-op))
+!(import! &self (library lib_string))
+!(test (string-length "abc") 3)
 ```
+
+`string-length` is a Prolog predicate. The library's own `lib.metta` says so,
+once, in a row the loader performs when the library is imported:
+
+```
+(= (package backing) (prolog "lib_string.pl" (string-length string-upper ...)))
+```
+
+The row is data, so an implementation that is not this one reads it, decides
+whether it can perform a `prolog` artifact, and refuses by name if it cannot.
 
 No boundary is crossed: the engine is Prolog, so this is an ordinary call. Use
 it for anything that needs a real implementation and is called often. Every
@@ -1053,7 +1063,7 @@ one-off, MeTTa can reach Prolog three ways, and they do not cost the same.
 registration at all.** It follows the same convention, inputs then one output:
 
 ```metta
-!(call (succ_or_zero 3))       ; compiles to succ_or_zero(3, Out)
+!(test (call (succ 3)) 4)      ; compiles to succ(3, Out)
 ```
 
 `translatePredicate` is the same idea with the output slot written out:
@@ -1182,10 +1192,13 @@ From MeTTa, load and register it the same way as any other Prolog:
 :- use_foreign_library('/abs/path/cbump.so', install_cbump).
 ```
 
+`lib_string` is this shape and ships: its Prolog half loads the C built
+beside it from `support/string_native.cpp`, and its backing row registers the
+heads, so importing the library is all a caller does.
+
 ```metta
-!(import! &self (library lib_import))
-!(import_prolog_functions_from_file "loader.pl" (c-bump))
-!(c-bump 41)                                    ; 42
+!(import! &self (library lib_string))
+!(test (string-edit-distance "kitten" "sitting") 3)
 ```
 
 Give `use_foreign_library/2` an absolute path or a `foreign(Name)` alias.

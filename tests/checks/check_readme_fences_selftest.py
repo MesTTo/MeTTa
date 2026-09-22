@@ -17,6 +17,9 @@ Guarantees:
     [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - a fence that runs is not reported
     [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
+  - a fence DEMONSTRATING a refusal, whose comment is the message the engine
+    raises, is not reported, and one whose comment is not that message still is
+    [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
   To Do: None
@@ -53,6 +56,23 @@ CASES: tuple[tuple[str, str, str | None], ...] = (
         "a fence that runs",
         "!(test (+ 1 1) 2)\n",
         None,
+    ),
+    (
+        # The page DEMONSTRATES a guard, so the run must fail and the comment
+        # under the form must be the message it failed with.
+        "a refusal the fence states",
+        "!(add-translator-rule! if)\n"
+        "; No permission to register metta_protected_core `if'\n",
+        None,
+    ),
+    (
+        # And the excuse has to be earned: a comment long enough to be a claim
+        # but not the message is still a broken fence, which is what stops the
+        # branch above from becoming a blanket skip for anything commented.
+        "a refusal the fence states wrongly",
+        "!(add-translator-rule! if)\n"
+        "; this comment is long enough to be a claim and is not the message\n",
+        "does not run",
     ),
 )
 
