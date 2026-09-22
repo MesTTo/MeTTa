@@ -2,7 +2,7 @@
 
 Assumes: the checkout's Python seat and engine can supply their own rosters.
 Guarantees: missing names, empty rosters and unavailable sources have distinct
-  outcomes [tested: tests/checks/check_llms_coverage_selftest.py; commit=WORKTREE].
+  outcomes [tested: tests/checks/check_llms_coverage_selftest.py; commit=2abd24a121d519a0a2b33d35a6f3c6fe4e9f3562].
 Decides: a door is an explicit export of a public Python module, a declared
   door key, a callable engine or carried library head, a CLI command path, or
   an advertised entry-point group. Re-exports are separate public paths;

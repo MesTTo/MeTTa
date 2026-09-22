@@ -2,7 +2,7 @@
 
 Guarantees: source discovery, exact matching, owner and command identity,
   refusal, and exit status are exercised against independent expected results
-  [tested: tests/checks/check_llms_coverage_selftest.py; commit=WORKTREE].
+  [tested: tests/checks/check_llms_coverage_selftest.py; commit=2abd24a121d519a0a2b33d35a6f3c6fe4e9f3562].
 Owns resources: temporary fixture files beneath ai-tmp, removed on exit;
   unittest.mock patches restore every source reader even after refusal.
 Open Obligations:
