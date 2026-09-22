@@ -22730,6 +22730,50 @@
           "status": "untried"
         }
       ]
+    },
+    "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here": {
+      "title": "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here",
+      "supports": [
+        {
+          "node": "require every metta_* condition the engine throws to be either classified by a clause or listed as deliberately generic with its reason, checked statically, which is how PostgreSQL makes errcode() a required argument of ereport",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the spanning property of a rule basis cannot be observed from inside a total function with a default; PostgreSQL makes the classification unrepresentable-if-absent rather than checked afterwards, and engine/metta/registration.pl already cites errcodes.txt as the shape it follows"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition": {
+      "title": "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition",
+      "supports": [
+        {
+          "node": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "status": "untried"
+        },
+        {
+          "node": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "relation": "addresses",
+          "target": "nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic"
+        }
+      ]
+    },
+    "written into engine/metta/registration.pl beside the row table": {
+      "title": "written into engine/metta/registration.pl beside the row table",
+      "supports": [
+        {
+          "node": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -25366,7 +25410,7 @@
     "require every metta_* condition the engine throws to be either classified by a clause or listed as deliberately generic with its reason, checked statically, which is how PostgreSQL makes errcode() a required argument of ereport": {
       "title": "require every metta_* condition the engine throws to be either classified by a clause or listed as deliberately generic with its reason, checked statically, which is how PostgreSQL makes errcode() a required argument of ereport",
       "effort": 3,
-      "status": "untried",
+      "status": "unwanted",
       "addresses": [
         "nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic"
       ]
@@ -25388,6 +25432,14 @@
       "title": "remove extensions/node/ai-node-depth-report.md from the node package and keep its six boundary decisions in the record instead",
       "effort": 1,
       "status": "untried"
+    },
+    "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts": {
+      "title": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+      "effort": 1,
+      "status": "done",
+      "addresses": [
+        "nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic"
+      ]
     }
   },
   "format": 2,
@@ -96215,6 +96267,130 @@
         ]
       ],
       "id": "df25c9d5494be0ad"
+    },
+    {
+      "at": "2026-09-22T08:16:04.154703+00:00",
+      "after": "53512d1edffe7d740580691159e4c90e792d5027",
+      "did": "[{\"op\": \"status\", \"id\": \"require every metta_* condition the engine throws to be either classified by a clause or listed as deliberately generic with its reason, checked statically, which is how PostgreSQL makes errcode() a required argument of ereport\", \"because\": \"MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here\", \"tags\": [\"measured\"], \"status\": \"unwanted\"}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition\", \"tags\": [], \"title\": \"state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts\", \"fields\": {\"effort\": 1, \"addresses\": [\"nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic\"]}}, {\"op\": \"status\", \"id\": \"state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts\", \"because\": \"written into engine/metta/registration.pl beside the row table\", \"tags\": [\"source\"], \"status\": \"done\"}]",
+      "parents": [
+        "df25c9d5494be0ad"
+      ],
+      "assert": [
+        [
+          "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here",
+          "sort",
+          "prop"
+        ],
+        [
+          "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here",
+          "supersedes",
+          "the spanning property of a rule basis cannot be observed from inside a total function with a default; PostgreSQL makes the classification unrepresentable-if-absent rather than checked afterwards, and engine/metta/registration.pl already cites errcodes.txt as the shape it follows"
+        ],
+        [
+          "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here",
+          "supports",
+          {
+            "node": "require every metta_* condition the engine throws to be either classified by a clause or listed as deliberately generic with its reason, checked statically, which is how PostgreSQL makes errcode() a required argument of ereport",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here",
+          "tags",
+          "measured"
+        ],
+        [
+          "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here",
+          "title",
+          "MEASURED: the classifier decides EIGHT of the 123 metta_* functors the engine throws (metta_control_signal; metta_assertion_failed, metta_test_failed and metta_not_a_prolog_module through metta_assertion_failure; metta_space_capability_required, metta_foreign_token_mutation_required and metta_foreign_tokens_required through metta_host_space_capability_error; and now metta_platform_required), so such a check would carry 115 rows of judgement calls that never clear, which is a list rather than a burn-down surface. PostgreSQL's errcode() works because its codes are many-to-one over thousands of raise sites, and there is no derivable test for deserves-a-kind here"
+        ],
+        [
+          "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition",
+          "sort",
+          "prop"
+        ],
+        [
+          "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition",
+          "supports",
+          {
+            "node": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+            "status": "untried"
+          }
+        ],
+        [
+          "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition",
+          "supports",
+          {
+            "node": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+            "relation": "addresses",
+            "target": "nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic"
+          }
+        ],
+        [
+          "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition",
+          "title",
+          "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition"
+        ],
+        [
+          "written into engine/metta/registration.pl beside the row table",
+          "sort",
+          "prop"
+        ],
+        [
+          "written into engine/metta/registration.pl beside the row table",
+          "supersedes",
+          "the comment said engine is for a ball this engine did not shape, which is false for 115 of them, and that wording is what made an unclassified engine condition look like a decision; correcting the generator's description is shorter than enumerating its outputs and it puts the right question in front of whoever adds the next condition"
+        ],
+        [
+          "written into engine/metta/registration.pl beside the row table",
+          "supports",
+          {
+            "node": "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+            "status": "done"
+          }
+        ],
+        [
+          "written into engine/metta/registration.pl beside the row table",
+          "tags",
+          "source"
+        ],
+        [
+          "written into engine/metta/registration.pl beside the row table",
+          "title",
+          "written into engine/metta/registration.pl beside the row table"
+        ],
+        [
+          "require every metta_* condition the engine throws to be either classified by a clause or listed as deliberately generic with its reason, checked statically, which is how PostgreSQL makes errcode() a required argument of ereport",
+          "status",
+          "unwanted"
+        ],
+        [
+          "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "sort",
+          "approach"
+        ],
+        [
+          "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "addresses",
+          "nothing detects a raisable condition that has no classifier clause, because metta_host_error_kind/3 ends in a catch-all that makes an unclassified ball indistinguishable from one deliberately left generic"
+        ],
+        [
+          "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "effort",
+          1
+        ],
+        [
+          "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "status",
+          "done"
+        ],
+        [
+          "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts",
+          "title",
+          "state the engine-origin rule accurately instead: say that 115 of the engine's OWN conditions land in the default and that a condition earns a kind when a seat would ACT on its parts"
+        ]
+      ],
+      "id": "b7833d29af2278a5"
     }
   ]
 }

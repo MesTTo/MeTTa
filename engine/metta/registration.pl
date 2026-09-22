@@ -404,8 +404,16 @@ control_exception(error(resource_error(_), _)).
 %Two origins. A `signal` is the reserved control envelope,
 %error(metta_control_signal(Kind, Detail), context(metta, _)), which passes
 %through every recovery catch; a `term` is an ordinary ball whose shape names
-%the refusal. `engine` is the honest default, a ball this engine did not
-%shape, which each seat raises as its own generic class.
+%the refusal. `engine` is the default, and it is NOT only for a ball this
+%engine did not shape: the engine throws 123 distinct metta_* conditions and
+%eight of them are decided below, so 115 of its OWN conditions land there,
+%each raised by a seat as its generic class. A condition earns a kind when a
+%seat would ACT on its parts and lands in `engine` when its whole payload is
+%its sentence, which is the field test above applied to the ball rather than
+%to one field. Reading `engine` as foreign-only is what let
+%metta_platform_required sit in the default: it carries the form, the
+%capability, the library the build wants and what its absence costs, and
+%every seat delivered none of them.
 %
 %This is the errno/SQLSTATE shape: one table in the layer that raises, one
 %hand-written map per binding, and a test per binding that its map covers the
