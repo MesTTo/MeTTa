@@ -23927,6 +23927,49 @@
       "tags": [
         "measured"
       ]
+    },
+    "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why": {
+      "title": "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+      "supports": [
+        {
+          "node": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents",
+          "status": "abandoned"
+        }
+      ],
+      "supersedes": [
+        "it is the only route that never consults project.create, and per-project environments are what make the tuples distinct so three fit under the cap instead of one",
+        "round one is armed: metta-graphql, metta-live and metta-nanoarrow are registered on PyPI with environments pypi-metta-graphql, pypi-metta-live and pypi-metta-nanoarrow, read back from the account page, and publish.yml's plan and bootstrap jobs derive exactly those names from tools/pending-publishers.py. Pushed as 2ba8b897d, 0c6a7a033 and 9ece844c3"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run": {
+      "title": "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run",
+      "supports": [
+        {
+          "node": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "status": "unwanted"
+        }
+      ],
+      "supersedes": [
+        "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts": {
+      "title": "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts"
+    },
+    "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked": {
+      "title": "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked",
+      "supports": [
+        "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -26657,7 +26700,7 @@
     "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments": {
       "title": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
       "effort": 1,
-      "status": "untried",
+      "status": "unwanted",
       "addresses": [
         "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
       ]
@@ -26665,7 +26708,7 @@
     "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents": {
       "title": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents",
       "effort": 3,
-      "status": "active",
+      "status": "abandoned",
       "addresses": [
         "PyPI throttles new-PROJECT creation, and the seventeen extension distributions are seventeen new projects: four landed and the fifth met 429 Too Many Requests with no Retry-After. A per-package backoff is the wrong shape, because it spends every attempt inside one closed window and then moves on with the window still shut"
       ]
@@ -101051,6 +101094,143 @@
         "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
       },
       "id": "d8675a9b5879cf75"
+    },
+    {
+      "at": "2026-09-22T10:31:32.393200+00:00",
+      "after": "00a87edd9b7d85ccb90be62243969844883f8bea",
+      "did": "[{\"op\": \"status\", \"id\": \"create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents\", \"because\": \"DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why\", \"tags\": [\"user\"], \"status\": \"abandoned\"}]",
+      "parents": [
+        "d8675a9b5879cf75"
+      ],
+      "assert": [
+        [
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+          "sort",
+          "prop"
+        ],
+        [
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+          "supersedes",
+          "it is the only route that never consults project.create, and per-project environments are what make the tuples distinct so three fit under the cap instead of one"
+        ],
+        [
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+          "supersedes",
+          "round one is armed: metta-graphql, metta-live and metta-nanoarrow are registered on PyPI with environments pypi-metta-graphql, pypi-metta-live and pypi-metta-nanoarrow, read back from the account page, and publish.yml's plan and bootstrap jobs derive exactly those names from tools/pending-publishers.py. Pushed as 2ba8b897d, 0c6a7a033 and 9ece844c3"
+        ],
+        [
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+          "supports",
+          {
+            "node": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents",
+            "status": "abandoned"
+          }
+        ],
+        [
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+          "tags",
+          "user"
+        ],
+        [
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why",
+          "title",
+          "DEFERRED, not dropped: round one is armed and the machinery is committed, but each further round needs a release run, and publish.yml's own rule is that a release is cut at a commit whose checks already passed. The gate has no verdict yet. Nothing more can be done from here without either a green gate or spending PyPI attempts, and the user has been told which item this is and why"
+        ],
+        [
+          "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents",
+          "status",
+          "abandoned"
+        ]
+      ],
+      "telemetry": {
+        "focus": "create the thirteen missing PyPI projects through pending Trusted Publishers, three per release round, each registered against its own environment pypi-<project> which a bootstrap matrix job in publish.yml presents"
+      },
+      "id": "df2b0fe6046f6d81"
+    },
+    {
+      "at": "2026-09-22T10:31:34.073401+00:00",
+      "after": "00a87edd9b7d85ccb90be62243969844883f8bea",
+      "did": "[{\"op\": \"status\", \"id\": \"ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments\", \"because\": \"the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run\", \"tags\": [\"user\"], \"status\": \"unwanted\"}]",
+      "parents": [
+        "df2b0fe6046f6d81"
+      ],
+      "assert": [
+        [
+          "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run",
+          "supersedes",
+          "the 429 persisting 14 hours contradicts the documented 20-per-hour moving window, which points at an account-level restriction that no client-side route can clear; one message versus five release rounds plus re-registering the publishers of five existing projects"
+        ],
+        [
+          "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run",
+          "supports",
+          {
+            "node": "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+            "status": "unwanted"
+          }
+        ],
+        [
+          "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run",
+          "tags",
+          "user"
+        ],
+        [
+          "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run",
+          "title",
+          "the user did not take this route; the pending-publisher machinery is built instead and the remaining rounds are theirs to run"
+        ],
+        [
+          "ask PyPI admins to lift the project-creation limit on this account, before restructuring publish.yml into per-project environments",
+          "status",
+          "unwanted"
+        ]
+      ],
+      "id": "36ee009aec5c483f"
+    },
+    {
+      "at": "2026-09-22T10:42:17.647391+00:00",
+      "after": "00a87edd9b7d85ccb90be62243969844883f8bea",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked\", \"tags\": [\"measured\"], \"title\": \"the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts\", \"fields\": {}}]",
+      "parents": [
+        "36ee009aec5c483f"
+      ],
+      "assert": [
+        [
+          "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked",
+          "sort",
+          "prop"
+        ],
+        [
+          "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked",
+          "supports",
+          "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts"
+        ],
+        [
+          "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked",
+          "tags",
+          "measured"
+        ],
+        [
+          "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked",
+          "title",
+          "ran both against dist and grepped the catalog union; predates the head-roster work, which only made fn.neg typed rather than reachable-but-unchecked"
+        ],
+        [
+          "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts",
+          "sort",
+          "prop"
+        ],
+        [
+          "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts",
+          "title",
+          "the TypeScript seat spells one word two ways with two meanings: neg(3) from words.ts builds (- 0 3), the composite, while fn.neg(3) builds (neg 3), and the engine's catalog DOES carry a neg head, so both are real and they are not the same term. words.ts says it avoids 'pretending there is a unary minus head', which the catalog contradicts"
+        ]
+      ],
+      "id": "1b133ce9ddd29589"
     }
   ]
 }

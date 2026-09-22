@@ -1,0 +1,20 @@
+# The SWI-Prolog source this seat's host wheel is built from, as data rather
+# than prose. docs/host-workarounds.md describes the patches; this says which
+# tree they apply to, and tools/pymetta-host/fetch-source.sh is the only
+# reader. Before this file the tag lived in a sentence, so nothing could
+# fetch it and the build took a path someone had prepared by hand.
+#
+# The submodule pin is separate because two of the nineteen patches target
+# packages/swipy, which is a submodule of swipl-devel with its own history;
+# swipl-devel's tag does not fix which swipy commit a fresh clone gets unless
+# the clone is recursive at that tag, and naming it makes the build
+# reproducible without relying on that.
+url         https://github.com/SWI-Prolog/swipl-devel.git
+tag         V10.1.14
+# The COMMIT the tag peels to, not the tag object. V10.1.14 is annotated, so
+# `git rev-parse V10.1.14` answers the tag object bb72b45af and a clone's
+# HEAD can never equal it; `git rev-parse V10.1.14^{}` answers this. The
+# first version of this file recorded the tag object and fetch-source.sh
+# refused, which is what the check is for.
+commit      69775434c8226897626b226aefcc8266499f1e2e
+swipy       b0356a16284b88cf9b9cd8c18bb42cca877c54ff

@@ -731,6 +731,13 @@ run GATE battery-selftest sh "$HERE/tools/battery_selftest.sh"
 # reaches PyPI and nothing is uploaded.
 run GATE publish-selftest sh "$HERE/tools/publish_selftest.sh"
 
+# The host wheel is built from a swipl-devel tree this repository fetches and
+# patches itself, and two of the nineteen patches target a SUBMODULE of it.
+# A router that tried only the superproject would apply seventeen and refuse
+# two, which builds a host missing fixes rather than failing. This plants its
+# own trees, so it needs no clone and no network.
+run GATE fetch-source-selftest sh "$HERE/tools/pymetta-host/fetch_selftest.sh"
+
 # The publish workflow splits dist/ between two jobs, because the token each
 # environment mints is scoped to the projects its publisher covers: a file
 # handed to the wrong job is a 403 that fails every upload behind it, and

@@ -12,11 +12,20 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
 PKG=$REPO/ext/pymetta-host
 OUT=${OUT:-$REPO/ai-tmp/host-build}
-# The swipl-devel checkout this builds the host from. No default: an absolute
-# path works only on the machine it was written on and this repository may be
-# published, so the caller names it and an unset SRC refuses by name rather
-# than mounting whatever sits at someone else's path.
-: "${SRC:?name the swipl-devel checkout to build from, e.g. SRC=../swipl-devel}"
+# The swipl-devel checkout this builds the host from. An absolute path works
+# only on the machine it was written on, which is why this used to refuse
+# without one -- and the consequence was that only someone who had already
+# prepared that tree by hand could build the wheel, so the release shipped 17
+# distributions of 18 and build-distributions.sh skipped this one by name.
+#
+# The tree is DERIVED now: fetch-source.sh clones swipl-devel at the pinned
+# commit and applies every patch in tests/checks/host_workarounds, all of
+# which were committed here all along. SRC stays as an override for a tree
+# someone is actively editing.
+if [ -z "${SRC:-}" ]; then
+    sh "$HERE/fetch-source.sh"
+    SRC=${DEST:-$REPO/ai-tmp/swipl-src}
+fi
 IMAGE=quay.io/pypa/manylinux_2_28_x86_64:latest
 
 TAGS=$(python3 - "$PKG/pyproject.toml" <<'PY'
