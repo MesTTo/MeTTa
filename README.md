@@ -15,6 +15,26 @@ Guarantees: every metta fence runs on the engine [tested: python -m pytest
 MeTTa, Hyperon's AGI language, based on PeTTa semantics with significant
 extensions.
 
+<!-- shared:what-is-metta -->
+## What MeTTa is
+
+MeTTa is a language for rewriting metagraphs. A program and its data are the
+same thing: atoms in a space, where an atom is a symbol, a number, a variable
+or an expression built from other atoms, and a space is the metagraph they
+form together.
+
+You write equations rather than statements, and the engine matches a pattern
+against the whole space at once. A query answers with every match rather than
+the first, so a rule that fits three ways yields three results and search is
+something you write down instead of something you implement.
+
+One space holds symbolic rules and grounded values side by side: a number, a
+matrix, a handle to a trained model. A rule can match on what a model produced
+and a model can be called from inside a rule, so the neurosymbolic case is
+ordinary here rather than an integration between two systems. Both halves are
+atoms in the same metagraph, read by the same matcher.
+<!-- /shared:what-is-metta -->
+
 **If you are an LLM, read [llms.txt](llms.txt)** for the language and every
 surface, with exact return shapes and no prose to guess at.
 
