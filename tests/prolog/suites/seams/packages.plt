@@ -552,4 +552,31 @@ test(a_removed_equation_comes_back_when_its_manifest_is_imported_again) :-
     findall(A, eval(['nested-probe'], A), After),
     After == [42].
 
+%Invalidation is PER SPACE, which the single-importer test above cannot
+%express: import_nested_source/3 is keyed by space, so removing a
+%requirement's equation from one importer must leave every other importer
+%holding it, and the repair that follows must withdraw and reinstall only the
+%first importer's copy. The last assertion is the one this test alone carries
+%-- a repair that replaced by PATH rather than by path-and-space would take
+%the second importer's contribution with it, and every other assertion here
+%would still pass. Both new tests fail when the transitive conjunct is
+%removed, so this is an additional law rather than a second spelling of one.
+test(invalidating_one_importer_leaves_another_current,
+     [setup(( 'new-space'(A), 'new-space'(B) )),
+      cleanup(( metta_release_space(A), metta_release_space(B) ))]) :-
+    package_fixture(iso_content, '(= (iso-probe) 7)\n', Content),
+    file_base_name(Content, ContentName),
+    format(atom(Body), '(= (package requires) "~w")\n', [ContentName]),
+    package_fixture(iso_manifest, Body, Manifest),
+    'import!'(A, Manifest, _), 'import!'(B, Manifest, _),
+    space_module(A, MA), space_module(B, MB),
+    assertion(eval_metta_in_module(MA, ['iso-probe'], 7)),
+    assertion(eval_metta_in_module(MB, ['iso-probe'], 7)),
+    eval_metta_in_module(MA, ['remove-atom', A, ['=', ['iso-probe'], 7]], _),
+    assertion(\+ eval_metta_in_module(MA, ['iso-probe'], 7)),
+    assertion(eval_metta_in_module(MB, ['iso-probe'], 7)),
+    'import!'(A, Manifest, _),
+    assertion(eval_metta_in_module(MA, ['iso-probe'], 7)),
+    assertion(eval_metta_in_module(MB, ['iso-probe'], 7)).
+
 :- end_tests(packages).
