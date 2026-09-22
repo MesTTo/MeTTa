@@ -742,6 +742,15 @@ run GATE publish-selftest sh "$HERE/tools/publish_selftest.sh"
 run GATE pending-publishers-selftest "$PY" \
     "$HERE/tools/pending_publishers_selftest.py"
 
+# And the lane above must be able to FAIL. Two earlier versions of it could
+# not: one restated the planner's answer instead of calling it, and one
+# checked only that no file was claimed twice, which let `pymetta*` swallow
+# `pymetta_host-*` unnoticed. Both were found by mutating, not by re-reading,
+# so the mutation sweep is a lane of its own rather than a thing somebody
+# remembers to run.
+run GATE pending-publishers-mutants "$PY" \
+    "$HERE/tools/pending_publishers_selftest.py" --mutants
+
 # Each repository is published and read on its own, so each front page tells a
 # newcomer what MeTTa is rather than assuming they came through another. That
 # duplication is deliberate and still duplication: the root page and

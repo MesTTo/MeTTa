@@ -47,9 +47,11 @@ Guarantees:
     [source: .github/workflows/publish.yml; commit=WORKTREE]
   - the projects are exactly those build-distributions.sh --list names
     [tested: this tool against that script; commit=WORKTREE]
-  - --json-plan's `bootstrap` and `steady` partition that set, so the
-    publish workflow's two jobs cannot both claim a project or miss one
-    [tested: this tool; commit=WORKTREE]
+  - --json-plan's `bootstrap` and `steady` partition the distributions PyPI
+    can accept this round, so the publish workflow's two jobs cannot both
+    claim a project or miss one [tested: this tool; commit=WORKTREE]
+  - `bootstrap` never exceeds PENDING_CAP rows, because a row beyond it
+    cannot have a publisher [tested: this tool; commit=WORKTREE]
   - a name already on PyPI is omitted, because a pending publisher is refused
     for an existing project [source: warehouse oidc/views.py:218-224]
 Fails when: pypi.org is unreachable; it reports the name and exits nonzero
@@ -72,6 +74,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 WORKFLOW = ROOT / ".github" / "workflows" / "publish.yml"
 BUILDER = ROOT / "tools" / "build-distributions.sh"
+#: PyPI refuses a fourth pending publisher. Measured against the live site on
+#: 2026-09-22, and stated in warehouse as "You can't register more than 3
+#: pending trusted publishers at once." It is fixed outside this program, so
+#: it is a constant rather than a guess: nothing here can observe or change
+#: it, and making it configurable would only hand the guess to the operator.
+PENDING_CAP = 3
 
 
 def bootstrap_environment(project: str) -> str:
@@ -150,10 +158,16 @@ def plan(every, exists, shared):
     missing = [name for name in every if not seen[name]]
     present = [name for name in every if seen[name]]
     return {
+        # At most PENDING_CAP, because a row beyond it cannot have a pending
+        # publisher and its job would fail the OIDC exchange. Truncating here
+        # rather than letting those jobs go red keeps the run's failures
+        # meaningful, and it is the same prefix the printed list marks as
+        # this round, so what an operator registers and what the workflow
+        # presents cannot disagree.
         "bootstrap": [
             {"project": n, "stem": filename_stem(n),
              "environment": bootstrap_environment(n), **shared}
-            for n in missing
+            for n in missing[:PENDING_CAP]
         ],
         "steady": [filename_stem(n) for n in present],
     }
@@ -164,9 +178,13 @@ def main() -> int:
     every = distributions()
     computed = plan(every, on_pypi, shared)
     missing = [row["project"] for row in computed["bootstrap"]]
-    if not missing:
-        print("every distribution this repository releases already exists on PyPI")
-        return 0
+
+    # The machine-readable forms answer FIRST, and for EVERY state including
+    # the one where nothing is missing. The human early-return used to sit
+    # above them, so the moment the last project was created -- the success
+    # state, where bootstrap correctly goes empty -- `--json-plan` printed a
+    # sentence and the workflow's jq step failed on it. A total function
+    # here is what stops the release breaking at the finish line.
     if "--json-plan" in sys.argv:
         # Both halves from ONE pass over PyPI, and they PARTITION the release:
         # `bootstrap` is every distribution with no project yet, which only a
@@ -181,6 +199,10 @@ def main() -> int:
     if "--json" in sys.argv:
         print(json.dumps(computed["bootstrap"]))
         return 0
+
+    if not missing:
+        print("every distribution this repository releases already exists on PyPI")
+        return 0
     print(f"{len(missing)} distributions have no PyPI project yet.")
     print("Register pending publishers at")
     print("  https://pypi.org/manage/account/publishing/\n")
@@ -192,7 +214,7 @@ def main() -> int:
         print(f"  {field:<12} {value}   (same for every row)")
     print("\nPyPI Project Name, and the environment that row must carry:")
     for index, name in enumerate(missing):
-        mark = "  <- this round" if index < 3 else ""
+        mark = "  <- this round" if index < PENDING_CAP else ""
         print(f"  {name:<22} {bootstrap_environment(name)}{mark}")
     return 0
 
