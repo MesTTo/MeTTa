@@ -32,11 +32,27 @@
 # detector matching the title classified every rate limit as a real failure,
 # so the stop-on-429 rule did nothing and two more attempts went out before
 # anyone noticed. Match the status line.
-set -u
-
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+# The same interpreter every other lane runs under, taken from $PY, which is
+# what select-python.sh is documented to set and leaves EMPTY when it finds
+# nothing. A bare `python3` fallback here was /usr/bin/python3, which carries
+# no twine, and the run died before reaching the network -- harmless only
+# because nothing had been spent yet. A fallback is the wrong shape for this
+# script anyway: the cost of guessing wrong is an attempt against an hourly
+# budget, so both checks below refuse rather than continue.
+. "$HERE/tools/select-python.sh" > /dev/null 2>&1
+set -u
 DIST=${DIST:-$HERE/dist}
-PYTHON=${CHECK_PY:-python3}
+PYTHON=${PY:-}
+if [ -z "$PYTHON" ]; then
+    printf 'publish-new-projects: tools/select-python.sh found no interpreter; set CHECK_PY\n' >&2
+    exit 1
+fi
+if ! "$PYTHON" -c 'import twine' 2>/dev/null; then
+    printf 'publish-new-projects: %s cannot import twine; install it there with\n' "$PYTHON" >&2
+    printf '  %s -m pip install twine\n' "$PYTHON" >&2
+    exit 1
+fi
 #: 65 minutes: the limiter's hour plus a margin. Only spent with --publish,
 #: and only when a previous run reported the window shut.
 DRAIN=${DRAIN:-0}
