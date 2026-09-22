@@ -5,11 +5,11 @@
 % Guarantees: local boot validation precedes effects; receipts belong to the
 % source; setup publishes only successful work under a directory lock.
 % [tested: package_laws; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
-% Guarantees: asking whether a head is already loaded never DEFINES it, so
-% performing a backing row cannot re-enter the translation of a name that
-% row is registering.
+% Guarantees: ownership probes made while performing a backing row leave
+% deferred equations untranslated; asking whether a head is loaded cannot
+% define it.
 % [tested: package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
-% commit=49be31cf5e016a873b058fd8b278bdd5408a9d23].
+% commit=WORKTREE].
 % Owns resources: package_acquired/5 records live answers until reverse release
 % on withdrawal, replacement, failed activation, space release or process exit.
 % Artifact streams, metadata spaces, directory locks and staged files close on
@@ -622,17 +622,17 @@ package_perform_row(_, _, Row, Row).
 % predicate_property/2 resolves its head first, and on an undefined one that
 % resolution fires SWI's undefined-procedure hook, which this engine answers by
 % translating the name's MeTTa equations. Asked while a backing row is being
-% performed, that turns registering `math-rational`/3 into a re-entrant
-% translation of `math-rational`/1, whose body calls arity 3 -- still
-% unregistered, because the frame that would have registered it is the one
-% asking. The unary equation then compiles to a function_overapplication goal,
-% and by the time that goal runs and renders its message the arity set it
-% prints contains the very arity it refuses, so the error refutes itself
+% performed, that forces the unary math-rational equation while its binary
+% overload is still unregistered. Before self-call dependencies were retained,
+% registration could not repair the resulting function_overapplication goal;
+% its later diagnostic listed the very arity it refused
 % [measured 2026-09-21: predicate_property(M:H, file(F)) fires the hook on an
 % undefined head while current_predicate/2 does not and still answers for an
-% imported one; tested: package_laws:a_backing_row_registers_before_the_equations_calling_it_translate].
-% Guarding on current_predicate/2 is what makes "asking never defines" true by
-% shape, rather than by which of the load's two halves happens to run first.
+% imported one; commit=49be31cf5e016a873b058fd8b278bdd5408a9d23].
+% current_predicate/2 keeps this ownership query observational even though
+% later registration now repairs arity-dependent bodies [tested:
+% package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
+% commit=WORKTREE].
 package_head_source(Module, Head, File) :-
     current_predicate(_, Module:Head),
     predicate_property(Module:Head, file(File)).

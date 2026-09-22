@@ -283,6 +283,11 @@
 %   record_translated_supports/3 retains raw annotation dependencies in the
 %   existing support graph, including previously missing aliases [tested:
 %   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
+% Guarantees: self-calls retain their function-view dependency, so native
+%   overload registration repairs an eagerly compiled body in ordinary and
+%   alias-aware scopes [tested:
+%   package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
+%   commit=WORKTREE].
 
 %The loader's surface: what the engine core asks of it, what a write records
 %with it, the host services a binding calls, and the parser doors it publishes
@@ -1799,12 +1804,19 @@ record_translated_supports(Module, Ref, [=, [Reserved|_], Body]) :-
     ;   Supports = []
     ),
     support_publish_compiled_form(Module, package, Ref, Supports, Body).
+% A self-call reads the same mutable arity and dispatch view as any other
+% call. Omitting its edge leaves an eager unary wrapper refusing a binary
+% overload registered later. The support graph visits each node once even
+% when the view leads back to this compiled function.
+% [tested: package_laws:a_backing_row_registers_before_the_equations_calling_it_translate;
+% commit=WORKTREE].
+% Dependency discovery: O(b + c log c) time and O(c) temporary space,
+% b = body nodes, c = called-symbol occurrences; one edge per distinct name.
 record_translated_supports(Module, Ref, [=, [G|_], Body]) :-
     atom(G),
     !,
     findall(Support,
             ( called_symbol(Body, Symbol),
-              Symbol \== G,
               Support = function_view(Module, Symbol) ),
             Supports0),
     sort(Supports0, Supports),
@@ -1836,7 +1848,7 @@ set_type_alias_support_scope(Scope, disabled) :-
 record_translated_alias_supports(Module, Ref, G, Body) :-
     type_annotation_supports(Module, G, Body, AnnotationSupports),
     findall(function_view(Module, Symbol),
-            ( called_symbol(Body, Symbol), Symbol \== G ), Views),
+            called_symbol(Body, Symbol), Views),
     append(Views, AnnotationSupports, Supports0),
     sort(Supports0, Supports),
     support_publish_compiled_form(Module, G, Ref, Supports, Body).
@@ -1979,15 +1991,14 @@ support_function_node(F, Node) :-
     support_view_module(F, Module),
     Node = function_view(Module, F).
 
-%F's OWN compiled equations, which the two invalidations above deliberately
-%cannot reach: the graph flows compiled_function -> function -> function_view,
-%so invalidating a view reaches the CALLERS and never the definition. That is
-%right for an equation change, where a sibling equation's compiled body does
-%not depend on this one, and wrong for a DECLARATION, which decides how the
-%declared function's own clause compiles: the result rule reads the declared
-%result type, so `(: f (-> Atom Atom))` arriving after `(= (f $x) (g $x))`
-%has to rebuild f's clause or its answer keeps re-entering evaluation
-%[tested: spaces_late_type_declaration:a_late_type_declaration_repairs_its_call_sites].
+% A declaration can change F's own compiled body even when it contains no
+% self-call. Function-view invalidation reaches callers, including recursive
+% ones, but a nonrecursive definition has no such edge to its own view.
+% The result rule reads the declared result type, so `(: f (-> Atom Atom))`
+% arriving after `(= (f $x) (g $x))` must rebuild f's clause or its answer
+% keeps re-entering evaluation
+% [tested: spaces_late_type_declaration:a_late_type_declaration_repairs_its_call_sites;
+% commit=WORKTREE].
 %
 %Every module holding compiled equations of F, which support_function_module/2
 %enumerates exactly: the function node is published once per compiled form.

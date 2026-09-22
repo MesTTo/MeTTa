@@ -4,6 +4,10 @@
 % [tested: tests/data/package_laws/mutations.pl; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Owns resources: fixtures stay under this battery's ai-tmp; each home and its
 % source lifetime are independent of the other test cases.
+% Guarantees: native overloads repair self-calls under eager and deferred
+% loading, including alias-aware dependency recording [tested:
+% a_backing_row_registers_before_the_equations_calling_it_translate;
+% commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/metta.pl').
@@ -645,31 +649,43 @@ test(package_lifetime_sweeps_lengths_and_failure_positions) :-
               lp_answers(Policy,['package-fixture-reverse',Kept,[]],[Reverse]),
               findall(release(Id),member(Id,Reverse),Released), append(Acquired,Released,Expected), lp_events(Expected) ))).
 
-% Performing a backing row must not translate the MeTTa equations of a name
-% that row is registering. The loader asks whether a head is already loaded
-% from this artifact; asked with predicate_property/2 that question RESOLVES
-% the head, and resolving an undefined one fires SWI's undefined-procedure
-% hook, which this engine answers by translating the name. The translation
-% then runs inside the registration that has not yet recorded the arity the
-% equation's own body calls, so the body compiles to a function_overapplication
-% goal whose message, rendered later from the completed registry, names the
-% very arity it refuses.
-%
-% The fixture is the shape rather than one library: a unary equation whose body
-% calls the binary form, the binary form supplied only by this package's own
-% Prolog backing, and the binary type declared AFTER the row exactly as the
-% generated faces place it. lib_math, lib_tabling and lib_thread are three
-% instances of it [measured 2026-09-21: (math-ratio (math-rational 0.1))
-% raised `function_input_arities(math-rational,[1,2])' expected, found `2'].
-test(a_backing_row_registers_before_the_equations_calling_it_translate) :-
-    lp_package(reentrant,
-        "(: lp-native-pair (-> Number Number))\n\c
-         (= (lp-native-pair $v) (lp-native-pair $v 1))\n\c
-         (= (package backing) (prolog \"native.pl\" (lp-native-pair)))\n\c
-         (: lp-native-pair (-> Number Number Number))\n",
-        Path, Home),
-    lp_adjacent(Path, 'native.pl', "'lp-native-pair'(X, Y, Z) :- Z is X + Y.", _),
-    lp_import(Path, Home),
-    lp_answers(Home, ['lp-native-pair', 41], [42]).
+% The unary equation calls a binary overload supplied by its native backing.
+% Silent loading defers translation; verbose loading compiles before the
+% backing arrives and therefore needs its self-call dependency repaired.
+% Aliases install a separate dependency recorder, which owes the same edge.
+% Fresh names keep the global arity registry from letting one case mask another.
+% The deferred marker also proves the backing's ownership probe did not force
+% translation; repaired answers alone cannot detect that probe's side effect.
+test(a_backing_row_registers_before_the_equations_calling_it_translate,
+     [forall((member(Silent, [false, true]), member(Aliased, [false, true]))),
+      setup(filereader:silent(Previous)),
+      cleanup(filereader:metta_host_set_silent(Previous))]) :-
+    gensym('lp-native-pair-', Name),
+    ( Aliased == true
+    -> Prefix = "(: PairNumber (Alias Number))\n", Type = 'PairNumber'
+    ; Prefix = "", Type = 'Number' ),
+    format(string(Source),
+        "~s(: ~w (-> ~w ~w))\n\c
+         (= (~w $v) (~w $v 1))\n\c
+         (= (package backing) (prolog \"native.pl\" (~w)))\n\c
+         (: ~w (-> ~w ~w ~w))\n",
+        [Prefix, Name, Type, Type, Name, Name, Name, Name, Type, Type, Type]),
+    lp_package(reentrant, Source, Path, Home),
+    format(string(Native), '~q(X, Y, Z) :- Z is X + Y.', [Name]),
+    lp_adjacent(Path, 'native.pl', Native, _),
+    setup_call_cleanup(
+        filereader:metta_host_set_silent(Silent),
+        ( lp_import(Path, Home),
+          space_module(Home, Module),
+          ( Silent == true
+          -> assertion(spaces:deferred_metta_function(Name, Module, Home, 1, _, 1))
+          ; true ),
+          findall(A, metta_engine:arity(Name, A), Arities),
+          sort(Arities, Known), assertion(Known == [2,3]),
+          forall(between(-3, 3, X),
+                 ( Expected is X + 1,
+                   lp_answers(Home, [Name, X], [Expected]),
+                   lp_answers(Home, [Name, X, 1], [Expected]) )) ),
+        metta_release_space(Home)).
 
 :- end_tests(package_laws).

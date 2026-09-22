@@ -2613,15 +2613,16 @@ announce_function_changed(Module, FAtom) :- prepare_specialization_invalidation(
                                    announce_function_call_graph_changed(Module,
                                                                         FAtom).
 
-%A DECLARATION reaches one place an equation change does not: the declared
-%function's OWN compiled clause. A parameter type decides how a CALL SITE
-%compiles, which is what announce_function_changed/2 covers, but the declared
-%RESULT type decides whether the function's answer re-enters evaluation, and
-%that goal sits in the function's own body. So `(: f (-> Atom Atom))` arriving
+% A declaration also reaches the declared function's own compiled clause
+% when it has no self-call dependency. A parameter type decides how a call
+% site compiles, which announce_function_changed/2 covers, but the declared
+% result type decides whether the answer re-enters evaluation, and that goal
+% sits in the function's own body. So `(: f (-> Atom Atom))` arriving
 %after `(= (f $x) (g $x))` left f still re-entering evaluation and
 %`!(f (+ 1 2))` answered `(g 3)` where writing the declaration first answers
 %`(g (+ 1 2))` [tested:
-%spaces_late_type_declaration:a_late_type_declaration_repairs_its_call_sites].
+%spaces_late_type_declaration:a_late_type_declaration_repairs_its_call_sites;
+%commit=WORKTREE].
 %
 %ONLY when that result view actually MOVED, and the narrowness is the point.
 %Re-translating an equation loses which declared arrow it was compiled under,
