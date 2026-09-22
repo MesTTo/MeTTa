@@ -2,7 +2,7 @@
 % Guarantees: the differential reaches populated sum tables, preserves each
 %   answer's multiplicity on cold calls and replay through 6,561 occurrences
 %   [tested: memo_coefficients:recursive_sum_matches_the_uncached_bag;
-%   commit=WORKTREE].
+%   commit=dc8b4949c1b70521a85ff3e3d8cd01f9fdcd80c8].
 % Owns resources: every case releases its space and its cache refusal row.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
