@@ -24119,6 +24119,42 @@
       "tags": [
         "measured"
       ]
+    },
+    "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service": {
+      "title": "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service"
+    },
+    "diffed the two discovery rules directly: 61 each, differing by exactly those two": {
+      "title": "diffed the two discovery rules directly: 61 each, differing by exactly those two",
+      "supports": [
+        "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename": {
+      "title": "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename"
+    },
+    "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green": {
+      "title": "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green",
+      "supports": [
+        "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change": {
+      "title": "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change"
+    },
+    "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start": {
+      "title": "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start",
+      "supports": [
+        "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -101828,6 +101864,107 @@
         ]
       ],
       "id": "fea4bfbde10f3cf8"
+    },
+    {
+      "at": "2026-09-22T11:07:36.664938+00:00",
+      "after": "a7955cd078e8fbc0dea2744575254eec1eedbb5e",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"diffed the two discovery rules directly: 61 each, differing by exactly those two\", \"tags\": [\"measured\"], \"title\": \"the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green\", \"tags\": [\"measured\"], \"title\": \"my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start\", \"tags\": [\"measured\"], \"title\": \"I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change\", \"fields\": {}}]",
+      "parents": [
+        "fea4bfbde10f3cf8"
+      ],
+      "assert": [
+        [
+          "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green",
+          "sort",
+          "prop"
+        ],
+        [
+          "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green",
+          "supports",
+          "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename"
+        ],
+        [
+          "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green",
+          "tags",
+          "measured"
+        ],
+        [
+          "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green",
+          "title",
+          "A/B against the pre-split lib tree: the cost test passes at 1d444b2 and fails at 629c86c; fixed and 44 of 44 shipped-library examples stay green"
+        ],
+        [
+          "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change",
+          "sort",
+          "prop"
+        ],
+        [
+          "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change",
+          "title",
+          "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change"
+        ],
+        [
+          "diffed the two discovery rules directly: 61 each, differing by exactly those two",
+          "sort",
+          "prop"
+        ],
+        [
+          "diffed the two discovery rules directly: 61 each, differing by exactly those two",
+          "supports",
+          "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service"
+        ],
+        [
+          "diffed the two discovery rules directly: 61 each, differing by exactly those two",
+          "tags",
+          "measured"
+        ],
+        [
+          "diffed the two discovery rules directly: 61 each, differing by exactly those two",
+          "title",
+          "diffed the two discovery rules directly: 61 each, differing by exactly those two"
+        ],
+        [
+          "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename",
+          "sort",
+          "prop"
+        ],
+        [
+          "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename",
+          "title",
+          "my pkg.metta split broke the engine's boot and nothing but a library card noticed: load_builtin_type_surface resolves the library NAME to its manifest and then flat-reads that one file, following no imports, so the (: ...) and (cost ...) rows that moved to lib.metta stopped loading and all 195 builtin heads lost their cost silently. It now reads every .metta in the library's directory, which also survives a further split rather than naming lib.metta as a third home for that filename"
+        ],
+        [
+          "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start",
+          "sort",
+          "prop"
+        ],
+        [
+          "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start",
+          "supports",
+          "I twice called that failure not mine on partial evidence: first because reverting only the uncommitted Python changes left it failing, then because car-atom looked like an engine builtin. The split was committed, so reverting Python ruled out nothing, and the cost row for car-atom lives in lib_builtin_types. Ruling out a subset of the change is not ruling out the change"
+        ],
+        [
+          "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start",
+          "tags",
+          "measured"
+        ],
+        [
+          "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start",
+          "title",
+          "the clean A/B against the pre-split submodule commit is what settled it, and it was available from the start"
+        ],
+        [
+          "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service",
+          "sort",
+          "prop"
+        ],
+        [
+          "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service",
+          "title",
+          "the lib_ prefix guard was wrong in BOTH directions, which is what makes the manifest rule a derivation rather than a preference: minimal_metta_lib is a shipped library and the prefix hid it from the roster, dir(metta.lib) and cards entirely, while lib_gitimport was listed although it carries no manifest and cannot be imported, being a Prolog-only backing service"
+        ]
+      ],
+      "id": "4e04e63a4560151d"
     }
   ]
 }

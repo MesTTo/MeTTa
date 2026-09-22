@@ -2544,8 +2544,23 @@ load_builtin_type_surface :-
     library(lib_builtin_types, Path),
     exists_file(Path),
     !,
-    read_file_to_string(Path, Text, [encoding(utf8)]),
-    parse_metta_source(Text, Forms),
+    % EVERY .metta of the library, not just the file the name resolves to.
+    % That resolves to the MANIFEST, which says what the library depends on
+    % and where its source is; the (: ...) and (cost ...) rows live in the
+    % source beside it. This read follows no imports, so reading only the
+    % manifest loaded an empty surface and every builtin silently lost its
+    % cost row -- 195 heads with none, which only a library card noticed.
+    % Reading the directory survives a further split of the source, where
+    % naming lib.metta here would be a third home for that filename.
+    file_directory_name(Path, Directory),
+    directory_file_path(Directory, '*.metta', Pattern),
+    expand_file_name(Pattern, Sources),
+    findall(Form,
+            ( member(Source, Sources),
+              read_file_to_string(Source, Text, [encoding(utf8)]),
+              parse_metta_source(Text, Parsed),
+              member(Form, Parsed) ),
+            Forms),
     forall(( member(parsed(expression, _, [':', Name, Type]), Forms),
              atom(Name) ),
            ( seam:builtin_type_declaration(Name, Type)
