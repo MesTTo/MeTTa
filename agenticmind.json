@@ -24054,6 +24054,71 @@
       "tags": [
         "measured"
       ]
+    },
+    "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it": {
+      "title": "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+    },
+    "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row": {
+      "title": "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row",
+      "supports": [
+        "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+      ],
+      "tags": [
+        "user"
+      ]
+    },
+    "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source": {
+      "title": "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source"
+    },
+    "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library": {
+      "title": "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library",
+      "supports": [
+        "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source"
+      ],
+      "tags": [
+        "source"
+      ]
+    },
+    "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one": {
+      "title": "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one",
+      "supports": [
+        {
+          "node": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "status": "untried"
+        },
+        {
+          "node": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "relation": "addresses",
+          "target": "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+        }
+      ]
+    },
+    "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e": {
+      "title": "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e",
+      "supports": [
+        {
+          "node": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "status": "done"
+        }
+      ],
+      "supersedes": [
+        "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one"
+      ],
+      "tags": [
+        "measured"
+      ]
+    },
+    "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import": {
+      "title": "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import"
+    },
+    "wc over the split tree after the conservation check passed": {
+      "title": "wc over the split tree after the conservation check passed",
+      "supports": [
+        "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import"
+      ],
+      "tags": [
+        "measured"
+      ]
     }
   },
   "approaches": {
@@ -26808,6 +26873,14 @@
       "status": "unwanted",
       "addresses": [
         "SymFactory declares `readonly [key: string]: Name`, so under noUncheckedIndexedAccess every property access on S, V and fn is typed `Name | undefined` and the documented spelling refuses to compile: `fn.add(1, 2)` and `S.parent(S.alice, S.bob)` both raise TS18048 'possibly undefined' plus TS2722. The type is simply false, because the Proxy's get returns a term for every string key; nothing is ever undefined there"
+      ]
+    },
+    "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta": {
+      "title": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+      "effort": 3,
+      "status": "done",
+      "addresses": [
+        "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
       ]
     }
   },
@@ -101547,6 +101620,214 @@
         ]
       ],
       "id": "a84b0370501b2087"
+    },
+    {
+      "at": "2026-09-22T10:51:09.599913+00:00",
+      "after": "1c3698c52b52185e9624d63b45a464db1c589a3c",
+      "did": "[{\"op\": \"add-issue\", \"id\": null, \"because\": \"the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row\", \"tags\": [\"user\"], \"title\": \"pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it\", \"fields\": {}}, {\"op\": \"add-claim\", \"id\": null, \"because\": \"read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library\", \"tags\": [\"source\"], \"title\": \"the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source\", \"fields\": {}}, {\"op\": \"add-approach\", \"id\": null, \"because\": \"lib_statistics already imports its source as (library \\\"_support/statistics.metta\\\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one\", \"tags\": [], \"title\": \"split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta\", \"fields\": {\"effort\": 3, \"addresses\": [\"pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it\"]}}]",
+      "parents": [
+        "a84b0370501b2087"
+      ],
+      "assert": [
+        [
+          "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one",
+          "sort",
+          "prop"
+        ],
+        [
+          "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one",
+          "supports",
+          {
+            "node": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+            "status": "untried"
+          }
+        ],
+        [
+          "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one",
+          "supports",
+          {
+            "node": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+            "relation": "addresses",
+            "target": "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+          }
+        ],
+        [
+          "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one",
+          "title",
+          "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one"
+        ],
+        [
+          "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it",
+          "sort",
+          "prop"
+        ],
+        [
+          "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it",
+          "title",
+          "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+        ],
+        [
+          "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library",
+          "sort",
+          "prop"
+        ],
+        [
+          "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library",
+          "supports",
+          "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source"
+        ],
+        [
+          "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library",
+          "tags",
+          "source"
+        ],
+        [
+          "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library",
+          "title",
+          "read lib/lib_package/lib_package.pl:192-205; I had been about to leave the row in the manifest, which would have broken coverage on every backed library"
+        ],
+        [
+          "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source",
+          "sort",
+          "prop"
+        ],
+        [
+          "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source",
+          "title",
+          "the split is FORCED rather than chosen: package_coverage checks each name a backing row claims through package_source_equation(Path, Space, Name, _), which is scoped to the SAME Path as the row, so a row and the equations satisfying it must share a file. The generated face therefore moves WHOLE to lib.metta, row included, and pkg.metta keeps the header, the dependency imports and one import of its own source"
+        ],
+        [
+          "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row",
+          "sort",
+          "prop"
+        ],
+        [
+          "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row",
+          "supports",
+          "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+        ],
+        [
+          "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row",
+          "tags",
+          "user"
+        ],
+        [
+          "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row",
+          "title",
+          "the user said it directly, and the measurement agrees: lib_uuid/pkg.metta is 130 lines of which one is a package row"
+        ],
+        [
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "sort",
+          "approach"
+        ],
+        [
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "addresses",
+          "pkg.metta is a MANIFEST name carrying the library's whole surface: 40 of 60 hold their own declarations and equations, 537 hand-written type declarations and 657 equations, plus 275 more declarations inside the generated Prolog face. The migration that created them cited Cargo.toml and package.json as precedent, which is exactly where the analogy breaks, because those name a source and contain none of it"
+        ],
+        [
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "effort",
+          3
+        ],
+        [
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "status",
+          "untried"
+        ],
+        [
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "title",
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta"
+        ]
+      ],
+      "id": "930622c0d9223bb9"
+    },
+    {
+      "at": "2026-09-22T10:54:46.859374+00:00",
+      "after": "1c3698c52b52185e9624d63b45a464db1c589a3c",
+      "did": "[{\"op\": \"status\", \"id\": \"split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta\", \"because\": \"all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e\", \"tags\": [\"measured\"], \"status\": \"done\"}]",
+      "parents": [
+        "930622c0d9223bb9"
+      ],
+      "assert": [
+        [
+          "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e",
+          "sort",
+          "prop"
+        ],
+        [
+          "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e",
+          "supersedes",
+          "lib_statistics already imports its source as (library \"_support/statistics.metta\"), so the shape exists here and 20 of 60 manifests are already thin; this finishes a split the repository started rather than inventing one"
+        ],
+        [
+          "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e",
+          "supports",
+          {
+            "node": "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+            "status": "done"
+          }
+        ],
+        [
+          "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e",
+          "tags",
+          "measured"
+        ],
+        [
+          "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e",
+          "title",
+          "all 61 done. Content conserved line by line against HEAD with 23 of 23 faces intact; prolog-face 0 findings, which is the generator independently agreeing with the placement; package-backings 0 findings and selftest green; packages.plt 26 of 26; llms 0 findings; all 44 shipped-library examples exit 0. lib 629c86c, extensions/python 8dc48f55e"
+        ],
+        [
+          "split every library into pkg.metta, the manifest carrying dependencies and an import of its source, and lib.metta carrying the surface, and point prologface.py's _metta_face at lib.metta",
+          "status",
+          "done"
+        ]
+      ],
+      "id": "5305bfd4f5c566c7"
+    },
+    {
+      "at": "2026-09-22T10:54:48.608524+00:00",
+      "after": "1c3698c52b52185e9624d63b45a464db1c589a3c",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"wc over the split tree after the conservation check passed\", \"tags\": [\"measured\"], \"title\": \"the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \\\"<dir>/lib.metta\\\") import\", \"fields\": {}}]",
+      "parents": [
+        "5305bfd4f5c566c7"
+      ],
+      "assert": [
+        [
+          "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import",
+          "sort",
+          "prop"
+        ],
+        [
+          "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import",
+          "title",
+          "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import"
+        ],
+        [
+          "wc over the split tree after the conservation check passed",
+          "sort",
+          "prop"
+        ],
+        [
+          "wc over the split tree after the conservation check passed",
+          "supports",
+          "the pkg.metta migration is complete: 7537 lines of manifest are now 310 lines of manifest and 7361 lines of source across 61 libraries, each pkg.metta carrying only its dependencies and one (library \"<dir>/lib.metta\") import"
+        ],
+        [
+          "wc over the split tree after the conservation check passed",
+          "tags",
+          "measured"
+        ],
+        [
+          "wc over the split tree after the conservation check passed",
+          "title",
+          "wc over the split tree after the conservation check passed"
+        ]
+      ],
+      "id": "fea4bfbde10f3cf8"
     }
   ]
 }
