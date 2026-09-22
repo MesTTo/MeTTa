@@ -23,8 +23,15 @@ SOURCE_PATHS = [
     *(REPO / "extensions" / "python" / "examples").rglob("*.py"),
     *(REPO / "extensions" / "python" / "metta").glob("*.py"),
     *(REPO / "extensions" / "python" / "tests").glob("*.py"),
-    REPO / "lib" / "lib_measure" / "lib_measure.metta",
-    REPO / "lib" / "lib_soft" / "lib_soft.metta",
+    # Every shipped library's manifest, by the rule the corpus entry below
+    # states: a fence with a GATE behind its provenance is the strongest entry
+    # this list can hold, and each of these runs under the examples and
+    # library lanes. It named lib_measure and lib_soft by hand, which were the
+    # two the site happened to quote, and the pkg.metta rename on 2026-09-22
+    # left both pointing at files that no longer exist -- a list that has to
+    # be edited whenever a library is renamed or added is a list that goes
+    # stale, and this one did.
+    *(REPO / "lib").glob("*/pkg.metta"),
     # The example corpus, which became a source the site quotes when `::: run`
     # arrived: a fence inside one is that file's text, byte for byte, and the
     # docs lane refuses the build when it is not. A fence with a GATE behind its
