@@ -23081,6 +23081,18 @@
       "tags": [
         "source"
       ]
+    },
+    "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact": {
+      "title": "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact"
+    },
+    "read on 2026-09-22; the two implementations now agree and each cites the other": {
+      "title": "read on 2026-09-22; the two implementations now agree and each cites the other",
+      "supports": [
+        "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact"
+      ],
+      "tags": [
+        "source"
+      ]
     }
   },
   "approaches": {
@@ -97632,6 +97644,47 @@
         ]
       ],
       "id": "a633d2de99aeb77f"
+    },
+    {
+      "at": "2026-09-22T08:44:41.958860+00:00",
+      "after": "bd559265ea8e3e4ae4e0f18e6c41bc4690b09d1e",
+      "did": "[{\"op\": \"add-claim\", \"id\": null, \"because\": \"read on 2026-09-22; the two implementations now agree and each cites the other\", \"tags\": [\"source\"], \"title\": \"the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact\", \"fields\": {}}]",
+      "parents": [
+        "a633d2de99aeb77f"
+      ],
+      "assert": [
+        [
+          "read on 2026-09-22; the two implementations now agree and each cites the other",
+          "sort",
+          "prop"
+        ],
+        [
+          "read on 2026-09-22; the two implementations now agree and each cites the other",
+          "supports",
+          "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact"
+        ],
+        [
+          "read on 2026-09-22; the two implementations now agree and each cites the other",
+          "tags",
+          "source"
+        ],
+        [
+          "read on 2026-09-22; the two implementations now agree and each cites the other",
+          "title",
+          "read on 2026-09-22; the two implementations now agree and each cites the other"
+        ],
+        [
+          "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact",
+          "sort",
+          "prop"
+        ],
+        [
+          "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact",
+          "title",
+          "the recorded issue that the Python finder still yields <name>/<name>.metta is STALE: extensions/python/metta/importing.py:_candidates yields the file beside the directory and then <name>/pkg.metta, and its docstring records the change and cites engine/metta.pl library_within/2 as the other half of the one fact"
+        ]
+      ],
+      "id": "914844313a511b51"
     }
   ]
 }
