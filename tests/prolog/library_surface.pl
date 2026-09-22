@@ -87,9 +87,31 @@ library_engine_name(Name) :- translator:metta_special_form(Name).
 
 % The shipped compatibility library is held to its vendored upstream model.
 % Every other library keeps the engine's existing meaning at its old arities.
+%
+%Named by the file that carries the SOURCE, and checked to exist rather than
+%merely named. This clause said `pkg.metta` until the manifest split moved
+%lib_he's source to `lib.metta`; same_file/2 then stopped matching, the clause
+%stopped firing, and every redefinition fell through to being compared against
+%the engine -- which is the comparison the exemption exists to prevent. The
+%exemption failed OPEN, so the lane reported 78 findings against the library
+%rather than one against itself [measured 2026-09-22].
+compatibility_library_source('../../lib/lib_he/lib.metta').
+compatibility_library_model('../conformance/petta/lib/lib_he.metta').
+
 library_meaning_reference(File, Forms) :-
-    same_file(File, '../../lib/lib_he/pkg.metta'), !,
-    library_source_forms('../conformance/petta/lib/lib_he.metta', Forms).
+    compatibility_library_source(Source),
+    compatibility_library_model(Model),
+    forall(member(Named, [Source, Model]),
+           (   exists_file(Named)
+           ->  true
+           ;   throw(error(existence_error(source_sink, Named),
+                           context(library_meaning_reference/2,
+                                   'a stale path here compares the \c
+                                    compatibility library against the engine \c
+                                    instead of upstream, silently')))
+           )),
+    same_file(File, Source), !,
+    library_source_forms(Model, Forms).
 library_meaning_reference(_, []).
 
 library_meaning_case(Name, Text) :- prelude_spec_case(Name, Text).

@@ -50,7 +50,10 @@ skip = *.lock,*.pyc,*.svg,package-lock.json,.git,node_modules,__pycache__,build,
 #   installed table policy in, "the options in force" written as one word the
 #   way a Prolog variable has to be. Fourteen sites in one file, and the
 #   dictionary reads it as `enforce`.
-ignore-words-list = intensional,dout,sourcee,notin,ba,nd,som,te,fo,anc,checkking,zar,reduct,reducts,arithmetics,buildt,ans,assync,derails,astroid,inforce
+# `disjointness` is the property of being disjoint, which is what the sentence
+# means; codespell offers `disjointedness`, which means incoherent and is a
+# different word. Not a typo at all, which is this list's own admission rule.
+ignore-words-list = intensional,dout,sourcee,notin,ba,nd,som,te,fo,anc,checkking,zar,reduct,reducts,arithmetics,buildt,ans,assync,derails,astroid,inforce,disjointness
 # Whole LINES that are known and stay unreported, matched verbatim. This is for
 # vendored third-party source -- tests/prolog/vendor, and tests/conformance/petta,
 # which is upstream PeTTa at ae66fa8e and is the CONFORMANCE ORACLE, so editing
