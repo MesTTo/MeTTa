@@ -10,12 +10,15 @@ a release that half-publishes. Reading them out of the workflow makes the
 agreement structural instead of something a person re-checks.
 
 The member list is not computed here: `build-distributions.sh --list` answers
-it, so a distribution with no producer cannot appear. That matters, because
-pymetta-host is skipped there (tools/pymetta-host/run.sh needs a patched
-swipl-devel checkout that is not in the repository) and a pending publisher for
-it would be one no workflow could ever reify. Re-globbing ext/ here instead
-would be a second definition of "what the release builds", free to drift from
-the one that actually builds it.
+it, so a distribution with no producer cannot appear. Re-globbing ext/ here
+would be a second definition of "what the release publishes", free to drift
+from the one the release uses.
+
+That list is the RELEASE set rather than the `python -m build` set, and the
+difference is pymetta-host: a manylinux container builds it from a
+swipl-devel tree tools/pymetta-host/fetch-source.sh clones and patches, so
+it is not a build target there and is still a distribution that ships. It
+was absent from every plan while the two were one list.
 
 TWO PYPI LIMITS SHAPE WHAT YOU CAN DO WITH THIS LIST, and neither is a rate
 limit that waiting clears:

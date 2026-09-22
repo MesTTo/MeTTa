@@ -22,11 +22,14 @@
 #     structural rather than a list of names to skip, so the next stray
 #     directory cannot reach the build either.
 #     [tested: reproduced at exit 1 before the guard; commit=WORKTREE]
-# Fails when: asked for ext/pymetta-host. That one carries a patched
-#   SWI-Prolog built inside quay.io/pypa/manylinux_2_28_x86_64, one wheel per
-#   interpreter, which is tools/pymetta-host/run.sh and needs both a container
-#   and an SRC swipl-devel checkout that is not in this repository.
-#   It is skipped by name rather than silently missed.
+# Fails when: asked to BUILD ext/pymetta-host. That one carries a patched
+#   SWI-Prolog compiled inside quay.io/pypa/manylinux_2_28_x86_64, one wheel
+#   per interpreter, which is tools/pymetta-host/run.sh and needs a container
+#   this script does not run. Its source is no longer the obstacle:
+#   tools/pymetta-host/fetch-source.sh clones swipl-devel at the pinned
+#   commit and applies the patches this repository carries. So it is skipped
+#   by the BUILD loop and named by --list, which is the whole reason those
+#   two are separate.
 # Decides: $DIST, which defaults to dist/ because that is the directory the
 #   workflow uploads and the publisher reads.
 set -eu
