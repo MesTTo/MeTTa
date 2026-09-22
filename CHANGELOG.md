@@ -189,6 +189,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A re-import rebuilds a library whose equations were removed. `import!` of
+  `(library L)` resolves to `L/pkg.metta`, and that manifest's own receipt
+  stays current however much of `L/lib.metta` is taken out of the space, so
+  the gate read current and the load never ran: `import!` answered `True`
+  while rebuilding nothing, and the receipt stayed stale for the rest of the
+  process. An import now records the loads it caused and is current only while
+  every one of them is, which is the invalidation a build system does over its
+  dependency graph. The single-file libraries before the manifest split hid
+  this, because the path an import resolved to and the path its equations came
+  from were the same path.
+
 - Clearing a space for release frees its owned children first, so a host that
   closes a world no longer raises out of it. `metta_release_space/1` already
   released the children inside the releasing mark and then cleared, with the

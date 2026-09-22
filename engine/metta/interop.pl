@@ -1662,6 +1662,11 @@ metta_import_base(top, Directory) :-
 :- dynamic imported_metta_source/2.
 :- dynamic import_life/3.
 :- dynamic import_receipt/4.
+%Which loads a load caused, in one space. Recorded from the imports still in
+%flight when a nested load begins, so it is the ANCESTOR relation rather than
+%the parent one: a manifest names every source beneath it directly and the
+%currency check below needs no recursion and no termination argument.
+:- dynamic import_nested_source/3.
 :- dynamic metta_source_flight/3.
 :- volatile metta_source_flight/3.
 :- '$notransact'(metta_source_flight/3).
@@ -1680,9 +1685,22 @@ import_cache_current(Space, CanonPath) :-
     imported_metta_source(Space, CanonPath),
     (   metta_space_name(Space)
     ->  ( import_life(Space, CanonPath, loading)
-        ; import_receipt_current(Space, CanonPath) )
+        ; import_receipt_current(Space, CanonPath),
+          import_nested_sources_current(Space, CanonPath) )
     ;   true
     ).
+
+%A load is current only while every load it caused is current too. Without this
+%a library's manifest answered current forever: import! of (library L) resolves
+%to L/pkg.metta, whose own receipt nothing invalidates, while the equations live
+%in the L/lib.metta it requires, so removing one of those equations left the
+%gate reading current and the re-import rebuilt nothing
+%[tested: test_public_import_rebuilds_when_a_receipt_dependency_disappears].
+%This is the invalidation every build system does over its dependency graph:
+%a stale header rebuilds the objects that include it.
+import_nested_sources_current(Space, CanonPath) :-
+    forall(import_nested_source(Space, CanonPath, Nested),
+           import_receipt_current(Space, Nested)).
 
 % Import records are a live view of the loader's committed ownership rows.
 % A stale digest still names a load that undo can withdraw; a cleared space
@@ -1753,16 +1771,26 @@ capture_import_state(Space, CanonPath, Terms) :-
               Term = import_life(Space, CanonPath, State)
             ; import_receipt(Space, CanonPath, LoadId, Digest),
               Term = import_receipt(Space, CanonPath, LoadId, Digest)
+            ; import_nested_source(Space, Enclosing, CanonPath),
+              Term = import_nested_source(Space, Enclosing, CanonPath)
             ), Terms).
 
 clear_import_state(Space, CanonPath) :-
     retractall(imported_metta_source(Space, CanonPath)),
     retractall(import_life(Space, CanonPath, _)),
-    retractall(import_receipt(Space, CanonPath, _, _)).
+    retractall(import_receipt(Space, CanonPath, _, _)),
+    retractall(import_nested_source(Space, _, CanonPath)).
 
+%The enclosing imports are read BEFORE this path's own loading marker goes in,
+%so a load never records itself as its own ancestor.
 begin_import_attempt(Space, CanonPath) :-
+    findall(Enclosing,
+            ( import_life(Space, Enclosing, loading), Enclosing \== CanonPath ),
+            Enclosings),
     clear_import_state(Space, CanonPath),
     assertz(imported_metta_source(Space, CanonPath)),
+    forall(member(Enclosing, Enclosings),
+           assertz(import_nested_source(Space, Enclosing, CanonPath))),
     (   metta_space_name(Space)
     ->  assertz(import_life(Space, CanonPath, loading))
     ;   true
