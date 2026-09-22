@@ -163,6 +163,7 @@ from __future__ import annotations
 
 import ast
 import json
+import functools
 import os
 import re
 import subprocess
@@ -1653,6 +1654,42 @@ def pinnable(path: Path) -> frozenset[int]:
     return frozenset(line for _at, line, reason in sites(path, _text(path)) if reason is None)
 
 
+def _repositories() -> tuple[Path, ...]:
+    """This checkout and every component repository mounted inside it.
+
+    A component is a submodule, so its history is its OWN: a file under
+    extensions/python cites a commit that `git cat-file` at the root cannot
+    name, and resolving only at the root reported fifteen true citations in the
+    Node seat and three in the Python one as unresolvable. A commit is pinned
+    here if ANY repository in the checkout holds it, which is the permissive
+    direction and the honest one, since a cross-cutting change is cited from a
+    component just as a component's own change is.
+
+    Time: one `git cat-file --batch-check` per repository per run, at most nine
+    on this tree, against one before.
+    """
+    return (ROOT, *sorted(
+        found.parent for found in ROOT.glob("*/.git")
+    ), *sorted(found.parent for found in ROOT.glob("*/*/.git")))
+
+
+@functools.cache
+def _resolves_anywhere(oid: str) -> bool:
+    """Whether any repository in this checkout names OID as a commit."""
+    for repository in _repositories():
+        answer = subprocess.run(
+            ["git", "cat-file", "--batch-check"],
+            cwd=repository,
+            input=f"{oid}^{{commit}}\n",
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout
+        if " commit " in f" {answer.strip()} ":
+            return True
+    return False
+
+
 def commit_problems(sites: list[tuple[Path, int, str, str]]) -> tuple[list[str], int]:
     """Check every pinned object ID, and count the WORKTREE placeholders.
 
@@ -1673,21 +1710,13 @@ def commit_problems(sites: list[tuple[Path, int, str, str]]) -> tuple[list[str],
             wanted.setdefault(oid, []).append(f"{path.relative_to(ROOT)}:{line}: {tag}")
     problems = []
     if wanted:
-        query = "".join(f"{oid}^{{commit}}\n" for oid in wanted)
-        result = subprocess.run(
-            ["git", "cat-file", "--batch-check"],
-            cwd=ROOT,
-            input=query,
-            capture_output=True,
-            text=True,
-            check=False,
+        unresolved = {oid for oid in wanted if not _resolves_anywhere(oid)}
+        problems.extend(
+            f"{site}: commit={oid} does not resolve to a commit"
+            for oid in wanted
+            if oid in unresolved
+            for site in wanted[oid]
         )
-        for oid, answer in zip(wanted, result.stdout.splitlines(), strict=False):
-            if " commit " not in f" {answer} ":
-                problems.extend(
-                    f"{site}: commit={oid} does not resolve to a commit"
-                    for site in wanted[oid]
-                )
     if placeholders and os.environ.get("RELEASE") == "1":
         problems.append(
             f"{placeholders} evidence tag(s) still say commit={PLACEHOLDER}; a release "
