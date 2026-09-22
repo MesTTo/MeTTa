@@ -59,13 +59,22 @@ DRAIN=${DRAIN:-0}
 #: A gap between uploads. Nothing requires it; it keeps one burst from looking
 #: like a scripted flood to any limiter this does not know about.
 GAP=${GAP:-20}
-#: The index whose JSON API answers the existence question. TestPyPI is the
-#: other real value; a host that cannot answer is how the refusal below is
-#: exercised.
+#: The index whose JSON API answers the existence question, and the ONLY thing
+#: it changes. twine uploads to its own configured repository, so pointing
+#: this elsewhere would classify against one index and publish to another,
+#: which is why --publish refuses whenever it is not the default. It exists to
+#: exercise the refusal below against a host that cannot answer.
 INDEX=${INDEX:-https://pypi.org}
+DEFAULT_INDEX=https://pypi.org
 
 publish=0
 [ "${1:-}" = "--publish" ] && publish=1
+if [ "$publish" -eq 1 ] && [ "$INDEX" != "$DEFAULT_INDEX" ]; then
+    printf 'publish-new-projects: INDEX is %s but twine uploads to its own configured\n' "$INDEX" >&2
+    printf 'repository, so this run would decide what is missing from one index and\n' >&2
+    printf 'create it on another. INDEX is for checking; drop --publish.\n' >&2
+    exit 1
+fi
 
 # Derived, not listed. Every distribution this repository ships is a directory
 # under ext/ carrying a pyproject.toml, and the name in that file is the name
@@ -112,6 +121,25 @@ if [ "$publish" -eq 0 ]; then
     exit 0
 fi
 [ "$#" -eq 0 ] && exit 0
+
+# Every artifact is located before the first upload. Without this the run
+# spends an attempt per project until it reaches the one nobody built, so a
+# missing wheel costs a creation budget rather than a message: twine fails
+# locally on a path that is not there, which is safe but only after the
+# projects before it are gone from the budget.
+missing=""
+for name in $@; do
+    # shellcheck disable=SC2086  -- the glob is the point
+    set +f
+    found=$(ls $DIST/$(echo "$name" | tr '-' '_')-* 2>/dev/null | wc -l)
+    [ "$found" -eq 0 ] && missing="$missing $name"
+done
+if [ -n "$missing" ]; then
+    printf 'publish-new-projects: no artifact in %s for:%s\n' "$DIST" "$missing" >&2
+    printf 'Build them first; a run that starts without them spends one creation\n' >&2
+    printf 'attempt per project before reaching the first one that is not there.\n' >&2
+    exit 1
+fi
 
 if [ "$DRAIN" -gt 0 ]; then
     printf '%s waiting %ss for the creation window to drain\n' "$(date -Is)" "$DRAIN"
