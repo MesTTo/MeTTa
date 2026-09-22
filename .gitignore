@@ -76,3 +76,10 @@ ai-notes/
 
 # Catalog runtime state, written where a program that imports lib_package runs.
 catalog/
+
+# Gate worktrees. A gate reading the checkout being edited returns a verdict
+# about no particular state, so it runs in `git worktree add --detach
+# ai-battery-<n> HEAD` INSIDE the repository: a sibling is invisible to a
+# search, an editor workspace, a container mount and a backup, all of which
+# stop at the repository root.
+ai-battery-*/
