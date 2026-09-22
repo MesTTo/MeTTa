@@ -169,6 +169,12 @@ def plan(every, exists, shared):
              "environment": bootstrap_environment(n), **shared}
             for n in missing[:PENDING_CAP]
         ],
+        # What the cap left behind. Carried rather than recomputed, so the
+        # human count cannot drift from the matrix: reporting len(bootstrap)
+        # as the number missing said "3 distributions have no PyPI project
+        # yet" while thirteen had none, because bootstrap is capped and the
+        # count was taken from it.
+        "deferred": missing[PENDING_CAP:],
         "steady": [filename_stem(n) for n in present],
     }
 
@@ -177,7 +183,8 @@ def main() -> int:
     shared = constants()
     every = distributions()
     computed = plan(every, on_pypi, shared)
-    missing = [row["project"] for row in computed["bootstrap"]]
+    this_round = [row["project"] for row in computed["bootstrap"]]
+    missing = this_round + computed["deferred"]
 
     # The machine-readable forms answer FIRST, and for EVERY state including
     # the one where nothing is missing. The human early-return used to sit
@@ -203,7 +210,8 @@ def main() -> int:
     if not missing:
         print("every distribution this repository releases already exists on PyPI")
         return 0
-    print(f"{len(missing)} distributions have no PyPI project yet.")
+    print(f"{len(missing)} distributions have no PyPI project yet; "
+          f"{len(this_round)} can be registered now.")
     print("Register pending publishers at")
     print("  https://pypi.org/manage/account/publishing/\n")
     print("  PyPI allows 3 pending publishers at once, and only one per")

@@ -109,9 +109,16 @@ def check(mod, published: list[str], present: set[str]) -> list[str]:
     # registers different projects from the ones the workflow presents.
     if boot != absent[:mod.PENDING_CAP]:
         bad.append(f"bootstrap {boot} is not the first {mod.PENDING_CAP} of {absent}")
-    if len(boot) + len(steady_stems) != min(len(published),
-                                            len(present) + mod.PENDING_CAP):
-        bad.append(f"{len(boot)}+{len(steady_stems)} covers the wrong count for {present}")
+    # THREE-way and TOTAL: bootstrap this round, deferred past the cap, and
+    # steady. Checking only bootstrap+steady let a caller take the number
+    # missing from the capped list, which reported "3 distributions have no
+    # PyPI project yet" while thirteen had none.
+    deferred = computed["deferred"]
+    if len(boot) + len(deferred) + len(steady_stems) != len(published):
+        bad.append(f"{len(boot)}+{len(deferred)}+{len(steady_stems)} != "
+                   f"{len(published)} for present={sorted(present)}")
+    if deferred != absent[mod.PENDING_CAP:]:
+        bad.append(f"deferred {deferred} is not what the cap left of {absent}")
     if set(boot) & set(present):
         bad.append(f"bootstrap {boot} claims something already on PyPI")
     for row in computed["bootstrap"]:
@@ -134,11 +141,11 @@ def check(mod, published: list[str], present: set[str]) -> list[str]:
             claimed[f] = stem
     # A distribution deferred past the cap is correctly claimed by nobody:
     # it waits for the next round. Anything NOT deferred must be claimed.
-    deferred = {mod.filename_stem(n) for n in absent[mod.PENDING_CAP:]}
+    deferred_stems = {mod.filename_stem(n) for n in absent[mod.PENDING_CAP:]}
     for f in files:
         if f in claimed:
             continue
-        if owner(f) in {mod.filename_stem(n) for n in published} - deferred:
+        if owner(f) in {mod.filename_stem(n) for n in published} - deferred_stems:
             bad.append(f"{f} is claimed by neither job")
     return bad
 
@@ -168,6 +175,8 @@ MUTANTS = [
      "[name for name in every if exists(name)]", "tool"),
     ("the pending cap is forgotten",
      "PENDING_CAP = 3", "PENDING_CAP = 99", "tool"),
+    ("what the cap left behind is dropped, so nothing can count the total",
+     '"deferred": missing[PENDING_CAP:],', '"deferred": [],', "tool"),
     ("prose shadows --json-plan once nothing is missing",
      '    if "--json-plan" in sys.argv:',
      '    if not missing:\n        print("all done")\n        return 0\n'
@@ -246,8 +255,8 @@ def check_json_is_total(mod) -> list[str]:
             bad.append(f"--json-plan printed non-JSON with {label}: "
                        f"{out.getvalue().strip()[:70]!r}")
             continue
-        if sorted(parsed) != ["bootstrap", "steady"]:
-            bad.append(f"--json-plan with {label} lacks both halves: {sorted(parsed)}")
+        if sorted(parsed) != ["bootstrap", "deferred", "steady"]:
+            bad.append(f"--json-plan with {label} lacks a part: {sorted(parsed)}")
     return bad
 
 
