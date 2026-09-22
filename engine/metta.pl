@@ -191,7 +191,7 @@
 %     and every row the library ships is in them, read from the library's
 %     directory rather than through builtin_type_surface_forms/1 [tested:
 %     metta_builtin_type_surface:every_row_the_library_ships_reaches_the_shipped_tables;
-%     commit=WORKTREE].
+%     commit=684cf1560a5b7b2fcf06b18f4d6a11d7ddd4a827].
 %   - External Prolog libraries extend seam:builtin_type_declaration/2 without
 %     replacing the engine's rows, and unloading retires only their own clauses
 %     [tested: test_a_library_types_its_own_blob_without_destroying_the_table;

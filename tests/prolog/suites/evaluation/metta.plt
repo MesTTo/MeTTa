@@ -27,7 +27,7 @@
 %     that silently shrank is a failure here and not a silence in the identity
 %     that rests on that predicate [tested:
 %     metta_builtin_type_surface:every_row_the_library_ships_reaches_the_shipped_tables;
-%     commit=WORKTREE].
+%     commit=684cf1560a5b7b2fcf06b18f4d6a11d7ddd4a827].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
