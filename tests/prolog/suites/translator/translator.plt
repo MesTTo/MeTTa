@@ -54,7 +54,7 @@
 %     own source withdrawal, so no type declaration it loaded reaches a later
 %     unit, whatever the library's files are called [tested:
 %     translator_evaluation_errors:the_builtin_type_import_leaves_nothing_behind;
-%     commit=WORKTREE].
+%     commit=0338775c8b65ae642ffd97d425cdb32b0ed9bbbc].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
