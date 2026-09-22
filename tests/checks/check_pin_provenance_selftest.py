@@ -574,6 +574,134 @@ def cmake_lexical_complaints() -> tuple[list[str], int]:
     return found, len(cases) * 2
 
 
+def _git(root: Path, *arguments: str) -> str:
+    """One git command over a fixture tree, with an identity it can commit under."""
+    done = subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@t",
+         "-c", "protocol.file.allow=always", *arguments],
+        cwd=root, capture_output=True, text=True, check=True,
+    )
+    return done.stdout.strip()
+
+
+def _repo(path: Path, name: str, body: str) -> str:
+    """A repository holding one placeholder-carrying file, committed."""
+    path.mkdir(parents=True, exist_ok=True)
+    (path / name).parent.mkdir(parents=True, exist_ok=True)
+    (path / name).write_text(body, encoding="utf-8")
+    _git(path, "init", "-q")
+    _git(path, "add", "-A")
+    _git(path, "commit", "-qm", "one")
+    return _git(path, "rev-parse", "HEAD")
+
+
+#: What a pin resolves to is a function of DEPTH and of WHEN the superproject
+#: took the content, so the fixture below separates the two rather than
+#: planting a case per combination: three depths, and the two submodule depths
+#: arriving at different superproject commits. A tree where every file is added
+#: in one commit cannot tell a correct answer from HEAD.
+def derive_complaints() -> tuple[list[str], int]:
+    """Whether --derive names the superproject commit that carries each pin."""
+    found: list[str] = []
+    checked = 0
+    with tempfile.TemporaryDirectory() as directory:
+        scratch = Path(directory)
+        root = scratch / "root"
+
+        # R1: the superproject alone, carrying its own pin.
+        tools = root / "tools/checks"
+        tools.mkdir(parents=True)
+        for module in sibling_closure(("pin_provenance.py",)):
+            (tools / module).write_text(
+                (HERE / module).read_text(encoding="utf-8").replace(
+                    WORD, "commit=(pinned in the tree this copy was taken from)"
+                ),
+                encoding="utf-8",
+            )
+        (root / "check.sh").write_text("# a gate script the runner model expects\n")
+        (root / "probe.py").write_text(f'"""Purpose: p.\n\nGuarantees: r [{TAG} {WHEN}: a case; {WORD}]\n"""\n')
+        _git(root, "init", "-q")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-qm", "root alone")
+        r1 = _git(root, "rev-parse", "HEAD")
+
+        # The nested pair, built outside and mounted in afterwards, so the
+        # superproject commit that carries them is NOT the one that carries
+        # probe.py.
+        deep = scratch / "deepsrc"
+        _repo(deep, "vendor.h", f"/* Purpose: v. Guarantees: g [{TAG} {WHEN}: a case; {WORD}] */\n")
+        sub = scratch / "subsrc"
+        _repo(sub, "thing.pl", f"% Purpose: t. Guarantees: g [{TAG} {WHEN}: a case; {WORD}]\n")
+        _git(sub, "submodule", "add", "-q", str(deep), "vendor")
+        _git(sub, "commit", "-qm", "sub takes deep")
+
+        # R2: the superproject takes both at once.
+        _git(root, "submodule", "add", "-q", str(sub), "lib/libx")
+        _git(root, "commit", "-qm", "root takes sub")
+        r2 = _git(root, "rev-parse", "HEAD")
+
+        # R3: a SECOND file in the deepest repository, arriving later, so the
+        # two pins inside one submodule must resolve to different commits.
+        (deep / "extra.h").write_text(f"/* Purpose: e. Guarantees: g [{TAG} {WHEN}: a case; {WORD}] */\n")
+        _git(deep, "add", "-A")
+        _git(deep, "commit", "-qm", "deep grows")
+        _git(sub / "vendor", "fetch", "-q", "origin")
+        _git(sub / "vendor", "checkout", "-q", _git(deep, "rev-parse", "HEAD"))
+        _git(sub, "add", "-A")
+        _git(sub, "commit", "-qm", "sub bumps deep")
+        _git(root / "lib/libx", "fetch", "-q", "origin")
+        _git(root / "lib/libx", "checkout", "-q", _git(sub, "rev-parse", "HEAD"))
+        _git(root / "lib/libx", "submodule", "update", "--init", "-q")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-qm", "root bumps sub")
+        r3 = _git(root, "rev-parse", "HEAD")
+
+        wanted = {
+            "probe.py": r1,
+            "lib/libx/thing.pl": r2,
+            "lib/libx/vendor/vendor.h": r2,
+            "lib/libx/vendor/extra.h": r3,
+        }
+        done = run(root, "--check", "--derive")
+        seen = dict(
+            (line.split(":", 1)[0], line.rsplit(" ", 1)[1])
+            for line in done.stdout.splitlines()
+            if "would pin to" in line
+        )
+        for where, expected in wanted.items():
+            checked += 1
+            got = seen.get(where)
+            if got is None:
+                found.append(f"--derive never reached {where}; it saw {sorted(seen)}")
+            elif got != expected:
+                rung = {r1: "the root's own commit", r2: "the commit taking the submodule",
+                        r3: "the commit bumping it"}.get(got, got)
+                found.append(
+                    f"--derive put {where} on {got[:9]} ({rung}), wanted {expected[:9]}"
+                )
+        # A submodule's OWN object ID never resolves in the superproject, which
+        # is the failure the climb exists to prevent, so it is worth naming
+        # rather than only implying through the expectations above.
+        checked += 1
+        inside = {_git(sub, "rev-parse", "HEAD"), _git(deep, "rev-parse", "HEAD")}
+        if inside & set(seen.values()):
+            found.append("--derive pinned a submodule file to the submodule's own commit")
+
+        # An uncommitted line has no tree that produced it, and is refused
+        # rather than pinned to whatever commit happens to be current.
+        checked += 1
+        (root / "probe.py").write_text(
+            f'"""Purpose: p.\n\nGuarantees: r [{TAG} {WHEN}: a case; {WORD}]\nAnd: s [{TAG} {WHEN}: a second case; {WORD}]\n"""\n'
+        )
+        refused = run(root, "--derive")
+        if refused.returncode == 0 or "not committed" not in refused.stdout + refused.stderr:
+            found.append(
+                f"--derive accepted an uncommitted placeholder: rc={refused.returncode} "
+                f"{(refused.stdout + refused.stderr).strip()[:160]}"
+            )
+    return found, checked
+
+
 def main() -> int:
     """Report the defects and exit nonzero if there are any."""
     found = complaints()
@@ -581,13 +709,16 @@ def main() -> int:
     found.extend(lexical)
     cmake, cmake_cases = cmake_lexical_complaints()
     found.extend(cmake)
+    derived, derived_cases = derive_complaints()
+    found.extend(derived)
     for one in found:
         print(one)
     planted = sum(len(rewritten) + len(declined) for _n, _l, rewritten, declined in PLANTS)
     print(
         f"pin-provenance selftest: {len(found)} defect(s), over {planted} planted placeholders "
         f"in {len(PLANTS)} files, one of them outside the gate's globs; "
-        f"{cases} C-family and {cmake_cases} CMake lexical cases; eight pre-write refusals"
+        f"{cases} C-family and {cmake_cases} CMake lexical cases; eight pre-write refusals; "
+        f"{derived_cases} --derive cases over a superproject, a submodule and a submodule of one"
     )
     return 1 if found else 0
 

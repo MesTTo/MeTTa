@@ -6,7 +6,15 @@ grammar says the text is a comment.
 
 A commit cannot contain its own object ID, so the scheme writes the functional
 state as commit A, then replaces the placeholder with A's ID in a
-provenance-only commit B. Doing that replacement by hand is a plain textual
+provenance-only commit B.
+
+--commit A names one tree for every pin in the sweep, which is exact while the
+outstanding set is what the current session just wrote. It stops being exact
+the moment the set has accumulated: on 2026-09-22 the tree carried 340, of
+which 301 were `measured:` numbers taken on three different days, and naming
+one commit for those asserts a tree produced numbers it was never run for.
+--derive reads each pin's own history instead, so that condition holds by
+construction rather than by how often the pass is run. Doing that replacement by hand is a plain textual
 substitution over the whole tree, and on 2026-08-31 one reached into twelve
 STRING LITERALS: the re-pin tool's own tag template began writing a stale
 object ID into every twin it priced, and the evidence gate's self-test planted
@@ -65,6 +73,13 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - --check writes nothing and exits 1 when any pin would be rewritten, which
     is the same condition RELEASE=1 refuses on
+    [tested: tests/checks/check_pin_provenance_selftest.py]
+  - --derive resolves each placeholder to the SUPERPROJECT commit whose tree
+    carries it, climbing as many submodule rungs as the file sits under, and
+    never to a submodule's own object ID, which the evidence gate cannot
+    resolve [tested: tests/checks/check_pin_provenance_selftest.py]
+  - --derive refuses a placeholder on a line no commit carries, rather than
+    pinning it to whichever commit is current
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - a commit that does not resolve is refused before any file is opened
     [tested: tests/checks/check_pin_provenance_selftest.py]
@@ -590,6 +605,187 @@ def resolve(commit: str) -> str:
     return done.stdout.strip()
 
 
+#: git blame's object ID for a line no commit carries yet.
+ZERO = "0" * 40
+
+#: Pins whose producing commit the parent repository never held exactly, as
+#: (submodule, produced at, earliest carrier, that carrier's gitlink). Empty
+#: on this tree, measured 2026-09-22: all 263 twin pins matched exactly.
+INEXACT: list[tuple[str, str, str, str]] = []
+
+
+@cache
+def repository(directory: Path) -> Path:
+    """The repository that tracks this directory, a submodule's own root inside one."""
+    done = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=directory,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if done.returncode != 0:
+        msg = f"pin_provenance: {directory} is not inside a git repository"
+        raise SystemExit(msg)
+    return Path(done.stdout.strip())
+
+
+@cache
+def blamed(path: Path) -> dict[int, str]:
+    """Every line of this file against the commit that last touched it.
+
+    One call per FILE rather than per pin. `--line-porcelain` repeats the
+    header for every line, so the whole map costs the single subprocess that
+    one `git blame -L n,n` would, and the 340 pins this tree carries over 294
+    files ask for 294 of them instead of 340.
+    """
+    owner = repository(path.parent)
+    done = subprocess.run(
+        ["git", "blame", "--line-porcelain", "--", str(path.relative_to(owner))],
+        cwd=owner,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if done.returncode != 0:
+        msg = (
+            f"pin_provenance: git blame refused {path.relative_to(ROOT)} in {owner}: "
+            f"{done.stderr.strip()}"
+        )
+        raise SystemExit(msg)
+    lines: dict[int, str] = {}
+    oid: str | None = None
+    number = 0
+    for text in done.stdout.split("\n"):
+        head = text.split()
+        if not text.startswith("\t") and len(head) >= 3 and len(head[0]) == len(ZERO):
+            oid, number = head[0], int(head[2])
+        elif text.startswith("\t") and oid is not None:
+            lines[number] = oid
+    return lines
+
+
+@cache
+def bumps(parent: Path, submodule: str) -> tuple[tuple[str, str], ...]:
+    """Every commit of `parent` that moved this gitlink, oldest first, with its value.
+
+    Two subprocesses whatever the history's depth: `rev-list` names the
+    commits and one `cat-file --batch-check` reads all their gitlinks, where
+    `git rev-parse <commit>:<submodule>` is the same answer at one process
+    each.
+    """
+    walk = subprocess.run(
+        ["git", "rev-list", "--reverse", "HEAD", "--", submodule],
+        cwd=parent,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    commits = walk.stdout.split()
+    if not commits:
+        return ()
+    batch = subprocess.run(
+        ["git", "cat-file", "--batch-check=%(objectname)"],
+        cwd=parent,
+        input="".join(f"{commit}:{submodule}\n" for commit in commits),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    answers = batch.stdout.split("\n")
+    return tuple(
+        (commit, answer.split()[0])
+        for commit, answer in zip(commits, answers, strict=False)
+        if answer and len(answer.split()[0]) == len(ZERO)
+    )
+
+
+@cache
+def carried_by(oid: str, child: Path, parent: Path) -> str:
+    """The earliest commit of `parent` whose gitlink for `child` carries `oid`.
+
+    The descendant set comes from one `rev-list --ancestry-path` inside the
+    child rather than a `merge-base --is-ancestor` per candidate bump, which
+    is the same answer at one subprocess instead of one per commit that ever
+    moved the gitlink.
+    """
+    reach = subprocess.run(
+        ["git", "rev-list", "--ancestry-path", f"{oid}..HEAD"],
+        cwd=child,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    carried = {oid, *reach.stdout.split()}
+    for commit, gitlink in bumps(parent, str(child.relative_to(parent))):
+        if gitlink in carried:
+            # Reachability proves the claim is IN that tree, not that the tree
+            # reproduces it. They differ only when the parent skipped over the
+            # producing commit, and then the earliest carrier is still the best
+            # answer but a weaker one, so it is named rather than resolved
+            # silently -- which is the same response this file already gives a
+            # pin whose grammar it cannot read.
+            if gitlink != oid:
+                INEXACT.append((str(child.relative_to(ROOT)), oid, commit, gitlink))
+            return commit
+    msg = (
+        f"pin_provenance: no commit of {parent} carries {child.relative_to(parent)} at "
+        f"{oid}, so that evidence has never been part of this repository; commit the "
+        f"submodule and bump its parent before pinning"
+    )
+    raise SystemExit(msg)
+
+
+def superproject(oid: str, owner: Path) -> str:
+    """`oid`, read in `owner`, as the superproject commit whose tree carries it.
+
+    `commit=` names a SUPERPROJECT commit, settled by ce40ca012 against a
+    header that cited an engine one: the evidence gate resolves every pin with
+    `git cat-file` in the superproject, so a submodule's own object ID is
+    reported as not resolving.
+
+    Submodules NEST, so this climbs rather than stepping once.
+    `extensions/python/examples/language-feature-examples` carries 298 of the
+    340 pins standing on 2026-09-22 and is a submodule of `extensions/python`,
+    not of the root: the superproject has no gitlink for it at all, and a
+    single step refused it by name rather than resolving it to the wrong
+    commit. Each rung is the same question asked of the next repository up,
+    and a file the superproject tracks itself is the degenerate case of zero
+    rungs.
+    """
+    while owner != ROOT:
+        parent = repository(owner.parent)
+        if parent == owner:
+            msg = f"pin_provenance: {owner} is not inside {ROOT}, so no superproject commit carries it"
+            raise SystemExit(msg)
+        oid = carried_by(oid, owner, parent)
+        owner = parent
+    return oid
+
+
+def provenance(path: Path, line: int) -> str:
+    """The superproject commit whose tree carries the evidence on this line.
+
+    One rule, with the superproject file as the degenerate case where the two
+    commits coincide: blame the line in the repository that owns it, then map
+    that commit into the superproject if it came from a submodule.
+    """
+    owner = repository(path.parent)
+    oid = blamed(path).get(line)
+    if oid is None:
+        msg = f"pin_provenance: {path.relative_to(ROOT)}:{line} is past the end of git blame's answer"
+        raise SystemExit(msg)
+    if oid == ZERO:
+        msg = (
+            f"pin_provenance: {path.relative_to(ROOT)}:{line} is not committed, so no tree "
+            f"produced its evidence. Commit the functional change first: that two-phase "
+            f"order is what this tool exists for, and a pin written now would name a tree "
+            f"that never held the claim"
+        )
+        raise SystemExit(msg)
+    return superproject(oid, owner)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Resolve the placeholders, or report the ones still open under --check."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -610,6 +806,18 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="write nothing and exit 1 if any placeholder would be rewritten",
     )
+    #The general form of --commit. That flag names ONE tree for the whole
+    #sweep, which is exact while the outstanding set is what the current
+    #session just wrote and false as soon as it is not: 301 of the 340 pins
+    #standing on 2026-09-22 are `measured:` numbers from three different days,
+    #and naming one commit for them asserts a tree produced numbers it was
+    #never run for. Deriving each pin from history makes that invariant true
+    #by construction instead of leaving it to how often the pass is run.
+    parser.add_argument(
+        "--derive",
+        action="store_true",
+        help="resolve each placeholder to the superproject commit whose tree carries it",
+    )
     arguments = parser.parse_args(argv)
 
     found, seen = scan()
@@ -620,22 +828,49 @@ def main(argv: list[str] | None = None) -> int:
     ]
     total = sum(len(items) for _, items, _ in pins)
 
-    reporting = arguments.check or arguments.commit is None
+    if arguments.commit and arguments.derive:
+        msg = "pin_provenance: --commit names one tree for every pin and --derive reads each pin's own; pass one"
+        raise SystemExit(msg)
+    reporting = arguments.check or (arguments.commit is None and not arguments.derive)
     if reporting:
+        # With --derive the report says what each pin WOULD resolve to, which
+        # is the only way to read a sweep's answer before it writes 340 files.
         for path, items, _ in pins:
             for _, line, _reason in items:
-                print(f"{path.relative_to(ROOT)}:{line}: placeholder awaiting a provenance pin")
+                where = f"{path.relative_to(ROOT)}:{line}"
+                if arguments.derive:
+                    print(f"{where}: placeholder would pin to {provenance(path, line)}")
+                else:
+                    print(f"{where}: placeholder awaiting a provenance pin")
     else:
-        oid = resolve(arguments.commit)
+        fixed = None if arguments.derive else resolve(arguments.commit)
+        # Every pin is resolved BEFORE any file is written, so a refusal in the
+        # last file does not leave the first hundred rewritten: the pass is all
+        # or nothing, which is what lets a failed run be re-run rather than
+        # unpicked.
+        chosen = {
+            (path, line): (fixed if fixed else provenance(path, line))
+            for path, items, _ in pins
+            for _at, line, _reason in items
+        }
         for path, items, text in pins:
             if not items:
                 continue
             rewritten = text
-            for at, _line, _reason in reversed(items):
+            for at, line, _reason in reversed(items):
+                oid = chosen[(path, line)]
                 rewritten = rewritten[:at] + f"commit={oid}" + rewritten[at + len(f"commit={PLACEHOLDER}") :]
             path.write_text(rewritten, encoding="utf-8")
-            print(f"{path.relative_to(ROOT)}: {len(items)} pin(s) -> {oid}")
+            named = sorted({chosen[(path, line)] for _at, line, _reason in items})
+            print(f"{path.relative_to(ROOT)}: {len(items)} pin(s) -> {', '.join(o[:9] for o in named)}")
 
+    for submodule, produced, commit, gitlink in INEXACT:
+        print(
+            f"{submodule}: evidence produced at {produced[:9]} was never a state of this "
+            f"repository; the earliest commit carrying it is {commit[:9]}, whose gitlink is "
+            f"{gitlink[:9]}, so the pin says the claim is in that tree rather than that the "
+            f"tree reproduces it"
+        )
     for path, line, reason in declined:
         print(f"{path.relative_to(ROOT)}:{line}: left alone, {reason}")
     for path, pins_missed in missed:
