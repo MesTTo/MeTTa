@@ -182,6 +182,37 @@ else
 fi
 expect "the battery holding a linked install directory" 0
 
+# A battery provisioned a SECOND time takes the source's current revision. It
+# used to keep whatever identity it already had, because the check asked only
+# whether a .git existed: on 2026-09-22 ai-tmp/wt-battery-1 held files from
+# 01287442c and a git that answered cf282de8f, so `git ls-files` omitted every
+# file added between them and each lane reading the tracked set passed over a
+# tree that was short. Nothing said so except the worktree lane, whose probe
+# could not check components out.
+( cd "$FIXTURE/src" && git init -q . 2>/dev/null; \
+  git -c user.name=t -c user.email=t@t add -A >/dev/null 2>&1; \
+  git -c user.name=t -c user.email=t@t commit -qm first >/dev/null 2>&1 ) || true
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+printf 'second\n' > "$FIXTURE/src/second.txt"
+( cd "$FIXTURE/src" && git -c user.name=t -c user.email=t@t add -A >/dev/null 2>&1; \
+  git -c user.name=t -c user.email=t@t commit -qm second >/dev/null 2>&1 ) || true
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+want=$(git -C "$FIXTURE/src" rev-parse HEAD 2>/dev/null)
+have=$(git -C "$TREE" rev-parse HEAD 2>/dev/null)
+if [ -n "$want" ] && [ "$want" = "$have" ]; then
+    echo "  ok   re-provisioning: the battery's git identity followed the source"
+else
+    echo "  FAIL re-provisioning: source is $want and the battery answers $have,"
+    echo "       so every lane reading the tracked set would read the older tree"
+    failures=$((failures + 1))
+fi
+if git -C "$TREE" ls-files --error-unmatch second.txt >/dev/null 2>&1; then
+    echo "  ok   re-provisioning: a file added since the first provision is tracked"
+else
+    echo "  FAIL re-provisioning: second.txt is on disk and not in the battery's index"
+    failures=$((failures + 1))
+fi
+
 rm -rf "$TREE"
 [ "$failures" -eq 0 ] || { echo "battery selftest: $failures case(s) failed"; exit 1; }
 echo "battery selftest: every planted drift was refused, no excluded write was,"

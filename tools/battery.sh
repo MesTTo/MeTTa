@@ -200,7 +200,21 @@ battery_git_identity() {
     identity_source=$1
     identity_tree=$2
     [ -d "$identity_tree" ] || return 0
-    [ -e "$identity_tree/.git" ] && return 0
+    # An identity that is ALREADY THIS REVISION is kept; one from an earlier
+    # provision is replaced. Testing only that a .git exists was an existence
+    # check where a consistency check belongs, and the failure it allows is
+    # silent: re-provisioning ai-tmp/wt-battery-1 on 2026-09-22 gave a tree
+    # whose files were 01287442c and whose git answered cf282de8f, so
+    # `git ls-files` omitted every file added since and each owned() lane read
+    # a short tree and passed. The worktree lane was the only one that said
+    # anything, and it said its probe could not check components out.
+    if [ -e "$identity_tree/.git" ]; then
+        identity_want=$(git -C "$identity_source" rev-parse HEAD 2>/dev/null || echo want)
+        identity_have=$(git -C "$identity_tree" rev-parse HEAD 2>/dev/null || echo have)
+        [ "$identity_want" = "$identity_have" ] && return 0
+        rm -rf "$identity_tree/.git"
+        git -C "$identity_source" worktree prune >/dev/null 2>&1 || true
+    fi
     identity_seed="$identity_tree.gitseed"
     rm -rf "$identity_seed"
     git -C "$identity_source" worktree add --detach "$identity_seed" HEAD \
