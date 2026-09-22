@@ -28,6 +28,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+from bounded_spawn import bounded  # noqa: E402  -- HERE first
 from check_shared_intro import CLOSE, FRONT_PAGES, OPEN  # noqa: E402  -- HERE first
 
 GOOD = "\n## What MeTTa is\n\nA language for rewriting metagraphs.\n"
@@ -52,13 +53,13 @@ def plant(root: Path, bodies: dict[str, str]) -> None:
         ["git", "add", "-A"],
         ["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "fixture"],
     ):
-        subprocess.run(command, cwd=root, check=True, capture_output=True)
+        subprocess.run(bounded(command), cwd=root, check=True, capture_output=True)
 
 
 def run(root: Path) -> subprocess.CompletedProcess[str]:
     """The real checker, over the planted tree."""
     return subprocess.run(
-        [sys.executable, str(root / "tools/checks/check_shared_intro.py")],
+        bounded([sys.executable, str(root / "tools/checks/check_shared_intro.py")]),
         capture_output=True, text=True, check=False)
 
 

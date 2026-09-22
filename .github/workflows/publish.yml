@@ -170,6 +170,12 @@ jobs:
       steady: ${{ steps.plan.outputs.steady }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The plan reads the distribution list, which is a glob over
+          # ext/*/pyproject.toml. Without the components that glob is empty,
+          # so the bootstrap matrix would be empty and the job would succeed
+          # having registered nothing.
+          submodules: recursive
       - uses: actions/setup-python@v5
         with:
           python-version-file: "pyproject.toml"
