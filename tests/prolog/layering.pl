@@ -361,6 +361,10 @@ reaches(filereader, identity, 'captures portable image identity and advances the
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
 reaches(filereader, materialize, 'source prefixes and completed loads prepare counted relations inside their rollback boundary').
 reaches(filereader, ext_points, 'a completed source batch announces its compile-time analysis boundary').
+reaches(filereader, packages, 'a load asks whether a space is FOREIGN, and \c
+    the catalog the package laws publish is one. Only the static walk sees \c
+    this: the call is to the multifile seam:foreign_space/1, and the walk over \c
+    a booted engine attributes it to whichever clause a run reached').
 reaches(filereader, parser, 'reading a source file is parsing it').
 reaches(filereader, spaces, 'a load writes atoms and compiles equations into a space').
 reaches(filereader, support_graph, 'a load records what its assertions support so a reload can invalidate them').
@@ -370,6 +374,9 @@ reaches(filereader, type_rules, 'source compilation and rollback hold the typing
 reaches(filereader, host_transactions, 'source retirement, the loading marker and the type-alias support scope release clause references recorded in transactional tables, and whether such a reference is still live is a transaction-semantics question rather than a loader one').
 reaches(kernel, metta, 'the kernel builtins are typed and refuse through the core\'s own vocabulary').
 reaches(kernel, spaces, 'the kernel builtins ask spaces about their atoms').
+reaches(kernel, packages, 'space-admission-verdict asks whether a space is \c
+    foreign before admitting a write, and the catalog is one; seen by the \c
+    static walk for the reason the filereader line above gives').
 reaches(prelude, metta, 'the prelude vocabulary is written in the core\'s own operations: it compares with =alpha, asserts through assert-answers, evaluates through metta_eval_step and asks get-metatype what it was handed').
 reaches(prelude, spaces, 'match-types unifies two types through the matcher, and type-cast prunes the empty answers out of a collapse').
 reaches(prelude, translator, 'a masked operand is collapsed and a masked result re-entered through the translator\'s own runtime doors, which is what the equations these bodies replace compiled to').
@@ -705,14 +712,25 @@ owns_write(Module, Name/Arity) :-
 % visible edit, and this lane is what makes the alternative visible too.
 owns_write(_, PI) :- metta_shared_registry(PI).
 
-%!  layering_finding(-Message) is nondet.
+%!  layering_finding(-Kind, -Message) is nondet.
+%
+%   The KIND is the one planted_violation/3 names, so a reader can select a
+%   finding by what it is rather than by matching its wording. The suite needs
+%   that: this contract is read in TWO configurations, the lane's, which
+%   consults the engine alone, and the suite's, which boots it with
+%   `-- extensions`, and a C path replacing a Prolog one removes call sites
+%   from one that the other still has. A line unused HERE can be the line the
+%   other REQUIRES, which reaches(filereader, packages, _) and
+%   reaches(kernel, packages, _) both are: each carries seam:foreign_space/1
+%   calls the lane reports as undeclared and this walk never sees. Staleness is
+%   therefore decided by the lane, over the configuration the engine ships.
 %
 %   One message per violation, each naming the two parties and the contract
 %   line that would settle it, so a reader can act on the message without
 %   opening this file. Nondet rather than a list so the .plt can ask for one
 %   planted violation and read what it says.
 
-layering_finding(Message) :-
+layering_finding(undeclared_edge, Message) :-
     undeclared_edges(Undeclared),
     member(Caller-Callee-CallerPI-CalleePI, Undeclared),
     format(atom(Message),
@@ -720,26 +738,26 @@ layering_finding(Message) :-
             reaches(~w, ~w, '<why>') to tests/prolog/layering.pl, or change \c
             the caller",
            [Caller, CallerPI, Callee, CalleePI, Caller, Callee]).
-layering_finding(Message) :-
+layering_finding(stale_contract_line, Message) :-
     stale_contract_lines(Stale),
     member(Caller-Callee, Stale),
     format(atom(Message),
            "reaches(~w, ~w, _) is a contract line no call needs any more; \c
             delete it", [Caller, Callee]).
-layering_finding(Message) :-
+layering_finding(unexported_reach, Message) :-
     unexported_reaches(Unexported),
     member(Callee-CalleePI-Caller, Unexported),
     format(atom(Message),
            "~w reaches ~w:~w, which ~w's module does not export; add it to \c
             the module's export list or change the caller",
            [Caller, Callee, CalleePI, Callee]).
-layering_finding(Message) :-
+layering_finding(new_tangle, Message) :-
     new_tangles(New),
     member(Members, New),
     format(atom(Message),
            "~w are mutually recursive and no tangle/1 line declares it; break \c
             the cycle or declare it", [Members]).
-layering_finding(Message) :-
+layering_finding(stray_write, Message) :-
     stray_writes(Strays),
     member(Module-PI-Caller, Strays),
     format(atom(Message),
@@ -748,7 +766,7 @@ layering_finding(Message) :-
             reads it. Declare it with metta_shared_registry/1 in \c
             engine/metta.pl, or let its owner do the write",
            [Module, Caller, PI, Module, Module]).
-layering_finding(Message) :-
+layering_finding(vanished_tangle, Message) :-
     vanished_tangles(Gone),
     member(Members, Gone),
     format(atom(Message),
@@ -763,7 +781,7 @@ layering_gate :-
     consult('../../engine/qlf_boot.pl'),
     consult('../../engine/metta.pl'),
     measure_layer_edges,
-    findall(Message, layering_finding(Message), Findings),
+    findall(Message, layering_finding(_, Message), Findings),
     report(Findings).
 
 report([]) :-

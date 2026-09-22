@@ -44,11 +44,24 @@ measured :-
 
 test(test_the_engine_layering_contract_holds_and_a_violation_is_named) :-
     measured,
-    findall(Message, layering_finding(Message), Clean),
+    %Every kind but staleness, because this suite boots with `-- extensions`
+    %and engine/check.sh's layering lane consults the engine alone: a C path
+    %replacing a Prolog one takes call sites out of THIS walk that the lane
+    %still has, so a line unused here can be the one the lane requires. A
+    %dependency edge has to over-approximate for the same reason Make, Ninja,
+    %Salsa and Shake record what they observed instead of narrowing the graph,
+    %so deleting on the narrower view is the unsound direction. The lane
+    %decides staleness over the configuration the engine ships; the plant below
+    %still proves the detector works.
+    findall(Message,
+            ( layering_finding(Kind, Message), Kind \== stale_contract_line ),
+            Clean),
     assertion(Clean == []),
     forall(planted_violation(Kind, Clauses, Expected),
            plant_all(Clauses, violation_names(Kind, Expected))),
-    findall(Message, layering_finding(Message), Restored),
+    findall(Message,
+            ( layering_finding(Kind, Message), Kind \== stale_contract_line ),
+            Restored),
     assertion(Restored == []).
 
 plant_all([], Goal) :- call(Goal).
@@ -56,7 +69,7 @@ plant_all([Clause|Clauses], Goal) :-
     with_planted_contract(Clause, plant_all(Clauses, Goal)).
 
 violation_names(Kind, Expected) :-
-    findall(Message, layering_finding(Message), Messages),
+    findall(Message, layering_finding(_, Message), Messages),
     (   forall(member(Fragment, Expected),
                ( member(Message, Messages),
                  sub_atom(Message, _, _, _, Fragment) ))
