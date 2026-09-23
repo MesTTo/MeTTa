@@ -3,8 +3,9 @@
 #   its source, by planting each shape of drift in a fixture and requiring a
 #   refusal that names it; prove it can CLEAR what a previous run left,
 #   including a git repository a fixture wrote and a cache inside a directory
-#   the source does not have; and prove a provisioned battery answers `git`
-#   about ITSELF rather than about the checkout it sits inside.
+#   the source does not have; prove a provisioned battery answers `git`
+#   about ITSELF rather than about the checkout it sits inside; and prove a
+#   battery re-provisioned from another source reads that source's installs.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
 # Guarantees: exits nonzero if any planted drift goes unreported, or if the
 #   excluded-scratch case is reported (the false positive -O exists to stop).
@@ -181,6 +182,23 @@ else
     failures=$((failures + 1))
 fi
 expect "the battery holding a linked install directory" 0
+
+# The same battery provisioned from ANOTHER source must read that source's
+# installs. The link is excluded from the snapshot, so it survived a change of
+# BATTERY_SOURCE and the battery ran the first source's dependencies under the
+# second source's code [measured 2026-09-23 on battery 4].
+rm -rf "$FIXTURE/other"
+cp -R "$FIXTURE/src" "$FIXTURE/other"
+printf 'other dep\n' > "$FIXTURE/other/node_modules/pkg/index.js"
+BATTERY_SOURCE="$FIXTURE/other" bounded sh "$BATTERY" provision "$INDEX"
+if [ "$(cat "$TREE/node_modules/pkg/index.js" 2>/dev/null)" = "other dep" ]; then
+    echo "  ok   a second source: the battery reads that source's install directory"
+else
+    echo "  FAIL a second source: the battery still reads $(readlink "$TREE/node_modules")"
+    failures=$((failures + 1))
+fi
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+rm -rf "$FIXTURE/other"
 
 # A battery provisioned a SECOND time takes the source's current revision. It
 # used to keep whatever identity it already had, because the check asked only

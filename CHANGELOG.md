@@ -91,6 +91,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A battery provisioned from a second `BATTERY_SOURCE` kept the first
+  source's `node_modules` link, because the snapshot excludes installs and so
+  never touches the link, and ran the first tree's dependencies under the
+  second tree's code. `tools/battery.sh` now removes every install link that
+  does not point into the source it is provisioning before it links, and
+  `tools/battery_selftest.sh` re-provisions from a second source to hold it.
+
 - The evidence lane reads the host-build scripts. `tools/*/*.sh` and
   `tools/*/*.mjs` join both of its halves, so the pins in
   `tools/pymetta-host/` and `tools/wasm-host/` are read and resolved instead

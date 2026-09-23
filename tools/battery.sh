@@ -246,8 +246,25 @@ battery_component_paths() {
 # lockfile rather than code under test: the battery must READ the same
 # dependencies, and copying hundreds of megabytes per provision to own a second
 # identical set buys nothing. A battery that already has its own is left alone.
+#
+# A LINK is not its own, though: it is what an earlier provision left, and it
+# names the source THAT provision read. The exclusion keeps rsync from touching
+# it, so a battery provisioned from one BATTERY_SOURCE and then another went on
+# running the first tree's dependencies under the second tree's code, the
+# mismatched A/B this tool exists to prevent [measured 2026-09-23: battery 4,
+# provisioned from the checkout and then from a copy whose swipl-wasm had been
+# replaced, still resolved node_modules into the checkout and measured the
+# checkout's swipl-wasm]. So every link that does not point into this source is
+# removed before the links are made.
 battery_link_installs() {
     install_tree=$1
+    for install_link in $(cd "$install_tree" && find . -maxdepth 4 -type l -name node_modules \
+                              -not -path '*/node_modules/*' 2>/dev/null); do
+        case $(readlink "$install_tree/${install_link#./}") in
+            "$ROOT"/*) ;;
+            *) rm -f "$install_tree/${install_link#./}" ;;
+        esac
+    done
     for install_dir in $(cd "$ROOT" && find . -maxdepth 4 -type d -name node_modules \
                              -not -path '*/node_modules/*' 2>/dev/null); do
         install_source=$ROOT/${install_dir#./}
