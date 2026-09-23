@@ -115,6 +115,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `instructions` lane's measured window no longer lets a collector land
+  in it by chance. Python's cyclic collector runs when its allocation counters
+  cross a threshold, and SWI's gc thread finishes inside the window or after
+  it by thread schedule, and perf counts every thread: sort-atom and
+  alpha-unique read 3 percent over their pins with the first left alone, and
+  save-load-metta spread 1.5 percent across eight samples with the second
+  running against 0.011 percent with it stopped. `benchmarks/pure.py` now holds
+  both off for the window and restores each only if it was on, without
+  collecting first, which distorts a Python-only workload by 1.8 percent.
+
 - `parity-perf-selftest` runs alone in the gate. Its artifact fixture purges
   the governed QLF set under `engine/` and `lib/`, regenerates it twice
   through the shipping loader and requires the two generations to agree, so
