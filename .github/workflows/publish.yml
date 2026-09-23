@@ -1,4 +1,12 @@
-# Purpose: publish pymetta to PyPI when a version tag is pushed.
+# Purpose: publish every distribution this repository releases, pymetta and
+#   each member under ext/, to PyPI. The files come from one of two sources:
+#   the build and host jobs make them when a version tag is pushed, or, when
+#   the workflow is dispatched with `assets`, the fetch job takes the files
+#   attached to that GitHub Release exactly as they are. Both sources hand on
+#   the same two artifacts, so everything after them is one path: plan which
+#   projects PyPI already has, check that every published entry point still
+#   resolves, publish the existing projects in upload order, then create the
+#   missing ones.
 #
 # No token is stored anywhere. PyPI's Trusted Publishing mints a short-lived
 # credential for this exact repository and workflow through OIDC, so there is
@@ -20,12 +28,22 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      assets:
+        description: >-
+          The tag of a GitHub Release whose attached files are published as
+          they are, with nothing built here. Its tag must not start with v.
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
+  # The building source: build, then host. An assets run skips both, and the
+  # fetch job below supplies the same two artifacts instead.
   build:
+    if: inputs.assets == ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -154,6 +172,52 @@ jobs:
           name: host-distributions
           path: ai-tmp/host-build/dist/
 
+  # THE OTHER SOURCE: FILES BUILT AND VERIFIED ELSEWHERE.
+  #
+  # Some uploads cannot leave the machine that built them. PyPI's upload host
+  # is one AWS region, and a single connection to it from far away runs at
+  # tens of kB/s, under which a 24 MB manylinux wheel fails with 500 Internal
+  # Server Error before it is sent [measured 2026-09-24: 40 to 90 kB/s to
+  # upload.pypi.org from the machine that built 0.9.2, 1.28 MB/s to
+  # uploads.github.com from the same machine; eight 500s over two twine
+  # attempts at pymetta-0.9.2-cp312's manylinux wheel]. Dispatching with
+  # `assets` names a GitHub Release, and this job hands its attached files on
+  # as the two artifacts the build and host jobs would have made, so the files
+  # someone verified are the files PyPI receives. Nothing is built here.
+  #
+  # The Release must carry every distribution the tree releases, as a build
+  # does; the resolvable job refuses one that is missing and a file no
+  # distribution owns. Its tag must not start with v, or creating it would
+  # start the building run beside this one.
+  fetch:
+    if: inputs.assets != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the Release's files
+        # The manylinux wheels go to the artifact the host job makes, so every
+        # job after this reads one layout whichever source ran. A Release
+        # without them fails here, since pymetta's pure wheel published alone
+        # would leave a Linux x86_64 reader an engine that refuses to boot.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSETS: ${{ inputs.assets }}
+        run: |
+          case "$ASSETS" in v*) echo "a tag starting with v also starts the building run" >&2; exit 1 ;; esac
+          gh release download "$ASSETS" --repo "$GITHUB_REPOSITORY" --dir dist
+          mkdir -p host-dist
+          mv dist/pymetta-*-manylinux_*.whl host-dist/
+          ls -la dist host-dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: host-distributions
+          path: host-dist/
+          if-no-files-found: error
+
   # WHICH DISTRIBUTIONS HAVE NO PYPI PROJECT YET.
   #
   # A project that does not exist cannot be published by the `publish` job
@@ -176,8 +240,10 @@ jobs:
   # this matrix, so the environment a row is registered under and the
   # environment this job presents come from one function rather than two
   # places that can drift.
+  #
+  # It reads PyPI and the tree, never the files, so it waits for neither
+  # source and runs beside whichever one this run uses.
   plan:
-    needs: build
     runs-on: ubuntu-latest
     outputs:
       bootstrap: ${{ steps.plan.outputs.bootstrap }}
@@ -196,13 +262,15 @@ jobs:
           python-version-file: "pyproject.toml"
       - id: plan
         # One pass over PyPI for both halves, so they cannot disagree about
-        # which job owns a project.
+        # which job owns a project. `deferred` carries the planner's rows, as
+        # `bootstrap` does, so the files of a project waiting for a later
+        # round are found by the stem the planner computed.
         run: |
           plan=$(python tools/pending-publishers.py --json-plan)
           {
             printf 'bootstrap=%s\n' "$(printf '%s' "$plan" | jq -c .bootstrap)"
             printf 'steady=%s\n' "$(printf '%s' "$plan" | jq -r '.steady | join(" ")')"
-            printf 'deferred=%s\n' "$(printf '%s' "$plan" | jq -r '.deferred | join(" ")')"
+            printf 'deferred=%s\n' "$(printf '%s' "$plan" | jq -c .deferred)"
           } >> "$GITHUB_OUTPUT"
           python tools/pending-publishers.py
 
@@ -220,8 +288,18 @@ jobs:
   # acknowledged with --awaiting, so a cell failing only because one of them
   # is not on the index yet is reported apart and does not fail the run, while
   # any other failure does. Both upload jobs wait for it.
+  #
+  # Staging also accounts for every file: each one is uploaded by this run or
+  # belongs to a project a later round creates. A file owned by no
+  # distribution of this tree, which only a hand-assembled Release can hold,
+  # stops the run rather than being left behind unnoticed.
+  #
+  # One source is always skipped, and a job whose needs include a skipped job
+  # is skipped too unless its condition calls a status function. `!failure()`
+  # runs this after whichever source ran, and not after one that failed.
   resolvable:
-    needs: [build, host, plan]
+    needs: [build, host, fetch, plan]
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -240,28 +318,110 @@ jobs:
           path: staged/
       - name: Stage exactly what this run uploads
         run: |
-          mkdir -p dist
+          mkdir -p dist later
           for stem in ${{ needs.plan.outputs.steady }}; do mv staged/"$stem"-* dist/; done
           for stem in $(printf '%s' '${{ needs.plan.outputs.bootstrap }}' | jq -r '.[].stem'); do
             mv staged/"$stem"-* dist/
           done
+          for stem in $(printf '%s' '${{ needs.plan.outputs.deferred }}' | jq -r '.[].stem'); do
+            mv staged/"$stem"-* later/
+          done
+          leftover=$(ls staged)
+          if [ -n "$leftover" ]; then
+            echo "files no distribution of this tree owns: $leftover" >&2
+            exit 1
+          fi
           ls -la dist/
       - name: Every published entry point must still resolve
         run: |
           python -m pip install --upgrade uv packaging
           awaiting=()
-          for project in $(printf '%s' '${{ needs.plan.outputs.bootstrap }}' | jq -r '.[].project') ${{ needs.plan.outputs.deferred }}; do
+          for project in $(printf '%s' '${{ needs.plan.outputs.bootstrap }}' '${{ needs.plan.outputs.deferred }}' | jq -r '.[].project'); do
             awaiting+=(--awaiting "$project")
           done
           python tests/checks/check_release_resolvable.py --upload dist/ "${awaiting[@]}"
+
+  # The half of the partition PyPI already has a project for. It must be a
+  # half rather than the whole directory, because the token this environment
+  # mints is scoped to the projects its publisher covers, and a file belonging
+  # to a project that does not exist yet is a 403 that fails the upload for
+  # everything behind it. skip-existing covers a file PyPI already holds; it
+  # does not cover one we are not allowed to send.
+  #
+  # Every upload here skips a filename PyPI already holds. The distributions'
+  # versions move INDEPENDENTLY, so a release normally includes files PyPI
+  # has, and twine fails the whole upload on the first such file, so the
+  # distributions after it never go out. Skipping is also the only safe
+  # reading, because a version is never freed.
+  #
+  # The upload order never leaves a reader a worse install than before:
+  # pymetta's manylinux wheels, then its pure wheel, then its sdist, then the
+  # members that pin it. A Linux x86_64 reader installing mid-run gets either
+  # the previous release or a wheel carrying its host, never the pure wheel
+  # alone, and no member arrives pinning a pymetta the index does not have yet.
+  publish:
+    needs: [build, host, fetch, plan, resolvable]
+    if: ${{ !cancelled() && !failure() && needs.plan.outputs.steady != '' }}
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: staged/
+      - uses: actions/download-artifact@v4
+        with:
+          name: host-distributions
+          path: staged/
+      - name: Keep only the projects that already exist, in upload order
+        run: |
+          mkdir -p dist 1-linux 2-pure 3-sdist 4-members
+          for stem in ${{ needs.plan.outputs.steady }}; do
+            mv staged/"$stem"-* dist/
+          done
+          find dist -maxdepth 1 -name 'pymetta-*-manylinux_*.whl' -exec mv {} 1-linux/ \;
+          find dist -maxdepth 1 -name 'pymetta-*-py3-none-any.whl' -exec mv {} 2-pure/ \;
+          find dist -maxdepth 1 -name 'pymetta-*.tar.gz' -exec mv {} 3-sdist/ \;
+          find dist -maxdepth 1 -type f -exec mv {} 4-members/ \;
+          ls -la 1-linux 2-pure 3-sdist 4-members
+      - name: pymetta's manylinux wheels
+        if: hashFiles('1-linux/*') != ''
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 1-linux/
+          skip-existing: true
+      - name: pymetta's pure wheel
+        if: hashFiles('2-pure/*') != ''
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 2-pure/
+          skip-existing: true
+      - name: pymetta's sdist
+        if: hashFiles('3-sdist/*') != ''
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 3-sdist/
+          skip-existing: true
+      - name: The members that pin it
+        if: hashFiles('4-members/*') != ''
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 4-members/
+          skip-existing: true
 
   # One job per project PyPI does not have, each in its own environment so
   # its pending publisher matches. fail-fast is off because a project whose
   # publisher has not been registered yet fails only its own job, and that
   # failure is the accurate signal that it is still waiting for a slot.
+  #
+  # It waits for publish, for the reason the upload order gives: a new member
+  # pins the pymetta of its own release, which has to be on the index first,
+  # so a failed publish holds every new project back.
   bootstrap:
-    needs: [build, host, plan, resolvable]
-    if: needs.plan.outputs.bootstrap != '[]'
+    needs: [build, host, fetch, plan, resolvable, publish]
+    if: ${{ !cancelled() && !failure() && needs.plan.outputs.bootstrap != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -292,46 +452,4 @@ jobs:
           ls -la dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip-existing: true
-
-  # The other half of the partition: every distribution PyPI already has a
-  # project for. It must be a half rather than the whole directory, because
-  # the token this environment mints is scoped to the projects its publisher
-  # covers, and a file belonging to a project that does not exist yet is a
-  # 403 that fails the upload for everything behind it. skip-existing covers
-  # a file PyPI already holds; it does not cover one we are not allowed to
-  # send.
-  publish:
-    needs: [build, host, plan, resolvable]
-    if: needs.plan.outputs.steady != ''
-    runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: distributions
-          path: staged/
-      - uses: actions/download-artifact@v4
-        with:
-          name: host-distributions
-          path: staged/
-      - name: Keep only the projects that already exist
-        run: |
-          mkdir -p dist
-          for stem in ${{ needs.plan.outputs.steady }}; do
-            mv staged/"$stem"-* dist/
-          done
-          ls -la dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          # dist/ carries every distribution this repository releases and
-          # their versions move INDEPENDENTLY, so a release normally includes
-          # files PyPI already has. twine fails the whole upload on the first
-          # such file, and the distributions after it never go out. That is
-          # the tree's state right now: 5 of the 18 are published and a re-run
-          # of this job would die on pymetta-0.9.0 before reaching any of the
-          # 13 that are missing. Skipping a filename PyPI already holds is
-          # also the only safe reading, because a version is never freed.
           skip-existing: true

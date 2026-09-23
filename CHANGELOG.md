@@ -7,6 +7,116 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The publish workflow can publish files built and verified elsewhere, and
+  it publishes them the same way it publishes its own builds. Dispatched with
+  `assets=<tag>`, the new `fetch` job downloads that GitHub Release's
+  attached files and hands them on as the two artifacts the `build` and
+  `host` jobs make on a version tag, so the planner, the resolvability check,
+  the publish job and the bootstrap job that creates missing projects all
+  run on either source. 0.9.2 needed this: a 24 MB manylinux wheel could not
+  reach upload.pypi.org from the machine that built it, and only the
+  workflow's pending publishers can create the nine members PyPI still lacks.
+
+  The publish job now uploads in an order that never leaves a reader a worse
+  install than before: pymetta's manylinux wheels, its pure wheel, its sdist,
+  then the members that pin it. The bootstrap job runs after it, so a new
+  member never arrives pinning a pymetta the index lacks. The resolvable
+  job's staging accounts for every file, uploading it this run or setting it
+  aside for the round that creates its project, and it stops the run on a
+  file no distribution of the tree owns. `tools/pending-publishers.py
+  --json-plan` gives `deferred` the same rows as `bootstrap`, stems included,
+  so the workflow never re-derives a filename.
+
+- No benchmark lane decides on time. The C seat's rows, the only ones that
+  compared CPU time, are now decided by instructions:u paired with estimated
+  cycles: the cost of the same window on a fixed simulated cache, from
+  valgrind's Cachegrind, which no other process on the box can move
+  (`metta_benchmarking.measure_simulated`, `estimated_cycles`,
+  `ESTIMATED_CYCLES`). CPU time is recorded beside the pins as advice. It could
+  decide only below one runnable process per core, and the box the gate runs on
+  is never quiet, so its comparisons were declined in nearly every run. The load
+  ceiling, `CPU_SECONDS` and their helpers are gone; the C lane and the CI image
+  need valgrind.
+
+### Fixed
+
+- `mork-bench` no longer fails whenever `c-bench` runs before it in the gate.
+  Its preparation purged the governed .qlf set only when stale, so a fresh set
+  the C bench had prepared survived, and that set compiles two units the MORK
+  lane's own boot consults from source; loading them compiled moved its
+  native-add rows by +1.2% with the same work. The lane now purges before the
+  boot that regenerates its set.
+
+- `extensions/cmetta` relinks its library and every program built on it when
+  the compiler, its flags, the SWI host or the engine path change. A library
+  linked against the stock SWI before the engine began refusing unpatched
+  hosts had kept booting it, so the C bench died in PL_initialise, and a copied
+  checkout kept booting the original's engine.
+
+- The `instructions` lane's measured window no longer lets a collector land
+  in it by chance. Python's cyclic collector runs when its allocation counters
+  cross a threshold, and SWI's gc thread finishes inside the window or after
+  it by thread schedule, and perf counts every thread: sort-atom and
+  alpha-unique read 3 percent over their pins with the first left alone, and
+  save-load-metta spread 1.5 percent across eight samples with the second
+  running against 0.011 percent with it stopped. `benchmarks/pure.py` now holds
+  both off for the window and restores each only if it was on, without
+  collecting first, which distorts a Python-only workload by 1.8 percent.
+
+- `parity-perf-selftest` runs alone in the gate. Its artifact fixture purges
+  the governed QLF set under `engine/` and `lib/`, regenerates it twice
+  through the shipping loader and requires the two generations to agree, so
+  since the gate became concurrent any lane booting the engine beside it
+  compiled into the set between the two generations, and the selftest failed
+  on "repeated shipping generations changed artifact set or content digests"
+  for a tree that was fine. With four engine boots looping in the same
+  battery it failed on exactly that; alone it passes with all 26 artifacts'
+  content digests equal across the generations, so QLF output is
+  deterministic and the gate's scheduling was the cause.
+
+- Importing a library no longer fails when an earlier import's function has
+  been specialized in the same space. A withdrawal removes one stored
+  occurrence by exact reference, and while it ran every other removal was held
+  to that selection: when the withdrawal's transaction completed and walked a
+  reference face to a specialization, the specializer's removal of the
+  specialization's own equation was refused as "the removal changed the
+  selected imported occurrence". In the pytest lane that errored every test of
+  a module whose fixture imported a library after another had specialized one
+  of its higher-order functions, `test_collection_libraries.py` and
+  `test_statistics_lib.py` among them, in whichever runs the file order put
+  them there. The selection now carries the head of the occurrence it names and
+  decides only a removal of that atom.
+
+- `stats-geometric-mean` over binary64 extremes costs what an ordinary sample
+  costs. The exact ratio of `1.0e308` or `5.0e-324` has a numerator or
+  denominator of about a thousand bits, and the bit length it needs was
+  counted one shift per bit: `(1.0e308 1.0e308)` took 12,158,312 inferences
+  where `(1.0 2.0 3.0 4.0)` took 98,070. It now doubles a probe width and
+  bisects, about 2 log2 B shifts for a B-bit value, and reads 17,641. The
+  hypothesis test that draws such lists went from 218.89 s to 1.29 s, and it
+  was the one test the Python suite's makespan could not get under.
+
+- A reference-face event that leaves the face resolving to what it resolved to
+  before no longer recompiles every caller that resolves a name through it.
+  Every such event walked the face's whole forward closure before the face was
+  recomputed, so with M compiled callers in an importing space, N events that
+  changed nothing recompiled every caller N times: exactly M times N, 256 at
+  sixteen callers and sixteen events. An event whose effect the face value
+  carries (a row, a registered Prolog head, a visibility grade, an equation or
+  a declaration) now marks the face, and its republication walks the
+  dependents only when the value moved; the same sweep reads zero at every
+  point. The value is the face together with the part of it an importer may
+  see, so an `(internal X)` coming or going still reaches the importer. The
+  events whose effect it does not carry still walk: a background load
+  finishing, a deferred head materialising, a release, and a transaction's
+  completion after a rollback. The republished face's wave runs under the
+  face-wave marker, so a table filled by a live call survives a refresh that
+  changes nothing.
+
+## [0.9.2] - 2026-09-24
+
 ### Added
 
 - TSMeTTa's SWI-Prolog is now built here, patched, and the Node seat refuses
@@ -93,17 +203,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
-- No benchmark lane decides on time. The C seat's rows, the only ones that
-  compared CPU time, are now decided by instructions:u paired with estimated
-  cycles: the cost of the same window on a fixed simulated cache, from
-  valgrind's Cachegrind, which no other process on the box can move
-  (`metta_benchmarking.measure_simulated`, `estimated_cycles`,
-  `ESTIMATED_CYCLES`). CPU time is recorded beside the pins as advice. It could
-  decide only below one runnable process per core, and the box the gate runs on
-  is never quiet, so its comparisons were declined in nearly every run. The load
-  ceiling, `CPU_SECONDS` and their helpers are gone; the C lane and the CI image
-  need valgrind.
-
 - The `engine` extra adds `janus-swi` only where no pymetta wheel carries the
   patched host, and a packaging test holds that marker to the classifiers the
   host build reads. Every integration member moves to 0.9.2 with pymetta,
@@ -125,79 +224,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   is why three of its cases moved.
 
 ### Fixed
-
-- `mork-bench` no longer fails whenever `c-bench` runs before it in the gate.
-  Its preparation purged the governed .qlf set only when stale, so a fresh set
-  the C bench had prepared survived, and that set compiles two units the MORK
-  lane's own boot consults from source; loading them compiled moved its
-  native-add rows by +1.2% with the same work. The lane now purges before the
-  boot that regenerates its set.
-
-- `extensions/cmetta` relinks its library and every program built on it when
-  the compiler, its flags, the SWI host or the engine path change. A library
-  linked against the stock SWI before the engine began refusing unpatched
-  hosts had kept booting it, so the C bench died in PL_initialise, and a copied
-  checkout kept booting the original's engine.
-
-- The `instructions` lane's measured window no longer lets a collector land
-  in it by chance. Python's cyclic collector runs when its allocation counters
-  cross a threshold, and SWI's gc thread finishes inside the window or after
-  it by thread schedule, and perf counts every thread: sort-atom and
-  alpha-unique read 3 percent over their pins with the first left alone, and
-  save-load-metta spread 1.5 percent across eight samples with the second
-  running against 0.011 percent with it stopped. `benchmarks/pure.py` now holds
-  both off for the window and restores each only if it was on, without
-  collecting first, which distorts a Python-only workload by 1.8 percent.
-
-- `parity-perf-selftest` runs alone in the gate. Its artifact fixture purges
-  the governed QLF set under `engine/` and `lib/`, regenerates it twice
-  through the shipping loader and requires the two generations to agree, so
-  since the gate became concurrent any lane booting the engine beside it
-  compiled into the set between the two generations, and the selftest failed
-  on "repeated shipping generations changed artifact set or content digests"
-  for a tree that was fine. With four engine boots looping in the same
-  battery it failed on exactly that; alone it passes with all 26 artifacts'
-  content digests equal across the generations, so QLF output is
-  deterministic and the gate's scheduling was the cause.
-
-- Importing a library no longer fails when an earlier import's function has
-  been specialized in the same space. A withdrawal removes one stored
-  occurrence by exact reference, and while it ran every other removal was held
-  to that selection: when the withdrawal's transaction completed and walked a
-  reference face to a specialization, the specializer's removal of the
-  specialization's own equation was refused as "the removal changed the
-  selected imported occurrence". In the pytest lane that errored every test of
-  a module whose fixture imported a library after another had specialized one
-  of its higher-order functions, `test_collection_libraries.py` and
-  `test_statistics_lib.py` among them, in whichever runs the file order put
-  them there. The selection now carries the head of the occurrence it names and
-  decides only a removal of that atom.
-
-- `stats-geometric-mean` over binary64 extremes costs what an ordinary sample
-  costs. The exact ratio of `1.0e308` or `5.0e-324` has a numerator or
-  denominator of about a thousand bits, and the bit length it needs was
-  counted one shift per bit: `(1.0e308 1.0e308)` took 12,158,312 inferences
-  where `(1.0 2.0 3.0 4.0)` took 98,070. It now doubles a probe width and
-  bisects, about 2 log2 B shifts for a B-bit value, and reads 17,641. The
-  hypothesis test that draws such lists went from 218.89 s to 1.29 s, and it
-  was the one test the Python suite's makespan could not get under.
-
-- A reference-face event that leaves the face resolving to what it resolved to
-  before no longer recompiles every caller that resolves a name through it.
-  Every such event walked the face's whole forward closure before the face was
-  recomputed, so with M compiled callers in an importing space, N events that
-  changed nothing recompiled every caller N times: exactly M times N, 256 at
-  sixteen callers and sixteen events. An event whose effect the face value
-  carries (a row, a registered Prolog head, a visibility grade, an equation or
-  a declaration) now marks the face, and its republication walks the
-  dependents only when the value moved; the same sweep reads zero at every
-  point. The value is the face together with the part of it an importer may
-  see, so an `(internal X)` coming or going still reaches the importer. The
-  events whose effect it does not carry still walk: a background load
-  finishing, a deferred head materialising, a release, and a transaction's
-  completion after a rollback. The republished face's wave runs under the
-  face-wave marker, so a table filled by a live call survives a refresh that
-  changes nothing.
 
 - The Python seat's mypy lanes no longer crash or read each other's platforms
   when they run together. All eight shared one incremental cache, which since
@@ -15142,8 +15168,10 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
 - Released PeTTa v1.0 with smart dispatch, two-stage compilation, function
   specialization, modular libraries, and MORK, MM2, and FAISS integration.
 
-[Unreleased]: https://github.com/MesTTo/MeTTa/compare/v0.9.0...HEAD
-[0.9.0]: https://github.com/MesTTo/MeTTa/compare/v0.8.0...v0.9.0
+[Unreleased]: https://github.com/MesTTo/MeTTa/compare/pymetta-0.9.2...HEAD
+[0.9.2]: https://github.com/MesTTo/MeTTa/compare/e5c9e672e12cb40a88bbc7a6a776a62b46c370b6...pymetta-0.9.2
+[0.9.1]: https://github.com/MesTTo/MeTTa/compare/ca56ac3875e307ab049f6941529dc207d03480c2...e5c9e672e12cb40a88bbc7a6a776a62b46c370b6
+[0.9.0]: https://github.com/MesTTo/MeTTa/compare/v0.8.0...ca56ac3875e307ab049f6941529dc207d03480c2
 [0.8.0]: https://github.com/MesTTo/MeTTa/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/MesTTo/MeTTa/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/MesTTo/MeTTa/compare/v0.7.1...v0.7.2
