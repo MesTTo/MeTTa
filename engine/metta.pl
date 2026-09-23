@@ -1423,7 +1423,7 @@ metta_platform_capability('fast-cache', [library(fastrw), library(memfile)],
 %place, and two threads reading one absent capability then read it present
 %where the second decided after the first had asserted, present where the
 %second read began between the retract and the assert, and listed it twice
-%where both asserted [tested: platform_census_threads; commit=WORKTREE]. A
+%where both asserted [tested: platform_census_threads; commit=984eabe2386f5cbbed9b003a69fe0b0e765282c7]. A
 %clause written inside transaction/1 is also the transaction's until it
 %commits, and gone if it rolls back, and engine/materialize.pl evaluates inside
 %one. A flag is neither: get_flag/2 reads its current value, and set_flag/2

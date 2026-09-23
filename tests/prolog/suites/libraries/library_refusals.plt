@@ -10,7 +10,7 @@
 %       operation, so they raise its handle refusal on a build with or without
 %       the socket capability; lib_socket's capability guard sits after that
 %       lookup [source: lib/lib_socket/lib_socket.pl:socket_handle/4;
-%       commit=WORKTREE]
+%       commit=76b710d028bf4c9ed2bf6c8462a9f50fec2c7f90]
 % Guarantees:
 %     - each documented refusal below raises the term the row names, and
 %       returns no answer instead [tested: a_documented_refusal_refuses]

@@ -15,7 +15,7 @@
 #     b18f7d3, compiled at Sep 23 2026, 11:30:04, and absent on the host
 #     tools/wasm-host/build.sh builds with
 #     tests/checks/host_workarounds/swi-wasm-text-nul-truncation.patch;
-#     commit=WORKTREE]
+#     commit=75d29b57f4abcff369af46419b477b47ff9ec386]
 set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 cd "$here/support"

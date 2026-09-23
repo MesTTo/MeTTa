@@ -15,7 +15,7 @@
 #     b18f7d3, compiled at Sep 23 2026, 11:30:04, and absent on the host
 #     tools/wasm-host/build.sh builds with
 #     tests/checks/host_workarounds/swi-libbf-powm-unreduced.patch;
-#     commit=WORKTREE]
+#     commit=d92d9b2393454180c6e727dab695ab763b9ec697]
 set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 cd "$here/support"
