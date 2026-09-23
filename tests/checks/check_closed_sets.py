@@ -84,7 +84,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from evidence_runners import gate_scripts  # noqa: E402  -- installed above
-from gate_layout import CHECK as _CHECK, LANE_PREFIX  # noqa: E402  -- installed above
+from gate_layout import CHECK as _CHECK  # noqa: E402  -- installed above
+from gate_layout import LANE_PREFIX  # noqa: E402  -- installed above
 
 sys.path.insert(0, str(ROOT / "extensions/python/tools"))
 from artifacts import ARTIFACTS  # noqa: E402 -- a checkout tool, imported once the root is known

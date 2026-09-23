@@ -1432,8 +1432,8 @@ sort -t"$(printf '\t')" -k1,1n "$SUMMARY" |
 # 2026-09-20 run spent its first hour inside a handful of component lanes while
 # the other two hundred cost seconds apiece.
 printf '\nran for %ds; the lanes that cost it:\n' "$(( $(date +%s) - CHECK_STARTED ))"
-sort -t"$(printf '\t')" -k4,4nr "$SUMMARY" | head -10 |
-    awk -F'\t' '$4 > 0 { printf "  %5ds  %s\n", $4, $2 }'
+sort -t"$(printf '\t')" -k5,5nr "$SUMMARY" | head -10 |
+    awk -F'\t' '$5 > 0 { printf "  %5ds  %s\n", $5, $3 }'
 
 # Named before the verdict, and on every run, because the point of the word is
 # that a reader scanning the last two lines learns a lane had nothing to say.
