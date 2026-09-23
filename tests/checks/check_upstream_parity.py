@@ -132,7 +132,7 @@ Guarantees:
     so a loaded box re-pins it; a named rebaseline leaves every other row as
     committed, and a name outside the corpus is refused
     [tested: check_upstream_parity_selftest.rebaseline_half_failures;
-    commit=WORKTREE].
+    commit=df94e0828c7bafb14179b6ae4d55643faa63a00e].
   - a measurement that hits TIMEOUT leaves nothing running: the command owns a
     session and the session is what is killed, because the engine is `perf`'s
     child and outlives every signal aimed at its parents
