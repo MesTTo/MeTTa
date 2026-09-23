@@ -80,6 +80,17 @@ EXPECTED = PIN / "expected"
 MANIFEST = PIN / "MANIFEST.json"
 
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
+#: The engine is named to swipl by ABSOLUTE path, so every diagnostic it
+#: prints carries the tree it ran in. A recorded divergence that embeds one
+#: holds only on the machine and directory that captured it, and the gate
+#: always runs in a battery SNAPSHOT under ai-tmp/wt-battery-N, so such an
+#: entry passes from the checkout and fails from the gate every time. The
+#: path is environment, not behaviour, which is the same reason ANSI escapes
+#: are stripped above; normalising at the single capture point below is what
+#: keeps recording and comparing in agreement by construction rather than by
+#: two call sites remembering to do it.
+TREE = re.compile(re.escape(str(ROOT)))
+TREE_TOKEN = "<tree>"
 
 #: The stable spelling the writer emits for a variable, and one of exactly two:
 #: `$_<index>` from the numbervars path and `$<name>` from the named one, whose
@@ -318,7 +329,9 @@ def run_ours(name: str, timeout: int) -> tuple[int | None, str, bool]:
         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
         out, err = proc.communicate()
         timed = True
-    return proc.returncode, ANSI.sub("", (out or "") + (err or "")), timed
+    return (proc.returncode,
+            TREE.sub(TREE_TOKEN, ANSI.sub("", (out or "") + (err or ""))),
+            timed)
 
 
 def main() -> int:
