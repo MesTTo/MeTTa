@@ -99,6 +99,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The parity-perf lane no longer reports TREE DRIFT. Six rows' within-tree
+  inference tripwires had drifted past their allowance by the `pkg.metta` entry
+  path, 3,319 to 4,130 inferences for every library a program enters, by
+  lib_spaces' added operations, and by a residual under each row's own
+  allowance, measured row by row in `docs/record/record-triage-2026-09-24.md`.
+  Those six counts are re-pinned and no instruction or upstream number moved.
+  `07-datetime` and `11-combinatorics_lib` are recorded `upstream-error`: the
+  derived libraries added forms to them that pinned upstream fails, so their
+  committed rows priced programs that no longer exist.
+
 - `tests/checks/check_upstream_parity.py --rebaseline` re-pins a row's
   within-tree inference tripwire on a loaded machine. A rebaseline kept a row's
   whole committed measurement whenever either instruction net could not be

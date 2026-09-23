@@ -1,6 +1,7 @@
 {
  "//": {
   "annotated_arrow_product_repin": "RE-PINNED 2026-09-05 after three source-only before/after samples at the canonical checkout path, warm QLF, against 763b7f2d1b0c6882b171cfa0e6a56374e0e8d167. All four old inference bands also fail on that unmodified base. Only these four within-tree inference pins change; upstream fields, recorded instruction fields, waivers and allowances remain untouched. examples/ch09-types/02-builin_types.metta: base/product inferences 54589/55949; net instruction minima 42624311/43898010; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta: base/product inferences 87799/87797; net instruction minima 108030420/113627817; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta: base/product inferences 93598/93596; net instruction minima 115393277/120765591; examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta: base/product inferences 324825344/324827492; net instruction minima 156378969117/155175829651. [measured: three processes per example; command=ai-tmp/ai-remaining-ab.py; fixture=identical native artifacts, canonical path, warmed source-only base/product; commit=bbb512316280110a747e31c26adfc31e8c5104be]",
+  "manifest_split_repin": "RE-PINNED 2026-09-24, the within-tree inference tripwire only on six rows, and two rows recorded upstream-error; no instruction number and no upstream number moved. The six (08-unify_eval_branches, 12-patrick_iterate_fib, 06-spaces_removeallatoms, 03-memo_per_arity, 05-memo_variant_nonground, 07-pln_tuffy) had drifted past their allowance by three things, measured row by row in battery 15 at d832d20e8 through this file's parity driver: the pkg.metta entry path the manifest split gave every library import, 3,319 to 4,130 inferences per library a program enters (both memo rows enter lib_import as well); library growth the 2026-09-14 derived-library ruling accepts, 7,017 for lib_spaces' five added operations; and a residual under each row's own 2% plus 200, 308 to 461 on the rows measured down to it and 2,219 on 07-pln_tuffy. Their counts come from check_upstream_parity.py --rebaseline naming them in battery 16 at b8ef773d7, and only our_inferences was taken from that run, as the wave3 re-pin did. The two (07-datetime, 11-combinatorics_lib) are forms pinned upstream ae66fa8 cannot run: the derived-library work added (format-datetime ... -3600) and range-step to those examples after the freeze, and upstream fails both assertions, so their committed rows priced older programs on both sides. The per-row table is docs/record/record-triage-2026-09-24.md#parity-drift-attribution.",
   "null_program_correction": "REBUILT 2026-09-06 by the null-program correction, which is a MEASUREMENT change and not an engine change: every field in this file moved, and no engine, library or Python-seat source did. The subtrahend was the boot fixture tests/fixtures/parity_boot.pl, a second process that reached neither engine's per-run setup and, having a different command line, did not measure the same fixed cost either: 4,594,811 instructions BELOW upstream's real one and 8,661,096 ABOVE ours, a 13,255,907 bias in this tree's favour on every row, against a corpus whose smallest row is 225,455. It is now the EMPTY PROGRAM through the same driver at the same path length and directory count, median of three processes and of seven when the three disagree, after one process that is run and discarded; a program of no content nets between -13,405 and +12,852 here and between -7,446 and -705 on upstream's across nine corpus shapes, which is this method's resolution. The recorded our_inferences move on 135 of the 148 rows measured in both files, 84 of them DOWNWARD, and not one exceeds the old pin's 2% + 200, so this is the stale half of the 0.8.0 re-pin being brought to this tip rather than any drift: that re-pin advanced thirteen inference fields and left the rest at their 2026-08-31 values. Seven rows the old file recorded with a net at or below zero, between -94,022 and -50,470,138, are measured here for the first time. examples/ch11-python-as-a-notation/07-torch.metta leaves the comparable set: seven processes of it spread 7.46% on upstream and 6.80% here with no mode, so its old 2.07% flag was a minimum read off a distribution rather than a cost. examples/ch20-extending-the-engine/20-06-files-and-processes/_fixtures/exit-status.metta leaves it too, by name, because it terminates its own process at its second form here and runs three forms upstream. [measured 2026-09-06: one discarded process then three fresh ones per program per engine, seven where the three disagreed; command=$CHECK_PY tests/checks/check_upstream_parity.py --rebaseline; fixture=../pnull, a sibling clone of this branch whose absolute path is the same 29 characters as the repository root, with the five engine C artifacts, the three chapter-19 artifacts, libcmetta.so, both MORK artifacts and the git-import fixture cache present, the QLF purged and warmed, loadavg 34 to 54; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]",
   "our_null": {
    "at_longest_path": 1457506894,
@@ -120,7 +121,7 @@
   "status": "unmeasurable-null"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/06-spaces_removeallatoms.metta": {
-  "our_inferences": 15519,
+  "our_inferences": 27005,
   "our_instructions": 15607686,
   "our_null": 1455408810,
   "status": "measured",
@@ -184,7 +185,7 @@
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/08-unify_eval_branches.metta": {
-  "our_inferences": 33560,
+  "our_inferences": 38053,
   "our_instructions": 32446373,
   "our_null": 1455314812,
   "status": "measured",
@@ -616,7 +617,7 @@
   "status": "unmeasurable-null"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/12-patrick_iterate_fib.metta": {
-  "our_inferences": 17957,
+  "our_inferences": 22321,
   "our_instructions": 17247658,
   "our_null": 1455199733,
   "status": "measured",
@@ -704,12 +705,8 @@
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta": {
-  "our_inferences": 21651,
-  "our_instructions": 34409467,
-  "our_null": 1455211892,
-  "status": "measured",
-  "upstream_instructions": 71284643,
-  "upstream_null": 262056437
+  "detail": "349987298,,instructions:u,56126177,100.00,,",
+  "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/08-doc_lib.metta": {
   "detail": "281639883,,instructions:u,25417115,100.00,,",
@@ -724,12 +721,8 @@
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/11-combinatorics_lib.metta": {
-  "our_inferences": 78161,
-  "our_instructions": 92299870,
-  "our_null": 1455194053,
-  "status": "measured",
-  "upstream_instructions": 47760640,
-  "upstream_null": 262098372
+  "detail": "349676786,,instructions:u,62368322,100.00,,",
+  "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/12-dict_lib.metta": {
   "detail": "288666934,,instructions:u,25210946,100.00,,",
@@ -1052,7 +1045,7 @@
   "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/03-memo_per_arity.metta": {
-  "our_inferences": 24867,
+  "our_inferences": 32710,
   "our_instructions": 37675041,
   "our_null": 1455234545,
   "status": "measured",
@@ -1064,7 +1057,7 @@
   "status": "unmeasurable-null"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/05-memo_variant_nonground.metta": {
-  "our_inferences": 22223,
+  "our_inferences": 30058,
   "our_instructions": 35640359,
   "our_null": 1455272411,
   "status": "measured",
@@ -1508,7 +1501,7 @@
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/07-pln_tuffy.metta": {
-  "our_inferences": 301563,
+  "our_inferences": 307864,
   "our_instructions": 312391922,
   "our_null": 1457216555,
   "status": "measured",
