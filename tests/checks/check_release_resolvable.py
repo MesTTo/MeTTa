@@ -74,38 +74,38 @@ Guarantees:
   - every (distribution, extra, platform, python) cell that fails is reported
     with the resolver's own words, grouped by the reason so no cell is dropped
     and no paragraph is printed fifteen times
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - every finding kind reaches the exit status: an unpublished distribution, a
     distribution in the step with no project on the index, a new failure, a
     backtrack, an unreadable file in the step and a step holding one
     distribution twice each exit 1, and only a failure the index already has
     exits 0. A finding that is printed and not counted is a check that
     fails open on the state it was written for
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a resolution that SUCCEEDS but pins a distribution of this step to a
     version other than the step's is a backtrack and refuses, which is the
     shape a lagging member takes: it resolves, and the user gets the old one
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a distribution of the release set with no version in the step and none on
     the index is named, with the round that creates it, because after this step
     nothing can install it
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a distribution in the step whose name the index carries no project for is
     named and refuses, although every resolution reading its file succeeds:
     the file lands only once a pending publisher exists for that project
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - `--upload` is repeatable and the step is their union, so a distribution
     whose files are built in two places -- pymetta's pure wheel and sdist
     beside the manylinux wheels a container writes -- is one upload of one
     distribution [tested: tests/checks/check_release_resolvable_selftest.py;
-    commit=WORKTREE]
+    commit=89bd27b1e15e5f733a138143196ddef3981001c6]
 Fails when:
   - the index answers neither 200 nor 404 for a name. It refuses rather than
     reading a 503 as absence, which is the same fail-closed rule
     tools/publish-new-projects.sh draws, and for the same reason: pypi.org
     answered 503 for two of twenty names on one sweep here
     [measured 2026-09-23: metta-sqlite and metta-remote, 404 on the retry]
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6].
   - a resolution needs to BUILD a source distribution whose build refuses on
     this machine. uv reads static metadata where it can -- janus-swi 1.5.3 is
     sdist-only off Windows and resolved on macOS arm64 with nothing built
@@ -289,7 +289,7 @@ def read_directory(directory: Path) -> Directory:
     that quietly checks fewer files than the upload sends. The selftest found
     this by planting a wheel with an invalid Requires-Dist: the whole step
     read as empty and every case about it passed for no reason
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6].
     """
     found: dict[str, dict[str, Facts]] = {}
     unreadable: list[str] = []

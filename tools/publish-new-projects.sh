@@ -13,7 +13,7 @@
 #     leaves behind resolves on every platform and interpreter, which is
 #     tests/checks/check_release_resolvable.py and is the last thing before
 #     the first attempt
-#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
 # Fails when: a project already exists. Then this is the wrong tool and the
 #   publish workflow is the right one: it uploads from GitHub with OIDC and
 #   needs no project-creation budget at all.

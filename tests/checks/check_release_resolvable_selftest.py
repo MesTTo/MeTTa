@@ -24,35 +24,35 @@ Assumes: uv on PATH or in $UV. No network: the index is a directory and uv is
     reaches a resolver at all.
 Guarantees:
   - a step whose entry points all resolve passes
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a step naming a distribution no index carries is refused, and the report
     names the entry point and carries uv's own reason
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a step whose member pins an older core is refused as a BACKTRACK even
     though the resolution succeeds
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a failure the index already carries is reported and does NOT refuse, and
     an unrelated upload beside it still passes
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a distribution of the release set on neither the index nor the step
     REFUSES on its own, with every resolution in that run succeeding
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a step holding two versions of one distribution is refused before any
-    resolution runs [tested: this file; commit=WORKTREE]
+    resolution runs [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - the platform axis is real: a requirement gated to one platform's marker
     fails on that platform and nowhere else
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - the interpreter axis is real: a distribution's own Requires-Python takes
-    its cells out of the sweep [tested: this file; commit=WORKTREE]
+    its cells out of the sweep [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a file named like a distribution that cannot be read refuses rather than
-    being skipped [tested: this file; commit=WORKTREE]
+    being skipped [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - an index answering neither 200 nor 404 stops the run and names the status,
-    rather than reading it as absence [tested: this file; commit=WORKTREE]
+    rather than reading it as absence [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a step whose files were built into two directories is read as one step
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a step file for a name the index has no project for refuses and names the
     pending-publisher round, although every resolution reading it succeeds
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
 Fails when: nothing about the real tree or the real index. It is a unit test of
     the checker.
 Open Obligations:
