@@ -268,7 +268,11 @@ set, including their presence and commit checks.
 The script measures both engines over the corpus and compares against the
 committed baseline. `--rebaseline` rewrites the baseline from a fresh
 measurement, which is how the numbers on this page were produced, and
-`--frozen` compares without remeasuring.
+`--frozen` compares without remeasuring. `--rebaseline EXAMPLE...` re-measures
+only the rows named and keeps every other row as committed. On a loaded box an
+instruction net that cannot be resolved keeps its committed value and the row
+says `carried`, while the within-tree inference count, which is exact at any
+load, is always re-pinned.
 `tests/checks/check_upstream_parity_selftest.py` plants the ways this
 measurement can break and requires the lane to catch each.
 

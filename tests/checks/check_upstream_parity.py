@@ -65,7 +65,8 @@ commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 
 Assumes:
   - the configured upstream checkout is read-only, so its numbers
-    freeze into the baseline; --rebaseline re-measures everything
+    freeze into the baseline; --rebaseline re-measures every row, or only the
+    rows it names
     [assumed: the sibling checkout is a reference copy nothing in this
     repository writes to, which this tool relies on and cannot enforce]. That
     it is at the PINNED COMMIT is no longer assumed: upstream_head/0 reads it
@@ -125,6 +126,13 @@ Guarantees:
   - --rebaseline carries every meta note the old baseline held forward; the
     re-pin history is a record, not a cache
     [tested: tests/checks/check_upstream_parity_selftest.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
+  - --rebaseline takes each half of a row on its own: a net this run cannot
+    resolve keeps the committed one and `carried` names it, while the
+    inference tripwire is this run's whenever our program ran to one count,
+    so a loaded box re-pins it; a named rebaseline leaves every other row as
+    committed, and a name outside the corpus is refused
+    [tested: check_upstream_parity_selftest.rebaseline_half_failures;
+    commit=WORKTREE].
   - a measurement that hits TIMEOUT leaves nothing running: the command owns a
     session and the session is what is killed, because the engine is `perf`'s
     child and outlives every signal aimed at its parents
@@ -696,42 +704,97 @@ UNMEASURABLE = {
 _UNMEASURED = ("nondeterministic", "unstable", "below-floor", "unmeasurable-null", "timeout")
 
 
-def _carry(previous: dict, name: str, status: str, detail: str, side: str) -> dict:
-    """Keep the committed measurement when this run could not take a new one."""
-    kept = previous.get(name, {})
-    if kept.get("status") == "measured":
-        print(f"  {name}: {side}{status}, carried the committed measurement forward")
-        return {**kept, "carried": f"{side}{status}"}
-    print(f"  {name}: {side}{status}, excluded ({detail})")
-    return {"status": f"{side}{status}", "detail": detail}
+#: The fields each half of a measured row owns. A row is three measurements
+#: that depend on different things, so each is taken, or kept, on its own: the
+#: two nets are instruction counts, which a loaded box cannot resolve, and the
+#: inference count is counted inside one process and is exact at any load.
+_UPSTREAM_HALF = ("upstream_instructions", "upstream_null")
+_OUR_HALF = ("our_instructions", "our_null")
 
 
-def build_baseline() -> dict:
-    """Measure both engines over the whole corpus and answer a fresh baseline.
+def _excluded(name: str, status: str, detail: str) -> dict:
+    """The row a run records when it measured nothing and had nothing to keep."""
+    print(f"  {name}: {status}, excluded ({detail})")
+    return {"status": status, "detail": detail}
 
-    A row this run CANNOT measure keeps whatever the committed baseline already
-    holds, marked `carried`, instead of being flattened to a status-only stub.
-    Not having measured something and having no measurement of it are different
-    outcomes, and they were written the same way: on a box under load 163 of
-    these rows come back `unmeasurable-null`, because the instruction null
-    control's own spread exceeds resolution, so a rebaseline there discarded
-    163 rows of work taken on a quiet one [measured 2026-09-22]. That made
-    `--rebaseline` an operation you could only run on an idle machine, and the
-    machine is not always idle.
 
-    Only what this run could not measure is carried. A row that measures is
-    always re-measured, and `carried` says which is which, so nothing here ever
-    tells a reader a stale number is fresh.
+def rebaseline_names(arguments: list[str]) -> set[str] | None:
+    """The corpus rows a named rebaseline re-measures, or None for all of them.
+
+    A name is a corpus example, spelled from the repository root or absolute.
+    One that is not in the corpus is refused rather than skipped, because a
+    re-pin that silently measured nothing reads exactly like one that measured.
+    """
+    if not arguments:
+        return None
+    known = {str(example.relative_to(REPO)) for example in corpus()}
+    names = set()
+    for argument in arguments:
+        # Normalised and never resolved: corpus() does not follow a symlinked
+        # alias to its target, so resolving here would rename the row.
+        path = pathlib.Path(os.path.normpath(REPO / argument))
+        name = str(path.relative_to(REPO)) if path.is_relative_to(REPO) else argument
+        if name not in known:
+            msg = f"{argument} is not an example this lane measures"
+            raise ValueError(msg)
+        names.add(name)
+    return names
+
+
+def build_baseline(names: set[str] | None = None) -> dict:
+    """Measure both engines over the corpus, or over the named rows, and answer a baseline.
+
+    A half this run CANNOT measure keeps whatever the committed row already
+    holds, and `carried` names which halves those are, instead of the row being
+    flattened to a status-only stub. Not having measured something and having
+    no measurement of it are different outcomes, and they were written the same
+    way: on a box under load 163 of these rows come back `unmeasurable-null`,
+    because the instruction null control's own spread exceeds resolution, so a
+    rebaseline there discarded 163 rows of work taken on a quiet one [measured
+    2026-09-22]. That made `--rebaseline` an operation you could only run on an
+    idle machine, and the machine is not always idle.
+
+    Carrying was then the WHOLE row, which kept the stale inference count along
+    with the nets the box could not resolve, so the tripwire this lane fails on
+    could still only be re-pinned on an idle machine: eight rows read TREE
+    DRIFT on deterministic inference counts at loadavg 90, and a rebaseline
+    there would have carried every one of them unchanged [measured 2026-09-24
+    in battery 12 at HEAD 1cd69eed5, 06-spaces_removeallatoms 27005 against a
+    frozen 15519 among them]. The inference count is now this run's whenever
+    our program ran to a single count, whatever either net did, which is the
+    re-pin 48b3eedf9 and the baseline's own `wave3_merge_repin` note did by
+    hand: "the within-tree inference tripwire only; no instruction number and
+    no upstream number is touched".
+
+    `names` restricts the run to those rows, and every other row and the null
+    summary are copied from the committed baseline unchanged, so re-pinning
+    eight rows neither pays for the other 353 nor absorbs whatever drift they
+    carry.
+
+    Only what this run could not measure is carried, and `carried` says which
+    half that was, so nothing here ever tells a reader a stale number is fresh.
+    Time: one measure/2 per engine per re-measured row, and one more for ours
+    even where upstream's half is carried, since the inference count is ours.
     """
     previous = json.loads(BASELINE.read_text()) if BASELINE.exists() else {}
-    entries: dict[str, dict] = {"//": {"status": "meta", **_carried_meta()}}
+    if names is None:
+        entries: dict[str, dict] = {"//": {"status": "meta", **_carried_meta()}}
+    else:
+        entries = {"//": previous.get("//", {"status": "meta"})}
     ratios = []
     negatives = []
     for example in corpus():
         name = str(example.relative_to(REPO))
+        if names is not None and name not in names:
+            if name in previous:
+                entries[name] = previous[name]
+            continue
         if name in UNMEASURABLE:
             entries[name] = {"status": "unmeasurable", "detail": UNMEASURABLE[name]}
             continue
+        kept = previous.get(name, {})
+        kept = kept if kept.get("status") == "measured" else {}
+        carried = []
         upstream = measure(UPSTREAM, example)
         if upstream["status"] == "below-floor":
             entries[name] = {"status": "upstream-below-floor"}
@@ -746,23 +809,21 @@ def build_baseline() -> dict:
             negatives.append(f"{name}: upstream {upstream['instructions']}")
             print(f"  {name}: UPSTREAM NET BELOW ITS OWN NULL CONTROL")
             continue
-        if upstream["status"] != "ok":
-            entries[name] = (
-                _carry(previous, name, upstream["status"], upstream.get("detail", ""), "upstream-")
-                if upstream["status"] in _UNMEASURED
-                else {"status": f"upstream-{upstream['status']}",
-                      "detail": upstream.get("detail", "")}
-            )
+        if upstream["status"] == "ok":
+            theirs = {"upstream_instructions": upstream["instructions"],
+                      "upstream_null": upstream["fixed"]}
+        elif upstream["status"] in _UNMEASURED and kept:
+            theirs = {field: kept[field] for field in _UPSTREAM_HALF}
+            carried.append(f"upstream-{upstream['status']}")
+        else:
+            entries[name] = _excluded(name, f"upstream-{upstream['status']}",
+                                      upstream.get("detail", ""))
             continue
         ours = measure(REPO, example)
-        if ours["status"] in _UNMEASURED:
-            entries[name] = _carry(previous, name, ours["status"], ours.get("detail", ""), "")
-            continue
         if ours["status"] == "negative-net":
             entries[name] = {
                 "status": "negative-net",
-                "upstream_instructions": upstream["instructions"],
-                "upstream_null": upstream["fixed"],
+                **theirs,
                 "our_instructions": ours["instructions"],
                 "our_null": ours["fixed"],
                 "our_inferences": ours["inferences"],
@@ -770,31 +831,47 @@ def build_baseline() -> dict:
             negatives.append(f"{name}: ours {ours['instructions']}")
             print(f"  {name}: OUR NET BELOW OUR OWN NULL CONTROL")
             continue
-        if ours["status"] != "ok":
+        if ours["status"] == "ok":
+            mine = {"our_instructions": ours["instructions"], "our_null": ours["fixed"]}
+        elif ours["status"] in _UNMEASURED and kept:
+            mine = {field: kept[field] for field in _OUR_HALF}
+            carried.append(ours["status"])
+        elif ours["status"] in _UNMEASURED:
+            entries[name] = _excluded(name, ours["status"], ours.get("detail", ""))
+            continue
+        else:
             entries[name] = {
                 "status": "ours-fails",
                 "detail": ours.get("detail", ""),
             }
             print(f"  {name}: OURS FAILS where upstream runs")
             continue
-        entries[name] = {
-            "status": "measured",
-            "upstream_instructions": upstream["instructions"],
-            "upstream_null": upstream["fixed"],
-            "our_instructions": ours["instructions"],
-            "our_null": ours["fixed"],
-            "our_inferences": ours["inferences"],
-        }
+        # A program that ran to one count has an inference count whatever its
+        # null did; `nondeterministic`, `unstable` and `timeout` leave none,
+        # and only then is the committed count the one to keep.
+        if "inferences" in ours:
+            inferences = ours["inferences"]
+        else:
+            inferences = kept["our_inferences"]
+            carried.append("inferences")
+        entries[name] = {"status": "measured", **theirs, **mine,
+                         "our_inferences": inferences}
+        if carried:
+            entries[name]["carried"] = ", ".join(carried)
+            print(f"  {name}: carried {entries[name]['carried']}; "
+                  f"inferences {kept.get('our_inferences')} -> {inferences}")
+            continue
         ratio = ours["instructions"] / max(upstream["instructions"], 1)
         ratios.append(ratio)
         print(
             f"  {name}: instructions {upstream['instructions']} -> "
             f"{ours['instructions']} ({ratio:.2f}x)"
         )
-    entries["//"]["upstream_null"] = _null_summary(UPSTREAM)
-    entries["//"]["our_null"] = _null_summary(REPO)
-    print(f"upstream null program: {entries['//']['upstream_null']}")
-    print(f"our null program:      {entries['//']['our_null']}")
+    if names is None:
+        entries["//"]["upstream_null"] = _null_summary(UPSTREAM)
+        entries["//"]["our_null"] = _null_summary(REPO)
+    print(f"upstream null program: {entries['//'].get('upstream_null')}")
+    print(f"our null program:      {entries['//'].get('our_null')}")
     if ratios:
         print(f"median instruction ratio ours/upstream: {statistics.median(ratios):.3f}")
     for line in negatives:
@@ -1280,16 +1357,34 @@ def upstream_prerequisite(
     return 125
 
 
-def main() -> int:
-    """Report the parity verdicts, rebuilding the baseline under --rebaseline."""
+def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
+    """The lane's command line, parsed: the one place its shape is decided.
+
+    `rebaseline` is None without the flag and the list of named rows with it,
+    empty meaning every row. A caller that built the namespace by hand wrote
+    `rebaseline=False`, the shape of the boolean flag this replaced, which the
+    list shape reads as given: the artifact fixture then ran a full rebaseline
+    over the real corpus instead of the fixture it meant [measured 2026-09-24
+    in battery 16, 1881s]. So the selftest parses through here too.
+    """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rebaseline", action="store_true")
+    parser.add_argument(
+        "--rebaseline",
+        nargs="*",
+        metavar="EXAMPLE",
+        help="re-measure the named corpus rows, or every row when none is named",
+    )
     parser.add_argument(
         "--frozen",
         action="store_true",
         help="judge the stored numbers without re-measuring this tree",
     )
-    arguments = parser.parse_args()
+    return parser.parse_args(argv)
+
+
+def main() -> int:
+    """Report the parity verdicts, rebuilding the baseline under --rebaseline."""
+    arguments = parse_arguments()
     absent = upstream_prerequisite()
     if absent is not None:
         return absent
@@ -1310,21 +1405,29 @@ def _judge(arguments: argparse.Namespace) -> int:
     #baseline. So a checkout at the wrong commit is fatal to a rebaseline,
     #which would attribute fresh numbers to a pin they did not come from, and
     #is worth saying but not worth failing for anywhere else.
+    #`--rebaseline` with no example is an empty list, which is falsy, so the
+    #question is whether the flag was given at all.
+    rebaseline = arguments.rebaseline is not None
+    try:
+        names = rebaseline_names(arguments.rebaseline or [])
+    except ValueError as unknown:
+        print(f"error: {unknown}; refusing to rebaseline.", file=sys.stderr)
+        return 2
     head = upstream_head()
     if head is not None and head != UPSTREAM_COMMIT:
         drift = (
             f"{UPSTREAM} is at {head}, not the pinned {UPSTREAM_COMMIT} that "
             "the recorded upstream numbers were measured from"
         )
-        if arguments.rebaseline:
+        if rebaseline:
             print(f"error: {drift}; refusing to rebaseline against it.",
                   file=sys.stderr)
             return 1
         print(f"note: {drift}; this run does not read it, so the verdicts hold.")
-    if arguments.rebaseline or not arguments.frozen or not BASELINE.exists():
+    if rebaseline or not arguments.frozen or not BASELINE.exists():
         prepare_artifacts()
-    if arguments.rebaseline or not BASELINE.exists():
-        entries = build_baseline()
+    if rebaseline or not BASELINE.exists():
+        entries = build_baseline(names)
         BASELINE.write_text(json.dumps(entries, indent=1, sort_keys=True) + "\n")
         print(f"baseline written: {BASELINE}")
         broken = [n for n, e in entries.items() if e.get("status") == "ours-fails"]

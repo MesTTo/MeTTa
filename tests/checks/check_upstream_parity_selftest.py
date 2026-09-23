@@ -90,7 +90,6 @@ Open Obligations:
 
 from __future__ import annotations
 
-import argparse
 import contextlib
 import hashlib
 import io
@@ -476,6 +475,87 @@ def carried_meta_failures() -> list[str]:
         failures.append("a rebaseline drops the meta notes the baseline already held")
     if "our_boot" in carried:
         failures.append("a rebaseline carries forward a field it recomputes")
+    return failures
+
+
+def rebaseline_half_failures(corpus: list[Path]) -> list[str]:
+    """A rebaseline takes each half of a row on its own, and a named one touches only its rows.
+
+    The inference tripwire is counted inside one process and is exact at any
+    load, while both instruction nets need a quiet box. Carrying the whole row
+    whenever a net was unresolvable kept the stale inference count too, so on
+    2026-09-24 eight TREE DRIFT rows could not be re-pinned at loadavg 90. The
+    plants below give the committed row 4321 inferences and the run 9999: the
+    whole-row rule answers 4321, which is how each case tells the rules apart.
+    """
+    failures: list[str] = []
+    example, other = corpus[0], corpus[1]
+    name = str(example.relative_to(lane.REPO))
+    other_name = str(other.relative_to(lane.REPO))
+    committed = {
+        "status": "measured",
+        "upstream_instructions": 6_086_421, "upstream_null": 262_000_000,
+        "our_instructions": 5_000_000, "our_null": 1_455_000_000,
+        "our_inferences": PLANTED_INFERENCES,
+    }
+    meta = {"status": "meta", "a_repin": "kept", "upstream_null": {"median": 1}}
+    unresolved = {"status": "unmeasurable-null", "detail": "null spread"}
+
+    def rebuilt(upstream: dict, ours: dict, names, previous: dict) -> dict:
+        with tempfile.TemporaryDirectory() as scratch:
+            stored = Path(scratch) / "baseline.json"
+            stored.write_text(json.dumps(previous))
+            original = (lane.BASELINE, lane.corpus, lane.measure)
+            lane.BASELINE = stored
+            lane.corpus = lambda: [example, other]
+            lane.measure = lambda root, _example: dict(upstream if root == lane.UPSTREAM else ours)
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    return lane.build_baseline(names)
+            finally:
+                lane.BASELINE, lane.corpus, lane.measure = original
+
+    previous = {"//": meta, name: committed, other_name: {**committed, "our_inferences": 7}}
+    row = rebuilt(unresolved, {**unresolved, "inferences": 9999}, {name}, previous)
+    if row[name].get("our_inferences") != 9999:
+        failures.append(
+            f"an unresolvable net kept the committed inference count "
+            f"{row[name].get('our_inferences')}, so a loaded box cannot re-pin the tripwire"
+        )
+    if any(row[name].get(field) != committed[field]
+           for field in ("upstream_instructions", "upstream_null",
+                         "our_instructions", "our_null")):
+        failures.append("an unresolvable net was not carried from the committed row")
+    if "upstream-unmeasurable-null" not in row[name].get("carried", "") \
+            or ", unmeasurable-null" not in row[name].get("carried", ""):
+        failures.append(f"`carried` does not name both halves: {row[name].get('carried')!r}")
+    if row[other_name] != previous[other_name] or row["//"] != meta:
+        failures.append("a named rebaseline rewrote a row or a meta field it was not given")
+
+    row = rebuilt(unresolved, {"status": "nondeterministic"}, {name}, previous)
+    if row[name].get("our_inferences") != PLANTED_INFERENCES \
+            or "inferences" not in row[name].get("carried", ""):
+        failures.append("a run with no single inference count replaced the committed one")
+
+    fresh = {"status": "ok", "instructions": 7_000_000, "fixed": 263_000_000}
+    row = rebuilt(fresh, {**unresolved, "inferences": 5555}, {name}, previous)
+    if (row[name].get("upstream_instructions"), row[name].get("our_instructions"),
+            row[name].get("our_inferences")) != (7_000_000, 5_000_000, 5555):
+        failures.append("a measured upstream half was not taken alongside a carried one of ours")
+
+    row = rebuilt(fresh, {**unresolved, "inferences": 5555}, {name}, {"//": meta})
+    if row[name].get("status") != "unmeasurable-null":
+        failures.append("a row with nothing committed recorded an unresolved net as measured")
+
+    try:
+        lane.rebaseline_names(["examples/no-such-example.metta"])
+        failures.append("a named rebaseline accepted a name outside the corpus")
+    except ValueError:
+        pass
+    if lane.rebaseline_names([name, str(example)]) != {name}:
+        failures.append("a named rebaseline does not read a corpus path from the root and absolute alike")
+    if lane.rebaseline_names([]) is not None:
+        failures.append("a rebaseline naming nothing does not mean every row")
     return failures
 
 
@@ -1062,7 +1142,7 @@ def artifact_fixture_failures() -> list[str]:
           patch.object(lane, "upstream_head", lambda: lane.UPSTREAM_COMMIT)):
         for frozen in (False, True):
             calls.clear()
-            lane._judge(argparse.Namespace(rebaseline=False, frozen=frozen))
+            lane._judge(lane.parse_arguments(["--frozen"] if frozen else []))
             expected = [("compare", False)] if frozen else ["prepare", ("compare", True)]
             if calls != expected:
                 failures.append(f"parity fixture setup order at frozen={frozen}: {calls}")
@@ -1175,6 +1255,7 @@ def main() -> int:
         *overstated_control_failures(example, name),
         *frozen_negative_net_failures(name),
         *carried_meta_failures(),
+        *rebaseline_half_failures(corpus),
         *timeout_failures(),
         *null_program_failures(example),
         *upstream_selection_failures(),

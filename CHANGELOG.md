@@ -99,6 +99,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tests/checks/check_upstream_parity.py --rebaseline` re-pins a row's
+  within-tree inference tripwire on a loaded machine. A rebaseline kept a row's
+  whole committed measurement whenever either instruction net could not be
+  resolved, so the deterministic inference count the lane fails on went
+  unchanged with it and could only be re-pinned on an idle box. Each half of a
+  row is now taken or kept on its own, `carried` names what was kept, and
+  `--rebaseline EXAMPLE...` re-measures only the rows it names, leaving every
+  other row as committed.
+
 - `unicode-normalize`'s `nfkc-casefold` removes default-ignorable code points,
   as Unicode's NFKC_Casefold does: `(string-codes (unicode-normalize
   nfkc-casefold "a<U+00AD>b"))` answered `(97 173 98)` and answers `(97 98)`.
