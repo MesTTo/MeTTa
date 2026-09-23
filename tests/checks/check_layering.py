@@ -116,9 +116,19 @@ class Member(NamedTuple):
     distribution: str
     module: str
     version: str
-    requires: frozenset[str]
+    #: Requirements as the manifest WRITES them, specifier included. Storing
+    #: the bare names here instead threw the specifier away at construction,
+    #: which is how seventeen members came to declare version 0.9.0 while
+    #: pinning `pymetta==0.8.0`: the name was checked and the version it
+    #: carried was not readable by the time anything could check it.
+    requirements: frozenset[str]
     entry_points: dict[str, str]
     modules: tuple[str, ...] = ()
+
+    @property
+    def requires(self) -> frozenset[str]:
+        """The distributions this member names, without their specifiers."""
+        return frozenset(_requirement_name(one) for one in self.requirements)
 
 
 def _manifest(path: Path) -> dict:
@@ -158,7 +168,7 @@ def members(root: Path = ROOT) -> list[Member]:
                 modules[0] if modules else "",
                 project.get("version", ""),
                 frozenset(
-                    _requirement_name(requirement)
+                    requirement
                     for group in (
                         project.get("dependencies", []),
                         *project.get("optional-dependencies", {}).values(),
@@ -438,6 +448,26 @@ def _each_member_is_whole(roster: list[Member], root: Path) -> list[Finding]:
             findings.append(
                 Finding(where, "does not depend on pymetta; a member is released with the core")
             )
+        # Depending on pymetta and depending on THIS pymetta are two rules, and
+        # only the first was written. A member that pins an older core installs
+        # that core beside a row built against this one, so `pip install
+        # metta-arrays` fetched pymetta 0.8.0 while the member called itself
+        # 0.9.0 -- published and live on PyPI, not hypothetical. The version
+        # below is the one already derived for the check that follows, so the
+        # pin is compared against the core rather than against a second copy of
+        # the number.
+        findings.extend(
+            Finding(
+                where,
+                f"pins {requirement.strip()!r} where the core is "
+                f"{core_version!r}; a member is released with the core, so a "
+                f"pin that lags installs a core its own rows were not built "
+                f"against",
+            )
+            for requirement in member.requirements
+            if _requirement_name(requirement) == "pymetta"
+            and requirement.strip() != f"pymetta=={core_version}"
+        )
         if member.version != core_version:
             findings.append(
                 Finding(

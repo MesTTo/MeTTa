@@ -7,6 +7,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-09-23
+
 ### Added
 
 - A `from` source is a library name or a path, and the spelling decides: one
@@ -188,6 +190,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `libswipl` borrowed `libgmp` from the host.
 
 ### Fixed
+
+- An extension pins the core it was built against. Every member declared
+  version 0.9.0 while pinning `pymetta==0.8.0`, so installing one fetched a
+  core its own rows were not built against; `metta-arrays` went to PyPI that
+  way. The layering lane read a requirement's NAME and discarded its
+  specifier, so the drift was unobservable; it now keeps the requirement as
+  written and refuses a pin that does not equal the core's own version.
 
 - A released space leaves no import bookkeeping behind. `engine/spaces` only
   SEES the core's import tables, so a `retractall` there created a local

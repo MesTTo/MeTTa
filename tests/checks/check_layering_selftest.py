@@ -298,6 +298,21 @@ def main() -> int:
         )
         assert not any("no longer a workspace member" in line for line in found), found
 
+        # A member that DEPENDS on pymetta and one that depends on THIS pymetta
+        # are two rules, and the fixture satisfies both by default, so only a
+        # planted lag exercises the second. Seventeen shipped members carried
+        # version 0.9.0 with `pymetta==0.8.0` under a pass that read the name
+        # and discarded the specifier, and metta-arrays went to PyPI that way.
+        found = _reported(
+            scratch,
+            "ext/metta-solars/pyproject.toml",
+            MEMBER_MANIFEST.replace('pymetta==9.9.9', 'pymetta==0.0.1'),
+        )
+        assert any("pins 'pymetta==0.0.1'" in line for line in found), found
+        assert not any(
+            "does not depend on pymetta" in line for line in found
+        ), found
+
         # The SAME entry, against a root that spells its own name the way the
         # shipped manifest does. PEP 503 makes `PyMeTTa` and `pymetta` one
         # distribution, and uv, pip and importlib all compare them that way, so
