@@ -204,11 +204,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - The pytest suite's 900-second item timeout counts progress, not wall time:
   the wall time less what the item's thread spent waiting for a CPU, read from
   the kernel's per-thread scheduler statistics. On a loaded box a CPU-bound
-  item's wall time stretches with everyone else's work, and a worker running
-  `test_door_rows.py`, whose slowest items take 154.64 s and 100.94 s, was
-  killed at 900 s while it was still working. A blocked item still accrues
-  progress, so a hang is still stopped and named. The timer enters through
-  pytest-timeout's own timer hook and expires through its own dump and exit.
+  item's wall time stretches with everyone else's work: `test_door_rows.py`'s
+  slowest items take 154.64 s and 100.94 s at a load of about 15, and under
+  the gate's load workers running that file died with no reason given, after
+  a 180-second stack dump had shown them still working. A blocked item still
+  accrues progress, so a hang is still stopped and named. The timer enters
+  through pytest-timeout's own timer hook and expires through its own dump and
+  exit.
+
+- A per-item timeout inside a pytest-xdist worker now reports in the run's
+  output. pytest-timeout writes its report, a banner, the captured output and
+  every thread's stack, to the worker's stdout, which execnet discards, so the
+  lane showed only `node down: Not properly terminated` and `worker 'gwN'
+  crashed while running ...`, the same as a crash. The progress timer now
+  points the worker's stdout at its stderr, which the controller inherits,
+  just before the report, and puts a line ahead of it naming the item's
+  progress and wall time.
 
 - An abandoned `Channel` releases its SWI message queue again. Since the
   libraries became modules on 2026-09-08, the channel's finalizer called a

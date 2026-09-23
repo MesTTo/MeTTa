@@ -332,7 +332,7 @@ wrong, and each is measured rather than chosen:
 |---|---|---|
 | `testpaths` | `tests` | pytest is the one that can tell a path argument from a flag, so `sh extensions/python/test.sh -n 0 --durations=25` keeps the suite's root instead of collecting the whole seat |
 | `faulthandler_timeout` | 180 | twice the slowest test measured under the gate's own four-worker configuration (89.78s at loadavg 43); it dumps every thread's stack and fails nothing |
-| `timeout` | 900 | counted in progress seconds, the wall time less what the item's thread spent waiting for a CPU (`tests/_progress_timeout.py`), so the box's load cannot spend them: above the longest bound a test enforces on its own children (600s), well above the slowest item measured (154.64s), and a quarter of `bounded.sh`'s ceiling |
+| `timeout` | 900 | counted in progress seconds, the wall time less what the item's thread spent waiting for a CPU (`tests/_progress_timeout.py`), so the box's load cannot spend them: above the longest bound a test enforces on its own children (600s), well above the slowest item measured (154.64s), and a quarter of `bounded.sh`'s ceiling. When it fires in an xdist worker, whose stdout execnet discards, the report goes out on the worker's stderr, which the lane keeps |
 | `timeout_method` | `thread` | `signal` cannot interrupt a hang inside a Prolog crossing: measured against `janus_swi.query_once("sleep(30)")` under `--timeout=5`, the signal method reported the timeout after 30.18s, when `sleep/1` returned |
 
 `filterwarnings` starts at `error`, so a warning fails the test that raised it.
