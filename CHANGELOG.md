@@ -7,6 +7,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-09-24
+
 ### Added
 
 - TSMeTTa's SWI-Prolog is now built here, patched, and the Node seat refuses
@@ -15058,8 +15060,10 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
 - Released PeTTa v1.0 with smart dispatch, two-stage compilation, function
   specialization, modular libraries, and MORK, MM2, and FAISS integration.
 
-[Unreleased]: https://github.com/MesTTo/MeTTa/compare/v0.9.0...HEAD
-[0.9.0]: https://github.com/MesTTo/MeTTa/compare/v0.8.0...v0.9.0
+[Unreleased]: https://github.com/MesTTo/MeTTa/compare/pymetta-0.9.2...HEAD
+[0.9.2]: https://github.com/MesTTo/MeTTa/compare/e5c9e672e12cb40a88bbc7a6a776a62b46c370b6...pymetta-0.9.2
+[0.9.1]: https://github.com/MesTTo/MeTTa/compare/ca56ac3875e307ab049f6941529dc207d03480c2...e5c9e672e12cb40a88bbc7a6a776a62b46c370b6
+[0.9.0]: https://github.com/MesTTo/MeTTa/compare/v0.8.0...ca56ac3875e307ab049f6941529dc207d03480c2
 [0.8.0]: https://github.com/MesTTo/MeTTa/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/MesTTo/MeTTa/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/MesTTo/MeTTa/compare/v0.7.1...v0.7.2
