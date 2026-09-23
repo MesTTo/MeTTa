@@ -5,6 +5,15 @@
 %
 % Purpose: record module-qualified support edges and propagate invalidation
 %   from changed inputs to the derived engine artifacts that depend on them.
+% Guarantees: support_invalidate_node/1 marks ONE node dirty and runs its own
+%   invalidation action without visiting successors, which is the marking half
+%   of red-green: the walk is left to the node's next support_stabilize/3,
+%   which raises it only when the recomputed value differs from the stored one.
+%   The dirty mark is the part callers may not skip, because stabilization
+%   answers from the stored value while the node is clean
+%   [tested: references:a_face_that_resolves_the_same_recompiles_no_caller,
+%   references:one_face_publication_recompiles_a_shared_caller_once;
+%   commit=WORKTREE].
 % Guarantees: support_atomic/1 and with_support_repairs_deferred/1 restore
 %   their scoped markers on inference cuts, without changing mutex ownership
 %   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -97,6 +106,7 @@
             support_memo_sccs/2,
             support_record/2,
             support_invalidate/1,
+            support_invalidate_node/1,
             support_invalidate_many/1,
             support_forget/1,
             support_clear_module/1,
@@ -745,6 +755,32 @@ support_prune_function_locked(_).
 % inspected once. The closure is fixed before callbacks mutate artifacts.
 support_invalidate(Support) :-
     support_invalidate_many([Support]).
+
+% Invalidate ONE node: mark it dirty and run its own invalidation action,
+% without visiting successors. This is support_invalidate/1 at depth zero, and
+% it is the MARKING half of red-green: the caller is saying that this node's
+% value is no longer trusted, not that anything downstream of it has moved.
+% Which successors moved is decided later, by the node's own
+% support_stabilize/3, which walks them exactly when the recomputed value
+% differs from the stored one and not at all when it does not.
+%
+% The dirty mark is the part that cannot be skipped: support_stabilize/3
+% returns a node's STORED value when the node is not dirty, so a caller that
+% merely omitted the walk would leave the node's next republication answering
+% from the old value, and the comparison that decides the walk would never
+% run.
+%
+% Reach for support_invalidate_many/1 instead when the caller has no
+% recomputation step to hang the comparison on, which is every root whose
+% value the graph does not hold.
+support_invalidate_node(Support) :-
+    must_be_support_node(Support),
+    with_support_repairs_deferred(
+        support_atomic(support_invalidate_node_locked(Support))).
+
+support_invalidate_node_locked(Support) :-
+    support_mark_dirty(Support),
+    forall(support_invalidation_action(Support), true).
 
 % Invalidate a set of changed roots as one wave. A shared visited set means a
 % derived node reached from two roots still runs its invalidation action once.

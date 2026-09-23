@@ -364,9 +364,11 @@ metta_reference_provider_face(Home, Visited, Local) :-
         )
     ).
 
+%The node stores face(Own, Public); a provider's face is the Own half
+%[source: metta_reference_stabilize_face/3 below, which says why it holds both].
 metta_reference_retained_face(Home, Local) :-
     space_module(Home, Module),
-    support_graph:support_retained(derived(Module, reference_face), Local).
+    support_graph:support_retained(derived(Module, reference_face), face(Local, _)).
 
 metta_reference_memo_current :-
     flag('$metta_reference_epoch', Epoch, Epoch),
@@ -514,8 +516,7 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
                   [derived(HomeModule, reference_face)], []) ), Supports0),
     sort(Supports0, Supports),
     support_graph:support_publish(derived(Module, reference_face), Supports, []),
-    support_graph:support_stabilize(derived(Module, reference_face),
-                                   =(Face), _),
+    metta_reference_stabilize_face(Space, Module, Face),
     findall(Name/Arity,
             ( member(Name/Arity-_, Face), integer(Arity)
             ; metta_reference_slot(Module, Name, Arity) ), Keys0),
@@ -555,6 +556,49 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
              retractall(metta_reference_roots(Module, Name, Arity, _)),
              ( Roots == [] -> true
              ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) ) )).
+
+%The wave a MARKED face raises. support_stabilize/3 compares the value computed
+%now against the stored one and walks the face's dependents only when they
+%differ, so a republication that resolves to what it resolved to before costs
+%nothing downstream [source: engine/support_graph.pl:support_stabilize_locked/3].
+%metta_reference_mark/1 dirties the face without walking, which is what brings
+%the comparison within reach of the cutoff at all; the events that walk instead
+%are named with the rule above metta_reference_changed/1 in
+%engine/metta/reference_refresh.pl.
+%
+%Raised BEFORE the binding loop in metta_reference_publish_face/4, so the walk
+%visits the successors the previous publication left: the nodes that resolved a
+%name through the OLD face, which are the ones a changed face leaves stale and
+%exactly the set the eager wave used to reach. A name this publication binds
+%for the first time announces itself from metta_reference_bind/6.
+%
+%The value is face(Own, Public), not the face alone, because the cutoff is sound
+%only while the stored value decides everything a dependent reads through the
+%edge, and this node's dependents read two different things. The home's own
+%reference nodes read Own, every name it resolves, internal ones included. An
+%importer reads the same face FILTERED by the home's visibility grades, which
+%metta_reference_source_face/4 applies live through
+%metta_reference_public_entry/2. With Own alone, removing `(internal X)` left
+%the stored value =@= and an importer kept answering `(X)` unevaluated where it
+%now had to answer X's definition
+%[tested: references:internal_is_an_occurrence_grade_and_direct_home_calls_still_work].
+%Public decides the filtered view of every BLOCKED face too: blocking only drops
+%entries and the filter is decided entry by entry, so a filter that moves on no
+%entry of Own moves on none of any subset of it.
+%
+%Under the face-wave marker, because a consumer keyed on BEHAVIOUR rather than
+%on resolution has to tell this wave from a definition moving: lib_tabling's
+%table node ignores a face wave and follows the head's own announcement
+%instead. Raised outside the marker, this wave abolished the table a live call
+%had just filled
+%[source: lib/lib_tabling/lib_tabling.pl:1424;
+%tested: test_a_reference_refresh_that_changes_nothing_keeps_the_table].
+metta_reference_stabilize_face(Space, Module, Face) :-
+    metta_with_under(visibility,
+        include(metta_reference_public_entry(Space), Face, Public)),
+    metta_with_trailed_enumeration('$metta_reference_face_wave', true,
+        support_graph:support_stabilize(derived(Module, reference_face),
+                                        =(face(Face, Public)), _)).
 
 metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
     (   Roots = [root(Space, Name, Arity, [])],

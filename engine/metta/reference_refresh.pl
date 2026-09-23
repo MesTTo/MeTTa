@@ -3,6 +3,14 @@
 % Guarantees: adding an importer publishes no existing sibling; changing a
 %   provider publishes its affected importers
 %   [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a face event whose effect the face value carries marks the face,
+%   so an event that leaves it resolving the same recompiles no caller; an
+%   event whose effect the value does not carry (settledness, release, a
+%   completion after rollback) walks the face's dependents as before
+%   [tested: references:a_face_that_resolves_the_same_recompiles_no_caller,
+%   references:one_face_publication_recompiles_a_shared_caller_once,
+%   reference_loading, release_preparation, specializer_invalidation;
+%   commit=WORKTREE].
 % Guarantees: patterned references participate in demand, publication and
 %   rollback through their original defining home
 %   [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
@@ -67,10 +75,49 @@ metta_reference_consumed(Spaces) :-
       forall(member(Space, Remaining), add_nb_set(Space, Pending)),
       nb_setval('$metta_reference_pending', Pending) ).
 
+%A face event invalidates in one of two ways, and which one is decided by a
+%single question: does the face's stored value carry everything this event
+%changed for the nodes that resolved a name through the face?
+%
+%  MARK (metta_reference_mark/1) when it does. The face is dirtied without
+%  walking, the next refresh recomputes it, and support_stabilize/3 in
+%  metta_reference_stabilize_face/3 walks its dependents only if the value
+%  moved. A row arriving or leaving, a Prolog head registering in a home, a
+%  visibility grade, an equation or a declaration: each moves which name
+%  resolves to which root or how visible it is, and the value is
+%  face(Own, Public), which holds both.
+%
+%  WALK (metta_reference_invalidate/1) when it does not, which is three kinds
+%  of event. SETTLEDNESS: a background load finishing or a deferred head
+%  materialising changes whether a root is settled, which an importer reads
+%  live when it binds (metta_reference_unsettled/2) and the value does not
+%  hold. EXISTENCE: a released space is never republished, so there is no
+%  comparison to make. HISTORY: a transaction's completion follows a rollback
+%  that rewound the stored value, a transactional row, and left the imports
+%  and wrappers its publication moved, which are not, so the rewound value
+%  compares equal to the recomputed one while the bindings disagree with both.
+%
+%The deferred-materialisation walk is also a matter of TIME. It runs while a
+%specialization's body is translating, and a specialization's invalidation
+%action forgets it rather than rebuilding it
+%[source: engine/specializer.pl, support_invalidation_action(specialization(_, _))].
+%Marked, the wave would arrive at the next refresh, after the specialization
+%was built against the settled head, and would delete the one the running call
+%had already emitted, so the call answered nothing where it answers 2
+%[tested: specializer_invalidation:a_specialization_invalidated_while_it_translates_is_rebuilt_once].
+%
+%What the mark saves is the walk's waste: N events that change nothing, with M
+%compiled callers resolving through the face, recompiled every caller at every
+%event. recompile_function_in_module/2 ran exactly M*N times -- 256 calls at
+%M=16 N=16, 4 at M=4 N=1, with no spread anywhere in a sweep of M in 4, 8, 16
+%and N in 1, 4, 8, 16 metta_reference_changed/1 calls on an unchanged home --
+%and runs 0 times at every point of the same sweep once these events mark
+%[measured 2026-09-23;
+%tested: references:a_face_that_resolves_the_same_recompiles_no_caller].
 metta_reference_changed(Space) :-
     (   metta_reference_refreshing
     ->  true
-    ;   metta_reference_definition_changed(Space),
+    ;   metta_reference_face_event(metta_reference_mark, Space),
         ( filereader:active_source_program(_)
         -> true
         ; metta_reference_refresh )
@@ -81,33 +128,45 @@ metta_reference_changed(Space) :-
 metta_reference_definition_changed(Space) :-
     (   metta_reference_refreshing
     ->  true
-    ;   metta_reference_face_changed(Space)
+    ;   metta_reference_face_event(metta_reference_mark, Space)
     ).
 
 % A change the refresh did not make, such as a deferred function a repair
 % forced into its physical arity, is queued even while a drain runs; the
 % drain's loop reads the queue again after each publication.
 metta_reference_face_changed(Space) :-
+    metta_reference_face_event(metta_reference_invalidate, Space).
+
+metta_reference_face_event(Invalidate, Space) :-
     metta_reference_track_transaction([Space]),
-    metta_reference_invalidate([Space]),
+    call(Invalidate, [Space]),
     filereader:source_definition_arrived('$metta_reference_face').
 
+metta_reference_mark(Spaces) :-
+    metta_reference_face_roots(Spaces, Roots),
+    forall(member(Root, Roots), support_graph:support_invalidate_node(Root)).
+
 metta_reference_invalidate(Spaces) :-
-    flag('$metta_reference_epoch', Epoch, Epoch+1),
-    findall(derived(Module, reference_face),
-            ( member(Space, Spaces), metta_reference_seen_space(Space, Module) ),
-            Roots),
+    metta_reference_face_roots(Spaces, Roots),
     metta_with_trailed_enumeration('$metta_reference_face_wave', true,
                                    support_graph:support_invalidate_many(Roots)).
 
-%The invalidation wave running now is a reference face's. It dirties every
-%node that resolved a name through the face, so the repair recompiles them
-%against whatever the face resolves to next, and says nothing about whether
-%a definition moved: a head whose binding the refresh then changes announces
-%itself, and that announcement's wave starts at the head. A cache keyed on
-%behaviour rather than resolution, lib_tabling's table node, ignores this
-%wave and follows that one, which is what keeps a table through the first
-%compile of a deferred library function in a space holding a `from` row
+metta_reference_face_roots(Spaces, Roots) :-
+    flag('$metta_reference_epoch', Epoch, Epoch+1),
+    findall(derived(Module, reference_face),
+            ( member(Space, Spaces), metta_reference_seen_space(Space, Module) ),
+            Roots).
+
+%The invalidation wave running now is a reference face's, raised either by a
+%walking event or by the republication of a marked face whose value moved. It
+%dirties every node that resolved a name through the face, so the repair
+%recompiles them against whatever the face resolves to next, and says nothing
+%about whether a definition moved: a head whose binding
+%the refresh then changes announces itself, and that announcement's wave
+%starts at the head. A cache keyed on behaviour rather than resolution,
+%lib_tabling's table node, ignores this wave and follows that one, which is
+%what keeps a table through the first compile of a deferred library function
+%in a space holding a `from` row
 %[tested: test_a_reference_refresh_that_changes_nothing_keeps_the_table;
 %commit=0cb96b1823038ffb8084168a7103dfac9eef0daa].
 metta_reference_face_wave :-

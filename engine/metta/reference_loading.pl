@@ -350,7 +350,14 @@ metta_reference_finish(Home, Catcher) :-
             assertz(metta_reference_load_state(Home, failed(Error, Future)))
         ),
         % The finished home is the mutation root: its importers republish,
-        % spaces elsewhere in the process stay untouched.
+        % spaces elsewhere in the process stay untouched. It WALKS before it
+        % publishes, because what finishing moves is whether the home's heads
+        % are settled, which an importer reads live when it binds and the face
+        % value does not carry, so the cutoff metta_reference_changed/1 alone
+        % would apply could stop the wave an importer's binding needs
+        % [source: engine/metta/reference_refresh.pl, the rule above
+        % metta_reference_changed/1; tested: reference_loading].
+        metta_reference_face_changed(Home),
         metta_reference_changed(Home),
         metta_reference_update_namespace_watch
     ;   true

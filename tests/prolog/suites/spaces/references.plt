@@ -114,26 +114,57 @@ test(a_same_name_binding_is_native_and_its_body_resolves_at_home,
     reference_space(2, Target), space_module(Target, Module),
     assertion(predicate_property(Module:'reference-f'(_, _), imported_from(Source))).
 
-test(one_face_publication_recompiles_a_shared_caller_once,
-     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+%A caller in space 2 that resolves two names through space 1's face, and the
+%number of times Goal recompiles it.
+reference_shared_caller(Home, Target, Module) :-
     reference_add(1, [=, ['reference-left'], 2]),
     reference_add(1, [=, ['reference-right'], 3]),
     reference_add(2, [=, ['reference-sum'],
                       [+, ['reference-left'], ['reference-right']]]),
     reference_from(2, 1),
-    reference_space(2, Target), space_module(Target, Module),
+    reference_space(1, Home), reference_space(2, Target),
+    space_module(Target, Module).
+
+reference_recompiles(Module, Name, Goal, Count) :-
     flag(reference_repairs, _, 0),
     setup_call_cleanup(
-        wrap_predicate(filereader:recompile_function_in_module_stable(Owner, Name),
+        wrap_predicate(filereader:recompile_function_in_module_stable(Owner, Seen),
                        reference_repairs, Original,
-                       ( ( Owner == Module, Name == 'reference-sum'
+                       ( ( Owner == Module, Seen == Name
                          -> flag(reference_repairs, N, N+1) ; true ),
                          call(Original) )),
-        ( reference_space(1, Home), metta_engine:metta_reference_changed(Home),
-          flag(reference_repairs, Count, Count), assertion(Count == 1),
-          reference_answers(2, ['reference-sum'], Bag), assertion(Bag == [5]) ),
+        ( call(Goal), flag(reference_repairs, Count, Count) ),
         unwrap_predicate(filereader:recompile_function_in_module_stable(_, _),
                          reference_repairs)).
+
+%A publication that MOVES the face rebinds both heads the caller uses, and the
+%caller is still recompiled once: its repairs wait for the whole face.
+test(one_face_publication_recompiles_a_shared_caller_once,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_shared_caller(Home, _, Module),
+    reference_recompiles(Module, 'reference-sum',
+        ( reference_add(1, [=, ['reference-other'], 7]),
+          metta_engine:metta_reference_changed(Home) ), Count),
+    assertion(Count == 1),
+    reference_answers(2, ['reference-sum'], Bag), assertion(Bag == [5]).
+
+%A face that resolves to what it resolved to before recompiles nothing. Each
+%event used to walk the face's whole forward closure before the face was
+%recomputed, so N events that changed nothing recompiled every caller N times.
+%The last step is the control that keeps this from passing vacuously: the same
+%counter, on the same caller, sees the face move once it does.
+test(a_face_that_resolves_the_same_recompiles_no_caller,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_shared_caller(Home, _, Module),
+    reference_recompiles(Module, 'reference-sum',
+        forall(between(1, 3, _), metta_engine:metta_reference_changed(Home)),
+        Unchanged),
+    assertion(Unchanged == 0),
+    reference_answers(2, ['reference-sum'], Same), assertion(Same == [5]),
+    reference_recompiles(Module, 'reference-sum',
+        ( reference_add(1, [=, ['reference-other'], 7]),
+          metta_engine:metta_reference_changed(Home) ), Moved),
+    assertion(Moved == 1).
 
 %A refresh that finds the same roots for an imported head announces no
 %change for it. The announcement abolishes every declared table and forgets

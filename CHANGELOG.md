@@ -115,6 +115,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A reference-face event that leaves the face resolving to what it resolved to
+  before no longer recompiles every caller that resolves a name through it.
+  Every such event walked the face's whole forward closure before the face was
+  recomputed, so with M compiled callers in an importing space, N events that
+  changed nothing recompiled every caller N times: exactly M times N, 256 at
+  sixteen callers and sixteen events. An event whose effect the face value
+  carries (a row, a registered Prolog head, a visibility grade, an equation or
+  a declaration) now marks the face, and its republication walks the
+  dependents only when the value moved; the same sweep reads zero at every
+  point. The value is the face together with the part of it an importer may
+  see, so an `(internal X)` coming or going still reaches the importer. The
+  events whose effect it does not carry still walk: a background load
+  finishing, a deferred head materialising, a release, and a transaction's
+  completion after a rollback. The republished face's wave runs under the
+  face-wave marker, so a table filled by a live call survives a refresh that
+  changes nothing.
+
 - The Python seat's mypy lanes no longer crash or read each other's platforms
   when they run together. All eight shared one incremental cache, which since
   mypy 2 is one SQLite database per Python version, so the Linux, win32 and
