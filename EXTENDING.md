@@ -1681,6 +1681,11 @@ There are two ways in, and they differ in cost the same way tiers 2 and 3 do.
 `extensions/python/metta/foreign/__init__.py` and `register_space`. Every match crosses
 the janus boundary, which is right when the atoms live somewhere Python already
 talks to. `das.py`, `remote.py` and `persistent.py` are three real instances.
+A term the wire grammar would hand back changed, a Prolog compound such as a
+partial application, a dict, an improper or partial list, reaches the provider
+as a handle holding the engine's own term rather than as the expression it
+would read as, so what a provider stores comes back as the term it was
+(`CODEC.md`, host values and native handles).
 
 **From Prolog**, add clauses to the multifile seams in the `seam` module:
 

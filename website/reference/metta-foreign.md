@@ -285,6 +285,17 @@ class SpaceProvider:
 > defect, the native path does the same, but a provider that PERSISTS atoms
 > persists the renamed form, and a rule editor, a serializer or a diff built
 > on this will meet it. If you need the source spelling, keep it yourself.
+>
+> A term the engine holds that no atom spells arrives as a handle: a
+> partial application such as the one `(id (+ 1))` makes, any other Prolog
+> compound, a dict, an improper or partial list. Read as an expression it
+> would come back changed, `(partial + (1))` no longer applies, so the
+> provider is handed the engine's own term by reference instead. It prints
+> as the engine writes it and gives the engine back that term. A ground
+> one equals itself crossing again; one with variables crosses under new
+> names each time, as a plain variable does, so two crossings are alpha_eq
+> rather than equal. It does not pickle, because the reference is this
+> process's.
 
 ### `SpaceProvider.__init_subclass__`
 

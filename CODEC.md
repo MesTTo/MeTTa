@@ -276,6 +276,23 @@ existence error naming it, never a fresh or empty value, because release is
 explicit on the host side and silence would turn a released handle into a
 wrong answer.
 
+A provider door puts an engine TERM under the same tag when the grammar would
+hand it back changed: a non-list compound, a partial application among them,
+a dict, an improper or partial list. A provider is a store, and a store has to
+give the engine back the term it was given, so such a term crosses as
+`["h", [record, key, names], text]` instead of as the expression or the
+`(cons Head Tail)` chain it reads as everywhere else. The record is the
+in-process host's hold on the engine's copy, a janus `Term` on the Python
+seat, released when the host drops it. `key` spells the term with each
+variable numbered by its first occurrence, and `names` gives the wire names
+those variables have in the atom around it, first occurrence first, so a
+variable the term shares with the rest of its atom is one variable again when
+the host hands the reference back. Two such references hold the same term
+exactly when their keys and names agree. Only the provider doors write one,
+an answer still reads the grammar, and only an in-process encoding can carry
+one [source: extensions/python/metta/_binding/wire.pl,
+metta_py_encode_carried/4; extensions/cmetta/cmetta.c, carries()].
+
 ## The text seam
 
 Text and wire are related through the engine's reader and writer, and the

@@ -99,6 +99,31 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A term stored through a Python space provider comes back as the term the
+  engine gave it. The provider door read every term through the wire grammar,
+  which spells a Prolog compound as an expression, an improper or partial list
+  as a `(cons Head Tail)` chain and a dict as text, so a partial application a
+  provider stored answered `((partial + (1)) 2)` where a native space answers
+  3. The door now hands the provider each such term as a handle holding the
+  engine's own term, as the C seat's provider door does: it prints as the
+  engine writes it and gives the engine back that term, a variable it shares
+  with the rest of the atom included. A ground one equals itself crossing
+  again; one with variables crosses under new names, as a plain variable does,
+  and is `alpha_eq` to its next crossing. Answers still read the grammar. A
+  world reified from a provider reads its image back the same way, so
+  committing it hands the provider only what the world changed, and two
+  crossings of one term with variables are one atom to `metta.spaces.diff`,
+  `AlphaSet` and a world commit. The world's rebase of its origin's name now
+  reaches inside such a term as it does inside a list, so a stored partial
+  naming the provider's space, applied in the world, writes to the world and
+  not straight into the provider. A rational tree is refused at the door with
+  the error a native space gives, where it exhausted the stack, and
+  `PersistentFactSpace` and the table bridge refuse a carried term in words;
+  the persistent space raised `AttributeError` on any handle argument before.
+  `tests/ch19_spaces_backed_by_anything/test_provider_carry.py` compares a
+  provider against a native space over generated terms of every shape. The
+  Node seat's provider door still has the same defect.
+
 - The `codespell` gate lane skips files a repository marks
   `linguist-vendored` or `linguist-generated` in its `.gitattributes`,
   through `tests/checks/check_codespell.py`, which reads the marking and adds
