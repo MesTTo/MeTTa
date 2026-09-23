@@ -80,6 +80,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- metta-benchmarking refuses Windows where it spawns a measured process,
+  naming the process group it needs, rather than reaching `os.posix_spawn`.
+  Its two measurements already refused off Linux for what they measure; the
+  spawner states its own requirement, which is what the `mypy-win32` lane
+  checks.
+
 - A battery no longer inherits the compiled `.qlf` artifacts of the tree it
   snapshots. SWI loads an artifact found outside the directory it was compiled
   in as moved and charges every process that loads it 8 inferences per
