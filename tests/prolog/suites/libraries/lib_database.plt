@@ -72,7 +72,7 @@ no_registration(Module,Journal) :-
 
 test(persistency_capability_is_declared) :-
     findall(Source,metta_engine:metta_platform_capability(persistency,Source,_),Sources),
-    assertion(Sources==[[library(persistency),library(shlib)]]).
+    assertion(Sources==[library(persistency)]).
 
 test(generated_multiset_operations_agree_with_an_ordered_list) :-
     forall(member(Sync,[none,flush,close]),with_store(Sync,model_case)).

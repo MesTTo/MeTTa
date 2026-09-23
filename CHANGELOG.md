@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The capability census decides a capability the first time anything reads
+  it, by whether every library its row names resolves. It used to answer
+  `present` for any capability no load had decided, so `metta_requires(yaml)`
+  admitted `lib_yaml` on a host without `library(yaml)` and the first call
+  died on an undefined procedure. Decided capabilities are read exactly as
+  before, so `metta_require_platform/2` costs what it did. Three rows now name
+  what their load needs: `http` adds `library(thread_pool)` and `https` adds
+  `library(crypto)`, which `thread_httpd` and `ssl` load, and `persistency`
+  drops `library(shlib)`, which a static host neither has nor needs.
+
 - The engine requires only the host patches to swipl-devel itself, and
   pymetta requires the patches to janus. The engine's code named the Python
   host: `engine/host_patches.pl` listed `janus-callback-exception-leak`

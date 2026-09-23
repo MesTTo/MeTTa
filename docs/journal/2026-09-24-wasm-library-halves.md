@@ -21,6 +21,28 @@ Measured: 22 of the 44 originals failed a form under tsmetta e5849bc (engine
 - 09-conformance died on `Loading /swipl/library/dcg/high_order ...`, and
   35-math_lib's `(math-power-mod 42 0 1)` answered 1.
 
+### Why an absent SWI library read as present
+
+The capability census answered `present` for any capability nothing had
+loaded: `metta_platform_absent/1` held a fact only where a load had FAILED, and
+nothing loads yaml, unicode, socket, http, https, uri, markup, archive,
+memory-files or persistency at boot. So `metta_requires(yaml)` admitted
+`lib_yaml` on the WebAssembly host and its first call died on Unknown
+procedure. Every row now starts with a clause
+`metta_platform_absent(C) :- metta_platform_decide(C)`, which a load of that
+capability retracts before deciding it, and which otherwise decides by
+`exists_source/1` over the row on first read and retracts itself. A decided
+capability then has no clause but its fact, so `metta_require_platform/2`,
+which runs inside compiled hyperpose code and every `(timeout N Expr)`, reads
+it exactly as before, and the Python seat's enumeration of
+`metta_platform_absent/1` needs no change.
+
+Deciding by `exists_source/1` exposed three rows naming less than their load
+needs. `http` gains `library(thread_pool)`, which `thread_httpd` loads;
+`https` gains `library(crypto)`, which `ssl` loads; `persistency` loses
+`library(shlib)`, which was only how the lock loaded and which a static host
+neither has nor needs.
+
 ### 35-math_lib
 
 SWI's LibBF emulation of `mpz_powm()` (`src/libbf/bf_gmp.c:306`, unchanged on

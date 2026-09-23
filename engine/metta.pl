@@ -1280,12 +1280,21 @@ metta_platform_capability(subprocess, library(process),
                            a program').
 % HTTP's optional TLS transport does not remove plain HTTP when SSL is absent.
 % [tested: lib_http:http_capabilities_are_separate; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
+% A row names every library the capability's load needs, including those its
+% libraries load in turn, because the census answers by whether each resolves:
+% thread_httpd loads library(thread_pool), and ssl loads library(crypto), so a
+% build with the files but without threads or OpenSSL, the WebAssembly host's
+% shape, would read present and then fail to load lib_http
+% [source: swipl-devel V10.1.14 packages/http/thread_httpd.pl:56,
+% packages/ssl/ssl.pl:67].
 metta_platform_capability(http,
                           [library(http/http_open), library(http/thread_httpd),
-                           library(http/http_client), library(socket), library(uri)],
+                           library(http/http_client), library(http/http_header),
+                           library(socket), library(uri), library(thread_pool)],
                           'lib_http client requests, response streams and local servers').
 metta_platform_capability(https,
-                          [library(http/http_ssl_plugin), library(ssl)],
+                          [library(http/http_ssl_plugin), library(ssl),
+                           library(crypto)],
                           'HTTPS client requests; plain HTTP remains available').
 % URI percent encoding is supplied by the native clib provider.
 % [tested: lib_uri:uri_capability_is_declared; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
@@ -1346,7 +1355,11 @@ metta_platform_capability('memory-files', library(memfile),
 metta_platform_capability(archive, library(archive),
                           'lib_compression archive metadata, entry reads and extraction').
 % [tested: lib_database; commit=060bea3199e9f504c6d425f60841f229fc96e861].
-metta_platform_capability(persistency, [library(persistency),library(shlib)],
+% library(shlib) is not part of the requirement: it is how a host that loads
+% shared objects loads the lock's native half, and a host that links foreign
+% code statically, the WebAssembly one, activates the half it was built with
+% and ships no library(shlib) [source: lib/_support/native_install.pl:native_install/2].
+metta_platform_capability(persistency, library(persistency),
                           'lib_database independent journals and owned file locks').
 %One capability over two libraries, because engine/filereader.pl imports both
 %and the cache is what a user loses when either goes. The row is CONSERVATIVE
@@ -1386,9 +1399,60 @@ metta_platform_capability('fast-cache', [library(fastrw), library(memfile)],
                            and parses it, which is what a load without a \c
                            cache does anyway, so nothing else changes').
 
-%What the boot found missing. Empty on a full platform, which is what makes
-%every read below one failing call on a dynamic predicate with no clauses.
+%What the platform is missing: one fact per capability found absent. Empty
+%on a full platform once every capability is decided, which is what makes
+%every read below one failing call on a dynamic predicate with no clause for
+%that capability.
+%
+%A capability no load has decided yet carries the one other kind of clause,
+%metta_platform_absent(C) :- metta_platform_decide(C), put there for every
+%row by the directive below. A load of the capability retracts it and decides
+%instead (metta_platform_load/2), and a read that reaches it first decides by
+%whether every library the row names resolves, the answer the load would have
+%given, then retracts it. Before this, only a load that FAILED recorded
+%anything, so a capability nothing loads read present on every host: on the
+%WebAssembly host metta_requires(yaml) admitted lib_yaml, and its first call
+%died on Unknown procedure lib_yaml:yaml_read/2 instead of refusing
+%[measured 2026-09-24: 28-yaml_lib under tsmetta on the host
+%tools/wasm-host/build.sh built at 02dc5471b].
+%
+%The clause is per capability so that first-argument indexing keeps it out of
+%every other capability's read: a decided capability is read exactly as
+%before, which matters because metta_require_platform/2 runs inside compiled
+%hyperpose code and every (timeout N Expr).
 :- dynamic metta_platform_absent/1.
+
+metta_platform_undecided(Capability) :-
+    (   clause(metta_platform_absent(Capability),
+               metta_platform_decide(Capability))
+    ->  true
+    ;   assertz((metta_platform_absent(Capability) :-
+                     metta_platform_decide(Capability)))
+    ).
+
+%The row's first read. It fails where the capability is present, since the
+%read it answers is "is this absent", and it fails where an absence fact
+%already exists too, because that fact is a later clause of the same read and
+%answers it; succeeding here as well would give an enumeration the capability
+%twice.
+metta_platform_decide(Capability) :-
+    metta_platform_settle(Capability),
+    \+ clause(metta_platform_absent(Capability), true),
+    metta_platform_capability(Capability, Requires, _),
+    \+ forall(metta_platform_spec(Requires, Spec), exists_source(Spec)),
+    assertz(metta_platform_absent(Capability)).
+
+%Whoever decides a capability removes its undecided clause first, so the
+%decision is the only thing its reads find afterwards.
+metta_platform_settle(Capability) :-
+    (   retract((metta_platform_absent(Capability) :-
+                     metta_platform_decide(Capability)))
+    ->  true
+    ;   true
+    ).
+
+:- forall(metta_platform_capability(Capability, _, _),
+          metta_platform_undecided(Capability)).
 
 %A name a capability would have published and could not. Recorded from the
 %import list the load asked for, so it needs no second list to fall out of
@@ -1420,6 +1484,7 @@ metta_platform_load(Capability) :-
 %libraries takes them whole.
 metta_platform_load(Capability, Imports) :-
     metta_platform_capability(Capability, Requires, _),
+    metta_platform_settle(Capability),
     (   prolog_load_context(module, Into)
     ->  true
     ;   metta_engine_module(Into)
@@ -1448,13 +1513,6 @@ metta_platform_admit(Capability, Into, Spec, Imports) :-
 %use_module(library(lists)) and would then need autoload to supply it, which
 %is the one thing the NO_AUTOLOAD=1 lane exists to catch; engine/qlf_boot.pl
 %carries qlf_member/2 for the same reason.
-
-
-%A row names one library or several. The walk is this file's own rather than
-%member/2, because the first census directive runs above this file's
-%use_module(library(lists)) and would then need autoload to supply it, which
-%is the one thing the NO_AUTOLOAD=1 lane exists to catch; engine/qlf_boot.pl
-%carries qlf_member/2 for the same reason.
 metta_platform_spec(Requires, Spec) :-
     (   is_list(Requires)
     ->  metta_platform_member(Requires, Spec)
@@ -1465,9 +1523,10 @@ metta_platform_member([Spec|_], Spec).
 metta_platform_member([_|Rest], Spec) :-
     metta_platform_member(Rest, Spec).
 
-%Idempotent because a reload under make/0 runs the directives again.
+%Idempotent because a reload under make/0 runs the directives again. It asks
+%for the FACT, because a read would run the capability's undecided clause.
 metta_platform_lost(Capability) :-
-    (   metta_platform_absent(Capability)
+    (   clause(metta_platform_absent(Capability), true)
     ->  true
     ;   assertz(metta_platform_absent(Capability))
     ).
