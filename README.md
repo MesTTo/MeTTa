@@ -41,10 +41,11 @@ surface, with exact return shapes and no prose to guess at.
 
 ```bash
 pip install pymetta    # Linux x86_64, CPython 3.12-3.14: the wheel carries the patched SWI-Prolog
+npm install tsmetta    # Node and browsers: the package carries a patched WebAssembly SWI-Prolog
 ```
 
 The engine runs only on a patched SWI-Prolog and refuses to boot on a stock one.
-On any other platform, and for the C seat, build it as
+For Python on any other platform, and for the C seat, build it as
 [docs/patched-host.md](docs/patched-host.md) describes.
 
 # Architecture
