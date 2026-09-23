@@ -20,9 +20,15 @@
 http_suite_setup :-
     import_prolog_functions(['http-suite-return','http-suite-echo','http-suite-answers',
                             'http-suite-boom','http-suite-spin','http-suite-self-stop',
-                            'http-suite-nested'],_).
+                            'http-suite-nested','http-suite-accept'],_).
 
 'http-suite-return'(Response,_Request,Response).
+% Posts the Accept field as the handler received it to the queue the test
+% owns. A message queue, because the handler runs on a server worker thread
+% inside the engine's own isolation, where an assertz does not outlive it.
+'http-suite-accept'(['http-request',_Method,_Path,_Target,Fields,_Bytes],
+                    ['http-response',200,[],[]]) :-
+    forall('http-header'(Fields,"accept",Accept),thread_send_message(http_suite_accept,Accept)).
 'http-suite-echo'(['http-request',Method,_Path,Target,_Fields,Bytes],
                   ['http-response',201,[["X-Method",Text],["X-Target",Target]],Bytes]) :-
     atom_string(Method,Text).
@@ -88,6 +94,21 @@ tls_case(_,URL) :-
     sub_string(URL,4,_,0,Rest),string_concat("https",Rest,Secure),
     must_throw('http-request!'(get,Secure,[[timeout,5]],_),error(_,_)),
     'http-request!'(get,URL,[],Response),assertion(Response=['http-response',201,_,[]]).
+
+% curl, browsers and Python's requests all send Accept: */*. SWI's header
+% grammar reads a `*` media type as an unbound variable, and converting it for
+% the handler raised, so the server answered 500 to every such request; a
+% wildcard now reaches the handler spelled as HTTP spells it.
+test(wildcard_media_ranges_reach_the_handler,
+     [setup(message_queue_create(_,[alias(http_suite_accept)])),
+      cleanup(message_queue_destroy(http_suite_accept))]) :-
+    with_server('http-suite-accept',accept_case).
+accept_case(_,URL) :-
+    'http-request!'(get,URL,[[header,"Accept","text/*;q=0.5, */*"]],Reply),
+    assertion(Reply=['http-response',200,_,[]]),
+    thread_get_message(http_suite_accept,Accept,[timeout(10)]),
+    assertion(Accept==[["media",["/","*","*"],[],1.0,[]],
+                       ["media",["/","text","*"],[],0.5,[]]]).
 
 test(repeated_headers_and_cookie_structure) :-
     fixed(['http-response',299,[["X-Reply","one"],["X-Reply","two"],

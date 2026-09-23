@@ -99,6 +99,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- lib_http's server answers a request whose Accept header carries a wildcard,
+  such as the `*/*` curl, browsers and Python's requests send. SWI parses a
+  `*` media type as an unbound variable, and converting the request's fields
+  for the handler raised on it, so every such request got a 500; the
+  wildcard now reaches the handler as `"*"`.
+
 - A term stored through a Python space provider comes back as the term the
   engine gave it. The provider door read every term through the wire grammar,
   which spells a Prolog compound as an expression, an improper or partial list
