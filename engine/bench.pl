@@ -18,7 +18,7 @@
 %     governed set through the boot's hermetic child: when this file carried
 %     its own copy of the load it compiled the umbrella in its own process
 %     instead, and the set had a second producer writing a different engine
-%     [tested: tests/shell/test_boot_inference_determinism.sh; commit=WORKTREE].
+%     [tested: tests/shell/test_boot_inference_determinism.sh; commit=4890e870df4bd263c19d95d214004d13bdb052cf].
 %     qlf_load_engine/0's torn-artifact retry, which purges the whole .qlf set
 %     and loads again on any error, is deliberately NOT run: a measurement
 %     that silently repaired its own inputs and carried on would report the

@@ -54,7 +54,7 @@
 %     qlf_prepare_engine/0, the first half of qlf_load_engine/0, as its setup,
 %     so the engine it measures loading is the set every host's boot writes,
 %     whichever of them wrote it last
-%     [tested: tests/shell/test_boot_inference_determinism.sh; commit=WORKTREE].
+%     [tested: tests/shell/test_boot_inference_determinism.sh; commit=4890e870df4bd263c19d95d214004d13bdb052cf].
 %   - the engine reads its own sources and writes its own output as UTF-8
 %     whatever the ambient locale says, and a .qlf set compiled under a
 %     different encoding is purged rather than served
@@ -549,7 +549,7 @@ qlf_load_engine :-
 %beside engine/bench.sh's purge regenerated the child's set under it
 %[measured 2026-09-24: bench_run(boot) after each producer's write in a
 %battery of 56d827312, and three sh tools/check.sh boot-determinism runs in a
-%fresh one; commit=WORKTREE].
+%fresh one; commit=4890e870df4bd263c19d95d214004d13bdb052cf].
 qlf_prepare_engine :-
     qlf_boot_directory(Here),
     atom_concat(Here, '/host_check.pl', HostCheck),

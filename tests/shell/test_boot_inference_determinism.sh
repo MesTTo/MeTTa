@@ -51,7 +51,7 @@
 #     boot case reads whichever wrote last: 343,992 on the child's set, 344,012
 #     on the bench's, and 356,810 for the bench's first boot on the child's
 #     set, which compiled two units inside its window [measured 2026-09-24:
-#     one sample after each write, battery of 56d827312; commit=WORKTREE].
+#     one sample after each write, battery of 56d827312; commit=4890e870df4bd263c19d95d214004d13bdb052cf].
 #   - a boot-time goal calls a name nothing defines. SWI answers with its
 #     undefined-procedure trap, which searches the whole autoload library
 #     index, and that search cost translator:metta_rule_gates_refresh/0 either
