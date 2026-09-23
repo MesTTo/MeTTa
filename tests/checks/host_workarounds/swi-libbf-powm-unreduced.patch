@@ -1,0 +1,12 @@
+diff --git a/src/libbf/bf_gmp.c b/src/libbf/bf_gmp.c
+index bf1d3a5..30c9387 100644
+--- a/src/libbf/bf_gmp.c
++++ b/src/libbf/bf_gmp.c
+@@ -310,6 +310,7 @@ mpz_powm(mpz_t r, const mpz_t base, const mpz_t exp, const mpz_t mod)
+   mpz_init_set(N, base);
+   mpz_init_set(x, exp);
+   mpz_set_ui(r, 1);
++  mpz_fdiv_r(r, r, mod);		/* 1 mod 1 is 0, as GMP's mpz_powm() answers */
+ 
+   while ( !bf_is_zero(x) )
+   { if ( mpz_scan1(x, 0) == 0 )	/* can be more efficient */

@@ -61,6 +61,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `(math-power-mod B 0 1)` answers 0 on the WebAssembly host, as it does
+  natively. SWI-Prolog's LibBF emulation of `mpz_powm()`, which a build
+  without GMP compiles, returned an exponent of 0 as 1 unreduced by the
+  modulus; `swi-libbf-powm-unreduced.patch` reduces it, and every host
+  declares it. A GMP build never compiles the file, so the native host needs
+  only its declaration rewritten.
+
 - The pytest suite's 900-second item timeout counts progress, not wall time:
   the wall time less what the item's thread spent waiting for a CPU, read from
   the kernel's per-thread scheduler statistics. On a loaded box a CPU-bound

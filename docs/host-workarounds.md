@@ -1143,6 +1143,27 @@ Lifted when: the host's rational conversion rounds subnormals once and the
   signed-underflow policy when replacing the conversion.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
 
+## swi-libbf-powm-unreduced
+Host: SWI-Prolog 10.1.14 built without GMP (`-DUSE_GMP=OFF`), which is how
+  tools/wasm-host builds the WebAssembly host; `mpz_powm()` in
+  src/libbf/bf_gmp.c:306, the LibBF emulation of GMP's, unchanged on
+  swipl-devel master in September 2026. A build linking GMP, as the native
+  host does, never compiles it.
+Defect: the emulation sets its result to 1 and reduces it by the modulus only
+  inside the loop over the exponent's bits, so an exponent of 0 returns 1
+  unreduced: `powm(42, 0, 1)` is 1 where GMP answers `1 mod 1`, 0. lib_math's
+  `(math-power-mod 42 0 1)` answered 1 on the WebAssembly host and 0 natively.
+Reproduction: tests/checks/host_workarounds/swi-libbf-powm-unreduced.sh,
+  `powm(42, 0, 1)` beside two controls, asked of the WebAssembly host the tree
+  vendors (`extensions/node/_host`, or `WASM_HOST_DIR`), since a GMP build
+  answers `absent` whatever it carries; `present` when it is 1.
+Patch: tests/checks/host_workarounds/swi-libbf-powm-unreduced.patch, against
+  swipl-devel V10.1.14 src/libbf/bf_gmp.c: the initial 1 is reduced by the
+  modulus before the loop, so every result lies in [0, mod) as GMP's does.
+Lifted when: SWI-Prolog's LibBF `mpz_powm()` reduces its initial value; the
+  patch and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md.
+
 ## swi-infinite-division-zero-sign
 Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).

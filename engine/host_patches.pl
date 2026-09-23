@@ -13,6 +13,7 @@ host_patch('swi-empty-indexed-snapshot.patch', '81c284a850e9d67a45f41da0b5f6772b
 host_patch('swi-erased-definition-bypasses-loader.patch', '56bf3f614f408d1bf667e397b7f9d8e08162b38a10636e1eb3fa4baa61499fb2').
 host_patch('swi-file-search-cache-sweep.patch', 'cca21f0871baa9ccd749b1c10e9a8b6fdcc8c7910c2d6494ec1cb72a523165bd').
 host_patch('swi-gc-in-frame-finished-listener-clears-a-live-slot.patch', '9895191655d5d5ea8776aea08811cda4ce6d6be26803994ea8f9aa05dabb30da').
+host_patch('swi-libbf-powm-unreduced.patch', '003e372224f7d0a22cf442e053d8b5d9ccf0c18ffa75a5f6fbec2d5d238e14e1').
 host_patch('swi-locale-default-encoding.patch', 'f4a78676056b8fcafa64ab6b4988bddc0f1700afe90b210e94f7676b565d730c').
 host_patch('swi-nested-retract-loses-outer-assert.patch', 'e07802e6a24d839288fb9805424cf583600066f129bfa15e644667902e281550').
 host_patch('swi-qlf-extension-spec.patch', 'd5d4c1e2ab9df25977d53bcc497bdd286d946c41fd3d4f69285b8ec48a8dbbe6').

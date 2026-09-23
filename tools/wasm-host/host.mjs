@@ -1,7 +1,8 @@
 /**
  * Purpose: boot a built WebAssembly SWI-Prolog from its artefacts and answer
  *   the two questions its build asks of it: which build it is, and whether the
- *   engine's own boot check accepts it.
+ *   engine's own boot check accepts it; and export that boot, bootHost(DIR),
+ *   for a host-workaround reproduction whose defect lives only in this host.
  *
  * Usage:
  *   node tools/wasm-host/host.mjs compiled-at DIR   print the compiled_at flag
@@ -32,9 +33,16 @@
  *     [measured 2026-09-23: exit 0 on the vendored host with 19 of 19 patches
  *     declared, and exit 1 naming all 19 missing on npm's swipl-wasm 8.0.6;
  *     commit=02dc5471b552c74826880441400114c798ea66ca]
+ *   - bootHost(DIR) resolves to the booted module with its print and printErr
+ *     on stderr, so a caller's stdout carries only what the caller prints; the
+ *     CLI runs only when this file is the program node was started with, so
+ *     importing it boots nothing
  * Fails when: DIR's .data belongs to another link; the boot then fails, or
  *   describes a host nobody ships, which is why build.sh asks the artefacts it
- *   is about to vendor rather than the image they came from.
+ *   is about to vendor rather than the image they came from. bootHost is once
+ *   per process: emscripten's loader reassigns its own module exports while
+ *   booting, so a second require of the same glue answers its LZ4 codec
+ *   [source: extensions/node/src/platform.ts:requireFactory].
  */
 
 import { createRequire } from "node:module";
@@ -44,11 +52,31 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
+/** Boot the host whose three artefacts sit in DIR, printing only to stderr. */
+export async function bootHost(where) {
+  const directory = resolve(where);
+  const glue = ["swipl-web.cjs", "swipl-web.js"]
+    .map((name) => join(directory, name))
+    .find((path) => existsSync(path));
+  if (glue === undefined) {
+    throw new Error(`host: ${directory} holds no swipl-web.cjs or swipl-web.js`);
+  }
+  const SWIPL = createRequire(import.meta.url)(glue);
+  return await SWIPL({
+    arguments: ["-q", "--"],
+    locateFile: (name) => join(directory, name),
+    print: (line) => console.error(line),
+    printErr: (line) => console.error(line),
+  });
+}
+
 // The answer is an exit CODE the event loop drains to, never process.exit():
 // stdout to a pipe is asynchronous here, and exiting after a write kept the
 // first 8 KB of `files` and dropped the rest [measured 2026-09-23: 199 of 331
 // lines through `| cut`, all 331 into a file].
-process.exitCode = await main(process.argv.slice(2));
+if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  process.exitCode = await main(process.argv.slice(2));
+}
 
 async function main([verb, where]) {
   if (!["compiled-at", "check", "files"].includes(verb ?? "") || where === undefined) {
@@ -56,21 +84,13 @@ async function main([verb, where]) {
     return 2;
   }
   const directory = resolve(where);
-  const glue = ["swipl-web.cjs", "swipl-web.js"]
-    .map((name) => join(directory, name))
-    .find((path) => existsSync(path));
-  if (glue === undefined) {
-    console.error(`host: ${directory} holds no swipl-web.cjs or swipl-web.js`);
+  let swipl;
+  try {
+    swipl = await bootHost(directory);
+  } catch (error) {
+    console.error(error.message);
     return 1;
   }
-
-  const SWIPL = createRequire(import.meta.url)(glue);
-  const swipl = await SWIPL({
-    arguments: ["-q", "--"],
-    locateFile: (name) => join(directory, name),
-    print: (line) => console.error(line),
-    printErr: (line) => console.error(line),
-  });
   const once = (goal) => swipl.prolog.query(goal).once();
 
   const at = once("current_prolog_flag(compiled_at, At).")?.At;

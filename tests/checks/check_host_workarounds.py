@@ -37,6 +37,11 @@ Assumes:
     Python host, which is always the interpreter running this lane, so a
     janus reproduction imports the janus the gate's interpreter is paired with
     rather than whatever `python3` a bare shell finds
+  - a defect only the WebAssembly host can show is reproduced in it: such a
+    `.sh` runs `node` from PATH and boots the host the Node seat vendors,
+    `extensions/node/_host`, or the one `WASM_HOST_DIR` names, through
+    `tests/checks/host_workarounds/support/wasm_host.mjs`; the gate's CI sets
+    up node and installs that seat before this lane runs
 Guarantees:
   - a site whose key has no entry, an entry with no site, an entry missing a
     required field, a key entered twice, a malformed site line and a
