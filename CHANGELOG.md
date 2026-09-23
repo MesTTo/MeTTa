@@ -108,6 +108,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tests/shell/test_components_follow_a_moved_pin.sh` puts its fixture under
+  `TMPDIR` when one is set, and under `ai-tmp/` when run alone. Under the gate,
+  `TMPDIR` is the scratch `tests/checks/gate_scratch.sh` allocates and
+  reclaims after a killed run. The test had named `ai-tmp/` unconditionally,
+  outside that reclaimed scratch.
 - `tools/battery.sh` no longer copies `.agenticmind/`, the reasoning record's
   lock and session directory, into a battery, and no longer reads a change to
   it as drift. Every write any session makes to the record touches a lock file

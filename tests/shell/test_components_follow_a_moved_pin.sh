@@ -25,8 +25,11 @@ set -eu
 command -v git >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+# The gate's scratch when a gate runs this, which tools/check.sh exports as
+# TMPDIR beneath ai-tmp/check-runs and reclaims after a killed run
+# (tests/checks/gate_scratch.sh); ai-tmp when run alone, never /tmp.
 mkdir -p "$project_dir/ai-tmp"
-fixture=$(mktemp -d "$project_dir/ai-tmp/components-pin.XXXXXX")
+fixture=$(mktemp -d "${TMPDIR:-$project_dir/ai-tmp}/components-pin.XXXXXX")
 trap 'rm -rf "$fixture"' EXIT
 
 # An identity and a branch name of the fixture's own, so the outcome does not
