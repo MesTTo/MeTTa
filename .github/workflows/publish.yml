@@ -1,4 +1,6 @@
-# Purpose: publish pymetta to PyPI when a version tag is pushed.
+# Purpose: publish pymetta to PyPI when a version tag is pushed, or, when
+#   dispatched with `assets`, publish the files attached to that GitHub
+#   Release exactly as they are (the publish-assets job below).
 #
 # No token is stored anywhere. PyPI's Trusted Publishing mints a short-lived
 # credential for this exact repository and workflow through OIDC, so there is
@@ -20,12 +22,22 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      assets:
+        description: >-
+          The tag of a GitHub Release whose attached files are published as
+          they are, with nothing built here. Its tag must not start with v.
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
+  # Every job below the build hangs off it through needs, so an assets run,
+  # which builds nothing, skips the whole building path from here.
   build:
+    if: inputs.assets == ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -334,4 +346,71 @@ jobs:
           # of this job would die on pymetta-0.9.0 before reaching any of the
           # 13 that are missing. Skipping a filename PyPI already holds is
           # also the only safe reading, because a version is never freed.
+          skip-existing: true
+
+  # PUBLISHING FILES BUILT AND VERIFIED ELSEWHERE.
+  #
+  # Some uploads cannot leave the machine that built them. PyPI's upload host
+  # is one AWS region, and a single connection to it from far away runs at
+  # tens of kB/s, under which a 24 MB manylinux wheel fails with 500 Internal
+  # Server Error before it is sent [measured 2026-09-24: 40 to 90 kB/s to
+  # upload.pypi.org from the machine that built 0.9.2, 1.28 MB/s to
+  # uploads.github.com from the same machine; eight 500s over two twine
+  # attempts at pymetta-0.9.2-cp312's manylinux wheel]. Dispatching with
+  # `assets` names a GitHub Release whose attached files this job publishes
+  # as they are, through this workflow's own Trusted Publisher, so the files
+  # someone verified are the files PyPI receives. Nothing is built here.
+  #
+  # The order never leaves a reader a worse install than before: pymetta's
+  # manylinux wheels, then its pure wheel, then its sdist, then the members
+  # that pin it. A Linux x86_64 reader installing mid-run gets either the
+  # previous release or a wheel carrying its host, never the pure wheel
+  # alone. The Release's tag must not start with v, or creating it would
+  # start the building run beside this one.
+  publish-assets:
+    if: inputs.assets != ''
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download the Release's files into upload order
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSETS: ${{ inputs.assets }}
+        run: |
+          case "$ASSETS" in v*) echo "a tag starting with v also starts the building run" >&2; exit 1 ;; esac
+          gh release download "$ASSETS" --repo "$GITHUB_REPOSITORY" --dir all
+          mkdir -p 1-linux 2-pure 3-sdist 4-members
+          mv all/pymetta-*-manylinux_*.whl 1-linux/
+          mv all/pymetta-*-py3-none-any.whl 2-pure/
+          mv all/pymetta-*.tar.gz 3-sdist/
+          find all -maxdepth 1 -name 'metta_*' -exec mv {} 4-members/ \;
+          leftover=$(ls all)
+          if [ -n "$leftover" ]; then
+            echo "files this job has no place for in the upload order: $leftover" >&2
+            exit 1
+          fi
+          ls -la 1-linux 2-pure 3-sdist 4-members
+      - name: pymetta's manylinux wheels
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 1-linux/
+          skip-existing: true
+      - name: pymetta's pure wheel
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 2-pure/
+          skip-existing: true
+      - name: pymetta's sdist
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 3-sdist/
+          skip-existing: true
+      - name: The members that pin it
+        if: hashFiles('4-members/*') != ''
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: 4-members/
           skip-existing: true
