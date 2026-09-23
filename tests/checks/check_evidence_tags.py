@@ -163,7 +163,6 @@ from __future__ import annotations
 
 import ast
 import json
-import functools
 import os
 import re
 import subprocess
@@ -1673,7 +1672,7 @@ def _repositories() -> tuple[Path, ...]:
     ), *sorted(found.parent for found in ROOT.glob("*/*/.git")))
 
 
-@functools.cache
+@cache
 def _resolves_anywhere(oid: str) -> bool:
     """Whether any repository in this checkout names OID as a commit."""
     for repository in _repositories():
