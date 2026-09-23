@@ -121,7 +121,7 @@ Guarantees:
     member itself could not satisfy, and is itself refused for a name outside
     the canonical release set, one the index already carries, or one declared
     dynamically; with none given, no probe runs and nothing changes
-    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=738f36cfe674f987db2fd9890dc6e4706f8a602c]
   - `--upload` is repeatable and the step is their union, so a distribution
     whose files are built in two places -- pymetta's pure wheel and sdist
     beside the manylinux wheels a container writes -- is one upload of one

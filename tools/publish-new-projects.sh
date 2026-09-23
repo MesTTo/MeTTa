@@ -14,7 +14,7 @@
 #     tests/checks/check_release_resolvable.py and is the last thing before
 #     the first attempt; each project this run is creating is acknowledged to
 #     it with --awaiting, since creating them is what this tool is for
-#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
+#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=738f36cfe674f987db2fd9890dc6e4706f8a602c]
 # Fails when: a project already exists. Then this is the wrong tool and the
 #   publish workflow is the right one: it uploads from GitHub with OIDC and
 #   needs no project-creation budget at all.

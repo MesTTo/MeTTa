@@ -57,7 +57,7 @@ Guarantees:
     that resolve once it exists as its pyproject.toml declares it, keeps
     refusing a cell with a second cause and a cell the member itself could not
     satisfy, and is itself refused for a name outside the release set or one
-    the index already carries [tested: this file; commit=WORKTREE]
+    the index already carries [tested: this file; commit=738f36cfe674f987db2fd9890dc6e4706f8a602c]
 Fails when: nothing about the real tree or the real index. It is a unit test of
     the checker.
 Open Obligations:
