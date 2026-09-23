@@ -80,6 +80,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `@define` compiles a function that reuses a finished `for` loop's variable
+  as a later loop's counter, rebinding it before reading it. The compiler's
+  check that a loop variable is not read after its loop visited a later
+  `while` as one expression, so every name read anywhere in it counted as
+  read; it now follows the loop's test, body order and `else` block and stops
+  at a `return`. A read of the variable in a later `for` loop's `else` block,
+  which used to compile and read a value the loop does not carry, is refused.
+
 - metta-benchmarking refuses Windows where it spawns a measured process,
   naming the process group it needs, rather than reaching `os.posix_spawn`.
   Its two measurements already refused off Linux for what they measure; the
