@@ -1453,9 +1453,14 @@ run GATE   docs        check_docs_site
 # one in engine code. .codespellrc carries the skips and the words that only
 # look wrong, and its entries are bare names because codespell prunes a walked
 # directory by NAME, so a ./-prefixed skip stops matching the moment a runner
-# passes explicit paths.
+# passes explicit paths. A file a repository marks linguist-vendored or
+# linguist-generated is skipped too, read from .gitattributes by the runner,
+# because nobody here wrote it: the vendored WebAssembly host was the lane's
+# only two findings.
 # Umbrella: spelling covers engine, libraries, seats, integrations, examples and shared documentation.
-run GATE   codespell   sh -c "cd '$HERE' && '$PY' -m codespell_lib extensions/python/metta ext extensions/python/bench.py extensions/python/examples extensions/python/notebooks extensions/python/tests extensions/python/tools engine lib extensions/mork extensions/node extensions/cmetta examples tests website .github *.md"
+run GATE   codespell   sh -c "cd '$HERE' && '$PY' tests/checks/check_codespell.py extensions/python/metta ext extensions/python/bench.py extensions/python/examples extensions/python/notebooks extensions/python/tests extensions/python/tools engine lib extensions/mork extensions/node extensions/cmetta examples tests website .github *.md"
+# Umbrella: the spelling runner's skip rule reads every component's own attributes.
+run GATE   codespell-selftest "$PY" "$HERE/tests/checks/check_codespell_selftest.py"
 # The same question of the PROLOG surface, which no duplication check reached:
 # the Python seat's jscpd and vulture lanes read Python, so 54,000 lines of
 # engine, library and seat Prolog had nothing looking for copies in them at all.

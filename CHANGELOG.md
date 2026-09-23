@@ -99,6 +99,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `codespell` gate lane skips files a repository marks
+  `linguist-vendored` or `linguist-generated` in its `.gitattributes`,
+  through `tests/checks/check_codespell.py`, which reads the marking and adds
+  those files to codespell's own skips. The vendored WebAssembly host's
+  loader was the lane's only two findings; `test_workspace_paths` already
+  exempted the same files by the same marking, so the component that owns a
+  file now says once that it did not write it.
+
 - Two runs can no longer provision one battery together. `tools/battery.sh`
   checked a battery's occupancy inside provisioning but recorded its own run
   only after provisioning, so two sessions that picked the same free index at
