@@ -9,6 +9,11 @@
 #   - the project list is read from the tree and from PyPI, never from a file
 #     somebody has to keep up to date
 #   - a verdict's cited upload log is never overwritten by a later run
+#   - under --publish, nothing is uploaded until every entry point this step
+#     leaves behind resolves on every platform and interpreter, which is
+#     tests/checks/check_release_resolvable.py and is the last thing before
+#     the first attempt
+#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
 # Fails when: a project already exists. Then this is the wrong tool and the
 #   publish workflow is the right one: it uploads from GitHub with OIDC and
 #   needs no project-creation budget at all.
@@ -224,6 +229,28 @@ if [ "$publish" -eq 0 ]; then
 fi
 [ "$#" -eq 0 ] && exit 0
 
+# WHAT THE SET RESOLVES TO, not merely which names are absent. Everything
+# above this line asks the index whether a PROJECT EXISTS and whether $DIST
+# holds a complete file set for it; neither question touches a dependency.
+# pymetta 0.9.1 passed both and still cannot be installed: its `engine` extra
+# names pymetta-host on Linux x86_64 and no such project exists, so
+# `pip install "pymetta[engine]"` has no solution there, and PyPI never frees
+# a version. So the last thing before the first upload attempt is to resolve
+# every entry point this step leaves behind, on every platform and every
+# supported interpreter, against the live index plus exactly these files.
+#
+# It runs only under --publish, because it is the gate on SPENDING something:
+# a reporting run costs nothing to be wrong about, and the selftest's fixture
+# index cannot answer a resolver. The offline proof that it refuses what it
+# should is tests/checks/check_release_resolvable_selftest.py, a gate lane.
+if ! "$PYTHON" "$HERE/tests/checks/check_release_resolvable.py" --upload "$DIST"; then
+    printf '\npublish-new-projects: the upload above was NOT attempted. After this step\n' >&2
+    printf 'something this repository publishes could not be resolved; the report names\n' >&2
+    printf 'every entry point, platform and interpreter it holds. Nothing here can be\n' >&2
+    printf 'taken back once uploaded, so this refuses first.\n' >&2
+    exit 1
+fi
+
 # Every artifact is located before the first upload. Without this the run
 # spends an attempt per project until it reaches the one nobody built, so a
 # missing wheel costs a creation budget rather than a message: twine fails
@@ -234,14 +261,22 @@ if [ "$DRAIN" -gt 0 ]; then
     sleep "$DRAIN"
 fi
 
-# pymetta-host first where it is one of the new ones: `pip install
-# pymetta[engine]` resolves to it on Linux x86_64, so until it exists that
-# install cannot resolve at all.
-ordered=""
-for name in "$@"; do [ "$name" = pymetta-host ] && ordered="pymetta-host"; done
-for name in "$@"; do [ "$name" = pymetta-host ] || ordered="$ordered $name"; done
-
-for name in $ordered; do
+# NO ORDER AMONG THEM. There used to be one: pymetta-host went first, because
+# `pip install pymetta[engine]` resolved to it on Linux x86_64 and until it
+# existed that install could not resolve at all. That distribution is retired
+# as of 2026-09-23 -- the patched SWI host is vendored inside pymetta's own
+# manylinux wheels, which are files of the pymetta distribution and upload
+# with it -- so nothing here is a prerequisite of anything else here, and a
+# sequence that says otherwise is a fact that has stopped being true.
+#
+# The counter is what the gap below reads, rather than the last word of a
+# hand-built list: `${ordered##* }` compared NAMES, so two projects whose
+# names were equal would have skipped the gap, and the question is "is this
+# the last one" rather than "is this that name".
+count=$#
+sent=0
+for name in "$@"; do
+    sent=$((sent + 1))
     log="$HERE/ai-tmp/upload.$RUN.$name.log"
     if $PYTHON -m twine upload --non-interactive --disable-progress-bar \
             --skip-existing "$DIST/$(echo "$name" | tr '-' '_')"-* > "$log" 2>&1; then
@@ -257,5 +292,5 @@ for name in $ordered; do
         exit 1
     fi
     # Between uploads, not after the last one.
-    [ "$name" = "${ordered##* }" ] || sleep "$GAP"
+    [ "$sent" -eq "$count" ] || sleep "$GAP"
 done

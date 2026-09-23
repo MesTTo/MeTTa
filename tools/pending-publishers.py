@@ -14,11 +14,13 @@ it, so a distribution with no producer cannot appear. Re-globbing ext/ here
 would be a second definition of "what the release publishes", free to drift
 from the one the release uses.
 
-That list is the RELEASE set rather than the `python -m build` set, and the
-difference is pymetta-host: a manylinux container builds it from a
-swipl-devel tree tools/pymetta-host/fetch-source.sh clones and patches, so
-it is not a build target there and is still a distribution that ships. It
-was absent from every plan while the two were one list.
+That list is one list: pymetta, and every directory under ext/ carrying a
+pyproject.toml. It used to be two, because a separate pymetta-host
+distribution was built by a manylinux container rather than by
+`python -m build`, and while the two lists were conflated that distribution
+was absent from every plan. It was retired on 2026-09-23, when the patched
+SWI host moved inside pymetta's own manylinux wheels: those are FILES of the
+pymetta distribution, uploaded with it, so they add no name here.
 
 TWO PYPI LIMITS SHAPE WHAT YOU CAN DO WITH THIS LIST, and neither is a rate
 limit that waiting clears:

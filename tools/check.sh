@@ -993,6 +993,19 @@ run GATE pending-publishers-selftest "$PY" \
 run GATE pending-publishers-mutants "$PY" \
     "$HERE/tools/pending_publishers_selftest.py" --mutants
 
+# Project existence is not resolvability. The two lanes above ask whether PyPI
+# HAS a project; neither asks whether `pip install pymetta[engine]` can then
+# resolve, and pymetta 0.9.1 went out naming a pymetta-host that does not
+# exist. This lane is the checker's own plants -- a missing project, a member
+# whose pin lags into a backtrack, a failure the index already had, a
+# distribution published nowhere -- against a directory standing in for the
+# index, so no case reaches pypi.org. The LIVE sweep is not a gate lane: it
+# needs the network and answers about the index rather than about this tree,
+# and tools/publish-new-projects.sh runs it before it spends an upload.
+# Umbrella: the release gate resolves every published entry point of the Python and ext distributions.
+run GATE release-resolvable-selftest "$PY" \
+    "$HERE/tests/checks/check_release_resolvable_selftest.py"
+
 # Each repository is published and read on its own, so each front page tells a
 # newcomer what MeTTa is rather than assuming they came through another. That
 # duplication is deliberate and still duplication: the root page and

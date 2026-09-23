@@ -15,9 +15,9 @@ Two things this file got wrong first, both worth keeping written down.
 It restated the bootstrap and steady lists as literals, so it checked itself
 rather than the planner; it now calls the real plan() with its own existence
 oracle. And it asserted only that no file was claimed TWICE, which a mutant
-dropping the hyphen from `<stem>-*` passed, because the host wheel was then
-claimed once, by the wrong project, and nothing looked. The property is an
-EQUALITY.
+dropping the hyphen from `<stem>-*` passed, because the wheel of the name
+`pymetta` is a prefix of was then claimed once, by the wrong project, and
+nothing looked. The property is an EQUALITY.
 
 Assumes: nothing about PyPI, because the oracle is supplied. No case here can
     pass or fail because a project was created between runs.
@@ -162,7 +162,7 @@ MARKER = "MUTANTS = ["
 #: has watched fail is an assumption, and two earlier versions of this file
 #: passed mutants: one restated the answer instead of calling plan(), and one
 #: checked only that no file was claimed twice, which let `pymetta*` swallow
-#: the host wheel unnoticed.
+#: a sibling whose name it is a prefix of, unnoticed.
 MUTANTS = [
     ("the glob loses its hyphen, so a name that is a prefix of another wins",
      'got = set(fnmatch.filter(files, f"{stem}-*"))',

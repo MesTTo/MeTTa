@@ -39,35 +39,51 @@ projects=$(for m in "$ROOT"/ext/*/pyproject.toml; do
     [ -f "$m" ] && sed -n 's/^name *= *"\([^"]*\)".*/\1/p' "$m" | head -1
 done)
 
-# Three cases below plant on pymetta-host specifically, because by then it is
-# the only project still to create. If ext/ is missing it -- which happens in
-# a worktree whose submodule pointer was never updated -- those cases run
-# against a fixture with nothing in it and report the TOOL as broken. That
-# cost a real diagnosis: "exit 0, wanted 1" says nothing about a stale
-# submodule. Refuse here instead, naming the cause.
-# $projects is NEWLINE-separated, so a space-delimited pattern never matches
-# it; the unquoted expansion collapses the newlines to spaces first. The
-# first version of this guard fired in a tree that does have pymetta-host.
-case " $(echo $projects) " in
-    *" pymetta-host "*) ;;
-    *)
-        printf 'publish-selftest: ext/ names no pymetta-host, so the fixture\n' >&2
-        printf '  cannot plant the three cases that need it. This is usually a\n' >&2
-        printf '  worktree whose submodules were never updated; run\n' >&2
-        printf '  git submodule update --init --recursive here.\n' >&2
-        exit 1 ;;
-esac
+# THE SUBJECT of the three cases that need a project still to be created. Each
+# of them puts every OTHER project into the fixture index, so the subject is
+# the only one the tool still has to create and therefore the only one whose
+# artifacts the rule under test reads.
+#
+# Taken from the list rather than named. It used to be pymetta-host, spelled
+# out here and in three cases; that distribution was retired on 2026-09-23
+# when the patched SWI host moved inside pymetta's own manylinux wheels, and a
+# fixture naming a distribution encodes a fact about the release that goes
+# stale under it.
+#
+# TWO names, at the ends of the list, because the fixture index is SHARED
+# across the cases below and they want opposite things from it. $HELD is the
+# one a case plants into that index, to prove a project the index already has
+# is not offered for creation. $SUBJECT must still be missing from it when the
+# last three cases run, so it cannot be $HELD -- taking the ends is what makes
+# them distinct without either being written down.
+#
+# $projects is NEWLINE-separated, so the unquoted expansion collapses it to
+# spaces first. Fewer than two names means ext/ is empty or nearly so, which
+# happens in a worktree whose submodule pointer was never updated: the cases
+# would then run against a fixture with nothing in it and report the TOOL as
+# broken. That cost a real diagnosis, because "exit 0, wanted 1" says nothing
+# about a stale submodule, so refuse here instead, naming the cause.
+HELD=$(echo $projects | awk '{print $1}')
+SUBJECT=$(echo $projects | awk '{print $NF}')
+HELD_STEM=$(echo "$HELD" | tr '-' '_')
+SUBJECT_STEM=$(echo "$SUBJECT" | tr '-' '_')
+if [ -z "$SUBJECT" ] || [ "$SUBJECT" = "$HELD" ]; then
+    printf 'publish-selftest: ext/ names fewer than two distributions, so the\n' >&2
+    printf '  fixture cannot plant the cases that need one project held by the\n' >&2
+    printf '  index and another still to create. This is usually a worktree whose\n' >&2
+    printf '  submodules were never updated; run\n' >&2
+    printf '  git submodule update --init --recursive here.\n' >&2
+    exit 1
+fi
 
-# A complete release for each: a pure wheel plus an sdist, except the one
-# binary distribution, whose platform wheels owe no sdist. Empty files are
-# enough, because nothing here uploads.
+# A complete release for each: a pure wheel plus an sdist. Empty files are
+# enough, because nothing here uploads. The binary shape -- platform wheels
+# and no sdist -- is planted in the one case that is about it, rather than
+# given to a distribution here, because which distributions are binary is a
+# fact about the release and this fixture should not carry one.
 for name in $projects; do
     stem=$(echo "$name" | tr '-' '_')
-    if [ "$name" = pymetta-host ]; then
-        touch "$FIXTURE/dist/$stem-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl"
-    else
-        touch "$FIXTURE/dist/$stem-0.9.0-py3-none-any.whl" "$FIXTURE/dist/$stem-0.9.0.tar.gz"
-    fi
+    touch "$FIXTURE/dist/$stem-0.9.0-py3-none-any.whl" "$FIXTURE/dist/$stem-0.9.0.tar.gz"
 done
 
 ( cd "$FIXTURE/index" && exec python3 -m http.server "$PORT" --bind 127.0.0.1 ) \
@@ -132,26 +148,31 @@ case_is "a non-default index with --publish" 1 "INDEX is for checking" \
 case_is "a dist holding nothing" 1 "(nothing)" \
     env DIST="$FIXTURE/empty" INDEX="$LOCAL" sh "$TOOL"
 
-# A pure wheel with no sdist: the shape metta-arrays actually shipped in, and
-# the one PyPI will not let anyone repair afterwards.
+# A pure wheel with no sdist: the shape metta-arrays really shipped in on
+# 2026-09-21, and the one PyPI will not let anyone repair afterwards. Planted
+# on $HELD rather than on that name, because the case is about the SHAPE and a
+# fixture naming a distribution outlives the release that made it true.
 mkdir -p "$FIXTURE/partial"
-cp "$FIXTURE/dist"/metta_arrays-0.9.0-py3-none-any.whl "$FIXTURE/partial/" 2>/dev/null
+touch "$FIXTURE/partial/$HELD_STEM-0.9.0-py3-none-any.whl"
 case_is "a pure wheel with no sdist" 1 "no sdist" \
     env DIST="$FIXTURE/partial" INDEX="$LOCAL" sh "$TOOL"
 
-# A project the index HAS is not offered for creation.
-mkdir -p "$FIXTURE/index/pypi/metta-arrays"
-printf '{}' > "$FIXTURE/index/pypi/metta-arrays/json"
-case_is "a project the index already holds" 0 "metta-arrays             on PyPI already" \
+# A project the index HAS is not offered for creation. The expected line is
+# built with the tool's OWN column width, because a hand-counted run of spaces
+# between the name and the words is a second copy of a format string.
+mkdir -p "$FIXTURE/index/pypi/$HELD"
+printf '{}' > "$FIXTURE/index/pypi/$HELD/json"
+case_is "a project the index already holds" 0 \
+    "$(printf '%-24s on PyPI already' "$HELD")" \
     env DIST="$FIXTURE/dist" INDEX="$LOCAL" sh "$TOOL"
 
 # An sdist with no wheel is the row the rule did not decide, so it passed.
-# Named on a project the index does NOT hold: the fixture index is shared and
-# the case above planted metta-arrays in it, which took that project out of
-# the to-create set and made this case pass for the wrong reason.
+# Planted on $SUBJECT, a project the index does NOT hold: the fixture index is
+# shared and the case above put $HELD into it, which took that project out of
+# the to-create set and would make this case pass for the wrong reason.
 mkdir -p "$FIXTURE/sdistonly"
-cp "$FIXTURE/dist"/metta_pandas-0.9.0.tar.gz "$FIXTURE/sdistonly/" 2>/dev/null
-case_is "an sdist with no wheel" 1 "metta-pandas(sdist, no wheel)" \
+touch "$FIXTURE/sdistonly/$SUBJECT_STEM-0.9.0.tar.gz"
+case_is "an sdist with no wheel" 1 "$SUBJECT(sdist, no wheel)" \
     env DIST="$FIXTURE/sdistonly" INDEX="$LOCAL" sh "$TOOL"
 
 # A binary distribution owes no sdist, so the completeness rule must not fire
@@ -160,12 +181,12 @@ case_is "an sdist with no wheel" 1 "metta-pandas(sdist, no wheel)" \
 # set, so a dist holding one project's files reports the other thirteen as
 # empty, which is what this case said the first time it ran.
 for name in $projects; do
-    [ "$name" = pymetta-host ] && continue
+    [ "$name" = "$SUBJECT" ] && continue
     mkdir -p "$FIXTURE/index/pypi/$name"
     printf '{}' > "$FIXTURE/index/pypi/$name/json"
 done
 mkdir -p "$FIXTURE/binary"
-cp "$FIXTURE/dist"/pymetta_host-* "$FIXTURE/binary/" 2>/dev/null
+touch "$FIXTURE/binary/$SUBJECT_STEM-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl"
 case_is "platform wheels without an sdist" 0 "1 project(s) to create" \
     env DIST="$FIXTURE/binary" INDEX="$LOCAL" sh "$TOOL"
 
@@ -189,20 +210,18 @@ fi
 
 # A version this repository does not publish. Read off the ARTIFACT, so it
 # fires on what would actually be uploaded rather than on a manifest that can
-# disagree. Planted on pymetta-host because by here every other project is in
-# the shared fixture index, so it is the only one still to create and the only
-# one whose artifacts the check reads.
+# disagree. Planted on $SUBJECT because by here every other project is in the
+# shared fixture index, so it is the only one still to create and the only one
+# whose artifacts the check reads.
 mkdir -p "$FIXTURE/badversion"
 cp "$FIXTURE/dist"/* "$FIXTURE/badversion/" 2>/dev/null
-cp "$FIXTURE/dist"/pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl \
-   "$FIXTURE/badversion/pymetta_host-1.0.0-cp312-cp312-manylinux_2_28_x86_64.whl" 2>/dev/null
+touch "$FIXTURE/badversion/$SUBJECT_STEM-1.0.0-cp312-cp312-manylinux_2_28_x86_64.whl"
 case_is "an artifact carrying the refused version" 1 "1.0.0 is not a version" \
     env DIST="$FIXTURE/badversion" INDEX="$LOCAL" sh "$TOOL"
 
 mkdir -p "$FIXTURE/badzip"
 cp "$FIXTURE/dist"/* "$FIXTURE/badzip/" 2>/dev/null
-cp "$FIXTURE/dist"/pymetta_host-0.9.0-cp312-cp312-manylinux_2_28_x86_64.whl \
-   "$FIXTURE/badzip/pymetta_host-1.0.0.zip" 2>/dev/null
+touch "$FIXTURE/badzip/$SUBJECT_STEM-1.0.0.zip"
 case_is "a refused version in an extension no list names" 1 "1.0.0 is not a version" \
     env DIST="$FIXTURE/badzip" INDEX="$LOCAL" sh "$TOOL"
 

@@ -7,6 +7,55 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A release upload is refused before it is spent when it would leave something
+  unresolvable. `pip install "pymetta[engine]"` cannot resolve on Linux x86_64
+  and never could: the extra names `pymetta-host` under a Linux x86_64 marker
+  and PyPI has no such project. Nine of the integration members the other
+  extras name were missing the same way. Everything on the release path asked
+  whether a PROJECT EXISTS; nothing had ever resolved a requirement, and PyPI
+  never frees a version, so the mistake shipped permanently.
+
+  `tests/checks/check_release_resolvable.py` resolves every
+  `<distribution>[<extra>]==<version>` this repository publishes, on linux
+  x86_64, linux aarch64, macOS arm64, macOS x86_64 and windows amd64 for every
+  interpreter the distributions' own classifiers claim, against the live index
+  plus exactly the files one upload step is about to send. The resolver is
+  uv's, so no PEP 508 marker, wheel tag or backtracking rule is reimplemented.
+  `tools/publish-new-projects.sh --publish` runs it as the last thing before
+  the first upload attempt.
+
+  It refuses what the step could have fixed and reports what no upload can
+  reach, which is Debian britney2's rule that a migration is admitted when
+  installability does not REGRESS: a distribution of the release set published
+  nowhere, a resolution this step would break, a file in the step it cannot
+  read, and a resolution that SUCCEEDS with the wrong version all refuse, while
+  a failure the index already carries at a published version is reported and
+  does not. That last case is not a courtesy: pymetta 0.9.1's engine extra
+  cannot be repaired by any upload, so a gate refusing on it could never go
+  green.
+
+  The backtrack case is the one nothing was looking for. Every member pins
+  `pymetta==<its own version>` exactly, so a family whose members lag does not
+  fail to resolve; it resolves to the OLDER core and the older member, the
+  install succeeds, and the reader has the release that was being replaced.
+
+### Changed
+
+- The separate `pymetta-host` distribution is retired; the patched SWI-Prolog
+  host ships inside pymetta's own manylinux wheels, which are files of the
+  pymetta distribution and upload with it. The release tooling no longer
+  carries a special case for it: `tools/publish-new-projects.sh` uploads its
+  projects in no particular order, where pymetta-host used to go first because
+  `pip install "pymetta[engine]"` resolved to it on Linux x86_64;
+  `tools/pending-publishers.py` describes one list instead of two; and
+  `tools/publish_selftest.sh` takes the two names its fixture needs — one the
+  index already holds, one still to be created — from the ends of the
+  distribution list rather than spelling them, since a fixture naming a
+  distribution encodes a fact about the release that goes stale under it. That
+  last one is why three of its cases had to move at all.
+
 ## [0.9.1] - 2026-09-23
 
 ### Added
