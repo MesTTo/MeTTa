@@ -1914,7 +1914,11 @@ remove_equation(Space, Term, F, Args, Body, Removed) :-
     ->  transaction(
             (   native_storage_module_ready(Space, Storage),
                 native_atom_clause(Space, Term, _, Head),
-                ( native_removal_reference(Selected)
+                %An outer selection is adopted only when it selects an
+                %occurrence of THIS equation, so every reader of the selector
+                %below, resolved_equation_removal/4 included, sees one that
+                %is about this atom [source: native_removal_selects/2].
+                ( native_removal_selects(Storage:Head, Selected)
                 -> true
                 ; metta_least_storage_reference(Storage:Head, Selected) )
             ->  with_native_removal_reference(Selected,

@@ -115,6 +115,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Importing a library no longer fails when an earlier import's function has
+  been specialized in the same space. A withdrawal removes one stored
+  occurrence by exact reference, and while it ran every other removal was held
+  to that selection: when the withdrawal's transaction completed and walked a
+  reference face to a specialization, the specializer's removal of the
+  specialization's own equation was refused as "the removal changed the
+  selected imported occurrence". In the pytest lane that errored every test of
+  a module whose fixture imported a library after another had specialized one
+  of its higher-order functions, `test_collection_libraries.py` and
+  `test_statistics_lib.py` among them, in whichever runs the file order put
+  them there. The selection now carries the head of the occurrence it names and
+  decides only a removal of that atom.
+
 - `stats-geometric-mean` over binary64 extremes costs what an ordinary sample
   costs. The exact ratio of `1.0e308` or `5.0e-324` has a numerator or
   denominator of about a thousand bits, and the bit length it needs was

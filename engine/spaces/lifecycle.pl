@@ -37,7 +37,12 @@
 % Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Owns resources: native_removal_reference/1 reads a per-thread control context,
-%   consumed before callbacks and restored by setup_call_cleanup/3.
+%   consumed when storage removes the selected occurrence and restored by
+%   setup_call_cleanup/3; native_removal_selects/2 confines it to removals of
+%   that occurrence's atom, so a callback's removal of another atom is decided
+%   the ordinary way even while it is live
+%   [tested: lib_import_lifecycle:an_exact_removal_does_not_select_what_its_callbacks_remove;
+%   commit=WORKTREE].
 % Guarded by: non-backtrackable thread-local storage isolates removal selection
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
@@ -288,8 +293,11 @@ remove_sexp(Space, Atom, Removed) :-
 
 % A source withdrawal selects a stored occurrence before entering the ordinary
 % removal funnel. Consume its selector when storage removes that occurrence,
-% so callbacks cannot accidentally inherit it. SWI's erase/1 is the exact
-% reference operation; term equality cannot identify duplicate ownership.
+% and let it decide only removals of that occurrence's atom
+% (native_removal_selects/2), so a callback's removal of another atom cannot
+% inherit it whether the callback runs before the consumption or after. SWI's
+% erase/1 is the exact reference operation; term equality cannot identify
+% duplicate ownership.
 % [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 % The selector is control state, like with_metta_space_releasing/2 below: a
 % scoped global rather than a database row, so a callback cannot inherit
@@ -300,16 +308,52 @@ remove_sexp(Space, Atom, Removed) :-
 % [tested: extensions/python/tests/ch05_equations_and_evaluation/test_reload.py;
 % commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 native_removal_reference(Ref) :-
-    nb_current('$metta_native_removal_reference', Ref).
+    nb_current('$metta_native_removal_reference', selected(_, Ref)).
+
+%Whether the live selector selects an occurrence of Head, the one question every
+%reader of the selector asks. The selector is selected(Selected, Ref): the
+%occurrence's clause head, read when it was selected, beside its reference. It
+%decides only a removal whose Head that clause is an instance of. A removal of a
+%different atom goes the ordinary way even while it is live, because the
+%selector cannot always be consumed before callbacks run: remove_equation/6
+%removes the equation inside a transaction whose completion runs before the
+%stored atom is taken, and that completion can walk a reference face to a
+%specialization, whose invalidation removes the specialization's own equation.
+%Refusing that removal as "the removal changed the selected imported
+%occurrence" failed every test of a pytest module whose fixture imported a
+%library after another library's function had been specialized
+%[tested: lib_import_lifecycle:an_exact_removal_does_not_select_what_its_callbacks_remove].
+%
+%The head is read at selection and KEPT, not read back through the reference
+%when asked, because by the time a callback asks, the selected clause may
+%already be gone: the lane's case completed after the equation's own
+%transaction had erased it, so a reference read back answered nothing and
+%could not tell the selected atom from any other.
+native_removal_selects(Head, Ref) :-
+    nb_current('$metta_native_removal_reference', selected(Selected, Ref)),
+    (   var(Selected)
+    ->  true
+    ;   strip_module(Selected, SelectedModule, SelectedTerm),
+        strip_module(Head, HeadModule, HeadTerm),
+        SelectedModule == HeadModule,
+        \+ SelectedTerm \= HeadTerm
+    ).
+
+%A selection for Ref. A reference already dead when it is selected keeps an
+%unbound head, which selects every removal, the exact rule's reading before
+%selections carried their atom.
+native_removal_selection(Ref, selected(Head, Ref)) :-
+    ( clause(Selected, true, Ref) -> Head = Selected ; true ).
 
 metta_remove_atom_reference(Ref) :-
     (   stored_atom_of_ref(Ref, Space, Atom, Token),
         native_storage_module_ready(Space, Module),
         native_atom_clause(Space, Atom, Token, Head),
         once((clause(Module:Head, true, Live), Live == Ref))
-    ->  ( native_removal_reference(Previous) -> Prior = some(Previous) ; Prior = none ),
+    ->  ( nb_current('$metta_native_removal_reference', Previous)
+        -> Prior = some(Previous) ; Prior = none ),
         setup_call_cleanup(
-            nb_setval('$metta_native_removal_reference', Ref),
+            nb_setval('$metta_native_removal_reference', selected(Module:Head, Ref)),
             (   metta_remove_atom(Space, Atom, Removed), Removed == true
             ->  true
             ;   throw(error(permission_error(remove, source_atom, Atom),
@@ -319,13 +363,13 @@ metta_remove_atom_reference(Ref) :-
     ;   true
     ).
 
-restore_native_removal_reference(some(Ref)) :-
-    nb_setval('$metta_native_removal_reference', Ref).
+restore_native_removal_reference(some(Selection)) :-
+    nb_setval('$metta_native_removal_reference', Selection).
 restore_native_removal_reference(none) :-
     nb_delete('$metta_native_removal_reference').
 
 native_retract_one(Head, Removed) :-
-    native_removal_reference(Ref), !,
+    native_removal_selects(Head, Ref), !,
     (   clause(Head, true, Ref)
     ->  nb_delete('$metta_native_removal_reference'),
         flag('$metta_generation', Generation, Generation+1),
@@ -359,8 +403,10 @@ metta_least_storage_reference(Head, Ref) :-
 
 :- meta_predicate with_native_removal_reference(+, 0).
 with_native_removal_reference(Ref, Goal) :-
-    ( native_removal_reference(Previous) -> Prior = some(Previous) ; Prior = none ),
-    setup_call_cleanup(nb_setval('$metta_native_removal_reference', Ref),
+    ( nb_current('$metta_native_removal_reference', Previous)
+    -> Prior = some(Previous) ; Prior = none ),
+    native_removal_selection(Ref, Selection),
+    setup_call_cleanup(nb_setval('$metta_native_removal_reference', Selection),
                        call(Goal),
                        restore_native_removal_reference(Prior)).
 

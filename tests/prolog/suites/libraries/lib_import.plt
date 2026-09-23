@@ -283,6 +283,58 @@ check_equation_undo(Space, Path) :-
     findall(R, with_metta_module(Module, eval(['owned-answer', 42], R)), Results),
     assertion(Results == [42, 42]).
 
+%An exact removal selects one stored occurrence, and that selection decides no
+%other removal. Removing an imported equation from a space holding a `from`
+%row completes a transaction whose reference frame walks the space's face,
+%and the walk reaches a specialization the space built; the specializer forgets
+%it by removing its equation, a DIFFERENT atom, while the outer selection is
+%still live. That removal was refused as "the removal changed the selected
+%imported occurrence", which in the pytest lane failed every test of a module
+%whose fixture imported a library after another had specialized one of its
+%functions.
+test(an_exact_removal_does_not_select_what_its_callbacks_remove) :-
+    with_owned_import("(= (lifecycle-row) 1)\n", check_nested_removal).
+
+check_nested_removal(Space, Path) :-
+    setup_call_cleanup('new-space'(Home),
+        ( 'add-atom'(Home, [=, ['lifecycle-home'], 1], _),
+          'add-atom'(Space, [from, Home], _),
+          'add-atom'(Space, [=, ['lifecycle-hof', F, X], [F, X]], _),
+          'add-atom'(Space, [=, ['lifecycle-use', Y],
+                             ['lifecycle-hof', ['|->', [Z], [+, Z, 1]], Y]], _),
+          space_module(Space, Module),
+          findall(R, with_metta_module(Module, eval(['lifecycle-use', 1], R)), Before),
+          assertion(Before == [2]),
+          assertion(ho_specialization(Module, 'lifecycle-hof', _)),
+          'import!'(Space, Path, true),
+          'unimport!'(Space, Path, true),
+          findall(A, 'get-atoms'(Space, [=, ['lifecycle-row'], A]), Rows),
+          assertion(Rows == []),
+          findall(R, with_metta_module(Module, eval(['lifecycle-use', 1], R)), After),
+          assertion(After == [2]) ),
+        spaces:metta_release_space(Home)).
+
+%The lane's own shape, where the selected occurrence is already ERASED when the
+%callback removes: importing lib_pairs replaces the previous load of a
+%requirement lib_string brought in, and that package row's equation is gone by
+%the time its transaction completes and the face walk forgets string-pad's
+%specialization. Reading the selected head back through the dead reference
+%answered nothing, so the selection has to carry its head.
+test(a_replaced_requirement_does_not_select_a_specialization_it_forgets,
+     [setup(( 'new-space'(Space), 'new-space'(Home) )),
+      cleanup(( spaces:metta_release_space(Space), spaces:metta_release_space(Home) ))]) :-
+    'add-atom'(Home, [=, ['lifecycle-home'], 1], _),
+    'add-atom'(Space, [from, Home], _),
+    'import!'(Space, [library, lib_string], true),
+    space_module(Space, Module),
+    findall(R, with_metta_module(Module,
+                                 eval(['string-pad-left', "x", 3, "."], R)), Padded),
+    assertion(Padded == ["..x"]),
+    'import!'(Space, [library, lib_pairs], true),
+    findall(R, with_metta_module(Module,
+                                 eval(['string-pad-left', "y", 2, "-"], R)), Again),
+    assertion(Again == ["-y"]).
+
 test(undo_skips_removed_occurrences_and_preserves_replacements) :-
     with_owned_import("(payload x)\n", check_removed_occurrence).
 
