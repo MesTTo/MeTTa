@@ -7,6 +7,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The WebAssembly host tsmetta runs on carries the shipped libraries' native
+  halves and the SWI packages they import. `lib_string`, `lib_regex`,
+  `lib_database` and `lib_compression` each carry `support/static.cmake`, and
+  `tools/wasm-host/build.sh` links every such half into the host as a static
+  extension, which the library activates by name there
+  (`lib/_support/native_install.pl`) where a native host builds and loads a
+  shared object. SWI's archive, utf8proc and yaml packages are built too, over
+  libarchive (lib_compression's own pinned snapshot), utf8proc 2.10.0 and
+  libyaml 0.2.5, the versions the native host links, so `library(archive)`,
+  `library(unicode)` and `library(yaml)` load in the browser. 37 of the 44
+  shipped-library originals now run every form under tsmetta, where 22 failed
+  on undefined procedures; the other 7 refuse at their first form needing
+  crypto, the environment listing, processes, HTTP or sockets.
+  `tools/wasm-host/Dockerfile` takes its package list from the packages its
+  context carries, so `Dockerfile.dockerignore` is the one statement of what
+  the host is built with, and `JOBS` bounds the compile on a shared machine.
+
 ### Changed
 
 - A library whose platform capability is missing imports, and only the call
@@ -171,6 +190,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   JavaScript as "a", with no error; `swi-wasm-text-nul-truncation.patch`
   reads the text by the length `PL_get_nchars()` reports, and every host
   declares it.
+
+- lib_database's lock refuses a second handle on the WebAssembly host.
+  emscripten's `flock()` always succeeds, so under `__EMSCRIPTEN__` the lock
+  keeps its own table of claimed files, released when the claiming stream
+  closes, which gives Linux's answers in a program that is one process.
 
 - `lib_database.plt`'s abandoned-engine test no longer races the lock's
   release: it observed `finish_store/3`, which runs before the lock stream

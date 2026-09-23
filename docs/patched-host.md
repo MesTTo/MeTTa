@@ -115,14 +115,34 @@ which reads `compiled_at` by booting the built files under Node because the
 host has no launcher to ask, and links the declaration into the host's home,
 `/swipl`. It stops unless the engine's own check passes on the result.
 `sh tools/wasm-host/build.sh vendor` then copies the host into
-`extensions/node/_host/`. It needs Docker, Node and the network.
+`extensions/node/_host/`. It needs Docker, Node and the network; `JOBS=8` in
+its environment holds the compile to eight cores.
+
+The recipe adds what the shipped libraries need beyond upstream's. SWI's
+archive, utf8proc and yaml packages are built, over libarchive (from
+lib_compression's own pinned snapshot), utf8proc and libyaml at the versions
+the native host links, so `library(archive)`, `library(unicode)` and
+`library(yaml)` load in the browser too. And every library carrying
+`support/static.cmake` (lib_string, lib_regex, lib_database, lib_compression)
+has its native half linked into the host as a static extension, which the
+library activates by name where a native host builds and loads a shared object
+(`lib/_support/native_install.pl`). What the host still lacks is refused per
+call, naming the capability: threads, time limits, processes, sockets, HTTP and
+OpenSSL, since a WebAssembly module has none of them.
 
 ## When a patch changes
 
 A patch edited in `tests/checks/host_workarounds/` has a new digest, so a host
 built before the edit is refused as `built from an older version of the
-patch`. Rebuild it from step 1, and the WebAssembly host with
-`sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh vendor`.
+patch`, and a host built before a patch was added is refused as missing it.
+Rebuild it from step 1, and the WebAssembly host with
+`sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh vendor`. A patch to
+a file the host never compiles needs no rebuild, only the declaration:
+`swi-libbf-powm-unreduced.patch` changes LibBF, which a build linking GMP
+leaves out, and `swi-wasm-text-nul-truncation.patch` changes
+`src/wasm/prolog.js`, which only the WebAssembly link reads, so for a native
+host apply them to the source tree and rerun `declare-host.sh declare`, whose
+`compiled_at` is unchanged.
 Each requirement is regenerated in the same change: `engine/host_patches.pl`
 with `sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`,
 and pymetta's `extensions/python/metta/_binding/host_patches.pl` with

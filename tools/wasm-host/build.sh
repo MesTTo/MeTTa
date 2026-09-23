@@ -40,12 +40,23 @@
 # difference]. So the file sets of the two links are compared too, and may
 # differ by /swipl/metta-host.pl alone.
 #
+# One more step is ours: the library pack's native halves. A library whose
+# native half belongs in a host that links foreign code statically carries
+# support/static.cmake, and this script stages each such library's support/ and
+# vendor/ directories into the source tree as packages/metta, beside
+# metta-package/CMakeLists.txt, which includes every staged fragment. The
+# library then activates its half by name on this host
+# (lib/_support/native_install.pl:native_install/2), where the native host builds
+# and loads a shared object instead.
+#
 # Assumes: docker, node, git and sha256sum on PATH, and network for the clone
 #   and the image's downloads.
 # Guarantees:
 #   - the host compiles swipl-devel at tools/pymetta-host/swipl.pin with every
 #     patch under tests/checks/host_workarounds applied, since fetch-source.sh
 #     refuses a tree it could not patch whole
+#   - packages/metta is staged fresh on every build from lib/, so the host links
+#     the halves of exactly the libraries that carry support/static.cmake now
 #   - host/ is written only after `node tools/wasm-host/host.mjs check` passes
 #     on the relinked artefacts, so a host whose declaration misses a patch, or
 #     whose relink changed its build, never reaches it
@@ -59,7 +70,9 @@
 # Fails when: the network is down, or a patch no longer applies to the pin;
 #   both stop before an image is built.
 # Decides: OUT, defaulting to ai-tmp/wasm-host-build, since everything but the
-#   vendored copy is build input or scratch.
+#   vendored copy is build input or scratch; JOBS, the compile and ctest job
+#   count inside the image, defaulting to every core as upstream's recipe
+#   does, which a shared machine lowers.
 set -eu
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -75,7 +88,9 @@ OWNER="$(id -u):$(id -g)"
 field() { sed -n "s/^$1[[:space:]]\\+\\(.*\\)\$/\\1/p" "$HERE/wasm.pin" | head -1; }
 
 EMSDK=$(field emsdk); ZLIB=$(field zlib); PCRE2=$(field pcre2)
-for name in EMSDK ZLIB PCRE2; do
+LIBYAML=$(field libyaml); LIBYAML_SHA256=$(field libyaml_sha256)
+UTF8PROC=$(field utf8proc); UTF8PROC_SHA256=$(field utf8proc_sha256)
+for name in EMSDK ZLIB PCRE2 LIBYAML LIBYAML_SHA256 UTF8PROC UTF8PROC_SHA256; do
     eval "value=\$$name"
     [ -n "$value" ] || { printf 'build: %s missing from %s/wasm.pin\n' "$name" "$HERE" >&2; exit 1; }
 done
@@ -106,6 +121,12 @@ if [ "${1:-}" = vendor ]; then
         echo "npm-swipl-wasm's own Docker recipe at commit $(field upstream_commit), with"
         echo "emsdk $EMSDK, zlib $ZLIB and $PCRE2, and report \`compiled_at\` $built."
         echo
+        echo "Beyond that recipe the build links SWI's archive, utf8proc and yaml packages"
+        echo "over libarchive (MesTTo/MeTTa-Library-Pack's pinned lib_compression snapshot),"
+        echo "utf8proc $UTF8PROC and libyaml $LIBYAML, and the native half of every library"
+        echo "in that pack carrying \`support/static.cmake\`, which the library activates by"
+        echo "name here where a native host loads a shared object."
+        echo
         echo "The data image holds SWI's library and, at /swipl/metta-host.pl, the"
         echo "declaration of the patches this build carries, which the engine checks at every"
         echo "boot. Rebuild with \`sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh"
@@ -120,10 +141,34 @@ fi
 mkdir -p "$OUT"
 DEST=$SRC sh "$ROOT/tools/pymetta-host/fetch-source.sh"
 
+# fetch-source.sh resets the tracked tree and leaves untracked files, so the
+# package is removed and staged whole each time rather than updated.
+PACKAGE=$SRC/packages/metta
+rm -rf "$PACKAGE"
+mkdir -p "$PACKAGE/lib"
+cp "$HERE/metta-package/CMakeLists.txt" "$PACKAGE/CMakeLists.txt"
+staged=0
+for fragment in "$ROOT"/lib/*/support/static.cmake; do
+    [ -f "$fragment" ] || continue
+    library=$(basename "$(dirname "$(dirname "$fragment")")")
+    mkdir -p "$PACKAGE/lib/$library"
+    for part in support vendor; do
+        [ -d "$ROOT/lib/$library/$part" ] && cp -R "$ROOT/lib/$library/$part" "$PACKAGE/lib/$library/"
+    done
+    staged=$((staged + 1))
+done
+[ "$staged" -gt 0 ] || { printf 'build: no lib/*/support/static.cmake under %s\n' "$ROOT/lib" >&2; exit 1; }
+printf 'build: staged the native halves of %s libraries as packages/metta\n' "$staged"
+
 docker build \
     --build-arg EMSDK_VERSION="$EMSDK" \
     --build-arg ZLIB_VERSION="$ZLIB" \
     --build-arg PCRE2_NAME="$PCRE2" \
+    --build-arg LIBYAML_VERSION="$LIBYAML" \
+    --build-arg LIBYAML_SHA256="$LIBYAML_SHA256" \
+    --build-arg UTF8PROC_VERSION="$UTF8PROC" \
+    --build-arg UTF8PROC_SHA256="$UTF8PROC_SHA256" \
+    --build-arg JOBS="${JOBS:-}" \
     -f "$HERE/Dockerfile" -t "$IMAGE" "$SRC"
 
 # The first link, taken out only to be booted: its compiled_at is the build's.

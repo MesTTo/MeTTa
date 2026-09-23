@@ -172,6 +172,20 @@ released by an `Sclosehook`, which SWI runs for every stream it closes. It
 answers as Linux does: the holder may claim again, any other stream on the
 file gets `EWOULDBLOCK`, and the claim ends with the stream.
 
+### 09-conformance
+
+`library(dcg/high_order)` is in the host's home and loads. The error was
+`js_eval_error('ReferenceError: window is not defined', [window, location, ...])`:
+the probe runs forms through `m.run` with nothing mounted and the engine's
+working directory at `/`, so the fixture's relative path did not exist, and
+SWI's `library(wasm)` load hook then took it for a browser URL and evaluated
+`window.location` (`library/wasm.pl:412`), which Node lacks. `dcg/high_order`
+loads only to render that error. With the examples tree mounted at its host
+path and the working directory at the repository root, which is how
+`sh tools/run.sh` runs an original natively, the import succeeds and both
+checks answer as the original expects. The fixture is right; a runner has to
+give the engine the files the original names.
+
 ### 35-math_lib
 
 SWI's LibBF emulation of `mpz_powm()` (`src/libbf/bf_gmp.c:306`, unchanged on
@@ -199,6 +213,29 @@ maxBytesToRead, ignoreNul)` with `ignoreNul` true decodes exactly
 string and an atom holding U+0000, one with a supplementary character after
 it so a length in characters rather than bytes would show, through the
 vendored host, and answers `present` there.
+
+### The rebuilt host
+
+`JOBS=8 sh tools/wasm-host/build.sh` built it with ctest 58 of 58 in the
+image, where the upstream package set had 53. Activating each name on it,
+`lib_string`, `metta_pcre`, `lib_database`, `lib_compression`, `archive4pl`,
+`unicode4pl`, `unicode_security4pl`, `uniname4pl` and `yaml4pl` are linked
+beside upstream's `pcre4pl`, and `uuid` is not, since SWI's clib builds that
+package's Prolog half alone under emscripten. The declaration carries 21 of 21
+patches and the engine's check passes with the 19 it requires.
+
+Every original, run under tsmetta on it from the repository root with the
+examples tree mounted: 37 of 44 run every form. The other 7 refuse at their
+first failing form with `PlatformCapabilityError`: 06 and 16 and 33 on
+crypto, 31 on the environment listing, 32 on subprocess, 38 on http, 40 on
+socket. Of the 22 the corpus probe had failing, 15 now run whole. Two later
+forms differ by host rather than by capability. 31's `(platform-info family)`
+answers `"emscripten"`, the flag this host sets in place of `unix`, `linux`
+and `apple`, where the original pins the native `"unix"`; lib_system read
+only the other three and answered `"unknown"` until it read that flag too.
+And 33's `uuid-time!` refuses with lib_uuid's own domain error naming OSSP
+UUID, since version 1 rests on uuid's foreign half, which the census's
+`library(X)` rows cannot name.
 
 ### A test that raced
 

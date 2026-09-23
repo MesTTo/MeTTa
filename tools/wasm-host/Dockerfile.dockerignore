@@ -1,19 +1,27 @@
-# The build context is the patched swipl-devel tree, and this file makes it the
-# tree upstream's recipe builds from: npm-swipl-wasm clones swipl-devel without
+# The build context is the patched swipl-devel tree, and this file decides
+# which of its packages the host is built with: tools/wasm-host/Dockerfile
+# hands cmake every packages/*/CMakeLists.txt the context holds as
+# SWIPL_PACKAGE_LIST, so an entry here is the whole of adding a package.
+#
+# The base set is upstream's: npm-swipl-wasm clones swipl-devel without
 # --recursive and initialises exactly twelve package submodules
 # (docker/Dockerfile at the commit tools/wasm-host/wasm.pin names:
 #   packages/chr packages/clib packages/clpqr packages/http packages/json
 #   packages/nlp packages/pcre packages/plunit packages/sgml packages/RDF
 #   packages/semweb packages/zlib).
 # tools/pymetta-host/fetch-source.sh checks out every submodule, because the
-# native host builds far more. Handing that tree over as it stands gives cmake
-# packages/utf8proc, which is in SWI's WASM package list, and its CMakeLists
-# stops on `find_package(PkgConfig REQUIRED)` in an image with no pkg-config
-# [measured 2026-09-23: the first build of this image failed there]. No
-# swipl-wasm release has ever carried it, so the answer is the upstream
-# package set, not a new dependency.
+# native host builds far more, so the rest are excluded here.
 #
-# The excluded entries are submodules upstream leaves empty; the plain files
+# Four are ours. packages/archive, packages/utf8proc and packages/yaml are
+# SWI's own bindings for library(archive), library(unicode) and library(yaml),
+# which lib_compression, lib_unicode and lib_yaml import; no swipl-wasm
+# release has carried them, and the Dockerfile builds the C libraries they
+# link (utf8proc through pkg-config, which the image now installs; its absence
+# is what stopped the first build of this image, measured 2026-09-23).
+# packages/metta is staged by tools/wasm-host/build.sh and holds the library
+# pack's own native halves.
+#
+# The excluded entries are submodules the host leaves out; the plain files
 # under packages/ (README, cmake/, index.html) are kept, as a clone has them.
 bench
 debian
@@ -33,3 +41,7 @@ packages/*
 !packages/RDF
 !packages/semweb
 !packages/zlib
+!packages/archive
+!packages/utf8proc
+!packages/yaml
+!packages/metta
