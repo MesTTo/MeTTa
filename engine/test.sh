@@ -114,108 +114,40 @@ run_plunit() {
     # parent's variable: the assignment would succeed, vanish, and leave a red
     # suite reporting green, which is the one failure a gate must not have.
     #
-    # A BOUNDED QUEUE rather than batches of $slots with a wait between them.
-    # Batching makes every batch cost its slowest member, and these suites are
-    # very skewed: 292.6s of work across 183 suites with a single 87.29s one
-    # in it, so barriers ran 219s where the floor is that one suite at 87.3s.
+    # ONE queue, in tools/suitequeue.sh, shared with the dev-typed lane. Both
+    # lanes ran the same serial loop over the same suites and differed only in
+    # the swipl command run per suite, which is one concept wearing two names:
+    # the dispatch, the per-suite capture, the ordered replay and the status
+    # aggregation were identical. It lives in one file now and takes the
+    # command as a parameter, so a change to the dispatch cannot fix one lane
+    # and miss the other. That file's header carries why the queue is
+    # `xargs -P` rather than a FIFO of slot tokens, and what a token the worker
+    # has to hand back costs when the worker is killed before it can.
     #
-    # `xargs -P` IS that queue. A FIFO holding one token per slot was written
-    # here first and is wrong in a way worth recording, because it looks
-    # correct: the worker returned its own token as its last act, so a worker
-    # killed by a signal, by the OOM killer or by a failed exec never returned
-    # one and the queue lost that slot for the rest of the run [measured
-    # 2026-09-23, three slots and six jobs: one abnormal death still finished,
-    # three deadlocked the loop after exactly three dispatches]. That is the
-    # silent shape, since one lost slot only makes the run slower, and a
-    # process-group signal loses EVERY token at once -- which is why
-    # `timeout -s INT 6 sh engine/test.sh` was still alive 22 minutes later,
-    # blocked in read(2) on a FIFO no living writer would ever feed again.
-    #
-    # xargs frees a slot by wait(2)ing on a PID instead, and the kernel
-    # reports a child that crashed or was killed exactly as it reports one
-    # that exited, so the slot cannot leak. It also deletes the pre-filled
-    # token count, the long-lived file descriptor and the trap-resume hazard:
-    # those are not satisfied here, they are unrepresentable.
-    slots=$(nproc 2>/dev/null || echo 4)
-    parts=$(mktemp -d)
-    # Cleanup runs however the run ends, and a trapped signal CLEANS AND
-    # RE-RAISES rather than returning. A POSIX trap that does not exit resumes
-    # the script where it was interrupted, which is what turned a clean Ctrl-C
-    # into the 22-minute hang above. Resetting the handler and signalling
-    # ourselves is the standard form -- mbedtls ships these three lines
-    # verbatim in framework/scripts/demo_common.sh -- and the reason is the
-    # CALLER: a script that exits 130 looks like it chose to, where one that
-    # dies by SIGINT tells its own caller to stop looping too.
+    # lock_order.pl loads before the suite, so every mutex acquisition and
+    # every listener registration of the process is recorded; its header says
+    # what it sees.
+    list=$(mktemp)
+    # A trapped signal CLEANS AND RE-RAISES rather than returning: a POSIX trap
+    # that does not exit resumes the script where it was interrupted, which
+    # once turned a clean Ctrl-C into a 22-minute hang.
     # http://mywiki.wooledge.org/SignalTrap#Special_Note_On_SIGINT
-    queue_pid=
-    # SIGTERM rather than SIGKILL, and to the `bounded` wrapper rather than to
-    # xargs: bounded.sh's outer rung is a GNU timeout whose SIGTERM handler
-    # passes the signal to the whole process group and escalates to SIGKILL
-    # after the grace, which is what reaches the suites [tools/bounded.sh:376-386,
-    # measured 2026-09-05: SIGTERM to a GNU timeout wrapper leaves neither its
-    # child nor its grandchild alive]. A SIGKILL here would take the ceiling
-    # program out before it could pass anything on.
-    stop_queue() {
-        [ -n "${queue_pid:-}" ] && kill -TERM "$queue_pid" 2>/dev/null
-        :
-    }
-    cleanup() {
-        stop_queue
-        rm -rf "$parts" 2>/dev/null; rm -f "$log" "$out" 2>/dev/null
-    }
+    cleanup() { rm -f "$list" "$log" "$out" 2>/dev/null; }
     trap 'cleanup' EXIT
     trap 'cleanup; trap - HUP;  kill -HUP  $$' HUP
     trap 'cleanup; trap - INT;  kill -INT  $$' INT
     trap 'cleanup; trap - TERM; kill -TERM $$' TERM
-    : >"$parts/queue"
     for suite in "$@"; do
         [ -e "$suite" ] || suite=${suite#tests/prolog/}
         [ -e "$suite" ] || continue
         ran=$((ran + 1))
-        printf '%s\0%s\0' "$ran" "$suite" >>"$parts/queue"
+        printf '%s\n' "$suite" >>"$list"
     done
-    # lock_order.pl loads before the suite, so every mutex acquisition and
-    # every listener registration of the process is recorded; its header says
-    # what it sees.
-    #
-    # The worker names bounded.sh as a PATH rather than reaching it through
-    # the `bounded` function above: xargs execs, an exec cannot exec a shell
-    # function, and check_process_bounds.py reads the spawn statically, so a
-    # bound spelled "$0" is one it cannot see and correctly refuses. HERE is
-    # exported for the same reason -- the inner shell is a new process.
-    #
-    # $1 is the scratch directory, fixed for every worker; xargs appends one
-    # index and one suite as $2 and $3.
     export HERE
-    # -r is why there is no `if [ "$ran" -gt 0 ]` here: xargs runs nothing on
-    # empty input rather than once with no arguments. nixpkgs pairs two
-    # NUL-separated fields per job the same way in
-    # pkgs/build-support/setup-hooks/make-symlinks-relative.sh.
-    bounded xargs -0 -n 2 -r -P "$slots" sh -c '
-            sh "$HERE/tools/bounded.sh" swipl -s lock_order.pl \
-                -g "set_test_options([format(log)]), run_tests" \
-                -t halt "$3" -- extensions >"$1/$2.out" 2>&1 \
-                || : >"$1/$2.bad"
-    ' petta-suite-worker "$parts" <"$parts/queue" &
-    queue_pid=$!
-    # `wait` rather than running the queue in the foreground. A shell does not
-    # run a trap handler while it is waiting for a FOREGROUND command -- POSIX
-    # defers the handler until that command completes -- so with the dispatch
-    # in front, Ctrl-C did nothing for the 97 seconds the whole run took
-    # [measured 2026-09-23: `timeout -s INT 6 sh engine/test.sh` exited at 97s,
-    # not at 6s]. `wait` is the documented exception and is interrupted by a
-    # trapped signal, which is what makes the handlers above reachable at all.
-    wait "$queue_pid"
-    queue_pid=
-    part=1
-    while [ "$part" -le "$ran" ]; do
-        if [ -f "$parts/$part.out" ]; then
-            cat "$parts/$part.out"; cat "$parts/$part.out" >>"$log"
-        fi
-        [ -f "$parts/$part.bad" ] && ok=1
-        part=$((part + 1))
-    done
-    rm -rf "$parts"
+    bounded sh "$HERE/tools/suitequeue.sh" \
+        'swipl -s lock_order.pl -g "set_test_options([format(log)]), run_tests" -t halt "$1" -- extensions' \
+        <"$list" >"$out" 2>&1 || ok=1
+    cat "$out"; cat "$out" >>"$log"
     if grep -q "succeeded with choicepoint" "$log"; then
         echo "plunit: a test succeeded with a choicepoint:"
         grep -B1 "succeeded with choicepoint" "$log"

@@ -363,13 +363,24 @@ check_dev_typed() {
     cd "$HERE/tests/prolog" || return 1
     ok=0
     bounded swipl -q --on-error=status -g dev_typed_report -t 'halt(0)' dev_typed.pl || ok=1
+    # The same queue the plunit lane runs on, tools/suitequeue.sh. This loop
+    # and engine/test.sh's were one concept wearing two names -- identical
+    # dispatch, capture, ordered replay and status aggregation, differing only
+    # in the swipl command -- so the dispatch lives in one file and takes the
+    # command as a parameter. Serially this was 394 seconds of one core on a
+    # thirty-two core box, and a fix to the dispatch could reach one lane and
+    # silently miss the other.
+    #
+    # dev_typed.plt consults the engine itself; running it UNDER the typed
+    # build would consult the engine twice into one session, so it is the one
+    # suite the list leaves out.
+    export HERE
     for suite in suites/*/*.plt; do
         [ -e "$suite" ] || continue
-        # dev_typed.plt consults the engine itself; running it UNDER the
-        # typed build would consult the engine twice into one session.
         [ "$suite" = suites/seams/dev_typed.plt ] && continue
-        bounded swipl -q -g dev_typed_suites -t 'halt(0)' dev_typed.pl -- "$suite" || ok=1
-    done
+        printf '%s\n' "$suite"
+    done | bounded sh "$HERE/tools/suitequeue.sh" \
+        'swipl -q -g dev_typed_suites -t "halt(0)" dev_typed.pl -- "$1"' || ok=1
     return $ok
 }
 run GATE dev-typed check_dev_typed

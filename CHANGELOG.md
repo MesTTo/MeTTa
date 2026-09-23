@@ -288,6 +288,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The `plunit` and `dev-typed` lanes share one suite dispatcher,
+  `tools/suitequeue.sh`, and run their suites concurrently. They held two
+  implementations of one concept: both looped over every suite in
+  `tests/prolog`, captured each one's output, replayed it in order and
+  aggregated the failures, and they differed only in the `swipl` command run
+  per suite. Parallelising `engine/test.sh` alone therefore left `dev-typed`
+  running 184 suites one after another on a thirty-two core box, and any later
+  fix to the dispatch could reach one lane and silently miss the other. The
+  command is passed as a shell body using `"$1"` for the suite rather than as
+  argument words, because re-splitting a word list breaks
+  `-g "set_test_options([format(log)]), run_tests"` on its spaces.
+
 - `engine/test.sh` runs its suites concurrently, so the `plunit` lane is 97
   seconds where it was 332. The suites are very skewed -- 292.6s of work across
   183 of them with a single 87.29s one -- so batches with a barrier between
