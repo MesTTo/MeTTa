@@ -1,0 +1,67 @@
+diff --git a/packages/clib/CMakeLists.txt b/packages/clib/CMakeLists.txt
+index 77ae3a2..141e7c9 100644
+--- a/packages/clib/CMakeLists.txt
++++ b/packages/clib/CMakeLists.txt
+@@ -86,17 +86,6 @@ clib_plugin(syslog C_SOURCES syslog.c         PL_LIBS syslog.pl)
+ clib_plugin(sched  C_SOURCES sched.c          PL_LIBS sched.pl)
+ endif(UNIX)
+ 
+-if(LIBUUID_FOUND)
+-  clib_plugin(uuid
+-	      C_SOURCES uuid.c
+-	      C_LIBS ${UUID_LIBRARY}
+-	      C_INCLUDE_DIR ${LIBUUID_INCLUDE_DIR}
+-	      PL_LIBS uuid.pl)
+-else()
+-  swipl_plugin(uuid
+-	       PL_LIBS uuid.pl)
+-endif()
+-
+ if(HAVE_SOCKET)
+ clib_plugin(
+     socket
+@@ -107,10 +96,22 @@ if(MULTI_THREADED)
+   test_libs(socket af_unix udp_sockets)
+ endif()
+ endif(HAVE_SOCKET)
+-else(NOT EMSCRIPTEN)
+-  swipl_plugin(uuid                                                                          PL_LIBS uuid.pl) 
+ endif(NOT EMSCRIPTEN)
+ 
++# uuid's C half rests on OSSP UUID alone, which a statically linked build
++# links as readily as a shared one, so it is built wherever LibUUID is
++# found, the WebAssembly build included.
++if(LIBUUID_FOUND)
++  clib_plugin(uuid
++	      C_SOURCES uuid.c
++	      C_LIBS ${UUID_LIBRARY}
++	      C_INCLUDE_DIR ${LIBUUID_INCLUDE_DIR}
++	      PL_LIBS uuid.pl)
++else()
++  swipl_plugin(uuid
++	       PL_LIBS uuid.pl)
++endif()
++
+ test_libs(uuid)
+ 
+ ################
+diff --git a/packages/clib/uuid.pl b/packages/clib/uuid.pl
+index 979f8d7..f4af526 100644
+--- a/packages/clib/uuid.pl
++++ b/packages/clib/uuid.pl
+@@ -63,6 +63,15 @@ versions.  Some typical calls are given below:
+ @see https://en.wikipedia.org/wiki/Universally_unique_identifier
+ */
+ 
++% A statically linked build has no load_foreign_library/1 and carries the C
++% half, when it was built with OSSP UUID, as the extension uuid; one built
++% without it keeps the Prolog alternative below.
++link_uuid :-
++    current_predicate(system:'$activate_static_extension'/1),
++    !,
++    catch('$activate_static_extension'(uuid),
++          error(existence_error(foreign_extension, _), _),
++          true).
+ link_uuid :-
+     catch(load_foreign_library(foreign(uuid)), error(_,_), true).
+ 

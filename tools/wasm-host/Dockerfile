@@ -10,13 +10,14 @@
 #     output of tools/pymetta-host/fetch-source.sh (the pinned source with
 #     every host-workaround patch applied) and with packages/metta, the
 #     library pack's native halves;
-#   - libyaml, utf8proc and libarchive are built into /wasm beside upstream's
-#     zlib and pcre2, because SWI's yaml, utf8proc and archive packages and
-#     lib_compression's binding link them; libarchive comes from
-#     lib_compression's own pinned snapshot and ZIP correction;
+#   - libyaml, utf8proc, libarchive and OSSP UUID are built into /wasm beside
+#     upstream's zlib and pcre2, because SWI's yaml, utf8proc, archive and
+#     clib uuid packages and lib_compression's binding link them; libarchive
+#     comes from lib_compression's own pinned snapshot and ZIP correction;
 #   - cmake is given the package list: every package whose source the context
 #     carries, which Dockerfile.dockerignore decides, so that file is the one
-#     statement of what this host is built with;
+#     statement of what this host is built with; and the static libarchive and
+#     OSSP UUID, by the variables their packages take in place of a search;
 #   - ninja and ctest take JOBS, so a shared machine can hold the build to a
 #     share of its cores.
 # Everything else (the emsdk image, the zlib and pcre2 builds, the cmake
@@ -96,6 +97,25 @@ RUN emcmake cmake -S /wasm/lib_compression/support -B /wasm/libarchive-build \
       -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/wasm \
       -DCMAKE_FIND_ROOT_PATH=/wasm \
  && ninja -C /wasm/libarchive-build -j ${JOBS:-$(nproc)} install
+# OSSP UUID, whose C half packages/clib's uuid binding links for version 1
+# UUIDs, from Debian's copy of the 1.6.2 release (OSSP's own server is gone),
+# the source the native host is built from. Only libuuid.la is made:
+# `make install` also installs the uuid program through shtool's `install -s`,
+# which runs the build machine's strip on emcc's output and fails, and nothing
+# here runs that program. The library and its header go where UUID_LIBRARY
+# and LIBUUID_INCLUDE_DIR below name them.
+ARG OSSP_UUID_VERSION
+ARG OSSP_UUID_SHA256
+RUN wget --no-verbose -O ossp-uuid.tar.gz \
+      https://deb.debian.org/debian/pool/main/o/ossp-uuid/ossp-uuid_$OSSP_UUID_VERSION.orig.tar.gz \
+ && echo "$OSSP_UUID_SHA256  ossp-uuid.tar.gz" | sha256sum -c - \
+ && tar xzf ossp-uuid.tar.gz && rm ossp-uuid.tar.gz \
+ && cd uuid-$OSSP_UUID_VERSION \
+ && emconfigure ./configure --disable-shared --with-cxx=no --with-perl=no \
+      --with-php=no --with-pgsql=no \
+ && emmake make -j ${JOBS:-$(nproc)} libuuid.la \
+ && install -m 644 .libs/libuuid.a /wasm/lib/ \
+ && install -m 644 uuid.h /wasm/include/
 # The Emscripten toolchain file replaces pkg-config's search path with the
 # emscripten sysroot's; PKG_CONFIG_PATH is searched first and names /wasm.
 ENV PKG_CONFIG_PATH=/wasm/lib/pkgconfig
@@ -115,7 +135,10 @@ ENV LDFLAGS="-s STACK_SIZE=1048576"
 # (cmake/PackageSelection.cmake). LibArchive_LIBRARIES names zlib beside the
 # static libarchive, which packages/archive/CMakeLists.txt accepts in place of
 # find_package, because its feature probes link libarchive alone and a static
-# libarchive needs the codec it was built with.
+# libarchive needs the codec it was built with. UUID_LIBRARY and
+# LIBUUID_INCLUDE_DIR are what packages/clib's FindLibUUID.cmake takes in place
+# of its search, which looks for OSSP's uuid-config and would otherwise find
+# none.
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_FIND_ROOT_PATH=/wasm \
@@ -126,6 +149,8 @@ RUN cmake -DCMAKE_TOOLCHAIN_FILE=/emsdk/upstream/emscripten/cmake/Modules/Platfo
   -DSWIPL_PACKAGE_LIST="$(cd .. && ls packages/*/CMakeLists.txt | cut -d/ -f2 | paste -sd';')" \
   -DLibArchive_LIBRARIES="/wasm/lib/libarchive.a;/wasm/lib/libz.a" \
   -DLibArchive_INCLUDE_DIRS=/wasm/include \
+  -DUUID_LIBRARY=/wasm/lib/libuuid.a \
+  -DLIBUUID_INCLUDE_DIR=/wasm/include \
   -G Ninja ..
 RUN ninja -j ${JOBS:-$(nproc)}
 

@@ -122,7 +122,9 @@ The recipe adds what the shipped libraries need beyond upstream's. SWI's
 archive, utf8proc and yaml packages are built, over libarchive (from
 lib_compression's own pinned snapshot), utf8proc and libyaml at the versions
 the native host links, so `library(archive)`, `library(unicode)` and
-`library(yaml)` load in the browser too. And every library carrying
+`library(yaml)` load in the browser too, and clib's uuid binding is linked
+over OSSP UUID 1.6.2, so version 1 UUIDs are made there as well. And every
+library carrying
 `support/static.cmake` (lib_string, lib_regex, lib_database, lib_compression)
 has its native half linked into the host as a static extension, which the
 library activates by name where a native host builds and loads a shared object
@@ -139,10 +141,12 @@ Rebuild it from step 1, and the WebAssembly host with
 `sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh vendor`. A patch to
 a file the host never compiles needs no rebuild, only the declaration:
 `swi-libbf-powm-unreduced.patch` changes LibBF, which a build linking GMP
-leaves out, and `swi-wasm-text-nul-truncation.patch` changes
-`src/wasm/prolog.js`, which only the WebAssembly link reads, so for a native
-host apply them to the source tree and rerun `declare-host.sh declare`, whose
-`compiled_at` is unchanged.
+leaves out; `swi-wasm-text-nul-truncation.patch` changes `src/wasm/prolog.js`,
+which only the WebAssembly link reads; and
+`swi-uuid-static-half-unlinked.patch` changes clib's build for an emscripten
+build and a branch of `uuid.pl` only a statically linked host takes. So for a
+native host apply them to the source tree and rerun `declare-host.sh declare`,
+whose `compiled_at` is unchanged.
 Each requirement is regenerated in the same change: `engine/host_patches.pl`
 with `sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`,
 and pymetta's `extensions/python/metta/_binding/host_patches.pl` with

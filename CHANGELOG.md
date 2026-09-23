@@ -99,6 +99,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `uuid-time!` makes version 1 UUIDs on the WebAssembly host. SWI's clib
+  built uuid's C half only for a build that loads shared objects, and
+  `uuid.pl` looked for it only through `library(shlib)`, so a statically
+  linked host answered `uuid/2` from the Prolog alternative, which refuses
+  version 1. `swi-uuid-static-half-unlinked.patch` builds the half wherever
+  OSSP UUID is found and activates it on a static host, and
+  `tools/wasm-host/build.sh` builds OSSP UUID 1.6.2, the release the native
+  host links, into the image. `33-uuid_lib.metta`'s three version 1 forms now
+  run under tsmetta.
+
 - Two threads reading one platform capability for the first time no longer
   read an absent capability as present or list it twice. The census decided a
   capability by replacing its clause of `metta_platform_absent/1` while other

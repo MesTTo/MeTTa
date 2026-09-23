@@ -31,3 +31,11 @@ libyaml     0.2.5
 libyaml_sha256 fa240dbf262be053f3898006d502d514936c818e422afdcf33921c63bed9bf2e
 utf8proc    2.10.0
 utf8proc_sha256 6f4f1b639daa6dca9f80bc5db1233e9cbaa31a67790887106160b33ef743f136
+#
+# OSSP UUID, which packages/clib's uuid binding links for version 1 UUIDs, at
+# the release the native host this tree runs on links: 1.6.2, whose uuid.c is
+# byte-identical to the native build's (measured 2026-09-24). OSSP's own
+# server is gone, so the source is Debian's copy of that release, and the
+# sha256 is the one Debian's ossp-uuid_1.6.2-1.5.dsc lists for it.
+ossp_uuid   1.6.2
+ossp_uuid_sha256 11a615225baa5f8bb686824423f50e4427acd3f70d394765bdff32801f0fd5b0

@@ -237,6 +237,35 @@ And 33's `uuid-time!` refuses with lib_uuid's own domain error naming OSSP
 UUID, since version 1 rests on uuid's foreign half, which the census's
 `library(X)` rows cannot name.
 
+### Version 1 UUIDs on the WebAssembly host
+
+`uuid-time!` still refused on the rebuilt host, with lib_uuid's own error
+naming OSSP UUID, and the reason was SWI's rather than the library's.
+`packages/clib/CMakeLists.txt` puts the uuid plugin inside
+`if(NOT EMSCRIPTEN)` and gives an emscripten build the Prolog half alone,
+whatever LibUUID finds, and `uuid.pl` looks for its C half only through
+`load_foreign_library/1`, which a static host has none of. OSSP UUID itself
+builds with the pinned emsdk: under Node, a probe made version 1 UUIDs whose
+node field is random with the multicast bit set, OSSP's answer where no MAC
+address is found (RFC 4122 section 4.5), and version 4 ones. Its
+`make install` fails on the `uuid` program, whose install runs the build
+machine's `strip` on emcc's output, so the image makes only `libuuid.la` and
+puts the library and header where `UUID_LIBRARY` and `LIBUUID_INCLUDE_DIR`
+name them, which `FindLibUUID.cmake` takes in place of a search.
+
+`swi-uuid-static-half-unlinked.patch` moves the plugin out of the
+conditional and gives `link_uuid/0` a static branch. It sits at the top of
+the ledger rather than under `packages/clib/`: it is written against the
+swipl-devel root, from which a plain `git apply` reaches the submodule's
+files, and the engine requires the patches at the top, where a directory of
+its own would have needed a requirement nothing holds. The native host was
+redeclared rather than rebuilt: it never takes the static branch, and
+replacing its installed `uuid.pl` alone would leave `uuid.qlf` older than its
+source, so every load of `library(uuid)` would read source and move the twins
+that import it. On the host built with the patch the reproduction answers
+`absent`, `uuid` is in the static extension table, and `33-uuid_lib` runs 48
+of its 53 forms, the other five refusing on crypto.
+
 ### A test that raced
 
 `lib_database.plt`'s abandoned-engine test waited for `finish_store/3`, which

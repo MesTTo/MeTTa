@@ -1188,6 +1188,32 @@ Lifted when: SWI-Prolog's `get_chars()` reads text by its length; the patch
   and the entry go together then.
 Record: docs/journal/2026-09-24-wasm-library-halves.md.
 
+## swi-uuid-static-half-unlinked
+Host: SWI-Prolog 10.1.14's WebAssembly build as shipped; packages/clib at
+  swipl-devel V10.1.14 (6977543): `CMakeLists.txt`, whose uuid plugin sits
+  inside `if(NOT EMSCRIPTEN)`, and `uuid.pl`'s `link_uuid/0`.
+Defect: a statically linked SWI-Prolog never has uuid's C half. The clib
+  build gives an emscripten build the Prolog alternative whatever LibUUID
+  finds, and `uuid.pl` looks for the half only through
+  `load_foreign_library/1`, which a static host has none of. So `uuid/2`
+  there makes version 4 UUIDs and refuses version 1 with
+  `domain_error(uuid_options, [version(1)])`, which lib_uuid's `uuid-time!`
+  reports as needing an OSSP UUID build.
+Reproduction: tests/checks/host_workarounds/swi-uuid-static-half-unlinked.sh,
+  a version 4 control and a version 1 UUID made through the WebAssembly host
+  the tree vendors (`extensions/node/_host`, or `WASM_HOST_DIR`); `present`
+  when version 1 is refused.
+Patch: tests/checks/host_workarounds/swi-uuid-static-half-unlinked.patch,
+  against swipl-devel V10.1.14 packages/clib, applied from the root like the
+  patches to swipl-devel itself: the uuid plugin is built wherever LibUUID is
+  found, the emscripten build included, and `link_uuid/0` activates the
+  linked extension on a static host. tools/wasm-host builds OSSP UUID 1.6.2
+  into the image for it. A host that loads shared objects takes neither
+  branch.
+Lifted when: SWI-Prolog's clib builds and loads uuid's half on a static host;
+  the patch and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md.
+
 ## swi-infinite-division-zero-sign
 Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).

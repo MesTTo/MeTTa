@@ -5,10 +5,12 @@
 # Sourced, never run. A patch's paths are relative to the tree it was made
 # in, so that tree is part of what the patch is, and it is written down once:
 # by where the patch file sits under PATCHES, at that tree's own path inside
-# swipl-devel. The two that patch janus live in packages/swipy/, because
-# packages/swipy is a submodule of swipl-devel with its own history and
-# `git apply` has to run inside it; every other patch sits at the top and
-# applies to swipl-devel itself.
+# swipl-devel. The two that patch janus live in packages/swipy/, because they
+# are written against that submodule's own tree and `git apply` has to run
+# inside it; every other patch sits at the top and is written against the
+# swipl-devel root, where a plain `git apply` also reaches the files of a
+# submodule's working tree, as swi-uuid-static-half-unlinked.patch does for
+# packages/clib.
 #
 # The tree used to be FOUND, by looking for the patch's first target in each
 # tree in turn. That needs a source tree to answer, and the requirement the

@@ -90,7 +90,9 @@ field() { sed -n "s/^$1[[:space:]]\\+\\(.*\\)\$/\\1/p" "$HERE/wasm.pin" | head -
 EMSDK=$(field emsdk); ZLIB=$(field zlib); PCRE2=$(field pcre2)
 LIBYAML=$(field libyaml); LIBYAML_SHA256=$(field libyaml_sha256)
 UTF8PROC=$(field utf8proc); UTF8PROC_SHA256=$(field utf8proc_sha256)
-for name in EMSDK ZLIB PCRE2 LIBYAML LIBYAML_SHA256 UTF8PROC UTF8PROC_SHA256; do
+OSSP_UUID=$(field ossp_uuid); OSSP_UUID_SHA256=$(field ossp_uuid_sha256)
+for name in EMSDK ZLIB PCRE2 LIBYAML LIBYAML_SHA256 UTF8PROC UTF8PROC_SHA256 \
+            OSSP_UUID OSSP_UUID_SHA256; do
     eval "value=\$$name"
     [ -n "$value" ] || { printf 'build: %s missing from %s/wasm.pin\n' "$name" "$HERE" >&2; exit 1; }
 done
@@ -122,8 +124,9 @@ if [ "${1:-}" = vendor ]; then
         echo "emsdk $EMSDK, zlib $ZLIB and $PCRE2, and report \`compiled_at\` $built."
         echo
         echo "Beyond that recipe the build links SWI's archive, utf8proc and yaml packages"
-        echo "over libarchive (MesTTo/MeTTa-Library-Pack's pinned lib_compression snapshot),"
-        echo "utf8proc $UTF8PROC and libyaml $LIBYAML, and the native half of every library"
+        echo "and clib's uuid binding over libarchive (MesTTo/MeTTa-Library-Pack's pinned"
+        echo "lib_compression snapshot), utf8proc $UTF8PROC, libyaml $LIBYAML and OSSP UUID"
+        echo "$OSSP_UUID, and the native half of every library"
         echo "in that pack carrying \`support/static.cmake\`, which the library activates by"
         echo "name here where a native host loads a shared object."
         echo
@@ -168,6 +171,8 @@ docker build \
     --build-arg LIBYAML_SHA256="$LIBYAML_SHA256" \
     --build-arg UTF8PROC_VERSION="$UTF8PROC" \
     --build-arg UTF8PROC_SHA256="$UTF8PROC_SHA256" \
+    --build-arg OSSP_UUID_VERSION="$OSSP_UUID" \
+    --build-arg OSSP_UUID_SHA256="$OSSP_UUID_SHA256" \
     --build-arg JOBS="${JOBS:-}" \
     -f "$HERE/Dockerfile" -t "$IMAGE" "$SRC"
 
