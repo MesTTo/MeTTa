@@ -83,6 +83,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   project it is about to create, which it has to: creating them is what it is
   for, and the check refuses a file whose project does not exist.
 
+  `.github/workflows/publish.yml` runs the same check in a `resolvable` job
+  that both upload jobs wait for. It stages exactly the files its run uploads,
+  the existing projects' and this round's new ones, and acknowledges every
+  project still to be created, this round's and the later rounds', with
+  `--awaiting`. Run on 2026-09-23 against PyPI and round one's plan, the step
+  passes: 285 of 405 cells resolve, none refuse, and the other 120 wait on the
+  nine new projects.
+
 ### Changed
 
 - The `engine` extra adds `janus-swi` only where no pymetta wheel carries the

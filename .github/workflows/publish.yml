@@ -104,8 +104,15 @@ jobs:
           # pymetta's OWN archive by name. `dist/*.tar.gz` matched one file
           # when this job built one distribution and matches eighteen now, and
           # the sed over all of them produced a version string no comparison
-          # could pass.
-          built=$(ls dist/pymetta-*.tar.gz | sed -E 's/.*pymetta-(.*)\.tar\.gz/\1/')
+          # could pass. The glob must name exactly one file, since the version
+          # is read from that one name.
+          set -- dist/pymetta-*.tar.gz
+          if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
+            echo "expected exactly one pymetta sdist in dist/, found: $*" >&2
+            exit 1
+          fi
+          built=${1#dist/pymetta-}
+          built=${built%.tar.gz}
           if [ "$tagged" != "$built" ]; then
             echo "tag $GITHUB_REF_NAME carries $tagged, the build carries $built" >&2
             exit 1
@@ -174,6 +181,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       bootstrap: ${{ steps.plan.outputs.bootstrap }}
+      deferred: ${{ steps.plan.outputs.deferred }}
       steady: ${{ steps.plan.outputs.steady }}
     steps:
       - uses: actions/checkout@v4
@@ -191,16 +199,68 @@ jobs:
         # which job owns a project.
         run: |
           plan=$(python tools/pending-publishers.py --json-plan)
-          printf 'bootstrap=%s\n' "$(printf '%s' "$plan" | jq -c .bootstrap)" >> "$GITHUB_OUTPUT"
-          printf 'steady=%s\n' "$(printf '%s' "$plan" | jq -r '.steady | join(" ")')" >> "$GITHUB_OUTPUT"
+          {
+            printf 'bootstrap=%s\n' "$(printf '%s' "$plan" | jq -c .bootstrap)"
+            printf 'steady=%s\n' "$(printf '%s' "$plan" | jq -r '.steady | join(" ")')"
+            printf 'deferred=%s\n' "$(printf '%s' "$plan" | jq -r '.deferred | join(" ")')"
+          } >> "$GITHUB_OUTPUT"
           python tools/pending-publishers.py
+
+  # WHETHER A READER CAN STILL INSTALL WHAT THIS RUN LEAVES BEHIND.
+  #
+  # `plan` asks PyPI whether a PROJECT EXISTS, which is a different question
+  # from whether `pip install "pymetta[engine]"` resolves: pymetta 0.9.1
+  # passed the first and fails the second on Linux x86_64, because its engine
+  # extra named a pymetta-host that does not exist, and a version is never
+  # freed once uploaded. So one job resolves every entry point this run leaves
+  # behind, on every platform row and interpreter, against the live index plus
+  # exactly the files the two upload jobs below send: the steady projects and
+  # this round's bootstrap ones, not the deferred rounds' files, which nothing
+  # here uploads. The new projects, this round's and the later rounds', are
+  # acknowledged with --awaiting, so a cell failing only because one of them
+  # is not on the index yet is reported apart and does not fail the run, while
+  # any other failure does. Both upload jobs wait for it.
+  resolvable:
+    needs: [build, host, plan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: staged/
+      - uses: actions/download-artifact@v4
+        with:
+          name: host-distributions
+          path: staged/
+      - name: Stage exactly what this run uploads
+        run: |
+          mkdir -p dist
+          for stem in ${{ needs.plan.outputs.steady }}; do mv staged/"$stem"-* dist/; done
+          for stem in $(printf '%s' '${{ needs.plan.outputs.bootstrap }}' | jq -r '.[].stem'); do
+            mv staged/"$stem"-* dist/
+          done
+          ls -la dist/
+      - name: Every published entry point must still resolve
+        run: |
+          python -m pip install --upgrade uv packaging
+          awaiting=()
+          for project in $(printf '%s' '${{ needs.plan.outputs.bootstrap }}' | jq -r '.[].project') ${{ needs.plan.outputs.deferred }}; do
+            awaiting+=(--awaiting "$project")
+          done
+          python tests/checks/check_release_resolvable.py --upload dist/ "${awaiting[@]}"
 
   # One job per project PyPI does not have, each in its own environment so
   # its pending publisher matches. fail-fast is off because a project whose
   # publisher has not been registered yet fails only its own job, and that
   # failure is the accurate signal that it is still waiting for a slot.
   bootstrap:
-    needs: [build, host, plan]
+    needs: [build, host, plan, resolvable]
     if: needs.plan.outputs.bootstrap != '[]'
     runs-on: ubuntu-latest
     strategy:
@@ -242,7 +302,7 @@ jobs:
   # a file PyPI already holds; it does not cover one we are not allowed to
   # send.
   publish:
-    needs: [build, host, plan]
+    needs: [build, host, plan, resolvable]
     if: needs.plan.outputs.steady != ''
     runs-on: ubuntu-latest
     environment: pypi
