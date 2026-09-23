@@ -20,7 +20,7 @@
  *     output goes to stderr, so a noisy boot is never read as an identity,
  *     and a host reporting no flag exits 1 [tested: tools/wasm-host/build.sh
  *     passes it to declare-host.sh --built-by, which refuses anything but one
- *     line; commit=WORKTREE]
+ *     line; commit=02dc5471b552c74826880441400114c798ea66ca]
  *   - `files` prints one `size<TAB>path` line per regular file under /swipl,
  *     sorted by path, read from the booted host's own filesystem rather than
  *     from the loader's packing metadata, so it is what the engine would see
@@ -28,7 +28,7 @@
  *     the booted host, with this checkout's engine/host_check.pl and
  *     engine/host_patches.pl mounted at /metta/engine, the paths the seat
  *     mounts them at; a refusal prints the engine's own message and exits 1
- *     [tested: build.sh runs it on every host it produces; commit=WORKTREE]
+ *     [tested: build.sh runs it on every host it produces; commit=02dc5471b552c74826880441400114c798ea66ca]
  * Fails when: DIR's .data belongs to another link; the boot then fails, or
  *   describes a host nobody ships, which is why build.sh asks the artefacts it
  *   is about to vendor rather than the image they came from.

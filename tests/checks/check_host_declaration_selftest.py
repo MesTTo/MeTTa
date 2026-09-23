@@ -18,7 +18,7 @@ Guarantees:
   - `declare --built-by COMMAND...` binds a home with no launcher, the shape
     of the WebAssembly host, to the one line COMMAND prints, and refuses,
     writing nothing, when COMMAND exits nonzero, prints nothing or prints more
-    than one line [tested: this file; commit=WORKTREE]
+    than one line [tested: this file; commit=02dc5471b552c74826880441400114c798ea66ca]
   - the lane reports an edited requirement and a host that does not declare
     what the requirement names, and passes a matching pair
     [tested: this file; commit=WORKTREE]

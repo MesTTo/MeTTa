@@ -49,7 +49,7 @@
 #   - host/ is written only after `node tools/wasm-host/host.mjs check` passes
 #     on the relinked artefacts, so a host whose declaration misses a patch, or
 #     whose relink changed its build, never reaches it
-#     [tested: this script, 2026-09-23; commit=WORKTREE]
+#     [tested: this script, 2026-09-23; commit=02dc5471b552c74826880441400114c798ea66ca]
 #   - the relinked host's /swipl holds exactly the first link's files plus
 #     metta-host.pl, each the same size, or the build stops showing the diff
 #   - `vendor` copies host/'s three artefacts and SWI-Prolog's LICENSE, the

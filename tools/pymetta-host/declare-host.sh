@@ -57,7 +57,7 @@
 #     writing nothing, when there is no launcher and no --built-by, and when the
 #     command exits nonzero, prints nothing, or prints more than one line, since
 #     none of those is one build's identity
-#     [tested: tests/checks/check_host_declaration_selftest.py; commit=WORKTREE]
+#     [tested: tests/checks/check_host_declaration_selftest.py; commit=02dc5471b552c74826880441400114c798ea66ca]
 #   - the declaration is replaced whole, by rename, so a reader never sees a
 #     half-written one
 #   - `declare` exits 1 when the tree lacks any patch, after writing the
