@@ -649,12 +649,19 @@ ensure_conformance_kit :-
     %predicate EXIST with zero clauses so the static engine load is
     %clean, and an existence guard here would then never consult the
     %kit - the checker present as a receipt with no payload.
+    %The path is spelled out: a bare library name resolves to the library's
+    %pkg.metta since 33219ffa0, and consulting that manifest as Prolog raised
+    %four syntax errors and left the checker with no clauses [measured
+    %2026-09-24: clauses(0) after the call on a booted engine]. The kit is a
+    %governed half, so it loads through the one door and reads its artifact
+    %[tested: compiled_sources:the_conformance_kit_loads_through_the_door;
+    %commit=WORKTREE].
     (   predicate_property(lib_conformance:metta_check_space_provider(_, _),
                            number_of_clauses(N)),
         N > 0
     ->  true
-    ;   library(lib_conformance, Kit),
-        user:consult(Kit)
+    ;   library('lib_conformance/lib_conformance.pl', Kit),
+        metta_load_source(user:Kit, [expand(true)])
     ).
 
 check_extension_requirements(Name, Options) :-
@@ -1167,8 +1174,12 @@ ensure_loaded_global(File) :- refuse_unloadable_source_file(File),
 %statistics(inferences) around the load; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3]. The engine's own
 %units already load that way under engine/qlf_boot.pl, and this door is how
 %a unit loaded later reaches the same regime; the three loaders above, the
-%catalog's vocabulary seed and metta_ensure_source_observation/0 all load
-%through it.
+%catalog's vocabulary seed, metta_ensure_source_observation/0, a package's
+%backing row (engine/packages.pl, package_load_native/2), setup!'s lib_file
+%publication and the background loader's lib_thread all load through it, and
+%no engine code loads a governed source at runtime any other way. A half's own
+%use_module of another half names a stem, which SWI's rule loads from that
+%half's artifact whenever one exists; the claim's child writes those too.
 %
 %SWI decides by the spec unless the call says otherwise. boot/init.pl's
 %'$qlf_file'/5 loads a spec that names its .pl extension from source when
@@ -1399,18 +1410,24 @@ claimed_export_name(Forms, Name) :-
 %
 %Loaded twice on purpose: with an empty import list first, so the module
 %exists and can be asked what it exports, and then with the renames built from
-%those arities. A caller therefore writes two names and no arity.
+%those arities. A caller therefore writes two names and no arity. Both loads
+%are use_module/2's own options through the one door below, so a governed
+%half renamed on import takes its artifact like any other.
 use_module_global(File, Renames) :-
     %SWI reaches a plain file first and raises domain_error(module_header, _),
     %which says what is wrong and not what to do about it.
-    catch(loading_loudly(user:use_module(File, [])),
+    catch(loading_loudly(metta_load_source(user:File,
+                                           [if(not_loaded), must_be_module(true),
+                                            imports([])])),
           error(domain_error(module_header, _), _),
           throw(error(metta_not_a_prolog_module(File),
                       context(use_module_global/2,
                               'renaming imports needs a module')))),
     module_exports_of(File, Module, Exports),
     maplist(renamed_import(Module, Exports), Renames, Imports),
-    loading_loudly(user:use_module(File, Imports)),
+    loading_loudly(metta_load_source(user:File,
+                                     [if(not_loaded), must_be_module(true),
+                                      imports(Imports)])),
     register_pending_exports.
 
 module_exports_of(File, Module, Exports) :-

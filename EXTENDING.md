@@ -3313,12 +3313,14 @@ unfinished result. Recursive source entry through that cycle raises
 `evalc` while constructing that map; held values require no source elaboration.
 
 **`seam:compiled_source/1`** is the boot's claim over a Prolog source. Every
-Prolog unit the engine loads at run time (a library's Prolog half on its first
-import through `consult_global/1`, the catalog's vocabulary seed, the source
-observer) goes through one door, `metta_load_source/2`, which asks this seam
-before loading: a claimed source is loaded by its stem under `qcompile(auto)`,
-so it compiles beside itself once and loads from the `.qlf` in every process
-after, and an unclaimed one loads from source and leaves nothing behind.
+Prolog unit the engine loads at run time goes through one door,
+`metta_load_source/2`, which asks this seam before loading: a library's Prolog
+half when its package's backing row is performed, a half loaded through
+`consult_global/1` and its siblings, the conformance kit, the catalog's
+vocabulary seed and the source observer. A claimed source is loaded by its
+resolved path under `qcompile(auto)`, so it compiles beside itself once and
+loads from the `.qlf` in every process after, and an unclaimed one loads from
+source and leaves nothing behind.
 `engine/qlf_boot.pl` supplies the one clause, claiming exactly the sources
 whose artifacts it stamps and purges as a set (`engine/*.pl`, `engine/*/*.pl`,
 `lib/*.pl`, `lib/*/*.pl`) and only under the encoding its stamp records, which
@@ -3328,8 +3330,14 @@ version or the locale that wrote it. A process that never loaded the boot has
 no clause here and loads every runtime source from source. The claim also makes
 the artifact fresh: a stale or absent one is written by a child swipl the boot
 starts before the claiming process loads, so that process reads the artifact
-and never pays the compile, the first importer included; a process marked as
-such a child (the `metta_qlf_child` flag) compiles in place.
+and never pays the compile, only the few dozen inferences of deciding to start
+the child. The child is the running home's own `<home>/bin/<arch>/swipl`, not
+whatever `swipl` the PATH finds, because the host check refuses any other build
+and an artifact has to be written by the build that loads it. It also writes
+the artifact of every governed source its file's own load brought in, so a
+half that loads another half as a Prolog dependency finds that one's artifact
+too. A process marked as such a child (the `metta_qlf_child` flag) compiles in
+place.
 
 A clause of either that THROWS is your bug and is not caught. Reading a throw as
 "no bridge answered" once ran the class walk instead, and one broken protocol

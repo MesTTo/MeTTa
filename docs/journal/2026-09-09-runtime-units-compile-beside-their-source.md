@@ -313,3 +313,75 @@ artifact, then checks warmup and both directions of inventory drift.
 Measured: the plunit lane red on `engine/translator/runtime.pl:145: Unknown procedure: translator:metta_engine_src_dir/1` in the two suites under tests/prolog/suites/host that consult extensions/python/metta/_binding/shim.pl, whose `use_module('../../../../engine/translator')` loads the translator before engine/metta.pl; the gate log at 01f2e238d carried the same error ten times. On a metta.pl boot `translator` imports from `metta_engine` (`set_module(base(metta_engine))`) and the fact is there; on the shim's load the module exists and the fact does not, so the directive fails, `metta_mbr_artifact/1` is never asserted, and the branch-return analyzer's artifact is not named.
 Decided: engine/translator.pl and engine/spaces.pl, the umbrellas in engine/ whose units name an engine artifact, record `metta_engine:metta_engine_src_dir/1` from their own load context with the guard engine/metta.pl uses, since an umbrella's load context is engine/ in both modes and the static check leaves top-level engine/*.pl files free to read it. Rejected: resolving the directory in runtime.pl itself, because a unit consulted into an umbrella reads the umbrella's directory from a .qlf (the 2026-08-31 measurement engine/metta.pl records) and tests/prolog/static_checks.pl refuses the shape. Rejected: one helper predicate the umbrellas call, because it must be loaded by each umbrella first, one line more than the guarded directive it would replace. Test: shared_decode_index:the_translator_loaded_through_the_shim_names_the_engine_artifacts.
 Rejected, after the commit above: the same recording in engine/spaces.pl. Measured: `use_module('../../engine/spaces')` alone raises `Unknown procedure: spaces:metta_import_shared_registries/1` at engine/spaces.pl:450 and `seam:space_access/1` at spaces/catalog.pl:271, so no load reaches bounded_matching.pl's directive without engine/metta.pl, and a recording there served no path while carrying a test tag the test never reached; it goes, and engine/metta.pl's comment says why. Revisit if the spaces umbrella ever loads without the engine umbrella.
+
+## 2026-09-24: library halves reach the claim, and the child is the running build
+
+Found: `!(import! &self (library lib_markup))` spawned no compile child, wrote
+no `lib_markup.qlf` and read 70,249 to 70,283 inferences in every process. A
+package's backing row loads its half through `package-prolog`, and
+`packages:package_load_native/2` called `load_files/2` directly with the `.pl`
+path, which SWI compiles from source whatever artifact exists; the comment
+beside it said this kept import offline, carrying lib_package's "import
+resolution starts no process; only setup may fetch Git" from Git over to the
+compile child. Four more runtime loads of a governed half bypassed the door:
+setup!'s lib_file publication, the background loader's lib_thread,
+`use_module_global/2`, and `ensure_conformance_kit/0`, which since 33219ffa0
+resolved `library(lib_conformance, Kit)` to the manifest and consulted
+`lib/lib_conformance/pkg.metta` as Prolog, loading no kit.
+Decided: all five load through `metta_load_source/2`. Offline keeps its
+meaning: a backing outside the stamped set, a program's own file or a
+git-fetched checkout, is claimed by nothing and starts no child.
+Found: the +10.3k inferences per library load that the twins were re-pinned
+for on f2822e2ae is not the host check's cost. `qlf_swipl/1` took the
+executable flag, which an embedded engine derives from the first `swipl` on
+PATH, and the lane's child environment finds the stock /usr/bin/swipl first,
+since its PATH starts at the resolved venv interpreter's directory. The host
+check correctly refuses the stock binary on the patched home, so from
+f2822e2ae on every compile child died and none wrote an artifact [measured:
+strace of the lane's warm-up, 47 execs of
+/usr/lib/swi-prolog/bin/x86_64-linux/swipl each writing
+metta_host_declaration_foreign to stderr; 0 of 46 artifacts written]. A
+nested `use_module` of a stem takes a fresh artifact but writes none without a
+qcompile option or flag, so `lib/_support/native_build.pl`, which every
+library with a native half loads, compiled from source in every process:
+10,799 inferences where the artifact loads for 516. Load messages inside the
+lane's window place the whole difference there: text_lib's twin 521,800 with
+the warm-up's artifacts absent and 511,496 with them present, csv_lib's
+example adding lib_string's nested load compiled (78,488) instead of loaded
+(36,405). Before f2822e2ae the same children ran the stock binary and wrote
+the tree's shared artifacts with it.
+Tried, and wrong: an A/B that toggled the check with `METTA_PROBE_NOCHECK`
+read +10,304 on text_lib and +42,098 on csv_lib in two batteries, but it ran
+the check arm first after each regeneration. Replayed in fresh batteries 93
+and 95, the first invocation reads high in either arm and every later one
+reads 511,415 and 494,150 in both; the check arm's warm-up wrote nothing in
+2.8 s where the no-check arm's wrote 46 artifacts in 13.4 s, because the
+toggle also reached the children.
+Decided: the child is the running home's own `<home>/bin/<arch>/swipl`, the
+install the process's libswipl came from, then the executable flag for a
+build tree with no bin/, then the bare name. It also compiles every governed
+source its file's own load brought in and found stale, so a half's nested
+dependency on another half gets its artifact from the first import; an
+ungoverned nested source such as `lib/lib_csv/support/csv_codec.pl` still
+loads from source and gains none.
+Rejected: extending the stamped set to `lib/*/*/*.pl` so the support files
+gain artifacts too, because the pattern table is the purge's and the claim's
+one boundary and widening it is a policy change of its own; setting the
+child's qcompile flag to auto instead of the closure, because SWI's
+`'$qlf_auto'/3` would then write an artifact beside every ungoverned file the
+half loads; making the first importer's count equal the later ones', because
+the decision to start a child is Prolog work the process runs and a warm-up
+already keeps it out of a measuring lane.
+Measured: lib_markup's import now reads 43,553 in the first process after a
+purge, which started two children (lib_import's half and lib_markup's), and
+43,486 in each process after, which start none
+(ai-tmp/orchestrator/hostcheck-probe.py). In a copied tree with an ELF
+`swipl` decoy first on PATH, lib_uri's import reads 62,686 with two children
+and 62,622 twice after with none, lib_encoding loaded from the artifact
+lib_uri's child wrote.
+Test: extensions/python/tests/repository/test_library_halves.py, which fails
+against the old engine files, against the executable flag first and against
+the child without its closure; package_laws's
+`a_backing_row_loads_its_half_through_the_claim` and
+`an_unclaimed_backing_loads_from_source_and_leaves_no_artifact`;
+compiled_sources's `the_conformance_kit_loads_through_the_door`.

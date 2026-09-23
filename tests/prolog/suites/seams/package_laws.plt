@@ -8,6 +8,11 @@
 % loading, including alias-aware dependency recording [tested:
 % a_backing_row_registers_before_the_equations_calling_it_translate;
 % commit=814b9946878385039bbe7af7bd4fa15b9a4b0dc3].
+% Guarantees: a shipped half's backing row loads through the boot's claim and
+% reads its artifact, and a backing outside the stamped set loads from source
+% and leaves no artifact [tested: a_backing_row_loads_its_half_through_the_claim,
+% an_unclaimed_backing_loads_from_source_and_leaves_no_artifact;
+% commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/metta.pl').
@@ -39,6 +44,16 @@ lp_adjacent(Path, Name, Text, File) :-
     lp_write(File, Text).
 
 lp_import(Path, Home) :- once(metta_engine:importer_helper(Home, Path)).
+
+% SWI's own account of how a file was loaded, kept per source stem: the done
+% message names the .qlf when the artifact was read, and says compiled for a
+% source load.
+:- dynamic lp_loaded/2.
+:- multifile user:message_hook/3.
+user:message_hook(load_file(done(_, file(_, Absolute), How, _, _, _)), _, _) :-
+    file_name_extension(Stem, _, Absolute),
+    assertz(plunit_package_laws:lp_loaded(Stem, How)),
+    fail.
 lp_answers(Home, Expression, Answers) :- findall(V, eval([evalc, Expression, Home], V), Answers).
 lp_events(Events) :- findall(E, lp_event(E), Events).
 
@@ -253,6 +268,39 @@ test(pending_requirements_expose_cycles_outside_their_transaction) :-
         (thread_send_message(Continue,continue),thread_join(Worker,Status),erase(Gate),
          message_queue_destroy(Ready),message_queue_destroy(Continue))),
     Status == true,\+ packages:package_pending_requirement(Path,_).
+
+% A shipped half is inside the boot's stamped set, so its backing row loads it
+% through the claim and this process reads the artifact the claim's child
+% wrote, never the compile; the row's direct load_files/2 read the source.
+% SWI's source flag is off for the import, as in a shipped process: the
+% typed-development build turns it on (tests/prolog/dev_typed.pl), and it makes
+% every load read the source whatever artifact exists.
+test(a_backing_row_loads_its_half_through_the_claim,
+     [setup(retractall(lp_loaded(_, _))), cleanup(retractall(lp_loaded(_, _)))]) :-
+    metta_engine:library(lib_markup, Raw), absolute_file_name(Raw, Path),
+    file_directory_name(Path, Directory),
+    directory_file_path(Directory, lib_markup, Stem),
+    'new-space'(Home),
+    current_prolog_flag(source, Source),
+    setup_call_cleanup(set_prolog_flag(source, false), lp_import(Path, Home),
+                       ( set_prolog_flag(source, Source), metta_release_space(Home) )),
+    assertion(lp_loaded(Stem, loaded)),
+    assertion(\+ lp_loaded(Stem, compiled)),
+    file_name_extension(Stem, qlf, Artifact),
+    assertion(exists_file(Artifact)).
+
+% A backing outside the stamped set is claimed by nothing, so its import
+% starts no child, reads the source and leaves nothing beside it.
+test(an_unclaimed_backing_loads_from_source_and_leaves_no_artifact,
+     [setup(retractall(lp_loaded(_, _))), cleanup(retractall(lp_loaded(_, _)))]) :-
+    lp_package(unclaimed, "(= (package backing) (prolog \"native.pl\" (lp_native_unclaimed)))",
+               Path, Home),
+    lp_adjacent(Path, 'native.pl', "lp_native_unclaimed(42).", Source),
+    lp_import(Path, Home), lp_answers(Home, [lp_native_unclaimed], [42]),
+    file_name_extension(Stem, pl, Source),
+    assertion(lp_loaded(Stem, compiled)),
+    file_name_extension(Stem, qlf, Artifact),
+    assertion(\+ exists_file(Artifact)).
 
 test(missing_artifact_names_setup_as_the_remedy) :-
     lp_package(missing, "(= (package backing) (prolog \"absent.pl\" (lp_missing)))", Path, Home),

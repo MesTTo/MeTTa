@@ -221,8 +221,11 @@ metta_reference_background(Home, Path, manifest(Forms, Signatures)) :-
     ; true ),
     % The path spelled out: this wants one Prolog file inside the library,
     % not the library's manifest, and nothing infers the directory from a
-    % filename any more.
-    library('lib_thread/lib_thread.pl', ThreadLibrary), use_module(ThreadLibrary, []),
+    % filename any more. It loads through the one door for a runtime-loaded
+    % Prolog source, so the half takes its artifact as an imported one does.
+    library('lib_thread/lib_thread.pl', ThreadLibrary),
+    metta_load_source(metta_engine:ThreadLibrary,
+                      [if(not_loaded), must_be_module(true), imports([])]),
     metta_reference_admission_scope(Home, background, enabled),
     retractall(metta_reference_manifest_head(Home, _, _)),
     retractall(metta_reference_manifest_row(Home, _)),

@@ -28,7 +28,16 @@
    engine's own set goes through the same child when its umbrella artifact is
    absent, and never in a child-marked process
    [tested: the_engine_set_is_written_by_a_hermetic_child,
-   a_child_marked_process_writes_the_engine_set_in_place; commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1].
+   a_child_marked_process_writes_the_engine_set_in_place; commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1]. The
+   conformance kit, a runtime-loaded half, loads through the door and reads
+   its artifact [tested: the_conformance_kit_loads_through_the_door;
+   commit=WORKTREE]. Three things are proved elsewhere, in an isolated tree,
+   by extensions/python/tests/repository/test_library_halves.py: the first
+   and later processes and the child's nested closure, because deleting a
+   shared artifact here would race the suites that load the same halves; and
+   the child being the running home's own swipl, because only an embedding's
+   executable flag can name another build, and in a standalone swipl the two
+   rules pick the same binary.
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -214,5 +223,23 @@ test(consult_global_loads_a_library_half_through_the_door,
     assertion(cs_loaded_how(File, loaded)),
     assertion(exists_file(Artifact)),
     assertion(current_predicate(lib_datetime:now/1)).
+
+cs_kit(Kit) :-
+    cs_root(Root),
+    atom_concat(Root, '/lib/lib_conformance/lib_conformance.pl', Kit).
+
+cs_unload_kit :-
+    cs_kit(Kit),
+    ( source_file(Kit) -> unload_file(Kit) ; true ),
+    retractall(cs_load_seen(_, _)).
+
+test(the_conformance_kit_loads_through_the_door,
+     [setup(cs_unload_kit), cleanup(cs_unload_kit)]) :-
+    cs_kit(Kit),
+    metta_engine:ensure_conformance_kit,
+    assertion(cs_loaded_how(Kit, loaded)),
+    predicate_property(lib_conformance:metta_check_space_provider(_, _),
+                       number_of_clauses(Clauses)),
+    assertion(Clauses > 0).
 
 :- end_tests(compiled_sources).

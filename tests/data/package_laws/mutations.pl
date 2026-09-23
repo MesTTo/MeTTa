@@ -149,6 +149,17 @@ replacement(no_contract_requirement, packages:package_contract(_,_,Row,Pattern,N
             (Row=[Token|_], Token\==prolog -> Names=Pattern, Contracts=[] ; call(Wrapped))).
 replacement(no_backing_shape, packages:package_backing_info(_,_,Row,Info), _,
             Info=info(Row,unclaimed,[],[])).
+%The half loaded the way it was before the door: load_files/2 on the .pl path,
+%which reads the source whatever artifact the claim would have written.
+replacement(native_load_bypasses_the_claim, packages:package_load_native(File,Owner), _,
+            (( source_file_property(File,module(Context)) -> true
+             ; atom_concat('$metta_package:',File,Context),
+               set_module(Context:base(metta_engine)) ),
+             load_files(Context:File,[expand(true),if(changed),imports([])]),
+             (source_file_property(File,module(Owner)) -> true ; Owner=Context))).
+%Every source claimed, the stamped set's boundary gone.
+replacement(claim_every_source, seam:compiled_source(File), _,
+            metta_qlf_boot:qlf_compile_aside(File)).
 
 % Discard export declarations while retaining the artifact's actual clauses.
 % The witness then observes the internal arity that an unrestricted scan leaks.
@@ -236,4 +247,6 @@ group(no_declared_contracts, [explicit_export_arities_are_native_contracts]).
 group(first_contract_only, [each_declared_arrow_matches_its_native_arity]).
 group(no_backing_shape, [empty_export_declarations_are_valid_signatures]).
 group(no_generic_contracts, [ordinary_contract_equations_describe_an_attached_claimant]).
+group(native_load_bypasses_the_claim, [a_backing_row_loads_its_half_through_the_claim]).
+group(claim_every_source, [an_unclaimed_backing_loads_from_source_and_leaves_no_artifact]).
 group(empty_generic_signature, [ordinary_contract_equations_describe_an_attached_claimant]).

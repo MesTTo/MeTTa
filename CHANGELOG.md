@@ -83,6 +83,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `test_the_installed_xdist_still_needs_the_restart_scheduler` fails the day
   a release carries them.
 
+- A library's Prolog half compiles beside itself on its first import and loads
+  from its `.qlf` in every process after, as `engine/qlf_boot.pl` promised.
+  A package's backing row loaded the half with a direct `load_files/2` that
+  never asked the boot's claim, so every shipped half compiled from source in
+  every process: `!(import! &self (library lib_markup))` read about 70,250
+  inferences each time and now reads 43,486 after the first. setup!'s
+  lib_file, the background loader's lib_thread, `use_module_global/2` and the
+  conformance kit take the same door, and the kit loads at all again: since the
+  bare library name began answering the manifest, it had consulted
+  `lib/lib_conformance/pkg.metta` as Prolog.
+
+- The claim's compile child is the running home's own swipl. It was started
+  from the `executable` flag, which an embedded engine takes from the first
+  `swipl` on PATH, so a Python host whose PATH found the stock binary had
+  every child refused by the host check once that check landed, and no child
+  wrote an artifact. Every process that loaded a library with a native half
+  then compiled `lib/_support/native_build.pl` from source, which is the
+  +10.3k inferences per library load the twins were re-pinned for on the host
+  check's commit; the check itself costs nothing there. The child also writes
+  the artifact of every governed source its file's own load brings in, so a
+  half's nested dependency on another half, lib_string under lib_csv or
+  lib_encoding under lib_uri, loads from an artifact too.
+
 - `mork-bench` no longer fails whenever `c-bench` runs before it in the gate.
   Its preparation purged the governed .qlf set only when stale, so a fresh set
   the C bench had prepared survived, and that set compiles two units the MORK

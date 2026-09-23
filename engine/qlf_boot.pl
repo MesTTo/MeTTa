@@ -67,6 +67,15 @@
 %     [tested: a_claimed_source_is_compiled_by_a_child_and_this_process_reads_the_artifact,
 %     a_stale_artifact_is_recompiled, a_child_marked_process_compiles_in_place;
 %     commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1].
+%   - the child is the running home's own swipl, whatever swipl the PATH
+%     finds, so the host check accepts it and the artifacts are written by
+%     the build that loads them; and it also writes the artifact of every
+%     governed source its file's own load brought in, so a half's nested
+%     governed dependency loads from an artifact in every later process
+%     [tested: extensions/python/tests/repository/test_library_halves.py,
+%     test_the_first_import_compiles_each_half_once_in_a_child and
+%     test_a_later_process_loads_every_governed_source_from_its_artifact;
+%     commit=WORKTREE].
 %   - the engine's own set is written by the same hermetic child (-f none,
 %     --no-packs) when a boot finds it absent, so no process's flags,
 %     initialisation file or packs shape an artifact the tree shares
@@ -219,8 +228,12 @@ seam:compiled_source(File) :-
 
 %A claimed source whose artifact is absent or older than it is compiled by a
 %CHILD swipl before this process loads it, so the compile's inferences land
-%in no measurement of this process: every importer of a library reads the
-%same count, the first one included. Without this the first importer after
+%in no measurement of this process: the first importer pays only the decision
+%to start the child, about 32 inferences a half, and every importer after it
+%reads one count [measured 2026-09-24: lib_uri's import, 62,686 in the process
+%that started two children and 62,622 in each of two later ones, in a copied
+%tree by extensions/python/tests/repository/test_library_halves.py's probe].
+%Without this the first importer after
 %a purge paid the compile, and a lane that prices processes read that one
 %process apart from the rest: the twins lane's combinatorics example read
 %97,944 inferences in the run that wrote lib_combinatorics.qlf and 75,810
@@ -282,21 +295,35 @@ qlf_artifact_stale(File, Artifact) :-
     ;   true
     ).
 
-%The executable flag names the real swipl in a standalone process and in an
-%embedding (janus reports /usr/lib/swi-prolog/bin/x86_64-linux/swipl for a
-%Python process); a C host may report itself, and SWI's own install layout,
-%<home>/bin/<arch>/swipl, is the next answer. The bare name is the last, and
-%the shell's failure to find it reads as a failed child.
-qlf_swipl(Swipl) :-
-    current_prolog_flag(executable, Swipl),
-    file_base_name(Swipl, Base),
-    qlf_member(Base, [swipl, 'swipl.exe']),
-    !.
+%The child has to be the BUILD this process runs: the host check it boots
+%through refuses any other (engine/host_check.pl, the compiled_at binding),
+%and an artifact every process on the tree loads has to be written by the
+%build that loads it. The running home's own binary, <home>/bin/<arch>/swipl
+%in SWI's install layout, is that build, because the home is the install this
+%process's libswipl came from and that binary links the same library. The
+%executable flag is not, in an embedding: janus derives it from the first
+%swipl on PATH, so a Python host whose PATH found the stock /usr/bin/swipl
+%started the stock binary on the patched home, the check refused it, and no
+%child wrote an artifact from f2822e2ae on. Every process that loaded a
+%library with a native half then compiled lib/_support/native_build.pl from
+%source, 10,799 inferences where its artifact loads for 516, which is the
+%+10.3k that commit was charged per library load [measured 2026-09-24: strace
+%of the twins lane's warm-up, 47 execs of
+%/usr/lib/swi-prolog/bin/x86_64-linux/swipl each refused and 0 of 46 artifacts
+%written, and 46 of 46 with this order]. The flag is next, for a build
+%tree whose home holds no bin/ and where a standalone swipl's flag names
+%itself; the bare name is last, and the shell's failure to find it reads as a
+%failed child.
 qlf_swipl(Swipl) :-
     current_prolog_flag(home, Home),
     current_prolog_flag(arch, Arch),
     atomic_list_concat([Home, '/bin/', Arch, '/swipl'], Swipl),
     system:exists_file(Swipl),
+    !.
+qlf_swipl(Swipl) :-
+    current_prolog_flag(executable, Swipl),
+    file_base_name(Swipl, Base),
+    qlf_member(Base, [swipl, 'swipl.exe']),
     !.
 qlf_swipl(swipl).
 
@@ -308,16 +335,33 @@ qlf_shell_word(Text, Word) :-
     atomic_list_concat(['\'', Joined, '\''], Word).
 
 %The child's whole job: raise the flag that says so, boot the engine the way
-%every host does, and compile the one file its command line names beside
-%itself. Its output is discarded by the parent and its status is the
-%parent's only reading, and a failure to compile is the next load's to
-%report, loudly, in the process that asked.
+%every host does, compile the one file its command line names beside itself,
+%then compile every governed source that file's own load brought in and found
+%stale. The second step is what lets a half's nested dependency load from an
+%artifact. A use_module inside a half names a stem, and SWI's '$qlf_file'/5
+%loads a fresh artifact for a stem but writes one only under a qcompile option
+%or flag, which a nested load in the importing process never carries; so
+%lib/_support/native_build.pl, which every library with a native half loads,
+%and lib_string.pl under lib_csv.pl compiled from source in every process
+%that reached them. Only governed sources are compiled, so an artifact still
+%appears only where the stamp purges it, and a file loaded before the
+%argument's own load, the engine included, is not this child's to write.
+%Its output is discarded by the parent and its status is the parent's only
+%reading, and a failure to compile is the next load's to report, loudly, in
+%the process that asked; that is also why one nested file that fails to
+%compile does not keep the rest from being written.
 qlf_compile_argument :-
     create_prolog_flag(metta_qlf_child, true, []),
     current_prolog_flag(argv, Argv),
     qlf_last(Argv, File),
     qlf_load_engine,
-    qcompile(File).
+    findall(Loaded, source_file(Loaded), Before),
+    qcompile(File),
+    forall(( source_file(Loaded),
+             \+ qlf_member(Loaded, Before),
+             qlf_governed_source(Loaded),
+             qlf_artifact_stale(Loaded, _) ),
+           catch(qcompile(Loaded), _, true)).
 
 %The engine's own set is written by a child for the same reason a library
 %half is: the first process to boot after a purge compiled it in place, under

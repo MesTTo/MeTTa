@@ -670,8 +670,7 @@ package_open_head(_, _, [Token|_], Name, Arity) :-
     metta_host_open_function(Name, Token, Arity).
 
 % Native clauses have process lifetime; only their MeTTa registration belongs
-% to the source. Direct load_files/2 keeps import offline even when a compiled
-% artifact is stale and the ordinary loader would invoke a compiler child.
+% to the source.
 'package-prolog'(File, Names, true) :-
     metta_engine:check_prolog_function_names(Names, File, true),
     current_metta_space(Home), space_module(Home, Module),
@@ -693,6 +692,19 @@ package_open_head(_, _, [Token|_], Name, Arity) :-
 % SWI load_files/2 imports([]) separates loading from namespace publication:
 % https://www.swi-prolog.org/pldoc/doc_for?object=load_files/2
 % [tested: package_laws:unselected_native_exports_leave_equation_heads_free; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% The load goes through metta_load_source/2, the engine's one door for a
+% runtime-loaded Prolog source, so the boot's claim decides it as it decides
+% every other: a half inside the stamped set (lib/*/*.pl) loads from its
+% artifact, written by the boot's hermetic compile child when absent or stale,
+% and a backing inside any other package (a program's own directory, a
+% git-fetched checkout) is claimed by nothing and loads from source with no
+% child and no artifact, which keeps such an import offline. The direct
+% load_files/2 this replaced compiled every shipped half from source in every
+% process and wrote no artifact; the cost is recorded in
+% docs/journal/2026-09-09-runtime-units-compile-beside-their-source.md
+% [tested: package_laws:a_backing_row_loads_its_half_through_the_claim,
+% package_laws:an_unclaimed_backing_loads_from_source_and_leaves_no_artifact;
+% commit=WORKTREE].
 package_load_native(File, Owner) :-
     ( source_file_property(File, module(Context)) -> true
     ; source_file_property(File, load_context(Context, _, _)) -> true
@@ -700,7 +712,8 @@ package_load_native(File, Owner) :-
       set_module(Context:base(metta_engine)) ),
     filereader:with_owning_source_load(none,
         metta_engine:loading_loudly(
-            load_files(Context:File, [expand(true), if(changed), imports([])]))),
+            metta_engine:metta_load_source(Context:File,
+                                           [expand(true), if(changed), imports([])]))),
     ( source_file_property(File, module(Owner)) -> true ; Owner = Context ).
 
 package_native_declarations(File, Home, Module, Names) :-
@@ -952,15 +965,21 @@ package_record_form(File, Parsed, Row) :-
 
 % Reuse lib_file's same-filesystem staged publication. It owns and removes the
 % stage even when the writer or rename fails; the receipt remains unchanged.
+% lib_file's half loads through the engine's one door for a runtime-loaded
+% Prolog source, as an imported half does, so it takes its artifact too.
+package_publish(File, Writer) :-
+    metta_engine:library('lib_file/lib_file.pl', Library),
+    metta_engine:metta_load_source(packages:Library,
+                                   [if(not_loaded), must_be_module(true), imports([])]),
+    lib_file:metta_staged_publish(File, Writer).
+
 package_publish_rows(Directory, Name, Rows) :-
-    metta_engine:library('lib_file/lib_file.pl', Library), use_module(Library, []),
     directory_file_path(Directory, Name, File),
-    lib_file:metta_staged_publish(File, packages:package_write_rows(Rows)).
+    package_publish(File, packages:package_write_rows(Rows)).
 
 package_publish_receipt(Directory, Setup, Rows) :-
-    metta_engine:library('lib_file/lib_file.pl', Library), use_module(Library, []),
     directory_file_path(Directory, 'performed.metta', File), variant_sha1(Setup, Digest),
-    lib_file:metta_staged_publish(File, packages:package_write_receipt(Digest, Rows)).
+    package_publish(File, packages:package_write_receipt(Digest, Rows)).
 
 package_write_receipt(Digest, Rows, File) :-
     setup_call_cleanup(open(File, write, Stream, [encoding(utf8)]),
