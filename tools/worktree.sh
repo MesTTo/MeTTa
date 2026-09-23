@@ -25,6 +25,11 @@
 #     only unlink-then-create did not; commit=7f3473649f8e54e6265f9b054cb8bdb4f6d1fdff]. A copy costs 2.5 MB
 #     and a build in the worktree lands in the worktree
 #     [tested: tests/shell/test_worktree_configuration.sh; commit=7f3473649f8e54e6265f9b054cb8bdb4f6d1fdff].
+#   - after this, every package with a package-lock.json (extensions/node,
+#     website) has the node_modules its lockfile names, installed by npm ci, so
+#     the suites that drive Node run here as they do in the main checkout
+#     [measured 2026-09-24: without them a fresh worktree failed two Node
+#     suites on ERR_MODULE_NOT_FOUND].
 #   - the C extension example's cbump and handle shared objects are built in
 #     the worktree exactly as check.sh builds them, so a direct pytest run
 #     here exercises the same integration surface instead of skipping it.
@@ -156,6 +161,27 @@ else
         { echo "worktree.sh: an engine C artefact failed to build; suites here would measure a Prolog fallback against pins measured with the C one" >&2
           exit 1; }
 fi
+
+# The Node dependencies are gitignored build input too, and the suites that
+# drive Node fail on a missing module rather than skip, so a worktree without
+# them reports defects its tree does not have [measured 2026-09-24: a fresh
+# worktree at 3620aa797 failed test_the_site_build_refuses_without_the_browser_kit
+# and test_the_node_term_table_and_codec_legs_follow_the_catalog on
+# ERR_MODULE_NOT_FOUND for extensions/node/node_modules/esbuild]. Each package
+# with a lockfile gets exactly what its lockfile names through `npm ci`,
+# offline first so a warm cache costs no network. A missing npm is noted, as a
+# missing C toolchain is; an install that is attempted and fails is fatal.
+for package in extensions/node website; do
+    [ -f "$HERE/$package/package-lock.json" ] || continue
+    [ -d "$HERE/$package/node_modules" ] && continue
+    if ! command -v npm >/dev/null 2>&1; then
+        echo "worktree.sh: npm not found, $package has no node_modules and the suites driving it will fail" >&2
+        continue
+    fi
+    bounded npm ci --prefer-offline --no-audit --no-fund --prefix "$HERE/$package" >/dev/null ||
+        { echo "worktree.sh: npm ci failed in $package; the suites driving it would fail for want of its modules" >&2
+          exit 1; }
+done
 
 # Warm the engine once so the Quick Load Format artifacts generate in a
 # single process before any concurrent lane first-boots this tree
