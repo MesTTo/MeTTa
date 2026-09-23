@@ -173,14 +173,38 @@ USAGE
 tree_for() { echo "$HOME_TREE/ai-tmp/wt-battery-$1"; }
 
 # A tree is occupied only while its recorded PID still answers. A stale record
-# from a killed run must not block the tree forever.
+# from a killed run must not block the tree forever, and the claimant's own
+# record, written at the claim below, is not somebody else's occupancy.
 occupant() {
     pidfile="$1/ai-tmp/battery.pid"
     [ -f "$pidfile" ] || return 1
     pid=$(head -1 "$pidfile" 2>/dev/null) || return 1
     case "$pid" in ''|*[!0-9]*) return 1 ;; esac
+    [ "$pid" = "$$" ] && return 1
     kill -0 "$pid" 2>/dev/null || return 1
     echo "$pid"
+}
+
+# Claimed before anything is written and held until the command ends. The
+# occupancy check above ran inside provision while `run` wrote its PID only
+# after provisioning and verifying, so the longest window, the copy and the
+# component identities, was unclaimed: two runs that picked one free index at
+# once both passed the check and provisioned the tree together, and each one's
+# rsync --delete or seed removal took the other's component identity out from
+# under it [the record, 2026-09-24: "mv: cannot stat
+# .../extensions/python.gitseed/.git" in battery 2, and a seed left holding
+# only its gitfile in battery 75]. flock(1) is released by the kernel when the
+# holder exits, so a killed run leaves nothing to clear, which a PID record
+# cannot promise; the PID record is still written, at the claim, for anyone
+# reading occupancy from it. The lock is a file beside the tree rather than in
+# it, because the tree may not exist yet and the snapshot owns its contents.
+claim() {
+    mkdir -p "$HOME_TREE/ai-tmp"
+    exec 9>"$HOME_TREE/ai-tmp/wt-battery-$1.lock"
+    flock -n 9 || {
+        echo "battery $1 is claimed by another run; pick another index" >&2
+        exit 1
+    }
 }
 
 # A battery has to be able to answer `git` about ITSELF. Without a .git it has
@@ -386,22 +410,32 @@ verify() {
 [ $# -ge 2 ] || usage
 command=$1; index=$2; shift 2
 case "$command" in
-    provision) provision "$index" ;;
+    provision) claim "$index"; provision "$index" ;;
     path)      tree_for "$index" ;;
     verify)    verify "$index" ;;
     run)
         [ "${1:-}" = "--" ] || usage
         shift
         [ $# -ge 1 ] || usage
-        provision "$index"
-        verify "$index" > /dev/null
+        claim "$index"
         tree=$(tree_for "$index")
-        log="$tree/ai-tmp/battery-$index.log"
+        # The occupancy record goes in with the claim, before the copy, so a
+        # reader of it sees the tree taken for the whole provision too.
+        if held=$(occupant "$tree"); then
+            echo "battery $index is running as PID $held; pick another index" >&2
+            exit 1
+        fi
+        mkdir -p "$tree/ai-tmp"
         echo "$$" > "$tree/ai-tmp/battery.pid"
         git -C "$ROOT" rev-parse HEAD >> "$tree/ai-tmp/battery.pid" 2>/dev/null || true
+        provision "$index"
+        verify "$index" > /dev/null
+        log="$tree/ai-tmp/battery-$index.log"
         # Never piped: a pipeline reports the filter's status and a failed gate
-        # would read as a pass. The log is read separately.
-        ( cd "$tree" && "$@" ) > "$log" 2>&1 && status=0 || status=$?
+        # would read as a pass. The log is read separately. The claim's
+        # descriptor is closed for the command, so a daemon the gate leaves
+        # running cannot hold the battery after this run has ended.
+        ( cd "$tree" && "$@" 9>&- ) > "$log" 2>&1 && status=0 || status=$?
         rm -f "$tree/ai-tmp/battery.pid"
         echo "battery $index: exit $status, log $log"
         exit "$status"

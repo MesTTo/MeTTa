@@ -99,6 +99,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Two runs can no longer provision one battery together. `tools/battery.sh`
+  checked a battery's occupancy inside provisioning but recorded its own run
+  only after provisioning, so two sessions that picked the same free index at
+  once both passed the check, and each one's copy or seed removal took the
+  other's component identity out from under it. A run and a provision now
+  claim the index with `flock` before anything is written and hold it until
+  they end; the kernel releases the claim when the holder exits, so a killed
+  run leaves nothing to clear.
+
 - The parity-perf lane no longer reports TREE DRIFT. Six rows' within-tree
   inference tripwires had drifted past their allowance by the `pkg.metta` entry
   path, 3,319 to 4,130 inferences for every library a program enters, by

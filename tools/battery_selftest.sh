@@ -86,6 +86,29 @@ printf 'log\n' > "$TREE/ai-tmp/run.log"
 printf 'bytes\n' > "$TREE/package/__pycache__/mid.pyc"
 expect "excluded scratch written into the battery" 0
 
+# Two runs that pick one free index at once must not provision it together:
+# the claim is taken before anything is written, and a second claimant is
+# refused while the first holds it. The holder here is this shell, on its own
+# descriptor, so no background process and no wait are needed; releasing it
+# frees the index again.
+exec 8>"$(dirname "$TREE")/wt-battery-$INDEX.lock"
+flock -n 8
+if BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX" \
+       > "$FIXTURE/out" 2>&1
+then
+    echo "  FAIL a battery another run has claimed: provisioned anyway"
+    failures=$((failures + 1))
+elif grep -q 'claimed by another run' "$FIXTURE/out"; then
+    echo "  ok   a battery another run has claimed: refused, naming the claim"
+else
+    echo "  FAIL a battery another run has claimed: refused for another reason"
+    cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+exec 8>&-
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+expect "a battery whose claim was released" 0
+
 # A compiled Prolog artifact is a cache whose copy is wrong rather than stale:
 # SWI loads a .qlf found outside the directory it was compiled in as moved and
 # charges 8 inferences per recorded source for it. So the source's is never
