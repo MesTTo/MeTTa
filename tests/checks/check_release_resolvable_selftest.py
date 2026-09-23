@@ -288,7 +288,7 @@ class _Refusing(http.server.BaseHTTPRequestHandler):
         """Refuse, the way a loaded index refuses."""
         self.send_error(503)
 
-    def log_message(self, format: str, *args: object) -> None:  # noqa: A002  -- the base class names it
+    def log_message(self, *_: object) -> None:
         """Say nothing: the selftest's own output is its report."""
 
 
