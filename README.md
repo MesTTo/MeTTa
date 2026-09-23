@@ -49,16 +49,16 @@ sudo apt install swi-prolog          # macOS: brew install swi-prolog
 One engine, in Prolog and C. Everything else reaches it through a declared
 seam, so each piece is built, versioned and published on its own.
 
-| Component | Repository | What it is |
-|---|---|---|
-| the engine | `engine/` | translator, matcher, spaces, catalog, extension points, the C half |
-| Python | [PyMeTTa](https://github.com/MesTTo/PyMeTTa) | Python is the notation and the engine is the meaning |
-| TypeScript | [TSMeTTa](https://github.com/MesTTo/TSMeTTa) | the same, through Node and a WebAssembly boot |
-| C | [CMeTTa](https://github.com/MesTTo/CMeTTa) | a C program opens the engine in its own process |
-| the libraries | [MeTTa-Library-Pack](https://github.com/MesTTo/MeTTa-Library-Pack) | written in MeTTa over the primitives, so they outlive the engine |
-| the examples | [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | executable programs, the semantics documentation |
-| the integrations | [PyMeTTa-Extensions](https://github.com/MesTTo/PyMeTTa-Extensions) | a library registers a row and the core names it nowhere |
-| a storage backend | [MeTTa-MORK](https://github.com/MesTTo/MeTTa-MORK) | spaces on MORK's Rust trie |
+| Component | Repository | Install | What it is |
+|---|---|---|---|
+| the engine | `engine/` | in the PyMeTTa and TSMeTTa packages | translator, matcher, spaces, catalog, extension points, the C half |
+| Python | [PyMeTTa](https://github.com/MesTTo/PyMeTTa) | `pip install pymetta` | Python is the notation and the engine is the meaning |
+| TypeScript | [TSMeTTa](https://github.com/MesTTo/TSMeTTa) | `npm install tsmetta` | the same, through Node and a WebAssembly boot |
+| C | [CMeTTa](https://github.com/MesTTo/CMeTTa) | from source | a C program opens the engine in its own process |
+| the libraries | [MeTTa-Library-Pack](https://github.com/MesTTo/MeTTa-Library-Pack) | in the PyMeTTa package | written in MeTTa over the primitives, so they outlive the engine |
+| the examples | [MeTTa-Examples](https://github.com/MesTTo/MeTTa-Examples) | clone it | executable programs, the semantics documentation |
+| the integrations | [PyMeTTa-Extensions](https://github.com/MesTTo/PyMeTTa-Extensions) | `pip install metta-pandas`, and its siblings | a library registers a row and the core names it nowhere |
+| a storage backend | [MeTTa-MORK](https://github.com/MesTTo/MeTTa-MORK) | from source | spaces on MORK's Rust trie |
 
 ## The four ways in
 
