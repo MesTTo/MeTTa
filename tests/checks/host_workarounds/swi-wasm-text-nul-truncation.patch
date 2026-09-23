@@ -1,0 +1,41 @@
+diff --git a/src/wasm/prolog.js b/src/wasm/prolog.js
+index b52a948..98eb1e3 100644
+--- a/src/wasm/prolog.js
++++ b/src/wasm/prolog.js
+@@ -704,6 +704,8 @@ class Prolog
+ 	'PL_get_functor', 'number', ['number', 'number']),
+       PL_get_chars: this.module.cwrap(
+ 	'PL_get_chars', 'number', ['number', 'number', 'number']),
++      PL_get_nchars: this.module.cwrap(
++	'PL_get_nchars', 'number', ['number', 'number', 'number', 'number']),
+       PL_get_arg: this.module.cwrap(
+ 	'PL_get_arg', 'number', ['number', 'number', 'number']),
+       PL_get_int64: this.module.cwrap(
+@@ -1920,19 +1922,24 @@ class Prolog
+     return !!this.bindings.PL_put_term_from_chars(t, this.REP_UTF8, -1, string);
+   };
+ 
+-// Converts the argument term to a string.
++// Converts the argument term to a string.  The text is read by its
++// length rather than up to its first zero byte, so a string or atom
++// holding U+0000 reaches JavaScript whole.
+   get_chars(term, flags)
+   { const ptr = _malloc(4);
++    const lenp = _malloc(4);
+     let rc;
+     flags  = flags||(this.CVT_ALL|this.CVT_WRITEQ);
+     flags |= this.CVT_EXCEPTION|this.REP_UTF8;
+     const mark = this.bindings.WASM_mark_string_buffers();
+-    if (this.bindings.PL_get_chars(term, ptr, flags)) {
+-      rc = this.module.UTF8ToString(this.module.getValue(ptr, 'i32'));
++    if (this.bindings.PL_get_nchars(term, lenp, ptr, flags)) {
++      rc = this.module.UTF8ToString(this.module.getValue(ptr, 'i32'),
++				    this.module.getValue(lenp, 'i32'), true);
+     } else {
+       rc = null;
+     }
+     this.bindings.PL_release_string_buffers_from_mark(mark);
++    _free(lenp);
+     _free(ptr);
+ 
+     return rc;

@@ -1164,6 +1164,30 @@ Lifted when: SWI-Prolog's LibBF `mpz_powm()` reduces its initial value; the
   patch and the entry go together then.
 Record: docs/journal/2026-09-24-wasm-library-halves.md.
 
+## swi-wasm-text-nul-truncation
+Host: SWI-Prolog 10.1.14's WebAssembly build as shipped; `get_chars()` in
+  src/wasm/prolog.js:1924 at swipl-devel V10.1.14 (6977543), which the link
+  prepends to swipl-web.js, and through which every string, atom and error
+  text the engine hands JavaScript passes.
+Defect: `get_chars()` takes the engine's UTF-8 from `PL_get_chars()` and
+  decodes it with `UTF8ToString(ptr)`, which stops at the first zero byte, so
+  text holding U+0000 arrives in JavaScript cut short with no error: the text
+  of `(string-from-codes (97 0 129418))` arrives as "a". The engine keeps it
+  whole, and JavaScript text going in keeps it too; only this decode loses it.
+Reproduction: tests/checks/host_workarounds/swi-wasm-text-nul-truncation.sh,
+  a string and an atom holding U+0000 read back through the WebAssembly host
+  the tree vendors (`extensions/node/_host`, or `WASM_HOST_DIR`), beside a
+  NUL-free control; `present` when either arrives shortened.
+Patch: tests/checks/host_workarounds/swi-wasm-text-nul-truncation.patch,
+  against swipl-devel V10.1.14 src/wasm/prolog.js: `get_chars()` calls
+  `PL_get_nchars()`, which `exports.json` already exports, and decodes exactly
+  the length it reports with `UTF8ToString(ptr, len, true)`, emscripten's
+  decode that does not stop at a zero byte (`findStringEnd` in emsdk 6.0.9's
+  src/lib/libstrings.js). A native build never compiles the file.
+Lifted when: SWI-Prolog's `get_chars()` reads text by its length; the patch
+  and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md.
+
 ## swi-infinite-division-zero-sign
 Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).

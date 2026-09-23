@@ -122,6 +122,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   declares it. A GMP build never compiles the file, so the native host needs
   only its declaration rewritten.
 
+- Text holding U+0000 reaches JavaScript whole on the WebAssembly host. The
+  host's `get_chars()` (`src/wasm/prolog.js`) decoded the engine's UTF-8 up
+  to its first zero byte, so `(string-from-codes (97 0 129418))` arrived in
+  JavaScript as "a", with no error; `swi-wasm-text-nul-truncation.patch`
+  reads the text by the length `PL_get_nchars()` reports, and every host
+  declares it.
+
 - `lib_database.plt`'s abandoned-engine test no longer races the lock's
   release: it observed `finish_store/3`, which runs before the lock stream
   closes, and failed 2 of 3 runs under load; it now observes `store_owner/2`'s

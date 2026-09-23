@@ -22,4 +22,5 @@ host_patch('swi-query-frame-discarded-on-engine-destroy.patch', '068f6ab5bcf8703
 host_patch('swi-thread-join-detach-window.patch', '418987e80776f6e69611af7912133f2398f208b3cbab5abd6209d1d4a576c192').
 host_patch('swi-transaction-enumerator-repeats-parent.patch', '9a0d35671e46540bd2109602e3d27054d53e36c0d36d9671b0facb98d30eeb6a').
 host_patch('swi-ugraphs-implicit-append.patch', '91a8a47f2e696d302c106478b62cb37bac925a554bd5bedb7da135bab6498824').
+host_patch('swi-wasm-text-nul-truncation.patch', '1d5ea004a7f12f0ab9d78115b4702ec593b7f90cc68f42bffda0d1ca34852405').
 host_patch('swi-wrapper-roundtrip-merges-closures.patch', '7da4db23ff7b999b5e6606299ec0df5b8b723e866c8db57943661a63b446815b').

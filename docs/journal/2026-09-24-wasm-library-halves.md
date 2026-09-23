@@ -144,6 +144,24 @@ answers 0. Fixed in the host: `swi-libbf-powm-unreduced.patch` reduces the
 initial 1. A GMP build never compiles the file, so the native host was
 redeclared, not rebuilt, and its `compiled_at` is unchanged.
 
+### Text holding U+0000
+
+Found by the TypeScript corpus worker on tsmetta bf758a5:
+`m.fn.stringFromCodes([97, 0, 129418])` answered the JavaScript string "a",
+while `(string-codes (string-from-codes (97 0 129418)))` evaluated in the
+engine answered `(97 0 129418)` and JavaScript text going in kept its NUL.
+`get_chars()` in `src/wasm/prolog.js` (line 1924 at V10.1.14) decodes the
+engine's UTF-8 with `UTF8ToString(ptr)`, which stops at the first zero byte,
+and every string, atom and error text the engine hands JavaScript goes
+through it. Read against emsdk 6.0.9 before patching: `UTF8ToString(ptr,
+maxBytesToRead, ignoreNul)` with `ignoreNul` true decodes exactly
+`maxBytesToRead` bytes (`findStringEnd` in `src/lib/libstrings.js`), and
+`_PL_get_nchars` is in the build's `exports.json`. So `get_chars()` now calls
+`PL_get_nchars()` and decodes the length it reports. The reproduction reads a
+string and an atom holding U+0000, one with a supplementary character after
+it so a length in characters rather than bytes would show, through the
+vendored host, and answers `present` there.
+
 ### A test that raced
 
 `lib_database.plt`'s abandoned-engine test waited for `finish_store/3`, which
