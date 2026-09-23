@@ -57,6 +57,10 @@ Guarantees:
     claim a project or miss one [tested: this tool; commit=WORKTREE]
   - `bootstrap` never exceeds PENDING_CAP rows, because a row beyond it
     cannot have a publisher [tested: this tool; commit=WORKTREE]
+  - `deferred` holds the rows past the cap in the same shape as
+    `bootstrap`'s, so with `steady` every distribution's files are found by
+    a stem computed here, and the workflow can refuse a file none of them
+    owns [tested: tools/pending_publishers_selftest.py; commit=WORKTREE]
   - a name already on PyPI is omitted, because a pending publisher is refused
     for an existing project [source: warehouse oidc/views.py:218-224]
 Fails when: pypi.org is unreachable; it reports the name and exits nonzero
@@ -162,6 +166,12 @@ def plan(every, exists, shared):
     seen = {name: exists(name) for name in every}
     missing = [name for name in every if not seen[name]]
     present = [name for name in every if seen[name]]
+    # One row per missing project, the same shape whichever round it falls
+    # in, so the workflow finds a later round's files by the stem computed
+    # here rather than by a second copy of the filename rule.
+    rows = [{"project": n, "stem": filename_stem(n),
+             "environment": bootstrap_environment(n), **shared}
+            for n in missing]
     return {
         # At most PENDING_CAP, because a row beyond it cannot have a pending
         # publisher and its job would fail the OIDC exchange. Truncating here
@@ -169,17 +179,13 @@ def plan(every, exists, shared):
         # meaningful, and it is the same prefix the printed list marks as
         # this round, so what an operator registers and what the workflow
         # presents cannot disagree.
-        "bootstrap": [
-            {"project": n, "stem": filename_stem(n),
-             "environment": bootstrap_environment(n), **shared}
-            for n in missing[:PENDING_CAP]
-        ],
+        "bootstrap": rows[:PENDING_CAP],
         # What the cap left behind. Carried rather than recomputed, so the
         # human count cannot drift from the matrix: reporting len(bootstrap)
         # as the number missing said "3 distributions have no PyPI project
         # yet" while thirteen had none, because bootstrap is capped and the
         # count was taken from it.
-        "deferred": missing[PENDING_CAP:],
+        "deferred": rows[PENDING_CAP:],
         "steady": [filename_stem(n) for n in present],
     }
 
@@ -189,7 +195,7 @@ def main() -> int:
     every = distributions()
     computed = plan(every, on_pypi, shared)
     this_round = [row["project"] for row in computed["bootstrap"]]
-    missing = this_round + computed["deferred"]
+    missing = this_round + [row["project"] for row in computed["deferred"]]
 
     # The machine-readable forms answer FIRST, and for EVERY state including
     # the one where nothing is missing. The human early-return used to sit

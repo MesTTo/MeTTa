@@ -7,6 +7,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The publish workflow can publish files built and verified elsewhere, and
+  it publishes them the same way it publishes its own builds. Dispatched with
+  `assets=<tag>`, the new `fetch` job downloads that GitHub Release's
+  attached files and hands them on as the two artifacts the `build` and
+  `host` jobs make on a version tag, so the planner, the resolvability check,
+  the publish job and the bootstrap job that creates missing projects all
+  run on either source. 0.9.2 needed this: a 24 MB manylinux wheel could not
+  reach upload.pypi.org from the machine that built it, and only the
+  workflow's pending publishers can create the nine members PyPI still lacks.
+
+  The publish job now uploads in an order that never leaves a reader a worse
+  install than before: pymetta's manylinux wheels, its pure wheel, its sdist,
+  then the members that pin it. The bootstrap job runs after it, so a new
+  member never arrives pinning a pymetta the index lacks. The resolvable
+  job's staging accounts for every file, uploading it this run or setting it
+  aside for the round that creates its project, and it stops the run on a
+  file no distribution of the tree owns. `tools/pending-publishers.py
+  --json-plan` gives `deferred` the same rows as `bootstrap`, stems included,
+  so the workflow never re-derives a filename.
+
 ## [0.9.2] - 2026-09-24
 
 ### Added

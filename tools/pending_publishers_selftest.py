@@ -2,14 +2,17 @@
 """Purpose: hold tools/pending-publishers.py's partition, and the filename
     globs the publish workflow uses to realise it, to the property the
     release depends on: every built file is claimed by exactly one of the two
-    jobs, and never by the wrong one.
+    jobs or by a later round, never by the wrong one, and a file no
+    distribution owns is claimed by nothing, which the workflow refuses.
 
 Why it matters. `bootstrap` and `publish` each upload with a token scoped to
 the projects its environment's publisher covers, so a file handed to the
 wrong job is a 403 that fails every upload queued behind it, and
-skip-existing does not cover that. The split is expressed in three places
-that cannot see each other: the planner's Python, `mv staged/<stem>-*` in the
-bootstrap job, and the loop over steady stems in the publish job.
+skip-existing does not cover that. The split is expressed in places that
+cannot see each other: the planner's Python, `mv staged/<stem>-*` in the
+bootstrap job, the loop over steady stems in the publish job, and the
+resolvable job's staging, which sets a later round's files aside and stops
+the run on whatever is left.
 
 Two things this file got wrong first, both worth keeping written down.
 It restated the bootstrap and steady lists as literals, so it checked itself
@@ -118,7 +121,7 @@ def check(mod, published: list[str], present: set[str]) -> list[str]:
     # steady. Checking only bootstrap+steady let a caller take the number
     # missing from the capped list, which reported "3 distributions have no
     # PyPI project yet" while thirteen had none.
-    deferred = computed["deferred"]
+    deferred = [row["project"] for row in computed["deferred"]]
     if len(boot) + len(deferred) + len(steady_stems) != len(published):
         bad.append(f"{len(boot)}+{len(deferred)}+{len(steady_stems)} != "
                    f"{len(published)} for present={sorted(present)}")
@@ -126,14 +129,21 @@ def check(mod, published: list[str], present: set[str]) -> list[str]:
         bad.append(f"deferred {deferred} is not what the cap left of {absent}")
     if set(boot) & set(present):
         bad.append(f"bootstrap {boot} claims something already on PyPI")
-    for row in computed["bootstrap"]:
+    for row in computed["bootstrap"] + computed["deferred"]:
         if row["environment"] != f"pypi-{row['project']}":
             bad.append(f"{row['project']} got environment {row['environment']}")
 
     files = [f for name in published for f in TREE[name]]
     files += TREE[NO_PRODUCER]          # present in the directory, owned by neither
+    # The workflow's three claimants, by the stems it reads: the rows' own
+    # `stem` for this round and the later ones, and `steady` as emitted. A
+    # later round's files are claimed too, because staging sets them aside
+    # and then refuses whatever no stem claimed.
+    claimants = ([("bootstrap", row["stem"]) for row in computed["bootstrap"]]
+                 + [("publish", stem) for stem in steady_stems]
+                 + [("later", row["stem"]) for row in computed["deferred"]])
     claimed: dict[str, str] = {}
-    for stem in [mod.filename_stem(p) for p in boot] + steady_stems:
+    for job, stem in claimants:
         expected = {f for f in files if owner(f) == stem}
         got = set(fnmatch.filter(files, f"{stem}-*"))
         for f in sorted(got - expected):
@@ -142,16 +152,16 @@ def check(mod, published: list[str], present: set[str]) -> list[str]:
             bad.append(f"{stem}-* misses {f}")
         for f in got:
             if f in claimed:
-                bad.append(f"{f} claimed by {claimed[f]} and {stem}")
-            claimed[f] = stem
-    # A distribution deferred past the cap is correctly claimed by nobody:
-    # it waits for the next round. Anything NOT deferred must be claimed.
-    deferred_stems = {mod.filename_stem(n) for n in absent[mod.PENDING_CAP:]}
-    for f in files:
-        if f in claimed:
-            continue
-        if owner(f) in {mod.filename_stem(n) for n in published} - deferred_stems:
-            bad.append(f"{f} is claimed by neither job")
+                bad.append(f"{f} claimed by {claimed[f]} and {job}")
+            claimed[f] = job
+    # What nothing claims is what staging refuses, so it must be EXACTLY the
+    # files of the distribution the release does not publish: one of the
+    # release's own files left over would stop every run, and a stray that
+    # some stem swallowed would be uploaded under the wrong project.
+    unclaimed = {f for f in files if f not in claimed}
+    if unclaimed != set(TREE[NO_PRODUCER]):
+        bad.append(f"staging would refuse {sorted(unclaimed)}, "
+                   f"want exactly {sorted(TREE[NO_PRODUCER])}")
     return bad
 
 
@@ -181,7 +191,9 @@ MUTANTS = [
     ("the pending cap is forgotten",
      "PENDING_CAP = 3", "PENDING_CAP = 99", "tool"),
     ("what the cap left behind is dropped, so nothing can count the total",
-     '"deferred": missing[PENDING_CAP:],', '"deferred": [],', "tool"),
+     '"deferred": rows[PENDING_CAP:],', '"deferred": [],', "tool"),
+    ("a row's stem keeps the project's hyphens, so its files match nothing",
+     '"stem": filename_stem(n)', '"stem": n', "tool"),
     ("prose shadows --json-plan once nothing is missing",
      '    if "--json-plan" in sys.argv:',
      '    if not missing:\n        print("all done")\n        return 0\n'
