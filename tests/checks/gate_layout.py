@@ -54,3 +54,14 @@ BOUNDED = "tools/bounded.sh"
 
 #: The three together, for a caller planting or verifying a whole gate tree.
 DRIVERS = (CHECK, TEST, BOUNDED)
+
+#: How a lane registration OPENS in a gate script, as a regex fragment the
+#: consumers finish with whatever groups they need. It lives here because three
+#: checks were each carrying their own copy and a fourth spelling of the same
+#: line appeared the day lanes started running concurrently: `run_solo`, for a
+#: lane whose evidence is load-sensitive and which therefore cannot share the
+#: box. Two lanes went invisible to `check_evidence_tags` that day --
+#: memory-scale-gate and node-bench, both reported as "names the check.sh lane
+#: ..., which the gate does not run" -- because the pattern had moved in
+#: tools/check.sh and not in the readers.
+LANE_PREFIX = r"^run(?:_solo)?\s+"

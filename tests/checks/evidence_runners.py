@@ -80,7 +80,7 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
-from gate_layout import CHECK, TEST
+from gate_layout import CHECK, LANE_PREFIX, TEST
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -190,7 +190,7 @@ def gate_scripts() -> tuple[Path, ...]:
 # functions those lanes call. A lane's text is the command plus the body of
 # every function it reaches, so a path written inside check_prolog_static
 # belongs to the GATE lane that calls it.
-LANE = re.compile(r"^run\s+(GATE|REPORT)\s+(\S+)\s+(.*)$", re.MULTILINE)
+LANE = re.compile(LANE_PREFIX + r"(GATE|REPORT)\s+(\S+)\s+(.*)$", re.MULTILINE)
 FUNCTION = re.compile(r"^([a-z_][a-z0-9_]*)\(\)\s*\{\n(.*?)^\}", re.MULTILINE | re.DOTALL)
 ONE_LINE_FUNCTION = re.compile(r"^([a-z_][a-z0-9_]*)\(\)\s*\{([^\n]*)\}[ \t]*$", re.MULTILINE)
 # A backslash-newline is ONE logical line to the shell, and LANE's `.` does not

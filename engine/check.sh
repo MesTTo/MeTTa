@@ -166,7 +166,7 @@ check_engine_bench() {
     # than skipping.
     bounded env CHECK_PY="$PY" sh "$HERE/engine/bench.sh"
 }
-run GATE engine-bench check_engine_bench
+run_solo GATE engine-bench check_engine_bench
 
 # What the lane above ASSUMES, checked rather than assumed. engine/bench.sh
 # gates on inferences and allows a case four of them, so a boot whose own count

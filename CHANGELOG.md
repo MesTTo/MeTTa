@@ -288,6 +288,52 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `tools/check.sh` runs its lanes concurrently, four at a time by default and
+  `CHECK_JOBS=1` for the serial run. The gate is 231 lanes and its wall time
+  was their SUM, where the makespan of an independent set is bounded below by
+  `max(longest lane, total work / slots)` instead. Each lane runs in a
+  SUBSHELL, which is what makes this possible at all: 36 lanes name a shell
+  function, an exec cannot exec a function, so every exec-based dispatcher is
+  ruled out while a subshell inherits `bounded`, `in_py` and the lane
+  functions for free. The component gates stay sourced into one shell for the
+  reason they always were, one `run` and one summary table and one exit
+  status; only execution is farmed out.
+
+  Three things had to hold. Output is captured per lane and printed when the
+  lane is reaped, so the log still reads in declaration order, and a `-->`
+  line is printed at dispatch because a log that goes quiet for minutes is one
+  a reader kills. A slot is freed by `wait` on a named PID, so a lane that
+  crashed or was killed frees it exactly as one that exited does. And a lane
+  that was dispatched but left no summary row is now a FAILURE: the parent
+  records every dispatch before the lane starts, so a subshell killed before
+  it could report is counted rather than vanishing, which is how a concurrent
+  harness exits 0 having only heard from the children that survived.
+
+  Declaration order no longer orders execution, so a lane that reads what an
+  earlier lane writes is preceded by a barrier. Two do: every component lane
+  reads what `build` produces, and `memory-scale-gate` reads the two files
+  `memory-scale` writes.
+
+  Two rules keep concurrency from changing what the gate says. A lane whose
+  evidence is LOAD-SENSITIVE runs alone, because sharing the box does not risk
+  a crash there, it changes the quantity being measured: `instructions` and
+  `parity-perf` take `instructions:u`, the four bench lanes take a wall clock,
+  and the two memory-scale lanes take a memory figure. An inference count is
+  deterministic, so `benchmarks` and `twins` keep running in parallel even
+  though both read like performance lanes -- the criterion is the evidence, not
+  the name. `pytest` is solo for its FOOTPRINT instead: its workers were
+  measured at 7.31 GB and 5.01 GB apiece.
+
+  And there is now ONE parallelism budget rather than each level taking the
+  whole box. Lane concurrency and the concurrency inside a lane multiply, so
+  four lanes with a suite queue taking `nproc` and a pytest lane taking sixteen
+  workers asked for over a hundred processes on a thirty-two core machine and
+  drove it from 14GB available to 3GB with 78GB in swap. `METTA_LANE_WIDTH` is
+  `nproc / CHECK_JOBS` and the suite queue takes its width from it. A static
+  division rather than a jobserver's token pool, because a pool needs each
+  worker to hand its token back and a worker killed by the ceiling never does;
+  a division has no token to leak.
+
 - The `plunit` and `dev-typed` lanes share one suite dispatcher,
   `tools/suitequeue.sh`, and run their suites concurrently. They held two
   implementations of one concept: both looped over every suite in

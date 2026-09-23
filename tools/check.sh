@@ -202,6 +202,44 @@ case " $WANT " in *" seat-layering "*) WANT="$WANT layering" ;; esac
 case " $WANT " in *" seat-layering-selftest "*) WANT="$WANT layering-selftest" ;; esac
 FAILED=''
 SKIPPED=''
+# How many lanes run at once. The gate's cost is 231 lanes run strictly one
+# after another, and makespan is bounded below by max(longest lane, total
+# work / slots) rather than by the total, so the slots are what decide whether
+# the run fits a coffee break. Four rather than `nproc`, because a lane is not
+# a single process: the pytest lane alone asks for sixteen workers and the
+# plunit lane for as many as the box has, so slots multiply an internal width
+# that is already near the core count. CHECK_JOBS=1 restores the serial run,
+# which is what to reach for when two lanes' output has to be read together or
+# a lane is suspected of depending on another having finished.
+# Derived from the box rather than frozen. The PRODUCT of this and the per-lane
+# width below is what the machine sees, so the split is the only free choice,
+# and it favours lane COUNT because most lanes are single-threaded: measured
+# 2026-09-23 at four lanes, 35 gate processes drew 502% of a possible 3200%,
+# five of thirty-two cores, with the rest of the box idle. Eight lanes four
+# wide is the same 32 processes and six times the lane parallelism.
+CHECK_JOBS=${CHECK_JOBS:-$(( $(nproc 2>/dev/null || echo 4) / 4 ))}
+[ "$CHECK_JOBS" -lt 1 ] && CHECK_JOBS=1
+# ONE parallelism budget, divided, rather than every level taking the whole
+# box. Lane concurrency and the concurrency INSIDE a lane multiply: with four
+# lanes at once, a suite queue taking `nproc` and a pytest lane taking sixteen
+# workers, this gate asked for well over a hundred processes on a thirty-two
+# core box and drove it from 14GB available to 3GB with 78GB in swap
+# [measured 2026-09-23]. A per-process RLIMIT_DATA ceiling cannot prevent that,
+# because a ceiling is not a reservation (tools/bounded.sh:214-217).
+#
+# A STATIC division rather than a jobserver's token pool, which is what a build
+# system uses for the same problem. A pool needs each worker to hand its token
+# back, and a worker killed by the ceiling or the OOM killer never does -- the
+# failure this repository measured twice on 2026-09-23, once as a suite queue
+# that deadlocked and once as a killed suite reporting green. A division has no
+# token to leak.
+METTA_LANE_WIDTH=$(( $(nproc 2>/dev/null || echo 4) / CHECK_JOBS ))
+[ "$METTA_LANE_WIDTH" -lt 1 ] && METTA_LANE_WIDTH=1
+export METTA_LANE_WIDTH
+LANE_PIDS=''
+LANE_RUNNING=0
+LANE_SEQ=0
+LANE_PRINTED=0
 # Whole seconds per lane and for the run. Without them the only cost signal is
 # a battery's provenance stamp against its log's mtime: one number for 206
 # lanes, which cannot separate a slow lane from a stalled one [2026-09-20: a
@@ -212,10 +250,17 @@ CHECK_STARTED=$(date +%s)
 SUMMARY=$(mktemp "${TMPDIR:-/tmp}/metta-check.XXXXXX")
 MEMORY_SCALE_DATA=$(mktemp "${TMPDIR:-/tmp}/metta-memory-scale.XXXXXX")
 MEMORY_SCALE_STATUS=$(mktemp "${TMPDIR:-/tmp}/metta-memory-scale-status.XXXXXX")
+# One file per lane. Concurrent lanes cannot share a stream: two lanes writing
+# one descriptor interleave mid-line and the result is attributable to neither,
+# so each writes its own file and the files are printed as each lane is reaped,
+# which puts them back in declaration order.
+LANE_PARTS=$(mktemp -d "${TMPDIR:-/tmp}/metta-check-lanes.XXXXXX")
 check_cleanup() {
     status=$?
     trap - EXIT
+    for lane_p in $LANE_PIDS; do kill -TERM "$lane_p" 2>/dev/null; done
     rm -f "$SUMMARY" "$MEMORY_SCALE_DATA" "$MEMORY_SCALE_STATUS" || status=1
+    rm -rf "$LANE_PARTS" || status=1
     metta_gate_scratch_close || status=1
     exit "$status"
 }
@@ -271,7 +316,33 @@ run() {
         return 0
     fi
 
-    printf '\n=== %s [%s] ===\n' "$name" "$tier"
+    # The lane BODY runs in a SUBSHELL. That is what makes concurrency
+    # possible at all here: 36 of these lanes name a shell FUNCTION, an exec
+    # cannot exec a function, so xargs and every other exec-based dispatcher is
+    # ruled out, while a subshell inherits `bounded`, `in_py` and every lane
+    # function for free. The component gates stay SOURCED into this one shell
+    # for the reason they always were -- one `run`, one summary table, one exit
+    # status -- and only the execution is farmed out.
+    LANE_SEQ=$((LANE_SEQ + 1))
+    # Written by the PARENT before the lane starts, so a lane that never
+    # reports is still known to have been dispatched. The check at the replay
+    # reads a missing row as a FAILURE: a subshell killed before its `printf`
+    # would otherwise drop out of the summary entirely and be counted neither
+    # ok nor FAIL, which is a harness that exits 0 because it only recorded the
+    # children that managed to report.
+    printf '%s\t%s\t%s\n' "$LANE_SEQ" "$tier" "$name" >>"$LANE_PARTS/order"
+    # A lane's own text is printed when it is REAPED, which is the only way to
+    # keep the log in declaration order, so nothing about a running lane
+    # reaches the log until the lane ahead of it finishes. That silence is
+    # dangerous rather than merely untidy: a gate whose log stops growing for
+    # six minutes is one a reader kills, and a 43-minute run was killed exactly
+    # that way on 2026-09-23 because a 15-minute quiet spell was read as a
+    # hang. This line is the liveness signal, and it doubles as the record of
+    # which lanes actually overlapped.
+    printf -- '--> %s [%s]\n' "$name" "$tier"
+    (
+        exec >"$LANE_PARTS/$LANE_SEQ.out" 2>&1
+        printf '\n=== %s [%s] ===\n' "$name" "$tier"
     # The bound belongs in a process that shares the LANE's fate, not this
     # driver's. A driver-side wait loop stops enforcing the moment the driver
     # is killed, and sessions here are killed routinely: two swipl children
@@ -321,7 +392,6 @@ run() {
         # the exit status is unchanged; what changes is that the summary says
         # which lanes had nothing to say.
         status=skipped
-        SKIPPED="$SKIPPED $name"
     else
         # A REPORT that exits nonzero has FINDINGS, which is its working state
         # and not a break. Calling both of them FAIL made a burn-down queue
@@ -329,12 +399,89 @@ run() {
         # for the summary to mean anything.
         if [ "$tier" = GATE ]; then
             status=FAIL
-            FAILED="$FAILED $name"
         else
             status=findings
         fi
     fi
-    printf '%s\t%s\t%s\t%s\n' "$tier" "$name" "$status" "$lane_elapsed" >> "$SUMMARY"
+        # The lane's declaration index leads the row. Rows are appended as
+        # lanes FINISH, which under concurrency is not the order they were
+        # declared in, and the table below is documented as being in run
+        # order; carrying the index lets it be restored without a second file.
+        printf '%s\t%s\t%s\t%s\t%s\n' \
+            "$LANE_SEQ" "$tier" "$name" "$status" "$lane_elapsed" >> "$SUMMARY"
+    ) &
+    LANE_PIDS="$LANE_PIDS $!"
+    LANE_RUNNING=$((LANE_RUNNING + 1))
+    while [ "$LANE_RUNNING" -ge "$CHECK_JOBS" ]; do lane_reap_one || break; done
+    return 0
+}
+
+# Reap the OLDEST outstanding lane and print its output. `wait PID` is POSIX
+# where `wait -n` is a bash extension and this driver runs under sh, so the
+# queue frees its slot by waiting on a named child rather than on whichever
+# finishes first. That costs head-of-line blocking -- a fast lane behind a slow
+# one holds its slot -- and buys two things worth more: the slot is freed by
+# the kernel, so a lane that segfaulted or was killed frees it exactly as one
+# that exited does and no slot can leak, and the outputs come back in
+# DECLARATION order, so the log reads as it did when the lanes ran serially.
+lane_reap_one() {
+    # shellcheck disable=SC2086  -- the PID list is deliberately word-split
+    set -- $LANE_PIDS
+    [ "$#" -gt 0 ] || return 1
+    wait "$1" 2>/dev/null
+    shift
+    LANE_PIDS="$*"
+    LANE_RUNNING=$((LANE_RUNNING - 1))
+    LANE_PRINTED=$((LANE_PRINTED + 1))
+    if [ -f "$LANE_PARTS/$LANE_PRINTED.out" ]; then
+        cat "$LANE_PARTS/$LANE_PRINTED.out"
+        rm -f "$LANE_PARTS/$LANE_PRINTED.out"
+    fi
+    return 0
+}
+
+# A lane whose evidence is LOAD-SENSITIVE runs alone. The criterion is not
+# that a lane measures -- it is what it measures. An inference count is
+# deterministic, and extensions/python/check.sh says so where the `scaling`
+# lane gates on one: "it needs no quiet box: all eight families returned
+# identical counts across three processes at loadavg 3.40 and again at 5.97".
+# A wall clock, an `instructions:u` sample and a memory figure are not, and
+# sharing the box does not risk a crash for those, it silently changes the
+# quantity being measured.
+#
+# So `benchmarks` and `twins` stay parallel, both gating on inferences --
+# `--counter-only` passes `--benchmark-disable`, which turns the wall clock
+# off -- while `instructions` and `parity-perf` take instructions:u, the four
+# bench lanes take wall clock, and the two memory-scale lanes take memory.
+# `pytest` is here for a different reason: its workers were measured at
+# 7.31 GB and 5.01 GB apiece on 2026-09-23, so it is the one lane whose
+# FOOTPRINT rather than whose evidence makes it a bad neighbour.
+#
+# Declared at the lane rather than inferred from its name, because a name that
+# happens to contain `bench` is a spelling and dispatch does not go on
+# spelling. A lane added tomorrow that takes a timing without saying so is the
+# gap this cannot close.
+run_solo() {
+    lane_barrier
+    run "$@"
+    lane_barrier
+}
+
+# Every outstanding lane, in order. Used at the end of the run and wherever a
+# lane below depends on one above having finished.
+#
+# THE ORDERING RULE, because declaration order no longer orders execution: a
+# lane that READS what an earlier lane WRITES is preceded by a call to this.
+# Two such dependencies exist today and each says so at its own site -- the
+# `build` lane above, which every component lane reads the output of, and
+# memory-scale-gate in extensions/python/check.sh, which reads the two files
+# memory-scale produces. A third would be found the same way this one was, by
+# a lane consuming a run-scoped file another lane creates; `git grep` for the
+# variables declared beside SUMMARY is where to look.
+lane_barrier() {
+    while [ "$LANE_RUNNING" -gt 0 ]; do lane_reap_one || break; done
+    LANE_PIDS=''
+    LANE_RUNNING=0
 }
 
 in_py() { ( cd "$PYDIR" && bounded "$@" ); }
@@ -428,6 +575,12 @@ run GATE worktree sh -c "cd '$HERE' && sh tests/shell/test_worktree_configuratio
 # fingerprint check rather than a compile [measured 2026-08-28: 5.0s warm].
 # Umbrella: the build driver composes engine, seats and chapter-19 examples.
 run GATE build sh -c "cd '$HERE' && sh tests/shell/test_build_is_idempotent_and_anchored.sh"
+# DEVELOPING.md records that the umbrella runs `worktree` and `build` first and
+# then every component's lanes: those two are a PREREQUISITE of the rest rather
+# than peers of it, since the component lanes read what build.sh produces. The
+# concurrency below them is therefore bounded above by this line, not by the
+# top of the file.
+lane_barrier
 
 # Every component's own lanes, DISCOVERED. A component is a directory with a
 # check.sh, the same rule the engine applies to a control file and build.sh
@@ -599,7 +752,7 @@ run GATE   petta        sh -c "cd '$HERE' && '$PY' tests/conformance/petta.py --
 # readable before the gate, and the lane refuses where CI=true, the same line
 # check_docs_site draws below.
 # Umbrella: the upstream and assembled local engines share the conformance corpus and counter harness.
-run GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_parity.py"
+run_solo GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_parity.py"
 
 # and the plant that proves the lane above can fail: thirteen cases, one
 # function each, one honest control the lane must stay green on and twelve
@@ -1241,9 +1394,38 @@ if [ -n "$WANT" ] && [ -z "$MATCHED_LANES" ]; then
 fi
 [ "$CHECK_LIST" = 1 ] && exit 0
 
+# Every lane still running, printed in declaration order as it is reaped.
+lane_barrier
+
+# A lane that was DISPATCHED but left no summary row did not report: its
+# subshell was killed before its `printf`, by the OOM killer, by a signal or by
+# this driver being torn down. Absence has to read as failure, because the
+# alternative is a harness that exits 0 having recorded only the children that
+# survived long enough to say otherwise. The parent wrote the order file before
+# each lane started, so what was dispatched is known independently of what
+# reported.
+# Keyed on FILENAME rather than on `NR == FNR`, which is the usual spelling
+# and is wrong here: with an EMPTY first file NR == FNR still holds for the
+# first record of the second, so the first dispatched lane would be read as a
+# reported one. An empty $SUMMARY means NOTHING reported, which is exactly the
+# case this check exists for, so the idiom fails where it is needed most.
+awk -F'\t' -v reported_from="$SUMMARY" '
+    FILENAME == reported_from { reported[$3] = 1; next }
+    !($3 in reported) { printf "%s\t%s\t%s\tFAIL\t0\n", $1, $2, $3 }
+' "$SUMMARY" "$LANE_PARTS/order" > "$LANE_PARTS/missing"
+cat "$LANE_PARTS/missing" >> "$SUMMARY"
+
+# DERIVED from the summary rather than accumulated while running. A subshell
+# cannot assign to its parent, and these two were only ever a function of the
+# status column, so reading them back off the table removes a second
+# representation instead of adding machinery to keep it.
+SKIPPED=$(awk -F'\t' '$4 == "skipped" { printf " %s", $3 }' "$SUMMARY")
+FAILED=$(awk -F'\t' '$2 == "GATE" && $4 == "FAIL" { printf " %s", $3 }' "$SUMMARY")
+
 # -------------------------------------------------------------------- report
 printf '\n================ summary ================\n'
-awk -F'\t' '{ printf "%-6s %-12s %-9s %5ds\n", $1, $2, $3, $4 }' "$SUMMARY"
+sort -t"$(printf '\t')" -k1,1n "$SUMMARY" |
+    awk -F'\t' '{ printf "%-6s %-12s %-9s %5ds\n", $2, $3, $4, $5 }' 
 
 # The table is in run order, which is the wrong order for the one question a
 # reader brings to it. Ten rows, because the cost here is long-tailed: the

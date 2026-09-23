@@ -172,7 +172,16 @@ from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-from evidence_runners import ROOT, Execution, executed, gate_scripts, owned, prolog_loads, tracked
+from evidence_runners import (
+    LANE_PREFIX,
+    ROOT,
+    Execution,
+    executed,
+    gate_scripts,
+    owned,
+    prolog_loads,
+    tracked,
+)
 
 #: Where BOTH obligations apply: a tag that names something must be backed,
 #: and a Guarantees line must carry a tag at all. The second is the stricter
@@ -1410,7 +1419,7 @@ def npm_scripts() -> frozenset[str]:
 
 #: How check.sh names a lane, so a command naming a lane that does not exist is
 #: still a finding.
-CHECK_LANE = re.compile(r"^run\s+(?:GATE|REPORT)\s+([a-z0-9-]+)", re.MULTILINE)
+CHECK_LANE = re.compile(LANE_PREFIX + r"(?:GATE|REPORT)\s+([a-z0-9-]+)", re.MULTILINE)
 
 
 def gate_lanes() -> frozenset[str]:

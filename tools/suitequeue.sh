@@ -42,7 +42,9 @@ set -u
 SUITE_BODY=${1:-}
 [ -n "$SUITE_BODY" ] || { echo "suitequeue: a command is required" >&2; exit 2; }
 
-slots=$(nproc 2>/dev/null || echo 4)
+# The gate divides one budget across its concurrent lanes and names this
+# share; run by hand with nothing else in flight, the whole box is the share.
+slots=${METTA_LANE_WIDTH:-$(nproc 2>/dev/null || echo 4)}
 parts=$(mktemp -d)
 queue_pid=
 # SIGTERM to the `bounded` wrapper rather than SIGKILL to xargs: bounded.sh's
