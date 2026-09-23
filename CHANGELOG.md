@@ -122,6 +122,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   verifying, and swept from the battery by the next provision. The tracked
   record, `agenticmind.json`, is copied as before. `tools/battery_selftest.sh`
   holds all three halves, and each fails against the previous script.
+- The benchmark harness counts the `swipl` the measurement environment names.
+  perf puts its own directories ahead of the `PATH` it hands its workload, so
+  every instruction sample of a bare `swipl` ran the stock
+  `/usr/lib/swi-prolog` build on the patched home. Since the engine's host
+  check began refusing that pairing, `engine-bench` has measured nothing.
+  `metta_benchmarking` now resolves the workload against the measurement
+  `PATH` before perf or Cachegrind starts it, and every instruction pin in
+  `engine/bench-baseline.json` is re-taken on the patched build.
+
 - No callback the garbage collector runs for the Python seat takes a lock any
   more. Four weak-reference callbacks did: the box interns' evictor and the
   replay, declaration and declared-carrier tables' evictors took their table's
