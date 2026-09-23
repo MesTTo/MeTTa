@@ -115,6 +115,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The parity selftest's artifact fixture no longer aborts engine boots that
+  run beside it. It restored the `.qlf` set it borrows by writing each file's
+  saved bytes over the live file, so a process loading one meanwhile read a
+  truncated file, and SWI's loader answers that by aborting the whole process:
+  two gate processes died that way, one of them the `readme-fences` run of
+  EXTENDING.md fence 27. Each artifact is now staged beside its path and
+  renamed over it, the way SWI writes its own, and a new plant holds a reader
+  that opened the file first to the bytes it opened.
+
 - A battery provisioned from a second `BATTERY_SOURCE` kept the first
   source's `node_modules` link, because the snapshot excludes installs and so
   never touches the link, and ran the first tree's dependencies under the

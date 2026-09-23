@@ -36,6 +36,10 @@ Guarantees:
     digests after removing only the embedded temporary filename's compiler
     PID and its derived offsets. A planted foreign artifact is removed
     [tested: check_upstream_parity_selftest.artifact_fixture_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+  - restoring the borrowed artifacts never changes the bytes a process that
+    already holds one reads, because each is staged beside its path and
+    renamed over it [tested: check_upstream_parity_selftest.held_reader_failures;
+    commit=WORKTREE]
   - every active waiver remains visible while its separate measurement verdict
     is preserved [tested: parity-perf-selftest; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - null extrema bound the compared difference, an overrun beyond the whole
@@ -73,8 +77,9 @@ Guarantees:
     with the two knobs that decide it [tested: this file is its own gate;
     commit=fc990fa3042ee05d931d3928694e89021be32855]
 Owns resources: artifact_fixture_failures restores the bytes and timestamps of
-  the checkout's original generated artifacts and stamp, including on failure.
-  check.sh serializes lanes that share them.
+  the checkout's original generated artifacts and stamp, including on failure,
+  each by a staged sibling renamed over it, so a concurrent reader never loads
+  a partial .qlf. check.sh serializes lanes that share them.
 Fails when: the production lane stops exposing ``_perf`` as its measured process
   call, or stops computing a row's net inside ``measure``.
 Open Obligations:
@@ -1088,10 +1093,67 @@ def artifact_fixture_failures() -> list[str]:
         if stamp not in originals:
             stamp.unlink(missing_ok=True)
         for path, (metadata, data) in saved.items():
-            path.write_bytes(data)
-            path.chmod(metadata.st_mode & 0o7777)
-            os.utime(path, ns=(metadata.st_atime_ns, metadata.st_mtime_ns))
+            restore_by_rename(path, metadata, data)
         lane._FIXED_COST.clear()
+    return failures
+
+
+def restore_by_rename(path: Path, metadata: os.stat_result, data: bytes) -> None:
+    """Put a borrowed artifact back the way SWI writes one: staged, then renamed.
+
+    Writing the saved bytes over the path truncated the live inode and refilled
+    it, so a process loading that .qlf meanwhile read a truncated or
+    half-written file, and SWI's loader aborts the whole process on one rather
+    than raising. Beside six looping engine boots, rewriting the governed set
+    in place with its own bytes aborted 7 of the 9 boots that finished with
+    `Unexpected EOF on intermediate code file at offset 22`, exit 134, and left
+    the rest hung; beside 2,855 passes of this function's staged rename, 150
+    boots of 150 finished and printed their marker [measured 2026-09-23: six
+    looping qlf_load_engine boots in one battery beside a loop rewriting every
+    engine and lib .qlf, once with write_bytes and once with this function;
+    commit=WORKTREE]. This fixture is the only in-place writer of that set, and
+    the gate carried the same abort twice while it ran: a qlf_compile_argument
+    child in loadPredicate's fatalError and the Python process running
+    EXTENDING.md fence 27 in outOfCore [measured 2026-09-23: coredumpctl info
+    102659 and 101786; commit=WORKTREE]. A sibling temporary renamed over the
+    path is what SWI's own '$install_staged_file' does, so a reader sees the
+    old file or the restored one and never a partial [tested:
+    check_upstream_parity_selftest.held_reader_failures; commit=WORKTREE].
+    """
+    fd, name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    staged = Path(name)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+        staged.chmod(metadata.st_mode & 0o7777)
+        os.utime(staged, ns=(metadata.st_atime_ns, metadata.st_mtime_ns))
+        staged.replace(path)
+    except BaseException:
+        staged.unlink(missing_ok=True)
+        raise
+
+
+def held_reader_failures() -> list[str]:
+    """A process already reading a borrowed artifact keeps a whole file through its restore."""
+    old, new = b"generation one " * 64, b"generation two"
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory() as scratch:
+        path = Path(scratch) / "held.qlf"
+        path.write_bytes(old)
+        os.utime(path, ns=(1_000_000_000, 2_000_000_000))
+        metadata = path.stat()
+        with path.open("rb") as held:
+            restore_by_rename(path, metadata, new)
+            seen = held.read()
+        if seen != old:
+            failures.append("a reader holding a borrowed artifact read other bytes "
+                            "while the fixture restored it")
+        if path.read_bytes() != new:
+            failures.append("a restored artifact does not hold the saved bytes")
+        if path.stat().st_mtime_ns != metadata.st_mtime_ns:
+            failures.append("restoring an artifact lost its saved modification time")
+        if [entry.name for entry in Path(scratch).iterdir()] != ["held.qlf"]:
+            failures.append("restoring an artifact left its staged temporary behind")
     return failures
 
 
@@ -1126,6 +1188,7 @@ def main() -> int:
         *counter_refusal_policy_failures(),
         *waiver_reporting_failures(),
         *artifact_fixture_failures(),
+        *held_reader_failures(),
     ]
 
     for failure in failures:
