@@ -9,6 +9,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- TSMeTTa's SWI-Prolog is now built here, patched, and the Node seat refuses
+  any other. `sh tools/wasm-host/build.sh` compiles swipl-devel at
+  `tools/pymetta-host/swipl.pin` with every patch in
+  `tests/checks/host_workarounds/` applied, using npm-swipl-wasm's own Docker
+  recipe at the emsdk, zlib and pcre2 versions upstream built that very commit
+  with (`tools/wasm-host/wasm.pin`), and SWI's own ctest passes on the result,
+  53 of 53. The host is linked twice: the first link is booted under Node to
+  read its `compiled_at`, `declare-host.sh declare SRC HOME --built-by COMMAND...`
+  writes the declaration from that one printed line, and the second link packs
+  it into the host's home, `/swipl`. The build stops unless the relinked home
+  is the first link's files plus `metta-host.pl` and the engine's own check
+  passes on it. `sh tools/wasm-host/build.sh vendor` puts it in
+  `extensions/node/_host/`. On it the fourteen ledger reproductions that
+  answer `present` under npm's swipl-wasm 8.0.6 answer `absent`, and the three
+  that already answered `absent` answer the same.
+
 - A release upload is refused before it is spent when it would leave something
   unresolvable. `pip install "pymetta[engine]"` cannot resolve on Linux x86_64
   and never could: the extra names `pymetta-host` under a Linux x86_64 marker

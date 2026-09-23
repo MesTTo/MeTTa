@@ -15,6 +15,10 @@ Guarantees:
     launcher it refuses and writes nothing; over a tree lacking one patch it
     exits 1 and omits exactly that one; `require` lists every patch in name
     order under the module header [tested: this file; commit=WORKTREE]
+  - `declare --built-by COMMAND...` binds a home with no launcher, the shape
+    of the WebAssembly host, to the one line COMMAND prints, and refuses,
+    writing nothing, when COMMAND exits nonzero, prints nothing or prints more
+    than one line [tested: this file; commit=WORKTREE]
   - the lane reports an edited requirement and a host that does not declare
     what the requirement names, and passes a matching pair
     [tested: this file; commit=WORKTREE]
@@ -123,6 +127,48 @@ def case_declare_refuses_a_home_without_a_launcher(work: Path) -> list[str]:
     return out
 
 
+def case_declare_built_by_names_the_build(work: Path) -> list[str]:
+    layout = plant(work)
+    tree = source(work, "a.patch", "b.patch")
+    home = work / "wasm-home"
+    home.mkdir()
+    built = "Sep 23 2026, 21:00:00"
+    ran = run(
+        "sh", "tools/pymetta-host/declare-host.sh", "declare", str(tree), str(home),
+        "--built-by", "echo", built, cwd=layout,
+    )
+    out = []
+    if ran.returncode != 0:
+        out.append(f"a launcherless home declared --built-by exited {ran.returncode}: {ran.stderr.strip()}")
+        return out
+    text = (home / "metta-host.pl").read_text()
+    if f"\nhost_build('{built}').\n" not in text:
+        out.append(f"the declaration does not name the build the command printed: {text!r}")
+    for name in ("a.patch", "b.patch"):
+        if fact(layout, name) not in text:
+            out.append(f"the declaration lacks {fact(layout, name)}")
+    return out
+
+
+def case_declare_built_by_fails_closed(work: Path) -> list[str]:
+    layout = plant(work)
+    tree = source(work, "a.patch", "b.patch")
+    home = work / "wasm-home"
+    home.mkdir()
+    out = []
+    for command in (("false",), ("true",), ("printf", "one\ntwo\n")):
+        ran = run(
+            "sh", "tools/pymetta-host/declare-host.sh", "declare", str(tree), str(home),
+            "--built-by", *command, cwd=layout,
+        )
+        if ran.returncode != 1:
+            out.append(f"--built-by {command} exited {ran.returncode}, wanted 1: {ran.stderr.strip()}")
+        if (home / "metta-host.pl").exists():
+            out.append(f"--built-by {command} wrote a declaration with no single build to bind it to")
+            (home / "metta-host.pl").unlink()
+    return out
+
+
 def case_declare_fails_closed(work: Path) -> list[str]:
     layout = plant(work)
     tree = source(work, "a.patch")
@@ -179,6 +225,8 @@ def case_lane_reports_an_undeclared_host(work: Path) -> list[str]:
 
 CASES: list[Callable[[Path], list[str]]] = [
     case_declare_every_patch,
+    case_declare_built_by_names_the_build,
+    case_declare_built_by_fails_closed,
     case_declare_fails_closed,
     case_declare_refuses_a_home_without_a_launcher,
     case_require_lists_every_patch,

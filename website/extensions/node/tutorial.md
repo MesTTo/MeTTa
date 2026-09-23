@@ -44,9 +44,9 @@ no server.
 
 ## The install has no prerequisite
 
-The engine here is [swipl-wasm](https://github.com/SWI-Prolog/npm-swipl-wasm),
-the SWI-Prolog organisation's own WebAssembly build of SWI-Prolog, and it comes
-down as an npm dependency like anything else. The whole install is npm, in a
+The engine here runs on SWI-Prolog compiled to WebAssembly by the SWI-Prolog
+organisation's own recipe, from source carrying the patches the engine
+requires, and it ships inside the package. The whole install is npm, in a
 directory with nothing else in it:
 
 ```sh

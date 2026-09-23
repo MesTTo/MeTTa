@@ -14,7 +14,7 @@ underneath it. Four ship today.
 | Extension | What you get |
 |---|---|
 | [PyMeTTa](./python/) | write MeTTa programs in Python, via the `metta` package |
-| [TSMeTTa](./node/) | write them in TypeScript, running on swipl-wasm inside Node |
+| [TSMeTTa](./node/) | write them in TypeScript, running on a patched WebAssembly SWI-Prolog inside Node |
 | [CMeTTa](./cmetta/) | embed the engine in a C program |
 | [MORK](./mork/) | store spaces in a Rust trie instead of in memory |
 

@@ -7,7 +7,8 @@
 #   declare-host.sh require            print engine/host_patches.pl: every
 #                                      patch this tree carries, the set the
 #                                      engine refuses to boot without
-#   declare-host.sh declare SRC HOME   write HOME/metta-host.pl: the patches
+#   declare-host.sh declare SRC HOME [--built-by COMMAND...]
+#                                      write HOME/metta-host.pl: the patches
 #                                      the source tree SRC carries, for a
 #                                      host installed from SRC into HOME
 #
@@ -17,13 +18,22 @@
 # stock host does rather than passing on its name.
 #
 # `declare` also writes host_build(CompiledAt), the compiled_at flag of the
-# launcher installed in HOME, because the C patches live in the binary and the
+# build installed in HOME, because the C patches live in the binary and the
 # declaration lives in the home, and SWI_HOME_DIR can put any binary in front
 # of any home: the venv here exports it to every process, and a stock
 # /usr/bin/swipl started under it reports the patched home and would read its
 # declaration [measured 2026-09-23: home=/home/user/Dev/swipl-patched/lib/swipl
 # with compiled_at 'Aug 30 2026, 09:21:19', the patched build's being
 # 'Sep 16 2026, 22:48:43'].
+#
+# The flag is read by RUNNING the host, and there is one way to do that: run a
+# command and take the one line it prints. By default the command is the
+# launcher installed at HOME/bin/<arch>/swipl. `--built-by` names another, for
+# a host whose home has no launcher: the WebAssembly build packs its home into
+# a data image and runs only under a JavaScript loader, so tools/wasm-host
+# passes `--built-by node tools/wasm-host/host.mjs compiled-at DIR`, which
+# boots the artefacts it is about to ship and prints their flag. The command is
+# argv, not a string a shell re-reads.
 #
 # Why a declaration at all: /usr/bin/swipl and the patched build both report
 # "SWI-Prolog version 10.1.14 for x86_64-linux", so the version cannot tell
@@ -41,9 +51,13 @@
 #     succeeds for it in the tree patch-root.sh routes it to, so a patch the
 #     tree lacks is absent from the declaration and the engine names it
 #     [tested: tests/checks/check_host_declaration.py; commit=WORKTREE]
-#   - `declare` records the compiled_at of HOME/bin/<arch>/swipl, read with
-#     SWI_HOME_DIR unset so the answer is that binary's own, and refuses when
-#     HOME holds no launcher to read it from
+#   - `declare` records the one line the identity command prints, run with
+#     SWI_HOME_DIR unset so the answer is that build's own: HOME/bin/<arch>/swipl
+#     reporting its compiled_at, or the command after --built-by. It refuses,
+#     writing nothing, when there is no launcher and no --built-by, and when the
+#     command exits nonzero, prints nothing, or prints more than one line, since
+#     none of those is one build's identity
+#     [tested: tests/checks/check_host_declaration_selftest.py; commit=WORKTREE]
 #   - the declaration is replaced whole, by rename, so a reader never sees a
 #     half-written one
 #   - `declare` exits 1 when the tree lacks any patch, after writing the
@@ -58,6 +72,13 @@ HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 ROOT=$(CDPATH= cd -- "$HERE/../.." && pwd)
 PATCHES="$ROOT/tests/checks/host_workarounds"
 . "$HERE/patch-root.sh"
+NL='
+'
+
+usage() {
+    echo "usage: declare-host.sh require | declare SRC HOME [--built-by COMMAND...]" >&2
+    exit 2
+}
 
 fact() {
     printf "host_patch('%s', '%s').\n" "$(basename "$1")" \
@@ -78,21 +99,35 @@ HEADER
         for patch in "$PATCHES"/*.patch; do fact "$patch"; done
         ;;
     declare)
-        [ $# -eq 3 ] || { echo "usage: declare-host.sh declare SRC HOME" >&2; exit 2; }
-        SRC=$2; HOME_DIR=$3
+        [ $# -ge 3 ] || usage
+        SRC=$2; HOME_DIR=$3; shift 3
+        if [ $# -gt 0 ]; then
+            [ "$1" = --built-by ] && [ $# -ge 2 ] || usage
+        fi
         git -c safe.directory='*' -C "$SRC" rev-parse --git-dir >/dev/null 2>&1 || {
             printf 'declare-host: %s is not a git tree, so nothing says which patches it carries\n' \
                 "$SRC" >&2; exit 1; }
         [ -d "$HOME_DIR" ] || {
             printf 'declare-host: %s does not exist; install the host first\n' "$HOME_DIR" >&2
             exit 1; }
-        LAUNCHER=$(ls "$HOME_DIR"/bin/*/swipl 2>/dev/null | head -1)
-        [ -n "$LAUNCHER" ] || {
-            printf 'declare-host: no launcher under %s/bin/<arch>/, so nothing says which build this home belongs to\n' \
-                "$HOME_DIR" >&2; exit 1; }
-        BUILT=$(env -u SWI_HOME_DIR "$LAUNCHER" -q \
-            -g 'current_prolog_flag(compiled_at, C), write(C)' -t halt < /dev/null)
-        [ -n "$BUILT" ] || { printf 'declare-host: %s reported no compiled_at\n' "$LAUNCHER" >&2; exit 1; }
+        # What remains of argv becomes the identity command.
+        if [ $# -gt 0 ]; then
+            shift
+        else
+            LAUNCHER=$(ls "$HOME_DIR"/bin/*/swipl 2>/dev/null | head -1)
+            [ -n "$LAUNCHER" ] || {
+                printf 'declare-host: no launcher under %s/bin/<arch>/ and no --built-by, so nothing says which build this home belongs to\n' \
+                    "$HOME_DIR" >&2; exit 1; }
+            set -- "$LAUNCHER" -q -g 'current_prolog_flag(compiled_at, C), write(C)' -t halt
+        fi
+        BUILT=$(env -u SWI_HOME_DIR "$@" < /dev/null) || {
+            printf 'declare-host: `%s` exited nonzero, so nothing says which build this home belongs to\n' \
+                "$*" >&2; exit 1; }
+        case $BUILT in
+            '') printf 'declare-host: `%s` reported no compiled_at\n' "$*" >&2; exit 1 ;;
+            *"$NL"*) printf 'declare-host: `%s` printed more than one line, which is not one build identity:\n%s\n' \
+                "$*" "$BUILT" >&2; exit 1 ;;
+        esac
         OUT="$HOME_DIR/metta-host.pl"
         {
             echo "% The host-workaround patches this SWI-Prolog was built with, written by"
@@ -118,7 +153,6 @@ HEADER
         [ -z "$missing" ]
         ;;
     *)
-        echo "usage: declare-host.sh require | declare SRC HOME" >&2
-        exit 2
+        usage
         ;;
 esac

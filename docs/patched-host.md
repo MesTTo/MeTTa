@@ -31,6 +31,17 @@ pymetta activates that host before it loads janus. A `SWI_HOME_DIR` naming
 another SWI home, or a `janus_swi` imported from somewhere else first, is
 refused, because the bundled bridge and home are one build.
 
+tsmetta, the TypeScript binding, carries its own. The WebAssembly SWI-Prolog it
+boots on is built from the same patched source and ships inside the package, in
+`extensions/node/_host/`, so on every platform Node runs on this is the whole
+install:
+
+```sh
+npm install tsmetta
+```
+
+npm's `swipl-wasm` is refused like any other host without the declaration.
+
 ## Building it anywhere else
 
 On macOS, Windows, ARM Linux, musl Linux, or any Python the wheels do not
@@ -89,11 +100,24 @@ carry.
 Then install pymetta, put `$HOME/swipl-patched/bin` first on your `PATH`, and
 leave `SWI_HOME_DIR` unset unless it names `$HOME/swipl-patched/lib/swipl`.
 
+## The WebAssembly host
+
+`sh tools/wasm-host/build.sh` builds the host tsmetta carries. It fetches the
+patched source as step 1 does, compiles it with npm-swipl-wasm's own Docker
+recipe at the emsdk, zlib and pcre2 versions `tools/wasm-host/wasm.pin` names,
+declares the build with `declare-host.sh declare SRC HOME --built-by ...`,
+which reads `compiled_at` by booting the built files under Node because the
+host has no launcher to ask, and links the declaration into the host's home,
+`/swipl`. It stops unless the engine's own check passes on the result.
+`sh tools/wasm-host/build.sh vendor` then copies the host into
+`extensions/node/_host/`. It needs Docker, Node and the network.
+
 ## When a patch changes
 
 A patch edited in `tests/checks/host_workarounds/` has a new digest, so a host
 built before the edit is refused as `built from an older version of the
-patch`. Rebuild it from step 1. `engine/host_patches.pl` is regenerated in the
-same change with
+patch`. Rebuild it from step 1, and the WebAssembly host with
+`sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh vendor`.
+`engine/host_patches.pl` is regenerated in the same change with
 `sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`, and
 the `host-declaration` lane fails until it is.
