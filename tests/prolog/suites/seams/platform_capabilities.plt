@@ -78,9 +78,11 @@ plant_absent(Capability) :-
     metta_engine_module(Engine),
     assertz(Engine:metta_platform_absent(Capability)).
 
+%retract/1 of a bare head removes a fact only, so the capability's reading
+%clause, which answers by its verdict, stays where the census put it.
 unplant_absent(Capability) :-
     metta_engine_module(Engine),
-    retractall(Engine:metta_platform_absent(Capability)).
+    retract(Engine:metta_platform_absent(Capability)).
 
 %The same plant for the name index a lost re-export leaves behind, written
 %into the engine's module for the same reason.

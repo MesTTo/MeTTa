@@ -1399,60 +1399,131 @@ metta_platform_capability('fast-cache', [library(fastrw), library(memfile)],
                            and parses it, which is what a load without a \c
                            cache does anyway, so nothing else changes').
 
-%What the platform is missing: one fact per capability found absent. Empty
-%on a full platform once every capability is decided, which is what makes
-%every read below one failing call on a dynamic predicate with no clause for
-%that capability.
+%What the platform is missing: one answer per absent capability, and none for
+%a present one, so a form resting on a present capability pays one failing
+%call on a dynamic predicate with no clause for that capability.
 %
-%A capability no load has decided yet carries the one other kind of clause,
-%metta_platform_absent(C) :- metta_platform_decide(C), put there for every
-%row by the directive below. A load of the capability retracts it and decides
-%instead (metta_platform_load/2), and a read that reaches it first decides by
-%whether every library the row names resolves, the answer the load would have
-%given, then retracts it. Before this, only a load that FAILED recorded
-%anything, so a capability nothing loads read present on every host: on the
-%WebAssembly host metta_requires(yaml) admitted lib_yaml, and its first call
-%died on Unknown procedure lib_yaml:yaml_read/2 instead of refusing
-%[measured 2026-09-24: 28-yaml_lib under tsmetta on the host
-%tools/wasm-host/build.sh built at 02dc5471b].
+%Every row starts with one reading clause here, put there by the directive
+%below: metta_platform_absent(C) :- metta_platform_status(C, absent). It
+%answers by the capability's verdict, deciding it on the first read if no load
+%has, and it goes once the verdict is present. An absent capability keeps it,
+%and it is then that capability's one answer. Before rows were decided on
+%first read, only a load that FAILED recorded anything, so a capability nothing
+%loads read present on every host: on the WebAssembly host
+%metta_requires(yaml) admitted lib_yaml, and its first call died on Unknown
+%procedure lib_yaml:yaml_read/2 instead of refusing [measured 2026-09-24:
+%28-yaml_lib under tsmetta on the host tools/wasm-host/build.sh built at
+%02dc5471b].
 %
-%The clause is per capability so that first-argument indexing keeps it out of
-%every other capability's read: a decided capability is read exactly as
-%before, which matters because metta_require_platform/2 runs inside compiled
-%hyperpose code and every (timeout N Expr).
+%The verdicts are SWI flags, one per capability, and never clauses. A read
+%cannot see a clause added or removed while it runs: SWI fixes the clauses a
+%call will try when the call starts, the logical update view
+%[source: swipl-devel man/builtin.plx, "Update view", sec:update]. The first
+%version decided by retracting the reading clause and asserting a fact in its
+%place, and two threads reading one absent capability then read it present
+%where the second decided after the first had asserted, present where the
+%second read began between the retract and the assert, and listed it twice
+%where both asserted [tested: platform_census_threads; commit=WORKTREE]. A
+%clause written inside transaction/1 is also the transaction's until it
+%commits, and gone if it rolls back, and engine/materialize.pl evaluates inside
+%one. A flag is neither: get_flag/2 reads its current value, and set_flag/2
+%writes it for every thread at once under SWI's own lock
+%[source: swipl-devel src/pl-flag.c, set_flag/2 under L_FLAG]. The clauses
+%here now change only in ways every read survives: an absent capability's
+%reading clause is never removed, and a present one's goes only after its flag
+%says present, so a read still running that clause answers present too.
+%
+%The reading clause is per capability so that first-argument indexing keeps it
+%out of every other capability's read: a decided present capability is read
+%exactly as before, which matters because metta_require_platform/2 runs inside
+%compiled hyperpose code and every (timeout N Expr).
 :- dynamic metta_platform_absent/1.
 
-metta_platform_undecided(Capability) :-
+metta_platform_reading(Capability) :-
     (   clause(metta_platform_absent(Capability),
-               metta_platform_decide(Capability))
+               metta_platform_status(Capability, absent))
     ->  true
     ;   assertz((metta_platform_absent(Capability) :-
-                     metta_platform_decide(Capability)))
+                     metta_platform_status(Capability, absent)))
     ).
 
-%The row's first read. It fails where the capability is present, since the
-%read it answers is "is this absent", and it fails where an absence fact
-%already exists too, because that fact is a later clause of the same read and
-%answers it; succeeding here as well would give an enumeration the capability
-%twice.
-metta_platform_decide(Capability) :-
-    metta_platform_settle(Capability),
-    \+ clause(metta_platform_absent(Capability), true),
-    metta_platform_capability(Capability, Requires, _),
-    \+ forall(metta_platform_spec(Requires, Spec), exists_source(Spec)),
-    assertz(metta_platform_absent(Capability)).
+%A capability's verdict, decided the first time anything asks: 0 until then,
+%and present or absent after. The unlocked read answers every decided
+%capability. A miss decides under the census mutex and reads the flag again
+%there, and sees what another thread recorded while this one waited. That is
+%SWI's own shape for a value computed once on demand [source: swipl-devel
+%boot/autoload.pl, load_library_index/3: an unlocked library_index/3 check,
+%then with_mutex('$autoload', ...)].
+metta_platform_status(Capability, Status) :-
+    metta_platform_key(Capability, Key),
+    get_flag(Key, Verdict),
+    (   Verdict == 0
+    ->  metta_platform_decide(Capability, Key, Decided)
+    ;   Decided = Verdict
+    ),
+    Status = Decided.
 
-%Whoever decides a capability removes its undecided clause first, so the
-%decision is the only thing its reads find afterwards.
-metta_platform_settle(Capability) :-
-    (   retract((metta_platform_absent(Capability) :-
-                     metta_platform_decide(Capability)))
+metta_platform_key(Capability, Key) :-
+    atom_concat('$metta_platform ', Capability, Key).
+
+%A read decides by whether every library the row names resolves, the answer a
+%load of it would give.
+metta_platform_decide(Capability, Key, Status) :-
+    with_mutex('$metta_platform_census',
+               (   get_flag(Key, Verdict),
+                   Verdict \== 0
+               ->  Status = Verdict
+               ;   metta_platform_capability(Capability, Requires, _),
+                   (   forall(metta_platform_spec(Requires, Spec),
+                              exists_source(Spec))
+                   ->  Status = present
+                   ;   Status = absent
+                   ),
+                   metta_platform_conclude(Capability, Status)
+               )).
+
+%Held under the census mutex, and the only place a verdict changes. A present
+%verdict retires the reading clause after the flag says present, and an
+%absent one leaves it where it is, so no read finds the capability in neither
+%form or both. A load that finds a library a read did not makes the
+%capability present, since a library can be installed while the process runs.
+%The opposite, a library that resolved for a read and then was not there for
+%the load, is the half-present case: it raises rather than turning a present
+%capability absent under readers that already answered present.
+metta_platform_conclude(Capability, Status) :-
+    metta_platform_key(Capability, Key),
+    get_flag(Key, Verdict),
+    (   Verdict == Status
+    ->  true
+    ;   Verdict == present
+    ->  metta_platform_capability(Capability, Requires, _),
+        throw(error(metta_platform_vanished(Capability, Requires),
+                    context(metta_platform_load/2, _)))
+    ;   set_flag(Key, Status),
+        (   Status == present
+        ->  metta_platform_retire(Capability)
+        ;   true
+        )
+    ).
+
+%Not inside a transaction, where the retract would be the transaction's and
+%undone by a rollback; the clause then stays, and answers present from the
+%flag, which costs that capability's reads a flag lookup and nothing else.
+metta_platform_retire(Capability) :-
+    (   current_transaction(_)
+    ->  true
+    ;   retract((metta_platform_absent(Capability) :-
+                     metta_platform_status(Capability, absent)))
     ->  true
     ;   true
     ).
 
+%Idempotent because a reload under make/0 runs the directive again. A reload
+%gives a capability already decided present its reading clause back, which
+%costs its reads a flag lookup and changes no answer, so the boot does not pay
+%a flag lookup per row to prevent it.
 :- forall(metta_platform_capability(Capability, _, _),
-          metta_platform_undecided(Capability)).
+          metta_platform_reading(Capability)).
 
 %A name a capability would have published and could not. Recorded from the
 %import list the load asked for, so it needs no second list to fall out of
@@ -1464,7 +1535,10 @@ metta_platform_settle(Capability) :-
 %The load and the census in one act, so the two cannot disagree: what is
 %recorded absent is exactly what failed to import. The catch is narrow, on the
 %spec it just tried, so a library that IS there and breaks while loading still
-%raises and stops the boot, which is the half-present half of the rule.
+%raises and stops the boot, which is the half-present half of the rule. The
+%libraries load outside the census mutex and only the verdict is written under
+%it, so no lock is held while SWI loads code; a read that arrives meanwhile
+%decides by resolution, and the load's verdict replaces it.
 %
 %The import lands in the module being LOADED rather than in this file's,
 %because the census now serves engine/parser.pl and engine/filereader.pl too
@@ -1484,13 +1558,18 @@ metta_platform_load(Capability) :-
 %libraries takes them whole.
 metta_platform_load(Capability, Imports) :-
     metta_platform_capability(Capability, Requires, _),
-    metta_platform_settle(Capability),
     (   prolog_load_context(module, Into)
     ->  true
     ;   metta_engine_module(Into)
     ),
-    forall(metta_platform_spec(Requires, Spec),
-           metta_platform_admit(Capability, Into, Spec, Imports)).
+    findall(Spec,
+            (   metta_platform_spec(Requires, Spec),
+                metta_platform_admit(Into, Spec, Imports, Admitted),
+                Admitted == false
+            ),
+            Lost),
+    with_mutex('$metta_platform_census',
+               metta_platform_loaded(Capability, Lost, Imports)).
 
 %An EMPTY import list asks whether the platform HAS the library, and takes no
 %name from it. use_module answers that by compiling and linking the whole
@@ -1498,15 +1577,15 @@ metta_platform_load(Capability, Imports) :-
 %26,939 inferences to load and 2,804 to look up, and the engine imports
 %nothing from it. So the census probes for the presence-only case and loads
 %only where a caller named something it needs.
-metta_platform_admit(Capability, _, Spec, []) :- !,
+metta_platform_admit(_, Spec, [], Admitted) :- !,
     (   exists_source(Spec)
-    ->  true
-    ;   metta_platform_lost(Capability, [])
+    ->  Admitted = true
+    ;   Admitted = false
     ).
-metta_platform_admit(Capability, Into, Spec, Imports) :-
-    catch(Into:use_module(Spec, Imports),
+metta_platform_admit(Into, Spec, Imports, Admitted) :-
+    catch(( Into:use_module(Spec, Imports), Admitted = true ),
           error(existence_error(source_sink, Spec), _),
-          metta_platform_lost(Capability, Imports)).
+          Admitted = false).
 
 %A row names one library or several. The walk is this file's own rather than
 %member/2, because the first census directive runs above this file's
@@ -1523,23 +1602,19 @@ metta_platform_member([Spec|_], Spec).
 metta_platform_member([_|Rest], Spec) :-
     metta_platform_member(Rest, Spec).
 
-%Idempotent because a reload under make/0 runs the directives again. It asks
-%for the FACT, because a read would run the capability's undecided clause.
-metta_platform_lost(Capability) :-
-    (   clause(metta_platform_absent(Capability), true)
-    ->  true
-    ;   assertz(metta_platform_absent(Capability))
-    ).
-
-%except([]) holds no Name/Arity pairs, so a whole-library load records the
-%capability and no names, which is right: nothing published them by name.
-metta_platform_lost(Capability, Imports) :-
-    metta_platform_lost(Capability),
+%Under the census mutex: the load's verdict, and the names a lost load would
+%have published. except([]) holds no Name/Arity pairs, so a whole-library load
+%records the capability and no names, which is right: nothing published them
+%by name.
+metta_platform_loaded(Capability, [], _) :- !,
+    metta_platform_conclude(Capability, present).
+metta_platform_loaded(Capability, _, Imports) :-
     forall(metta_platform_member(Imports, Name/_),
            (   metta_platform_absent_name(Name, Capability)
            ->  true
            ;   assertz(metta_platform_absent_name(Name, Capability))
-           )).
+           )),
+    metta_platform_conclude(Capability, absent).
 
 %!  metta_platform(?Capability, ?Status, ?Requires, ?Costs) is nondet.
 %
@@ -1567,6 +1642,10 @@ metta_require_platform(Form, Capability) :-
     ).
 
 :- multifile prolog:error_message//1.
+prolog:error_message(metta_platform_vanished(Capability, Requires)) -->
+    [ 'The ~w capability was found present, because ~w resolved, and loading \c
+       it then found ~w absent. The installation changed under the running \c
+       process; restart it.'-[Capability, Requires, Requires] ].
 prolog:error_message(metta_platform_required(Form, Capability, Requires,
                                              Costs)) -->
     [ '~w is refused: this build does not have the ~w capability, because ~w \c
@@ -1669,7 +1748,7 @@ prolog:error_message(metta_platform_required(Form, Capability, Requires,
 %library(pcre), the HOST TIER re-export the block above this file's imports
 %describes: re_replace/4 and nothing else, so a MeTTa program's
 %(import_prolog_function re_replace) finds a predicate. The import list is
-%what makes the absence say so by name -- metta_platform_lost/2 records
+%what makes the absence say so by name -- metta_platform_loaded/3 records
 %re_replace against the regex capability, and refuse_absent_prolog_function/1
 %reads that instead of answering "no predicate named re_replace is loaded"
 %[tested: platform_capabilities:a_re_export_lost_with_its_capability_refuses_by_name].

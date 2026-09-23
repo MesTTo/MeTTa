@@ -80,6 +80,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Two threads reading one platform capability for the first time no longer
+  read an absent capability as present or list it twice. The census decided a
+  capability by replacing its clause of `metta_platform_absent/1` while other
+  threads were reading that predicate, and a read never sees a clause changed
+  after it started, so a second reader could answer present on a host without
+  the capability: the undefined-procedure failure the census exists to turn
+  into a refusal. Each verdict is now an SWI flag, decided once under a mutex
+  and out of reach of a rolled-back `transaction/1`, and the predicate's
+  clauses change only in ways every read survives.
+  `tests/prolog/suites/seams/platform_census_threads.plt` forces each
+  interleaving, and a load that finds a capability's library gone after a read
+  found it raises instead of turning it absent.
+
 - A worktree follows its superproject across a component pin change.
   `tools/components.sh` judged a component's modified files after it had
   already moved the component's HEAD and index to the new pin, so every file

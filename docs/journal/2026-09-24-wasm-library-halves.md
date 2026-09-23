@@ -83,20 +83,58 @@ loaded: `metta_platform_absent/1` held a fact only where a load had FAILED, and
 nothing loads yaml, unicode, socket, http, https, uri, markup, archive,
 memory-files or persistency at boot. So `metta_requires(yaml)` admitted
 `lib_yaml` on the WebAssembly host and its first call died on Unknown
-procedure. Every row now starts with a clause
-`metta_platform_absent(C) :- metta_platform_decide(C)`, which a load of that
-capability retracts before deciding it, and which otherwise decides by
-`exists_source/1` over the row on first read and retracts itself. A decided
-capability then has no clause but its fact, so `metta_require_platform/2`,
-which runs inside compiled hyperpose code and every `(timeout N Expr)`, reads
-it exactly as before, and the Python seat's enumeration of
-`metta_platform_absent/1` needs no change.
+procedure. Every row now starts with a reading clause,
+`metta_platform_absent(C) :- metta_platform_status(C, absent)`, which answers
+by the capability's verdict and, on the first read that finds none, decides it
+by `exists_source/1` over the row, the answer a load would give. A present
+verdict retires the clause, so `metta_require_platform/2`, which runs inside
+compiled hyperpose code and every `(timeout N Expr)`, reads a present
+capability exactly as before, and the Python seat's enumeration of
+`metta_platform_absent/1` needs no change. The first version kept the verdict
+in the clauses themselves, and the next section says why that changed.
 
 Deciding by `exists_source/1` exposed three rows naming less than their load
 needs. `http` gains `library(thread_pool)`, which `thread_httpd` loads;
 `https` gains `library(crypto)`, which `ssl` loads; `persistency` loses
 `library(shlib)`, which was only how the lock loaded and which a static host
 neither has nor needs.
+
+### The census under threads
+
+The first version decided a capability by retracting its reading clause and
+asserting a fact in its place, inside `metta_platform_absent/1` itself. A probe
+that forced two threads through each ordering with `wrap_predicate/4` gates
+found three failures on an absent capability. A second decision made after the
+first had asserted read present, because a call never sees a clause asserted
+after it started (SWI's logical update view). A read that began between the
+retract and the assert found no clause and read present. And two decisions
+that both passed the "no fact yet" check left two facts, so the enumeration the
+Python seat reads listed the capability twice. Present on a host without the
+capability is the undefined-procedure failure the census exists to replace.
+
+Each verdict now lives outside the clause database, in an SWI flag per
+capability, read without a lock and decided under a mutex that reads it again,
+which is the shape of SWI's own autoloader index (`boot/autoload.pl`,
+`load_library_index/3`). A flag also escapes `transaction/1`, where a clause
+would not: `(atomically ...)` evaluates inside one, and a verdict asserted
+there would be rolled back with it. The clauses of `metta_platform_absent/1`
+now change only when a present verdict retires its reading clause, after the
+flag says present, and never inside a transaction; an absent capability keeps
+its clause as its one answer. A load that finds a library a read did not makes
+the capability present, since a library can be installed while the process
+runs, and one that loses a library a read found raises, since turning the
+capability absent would change an answer threads have already acted on.
+`platform_census_threads.plt` forces each interleaving against the new
+decision points; a mutant that puts the first version's fact back fails all
+eight of its tests, the three race tests on the check that an absent
+capability holds its reading clause and nothing beside it. The boot pays for
+the mutex and the flag writes of the capabilities it loads: 344,012 inferences
+against 343,852 before, read by `sh engine/bench.sh --counter-only boot` in one
+battery for both trees.
+
+Two idioms were weighed and not taken. A table computes its answer from its
+own goal, and a load's verdict is not the answer of any goal. And
+`library(settings)` declares values rather than computing them on demand.
 
 ### Per call, not at import
 
