@@ -495,8 +495,8 @@ lane_print_ready() {
 # reason is WRITING what the other lanes read: a lane that purges and
 # regenerates the governed QLF set races every lane booting the engine beside
 # it. parity-perf-selftest is alone for that reason only; engine-bench,
-# c-bench and parity-perf purge the same set and are already alone for their
-# counters.
+# c-bench, mork-bench and parity-perf purge the same set and are already alone
+# for their counters.
 #
 # Declared at the lane rather than inferred from its name, because a name that
 # happens to contain `bench` is a spelling and dispatch does not go on

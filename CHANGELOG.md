@@ -126,6 +126,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `mork-bench` no longer fails whenever `c-bench` runs before it in the gate.
+  Its preparation purged the governed .qlf set only when stale, so a fresh set
+  the C bench had prepared survived, and that set compiles two units the MORK
+  lane's own boot consults from source; loading them compiled moved its
+  native-add rows by +1.2% with the same work. The lane now purges before the
+  boot that regenerates its set.
+
 - `extensions/cmetta` relinks its library and every program built on it when
   the compiler, its flags, the SWI host or the engine path change. A library
   linked against the stock SWI before the engine began refusing unpatched
