@@ -13,7 +13,7 @@
 %   answers from the stored value while the node is clean
 %   [tested: references:a_face_that_resolves_the_same_recompiles_no_caller,
 %   references:one_face_publication_recompiles_a_shared_caller_once;
-%   commit=WORKTREE].
+%   commit=7472c49077c10a069876b88f1e154a5122820612].
 % Guarantees: support_atomic/1 and with_support_repairs_deferred/1 restore
 %   their scoped markers on inference cuts, without changing mutex ownership
 %   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].

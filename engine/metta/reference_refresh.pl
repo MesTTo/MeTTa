@@ -10,7 +10,7 @@
 %   [tested: references:a_face_that_resolves_the_same_recompiles_no_caller,
 %   references:one_face_publication_recompiles_a_shared_caller_once,
 %   reference_loading, release_preparation, specializer_invalidation;
-%   commit=WORKTREE].
+%   commit=7472c49077c10a069876b88f1e154a5122820612].
 % Guarantees: patterned references participate in demand, publication and
 %   rollback through their original defining home
 %   [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
