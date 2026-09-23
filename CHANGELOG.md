@@ -61,6 +61,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An abandoned `Channel` releases its SWI message queue again. Since the
+  libraries became modules on 2026-09-08, the channel's finalizer called a
+  `channel_close/2` that `user` no longer sees and logged the refusal as a
+  channel already gone, so every channel reclaimed by garbage collection kept
+  its queue: 200 abandoned channels left 200 queues live. The finalizer now
+  hands the release to the engine's deferred queue, as the abandoned-world
+  backstop does, and the next crossing releases the channel's space, which
+  `lib_thread`'s release hook turns into the queue's destruction. Neither a
+  channel's nor a debugger's finalizer crosses into Prolog from the collector
+  any more, which the 2026-09-06 finaliser ruling forbids.
+
+- A worker the pytest lane replaces after a crash no longer wedges the lane or
+  runs the crashed test a second time. pytest-xdist 3.8.0, the newest release,
+  could send a replacement a unit with nothing pending or a single test it
+  cannot start, so the lane sat at its 3600 s ceiling and reported nothing,
+  and it put the crashed test back in the queue for every replacement to die
+  on. `extensions/python/tests/_xdist_scheduling.py` carries the upstream
+  fixes for #1323, #1327 and #1371 through xdist's own scheduler hook while
+  the installed release lacks them, and
+  `test_the_installed_xdist_still_needs_the_restart_scheduler` fails the day
+  a release carries them.
+
 - `mork-bench` no longer fails whenever `c-bench` runs before it in the gate.
   Its preparation purged the governed .qlf set only when stale, so a fresh set
   the C bench had prepared survived, and that set compiles two units the MORK

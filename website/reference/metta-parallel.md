@@ -33,8 +33,8 @@ Source: `extensions/python/metta/parallel.py`.
 >     worker, from the first submit until shutdown(), plus the SimpleQueue
 >     carrying those workers' boot timings.
 >   - a Channel's foreign space, released by drop(), close(), context exit or a
->     finalizer retaining its runtime and name; a scope retains owned channels
->     through its library resource rows.
+>     finalizer that hands its name to the deferred engine queue; a scope
+>     retains owned channels through its library resource rows.
 > "; fixture=this checkout
 >     under load 44; commit=0179a14353a925115d545fc3ea0dc67eab4e4ecb].
 >   - a fan-out door answers an ITERATOR over results that already exist, not
