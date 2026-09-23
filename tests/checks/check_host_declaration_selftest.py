@@ -41,7 +41,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import check_host_declaration as lane  # noqa: E402
+import check_host_declaration as lane
 
 ROOT = Path(__file__).resolve().parents[2]
 PATCH_A = "--- a/one.txt\n+++ b/one.txt\n@@ -1 +1 @@\n-one\n+one patched\n"
@@ -70,8 +70,11 @@ def plant(work: Path) -> Path:
 
 
 def source(work: Path, *applied: str) -> Path:
-    """A git tree holding every target, packages/swipy a repository of its own,
-    with the named patches applied each in the tree it sits under."""
+    """A git tree holding every patch target, with the named patches applied.
+
+    packages/swipy is a repository of its own, as in swipl-devel, and each
+    patch is applied in the tree it sits under.
+    """
     tree = work / "src"
     (tree / NESTED).mkdir(parents=True)
     (tree / "one.txt").write_text("one\n")
@@ -112,6 +115,7 @@ def fact(layout: Path, name: str) -> str:
 
 
 def case_declare_every_patch(work: Path) -> list[str]:
+    """A tree carrying every patch declares each one and names the launcher's build."""
     layout = plant(work)
     tree = source(work, "a.patch", "b.patch")
     home = planted_home(work)
@@ -120,15 +124,15 @@ def case_declare_every_patch(work: Path) -> list[str]:
     out = []
     if ran.returncode != 0:
         out.append(f"a fully patched tree exited {ran.returncode}: {ran.stderr.strip()}")
-    for name in ("a.patch", "b.patch"):
-        if fact(layout, name) not in text:
-            out.append(f"the declaration lacks {fact(layout, name)}")
+    out.extend(f"the declaration lacks {fact(layout, name)}"
+               for name in ("a.patch", "b.patch") if fact(layout, name) not in text)
     if "\nhost_build('" not in text:
         out.append("the declaration names no build")
     return out
 
 
 def case_declare_refuses_a_home_without_a_launcher(work: Path) -> list[str]:
+    """A home with no launcher and no --built-by is refused, and nothing is written."""
     layout = plant(work)
     tree = source(work, "a.patch", "b.patch")
     home = work / "bare-home"
@@ -143,6 +147,7 @@ def case_declare_refuses_a_home_without_a_launcher(work: Path) -> list[str]:
 
 
 def case_declare_built_by_names_the_build(work: Path) -> list[str]:
+    """--built-by binds a launcherless home to the one line its command prints."""
     layout = plant(work)
     tree = source(work, "a.patch", "b.patch")
     home = work / "wasm-home"
@@ -159,13 +164,13 @@ def case_declare_built_by_names_the_build(work: Path) -> list[str]:
     text = (home / "metta-host.pl").read_text()
     if f"\nhost_build('{built}').\n" not in text:
         out.append(f"the declaration does not name the build the command printed: {text!r}")
-    for name in ("a.patch", "b.patch"):
-        if fact(layout, name) not in text:
-            out.append(f"the declaration lacks {fact(layout, name)}")
+    out.extend(f"the declaration lacks {fact(layout, name)}"
+               for name in ("a.patch", "b.patch") if fact(layout, name) not in text)
     return out
 
 
 def case_declare_built_by_fails_closed(work: Path) -> list[str]:
+    """A --built-by command that fails, prints nothing, or prints two lines writes nothing."""
     layout = plant(work)
     tree = source(work, "a.patch", "b.patch")
     home = work / "wasm-home"
@@ -185,6 +190,7 @@ def case_declare_built_by_fails_closed(work: Path) -> list[str]:
 
 
 def case_declare_fails_closed(work: Path) -> list[str]:
+    """A tree lacking one patch exits 1 and declares exactly the patches it carries."""
     layout = plant(work)
     tree = source(work, "a.patch")
     home = planted_home(work)
@@ -201,6 +207,7 @@ def case_declare_fails_closed(work: Path) -> list[str]:
 
 
 def case_require_lists_every_patch(work: Path) -> list[str]:
+    """The require mode lists the top-level patches in name order under the engine's module."""
     layout = plant(work)
     ran = run("sh", "tools/pymetta-host/declare-host.sh", "require", cwd=layout)
     facts = [line for line in ran.stdout.splitlines() if line.startswith("host_patch(")]
@@ -213,6 +220,7 @@ def case_require_lists_every_patch(work: Path) -> list[str]:
 
 
 def case_declare_applies_a_nested_patch_in_its_own_tree(work: Path) -> list[str]:
+    """A patch under packages/swipy is declared from its own nested repository."""
     layout = plant(work)
     nest(layout)
     tree = source(work, "a.patch", "b.patch", f"{NESTED}/c.patch")
@@ -228,6 +236,7 @@ def case_declare_applies_a_nested_patch_in_its_own_tree(work: Path) -> list[str]
 
 
 def case_require_splits_by_tree(work: Path) -> list[str]:
+    """The require TREE mode lists exactly that tree's patches under a module of its own."""
     layout = plant(work)
     nest(layout)
     top = run("sh", "tools/pymetta-host/declare-host.sh", "require", cwd=layout).stdout
@@ -245,6 +254,7 @@ def case_require_splits_by_tree(work: Path) -> list[str]:
 
 
 def case_require_refuses_a_shared_name(work: Path) -> list[str]:
+    """Two patches with one file name are refused, since the name is the key."""
     layout = plant(work)
     (layout / "tests/checks/host_workarounds" / NESTED).mkdir(parents=True)
     (layout / "tests/checks/host_workarounds" / NESTED / "a.patch").write_text(PATCH_C)
@@ -255,6 +265,7 @@ def case_require_refuses_a_shared_name(work: Path) -> list[str]:
 
 
 def case_lane_reports_a_stale_requirement(work: Path) -> list[str]:
+    """The lane passes a current requirement and reports an edited one."""
     layout = plant(work)
     current = run("sh", "tools/pymetta-host/declare-host.sh", "require", cwd=layout).stdout
     (layout / "engine/host_patches.pl").write_text(current)
@@ -268,6 +279,7 @@ def case_lane_reports_a_stale_requirement(work: Path) -> list[str]:
 
 
 def case_lane_reports_an_unrequired_tree(work: Path) -> list[str]:
+    """A tree holding patches that no requirement covers is reported by name."""
     layout = plant(work)
     (layout / "tests/checks/host_workarounds/packages/other").mkdir(parents=True)
     (layout / "tests/checks/host_workarounds/packages/other/d.patch").write_text(PATCH_C)
@@ -278,6 +290,7 @@ def case_lane_reports_an_unrequired_tree(work: Path) -> list[str]:
 
 
 def case_lane_reports_an_undeclared_host(work: Path) -> list[str]:
+    """A host lacking a required patch is refused, naming the patch."""
     layout = plant(work)
     # A requirement no real host can declare: its patch exists only here.
     (layout / "engine/host_patches.pl").write_text(
