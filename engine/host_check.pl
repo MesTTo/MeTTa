@@ -107,7 +107,7 @@ prolog:message(error(metta_host_unpatched(Missing, Stale, Declaration), _)) -->
     unpatched_lines(NStale, 'built from an older version of the patch', Stale),
     declaration_line(Declaration, NRequired),
     [ 'A stock SWI-Prolog has defects that crash the engine or change its answers.'-[], nl,
-      'On Linux x86_64 under CPython 3.12 to 3.14, `pip install pymetta` brings the patched host.'-[], nl,
+      'The patched host comes with `npm install tsmetta`, and with `pip install pymetta` on Linux x86_64 under CPython 3.12 to 3.14.'-[], nl,
       'Anywhere else, build it as docs/patched-host.md describes:'-[], nl,
       '    https://github.com/MesTTo/MeTTa/blob/main/docs/patched-host.md'-[] ].
 prolog:message(error(metta_host_declaration_foreign(Declaration, Built, Running), _)) -->

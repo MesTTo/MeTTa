@@ -147,7 +147,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the host's declaration, which `tools/pymetta-host/declare-host.sh` writes
   into the SWI home, with `engine/host_patches.pl`, generated from the
   patches, and refuses before anything loads. The refusal names each missing
-  or stale patch and points at `docs/patched-host.md`. The declaration is
+  or stale patch, names the two packages that carry a patched host, tsmetta
+  and pymetta's Linux x86_64 wheels, and points at `docs/patched-host.md` for
+  everywhere else. The declaration is
   bound to the `compiled_at` of the binary it was written for, because the C
   patches live in the binary and `SWI_HOME_DIR` can start any binary on any
   home. From Python the refusal is an `EngineError`, which is a `metta.MettaError`.
