@@ -237,6 +237,7 @@ METTA_LANE_WIDTH=$(( $(nproc 2>/dev/null || echo 4) / CHECK_JOBS ))
 [ "$METTA_LANE_WIDTH" -lt 1 ] && METTA_LANE_WIDTH=1
 export METTA_LANE_WIDTH
 LANE_PIDS=''
+LANE_DONE=''
 LANE_RUNNING=0
 LANE_SEQ=0
 LANE_PRINTED=0
@@ -258,7 +259,7 @@ LANE_PARTS=$(mktemp -d "${TMPDIR:-/tmp}/metta-check-lanes.XXXXXX")
 check_cleanup() {
     status=$?
     trap - EXIT
-    for lane_p in $LANE_PIDS; do kill -TERM "$lane_p" 2>/dev/null; done
+    for lane_p in $LANE_PIDS; do kill -TERM "${lane_p#*:}" 2>/dev/null; done
     rm -f "$SUMMARY" "$MEMORY_SCALE_DATA" "$MEMORY_SCALE_STATUS" || status=1
     rm -rf "$LANE_PARTS" || status=1
     metta_gate_scratch_close || status=1
@@ -410,34 +411,66 @@ run() {
         printf '%s\t%s\t%s\t%s\t%s\n' \
             "$LANE_SEQ" "$tier" "$name" "$status" "$lane_elapsed" >> "$SUMMARY"
     ) &
-    LANE_PIDS="$LANE_PIDS $!"
+    LANE_PIDS="$LANE_PIDS $LANE_SEQ:$!"
     LANE_RUNNING=$((LANE_RUNNING + 1))
     while [ "$LANE_RUNNING" -ge "$CHECK_JOBS" ]; do lane_reap_one || break; done
     return 0
 }
 
-# Reap the OLDEST outstanding lane and print its output. `wait PID` is POSIX
-# where `wait -n` is a bash extension and this driver runs under sh, so the
-# queue frees its slot by waiting on a named child rather than on whichever
-# finishes first. That costs head-of-line blocking -- a fast lane behind a slow
-# one holds its slot -- and buys two things worth more: the slot is freed by
-# the kernel, so a lane that segfaulted or was killed frees it exactly as one
-# that exited does and no slot can leak, and the outputs come back in
-# DECLARATION order, so the log reads as it did when the lanes ran serially.
+# Reap WHICHEVER lane has finished, not the oldest. Waiting on the oldest is
+# what `wait PID` gives a POSIX shell, and it head-of-line blocks: while a
+# 386-second memory-scale-gate sits at the head, no new lane starts although
+# seven slots are free. Measured over a whole gate on 2026-09-23: 2970
+# lane-seconds came back in 1759s of wall, an overlap of 1.7x on eight slots,
+# where the serial part is only about 600s of solo lanes.
+#
+# The primitive that fixes it is "block until ANY child finishes", which is
+# bash's `wait -n` and which sh does not have [measured: sh -c 'true & wait -n'
+# fails where bash -c succeeds]. This gets the same answer from the process
+# table: a shell reaps a finished background child on its own, so `kill -0` on
+# its PID FAILS once it is gone while a running one still answers. Polling that
+# is a non-blocking "has this one finished", and a tenth of a second between
+# sweeps is nothing against lanes measured in seconds. `kill` is a shell
+# builtin, so a sweep costs no process. [measured 2026-09-23 over one 6-second
+# job and eight 1-second ones at three slots: oldest 8s, polled 6s, and 6s is
+# the floor.]
+#
+# The slot is still freed by the KERNEL rather than by anything the lane does,
+# so a lane that segfaulted or was killed frees it exactly as one that exited
+# does, and no slot can leak.
 lane_reap_one() {
-    # shellcheck disable=SC2086  -- the PID list is deliberately word-split
-    set -- $LANE_PIDS
-    [ "$#" -gt 0 ] || return 1
-    wait "$1" 2>/dev/null
-    shift
-    LANE_PIDS="$*"
-    LANE_RUNNING=$((LANE_RUNNING - 1))
-    LANE_PRINTED=$((LANE_PRINTED + 1))
-    if [ -f "$LANE_PARTS/$LANE_PRINTED.out" ]; then
-        cat "$LANE_PARTS/$LANE_PRINTED.out"
-        rm -f "$LANE_PARTS/$LANE_PRINTED.out"
-    fi
-    return 0
+    [ -n "$LANE_PIDS" ] || return 1
+    while :; do
+        for lane_entry in $LANE_PIDS; do
+            if ! kill -0 "${lane_entry#*:}" 2>/dev/null; then
+                wait "${lane_entry#*:}" 2>/dev/null
+                LANE_PIDS=$(for lane_e in $LANE_PIDS; do
+                    [ "$lane_e" = "$lane_entry" ] || printf '%s ' "$lane_e"
+                done)
+                LANE_DONE="$LANE_DONE ${lane_entry%%:*}"
+                LANE_RUNNING=$((LANE_RUNNING - 1))
+                lane_print_ready
+                return 0
+            fi
+        done
+        sleep 0.1
+    done
+}
+
+# Printing stays in DECLARATION order even though reaping no longer is, so the
+# log reads exactly as it did when the lanes ran one after another. A lane that
+# finishes early waits its turn in LANE_DONE; the run of ready lanes is flushed
+# whenever the one the reader is next owed arrives.
+lane_print_ready() {
+    while :; do
+        lane_next=$((LANE_PRINTED + 1))
+        case " $LANE_DONE " in *" $lane_next "*) ;; *) return 0 ;; esac
+        if [ -f "$LANE_PARTS/$lane_next.out" ]; then
+            cat "$LANE_PARTS/$lane_next.out"
+            rm -f "$LANE_PARTS/$lane_next.out"
+        fi
+        LANE_PRINTED=$lane_next
+    done
 }
 
 # A lane whose evidence is LOAD-SENSITIVE runs alone. The criterion is not
@@ -480,6 +513,7 @@ run_solo() {
 # variables declared beside SUMMARY is where to look.
 lane_barrier() {
     while [ "$LANE_RUNNING" -gt 0 ]; do lane_reap_one || break; done
+    lane_print_ready
     LANE_PIDS=''
     LANE_RUNNING=0
 }
