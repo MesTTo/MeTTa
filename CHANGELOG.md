@@ -108,6 +108,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh` no longer copies `.agenticmind/`, the reasoning record's
+  lock and session directory, into a battery, and no longer reads a change to
+  it as drift. Every write any session makes to the record touches a lock file
+  there, so `run` refused battery 2 while other sessions were writing the
+  record, naming a lock whose mtime alone had moved. The directory now gets
+  the treatment caches already get: hidden from the copy, protected only while
+  verifying, and swept from the battery by the next provision. The tracked
+  record, `agenticmind.json`, is copied as before. `tools/battery_selftest.sh`
+  holds all three halves, and each fails against the previous script.
 - No callback the garbage collector runs for the Python seat takes a lock any
   more. Four weak-reference callbacks did: the box interns' evictor and the
   replay, declaration and declared-carrier tables' evictors took their table's

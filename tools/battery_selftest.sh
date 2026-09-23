@@ -7,8 +7,9 @@
 #   about ITSELF rather than about the checkout it sits inside; and prove a
 #   battery re-provisioned from another source reads that source's installs.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
-# Guarantees: exits nonzero if any planted drift goes unreported, or if the
-#   excluded-scratch case is reported (the false positive -O exists to stop).
+# Guarantees: exits nonzero if any planted drift goes unreported, or if
+#   anything the snapshot leaves out on purpose is reported as drift: scratch,
+#   caches, a compiled artifact, the record's lock directory.
 # Fails when: run concurrently with itself, since it owns one fixture path; or
 #   where `git worktree add` is unavailable, which the identity case needs.
 # Decides: the drift shapes are enumerated rather than sampled. The space is
@@ -131,6 +132,31 @@ if [ -e "$TREE/package/own.qlf" ]; then
 else
     echo "  ok   the battery's compiled artifact: swept by the next provision"
 fi
+
+# The record tool's lock directory moves whenever any session writes the
+# record, so it is never copied, a lock written after the copy is not drift in
+# either tree, and the next provision sweeps whatever the battery holds.
+mkdir -p "$FIXTURE/src/.agenticmind/locks"
+printf 'held\n' > "$FIXTURE/src/.agenticmind/locks/record.lock"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+if [ -e "$TREE/.agenticmind" ]; then
+    echo "  FAIL the record's lock directory: copied into the battery"
+    failures=$((failures + 1))
+else
+    echo "  ok   the record's lock directory: left behind"
+fi
+printf 'rewritten\n' > "$FIXTURE/src/.agenticmind/locks/record.lock"
+mkdir -p "$TREE/.agenticmind/locks"
+printf 'written in the battery\n' > "$TREE/.agenticmind/locks/record.lock"
+expect "a record lock written after the copy, in either tree" 0
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+if [ -e "$TREE/.agenticmind" ]; then
+    echo "  FAIL the battery's record lock directory: kept by the next provision"
+    failures=$((failures + 1))
+else
+    echo "  ok   the battery's record lock directory: swept by the next provision"
+fi
+rm -rf "$FIXTURE/src/.agenticmind"
 
 # Drift is one half of the contract and clearing it is the other: a battery
 # that cannot be re-provisioned is a battery lost. A gate run leaves what the

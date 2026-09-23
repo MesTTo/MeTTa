@@ -122,6 +122,15 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 # the source's are never copied, provision sweeps the battery's, and the
 # gate's own warm-up compiles a fresh set in place before any lane boots.
 #
+# `.agenticmind/` takes the caches' two halves for a reason of its own. It is
+# the reasoning record's lock and session directory for this machine, ignored
+# by git, touched by every write any session makes to the record, and read by
+# no lane; the record itself is the tracked agenticmind.json, which is copied
+# like any tracked file. A copy of the directory is stale as soon as it is
+# taken, so `run`'s verify read one lock's new mtime as drift and refused the
+# battery while other sessions were writing the record [measured 2026-09-24:
+# battery 2, `>f..t......` on .agenticmind/locks/99fbbe16….lock].
+#
 # ai-tmp/, node_modules and .venv* keep both halves, because losing them
 # changes WHAT RUNS rather than how fast: ai-tmp/ holds this tree's own
 # occupancy record, provenance and logs, and the other two are the installed
@@ -140,12 +149,13 @@ snapshot() {
           --filter="H .git" --filter="P /.git" \
           --filter="H __pycache__/" --filter="H .pytest_cache/" \
           --filter="H .mypy_cache/" --filter="H .ruff_cache/" \
-          --filter="H *.qlf" \
+          --filter="H *.qlf" --filter="H .agenticmind/" \
           ${caches:+--filter="P __pycache__/"} \
           ${caches:+--filter="P .pytest_cache/"} \
           ${caches:+--filter="P .mypy_cache/"} \
           ${caches:+--filter="P .ruff_cache/"} \
           ${caches:+--filter="P *.qlf"} \
+          ${caches:+--filter="P .agenticmind/"} \
           --exclude=ai-tmp/ --exclude='ai-tmp-*' \
           --exclude='ai-battery-*' \
           --exclude=node_modules --exclude='.venv*' \
