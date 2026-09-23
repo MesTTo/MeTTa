@@ -17,8 +17,12 @@ on:
   push:
     branches:
       - main
+    # The image's inputs: the Dockerfile and the two directories it copies.
     paths:
       - ".github/ci/Dockerfile"
+      - ".github/ci/Dockerfile.dockerignore"
+      - "tools/pymetta-host/**"
+      - "tests/checks/host_workarounds/**"
       - ".github/workflows/ci-image.yml"
   workflow_dispatch:
 
@@ -44,7 +48,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v6
         with:
-          context: .github/ci
+          # The root, because the image copies the host build tooling and the
+          # patches; .github/ci/Dockerfile.dockerignore sends only those.
+          context: .
+          file: .github/ci/Dockerfile
           push: true
           tags: ghcr.io/mestto/metta-kernel-ci:latest
           cache-from: type=gha

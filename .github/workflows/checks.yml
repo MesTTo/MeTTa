@@ -110,7 +110,12 @@ jobs:
         # and one distribution per extension package. Without it uv installs
         # the root project alone and every member's own suite fails to import
         # the module it tests.
-        run: uv sync --locked --all-packages --extra checks
+        run: |
+          uv sync --locked --all-packages --extra checks
+          # The bridge from the image's PATCHED janus source: the engine extra
+          # adds nothing on Linux x86_64 CPython, where pymetta's wheels carry
+          # their own host, and a PyPI janus would lack the janus patches.
+          uv pip install --python .venv/bin/python /opt/swipl-src/packages/swipy
 
       - name: Install the reviewed Ciao-grade packs
         run: |
@@ -229,7 +234,12 @@ jobs:
         # and one distribution per extension package. Without it uv installs
         # the root project alone and every member's own suite fails to import
         # the module it tests.
-        run: uv sync --locked --all-packages --extra checks
+        run: |
+          uv sync --locked --all-packages --extra checks
+          # The bridge from the image's PATCHED janus source: the engine extra
+          # adds nothing on Linux x86_64 CPython, where pymetta's wheels carry
+          # their own host, and a PyPI janus would lack the janus patches.
+          uv pip install --python .venv/bin/python /opt/swipl-src/packages/swipy
 
       - name: Report
         env:
@@ -262,8 +272,10 @@ jobs:
         with:
           enable-cache: true
 
-      # The PyPI janus_swi wheel links libswipl.so.9; building from source
-      # links whatever SWI the image actually has.
+      # janus is built from the image's PATCHED source, /opt/swipl-src, against
+      # the patched SWI it installed: janus's C half lives in the bridge rather
+      # than in libswipl, so a PyPI build would carry janus-callback-exception-leak
+      # whatever host it linked.
       #
       # This list is the project's own required dependencies plus the test
       # runner, and nothing else. It is checked against pyproject.toml by
@@ -281,9 +293,9 @@ jobs:
           # into an INTERNALERROR before a single test runs [measured
           # 2026-09-07]. A bare floor is still the subject of this job; these
           # two are part of running the suite at all, like pytest itself.
-          uv pip install --python /tmp/v/bin/python --no-binary janus_swi \
-                         janus_swi docstring-parser annotated-types pytest hypothesis \
-                         pytest-randomly pytest-timeout
+          uv pip install --python /tmp/v/bin/python \
+                         /opt/swipl-src/packages/swipy docstring-parser annotated-types \
+                         pytest hypothesis pytest-randomly pytest-timeout
           # The package itself, WITHOUT its dependencies: this job's subject is
           # the library on a bare floor, and pulling an extra in would make the
           # skip-clean property it exists to prove untestable. Installing
@@ -379,18 +391,20 @@ jobs:
                      echo "SWI_HOME_DIR=C:\\Program Files\\swipl" >> "$GITHUB_ENV" ;;
           esac
 
-      - name: The engine extra boots and round-trips JSON
+      # The engine runs only on a PATCHED SWI-Prolog and no wheel carries one
+      # for this platform, so what ships here is the refusal: the bridge
+      # installs and binds the stock SWI just installed, and the engine
+      # declines it at boot naming every patch it lacks (engine/host_check.pl).
+      # Booting is proved where a host ships, in the Linux wheel job.
+      - name: The engine extra binds a stock SWI-Prolog and the engine refuses it
         run: |
           python -m venv full
           case "${{ runner.os }}" in Windows) BIN=full/Scripts ;; *) BIN=full/bin ;; esac
           # janus_swi ships PREBUILT WHEELS for Windows, and a prebuilt one
           # carries its own idea of which SWI it links. Against the swipl this
-          # job just installed that mismatch surfaces late and obscurely: the
-          # boot got as far as loading the engine and then failed the
-          # library(json) directive, because the resolver was reading a
-          # different installation's library tree. Building janus from source
-          # links it against THIS swipl, which is what the Linux matrix
-          # already does for the same reason.
+          # job just installed that mismatch surfaces late and obscurely, so
+          # the bridge is built from source against THIS swipl, which is what
+          # the Linux matrix already does for the same reason.
           case "${{ runner.os }}" in
             Windows) "$BIN/python" -m pip install --quiet --no-cache-dir \
                        --no-binary janus_swi "$(echo dist/*.whl)[engine]" ;;
@@ -399,13 +413,16 @@ jobs:
           esac
           cd "$RUNNER_TEMP"
           "$GITHUB_WORKSPACE/$BIN/python" - <<'PY'
-          from metta import MeTTa, _json
-          answer = MeTTa().space().run("!(+ 1 2)")
-          assert answer == [[3]], answer
-          # The codec reaches this side through the engine's own alias, and an
-          # installed layout is where a relative path stopped resolving.
-          assert _json.loads(_json.dumps({"a": [1, 2]})) == {"a": [1, 2]}
-          print("engine and codec answer on", __import__("platform").platform())
+          from metta import MeTTa, MettaError
+          try:
+              MeTTa()
+          except MettaError as error:
+              text = str(error)
+              assert "does not carry every patch" in text, text
+              assert "patched-host.md" in text, text
+              print("stock host refused as designed on", __import__("platform").platform())
+          else:
+              raise SystemExit("the engine booted on a stock SWI-Prolog")
           PY
 
   # A wheel that boots in a clean environment is the only blackbox proof
@@ -444,10 +461,13 @@ jobs:
         # environment, which is what a user without a matching wheel gets.
         run: |
           python -m venv /tmp/wheeltest
-          # [engine] because the bridge to SWI-Prolog is an extra: a plain
-          # install is the one that must not fail on a machine without SWI,
-          # and this job boots the engine, so it needs the bridge.
-          /tmp/wheeltest/bin/pip install --no-binary :all: "$(echo dist/*.tar.gz)[engine]"
+          # The bridge first, from the image's PATCHED janus source, against the
+          # patched SWI the image declares: an sdist carries no host, and on
+          # Linux x86_64 CPython the engine extra adds nothing, because there
+          # pymetta's manylinux wheels carry their own. So this is the path a
+          # reader building from source with a patched host takes.
+          /tmp/wheeltest/bin/pip install /opt/swipl-src/packages/swipy
+          /tmp/wheeltest/bin/pip install --no-binary :all: "$(echo dist/*.tar.gz)"
           cd /tmp
           /tmp/wheeltest/bin/python -c "
           from pathlib import Path
@@ -608,7 +628,11 @@ jobs:
         # runs one. janus-swi comes from the `engine` extra, and the kernel
         # boots the engine through it in-process.
         run: |
-          uv sync --locked --all-packages --extra checks --extra engine
+          uv sync --locked --all-packages --extra checks
+          # The bridge from the image's PATCHED janus source: the engine extra
+          # adds nothing on Linux x86_64 CPython, where pymetta's wheels carry
+          # their own host, and a PyPI janus would lack the janus patches.
+          uv pip install --python .venv/bin/python /opt/swipl-src/packages/swipy
           uv pip install ipykernel nbclient nbformat
 
       - name: Start the upstream kernel against upstream and against this engine

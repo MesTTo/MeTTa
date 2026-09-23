@@ -5,8 +5,12 @@ on:
     branches: [main]   # ← tests always run on every PR to main
   push:
     branches: [main]   # ← publish :latest only when Dockerfile changes
+    # The image's inputs: the Dockerfile and the two directories it copies.
     paths:
       - ".github/ci/Dockerfile"
+      - ".github/ci/Dockerfile.dockerignore"
+      - "tools/pymetta-host/**"
+      - "tests/checks/host_workarounds/**"
 
 jobs:
   # 1) Detect if the Dockerfile changed (on PRs)
@@ -24,6 +28,9 @@ jobs:
           filters: |
             dockerfile:
               - ".github/ci/Dockerfile"
+              - ".github/ci/Dockerfile.dockerignore"
+              - "tools/pymetta-host/**"
+              - "tests/checks/host_workarounds/**"
 
   # 2) Build & (optionally) push a PR image only if Dockerfile changed
   build-image:
@@ -140,7 +147,12 @@ jobs:
           enable-cache: true
 
       - name: Install pymetta
-        run: uv sync --locked --extra checks
+        run: |
+          uv sync --locked --extra checks
+          # The bridge from the image's PATCHED janus source: the engine extra
+          # adds nothing on Linux x86_64 CPython, where pymetta's wheels carry
+          # their own host, and a PyPI janus would lack the janus patches.
+          uv pip install --python .venv/bin/python /opt/swipl-src/packages/swipy
 
       - name: Run Python tests
         run: uv run pytest extensions/python/tests --rootdir=extensions/python -c extensions/python/pyproject.toml

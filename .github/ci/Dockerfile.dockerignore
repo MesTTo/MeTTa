@@ -1,0 +1,6 @@
+# The image's build context is the repository root, and it copies two
+# directories out of it; BuildKit reads this file for .github/ci/Dockerfile
+# alone, so nothing else is sent to the daemon.
+*
+!tools/pymetta-host
+!tests/checks/host_workarounds
