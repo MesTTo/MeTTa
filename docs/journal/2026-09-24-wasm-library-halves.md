@@ -306,3 +306,52 @@ owner's cleanup closed the lock stream: 2 of 3 runs failed with
 `database_lock_failed(_, 11)` at load average 91. It now waits for a cleanup
 wrapped around `store_owner/2`, which follows the close, and 6 of 6 runs pass.
 The record had seen it pass on re-run before, which is what a race looks like.
+
+### The host's own files
+
+The TS corpus job found three originals failing under tsmetta 6663d06 on
+build-5 by path alone: 41-compression_lib's
+`examples/.../_fixtures/compression-data.zip` raised `SourceNotFoundError`,
+and 09-conformance's `import_prolog_functions_from_file
+"./examples/.../_fixtures/demo_provider.pl"` failed, while the same import by
+an absolute path it had copied in answered true. The WebAssembly host sees
+its preloaded `/swipl` and whatever a program writes into memory, and nothing
+of the directory the native engine resolves those paths against.
+
+Emscripten's bridge to Node's file system is NODEFS, and a link includes it
+only when asked: `src/lib/libfs.js` in emsdk 6.0.9 adds `$NODEFS` to
+`FS__deps`, and `NODEFS` to `FS.filesystems`, under
+`LibraryManager.has('libnodefs.js')`. SWI's swipl-web link names no file
+system library, so build-5's loader holds `FS.filesystems={MEMFS}`. CPython's
+emscripten `configure.ac` and Pyodide's `Makefile.envs` link `-lnodefs.js`
+into their main program. NODEFS's setup is a postset guarded by
+`ENVIRONMENT_IS_NODE`, and it reads Node's `fs` through the loader's own
+Node branch, so it brings no `require` the browser build does not already
+map to an empty module.
+
+The flag's home is the Dockerfile's `LDFLAGS`, which cmake takes as
+`CMAKE_EXE_LINKER_FLAGS`, so it is in the command ninja records for
+`src/swipl-web.js` and therefore in build.sh's second link. Appending it to
+that recorded command does nothing, which was the first probe's result: the
+Ninja generator writes a link as `: && em++ ... && :`, the flag landed after
+the closing `:`, and the loader came out byte-identical. Put where `LDFLAGS`
+lands, right after `-O3 -DNDEBUG`, the same relink of build-5's objects gave
+`FS.filesystems={MEMFS,NODEFS}` and a loader of 223399 bytes against 216495,
+with the `.wasm` and `.data` byte-identical. Under Node that relink mounted
+the checkout at its own path and, with SWI's working directory changed into
+it, resolved, sized, read and wrote repository-relative paths, saw a file the
+host wrote after the mount, and still loaded `library(lists)` from `/swipl`.
+Vendored into the node seat, it bundled for the browser and passed the
+Chromium suite 24 of 24, as build-5 does in the same battery. The other link
+the flag reaches is the `swipl` binary ctest runs, which links NODEFS already
+through `NODERAWFS`. Giving the flag to swipl-web alone would have meant
+target options in `packages/metta`, which holds the library pack's halves and
+nothing else, or a patch to SWI's cmake, and the ledger is for SWI's defects.
+
+Both builds' browser bundles print one esbuild warning, from SWI's
+`src/wasm/prolog.js:1094`: `url_properties` tests `! size instanceof
+Number`, which is `(!size) instanceof Number` and always false, so a URL
+answered without a Content-Length reports size NaN rather than -1. It is
+still there on swipl-devel master. Patching it changes what every host must
+declare, which this build was asked not to do, so it is left for a later
+one (`i-url-size-nan` in the record).

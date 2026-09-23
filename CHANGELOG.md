@@ -26,6 +26,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   context carries, so `Dockerfile.dockerignore` is the one statement of what
   the host is built with, and `JOBS` bounds the compile on a shared machine.
 
+- The WebAssembly host links emscripten's NODEFS, so a program running it
+  under Node can mount a host directory into the host's file system through
+  `FS.filesystems.NODEFS`. Before, the host saw its preloaded `/swipl` and
+  what was written into memory, so tsmetta could not reach a
+  repository-relative path the native engine opens, such as
+  41-compression_lib's ZIP fixture. `tools/wasm-host/Dockerfile` adds
+  `-lnodefs.js` to `LDFLAGS`. NODEFS sets itself up only under Node, so the
+  browser path is unchanged.
+
 ### Changed
 
 - A library whose platform capability is missing imports, and only the call

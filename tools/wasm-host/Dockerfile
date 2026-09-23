@@ -4,7 +4,7 @@
 #   need linked in.
 #
 # This is npm-swipl-wasm's own docker/Dockerfile at the commit
-# tools/wasm-host/wasm.pin names, with four changes, each marked "Ours" below:
+# tools/wasm-host/wasm.pin names, with five changes, each marked "Ours" below:
 #   - where upstream clones swipl-devel and checks out a commit, this copies
 #     the build context, which tools/wasm-host/build.sh has filled with the
 #     output of tools/pymetta-host/fetch-source.sh (the pinned source with
@@ -19,7 +19,10 @@
 #     statement of what this host is built with; and the static libarchive and
 #     OSSP UUID, by the variables their packages take in place of a search;
 #   - ninja and ctest take JOBS, so a shared machine can hold the build to a
-#     share of its cores.
+#     share of its cores;
+#   - LDFLAGS links emscripten's NODEFS beside upstream's stack size, so a
+#     program running the host under Node can mount a host directory into its
+#     file system.
 # Everything else (the emsdk image, the zlib and pcre2 builds, the cmake
 # flags, ctest) is upstream's, unedited.
 #
@@ -129,7 +132,23 @@ COPY . /swipl-devel
 # Build SWIPL
 WORKDIR /swipl-devel/build.wasm
 RUN mkdir -p /swipl-devel/build.wasm
-ENV LDFLAGS="-s STACK_SIZE=1048576"
+# Ours: -lnodefs.js. SWI's swipl-web link names no emscripten file system
+# library, and emscripten puts NODEFS in FS.filesystems only when one is
+# linked [source: emscripten 6.0.9 src/lib/libfs.js, FS__deps and
+# FS.staticInit], so the host saw its preloaded /swipl and memory alone, and
+# tsmetta could not reach a repository-relative path the native engine opens.
+# With NODEFS a Node program mounts a host directory into the host's file
+# system; its setup runs only under Node, so the browser path is unchanged.
+# CPython's and Pyodide's emscripten builds link it into their main program
+# the same way [source: CPython configure.ac, LINKFORSHARED; Pyodide
+# Makefile.envs, MAIN_MODULE_LDFLAGS]. It goes here because cmake takes
+# LDFLAGS as CMAKE_EXE_LINKER_FLAGS, which every executable link carries,
+# including the command build.sh's second link reruns. Appending it to that
+# command instead links nothing new, since the Ninja generator closes a link
+# with `&& :` and the flag lands after it [measured 2026-09-24: a swipl-web.js
+# byte-identical to the image's own; commit=6456b9822f637bf3bd106e001abf862d3d6ab262].
+# The swipl binary ctest runs links NODEFS already, through NODERAWFS.
+ENV LDFLAGS="-s STACK_SIZE=1048576 -lnodefs.js"
 # Ours: SWIPL_PACKAGE_LIST, every packages/*/CMakeLists.txt the context holds,
 # which SWI takes verbatim and still closes over dependencies
 # (cmake/PackageSelection.cmake). LibArchive_LIBRARIES names zlib beside the

@@ -134,6 +134,13 @@ library activates by name where a native host builds and loads a shared object
 call, naming the capability: threads, time limits, processes, sockets, HTTP and
 OpenSSL, since a WebAssembly module has none of them.
 
+It also links emscripten's NODEFS (`-lnodefs.js` in the Dockerfile's
+`LDFLAGS`), so a program running the host under Node can mount a host
+directory into the host's file system with
+`FS.mount(FS.filesystems.NODEFS, {root: dir}, dir)`. Mounting the working
+directory at its own path and changing into it lets a relative path resolve
+as it does on a native host. A browser never takes that path.
+
 ## When a patch changes
 
 A patch edited in `tests/checks/host_workarounds/` has a new digest, so a host

@@ -128,7 +128,10 @@ if [ "${1:-}" = vendor ]; then
         echo "lib_compression snapshot), utf8proc $UTF8PROC, libyaml $LIBYAML and OSSP UUID"
         echo "$OSSP_UUID, and the native half of every library"
         echo "in that pack carrying \`support/static.cmake\`, which the library activates by"
-        echo "name here where a native host loads a shared object."
+        echo "name here where a native host loads a shared object. It also links"
+        echo "emscripten's NODEFS, so under Node a program can mount a host directory into"
+        echo "the host's file system through \`FS.filesystems.NODEFS\`; a browser never"
+        echo "takes that path."
         echo
         echo "The data image holds SWI's library and, at /swipl/metta-host.pl, the"
         echo "declaration of the patches this build carries, which the engine checks at every"
