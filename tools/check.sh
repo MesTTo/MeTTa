@@ -428,7 +428,7 @@ run() {
 # where the serial part is only about 600s of solo lanes.
 #
 # The primitive that fixes it is "block until ANY child finishes", which is
-# bash's `wait -n` and which sh does not have [measured: sh -c 'true & wait -n'
+# bash's `wait -n` and which sh does not have [measured 2026-09-23: sh -c 'true & wait -n'
 # fails where bash -c succeeds]. This gets the same answer from the process
 # table: a shell reaps a finished background child on its own, so `kill -0` on
 # its PID FAILS once it is gone while a running one still answers. Polling that

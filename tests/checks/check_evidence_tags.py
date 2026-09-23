@@ -649,6 +649,14 @@ NODE_EXIT = re.compile(r"process\.exitCode\s*=\s*[1-9]|process\.exit\(\s*[1-9]")
 # The C equivalent, read only where main() exists and the file declares no case,
 # so a helper returning 1 in a suite cannot stand in for the suite running.
 C_EXIT = re.compile(r"\breturn\s+[1-9]|\bexit\s*\(\s*[1-9]|\bEXIT_FAILURE\b")
+# The other way a C program reports failure: an assert() in main(), which
+# aborts with a nonzero status. It counts only where the file undefines NDEBUG
+# before it includes <assert.h>, because a build defining NDEBUG compiles every
+# assert to nothing and the binary would then pass whatever it computed; six of
+# extensions/cmetta/tests' programs are written this way.
+C_ASSERT = re.compile(r"\bassert\s*\(")
+C_LIVE_ASSERTS = re.compile(r"^\s*#\s*undef\s+NDEBUG\b.*?^\s*#\s*include\s*<assert\.h>",
+                            re.MULTILINE | re.DOTALL)
 # A name written in prose, quoted so the splitter takes it whole. It may WRAP,
 # because a claim sits in a comment and a comment is wrapped like any other
 # prose, so the match spans newlines and the name's whitespace is normalised
@@ -1148,13 +1156,20 @@ def _c_file(path: Path, text: str, resolved: Path) -> Target:
     [measured 2026-08-31].
 
     The exit is read from main()'s BODY, not the file, because a helper
-    returning 1 is not the program reporting a failure.
+    returning 1 is not the program reporting a failure. An assert() in that
+    body is the program's other way of failing, and it is believed only where
+    the file undefines NDEBUG before <assert.h>, so no build flag can compile
+    the check away [tested: tests/checks/check_evidence_selftest.py;
+    commit=WORKTREE].
     """
     body = C_MAIN.search(text)
     if body is not None and C_CALL.search(body.group(1)):
         return Target("c", path, resolved, "the C suite exits nonzero on the first failing check")
     if body is not None and not C_TEST.search(text) and C_EXIT.search(body.group(1)):
         return Target("c", path, resolved, "the program exits nonzero")
+    if (body is not None and not C_TEST.search(text) and C_ASSERT.search(body.group(1))
+            and C_LIVE_ASSERTS.search(text)):
+        return Target("c", path, resolved, "an assert in main() aborts with a nonzero status")
     return Target("c", path, resolved, None,
                   "its main() calls no test_ case, so the binary runs none")
 

@@ -566,6 +566,48 @@ def seat_relative_path_complaints() -> list[str]:
     return complaints
 
 
+def c_assert_program_complaints() -> list[str]:
+    """A C program that asserts in main() reports failure only if its asserts are live.
+
+    A program with no test_ cases fails by aborting when an assert() in main()
+    does not hold, and six of the C seat's tests are written that way. It is
+    evidence only where the file undefines NDEBUG before <assert.h>: with
+    NDEBUG defined, every assert compiles to nothing and the binary passes
+    whatever it computed. So the live program is accepted and the one a build
+    flag could silence is still reported.
+    """
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        tests = root / "extensions/cmetta/tests"
+        body = "int main(void)\n{\n  assert(1 + 1 == 2);\n  return 0;\n}\n"
+        (tests / "asserts_live.c").write_text("#undef NDEBUG\n#include <assert.h>\n\n" + body)
+        (tests / "asserts_maybe_off.c").write_text("#include <assert.h>\n\n" + body)
+        makefile = root / "extensions/cmetta/Makefile"
+        makefile.write_text(makefile.read_text()
+                            + "\t./tests/asserts_live\n\t./tests/asserts_maybe_off\n")
+        header = root / "extensions/cmetta/fixture_asserts.h"
+        header.write_text(
+            "/* Purpose: a fixture citing assert-driven C programs.\n"
+            " * Guarantees:\n"
+            f" *   - live asserts back this [{TAG} {WHEN}: tests/asserts_live.c].\n"
+            f" *   - asserts a flag could remove do not [{TAG} {WHEN}: tests/asserts_maybe_off.c].\n"
+            " * Open Obligations:\n"
+            " *   To Do: None\n"
+            " *   Hacks: None\n"
+            " *   Future Enhancements: None\n"
+            " */\n"
+        )
+        output = run(root)
+        mine = [line for line in output if line.startswith("extensions/cmetta/fixture_asserts.h:")]
+        if [line for line in mine if "asserts_live.c" in line]:
+            complaints.append("rejected a C program whose asserts cannot be compiled out")
+        if not [line for line in mine if "asserts_maybe_off.c" in line]:
+            complaints.append("accepted a C program whose asserts NDEBUG would remove")
+    return complaints
+
+
 def line_continuation_complaints() -> list[str]:
     """A lane written across a backslash-newline runs what it names.
 
@@ -914,6 +956,7 @@ def main() -> int:
 
     complaints += symlinked_output_complaints()
     complaints += seat_relative_path_complaints()
+    complaints += c_assert_program_complaints()
     complaints += seat_root_path_complaints()
     complaints += line_continuation_complaints()
     complaints += tracked_probe_complaints()
@@ -927,7 +970,8 @@ def main() -> int:
     print(
         f"{len(complaints)} defect(s) in the evidence gate, over "
         f"{len(CITATIONS)} planted citations, one moved anchor, three commit "
-        f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
+        f"pins, a symlinked output directory, a path cited from beside its own file, a C program with "
+        f"live and with removable asserts, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
         f"probe, native support sources, a nested example fixture, a root build hook, a component shell test "
