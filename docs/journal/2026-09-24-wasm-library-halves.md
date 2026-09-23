@@ -98,6 +98,31 @@ needs. `http` gains `library(thread_pool)`, which `thread_httpd` loads;
 `library(shlib)`, which was only how the lock loaded and which a static host
 neither has nor needs.
 
+### Per call, not at import
+
+`lib_process`, `lib_socket` and `lib_http` declared `metta_requires/1`, which
+refuses the whole library at import, so every pure door went with the
+capability. They now load their platform libraries through the census and
+guard each door that needs the capability, after the door's own argument
+checks and before its first platform call, naming the door:
+`process-run! is refused: this build does not have the subprocess capability,
+because library(process) is absent`. `process-signals`, `http-server-url` and
+an empty `socket-wait!` answer on a build without them. `lib_socket` reaches
+its native half through four helpers, so the guard is in those four with the
+door's name passed in.
+
+Rejected: defining every lost import as a stub raising the refusal. It needs
+no per-door guard, but the refusal would name `socket_create/2` rather than
+the form the user called, against `metta_require_platform/2`'s own rule; the
+engine's import door relies on a lost name staying undefined; and `lib_http`
+calls `http_open` and `thread_httpd` internals module-qualified, which an
+import stub cannot cover.
+
+`http-header` needed the capability too: it canonicalises names with
+`http_header`'s grammar. The reduced-platform child caught it, answering
+`Unknown procedure: http_header:field_name/3` where the probe expected an
+answer.
+
 ### The lock under emscripten
 
 emscripten's `flock()` always answers 0, "Emscripten programs are a single

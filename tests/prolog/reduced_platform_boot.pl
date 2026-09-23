@@ -131,6 +131,24 @@ reduced_platform_report :-
     %lib_redis has no partial provider. Its metta_requires/1 declaration is
     %read before consult, so this names the capability instead of source_sink.
     refusal('redis-library', "!(import! &self (library lib_redis))"),
+    %lib_process, lib_http and lib_socket import whatever the platform lacks,
+    %as lib_crypto does, and refuse per call: the door that needs the
+    %capability names itself, and a door that needs none answers. Every
+    %child withholds process and threads, so subprocess and http are absent in
+    %each; socket is absent only where a child withholds library(socket).
+    refusal('process-run',
+            "!(import! &self (library lib_process))\n!(process-run! \"true\" ())"),
+    answer('process-signals',
+           "!(import! &self (library lib_process))\n!(process-signals)"),
+    refusal('http-methods', "!(import! &self (library lib_http))\n!(http-methods)"),
+    answer('http-server-url',
+           "!(import! &self (library lib_http))\n\c
+            !(http-server-url (http-server \"127.0.0.1\" 8080 0))"),
+    capability_probe(socket, 'socket-bind',
+                     "!(import! &self (library lib_socket))\n\c
+                      !(udp-bind! (endpoint ipv4 \"127.0.0.1\" 0))"),
+    answer('socket-wait',
+           "!(import! &self (library lib_socket))\n!(socket-wait! () 0)"),
     %The capabilities a child may or may not have, one probe per guard point.
     %Each says what it expects from the census rather than from the caller, so
     %the same report serves the run that withholds the library and the runs

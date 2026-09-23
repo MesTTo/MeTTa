@@ -6,11 +6,11 @@
 %       predicted from its prose [measured 2026-09-21; every row below
 %       re-measures it on each run, because the expected term is compared
 %       against what the head actually throws rather than against prose]
-%     - lib_socket's metta_requires(socket) directive fails on this engine, so
-%       the library's predicates load but its capability gate does not; the two
-%       socket rows reach the handle table in lib_file regardless
-%       [measured 2026-09-21: the consult warned `metta_platform_capability
-%       socket does not exist` and both heads still raised]
+%     - the two socket rows reach lib_file's handle table before any socket
+%       operation, so they raise its handle refusal on a build with or without
+%       the socket capability; lib_socket's capability guard sits after that
+%       lookup [source: lib/lib_socket/lib_socket.pl:socket_handle/4;
+%       commit=WORKTREE]
 % Guarantees:
 %     - each documented refusal below raises the term the row names, and
 %       returns no answer instead [tested: a_documented_refusal_refuses]

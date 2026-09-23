@@ -424,6 +424,30 @@ test(crypto_only_operations_refuse_by_name_without_crypto,
                   ["(crypto-hash ...)", "crypto", "library(crypto)",
                    "non-SHA"]).
 
+% The per-call rule: the import succeeds without library(process), the door
+% that starts a program refuses naming itself, and the one that needs no
+% process answers [source: lib/lib_process/lib_process.pl:launched/5].
+test(process_library_imports_and_a_launch_refuses_by_name,
+     [condition(reduced_platform_buildable)]) :-
+    refusal_names("process-run", ["process-run!", "subprocess",
+                                  "library(process)", "starts a program"]),
+    reduced_line("answer process-signals ", Signals),
+    assertion(sub_string(Signals, _, _, _, "term")).
+
+% The same rule for the two network libraries, in the child that also
+% withholds library(socket). http is absent in every child, which withholds
+% threads, and here socket is too; a server's URL and an empty wait still
+% answer.
+test(http_and_socket_libraries_import_and_refuse_per_call,
+     [condition(reduced_platform_buildable([socket]))]) :-
+    refusal_names([socket], "http-methods", ["http-methods", "http",
+                                              "library(socket)"]),
+    reduced_line([socket], "answer http-server-url ", URL),
+    assertion(sub_string(URL, _, _, _, "http://127.0.0.1:8080/")),
+    refusal_names([socket], "socket-bind", ["udp-bind!", "socket",
+                                            "library(socket)"]),
+    assertion(reduced_line([socket], "answer socket-wait ", _)).
+
 test(redis_import_refuses_by_name_without_redis,
      [condition(reduced_platform_buildable)]) :-
     refusal_names("redis-library",

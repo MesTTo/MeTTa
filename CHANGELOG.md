@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A library whose platform capability is missing imports, and only the call
+  that needs the capability refuses. `lib_process`, `lib_socket` and
+  `lib_http` refused the whole library at import through `metta_requires/1`;
+  each door that starts a program or touches the network now refuses by its
+  own name, after its argument checks, with the platform capability refusal
+  (`PlatformCapabilityError`), the way `lib_crypto`'s randomness always has.
+  `process-signals`, `http-server-url` and an empty `socket-wait!` answer on
+  a build without them.
+
 - The capability census decides a capability the first time anything reads
   it, by whether every library its row names resolves. It used to answer
   `present` for any capability no load had decided, so `metta_requires(yaml)`
