@@ -18,9 +18,10 @@
  * Guarantees:
  *   - `compiled-at` prints the flag and nothing else on stdout; the host's own
  *     output goes to stderr, so a noisy boot is never read as an identity,
- *     and a host reporting no flag exits 1 [tested: tools/wasm-host/build.sh
- *     passes it to declare-host.sh --built-by, which refuses anything but one
- *     line; commit=02dc5471b552c74826880441400114c798ea66ca]
+ *     and a host reporting no flag exits 1 [measured 2026-09-23: through a
+ *     pipe it printed the one line `Sep 23 2026, 11:30:04` for the vendored
+ *     host and `Aug 18 2026, 00:21:51` for npm's swipl-wasm 8.0.6;
+ *     commit=02dc5471b552c74826880441400114c798ea66ca]
  *   - `files` prints one `size<TAB>path` line per regular file under /swipl,
  *     sorted by path, read from the booted host's own filesystem rather than
  *     from the loader's packing metadata, so it is what the engine would see
@@ -28,7 +29,9 @@
  *     the booted host, with this checkout's engine/host_check.pl and
  *     engine/host_patches.pl mounted at /metta/engine, the paths the seat
  *     mounts them at; a refusal prints the engine's own message and exits 1
- *     [tested: build.sh runs it on every host it produces; commit=02dc5471b552c74826880441400114c798ea66ca]
+ *     [measured 2026-09-23: exit 0 on the vendored host with 19 of 19 patches
+ *     declared, and exit 1 naming all 19 missing on npm's swipl-wasm 8.0.6;
+ *     commit=02dc5471b552c74826880441400114c798ea66ca]
  * Fails when: DIR's .data belongs to another link; the boot then fails, or
  *   describes a host nobody ships, which is why build.sh asks the artefacts it
  *   is about to vendor rather than the image they came from.
