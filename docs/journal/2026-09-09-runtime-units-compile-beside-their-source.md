@@ -330,7 +330,14 @@ resolved `library(lib_conformance, Kit)` to the manifest and consulted
 `lib/lib_conformance/pkg.metta` as Prolog, loading no kit.
 Decided: all five load through `metta_load_source/2`. Offline keeps its
 meaning: a backing outside the stamped set, a program's own file or a
-git-fetched checkout, is claimed by nothing and starts no child.
+git-fetched checkout, is claimed by nothing and starts no child. This narrows
+the reading docs/record/package-laws-6-13.md gave law 9 on 2026-09-20 ("native
+loading avoids the loader path that may invoke a compiler child") back to the
+law as the 2026-09-09 packages journal states it: import fetches nothing and
+builds no missing requirement, naming `setup!` instead. The child builds
+nothing an import needs, only the engine's own cache of a source already
+present, and a load whose child cannot run compiles in the importing process
+as SWI's own rule does; the row now says so.
 Found: the +10.3k inferences per library load that the twins were re-pinned
 for on f2822e2ae is not the host check's cost. `qlf_swipl/1` took the
 executable flag, which an embedded engine derives from the first `swipl` on
