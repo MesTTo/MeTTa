@@ -80,6 +80,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A battery no longer inherits the compiled `.qlf` artifacts of the tree it
+  snapshots. SWI loads an artifact found outside the directory it was compiled
+  in as moved and charges every process that loads it 8 inferences per
+  recorded source, so a battery provisioned after a probe compiled
+  `lib/lib_import/lib_import.qlf` in the source read 83 twin findings, 60 of
+  them exactly +8, and the `qlf-provenance` lane refuses such an artifact.
+  `tools/battery.sh` now treats them as the other caches are treated: hidden
+  from the copy, swept at provision, not drift when the battery compiles its
+  own, which the gate's warm-up does before any lane boots.
+
 - The `root-walks` lane finds a counted walk to a checkout root however it is
   spelled. It matched `Path(__file__).resolve().parents[N]` alone, so a
   `.parent` chain, a count without `.resolve()`, one taken through a name or

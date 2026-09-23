@@ -111,6 +111,17 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 # given and `verify` reported `*deleting extensions/node/node_modules` as drift
 # [measured 2026-09-20].
 #
+# A compiled Prolog artifact, `*.qlf`, is a cache of the same kind with one
+# difference that makes copying it WRONG rather than merely slow: SWI records
+# the directory a .qlf was compiled in and loads one found anywhere else as
+# MOVED, charging every process that loads it 8 inferences per recorded
+# source, and the qlf-provenance lane refuses such an artifact outright. A
+# battery handed the source's artifacts read 83 twin findings, 60 of them
+# exactly +8, on an otherwise identical tree [measured 2026-09-24:
+# lib/lib_import/lib_import.qlf written in wt-merge by an import probe]. So
+# the source's are never copied, provision sweeps the battery's, and the
+# gate's own warm-up compiles a fresh set in place before any lane boots.
+#
 # ai-tmp/, node_modules and .venv* keep both halves, because losing them
 # changes WHAT RUNS rather than how fast: ai-tmp/ holds this tree's own
 # occupancy record, provenance and logs, and the other two are the installed
@@ -129,10 +140,12 @@ snapshot() {
           --filter="H .git" --filter="P /.git" \
           --filter="H __pycache__/" --filter="H .pytest_cache/" \
           --filter="H .mypy_cache/" --filter="H .ruff_cache/" \
+          --filter="H *.qlf" \
           ${caches:+--filter="P __pycache__/"} \
           ${caches:+--filter="P .pytest_cache/"} \
           ${caches:+--filter="P .mypy_cache/"} \
           ${caches:+--filter="P .ruff_cache/"} \
+          ${caches:+--filter="P *.qlf"} \
           --exclude=ai-tmp/ --exclude='ai-tmp-*' \
           --exclude='ai-battery-*' \
           --exclude=node_modules --exclude='.venv*' \

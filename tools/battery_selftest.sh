@@ -86,6 +86,29 @@ printf 'log\n' > "$TREE/ai-tmp/run.log"
 printf 'bytes\n' > "$TREE/package/__pycache__/mid.pyc"
 expect "excluded scratch written into the battery" 0
 
+# A compiled Prolog artifact is a cache whose copy is wrong rather than stale:
+# SWI loads a .qlf found outside the directory it was compiled in as moved and
+# charges 8 inferences per recorded source for it. So the source's is never
+# copied, the battery's own is not drift, and the next provision sweeps it.
+printf 'compiled in the source\n' > "$FIXTURE/src/package/mid.qlf"
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+if [ -e "$TREE/package/mid.qlf" ]; then
+    echo "  FAIL the source's compiled artifact: copied into the battery"
+    failures=$((failures + 1))
+else
+    echo "  ok   the source's compiled artifact: left behind"
+fi
+rm "$FIXTURE/src/package/mid.qlf"
+printf 'compiled in the battery\n' > "$TREE/package/own.qlf"
+expect "an artifact the battery compiled itself" 0
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+if [ -e "$TREE/package/own.qlf" ]; then
+    echo "  FAIL the battery's compiled artifact: kept by the next provision"
+    failures=$((failures + 1))
+else
+    echo "  ok   the battery's compiled artifact: swept by the next provision"
+fi
+
 # Drift is one half of the contract and clearing it is the other: a battery
 # that cannot be re-provisioned is a battery lost. A gate run leaves what the
 # source does not have, and some of it is git repositories -- the packaging
