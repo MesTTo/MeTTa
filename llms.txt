@@ -81,9 +81,10 @@ libraries carry over. The engine runs only on a PATCHED SWI-Prolog
 patches it lacks. pymetta's Linux x86_64 wheels for CPython 3.12, 3.13 and 3.14
 carry that host in `metta/_host`, with the janus bridge built against it, so
 there `pip install pymetta` is the whole install. Anywhere else, build the
-patched host as `docs/patched-host.md` describes, then
-`pip install 'pymetta[engine]'`: the `engine` extra adds `janus-swi`, the
-bridge, on exactly the platforms whose wheel carries no host. The engine tree,
+patched host and install its janus bridge as `docs/patched-host.md` describes,
+then `pip install 'pymetta[engine]'`: the `engine` extra names `janus-swi`, the
+bridge, on exactly the platforms whose wheel carries no host, and the bridge
+built from the patched tree already satisfies it. The engine tree,
 the libraries and the codec corpus ride in every wheel. Without a bridge the
 package still imports and the first engine call says what to do. The other
 extras are integration packages, one row each in the extras table under
