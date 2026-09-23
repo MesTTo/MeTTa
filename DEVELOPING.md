@@ -42,6 +42,7 @@ foundations; deferred body imports reach strictly higher orders. Run
 <!-- begin generated package layers (extensions/python/tools/layergen.py; source=metta/_layers.py:BUILDS_ON) -->
 | Order | Package | Builds on |
 |---:|---|---|
+| 0 | `_host` |  |
 | 0 | `_layers` |  |
 | 0 | `_lazy` |  |
 | 0 | `_roots` |  |
@@ -51,7 +52,7 @@ foundations; deferred body imports reach strictly higher orders. Run
 | 3 | `_atoms` | `_errors`, `seam` |
 | 4 | `vocabularies` | `_atoms` |
 | 5 | `_catalog` | `vocabularies`, `_atoms`, `_errors`, `seam` |
-| 6 | `_binding` | `_roots`, `_catalog`, `_atoms`, `_errors`, `seam` |
+| 6 | `_binding` | `_host`, `_roots`, `_catalog`, `_atoms`, `_errors`, `seam` |
 | 6 | `_compile` | `_catalog`, `_atoms`, `_errors`, `vocabularies` |
 | 6 | `doors` | `_catalog`, `vocabularies`, `_atoms`, `_layers` |
 | 7 | `_spaces` | `_binding`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam`, `_version` |
