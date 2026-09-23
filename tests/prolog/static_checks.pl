@@ -132,6 +132,11 @@ main :-
     %and the same reason the plunit lane appends it.
     set_prolog_flag(argv, [extensions]),
     consult('../../engine/qlf_boot.pl'),
+    %qlf_boot.pl loads the host check by a path computed inside
+    %qlf_load_engine/0 when a host boots, and this walk consults it without
+    %booting, so the module is loaded here: its clauses are walked like the
+    %rest, and the qualified call qlf_boot.pl makes into it resolves.
+    use_module('../../engine/host_check', []),
     consult('../../engine/metta.pl'),
     check_project_var_branches,
     every_seam_declares_one_kind,
