@@ -4,7 +4,8 @@
 % NFKC and case folding still happen; absent when it is removed as UCD 16.0.0
 % maps it (DerivedNormalizationProps.txt, 00AD ; NFKC_CF, to nothing)
 % [measured 2026-09-24: present on the native host before
-% swi-unicode-nfkc-casefold-keeps-ignorables.patch; commit=WORKTREE].
+% swi-unicode-nfkc-casefold-keeps-ignorables.patch was installed there, absent
+% after; commit=4f71bdc87668db0b82ce750c6e8f471185530852].
 
 :- use_module(library(unicode), [unicode_nfkc_casefold/2]).
 

@@ -13,7 +13,8 @@
 #     reads as neither answer. The mapping runs in a child process, because
 #     the defect ends the process that meets it
 #     [measured 2026-09-24: the native host aborted with unicode4pl.c:464
-#     unicode_map: Assertion `0' failed; commit=WORKTREE]
+#     unicode_map: Assertion `0' failed, and answers absent since the patch
+#     was installed there; commit=4f71bdc87668db0b82ce750c6e8f471185530852]
 set -u
 swipl=${SWIPL:-swipl}
 map() {

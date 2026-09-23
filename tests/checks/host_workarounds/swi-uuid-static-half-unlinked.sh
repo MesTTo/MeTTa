@@ -16,7 +16,7 @@
 #     ab9d98a, compiled at Sep 23 2026, 20:24:50, and absent on the host
 #     tools/wasm-host/build.sh builds with
 #     tests/checks/host_workarounds/swi-uuid-static-half-unlinked.patch,
-#     compiled at Sep 23 2026, 21:34:12; commit=WORKTREE]
+#     compiled at Sep 23 2026, 21:34:12; commit=6456b9822f637bf3bd106e001abf862d3d6ab262]
 set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 cd "$here/support"
