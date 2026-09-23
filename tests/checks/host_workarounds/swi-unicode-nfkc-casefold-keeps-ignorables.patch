@@ -1,0 +1,29 @@
+diff --git a/packages/utf8proc/unicode.pl b/packages/utf8proc/unicode.pl
+index 40b76d7..fcf6fee 100644
+--- a/packages/utf8proc/unicode.pl
++++ b/packages/utf8proc/unicode.pl
+@@ -218,15 +218,17 @@ unicode_nfkc(In, Out) :-
+ 
+ %!  unicode_nfkc_casefold(+In, -Out) is det.
+ %
+-%   Equivalent to unicode_nfkc/2 followed by unicode_casefold/2 done
+-%   in a single pass.  This is the normalisation form recommended by
+-%   UAX#31 for caseless identifier matching.  For example German
+-%   `'Strasse'` written with U+00DF (LATIN SMALL LETTER SHARP S)
+-%   maps to `'strasse'`, and U+FB03 (LATIN SMALL LIGATURE FFI) maps
+-%   to `'ffi'`.
++%   Equivalent to unicode_nfkc/2 followed by unicode_casefold/2 and the
++%   removal of default-ignorable code points, done in a single pass:
++%   Unicode's NFKC_Casefold (UCD DerivedNormalizationProps.txt) and
++%   utf8proc's utf8proc_NFKC_Casefold().  This is the normalisation form
++%   recommended by UAX#31 for caseless identifier matching.  For example
++%   German `'Strasse'` written with U+00DF (LATIN SMALL LETTER SHARP S)
++%   maps to `'strasse'`, U+FB03 (LATIN SMALL LIGATURE FFI) maps to
++%   `'ffi'`, and U+00AD (SOFT HYPHEN) is removed.
+ 
+ unicode_nfkc_casefold(In, Out) :-
+-    unicode_map(In, Out, [stable,compose,compat,casefold]).
++    unicode_map(In, Out, [stable,compose,compat,casefold,ignore]).
+ 
+ %!  unicode_casefold(+In, -Out) is det.
+ %

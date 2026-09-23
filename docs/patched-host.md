@@ -146,7 +146,15 @@ which only the WebAssembly link reads; and
 `swi-uuid-static-half-unlinked.patch` changes clib's build for an emscripten
 build and a branch of `uuid.pl` only a statically linked host takes. So for a
 native host apply them to the source tree and rerun `declare-host.sh declare`,
-whose `compiled_at` is unchanged.
+whose `compiled_at` is unchanged. A patch to one package's plugin or library
+file needs that package rebuilt and installed, not the host:
+`swi-unicode-map-empty-result-aborts.patch` and
+`swi-unicode-nfkc-casefold-keeps-ignorables.patch` change packages/utf8proc,
+so run `ninja plugin_unicode4pl library_qlf` in the host's build tree, install
+the package with `cmake -DCMAKE_INSTALL_PREFIX=<prefix> -P
+<build>/packages/utf8proc/cmake_install.cmake`, which puts `unicode.qlf` in
+beside `unicode.pl` so the library still loads from its compiled form, and
+rerun `declare-host.sh declare`.
 Each requirement is regenerated in the same change: `engine/host_patches.pl`
 with `sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`,
 and pymetta's `extensions/python/metta/_binding/host_patches.pl` with

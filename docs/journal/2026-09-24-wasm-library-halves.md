@@ -266,6 +266,38 @@ that import it. On the host built with the patch the reproduction answers
 `absent`, `uuid` is in the static extension table, and `33-uuid_lib` runs 48
 of its 53 forms, the other five refusing on crypto.
 
+### NFKC_Casefold, and a result with nothing left in it
+
+The C corpus found `nfkc-casefold` keeping U+00AD. UCD 16.0.0 constructs
+NFKC_CF from NFKC, case folding "and removal of Default_Ignorable_Code_Points"
+(DerivedNormalizationProps.txt, line 2986) and maps U+00AD, U+034F, U+115F,
+U+180E, U+200B, U+2060, U+FEFF and U+E0001 to nothing; utf8proc's own
+`utf8proc_NFKC_Casefold()` sets `UTF8PROC_IGNORE` for it. lib_unicode had
+copied the flag set of SWI's `unicode_nfkc_casefold/2`, and that set omits
+`ignore`. A test over those eight code points failed first, then passed with
+`ignore` in the row.
+
+The same suite's law comparing every form with SWI's own predicate then
+aborted its process: `unicode4pl.c:464: unicode_map: Assertion '0' failed`.
+`utf8proc_map()` answers 0, with an allocated buffer, when every code point is
+removed, and SWI's `unicode_map()` takes only a positive length for success,
+so a legitimately empty result reaches the `assert(0)` in its error switch; a
+build without assertions fails the call instead. `ignore` makes a text of
+soft hyphens such a result, and `stripmark` on a lone combining mark already
+was one. So the fix is two host patches beside the library's one line:
+`unicode_map()` answers the empty atom for a length of 0, and
+`unicode_nfkc_casefold/2` passes `ignore`. The random alphabet of the law now
+holds a soft hyphen, so the comparison with SWI's predicate covers the
+removal too.
+
+A native host needs the package, not the host, rebuilt: `ninja
+plugin_unicode4pl library_qlf` in its build tree relinked `unicode4pl.so`
+and recompiled `unicode.qlf` without touching `libswipl`, and the package's
+own `cmake_install.cmake`, staged through `DESTDIR` and moved into the home
+file by file, installed them. `unicode.qlf` has to go in with `unicode.pl`:
+a source newer than its `.qlf` is loaded from source, which changes the cost
+of every load of `library(unicode)`.
+
 ### A test that raced
 
 `lib_database.plt`'s abandoned-engine test waited for `finish_store/3`, which

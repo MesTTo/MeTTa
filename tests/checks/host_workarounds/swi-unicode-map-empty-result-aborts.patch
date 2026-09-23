@@ -1,0 +1,13 @@
+diff --git a/packages/utf8proc/unicode4pl.c b/packages/utf8proc/unicode4pl.c
+index d88f0e2..40865d1 100644
+--- a/packages/utf8proc/unicode4pl.c
++++ b/packages/utf8proc/unicode4pl.c
+@@ -443,7 +443,7 @@ unicode_map(term_t in, term_t out, term_t options)
+   if ( len_in == 0 )			/* empty atom */
+     return PL_unify_chars(out, PL_ATOM, 0, utf8_in);
+   len_out = utf8proc_map((uint8_t*)utf8_in, len_in, &utf8_out, mask);
+-  if ( len_out > 0 )
++  if ( len_out >= 0 )			/* 0: every code point was removed */
+   { bool rc;
+ 
+     rc = PL_unify_chars(out, PL_ATOM|REP_UTF8, len_out, (char*)utf8_out);

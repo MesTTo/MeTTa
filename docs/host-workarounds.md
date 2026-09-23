@@ -1214,6 +1214,54 @@ Lifted when: SWI-Prolog's clib builds and loads uuid's half on a static host;
   the patch and the entry go together then.
 Record: docs/journal/2026-09-24-wasm-library-halves.md.
 
+## swi-unicode-map-empty-result-aborts
+Host: SWI-Prolog 10.1.14, packages/utf8proc at swipl-devel V10.1.14
+  (6977543): `unicode_map()` in `unicode4pl.c`, whose `default: assert(0)`
+  sits at line 464.
+Defect: `utf8proc_map()` answers 0, with an allocated buffer, when every code
+  point of a non-empty input is removed, and `unicode_map()` takes only a
+  positive length for success, so a result that is legitimately empty falls
+  into its error switch and reaches `assert(0)`. A build with assertions
+  aborts the process; one without fails the call and leaks the buffer. It is
+  reached by `ignore` on a lone default-ignorable code point, `stripmark` on
+  a lone combining mark or `stripcc` on control characters, and so by
+  lib_unicode's `unicode-map` and, with `ignore`, its `nfkc-casefold`.
+Reproduction: tests/checks/host_workarounds/swi-unicode-map-empty-result-aborts.sh,
+  a soft hyphen and a control mapped with `ignore` in a child process;
+  `present` while the empty result aborts or fails.
+Patch: tests/checks/host_workarounds/swi-unicode-map-empty-result-aborts.patch,
+  against swipl-devel V10.1.14 packages/utf8proc/unicode4pl.c, applied from
+  the root: a length of 0 is a result like any other, unified as the empty
+  atom and its buffer freed (`utf8proc_map_custom()` in utf8proc 2.10.0's
+  utf8proc.c allocates one for an empty result).
+Lifted when: SWI-Prolog's `unicode_map()` accepts an empty result; the patch
+  and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md.
+
+## swi-unicode-nfkc-casefold-keeps-ignorables
+Host: SWI-Prolog 10.1.14, packages/utf8proc at swipl-devel V10.1.14
+  (6977543): `unicode_nfkc_casefold/2` in `unicode.pl`.
+Defect: `unicode_nfkc_casefold/2` maps with `[stable,compose,compat,casefold]`
+  and omits `ignore`, so it keeps the default-ignorable code points Unicode's
+  NFKC_Casefold removes: UCD 16.0.0 DerivedNormalizationProps.txt constructs
+  NFKC_CF from NFKC, CaseFolding "and removal of
+  Default_Ignorable_Code_Points" (line 2986) and maps U+00AD to nothing (line
+  3025), and utf8proc's own `utf8proc_NFKC_Casefold()` sets
+  `UTF8PROC_IGNORE` (utf8proc.h 2.10.0, lines 778-782). The fold of
+  "a", U+00AD, "b" is "a", U+00AD, "b" where Unicode's is "ab".
+Reproduction: tests/checks/host_workarounds/swi-unicode-nfkc-casefold-keeps-ignorables.pl,
+  that fold beside a control whose NFKC and case folding must still happen;
+  `present` while the soft hyphen survives.
+Patch: tests/checks/host_workarounds/swi-unicode-nfkc-casefold-keeps-ignorables.patch,
+  against swipl-devel V10.1.14 packages/utf8proc/unicode.pl, applied from the
+  root: `ignore` joins the options and the comment names the removal. It
+  lands with swi-unicode-map-empty-result-aborts, since `ignore` turns a text
+  of default-ignorables into the empty result that entry is about. A native
+  host takes it with its installed `unicode.pl` and `unicode.qlf` replaced.
+Lifted when: SWI-Prolog's `unicode_nfkc_casefold/2` removes default-ignorable
+  code points; the patch and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md.
+
 ## swi-infinite-division-zero-sign
 Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).

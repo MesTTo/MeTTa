@@ -99,6 +99,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `unicode-normalize`'s `nfkc-casefold` removes default-ignorable code points,
+  as Unicode's NFKC_Casefold does: `(string-codes (unicode-normalize
+  nfkc-casefold "a<U+00AD>b"))` answered `(97 173 98)` and answers `(97 98)`.
+  lib_unicode had copied the flag set of SWI's `unicode_nfkc_casefold/2`,
+  which omits `ignore`; both pass it now
+  (`swi-unicode-nfkc-casefold-keeps-ignorables.patch`). A text made only of
+  default-ignorables then maps to nothing, and SWI's `unicode_map/3` took an
+  empty result for an error and aborted the process where assertions are on,
+  which `(unicode-map "<U+0301>" (stripmark))` already reached
+  (`swi-unicode-map-empty-result-aborts.patch`).
+
 - `uuid-time!` makes version 1 UUIDs on the WebAssembly host. SWI's clib
   built uuid's C half only for a build that loads shared objects, and
   `uuid.pl` looked for it only through `library(shlib)`, so a statically

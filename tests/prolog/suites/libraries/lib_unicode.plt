@@ -2,7 +2,8 @@
 % predicates, against the Unicode standard's stated laws, and under the C locale,
 % where the classification must not move.
 % Guarantees: each normalization form answers what the host's own predicate for
-% it answers over generated text, normalization is idempotent and nfc and nfd
+% it answers over generated text, nfkc-casefold removes the default-ignorable
+% code points Unicode's NFKC_Casefold removes, normalization is idempotent and nfc and nfd
 % agree on every string, the classes are the general category and never the
 % locale, a character is a string or a code, an absent property has no answer
 % where a wrong name is refused, and graphemes group what code points split
@@ -26,13 +27,14 @@
 
 % Random text over an alphabet that exercises every form: ASCII letters, a
 % precomposed accented letter and its decomposition, a ligature, a superscript,
-% sharp s, a wide character and a combining mark on its own.
+% sharp s, a wide character, a combining mark on its own, and a soft hyphen,
+% which only nfkc-casefold removes.
 random_text(Text) :-
     random_between(0, 12, Length),
     length(Codes, Length),
-    maplist([Code]>>( random_between(1, 12, Which),
+    maplist([Code]>>( random_between(1, 13, Which),
                       nth1(Which, [0'a, 0'B, 0'é, 0'e, 0x301, 0xFB03, 0xB2, 0xDF,
-                                   0x6F22, 0x2019, 0'_, 0' ], Code) ),
+                                   0x6F22, 0x2019, 0'_, 0' , 0xAD], Code) ),
             Codes),
     string_codes(Text, Codes).
 
@@ -58,6 +60,20 @@ test(each_form_is_a_composition_of_flags) :-
              atom_string(ExpectedCase, ExpectedCaseString), assertion(Case == ExpectedCaseString) )),
     must_throw('unicode-normalize'(nfx, "a", _), error(domain_error(normalization_form, nfx), _)),
     must_throw('unicode-normalize'(nfc, 7, _), error(type_error(string, 7), _)).
+
+% NFKC_Casefold removes the default-ignorable code points outright: UCD 16.0.0
+% DerivedNormalizationProps.txt constructs it from NFKC, CaseFolding "and
+% removal of Default_Ignorable_Code_Points" (line 2986) and maps each code point
+% below to nothing (lines 3025, 3261, 3613, 3622, 4061, 4080, 6656 and 9144),
+% which utf8proc's own utf8proc_NFKC_Casefold does through UTF8PROC_IGNORE
+% [source: https://www.unicode.org/Public/16.0.0/ucd/DerivedNormalizationProps.txt;
+% https://github.com/JuliaStrings/utf8proc/blob/v2.10.0/utf8proc.h#L778-L782].
+test(nfkc_casefold_removes_default_ignorables) :-
+    forall(member(Ignorable, [0xAD, 0x34F, 0x115F, 0x180E, 0x200B, 0x2060,
+                              0xFEFF, 0xE0001]),
+           ( string_codes(Text, [0'a, Ignorable, 0'B]),
+             'unicode-normalize'('nfkc-casefold', Text, Folded),
+             assertion(Folded == "ab") )).
 
 % UAX#15's own laws: every form is idempotent, and nfc and nfd of one string are
 % canonically equivalent, so normalizing either to the other form gives the same
