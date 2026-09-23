@@ -485,26 +485,31 @@ Pick the counter from where the work happens, not from what is convenient.
 |---|---|---|
 | inside the engine | `MeTTa.stats().inferences`, min of three | deterministic: five runs of one workload gave the same count while wall clock swung 6.9% |
 | no engine involved | retired instructions, min of three | there is no inference to count |
-| across a host boundary | instructions AND CPU seconds, paired | foreign code retires NO inferences, so the inference counter is blind |
-| anything | not wall clock | it moves with scheduler load and CPU frequency |
+| across a host boundary | instructions AND estimated cycles, paired | foreign code retires NO inferences, so the inference counter is blind |
+| anything | not wall clock, not CPU time | both move with scheduler load and CPU frequency |
 
 The third row is the one people get wrong. A C wire encoder in this tree
 measured **526x faster on inferences while CPU time said it was 1.8x slower**,
 because the work had moved to where the counter cannot see it. `measure_counters`
 runs a command under `perf stat` for several events at once and hands back each
-run's counters and its standard output, and
-`BenchmarkBaseline.observe_measurement` pins any of them against a declared
-two-sided band. The two declarations that exist are `INSTRUCTIONS` and
-`CPU_SECONDS`; pair them, and never let inferences decide alone.
-`extensions/cmetta/benchmarks/bench.py` is the worked example, and a seat whose
-counters are not the default ones passes its own `policies` to
+run's counters and its standard output; `measure_simulated` runs it under
+Cachegrind over a fixed simulated cache, and `estimated_cycles` prices each run
+from what it counted. `BenchmarkBaseline.observe_measurement` pins either
+against a declared two-sided band. The two declarations that exist are
+`INSTRUCTIONS` and `ESTIMATED_CYCLES`; pair them, and never let inferences
+decide alone. Estimated cycles stand where CPU time used to: they see the
+memory behaviour an instruction count cannot, and no other process on the box
+can move them. `extensions/cmetta/benchmarks/bench.py` is the worked example,
+and a seat whose counters are not the default ones passes its own `policies` to
 `BenchmarkBaseline` so the committed file states its own rule rather than the
 default seat's.
 
-Before trusting any timing at all, check the box is quiet: `cat /proc/loadavg`
-and `ps -eo pcpu,pid,comm --sort=-pcpu | head`. Two false results in this
-repository, `pln_roman "+97%"` and `permutations "+16%"`, were both a busy
-machine rather than a code change.
+The box these gates run on is never quiet, so no gate decides on time.
+`observe_cpu` records CPU seconds beside a row's pins as advice and never
+compares them. A timing you read by hand still needs the load beside it:
+`cat /proc/loadavg` and `ps -eo pcpu,pid,comm --sort=-pcpu | head`. Two false
+results in this repository, `pln_roman "+97%"` and `permutations "+16%"`, were
+both a busy machine rather than a code change.
 
 ### Running the benchmarks
 

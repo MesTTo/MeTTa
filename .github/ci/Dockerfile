@@ -34,6 +34,11 @@
 # 2026-09-06: this image's base plus linux-perf answers `No permission to
 # enable instructions:u event` under the default profile and
 # `130379,,instructions:u,249770,100.00,,` with it off].
+#
+# valgrind is the C seat's second counter: extensions/cmetta/benchmarks/bench.py
+# prices each row's window under Cachegrind, and Debian's valgrind package also
+# carries the <valgrind/cachegrind.h> its benchmark driver marks that window
+# with. Without it the c-bench lane stamps its simulator `absent` and refuses.
 FROM debian:trixie-slim
 ENV LANG=C.UTF-8
 RUN apt-get update \
@@ -43,7 +48,7 @@ RUN apt-get update \
       libossp-uuid-dev libpcre2-dev libreadline-dev libedit-dev libssl-dev \
       zlib1g-dev libdb-dev unixodbc-dev libsqlite3-dev libserd-dev \
       libraptor2-dev libyaml-dev libgoogle-perftools-dev libpython3-dev \
-      python3 python3-dev python3-venv build-essential linux-perf \
+      python3 python3-dev python3-venv build-essential linux-perf valgrind \
  && rm -rf /var/lib/apt/lists/*
 COPY tools/pymetta-host /opt/metta-host/tools/pymetta-host
 COPY tests/checks/host_workarounds /opt/metta-host/tests/checks/host_workarounds

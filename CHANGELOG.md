@@ -93,6 +93,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- No benchmark lane decides on time. The C seat's rows, the only ones that
+  compared CPU time, are now decided by instructions:u paired with estimated
+  cycles: the cost of the same window on a fixed simulated cache, from
+  valgrind's Cachegrind, which no other process on the box can move
+  (`metta_benchmarking.measure_simulated`, `estimated_cycles`,
+  `ESTIMATED_CYCLES`). CPU time is recorded beside the pins as advice. It could
+  decide only below one runnable process per core, and the box the gate runs on
+  is never quiet, so its comparisons were declined in nearly every run. The load
+  ceiling, `CPU_SECONDS` and their helpers are gone; the C lane and the CI image
+  need valgrind.
+
 - The `engine` extra adds `janus-swi` only where no pymetta wheel carries the
   patched host, and a packaging test holds that marker to the classifiers the
   host build reads. Every integration member moves to 0.9.2 with pymetta,
@@ -114,6 +125,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   is why three of its cases moved.
 
 ### Fixed
+
+- `extensions/cmetta` relinks its library and every program built on it when
+  the compiler, its flags, the SWI host or the engine path change. A library
+  linked against the stock SWI before the engine began refusing unpatched
+  hosts had kept booting it, so the C bench died in PL_initialise, and a copied
+  checkout kept booting the original's engine.
 
 - The `instructions` lane's measured window no longer lets a collector land
   in it by chance. Python's cyclic collector runs when its allocation counters
