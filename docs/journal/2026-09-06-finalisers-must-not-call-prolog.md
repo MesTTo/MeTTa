@@ -113,3 +113,40 @@ a process whose only remaining work happens on bare threads keeps its queue.
 That is bounded by the number of Terms and cursors such a program drops, and it
 is a leak rather than a fault; a periodic drain from the home thread would
 close it if a workload ever shows one.
+
+## 2026-09-24
+
+Extended: the rule covers every callback the collector runs, not only a
+`weakref.finalize`. Four weak-reference callbacks still took a lock: the box
+interns' evictor in `metta/_atoms/model.py` took `_STATE_LOCK`, and the replay,
+declaration and declared-carrier tables' evictors in `metta/_binding/host.py`
+took `_REPLAY_LOCK` and `_DECLARATION_LOCK`. A callback runs on whichever thread
+drops the last reference or triggers the collection, at any allocation, so a
+thread inside `boxed()` holding `_STATE_LOCK` whose collector runs a
+declaration's evictor waits on `_DECLARATION_LOCK`, while a thread holding that
+lock whose collector runs a box's evictor waits on `_STATE_LOCK`. Being RLocks
+rules out only the same thread re-entering.
+
+Each table now maps an id to one `_WeakEntry`, a `weakref.ref` carrying its key
+and whatever the table keeps for the referent, which is CPython's own
+`weakref.KeyedRef` with a payload slot [CPython 3.14.4 Lib/weakref.py:277-295;
+`KeyedRef` is outside `weakref.__all__`]. Each table has one callback, and it
+clears the entry's payload and appends the entry to the table's own deque; the
+table's next operation expunges that deque under its lock, deleting an entry
+only while it is still the one that died. That is `java.util.WeakHashMap`'s
+`expungeStaleEntries`, and the abandoned watch's inbox (330e04d42). Clearing the
+payload in the callback keeps the replay cache's promise that a box's death
+releases its source and cache at once; only the table's own entry waits for the
+next operation.
+
+The census, now `test_every_collector_callback_in_the_package_only_hands_its_work_over`,
+reads every weak reference made with a callback, through weakref's constructors
+or a class the package derives from `weakref.ref`, as well as every
+`weakref.finalize`. On the previous `model.py` and `host.py` it names exactly
+the four evictors, and `test_a_weak_table_callback_takes_no_lock_and_its_owner_expunges`
+fails for each of the four tables while another thread holds its lock.
+
+Rejected: `_weakref._remove_dead_weakref`, which `WeakValueDictionary` calls to
+evict atomically without a lock. It is private, fits only the two tables whose
+value is the weak reference itself, and would leave two eviction mechanisms
+where one serves all four.

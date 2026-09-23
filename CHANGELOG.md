@@ -99,6 +99,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- No callback the garbage collector runs for the Python seat takes a lock any
+  more. Four weak-reference callbacks did: the box interns' evictor and the
+  replay, declaration and declared-carrier tables' evictors took their table's
+  lock, and the collector runs a callback on whichever thread drops the last
+  reference or triggers the collection, so a thread holding one of those locks
+  and a thread whose collector wanted it could each wait on the other. Each
+  callback now clears what its entry held and hands the entry to a queue its
+  table empties at its next operation under the lock, the rule the abandoned
+  watch's finaliser already follows, and the census in
+  `extensions/python/tests/ch17_concurrency_and_the_loop/test_finaliser_engine_safety.py`
+  holds every weak-reference callback to it as well as every
+  `weakref.finalize`.
+
 - lib_http's server answers a request whose Accept header carries a wildcard,
   such as the `*/*` curl, browsers and Python's requests send. SWI parses a
   `*` media type as an unbound variable, and converting the request's fields
