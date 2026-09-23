@@ -1296,6 +1296,14 @@ translate_expr_dl(X, Goals, Goals, X) :-
 %in (id p), (let $x p $x) and (== p p), answered 0 times with status ok]; it
 %is refused by name instead. This clause sits before the list clause so that
 %a list still reaches its clause last and leaves no choicepoint behind.
+%Limitation: an improper list, [a|b], is a list cell and still takes the list
+%clause, where it fails silently as before [measured 2026-09-24 through
+%qlf_load_engine: [a|b], (id [a|b]) and (car-atom [1|2]) each fail]. Its tail
+%is consumed by the rule, special-form, import, keyword and call paths alike,
+%so refusing it by name means either a walk of every expression's list or a
+%refusal in each consumer; the wire grammar encodes it as (cons Head Tail)
+%before it reaches here, so only a seat that skipped that encoding produces
+%one. An open tail, [a|_], is closed to [] as before.
 translate_expr_dl(X, _, _, _) :-
     compound(X),
     \+ X = [_|_],
