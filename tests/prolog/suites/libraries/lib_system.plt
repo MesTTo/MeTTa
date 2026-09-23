@@ -76,10 +76,10 @@ test(platform_info_is_the_hosts_own_flags) :-
     assertion(Cores == HostCores),
     'platform-info'('bounded-integers', Bounded),
     current_prolog_flag(bounded, HostBounded), assertion(Bounded == HostBounded),
-    % The family is the one flag of the three that is true, and the version text is
+    % The family is the one platform flag that is true, and the version text is
     % the three numbers.
     'platform-info'(family, Family),
-    assertion(memberchk(Family, ["unix", "windows", "apple", "unknown"])),
+    assertion(memberchk(Family, ["unix", "windows", "apple", "emscripten", "unknown"])),
     'platform-info'(version, Version), 'platform-info'('version-numbers', Numbers),
     Numbers = [Major, Minor, Patch],
     format(atom(Rebuilt), '~w.~w.~w', [Major, Minor, Patch]),
