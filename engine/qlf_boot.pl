@@ -75,7 +75,7 @@
 %     [tested: extensions/python/tests/repository/test_library_halves.py,
 %     test_the_first_import_compiles_each_half_once_in_a_child and
 %     test_a_later_process_loads_every_governed_source_from_its_artifact;
-%     commit=WORKTREE].
+%     commit=0a81c782fd6ba00984c36e58e228f73bca810dee].
 %   - the engine's own set is written by the same hermetic child (-f none,
 %     --no-packs) when a boot finds it absent, so no process's flags,
 %     initialisation file or packs shape an artifact the tree shares

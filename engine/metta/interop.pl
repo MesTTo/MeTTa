@@ -655,7 +655,7 @@ ensure_conformance_kit :-
     %2026-09-24: clauses(0) after the call on a booted engine]. The kit is a
     %governed half, so it loads through the one door and reads its artifact
     %[tested: compiled_sources:the_conformance_kit_loads_through_the_door;
-    %commit=WORKTREE].
+    %commit=0a81c782fd6ba00984c36e58e228f73bca810dee].
     (   predicate_property(lib_conformance:metta_check_space_provider(_, _),
                            number_of_clauses(N)),
         N > 0

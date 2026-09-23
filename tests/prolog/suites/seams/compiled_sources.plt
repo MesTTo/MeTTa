@@ -31,7 +31,7 @@
    a_child_marked_process_writes_the_engine_set_in_place; commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1]. The
    conformance kit, a runtime-loaded half, loads through the door and reads
    its artifact [tested: the_conformance_kit_loads_through_the_door;
-   commit=WORKTREE]. Three things are proved elsewhere, in an isolated tree,
+   commit=0a81c782fd6ba00984c36e58e228f73bca810dee]. Three things are proved elsewhere, in an isolated tree,
    by extensions/python/tests/repository/test_library_halves.py: the first
    and later processes and the child's nested closure, because deleting a
    shared artifact here would race the suites that load the same halves; and

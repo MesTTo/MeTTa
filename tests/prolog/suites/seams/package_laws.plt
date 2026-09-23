@@ -12,7 +12,7 @@
 % reads its artifact, and a backing outside the stamped set loads from source
 % and leaves no artifact [tested: a_backing_row_loads_its_half_through_the_claim,
 % an_unclaimed_backing_loads_from_source_and_leaves_no_artifact;
-% commit=WORKTREE].
+% commit=0a81c782fd6ba00984c36e58e228f73bca810dee].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/metta.pl').

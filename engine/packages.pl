@@ -704,7 +704,7 @@ package_open_head(_, _, [Token|_], Name, Arity) :-
 % docs/journal/2026-09-09-runtime-units-compile-beside-their-source.md
 % [tested: package_laws:a_backing_row_loads_its_half_through_the_claim,
 % package_laws:an_unclaimed_backing_loads_from_source_and_leaves_no_artifact;
-% commit=WORKTREE].
+% commit=0a81c782fd6ba00984c36e58e228f73bca810dee].
 package_load_native(File, Owner) :-
     ( source_file_property(File, module(Context)) -> true
     ; source_file_property(File, load_context(Context, _, _)) -> true
