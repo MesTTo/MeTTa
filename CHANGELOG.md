@@ -115,6 +115,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's mypy lanes no longer crash or read each other's platforms
+  when they run together. All eight shared one incremental cache, which since
+  mypy 2 is one SQLite database per Python version, so the Linux, win32 and
+  darwin lanes read and wrote one database for three platforms: run together
+  from a cold cache they printed `INTERNAL ERROR`, and once failed the Linux
+  lane on `signal.SIGKILL`, the win32 view read back from the shared cache.
+  Each lane now keeps its own cache under `extensions/python/.mypy_cache/`.
+
 - The parity selftest's artifact fixture no longer aborts engine boots that
   run beside it. It restored the `.qlf` set it borrows by writing each file's
   saved bytes over the live file, so a process loading one meanwhile read a
