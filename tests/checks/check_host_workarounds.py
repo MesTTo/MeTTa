@@ -33,7 +33,10 @@ Assumes:
   - a reproduction is a `.pl` file run as `swipl -q -f none -s FILE -g main
     -t halt` or a `.sh` file run as `sh FILE`, prints its verdict as its last
     non-empty line and exits 0; it reads `HOST_WORKAROUND_SCRATCH` for a fresh
-    directory of its own and `SWIPL` for the interpreter
+    directory of its own, `SWIPL` for the interpreter, and `CHECK_PY` for the
+    Python host, which is always the interpreter running this lane, so a
+    janus reproduction imports the janus the gate's interpreter is paired with
+    rather than whatever `python3` a bare shell finds
 Guarantees:
   - a site whose key has no entry, an entry with no site, an entry missing a
     required field, a key entered twice, a malformed site line and a
@@ -242,7 +245,8 @@ def run_reproduction(root: Path, path: Path) -> tuple[str, str]:
     else:
         command = ["sh", str(root / path)]
     scratch = tempfile.mkdtemp(prefix=f"host-workaround-{path.stem}-")
-    env = {**os.environ, "HOST_WORKAROUND_SCRATCH": scratch, "SWIPL": interpreter()}
+    env = {**os.environ, "HOST_WORKAROUND_SCRATCH": scratch, "SWIPL": interpreter(),
+           "CHECK_PY": sys.executable}
     try:
         ran = subprocess.run(
             ["sh", str(ROOT / BOUNDED), "--ceiling", str(CEILING_SECONDS), *command],

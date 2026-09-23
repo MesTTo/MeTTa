@@ -146,6 +146,15 @@ def test_an_absent_answer_names_the_sites_to_lift(tmp_path: Path) -> None:
     assert "lift the workaround at src/guard.pl:1" in findings[0]
 
 
+def test_a_shell_reproduction_runs_under_the_lanes_interpreter(tmp_path: Path) -> None:
+    """A janus reproduction needs the Python the gate runs, not the first python3 on PATH."""
+    reproduction = (
+        "#!/bin/sh\n"
+        f"[ \"$CHECK_PY\" = '{sys.executable}' ] && printf 'present\\n' || printf 'wrong\\n'\n"
+    )
+    assert findings_of(plant(tmp_path, reproduction=reproduction)) == []
+
+
 def test_a_third_word_is_a_broken_reproduction(tmp_path: Path) -> None:
     """A reproduction that answers neither word, or fails, cannot decide anything."""
     findings = findings_of(plant(tmp_path, reproduction="#!/bin/sh\nprintf 'maybe\\n'\n"))
