@@ -242,6 +242,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   just before the report, and puts a line ahead of it naming the item's
   progress and wall time.
 
+- A `watch()` iterator collected without `close()` no longer cancels its
+  subscription from inside the garbage collector. Its finaliser took the
+  subscription lock and the fold registry's lock, crossed into the engine to
+  republish the write guard and remove the reflection atom, and waited on
+  other threads' deliveries, all at a point no caller chose. It now stops the
+  subscription delivering at once and leaves the withdrawal to the next
+  `subscribe()` or `cancel()`, which make it under the lock. A test reads
+  every `weakref.finalize` in the Python seat and requires each to only hand
+  its work over.
+
+- Storing an Answers call-site position can no longer freeze its thread. The
+  position cache's weakref callback took the cache's own lock, and a garbage
+  collection starting inside the locked store, freeing a cached code object,
+  ran that callback on the same thread, which then waited on itself for good.
+  The callback is gone: reads already check that the cached code is alive.
+
 - An abandoned `Channel` releases its SWI message queue again. Since the
   libraries became modules on 2026-09-08, the channel's finalizer called a
   `channel_close/2` that `user` no longer sees and logged the refusal as a

@@ -33,6 +33,10 @@ Source: `extensions/python/metta/subscribe.py`.
 >     silently removing the bound
 >   - a guard-rejected event does not advance the queue's arrival counter, so a
 >     blocked events() stream remains open for the next accepted event
+>   - a watch collected without close() stops delivering when it is collected,
+>     its finaliser taking no lock and making no engine crossing, and the next
+>     subscribe() or cancel() withdraws its registry entry, engine guard and
+>     reflection atom together
 
 The entries below reproduce the source signatures and docstrings.
 
