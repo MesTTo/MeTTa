@@ -91,6 +91,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The evidence lane reads the host-build scripts. `tools/*/*.sh` and
+  `tools/*/*.mjs` join both of its halves, so the pins in
+  `tools/pymetta-host/` and `tools/wasm-host/` are read and resolved instead
+  of sitting outside every glob.
+
 - The engine installs on Linux x86_64 again, and it no longer runs on a host
   that crashes it. pymetta 0.9.1's `engine` extra named `pymetta-host`, which
   PyPI never created, so `pip install "pymetta[engine]"` could not resolve on

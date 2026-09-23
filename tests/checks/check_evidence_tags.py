@@ -380,6 +380,15 @@ CLAIM_SOURCES = (
     # new file class before anyone noticed it].
     "tools/*.py",
     "tools/*/*.py",
+    # And the shell and JavaScript beside them. tools/pymetta-host/ and
+    # tools/wasm-host/ hold the two host builds, whose scripts state what the
+    # build guarantees and pin the evidence, and the globs above stopped at
+    # their Python [measured 2026-09-23: pin_provenance --check reported
+    # assemble.sh, declare-host.sh, fetch-source.sh and patch-root.sh under
+    # tools/pymetta-host/, and build.sh and host.mjs under tools/wasm-host/,
+    # as "OUTSIDE the evidence gate's globs"].
+    "tools/*/*.sh",
+    "tools/*/*.mjs",
     "engine/*.sh",
     "extensions/*/*.sh",
     "extensions/*/tests/*.sh",
@@ -502,6 +511,8 @@ PROVENANCE_SOURCES = (
     "*.sh",
     # The gate's own runners, for the reason given on CLAIM_SOURCES above.
     "tools/*.sh",
+    "tools/*/*.sh",
+    "tools/*/*.mjs",
     "engine/*.sh",
     "extensions/*/*.sh",
     # Three more the out-of-glob net named on 2026-09-05, each carrying pins
