@@ -614,6 +614,16 @@ fi
 # Umbrella: engine, library and seat artifacts must survive workspace provisioning.
 run GATE worktree sh -c "cd '$HERE' && sh tests/shell/test_worktree_configuration.sh"
 
+# components.sh is how a worktree gets its components, and a worktree follows
+# its superproject from commit to commit, so a component whose pin moved has
+# to follow it. Its modified-files guard used to run after the pin had moved,
+# and refused every such component about files that were exactly the old
+# pin's, which is how a worktree moved from 3620aa797 to b49556c9a refused on
+# lib. The test builds its own component and superproject, so it costs a few
+# git commands and reads nothing of this checkout but the script.
+# Umbrella: component provisioning spans every component the superproject mounts.
+run GATE components sh -c "cd '$HERE' && sh tests/shell/test_components_follow_a_moved_pin.sh"
+
 # build.sh itself, which nothing checked before: it had no `set -e`, resolved
 # its paths against the CALLER's working directory, and ended by cloning
 # faiss_ffi with no destination argument into extensions/mork/faiss_ffi, a path no

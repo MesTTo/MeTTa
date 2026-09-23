@@ -20,11 +20,18 @@
 #     Python one, none of it tracked and all of it wanted.
 #   - components a component itself mounts are done too, because the twins
 #     carry the .metta corpus they are twins OF.
-#   - the index is read from the pinned commit and the WORKING TREE is left
-#     alone (`reset --mixed`), so files that already match come out clean and
-#     files that do not are reported as modified rather than silently replaced.
-#     That report is for files that PREDATE the run: a directory this run
-#     cloned is brought to the pin instead, because nobody's work is there.
+#   - for files that PREDATE the mount, with no commit of their own, the index
+#     is read from the pinned commit and the WORKING TREE is left alone
+#     (`reset --mixed`), so files that already match come out clean and files
+#     that do not are reported as modified rather than silently replaced.
+#   - a component with a commit of its own follows a moved pin by a checkout,
+#     as `git submodule update` does, after its own modifications are judged
+#     against that commit; so a worktree follows its superproject across a pin
+#     change, a file the new pin no longer tracks is removed, and a modified
+#     file is refused and kept [tested:
+#     tests/shell/test_components_follow_a_moved_pin.sh; commit=WORKTREE].
+#     A directory this run cloned is brought to the pin the same way, because
+#     nobody's work is there.
 #   - a pinned commit the remote does not carry is taken from a sibling
 #     worktree that holds it, and SAYS SO on that component's line. An
 #     unpushed component commit is the ordinary state while work is in
@@ -108,39 +115,58 @@ component() {
         echo "components.sh: neither $url nor a sibling worktree carries $sha for $path" >&2
         return 1
     }
-    git -C "$here" update-ref refs/heads/main "$sha" || {
-        echo "components.sh: cannot pin $path at $sha" >&2
-        return 1
-    }
-    git -C "$here" symbolic-ref HEAD refs/heads/main
+    # Gitlinks are excluded from every modification check below: a NESTED
+    # component sitting at a different commit reads as a modified path, and it
+    # is not somebody's work, it is the thing the recursion below is about to
+    # set. The raw format's second field is the destination mode, and 160000
+    # is a gitlink.
+    if git -C "$here" rev-parse --verify --quiet HEAD >/dev/null; then
+        # A component with a commit of its own, an earlier run's or the clone
+        # this run just made, follows its pin the way `git submodule update`
+        # moves a submodule: by a checkout, which also removes what the old
+        # commit tracked and the new one does not. Its modifications are judged
+        # against ITS commit, before anything moves; judged after the move,
+        # against the new pin, every file the two commits differ in read as
+        # modified, so no existing worktree could follow its superproject
+        # across a pin change, which is how that test's second run refused
+        # before this [tested: tests/shell/test_components_follow_a_moved_pin.sh;
+        # commit=WORKTREE]. A clone holds the remote tip and nobody's work, so
+        # it is never refused.
+        if [ "$cloned" = no ] &&
+           [ -n "$(git -C "$here" diff --raw --diff-filter=M HEAD | awk '$2 != "160000"')" ]; then
+            echo "components.sh: $path has modified tracked files; commit or discard them first" >&2
+            return 1
+        fi
+        git -C "$here" checkout --quiet -B main "$sha" || {
+            echo "components.sh: cannot check $path out at $sha" >&2
+            return 1
+        }
+    else
+        # A repository just made AROUND files that predate the mount has no
+        # commit to judge them by, so it adopts them: `reset --mixed` sets the
+        # index from the pin and leaves the working tree, which is what
+        # preserves the untracked build output. It does NOT bring back a
+        # tracked file the tree is missing, and a directory that git has just
+        # turned from tracked content into a gitlink is missing ALL of them,
+        # so the checkout below restores those. Modifications are a different
+        # thing and are never overwritten: they are somebody's work.
+        git -C "$here" update-ref refs/heads/main "$sha" || {
+            echo "components.sh: cannot pin $path at $sha" >&2
+            return 1
+        }
+        git -C "$here" symbolic-ref HEAD refs/heads/main
+        git -C "$here" reset --quiet --mixed main
+        if [ -n "$(git -C "$here" diff --raw --diff-filter=M | awk '$2 != "160000"')" ]; then
+            echo "components.sh: $path has modified tracked files; commit or discard them first" >&2
+            return 1
+        fi
+        git -C "$here" checkout --quiet -- .
+    fi
     # A component repository is created here rather than cloned from a host that configured
     # it, so it carries no author identity and a commit inside it refuses. Take the
     # superproject's, which is whose work it is.
     git -C "$here" config user.name "$(git -C "$HERE" config user.name)"
     git -C "$here" config user.email "$(git -C "$HERE" config user.email)"
-    git -C "$here" reset --quiet --mixed main
-    # `reset --mixed` sets the index and leaves the working tree, which is what
-    # preserves the untracked build output. It does NOT bring back a tracked
-    # file the tree is missing, and a directory that git has just turned from
-    # tracked content into a gitlink is missing ALL of them, so reporting and
-    # stopping there leaves a component that cannot be used. Modifications are
-    # a different thing and are never overwritten: they are somebody's work.
-    # Gitlinks are excluded: a NESTED component sitting at a different commit
-    # reads as a modified path here, and it is not somebody's work, it is the
-    # thing the recursion below is about to set. The raw format's second field
-    # is the destination mode, and 160000 is a gitlink.
-    # Only where the files predate this run. A directory THIS run cloned holds
-    # the remote tip, which differs from the pin whenever the pin is ahead of
-    # or behind it, and every one of those files reads as modified here; there
-    # is nobody whose work it could be, so refusing made a fresh worktree
-    # unprovisionable the moment its pin was not the remote's tip
-    # [measured 2026-09-21: the probe worktree refused on lib after the clone].
-    if [ "$cloned" = no ] &&
-       [ -n "$(git -C "$here" diff --raw --diff-filter=M | awk '$2 != "160000"')" ]; then
-        echo "components.sh: $path has modified tracked files; commit or discard them first" >&2
-        return 1
-    fi
-    git -C "$here" checkout --quiet -- .
     if [ "$pin_source" = sibling ]; then
         printf '  %-34s %s  UNPUBLISHED: supplied from a sibling worktree; %s does not carry it\n' \
             "$path" "$(echo "$sha" | cut -c1-9)" "$url"

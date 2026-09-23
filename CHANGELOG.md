@@ -80,6 +80,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A worktree follows its superproject across a component pin change.
+  `tools/components.sh` judged a component's modified files after it had
+  already moved the component's HEAD and index to the new pin, so every file
+  the two pins differ in read as somebody's edit and the component was
+  refused. It now judges them against the component's own commit first and
+  then moves it by a checkout, as `git submodule update` does, which also
+  removes a file the new pin no longer tracks and keeps untracked build
+  output. A component with a real modification is still refused and kept. A
+  new `components` gate lane holds both halves.
+
 - `tools/bounded.sh` bounds a command's memory by what it holds resident, not
   by the address space it reserves, wherever the kernel delegates a memory
   controller to the user. The outermost rung starts a user cgroup scope for
