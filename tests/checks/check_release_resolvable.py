@@ -31,19 +31,39 @@ is decided case by case.
   - a distribution of the release set published nowhere REFUSES: the step could
     have carried the file, and after it nothing can install that name;
   - a distribution IN the step for which the index has no project at all
-    REFUSES, because that file does not land on an upload: PyPI creates a
-    project on first use only through a pending Trusted Publisher, three per
-    round, which tools/pending-publishers.py prints and the publish workflow's
-    bootstrap job spends. Resolution cannot see this -- the file is in the
-    step, so everything naming it resolves -- and every one of those
-    resolutions is conditional on a registration nobody has made yet;
+    REFUSES unless the step acknowledges it, because that file lands only
+    through a route that creates the project: a pending Trusted Publisher,
+    three per round, which tools/pending-publishers.py prints and the publish
+    workflow's bootstrap job spends, or an account token's first upload, which
+    is tools/publish-new-projects.sh. Resolution cannot see this -- the file is
+    in the step, so everything naming it resolves -- and every one of those
+    resolutions is conditional on the route;
   - a resolution this step would break REFUSES, and so does one that succeeds
     while pinning a distribution of the step to some other version;
   - a failure the index ALREADY has, at a version the index already carries,
     is REPORTED and does not refuse, because PyPI never frees a version and no
     upload can reach it.
 
-The last of those is Debian's rule, in britney2's own words: a migration is
+One acknowledgement moves a refusal into a report, and only by name. The release
+order the project follows uploads the core BEFORE the members PyPI has no
+project for yet, and creates those afterwards over pending-publisher rounds. So
+`--awaiting NAME` says "this release creates NAME later": that project's own
+absence, and every cell that fails ONLY because it does not exist yet, go into
+an AWAITING CREATION section and do not fail the run. "Only" is asked of the
+resolver, not read from its prose: the cell is resolved again with a stand-in
+wheel for each acknowledged name, built from that member's own pyproject.toml
+so it carries the version and requirements the release will give it, and the
+cell is waived exactly when that succeeds.
+The acknowledgement is refused outright when a name is not in the release set
+tools/build-distributions.sh --list prints, which is a typo or a retired
+distribution such as pymetta-host; when the index already carries it, which
+leaves nothing to await; or when its pyproject.toml does not declare the
+version and requirements statically, which leaves nothing faithful to stand
+in. Both routes that create projects acknowledge what they create: the
+workflow's resolvable job for the bootstrap and deferred projects, and
+tools/publish-new-projects.sh for each name it is about to create.
+
+The last of the four refusal rules is Debian's, in britney2's own words: a migration is
 admitted when "installability will not regress", and "if a package has an
 existing issue in the target suite, the item including a new version of that
 package is generally allowed to migrate if it has the same issue (as it is not
@@ -91,9 +111,17 @@ Guarantees:
     nothing can install it
     [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
   - a distribution in the step whose name the index carries no project for is
-    named and refuses, although every resolution reading its file succeeds:
-    the file lands only once a pending publisher exists for that project
+    named and refuses unless acknowledged, although every resolution reading
+    its file succeeds: the file lands only through a route that creates its
+    project
     [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
+  - `--awaiting NAME` waives an acknowledged project's absence and exactly the
+    cells whose resolution succeeds once it exists as its pyproject.toml
+    declares it, keeps refusing any cell with a second cause and any the
+    member itself could not satisfy, and is itself refused for a name outside
+    the canonical release set, one the index already carries, or one declared
+    dynamically; with none given, no probe runs and nothing changes
+    [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
   - `--upload` is repeatable and the step is their union, so a distribution
     whose files are built in two places -- pymetta's pure wheel and sdist
     beside the manylinux wheels a container writes -- is one upload of one
@@ -111,9 +139,15 @@ Fails when:
     sdist-only off Windows and resolved on macOS arm64 with nothing built
     [measured 2026-09-23] -- so this has not been hit, and it would surface as
     a failing cell carrying the build's own error rather than as a wrong pass.
-Owns resources: one `uv` subprocess per cell, started through
+Owns resources: one `uv` subprocess per cell, and one more for a failing cell
+    whose meaning needs a second resolution -- the probe with stand-ins under
+    --awaiting, and the index-only baseline that decides whether a failure was
+    already there -- each started through
     tests/checks/bounded_spawn.py so a killed run cannot leave 495 of them
-    unreaped, and run to completion; no temporary files of its own.
+    unreaped, and run to completion. Under --awaiting it also owns
+    ai-tmp/release-check/awaiting.<pid>/, the stand-in wheels, created for the
+    run and removed in a `finally` however the run ends; nothing is written to
+    /tmp.
 Decides:
   - the five platform rows and their uv triples, below. They are fixed outside
     this program by what the project supports, not observable from it.
@@ -131,6 +165,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import functools
 import json
 import os
 import re
@@ -139,6 +174,7 @@ import subprocess  # nosec B404 # only uv and build-distributions.sh, fixed argv
 import sys
 import tarfile
 import time
+import tomllib
 import urllib.error
 import urllib.request
 import zipfile
@@ -219,9 +255,98 @@ class Verdict(NamedTuple):
     """A cell's answer, with the resolver's own words when it is not `ok`."""
 
     cell: Cell
-    kind: str  # ok | failed | backtrack
+    kind: str  # ok | failed | backtrack | awaited
     reason: str
     preexisting: bool
+
+
+def write_wheel(directory: Path, name: str, version: str, metadata: str) -> Path:
+    """One pure wheel carrying exactly this metadata, which is all a resolver reads.
+
+    The CHECK needs one: an acknowledged project has no files anywhere, and
+    standing one in is how the resolver is asked whether a cell fails for that
+    reason alone. tests/checks/check_release_resolvable_selftest.py writes its
+    fixtures through this same function, so a wheel's container is described
+    once in this tree rather than twice.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    module = name.replace("-", "_")
+    stem = f"{module}-{version}"
+    path = directory / f"{stem}-py3-none-any.whl"
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr(f"{stem}.dist-info/METADATA", metadata)
+        archive.writestr(f"{stem}.dist-info/WHEEL",
+                         "Wheel-Version: 1.0\nGenerator: check_release_resolvable\n"
+                         "Root-Is-Purelib: true\nTag: py3-none-any\n")
+        archive.writestr(f"{module}.py", "\n")
+        archive.writestr(f"{stem}.dist-info/RECORD",
+                         f"{module}.py,,\n{stem}.dist-info/RECORD,,\n")
+    return path
+
+
+def under_extra(requirement: str, extra: str) -> str:
+    """A Requires-Dist line for a requirement moved under an extra.
+
+    PEP 508 gives a requirement ONE marker expression, so the extra is ANDed
+    into any marker it already has rather than written as a second `;` clause,
+    which is invalid metadata that `packaging` rejects whole
+    [source: https://peps.python.org/pep-0508/#grammar].
+    """
+    left, _, marker = requirement.partition(";")
+    condition = (f'({marker.strip()}) and extra == "{extra}"' if marker.strip()
+                 else f'extra == "{extra}"')
+    return f"Requires-Dist: {left.strip()}; {condition}"
+
+
+def declared_metadata(name: str) -> str | None:
+    """The core metadata a release-set member will be built with, or None.
+
+    Read from the member's own ext/<name>/pyproject.toml, the file
+    tools/build-distributions.sh found it by, and transcribed field for field
+    the way PEP 621 defines them: `dependencies` are Requires-Dist,
+    `optional-dependencies` are Provides-Extra with their requirements under
+    the extra's marker, `requires-python` is Requires-Python
+    [source: https://packaging.python.org/en/latest/specifications/pyproject-toml/].
+    Only the fields a resolver reads, because a stand-in is resolved and never
+    installed. None when the tree does not declare them statically, since a
+    stand-in guessed at is exactly the thing this is here to avoid.
+    """
+    manifest = ROOT / "ext" / name / "pyproject.toml"
+    if not manifest.is_file():
+        return None
+    project = tomllib.loads(manifest.read_text(encoding="utf-8")).get("project", {})
+    resolved_by = {"version", "requires-python", "dependencies", "optional-dependencies"}
+    if (canonicalize_name(project.get("name", "")) != name or "version" not in project
+            or resolved_by & set(project.get("dynamic", []))):
+        return None
+    lines = ["Metadata-Version: 2.1", f"Name: {project['name']}",
+             f"Version: {project['version']}"]
+    if project.get("requires-python"):
+        lines.append(f"Requires-Python: {project['requires-python']}")
+    lines += [f"Requires-Dist: {requirement}" for requirement in project.get("dependencies", [])]
+    for extra, requirements in project.get("optional-dependencies", {}).items():
+        lines.append(f"Provides-Extra: {extra}")
+        lines += [under_extra(requirement, extra) for requirement in requirements]
+    return "\n".join(lines) + "\n"
+
+
+def stand_ins(directory: Path, declared: dict[str, str]) -> list[str]:
+    """A find-links directory standing in for projects that do not exist yet.
+
+    Each stand-in is the member AS THE TREE WILL BUILD IT: its declared version,
+    requirements and extras, not a bare name. That is what makes the probe
+    answer "fails only because this does not exist yet" rather than "fails
+    because this does not exist yet, among other things": a member whose own
+    pin lags -- `pymetta==0.9.1` in a 0.9.2 release -- leaves the core's extra
+    unresolvable even once it exists, and a stand-in carrying the name alone
+    would waive exactly the hazard this check was written for. `declared` is the
+    one computation main() refused every acknowledgement against, so each name
+    here has its metadata.
+    """
+    for name, metadata in declared.items():
+        version = Metadata.from_email(metadata, validate=False).version
+        write_wheel(directory, name, str(version), metadata)
+    return ["--find-links", str(directory)] if declared else []
 
 
 def _metadata_text(path: Path) -> str:
@@ -469,16 +594,28 @@ def resolve(uv: str, requirement: str, cell: Cell,
     return done.returncode == 0, pins, (done.stderr.strip() or done.stdout.strip())
 
 
-def judge(uv: str, cell: Cell, step_versions: dict[str, str],
-          index, step_links: list[str]) -> Verdict:
+class Run(NamedTuple):
+    """What every cell of one run is judged against; only the cell varies."""
+
+    uv: str
+    index: FlatIndex | WebIndex
+    step_versions: dict[str, str]
+    step_links: list[str]
+    #: Empty unless --awaiting named something, and then the probe that tells a
+    #: cell failing for an awaited project from one failing for anything else.
+    awaited_links: list[str]
+
+
+def judge(run: Run, cell: Cell) -> Verdict:
     """Resolve one cell, and say what its answer means for this step.
 
-    Three outcomes, and the second is the one nothing was looking for: a
+    Four outcomes, and the second is the one nothing was looking for: a
     resolution can SUCCEED and still be wrong, by pinning a distribution this
     step is uploading to some other version. That is what a lagging member
     does -- the exact pin on the core sends the resolver back to an older
     member, the install works, and the user has the wrong one.
     """
+    uv, index, step_versions, step_links, awaited_links = run
     after = index.uv_args() + step_links
     ok, pins, reason = resolve(uv, cell.requirement, cell, after)
     if ok:
@@ -488,6 +625,14 @@ def judge(uv: str, cell: Cell, step_versions: dict[str, str],
         if wrong:
             return Verdict(cell, "backtrack", "; ".join(wrong), preexisting=False)
         return Verdict(cell, "ok", "", preexisting=False)
+    # ONLY because of an acknowledged project, asked of the resolver rather
+    # than of its prose: run the same cell again with a stand-in for each
+    # acknowledged name and see whether it resolves. uv names ONE unavailable
+    # package in a message answering a whole extra, so reading the reason would
+    # waive a cell whose second cause nobody saw; a resolution that succeeds
+    # once those names exist, and only then, is the claim being made.
+    if awaited_links and resolve(uv, cell.requirement, cell, after + awaited_links)[0]:
+        return Verdict(cell, "awaited", reason, preexisting=False)
     # Britney's question: did the index already have this failure? Only asked
     # when the step contributes files at all and when the index really carries
     # this exact release, because a version the index does not have cannot have
@@ -505,7 +650,7 @@ def _pythons_for(facts: Facts, candidates: tuple[str, ...]) -> list[str]:
     return [python for python in candidates if facts.requires_python.contains(python)]
 
 
-def report(verdicts: list[Verdict]) -> None:
+def report(verdicts: list[Verdict], acknowledged: list[str]) -> None:
     """Every failing cell, grouped by the reason it failed.
 
     Grouped rather than listed one paragraph each: the same resolver message
@@ -517,17 +662,30 @@ def report(verdicts: list[Verdict]) -> None:
     log is read in order, and splitting a verdict across two streams printed
     the summary above the findings it summarised.
     """
-    for heading, chosen in (
+    # Refusals first, then what does not refuse: a reader deciding whether the
+    # step may go needs the blocking sections at the top, and each section is
+    # printed whole, so the acknowledged names sit with the cells they explain.
+    for heading, chosen, names in (
             ("NEW FAILURES, which this step would introduce",
-             [v for v in verdicts if v.kind == "failed" and not v.preexisting]),
+             [v for v in verdicts if v.kind == "failed" and not v.preexisting], []),
             ("BACKTRACKS, where the resolution succeeds with the wrong version",
-             [v for v in verdicts if v.kind == "backtrack"]),
+             [v for v in verdicts if v.kind == "backtrack"], []),
+            ("AWAITING CREATION, acknowledged with --awaiting. These projects do "
+             "not exist on the index and this release creates them, through a "
+             "pending Trusted Publisher three per round or through "
+             "tools/publish-new-projects.sh. Nothing here fails the run, and a cell "
+             "is here only when the same resolution succeeds once they exist",
+             [v for v in verdicts if v.kind == "awaited"], acknowledged),
             ("PRE-EXISTING FAILURES, which the index already has and this step "
              "neither causes nor fixes",
-             [v for v in verdicts if v.kind == "failed" and v.preexisting])):
-        if not chosen:
+             [v for v in verdicts if v.kind == "failed" and v.preexisting], [])):
+        if not chosen and not names:
             continue
         print(f"\n{heading}:")
+        for name in names:
+            print(f"  {name}")
+        if names and chosen:
+            print("  and the cells that fail only for them:")
         grouped: dict[tuple[str, str], list[Cell]] = {}
         for verdict in chosen:
             grouped.setdefault((verdict.cell.requirement, verdict.reason),
@@ -558,6 +716,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="check this interpreter instead of the declared ones")
     parser.add_argument("--jobs", type=int, default=8,
                         help="resolutions to run at once")
+    parser.add_argument("--awaiting", action="append", default=[],
+                        help="a release-set project this release creates later, whose "
+                             "absence, and the cells failing only for it, are reported "
+                             "without failing the run; repeatable")
     arguments = parser.parse_args(argv)
 
     uv = os.environ.get("UV") or shutil.which("uv")
@@ -601,9 +763,46 @@ def main(argv: list[str] | None = None) -> int:
                   "to guess")
         return 1
 
-    family = [canonicalize_name(name) for name in arguments.distribution] or release_set()
+    narrowed = [canonicalize_name(name) for name in arguments.distribution]
+    family = narrowed or release_set()
     checked = sorted(set(family) | set(step))
     step_versions = {name: next(iter(versions)) for name, versions in step.items()}
+
+    #: The acknowledgement is itself checked before anything it would waive:
+    #: a name outside the release set is a typo or a retired distribution --
+    #: pymetta-host is the one this exists to catch -- and a name the index
+    #: already carries has nothing left to await. Either would turn a real
+    #: refusal into a line nobody reads, so either refuses the run outright.
+    #: Membership is asked of the CANONICAL release set even when
+    #: --distribution narrows what is checked, because narrowing the check
+    #: does not change what the release publishes.
+    acknowledged = sorted({canonicalize_name(name) for name in arguments.awaiting})
+    release = (release_set() if narrowed else family) if acknowledged else []
+    #: Computed once and used twice, by the refusal below and by the stand-ins,
+    #: so a stand-in can never be asked of a name nobody declared.
+    declared = {name: declared_metadata(name) for name in acknowledged}
+
+    def refusal(name: str) -> str | None:
+        """Why this acknowledgement cannot stand, by the first rule it breaks."""
+        if name not in release:
+            return (f"not in the release set build-distributions.sh --list prints "
+                    f"({', '.join(release)}), so there is nothing of this release to await")
+        if (published := index.latest(name)) is not None:
+            return f"{index} already carries it at {published}, so there is nothing left to await"
+        if declared[name] is None:
+            return (f"ext/{name}/pyproject.toml does not declare its version and "
+                    "requirements statically, so nothing can stand in for it and no cell "
+                    "needing it could be told apart from one failing for another reason")
+        return None
+
+    misnamed = [f"--awaiting {name}: {why}" for name in acknowledged
+                if (why := refusal(name)) is not None]
+    if misnamed:
+        for problem in misnamed:
+            print(f"release-resolvable: {problem}")
+        print("An acknowledgement waives a refusal, so it is refused itself when it "
+              "names anything but a project this release has yet to create.")
+        return 1
 
     #: Version and facts per distribution: the step's when it sends one,
     #: otherwise what the index publishes. That is what a user gets after this
@@ -626,7 +825,12 @@ def main(argv: list[str] | None = None) -> int:
     #: happened: warehouse creates a project on first use only for a pending
     #: Trusted Publisher, three at a time. So this is invisible to resolution
     #: and decides whether any of it holds.
-    awaiting = sorted(name for name in step_versions if index.latest(name) is None)
+    unfounded = sorted(name for name in step_versions if index.latest(name) is None)
+    # What the acknowledgement covers is every finding whose ONE cause is that
+    # the project does not exist yet: its absence from the index, whether or
+    # not this step carries its file. The rest stay refusals.
+    unpublished = [name for name in unpublished if name not in acknowledged]
+    unfounded = [name for name in unfounded if name not in acknowledged]
 
     named = sorted({python for facts in entries.values() for python in facts.pythons})
     candidates = tuple(arguments.python or named or [f"{sys.version_info[0]}.{sys.version_info[1]}"])
@@ -643,9 +847,16 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {len(entries)} distribution(s), {len(cells)} cell(s) over "
           f"{len(PLATFORMS)} platform(s) and python {', '.join(candidates)}")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, arguments.jobs)) as pool:
-        verdicts = list(pool.map(
-            lambda cell: judge(uv, cell, step_versions, index, step_links), cells))
+    # The stand-ins live for this run only, under the repository's scratch
+    # root, never /tmp, and go when it ends however it ends.
+    stand_in_root = ROOT / "ai-tmp" / "release-check" / f"awaiting.{os.getpid()}"
+    try:
+        run = Run(uv, index, step_versions, step_links,
+                  stand_ins(stand_in_root, {name: declared[name] or "" for name in acknowledged}))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, arguments.jobs)) as pool:
+            verdicts = list(pool.map(functools.partial(judge, run), cells))
+    finally:
+        shutil.rmtree(stand_in_root, ignore_errors=True)
 
     if unpublished:
         print("\nUNPUBLISHED, in the release set with no version in this step and "
@@ -656,29 +867,35 @@ def main(argv: list[str] | None = None) -> int:
               "workflow's bootstrap job uploads them:")
         for name in unpublished:
             print(f"  {name}")
-    if awaiting:
+    if unfounded:
         print("\nAWAITING A PYPI PROJECT, in this step with no project on the index. "
-              "A file for a project that does not exist does not land: PyPI creates "
-              "one on first upload only through a pending Trusted Publisher, three "
-              "per round. tools/pending-publishers.py prints the rows to register, "
-              "and the publish workflow's bootstrap job spends them. Every "
-              "resolution below that reads one of these files is conditional on "
-              "that registration:")
-        for name in awaiting:
+              "A file for a project that does not exist lands only through a route "
+              "that creates the project: a pending Trusted Publisher, three per "
+              "round, which tools/pending-publishers.py prints and the publish "
+              "workflow's bootstrap job spends, or an account token's first upload, "
+              "which is tools/publish-new-projects.sh. A step that IS such a route "
+              "says so with --awaiting for each name it creates. Every resolution "
+              "below that reads one of these files is conditional on that:")
+        for name in unfounded:
             print(f"  {name}")
-    report(verdicts)
+    report(verdicts, acknowledged)
 
     refused = [verdict for verdict in verdicts
                if verdict.kind == "backtrack"
                or (verdict.kind == "failed" and not verdict.preexisting)]
     tolerated = [verdict for verdict in verdicts if verdict.kind == "failed" and verdict.preexisting]
-    print(f"\n{len(cells) - len(refused) - len(tolerated)} of {len(cells)} cell(s) resolve; "
-          f"{len(refused)} refuse this step, {len(tolerated)} were already broken.")
+    waived = [verdict for verdict in verdicts if verdict.kind == "awaited"]
+    print(f"\n{len(cells) - len(refused) - len(tolerated) - len(waived)} of {len(cells)} "
+          f"cell(s) resolve; {len(refused)} refuse this step, {len(tolerated)} were already "
+          f"broken, {len(waived)} await an acknowledged project.")
     if unpublished:
         print(f"{len(unpublished)} distribution(s) of the release set are published nowhere.")
-    if awaiting:
-        print(f"{len(awaiting)} distribution(s) in this step have no PyPI project yet.")
-    return 1 if refused or unpublished or awaiting else 0
+    if unfounded:
+        print(f"{len(unfounded)} distribution(s) in this step have no PyPI project yet.")
+    if acknowledged:
+        print(f"{len(acknowledged)} acknowledged with --awaiting: "
+              f"{', '.join(acknowledged)}.")
+    return 1 if refused or unpublished or unfounded else 0
 
 
 if __name__ == "__main__":

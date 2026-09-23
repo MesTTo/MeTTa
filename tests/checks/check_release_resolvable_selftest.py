@@ -53,6 +53,11 @@ Guarantees:
   - a step file for a name the index has no project for refuses and names the
     pending-publisher round, although every resolution reading it succeeds
     [tested: this file; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
+  - --awaiting waives an acknowledged project's absence and exactly the cells
+    that resolve once it exists as its pyproject.toml declares it, keeps
+    refusing a cell with a second cause and a cell the member itself could not
+    satisfy, and is itself refused for a name outside the release set or one
+    the index already carries [tested: this file; commit=WORKTREE]
 Fails when: nothing about the real tree or the real index. It is a unit test of
     the checker.
 Open Obligations:
@@ -69,11 +74,11 @@ import io
 import shutil
 import sys
 import threading
-import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_release_resolvable as checker
+from packaging.metadata import Metadata
 
 SCRATCH = Path(__file__).resolve().parents[2] / "ai-tmp" / "release-check" / "selftest"  # artifact-path-created
 
@@ -81,20 +86,6 @@ SCRATCH = Path(__file__).resolve().parents[2] / "ai-tmp" / "release-check" / "se
 #: two of them from the classifiers rather than being told. A case that wants
 #: one interpreter says so with --python.
 CLASSIFIED = ("3.12", "3.13")
-
-
-def _under_extra(requirement: str, extra: str) -> str:
-    """A requirement moved under an extra, keeping any marker it already had.
-
-    PEP 508 gives a requirement ONE marker expression, so an extra is ANDed
-    into the marker rather than written as a second `;` clause; the two-clause
-    spelling is invalid metadata and `packaging` rejects the whole file
-    [source: https://peps.python.org/pep-0508/#grammar].
-    """
-    left, _, marker = requirement.partition(";")
-    condition = f'({marker.strip()}) and extra == "{extra}"' if marker.strip() \
-        else f'extra == "{extra}"'
-    return f"Requires-Dist: {left.strip()}; {condition}"
 
 
 def wheel(directory: Path, name: str, version: str, *,
@@ -106,10 +97,10 @@ def wheel(directory: Path, name: str, version: str, *,
     Built here rather than through `python -m build` because the fixture is
     the METADATA: a case wants a Requires-Dist nobody can satisfy or a marker
     that holds on one platform, and a setuptools project per case would be
-    fifty times the code for the same three headers.
+    fifty times the code for the same three headers. The container itself is
+    written by the checker's own write_wheel, which it needs for the stand-ins
+    an acknowledgement probes with, so a wheel is described once.
     """
-    directory.mkdir(parents=True, exist_ok=True)
-    stem = f"{name.replace('-', '_')}-{version}"
     lines = [
         "Metadata-Version: 2.1",
         f"Name: {name}",
@@ -118,31 +109,24 @@ def wheel(directory: Path, name: str, version: str, *,
         *(f"Classifier: Programming Language :: Python :: {python}" for python in pythons),
         *(f"Provides-Extra: {extra}" for extra in (extras or {})),
         *(f"Requires-Dist: {requirement}" for requirement in requires),
-        *(_under_extra(requirement, extra)
+        *(checker.under_extra(requirement, extra)
           for extra, members in (extras or {}).items() for requirement in members),
         "",
         f"{name} {version}",
         "",
     ]
-    path = directory / f"{stem}-py3-none-any.whl"
-    with zipfile.ZipFile(path, "w") as archive:
-        archive.writestr(f"{stem}.dist-info/METADATA", "\n".join(lines))
-        archive.writestr(f"{stem}.dist-info/WHEEL",
-                         "Wheel-Version: 1.0\nGenerator: selftest\n"
-                         "Root-Is-Purelib: true\nTag: py3-none-any\n")
-        archive.writestr(f"{name.replace('-', '_')}.py", "\n")
-        archive.writestr(f"{stem}.dist-info/RECORD",
-                         f"{name.replace('-', '_')}.py,,\n{stem}.dist-info/RECORD,,\n")
-    return path
+    return checker.write_wheel(directory, name, version, "\n".join(lines))
 
 
 def run(index: Path, step: Path | tuple[Path, ...], distributions: tuple[str, ...],
-        pythons: tuple[str, ...] = ()) -> tuple[int, str]:
+        pythons: tuple[str, ...] = (), awaiting: tuple[str, ...] = ()) -> tuple[int, str]:
     """The checker as the release path runs it, with its output captured."""
     steps = step if isinstance(step, tuple) else (step,)
     argv = ["--flat-index", str(index), "--jobs", "6"]
     for directory in steps:
         argv += ["--upload", str(directory)]
+    for name in awaiting:
+        argv += ["--awaiting", name]
     for name in distributions:
         argv += ["--distribution", name]
     for python in pythons:
@@ -394,6 +378,157 @@ def case_awaiting_a_project(world: Path) -> list[str]:
     return [f"{problem}:\n{output}" for problem in wrong]
 
 
+def section(output: str, heading: str) -> str:
+    """The text of one report section, from its heading to the blank line ending it.
+
+    The checker separates its sections with a blank line, and none of them
+    contains one, so that line is the section's end.
+    """
+    if heading not in output:
+        return ""
+    body = output.split(heading, 1)[1]
+    # Whole lines, the last one included, so a name is found as `  name\n`
+    # whether or not anything follows it inside the section.
+    return body.split("\n\n", 1)[0] + "\n"
+
+
+def member() -> str:
+    """A real distribution of the release set, which --awaiting is checked against.
+
+    Taken from tools/build-distributions.sh --list through the checker's own
+    release_set() rather than spelled, because a fixture naming a distribution
+    encodes a fact about the release that goes stale under it: publish_selftest.sh
+    planted three cases on pymetta-host and lost them the day it was retired.
+    Only the NAME is real. The index and the step are still directories here,
+    so no case asks pypi.org anything about it.
+    """
+    return checker.release_set()[-1]
+
+
+def plant_requirements(directory: Path, name: str) -> None:
+    """Stubs for everything a real member declares, so its stand-in can resolve.
+
+    Read through the checker's own declared_metadata, so the fixture holds what
+    the probe will ask for rather than a second opinion of it. Each stub takes
+    the version its requirement pins, or its lower bound, or 1.0 when it names
+    none; nothing else about it matters to a resolver.
+    """
+    declared = Metadata.from_email(checker.declared_metadata(name), validate=False)
+    for requirement in declared.requires_dist or []:
+        if requirement.marker is not None:
+            continue
+        bounds = [spec.version for spec in requirement.specifier
+                  if spec.operator in {"==", ">=", "~="}]
+        wheel(directory, requirement.name, bounds[0] if bounds else "1.0")
+
+
+def case_awaited_passes(world: Path) -> list[str]:
+    """An acknowledged project is reported, and what fails only for it passes.
+
+    The 0.9.2 release shape in miniature: the core goes up first with an extra
+    naming a member PyPI has no project for yet, and a SECOND extra names a
+    member that exists nowhere and was not acknowledged. Only the first may be
+    waived; the second is the proof that the waiver is a probe and not a
+    blanket, since uv names one missing package per message and a waiver read
+    from its prose would have taken both.
+    """
+    later = member()
+    index, step = world / "index", world / "step"
+    wheel(index, "relcheck-core", "1.0")
+    plant_requirements(index, later)
+    wheel(step, "relcheck-core", "2.0",
+          extras={"p": (later,), "q": (later, "relcheck-typo")})
+    status, output = run(index, step, ("relcheck-core", later),
+                         pythons=("3.12",), awaiting=(later,))
+    awaiting = section(output, "AWAITING CREATION")
+    new = section(output, "NEW FAILURES")
+    wrong = []
+    if status != 1:
+        wrong.append(f"the unacknowledged extra must still refuse, got {status}")
+    if f"  {later}\n" not in awaiting:
+        wrong.append("the acknowledged project is named in its own section")
+    if "UNPUBLISHED" in output:
+        wrong.append("an acknowledged project's absence is not an unpublished refusal")
+    if "relcheck-core[p]==2.0" not in awaiting or "relcheck-core[p]==2.0" in new:
+        wrong.append("the extra failing only for the awaited project is reported as awaited")
+    if "relcheck-core[q]==2.0" not in new or "relcheck-core[q]==2.0" in awaiting:
+        wrong.append("the extra with a second, unacknowledged cause stays a new failure")
+    if "5 await an acknowledged project" not in output:
+        wrong.append("the awaited extra's five platform cells are counted apart")
+    problems = [f"{problem}:\n{output}" for problem in wrong]
+
+    # And with the second cause gone, the same step passes outright.
+    clean = world / "clean"
+    wheel(clean, "relcheck-core", "2.0", extras={"p": (later,)})
+    status, output = run(index, clean, ("relcheck-core", later),
+                         pythons=("3.12",), awaiting=(later,))
+    if status != 0:
+        problems.append(f"a step failing only for an awaited project passes, got {status}:"
+                        f"\n{output}")
+    return problems
+
+
+def case_awaited_member_unresolvable(world: Path) -> list[str]:
+    """An awaited member that could not resolve once it exists is not waived.
+
+    The stand-in is the member as its pyproject.toml declares it, so what it
+    requires has to resolve too. Here nothing it requires is on the index, the
+    shape a member pinning a core version that does not exist takes. The core's
+    extra would stay broken after the member is created, so it is a failure of
+    this release and not only a wait: it refuses. A stand-in carrying the name
+    alone waived it, which is the case this is here for.
+    """
+    later = member()
+    index, step = world / "index", world / "step"
+    wheel(index, "relcheck-core", "1.0")
+    wheel(step, "relcheck-core", "2.0", extras={"p": (later,)})
+    status, output = run(index, step, ("relcheck-core", later),
+                         pythons=("3.12",), awaiting=(later,))
+    wrong = []
+    if status != 1:
+        wrong.append(f"a member that cannot resolve once created must refuse, got {status}")
+    if "relcheck-core[p]==2.0" not in section(output, "NEW FAILURES"):
+        wrong.append("the core's extra is a new failure, not an awaited one")
+    if f"  {later}\n" not in section(output, "AWAITING CREATION"):
+        wrong.append("the member's own absence is still acknowledged")
+    return [f"{problem}:\n{output}" for problem in wrong]
+
+
+def case_awaited_not_a_member(world: Path) -> list[str]:
+    """A name outside the release set is refused, not waived.
+
+    A typo, or a retired distribution: pymetta-host is the one that exists to
+    be caught, since the release set stopped naming it and a waiver for it
+    would hide the 0.9.1 failure behind a line nobody reads.
+    """
+    index, step = world / "index", world / "step"
+    wheel(index, "relcheck-core", "1.0")
+    wheel(step, "relcheck-core", "2.0")
+    status, output = run(index, step, ("relcheck-core",), awaiting=("relcheck-retired",))
+    if status != 1 or "--awaiting relcheck-retired: not in the release set" not in output \
+            or member() not in output:
+        return [f"an acknowledgement outside the release set must refuse, got {status}:\n"
+                f"{output}"]
+    if "cell(s)" in output:
+        return [f"it refuses before any resolution runs:\n{output}"]
+    return []
+
+
+def case_awaited_already_exists(world: Path) -> list[str]:
+    """A name the index already carries has nothing left to await."""
+    existing = member()
+    index, step = world / "index", world / "step"
+    wheel(index, "relcheck-core", "1.0")
+    wheel(index, existing, "1.0")
+    wheel(step, "relcheck-core", "2.0")
+    status, output = run(index, step, ("relcheck-core", existing), awaiting=(existing,))
+    if status != 1 or f"--awaiting {existing}:" not in output \
+            or "already carries it at 1.0" not in output:
+        return [f"an acknowledgement of an existing project must refuse, got {status}:\n"
+                f"{output}"]
+    return []
+
+
 def case_unreadable(world: Path) -> list[str]:
     """A file named like a wheel that is not one: refused, not skipped."""
     index, step = world / "index", world / "step"
@@ -411,7 +546,8 @@ def cases():
     return (case_clean, case_missing_project, case_backtrack, case_preexisting,
             case_unpublished, case_two_versions, case_one_platform, case_requires_python,
             case_unreadable, case_index_unanswerable, case_two_upload_directories,
-            case_awaiting_a_project)
+            case_awaiting_a_project, case_awaited_passes, case_awaited_member_unresolvable,
+            case_awaited_not_a_member, case_awaited_already_exists)
 
 
 def main() -> int:
@@ -422,7 +558,13 @@ def main() -> int:
         world = SCRATCH / case.__name__
         world.mkdir(parents=True)
         (world / "step").mkdir()
-        problems = case(world)
+        # An exception is that case's failure, named, rather than the end of
+        # the run: a checker that crashes on a case is a checker that fails it,
+        # and the mutant sweep attributes a break to the case meant to see it.
+        try:
+            problems = case(world)
+        except Exception as error:
+            problems = [f"raised {type(error).__name__}: {error}"]
         for problem in problems:
             print(f"  {case.__name__}: {problem}")
         bad += 1 if problems else 0

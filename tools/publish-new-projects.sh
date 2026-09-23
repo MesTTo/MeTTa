@@ -12,8 +12,9 @@
 #   - under --publish, nothing is uploaded until every entry point this step
 #     leaves behind resolves on every platform and interpreter, which is
 #     tests/checks/check_release_resolvable.py and is the last thing before
-#     the first attempt
-#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=89bd27b1e15e5f733a138143196ddef3981001c6]
+#     the first attempt; each project this run is creating is acknowledged to
+#     it with --awaiting, since creating them is what this tool is for
+#     [tested: tests/checks/check_release_resolvable_selftest.py; commit=WORKTREE]
 # Fails when: a project already exists. Then this is the wrong tool and the
 #   publish workflow is the right one: it uploads from GitHub with OIDC and
 #   needs no project-creation budget at all.
@@ -243,7 +244,22 @@ fi
 # a reporting run costs nothing to be wrong about, and the selftest's fixture
 # index cannot answer a resolver. The offline proof that it refuses what it
 # should is tests/checks/check_release_resolvable_selftest.py, a gate lane.
-if ! "$PYTHON" "$HERE/tests/checks/check_release_resolvable.py" --upload "$DIST"; then
+#
+# Every project this run is about to create is acknowledged with --awaiting.
+# Creating them is this tool's whole job, and without the acknowledgement the
+# check refuses exactly those: a file in the step for a name the index has no
+# project for is a finding it makes, since through trusted publishing such a
+# file does not land. Here it does, because an account token's first upload
+# creates the project, so the acknowledgement is the true statement rather than
+# a waiver. The check still refuses anything else the step would break, and it
+# refuses the acknowledgement itself for a name that already exists or that the
+# release does not publish, which is what `$@` can never be: it is exactly the
+# release-set names the index answered 404 for, above.
+awaiting=""
+for name in "$@"; do awaiting="$awaiting --awaiting $name"; done
+# shellcheck disable=SC2086  -- project names carry no whitespace, and word
+# splitting is how each reaches the checker as its own flag.
+if ! "$PYTHON" "$HERE/tests/checks/check_release_resolvable.py" --upload "$DIST" $awaiting; then
     printf '\npublish-new-projects: the upload above was NOT attempted. After this step\n' >&2
     printf 'something this repository publishes could not be resolved; the report names\n' >&2
     printf 'every entry point, platform and interpreter it holds. Nothing here can be\n' >&2

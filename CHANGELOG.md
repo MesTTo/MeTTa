@@ -49,6 +49,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   cells resolve, `pymetta[engine]` included on every platform row, and the nine
   members PyPI has no project for are named with the round that creates them.
 
+  The release goes in the order the engine fix needs: pymetta 0.9.2 and the
+  members PyPI already has are uploaded first, and the nine are created
+  afterwards over pending-publisher rounds. `--awaiting NAME` acknowledges one
+  of those: its absence, and every cell that fails ONLY because it does not
+  exist yet, are reported under AWAITING CREATION and do not fail the run.
+  "Only" is asked of the resolver rather than read from its message, which
+  names one missing package per extra: the cell is resolved again with a
+  stand-in wheel for each acknowledged name, built from that member's own
+  `pyproject.toml` so it carries the version and requirements the release will
+  give it, and it is waived exactly when that succeeds. So an extra with a
+  second cause still refuses, and so does one whose awaited member would not
+  resolve itself, the shape a lagging pin takes. The acknowledgement is itself
+  refused for a name `tools/build-distributions.sh --list` does not print,
+  which catches a typo and a retired `pymetta-host` alike, and for a name the
+  index already carries. `tools/publish-new-projects.sh` acknowledges each
+  project it is about to create, which it has to: creating them is what it is
+  for, and the check refuses a file whose project does not exist.
+
 ### Changed
 
 - The `engine` extra adds `janus-swi` only where no pymetta wheel carries the
