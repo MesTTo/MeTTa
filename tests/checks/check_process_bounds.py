@@ -107,9 +107,14 @@ from gate_layout import BOUNDED, CHECK  # noqa: E402  -- HERE is installed above
 #: the test blocked forever on its pipe. `make` was not on this list, so the
 #: check called that lane clean while it was the one lane that could not end.
 #: `swipl-ld` is here because it drives a C compiler, and `perf` because it
-#: waits on whatever it measures.
+#: waits on whatever it measures. `xargs` is here for the same reason `make`
+#: is: it is a scheduler that outlives nothing of its own but waits on every
+#: child it starts, so an unbounded one holds the run open for as long as the
+#: slowest thing it dispatched, and the bound has to be on xargs itself rather
+#: than only on the workers.
 SPAWNERS = ("swipl", "swipl-ld", "node", "npx", "sh", '"$PY"', "$PY",
-            "make", "gcc", "clang", "cargo", "npm", "python3", "perf")
+            "make", "gcc", "clang", "cargo", "npm", "python3", "perf",
+            "xargs")
 
 #: Spellings that carry the bound. Each is verified, not trusted: `in_py` by
 #: its body calling `bounded`, and `bounded` by its body naming bounded.sh.

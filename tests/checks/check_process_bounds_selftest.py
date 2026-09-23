@@ -124,6 +124,18 @@ check_bad_make() {
     make --quiet -C "$binding" sanitize
 }
 
+# `xargs` is a scheduler: it starts every worker and waits on all of them, so
+# an unbounded one holds the run open for as long as the slowest thing it
+# dispatched. The payload here is a `printf` rather than a spawner so this
+# pair adds exactly one spawn each and the counts below stay readable.
+check_bad_xargs() {
+    xargs -0 -n 1 -P 4 printf '%s\\n'
+}
+
+check_good_xargs() {
+    bounded xargs -0 -n 1 -P 4 printf '%s\\n'
+}
+
 check_good_swipl() {
     bounded swipl -q --on-error=status thing.pl
 }
@@ -382,12 +394,13 @@ def main() -> int:
     problems.extend(
         f"{expected}: an unbounded spawn was NOT reported"
         for expected in ("check_bad_swipl", "check_bad_sh", "check_bad_python",
-                         "check_bad_make")
+                         "check_bad_make", "check_bad_xargs")
         if expected not in lanes
     )
     problems.extend(
         f"{spared}: reported, and it must not be"
-        for spared in ("check_good_swipl", "check_good_via_in_py",
+        for spared in ("check_good_swipl", "check_good_xargs",
+                       "check_good_via_in_py",
                        "check_only_a_comment", "check_dirname_only",
                        "check_prose_only")
         if spared in lanes
@@ -399,15 +412,16 @@ def main() -> int:
             "what let a hand-started swipl run 7,540 seconds outside every "
             "lane on 2026-09-05."
         )
-    if len(found) != 5:
-        problems.append(f"expected exactly 5 findings, got {len(found)}: {found}")
-    #: Four unbounded lane spawns, one `bounded swipl`, one `in_py`, and four in
+    if len(found) != 6:
+        problems.append(f"expected exactly 6 findings, got {len(found)}: {found}")
+    #: Five unbounded lane spawns, one `bounded swipl`, one `bounded xargs`,
+    #: one `in_py`, and four in
     #: the runner: its own `bounded swipl`, the excused child, the continued
     #: `bounded sh`, and the unbounded npm. A pass that forgot how to see a
     #: bounded spawn would still report the same findings over fewer of them.
-    if total != 10:
+    if total != 12:
         problems.append(
-            f"expected 10 spawns to be looked at, got {total}. A pass that "
+            f"expected 12 spawns to be looked at, got {total}. A pass that "
             f"stops recognising `bounded` as a spawn line reports the same "
             f"findings while covering less."
         )

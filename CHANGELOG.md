@@ -288,6 +288,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `engine/test.sh` runs its suites concurrently, so the `plunit` lane is 97
+  seconds where it was 332. The suites are very skewed -- 292.6s of work across
+  183 of them with a single 87.29s one -- so batches with a barrier between
+  them cost 219s against a floor of 87.3s, and a queue that hands each finished
+  slot straight to the next suite reaches that floor. The queue is `xargs -P`
+  rather than a FIFO of slot tokens: a token returned by the worker as its last
+  act is never returned by a worker that is killed, which silently shrinks the
+  pool by one slot per abnormal death and deadlocks once it reaches zero, where
+  `xargs` frees a slot by waiting on a PID and the kernel reports a killed
+  child just as it reports one that exited. Interrupting a run now stops it:
+  the handler cleans up and re-raises instead of returning, and the queue is
+  waited on rather than run in the foreground, because a POSIX shell defers a
+  trap until the foreground command it is waiting for has finished.
+
 - The `engine` extra partitions by platform. Where a `pymetta-host` wheel
   exists it carries the PATCHED SWI the engine needs, so nothing has to be
   installed by hand; elsewhere `janus-swi` binds whatever SWI the reader
