@@ -50,6 +50,11 @@
 %     .qlf boot exposes is the engine a source boot exposes
 %     [tested: test_the_compiled_boot_is_the_same_engine;
 %     commit=48b6cb4eea09e6f2f9637c7186e77c628d61b7e3].
+%   - the governed set has one producer: engine/bench.pl's boot case runs
+%     qlf_prepare_engine/0, the first half of qlf_load_engine/0, as its setup,
+%     so the engine it measures loading is the set every host's boot writes,
+%     whichever of them wrote it last
+%     [tested: tests/shell/test_boot_inference_determinism.sh; commit=WORKTREE].
 %   - the engine reads its own sources and writes its own output as UTF-8
 %     whatever the ambient locale says, and a .qlf set compiled under a
 %     different encoding is purged rather than served
@@ -513,17 +518,9 @@ purge_stale_qlf :-
 %Prolog-level failure of the load itself, and the purge is what stops the
 %retry meeting the same artifact set again.
 qlf_load_engine :-
+    qlf_prepare_engine,
     qlf_boot_directory(Here),
-    atom_concat(Here, '/host_check.pl', HostCheck),
-    use_module(HostCheck, []),
-    metta_host_check:metta_require_patched_host,
-    atom_concat(Here, '/source_loading.pl', SourceLoading),
-    use_module(SourceLoading, []),
-    atom_concat(Here, '/identity.pl', Identity),
-    use_module(Identity, []),
-    metta_identity:metta_boot_identity,
     atom_concat(Here, '/metta', Umbrella),
-    qlf_regenerate_aside(Here),
     current_prolog_flag(qcompile, Previous),
     setup_call_cleanup(
         set_prolog_flag(qcompile, auto),
@@ -534,5 +531,35 @@ qlf_load_engine :-
                     purge_all_qlf,
                     user:ensure_loaded(Umbrella) ))),
         set_prolog_flag(qcompile, Previous)).
+
+%Everything the umbrella's load rests on and nothing of the load itself: the
+%host check before anything else loads, the two units every later load goes
+%through, loaded from source, the boot identity, and the governed set
+%regenerated aside by the hermetic child when the umbrella has no artifact.
+%It is a predicate of its own because engine/bench.pl's boot case runs it as
+%SETUP and measures only the umbrella's load. While that case carried its own
+%copy of the load, it compiled the umbrella inside its own process, so the
+%governed set had two producers writing different engines: the child wrote 26
+%artifacts, without identity.qlf and source_loading.qlf because the two units
+%load from source here, and the bench wrote 28, and 23 of the 26 they share
+%differed in content. A boot reading the child's set read 343,992 inferences,
+%one reading the bench's 344,012, and the bench's first boot on the child's
+%set compiled and wrote the two units inside its window (356,810), so the boot
+%row answered with whichever producer had written last, and a host booting
+%beside engine/bench.sh's purge regenerated the child's set under it
+%[measured 2026-09-24: bench_run(boot) after each producer's write in a
+%battery of 56d827312, and three sh tools/check.sh boot-determinism runs in a
+%fresh one; commit=WORKTREE].
+qlf_prepare_engine :-
+    qlf_boot_directory(Here),
+    atom_concat(Here, '/host_check.pl', HostCheck),
+    use_module(HostCheck, []),
+    metta_host_check:metta_require_patched_host,
+    atom_concat(Here, '/source_loading.pl', SourceLoading),
+    use_module(SourceLoading, []),
+    atom_concat(Here, '/identity.pl', Identity),
+    use_module(Identity, []),
+    metta_identity:metta_boot_identity,
+    qlf_regenerate_aside(Here).
 
 :- purge_stale_qlf.

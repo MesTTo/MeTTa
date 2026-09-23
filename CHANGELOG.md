@@ -122,6 +122,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   verifying, and swept from the battery by the next provision. The tracked
   record, `agenticmind.json`, is copied as before. `tools/battery_selftest.sh`
   holds all three halves, and each fails against the previous script.
+- The engine benchmark's boot case loads the same engine every host loads.
+  It used to compile the umbrella in its own process, so the governed `.qlf`
+  set had two producers writing different engines: the boot's hermetic child
+  wrote 26 artifacts, and the benchmark's own warm-up wrote 28 of different
+  content. The boot row read whichever producer had written last, 343,992
+  inferences or 344,012, and 356,810 on the first boot after the child's set,
+  when the benchmark compiled two units inside its measured window. So
+  `boot-determinism` failed twice in multi-lane gates while every solo run
+  passed. `engine/qlf_boot.pl` now splits its load into
+  `metta_qlf_boot:qlf_prepare_engine/0`, which does the host check, loads the
+  two units and regenerates the set through the child, and the umbrella load.
+  `engine/bench.pl` runs the first as setup and measures the second. The
+  lane's script checks the property from the first sample after either
+  producer's write, and the lane runs alone, because it purges the set other
+  lanes boot from.
+
 - The benchmark harness counts the `swipl` the measurement environment names.
   perf puts its own directories ahead of the `PATH` it hands its workload, so
   every instruction sample of a bare `swipl` ran the stock

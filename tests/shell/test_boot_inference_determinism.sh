@@ -20,6 +20,11 @@
 #     temporary directory. check.sh exports TMP, TMPDIR and TEMP into every
 #     lane, SWI reads TMP for its own, and one atom in the table is enough to
 #     move this row by 27.
+#   - the boot case reads one number whichever producer wrote the governed
+#     set, a host's boot through qlf_load_engine/0 or the bench's own warm
+#     after a purge, on the FIRST sample after either write. That is the
+#     one-producer half: engine/bench.pl prepares its load through
+#     qlf_prepare_engine/0, so both writes are the boot's hermetic child's.
 # Assumes:
 #   - swipl on PATH and the .qlf artifact set warm. The first boot after a
 #     purge COMPILES, which is a different workload from loading, so this
@@ -27,6 +32,9 @@
 #     warm-up engine/bench.py does.
 #   - engine/qlf_boot.pl's metta_qlf_boot:qlf_load_engine/0, the door every
 #     host boots through.
+#   - no other lane boots the engine while this runs: the driver half and the
+#     producer half both purge the governed set, which is why engine/check.sh
+#     runs this lane alone.
 # Fails when:
 #   - anything registers a process-global prolog_listen/3 channel at load time
 #     that fires per collected clause. SWI delivers `erase` from clause garbage
@@ -36,6 +44,14 @@
 #     many callbacks the race sent there. engine/materialize.pl held one from
 #     acfa6e74 until it moved to flush_space_materialization/2, and the boot
 #     case read 264,281 to 265,616 over eight samples while it did.
+#   - engine/bench.pl's boot case compiles the umbrella in its own process
+#     instead of preparing through qlf_prepare_engine/0. The governed set then
+#     has two producers writing different engines (26 artifacts from the
+#     child, 28 from the bench, 23 shared files different in content), and the
+#     boot case reads whichever wrote last: 343,992 on the child's set, 344,012
+#     on the bench's, and 356,810 for the bench's first boot on the child's
+#     set, which compiled two units inside its window [measured 2026-09-24:
+#     one sample after each write, battery of 56d827312; commit=WORKTREE].
 #   - a boot-time goal calls a name nothing defines. SWI answers with its
 #     undefined-procedure trap, which searches the whole autoload library
 #     index, and that search cost translator:metta_rule_gates_refresh/0 either
@@ -210,5 +226,31 @@ if [ "$bare_reading" != "$gated_reading" ]; then
     exit 1
 fi
 
-printf 'boot inference determinism checks passed (%s, and %s with the temporary directory the gate sets)\n' \
-    "$(printf '%s\n' $readings | sort -u)" "$gated_reading"
+# The fourth half: the governed set has ONE producer. A host's boot writes it
+# through qlf_load_engine/0, whose hermetic child regenerates it, and the
+# bench's own warm writes it through bench_run(boot) after engine/bench.py's
+# purge. Each producer gets a purged tree, writes the set, and the boot case
+# is sampled ONCE with no warm-up discarded, because a first sample that
+# compiles is exactly the defect: with two producers the bench's first boot
+# on the child's set compiled engine/identity.pl and engine/source_loading.pl
+# inside its window, and later ones read the other engine.
+producer_reading() {
+    bounded swipl -q -g "consult('$ROOT/engine/qlf_boot.pl'), metta_qlf_boot:purge_all_qlf" -t halt </dev/null
+    "$@" >/dev/null 2>&1 </dev/null
+    bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl </dev/null |
+        sed -n 's/.*inferences=\([0-9][0-9]*\).*/\1/p'
+}
+host_written=$(producer_reading bounded swipl -q \
+    -g "consult('$ROOT/engine/qlf_boot.pl'), metta_qlf_boot:qlf_load_engine" -t halt)
+bench_written=$(producer_reading bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl)
+if [ -z "$host_written" ] || [ "$host_written" != "$bench_written" ]; then
+    printf 'the boot case read %s on the governed set a host boot wrote and %s '\
+'on the set the bench wrote, so the set has two producers: engine/bench.pl has '\
+'to prepare its load through metta_qlf_boot:qlf_prepare_engine/0, the first half '\
+'of the load every host runs, rather than compile the umbrella itself.\n' \
+        "$host_written" "$bench_written" >&2
+    exit 1
+fi
+
+printf 'boot inference determinism checks passed (%s, and %s with the temporary directory the gate sets, and %s whichever producer wrote the governed set)\n' \
+    "$(printf '%s\n' $readings | sort -u)" "$gated_reading" "$host_written"

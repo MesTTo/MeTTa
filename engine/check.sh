@@ -175,7 +175,16 @@ run_solo GATE engine-bench check_engine_bench
 # over eight samples because engine/materialize.pl registered a process-global
 # `erase` listener at load time and SWI delivers that event from clause garbage
 # collection on whichever thread trips the collector first.
-run GATE boot-determinism sh -c "cd '$HERE' && sh tests/shell/test_boot_inference_determinism.sh"
+#
+# Alone, for tools/check.sh's third reason: its driver half runs engine/bench.sh,
+# which purges and regenerates the governed QLF set before its samples
+# (engine/bench.py, prepare_governed_artifacts), so beside other lanes it
+# deletes the artifacts they are booting from and samples a set they are
+# rewriting. Run beside plunit, dev-typed and no-autoload it read its bare and
+# gated samples 20 inferences apart twice while eight solo runs agreed
+# [measured 2026-09-24: the WebAssembly job's multi-lane gates and battery 74's
+# lane at 06:41, 343,852 against 343,832].
+run_solo GATE boot-determinism sh -c "cd '$HERE' && sh tests/shell/test_boot_inference_determinism.sh"
 
 # Undefined predicates in the engine. Nothing checked the Prolog side before
 # this; SWI has had the check built in all along.

@@ -9,16 +9,20 @@
 %     never consulted by engine/metta.pl. The boot case
 %     measures loading the engine, so a file that had already loaded it could
 %     not measure that at all.
-%   - engine/qlf_boot.pl and engine/metta.pl load the way engine/main.pl loads
-%     them: qlf_boot first, then metta under set_prolog_flag(qcompile, auto),
-%     both named without their extension so SWI takes the .qlf when it is
-%     fresh. bench_boot/0 is that pair, copied rather than shared because
-%     main.pl runs it in directives at ITS load time and this has to run it
-%     inside a measured region [source: engine/main.pl:30-47]. main.pl's
-%     torn-artifact retry, which purges the whole .qlf set and loads again on
-%     any error, is deliberately NOT copied: a measurement that silently
-%     repaired its own inputs and carried on would report the repair's cost as
-%     the engine's.
+%   - engine/qlf_boot.pl and engine/metta.pl load the way every host loads
+%     them, through metta_qlf_boot:qlf_load_engine/0: bench_boot/0 runs that
+%     predicate's first half, qlf_prepare_engine/0, as setup and the umbrella
+%     under set_prolog_flag(qcompile, auto) as the measured load, named
+%     without its extension so SWI takes the .qlf when it is fresh. The first
+%     half is SHARED rather than copied, because it is what regenerates the
+%     governed set through the boot's hermetic child: when this file carried
+%     its own copy of the load it compiled the umbrella in its own process
+%     instead, and the set had a second producer writing a different engine
+%     [tested: tests/shell/test_boot_inference_determinism.sh; commit=WORKTREE].
+%     qlf_load_engine/0's torn-artifact retry, which purges the whole .qlf set
+%     and loads again on any error, is deliberately NOT run: a measurement
+%     that silently repaired its own inputs and carried on would report the
+%     repair's cost as the engine's.
 %   - spaces:deferred_metta_function/6 is the engine's register of equations
 %     whose translation is deferred. The translate case reads it only to CHECK
 %     that its own forcing pass left nothing behind; the pass itself drives
@@ -140,9 +144,12 @@ bench_source('examples/ch09-types/24-sorted_constructors.metta').
 
 %%%% Booting the engine %%%%
 %
-% engine/main.pl's two load directives, run as goals so the boot case can put
-% the counters around them, and split at the same seam main.pl splits them:
-% engine/qlf_boot.pl decides artifact freshness, engine/metta.pl is the engine.
+% The two halves of metta_qlf_boot:qlf_load_engine/0, the load every host
+% runs, taken as goals so the boot case can put the counters between them:
+% engine/qlf_boot.pl decides artifact freshness when it loads, and its
+% qlf_prepare_engine/0 checks the host, loads the two units every later load
+% goes through, and has the boot's hermetic child regenerate the governed set
+% when the umbrella has no artifact; engine/metta.pl is the engine.
 %
 % The boot case measures the SECOND half only, which is what "consulting
 % engine/metta.pl to a usable state" means. The first half is deliberately
@@ -171,7 +178,8 @@ bench_boot :-
 % [source: engine/metta.pl:module/2; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 bench_boot_prepare :-
     bench_path('engine/qlf_boot', QlfBoot),
-    user:ensure_loaded(QlfBoot).
+    user:ensure_loaded(QlfBoot),
+    metta_qlf_boot:qlf_prepare_engine.
 
 bench_boot_load :-
     bench_path('engine/metta', Metta),
@@ -203,7 +211,9 @@ bench_definitions(Text, Source) :-
 % measured region and NOTHING else is. bench_check(Case, Result) runs untimed
 % and fails the case when the work did not happen.
 
-% Only the freshness decision, which is disk bookkeeping and not the engine.
+% The freshness decision and the rest of the load's first half: disk
+% bookkeeping, the host check and the two units the umbrella's load goes
+% through, none of which is the engine.
 bench_setup(boot, none) :- bench_boot_prepare.
 % tests/data/prelude-spec.metta is the engine's own MeTTa vocabulary written
 % out, so it is a text the reader is asked for rather than a string invented
