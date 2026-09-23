@@ -61,15 +61,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
-- A Prolog compound that is not a list reaching the translator inside an
-  expression is refused by name, as `metta_foreign_compound(Term)`, where it
-  used to match no clause of `translate_expr_dl/4`, so the evaluation answered
-  nothing and said nothing. Such a compound is not a MeTTa term, and a host
-  passes one as an expression, as the Python and Node seats do. A C host that
-  held a refusal's payload as an opaque handle and passed it back in
-  `(id p)`, `(let $x p $x)` and `(== p p)` got 0 answers with status ok.
-  Partial applications and lists translate as before.
-
 - `mork-bench` no longer fails whenever `c-bench` runs before it in the gate.
   Its preparation purged the governed .qlf set only when stale, so a fresh set
   the C bench had prepared survived, and that set compiles two units the MORK

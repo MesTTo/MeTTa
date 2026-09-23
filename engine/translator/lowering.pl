@@ -1285,32 +1285,6 @@ translate_expr(Input, Goals, Out) :-
 
 translate_expr_dl(X, Goals, Goals, X) :-
     ((var(X) ; atomic(X)) ; X = partial(_,_)), !.
-%Any other compound that is not a list cell is not a MeTTa term
-%[source: engine/parser.pl, metta_unwritable_symbol/2's guarantee], and a host
-%boundary encodes one as an expression, its functor first and its arguments
-%after, which is the wire grammar the Python and Node seats share
-%[source: docs/journal/2026-09-05-node-runtime-gaps.md, after metta_py_encode/4].
-%So one reaching the translator is a seat that skipped the encoding. It
-%matched no clause, and the evaluation answered nothing and said nothing
-%[measured 2026-09-24: a refusal payload a C host held as a handle, passed back
-%in (id p), (let $x p $x) and (== p p), answered 0 times with status ok]; it
-%is refused by name instead. This clause sits before the list clause so that
-%a list still reaches its clause last and leaves no choicepoint behind.
-%Limitation: an improper list, [a|b], is a list cell and still takes the list
-%clause, where it fails silently as before [measured 2026-09-24 through
-%qlf_load_engine: [a|b], (id [a|b]) and (car-atom [1|2]) each fail]. Its tail
-%is consumed by the rule, special-form, import, keyword and call paths alike,
-%so refusing it by name means either a walk of every expression's list or a
-%refusal in each consumer; the wire grammar encodes it as (cons Head Tail)
-%before it reaches here, so only a seat that skipped that encoding produces
-%one. An open tail, [a|_], is closed to [] as before.
-translate_expr_dl(X, _, _, _) :-
-    compound(X),
-    \+ X = [_|_],
-    !,
-    throw(error(metta_foreign_compound(X),
-                context(translate_expr/3, 'a compound is not a MeTTa term'))).
-
 translate_expr_dl([H|T], Goals0, Goals, Out) :-
         translate_expr_dl(H, Goals0, AfterHead, HV),
         %--- Translator rules ---:
@@ -1436,14 +1410,6 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
                             ;  ValueGoals,
                                metta_dynamic_value_call(HV, T, AVs, Out)
                             )|Goals] ) ) )).
-
-:- multifile prolog:error_message//1.
-prolog:error_message(metta_foreign_compound(Term)) -->
-    [ '~p is a Prolog compound, not a MeTTa term, and it reached the \c
-       translator inside an expression. A host passes such a value as an \c
-       expression, its functor first and its arguments after, as the Python \c
-       and Node seats do; a seat that hands the engine the compound itself \c
-       has skipped that encoding.'-[Term] ].
 
 %A source's signature pre-pass makes a later equation's name visible before
 %the equation itself runs. That visibility is metadata, not a time machine:

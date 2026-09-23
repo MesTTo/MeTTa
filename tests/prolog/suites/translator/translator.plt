@@ -3786,31 +3786,3 @@ test(the_refresh_is_idempotent) :-
     assertion(NR == 1).
 
 :- end_tests(rule_gate_swap).
-
-%A Prolog compound that is not a list cell is not a MeTTa term, and a host
-%boundary encodes one as an expression before the engine sees it. One that
-%reaches the translator anyway is refused by name, where it used to match no
-%clause and answer nothing with no error; partial applications and lists,
-%which the translator owns, are unaffected.
-:- begin_tests(translator_foreign_compounds).
-
-test(a_non_list_compound_in_an_expression_is_refused_by_name,
-     throws(error(metta_foreign_compound(foo(bar)), _))) :-
-    translate_expr([id, foo(bar)], _Goals, _Out).
-
-test(the_refusal_names_the_encoding_the_host_skipped) :-
-    phrase(prolog:error_message(metta_foreign_compound(foo(bar))), Lines),
-    with_output_to(string(Text), print_message_lines(current_output, '', Lines)),
-    assertion(sub_string(Text, _, _, _, "foo(bar)")),
-    assertion(sub_string(Text, _, _, _, "as an expression")).
-
-test(a_partial_application_is_still_a_value) :-
-    translate_expr(partial(+, [1]), Goals, Out),
-    assertion(Goals == []),
-    assertion(Out == partial(+, [1])).
-
-test(a_list_still_translates_to_goals) :-
-    translate_expr([+, 1, 2], Goals, _Out),
-    assertion(Goals \== []).
-
-:- end_tests(translator_foreign_compounds).
