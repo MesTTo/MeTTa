@@ -3,13 +3,13 @@
 #   from, from this repository alone.
 #
 # Assumes: git, and network for the clone. Reads tools/pymetta-host/swipl.pin
-#   and every tests/checks/host_workarounds/*.patch.
+#   and every *.patch under tests/checks/host_workarounds, at any depth.
 # Guarantees:
 #   - the tree is swipl-devel at the pinned COMMIT with every recorded patch
 #     applied, or the script exits nonzero naming the patch that failed; a
 #     half-patched tree never reaches a build
-#   - each patch is applied at the root that actually contains its target, so
-#     the two patches under packages/swipy land in the submodule rather than
+#   - each patch is applied in the tree it sits under in the patch directory,
+#     so the two under packages/swipy/ land in that submodule rather than
 #     failing at the superproject
 #     [tested: tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]
 # Fails when: the network is unavailable, or a patch no longer applies because
@@ -62,15 +62,15 @@ got=$(git -C "$DEST/packages/swipy" rev-parse HEAD)
 git -C "$DEST" checkout --quiet --force -- .
 git -C "$DEST/packages/swipy" checkout --quiet --force -- .
 
-# The root for a patch is the tree that CONTAINS its first target, decided in
-# patch-root.sh, which declare-host.sh reads too: the tree a patch is applied
-# in and the tree it is later looked for in are one answer.
+# The root for a patch is the tree it sits under in the patch directory,
+# decided in patch-root.sh, which declare-host.sh reads too: the tree a patch
+# is applied in and the tree it is later looked for in are one answer.
 . "$HERE/patch-root.sh"
 applied=0
-for patch in "$PATCHES"/*.patch; do
+for patch in $(every_patch); do
     root=$(patch_root "$DEST" "$patch") || {
-        printf 'fetch-source: no tree under %s holds the target %s names\n' \
-            "$DEST" "$(basename "$patch")" >&2; exit 1; }
+        printf 'fetch-source: %s has no %s for %s\n' \
+            "$DEST" "$(patch_tree "$patch")" "$(basename "$patch")" >&2; exit 1; }
     git -C "$root" apply "$patch" || {
         printf 'fetch-source: %s no longer applies to %s; the pin moved\n' \
             "$(basename "$patch")" "${root#$DEST}" >&2; exit 1; }
