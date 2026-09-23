@@ -63,7 +63,7 @@ Reproduction: tests/checks/host_workarounds/janus-callback-exception-leak.sh,
   one Python child raising three exceptions inside `py_call/2`, then atom GC,
   a Prolog-to-Python call to drain the deferred releases and a Python
   collection; `present` when an instance survives.
-Patch: tests/checks/host_workarounds/janus-callback-exception-leak.patch,
+Patch: tests/checks/host_workarounds/packages/swipy/janus-callback-exception-leak.patch,
   applied to swipl-devel's packages/swipy at the tag the seat runs (V10.1.14),
   built there against the patched SWI-Prolog (`rm -rf build; SWIPL=<its swipl>
   uv build --wheel --no-build-isolation`, a stale `build/` keeps a `_swipl`
@@ -806,7 +806,7 @@ Reproduction: tests/checks/host_workarounds/swi-file-search-cache-autoload.sh,
   disabled at zero; explicitly importing `maplist/2` gives 8 in both arms.
   The native count surrounds the query, and each child restores the default
   flag value 10. This is the zero-setting uncached-walk control.
-Patch: tests/checks/host_workarounds/swi-file-search-cache-autoload.patch, against
+Patch: tests/checks/host_workarounds/packages/swipy/swi-file-search-cache-autoload.patch, against
   swipl-devel V10.1.14 packages/swipy janus/janus.pl: the library imports its
   lists, apply, error, dicts and option dependencies when it loads instead of
   declaring them for lazy autoloading, so the failed-query branch of

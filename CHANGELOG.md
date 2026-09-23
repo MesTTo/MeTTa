@@ -9,6 +9,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The engine requires only the host patches to swipl-devel itself, and
+  pymetta requires the patches to janus. The engine's code named the Python
+  host: `engine/host_patches.pl` listed `janus-callback-exception-leak`
+  beside the core patches, although no C or WebAssembly host loads janus,
+  and the home's declaration cannot vouch for janus's C half anyway. A patch
+  now sits in `tests/checks/host_workarounds/` at the path of the tree it
+  patches, so the two janus patches moved to `packages/swipy/`, and
+  `tools/pymetta-host/patch-root.sh` routes each patch by where it sits
+  instead of probing a source tree for its target. `declare-host.sh require
+  [TREE]` generates one requirement per tree: `engine/host_patches.pl` holds
+  the 17 core patches, and pymetta's `metta/_binding/host_patches.pl` holds
+  the 2 janus patches. `metta_host_check:metta_require_host_patches/2` is the
+  one check, taking a requirer's name and its list, and pymetta calls it
+  right after the engine boots, so a home lacking a janus patch is refused
+  with `EngineError` naming it and quoting `PyMeTTa's janus bridge`. The
+  `host-declaration` lane regenerates every requirement, checks the gate's
+  host against each, and names any tree holding patches that no requirement
+  covers.
+
 - The publish workflow can publish files built and verified elsewhere, and
   it publishes them the same way it publishes its own builds. Dispatched with
   `assets=<tag>`, the new `fetch` job downloads that GitHub Release's

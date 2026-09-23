@@ -9,9 +9,12 @@ reproductions and aborts the process on two. One of the two is the thread join
 that any worker evaluating MeTTa can reach.
 
 So the engine checks its host when it boots (`engine/host_check.pl`) and
-refuses one that does not declare every patch in
-`tests/checks/host_workarounds/` at its current digest. The refusal names each
-missing patch and points here.
+refuses one that does not declare, at its current digest, every patch to
+swipl-devel itself: the patches at the top of `tests/checks/host_workarounds/`.
+The patches to janus sit under `packages/swipy/` there and are pymetta's to
+require, since no other host loads janus, so pymetta checks them against the
+same declaration once the engine has booted. Either refusal names each missing
+patch and points here.
 
 All of this belongs to the Prolog engine, which carries the 1.0 line and will
 soon be replaced by an engine written in Rust; the README's Architecture
@@ -57,8 +60,9 @@ carry.
 
    This clones swipl-devel at the commit `tools/pymetta-host/swipl.pin` names
    into `ai-tmp/swipl-src` (set `DEST` to put it elsewhere), and applies every
-   patch in `tests/checks/host_workarounds/`. It stops, naming the patch, if
-   any one fails to apply.
+   patch in `tests/checks/host_workarounds/`, each in the tree it sits under,
+   so the ones in `packages/swipy/` land in that submodule. It stops, naming
+   the patch, if any one fails to apply.
 
 2. Build and install it with CMake, into a prefix of your choosing:
 
@@ -92,10 +96,11 @@ carry.
    ```
 
    Limitation: janus's C half is compiled into the Python extension, not into
-   `libswipl`, so the declaration cannot vouch for it. A PyPI `janus-swi` on a
-   patched home boots, and it still carries `janus-callback-exception-leak`,
-   which keeps every exception a callback raised alive for the rest of the
-   process.
+   `libswipl`, so the declaration, and pymetta's check of the janus patches
+   against it, says only that the source tree carried them, not which janus
+   the interpreter imports. A PyPI `janus-swi` on a patched home boots, and it
+   still carries `janus-callback-exception-leak`, which keeps every exception
+   a callback raised alive for the rest of the process.
 
 Then install pymetta, put `$HOME/swipl-patched/bin` first on your `PATH`, and
 leave `SWI_HOME_DIR` unset unless it names `$HOME/swipl-patched/lib/swipl`.
@@ -118,6 +123,9 @@ A patch edited in `tests/checks/host_workarounds/` has a new digest, so a host
 built before the edit is refused as `built from an older version of the
 patch`. Rebuild it from step 1, and the WebAssembly host with
 `sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh vendor`.
-`engine/host_patches.pl` is regenerated in the same change with
-`sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`, and
-the `host-declaration` lane fails until it is.
+Each requirement is regenerated in the same change: `engine/host_patches.pl`
+with `sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`,
+and pymetta's `extensions/python/metta/_binding/host_patches.pl` with
+`sh tools/pymetta-host/declare-host.sh require packages/swipy` into that file.
+The `host-declaration` lane fails until both are, and it names any tree holding
+patches that no requirement covers.

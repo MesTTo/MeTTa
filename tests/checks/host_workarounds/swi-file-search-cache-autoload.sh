@@ -7,9 +7,9 @@
 #   commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 # Owns resources: each fresh Python child is joined; no engine source is loaded.
 # [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
-#  absent on 10.1.14 built with tests/checks/host_workarounds/swi-file-search-cache-autoload.patch;
+#  absent on 10.1.14 built with tests/checks/host_workarounds/packages/swipy/swi-file-search-cache-autoload.patch;
 #  command=sh tools/check.sh host-workarounds;
-#  fixture=SWI-Prolog 10.1.14 with the patch; commit=45fb2d088dce8022f4fac580a8e1cc837f892cda]
+#  fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
 set -eu
 exec "${CHECK_PY:-python3}" - <<'PY'
 import json

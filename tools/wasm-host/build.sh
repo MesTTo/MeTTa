@@ -44,7 +44,7 @@
 #   and the image's downloads.
 # Guarantees:
 #   - the host compiles swipl-devel at tools/pymetta-host/swipl.pin with every
-#     tests/checks/host_workarounds/*.patch applied, since fetch-source.sh
+#     patch under tests/checks/host_workarounds applied, since fetch-source.sh
 #     refuses a tree it could not patch whole
 #   - host/ is written only after `node tools/wasm-host/host.mjs check` passes
 #     on the relinked artefacts, so a host whose declaration misses a patch, or

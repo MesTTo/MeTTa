@@ -1,7 +1,8 @@
 % Purpose: hold the engine's patched-host refusal to its contract: a home that
 %   declares every required patch at its digest boots, and one missing a patch,
 %   declaring an older digest, or holding a malformed declaration is refused
-%   naming exactly that.
+%   naming exactly that, whether the list checked is the engine's own or one a
+%   host's bridge passes for the patches only it relies on.
 % Guarantees: each refusal separates the patches the host lacks from the ones
 %   it carries at another digest, and the message names every one of them
 %   [tested: host_check; commit=WORKTREE].
@@ -54,14 +55,14 @@ test(a_complete_declaration_boots) :-
 test(a_missing_patch_is_named_as_missing) :-
     required([Build, host_patch(First, _)|Rest]),
     with_declaration([Build|Rest], refusal(Error)),
-    assertion(Error = error(metta_host_unpatched([First], [], _), _)),
+    assertion(Error = error(metta_host_unpatched('the MeTTa engine', [First], [], _, _), _)),
     rendered(Error, Text),
     assertion(sub_string(Text, _, _, _, First)).
 
 test(an_older_digest_is_named_as_stale) :-
     required([Build, host_patch(First, _)|Rest]),
     with_declaration([Build, host_patch(First, older)|Rest], refusal(Error)),
-    assertion(Error = error(metta_host_unpatched([], [First], _), _)),
+    assertion(Error = error(metta_host_unpatched('the MeTTa engine', [], [First], _, _), _)),
     rendered(Error, Text),
     assertion(sub_string(Text, _, _, _, "older version")).
 
@@ -69,7 +70,8 @@ test(a_declaration_naming_only_its_build_misses_every_patch) :-
     required([Build|Facts]),
     findall(File, member(host_patch(File, _), Facts), Every),
     with_declaration([Build], refusal(Error)),
-    assertion(Error = error(metta_host_unpatched(Every, [], _), _)).
+    length(Every, N),
+    assertion(Error = error(metta_host_unpatched('the MeTTa engine', Every, [], _, N), _)).
 
 test(a_term_that_is_not_a_patch_fact_is_refused_as_malformed) :-
     required(Facts),
@@ -92,6 +94,27 @@ test(a_second_build_line_is_malformed) :-
     required([Build|Facts]),
     with_declaration([Build, host_build(other)|Facts], refusal(Error)),
     assertion(Error = error(metta_host_declaration_malformed(_, host_build(other)), _)).
+
+%A bridge's own list is held to the same declaration: here it asks for one
+%patch the home does not declare, while the engine's own set is complete.
+test(a_bridges_own_requirement_is_refused_under_its_own_name) :-
+    required(Facts),
+    Pair = 'bridge-only.patch'-'0123',
+    with_declaration(Facts,
+        catch(( metta_require_host_patches('the planted bridge', [Pair]), Error = none ),
+              Error, true)),
+    assertion(Error = error(metta_host_unpatched('the planted bridge', ['bridge-only.patch'], [], _, 1), _)),
+    rendered(Error, Text),
+    assertion(sub_string(Text, _, _, _, "every patch the planted bridge needs")),
+    assertion(sub_string(Text, _, _, _, "against the 1 the planted bridge requires")).
+
+test(a_bridges_own_requirement_passes_when_declared) :-
+    required(Facts),
+    with_declaration([host_patch('bridge-only.patch', '0123')|Facts],
+        catch(( metta_require_host_patches('the planted bridge', ['bridge-only.patch'-'0123']),
+                Error = none ),
+              Error, true)),
+    assertion(Error == none).
 
 test(the_declaration_is_read_not_run) :-
     with_declaration([(:- assertz(user:host_check_ran))], refusal(Error)),
