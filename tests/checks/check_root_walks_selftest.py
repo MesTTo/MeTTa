@@ -21,6 +21,13 @@ Guarantees:
     [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
   - a correct derivation, and one naming scratch the program writes, are NOT
     reported [tested: this file; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f]
+  - the same count is found however it is spelled: a `.parent` chain, a base
+    without `.resolve()`, a count through a name, one inside a function, an
+    `os.path.dirname` chain, and a count from `seat()` or from a path inside the
+    seat [tested: this file; commit=WORKTREE]
+  - a step onto the file's own directory, wheel-only data beside the file, and
+    a walk that starts above the seat to leave the checkout are NOT reported, and
+    evaluating a module line runs no `open` [tested: this file; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
@@ -100,6 +107,84 @@ ROOT = next(parent for parent in Path(__file__).resolve().parents
 OUTPUT = ROOT / "ai-tmp" / "written-when-this-runs.metta"
 '''
 
+# The same counts, spelled every other way the language allows. Where a count lands
+# is evaluated rather than matched, so none of these may slip past the rule the
+# first two cases state.
+REACHES_THE_SEAT_BY_PARENT_STEPS = '''
+from pathlib import Path
+SEAT = Path(__file__).resolve().parent.parent.parent
+'''
+
+REACHES_ABOVE_UNRESOLVED = '''
+from pathlib import Path
+ROOT = Path(__file__).parents[3]
+'''
+
+REACHES_ABOVE_THROUGH_A_NAME = '''
+from pathlib import Path
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[2]
+'''
+
+COUNTS_INSIDE_A_FUNCTION = '''
+from pathlib import Path
+def root():
+    return Path(__file__).parents[3]
+'''
+
+COUNTS_BY_DIRNAME = '''
+import os.path as osp
+SEAT = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))
+'''
+
+# A count from a DERIVED root is still a count: this is the seat's depth in the
+# workspace written as a number, and it goes stale on the same move.
+COUNTS_FROM_THE_SEAT = '''
+from metta._roots import seat
+WORKSPACE = seat().parents[1]
+'''
+
+# And from a path inside the seat, reached through a relative import.
+COUNTS_FROM_INSIDE_THE_SEAT = '''
+from .._roots import seat
+CORE = seat() / "metta"
+IMPORT_ROOT = CORE.parent
+'''
+
+# The file's own directory moves with the file, so it is no count. Planted at the
+# seat's top, where that directory IS the seat, since only there could it be mistaken
+# for a walk to a root.
+NAMES_ITS_OWN_DIRECTORY = '''
+from pathlib import Path
+HERE = Path(__file__).resolve().parent
+'''
+
+# metta/_host's shape: data a built wheel carries beside the module, absent in a
+# checkout, in a file that says `.parents` for another reason.
+CARRIES_WHEEL_DATA = '''
+from pathlib import Path
+HERE = Path(__file__).resolve().parent
+BUNDLED = HERE / "present-only-in-a-built-wheel"
+def carried(module_file):
+    return HERE in Path(module_file).parents
+'''
+
+# Starting above the seat, a step leaves the checkout rather than counting a level
+# of it: a sibling repository is found beside the workspace.
+LEAVES_THE_CHECKOUT = '''
+from metta._roots import workspace
+def upstream():
+    return workspace().parent / "PeTTa-base"
+'''
+
+# Evaluating a module's bindings must not run them: were `open` reachable, this
+# line would create the file the check below looks for.
+WOULD_WRITE_A_FILE = '''
+from pathlib import Path
+HERE = Path(__file__).resolve().parent
+TOUCHED = open(str(HERE / "touched-by-the-lane"), "w")
+'''
+
 
 def main() -> int:
     """Plant every shape the pass must separate, and check it separates them."""
@@ -119,8 +204,11 @@ def main() -> int:
         # derived path that names nothing is a finding whatever built it, so the
         # fixture has to carry the file rather than assert the check ignores it.
         (package / "door_catalog.pl").write_text("% fixture\n", encoding="utf-8")
+        # The seat's real derivation, so `seat()` answers the fixture seat, plus a
+        # count that would be reported were the file not exempt.
         (seat / "metta" / "_roots.py").write_text(
-            "from pathlib import Path\nROOT = Path(__file__).resolve().parents[2]\n",
+            (ROOT / "extensions/python/metta/_roots.py").read_text(encoding="utf-8")
+            + "\n_COUNTED = Path(__file__).resolve().parents[1]\n",
             encoding="utf-8")
         (package / "reaches_the_seat.py").write_text(REACHES_THE_SEAT, encoding="utf-8")
         (package / "reaches_above.py").write_text(REACHES_ABOVE_THE_SEAT, encoding="utf-8")
@@ -130,7 +218,24 @@ def main() -> int:
         (package / "wrong_root.py").write_text(DERIVES_THE_WRONG_ROOT, encoding="utf-8")
         (package / "right_root.py").write_text(DERIVES_THE_RIGHT_ROOT, encoding="utf-8")
         (package / "scratch_output.py").write_text(WRITES_ITS_OWN_SCRATCH, encoding="utf-8")
+        planted = {
+            "parent_steps.py": REACHES_THE_SEAT_BY_PARENT_STEPS,
+            "unresolved.py": REACHES_ABOVE_UNRESOLVED,
+            "through_a_name.py": REACHES_ABOVE_THROUGH_A_NAME,
+            "in_a_function.py": COUNTS_INSIDE_A_FUNCTION,
+            "by_dirname.py": COUNTS_BY_DIRNAME,
+            "from_the_seat.py": COUNTS_FROM_THE_SEAT,
+            "from_inside.py": COUNTS_FROM_INSIDE_THE_SEAT,
+            "wheel_data.py": CARRIES_WHEEL_DATA,
+            "leaves.py": LEAVES_THE_CHECKOUT,
+            "would_write.py": WOULD_WRITE_A_FILE,
+        }
+        for name, source in planted.items():
+            (package / name).write_text(source, encoding="utf-8")
+        (seat / "own_directory.py").write_text(NAMES_ITS_OWN_DIRECTORY, encoding="utf-8")
         reported = {line.split(":")[0].rsplit("/", 1)[1] for line in findings(seat)}
+        touched = (package / "touched-by-the-lane").exists()
+    assert not touched, "evaluating a module line ran `open`"
     assert "reaches_the_seat.py" in reported, f"a walk to the seat was not found: {reported}"
     assert "reaches_above.py" in reported, f"a walk above the seat was not found: {reported}"
     assert "stays_inside.py" not in reported, f"a package-relative walk was reported: {reported}"
@@ -140,12 +245,18 @@ def main() -> int:
     assert "wrong_root.py" in reported, f"a derivation on the wrong root was not found: {reported}"
     assert "right_root.py" not in reported, f"a correct derivation was reported: {reported}"
     assert "scratch_output.py" not in reported, f"a scratch output was reported: {reported}"
+    respelled = {"parent_steps.py", "unresolved.py", "through_a_name.py", "in_a_function.py",
+                 "by_dirname.py", "from_the_seat.py", "from_inside.py"}
+    assert respelled <= reported, f"a respelled count was not found: {respelled - reported}"
+    spared = {"own_directory.py", "wheel_data.py", "leaves.py", "would_write.py"}
+    assert not spared & reported, f"reported what the rule spares: {spared & reported}"
     assert reported == {"reaches_the_seat.py", "reaches_above.py", "wrong_root.py",
-                        "one_marker.py"}, f"unexpected: {reported}"
-    print("root-walks selftest: a walk to the seat, one above it, a derivation that "
-          "lands on the wrong root, and one asking for `.git` alone are found; a walk "
-          "inside the seat, a correct derivation, a scratch output, and _roots.py "
-          "itself are not")
+                        "one_marker.py"} | respelled, f"unexpected: {reported}"
+    print("root-walks selftest: a walk to the seat, one above it, the same counts spelled "
+          "seven other ways, a derivation that lands on the wrong root, and one asking "
+          "for `.git` alone are found; a walk inside the seat, a correct derivation, a "
+          "scratch output, the file's own directory, wheel-only data, a walk leaving the "
+          "checkout and _roots.py itself are not, and no module line ran")
     return 0
 
 

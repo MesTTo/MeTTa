@@ -80,6 +80,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `root-walks` lane finds a counted walk to a checkout root however it is
+  spelled. It matched `Path(__file__).resolve().parents[N]` alone, so a
+  `.parent` chain, a count without `.resolve()`, one taken through a name or
+  from `seat()`, and an `os.path.dirname` chain all passed: sixteen such
+  counts in the Python seat now derive their root. The lane evaluates each
+  upward step over the module's path imports, its bindings and the seat's own
+  `metta._roots`, and reports one that starts at or inside the seat and lands
+  on it or above. It no longer reads data a built wheel carries beside a
+  module, `metta/_host`'s SWI home, as a wrong root, and evaluating a module
+  line runs no builtin that opens, imports or executes.
+
 - A Linux wheel's host activation (`metta._host.activate()`) guards whatever
   its `_vendor/` directory holds, read from the directory, and no longer names
   the bridge it vendors. It refuses a vendored module already imported with no
