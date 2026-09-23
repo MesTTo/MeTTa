@@ -19,9 +19,15 @@
 % Assumes:
 %   - autoload may be OFF (tests/fixtures/no_autoload_boot.pl). The inventory
 %     and freshness predicates depend only on builtins; qlf_load_engine/0
-%     explicitly loads identity.pl and source_loading.pl before the engine
+%     explicitly loads host_check.pl, identity.pl and source_loading.pl before
+%     the engine
 %     [tested: sh check.sh qlf-freshness no-autoload; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees:
+%   - qlf_load_engine/0 refuses a host missing any required patch BEFORE it
+%     loads anything else, by the exception metta_host_check raises, so every
+%     host that boots through it -- engine/main.pl, the Python seat and the C
+%     seat -- meets the same refusal as its own error
+%     [tested: tests/shell/test_stock_host_refused.sh; commit=WORKTREE].
 %   - a missing runtime source or failed extension directive raises a named
 %     load error after restoring the loader's source module
 %     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
@@ -464,6 +470,9 @@ purge_stale_qlf :-
 %retry meeting the same artifact set again.
 qlf_load_engine :-
     qlf_boot_directory(Here),
+    atom_concat(Here, '/host_check.pl', HostCheck),
+    use_module(HostCheck, []),
+    metta_host_check:metta_require_patched_host,
     atom_concat(Here, '/source_loading.pl', SourceLoading),
     use_module(SourceLoading, []),
     atom_concat(Here, '/identity.pl', Identity),

@@ -73,21 +73,21 @@ corpus never writes at all, and a row for a head nothing carries.
 
 ## Install and first call
 
-The distribution is `pymetta` and the module it installs is `metta`.
-`pip install 'pymetta[engine]'` after `apt install swi-prolog` (or
-`brew install swi-prolog`, or `winget install SWI-Prolog.SWI-Prolog`), which
-needs SWI-Prolog 9.3+ and Python 3.12+. The engine tree, the libraries and the
-codec corpus ride in the wheel; the `engine` extra adds `janus-swi`, the
-bridge to the SWI on the machine, and it is the only part a plain
-`pip install pymetta` leaves out. Without it the package still imports and the
-first engine call names the command for your platform. Four more extras each
-name what one door needs: `arrow` brings `nanoarrow`, which builds the Arrow C
-structs the capsule doors hand a consumer (a consumer needs no pyarrow);
-`arrays` brings NumPy and `array-api-compat`; `dataframes` brings pandas and
-polars 1.3+; `das` brings the websocket client. A door whose extra is missing
-raises naming it. `pip install .` from a
-checkout is the same thing, and `METTA_PATH` points an installed `metta` at a
-clone's engine tree instead of the bundled one.
+The distribution is `pymetta` and the module it installs is `metta`, for
+Python 3.12+. The engine runs only on a PATCHED SWI-Prolog
+(`docs/patched-host.md`), and it refuses to boot on a stock one, naming the
+patches it lacks. pymetta's Linux x86_64 wheels for CPython 3.12, 3.13 and 3.14
+carry that host in `metta/_host`, with the janus bridge built against it, so
+there `pip install pymetta` is the whole install. Anywhere else, build the
+patched host as `docs/patched-host.md` describes, then
+`pip install 'pymetta[engine]'`: the `engine` extra adds `janus-swi`, the
+bridge, on exactly the platforms whose wheel carries no host. The engine tree,
+the libraries and the codec corpus ride in every wheel. Without a bridge the
+package still imports and the first engine call says what to do. The other
+extras are integration packages, one row each in the extras table under
+"Integrating any library"; a door whose extra is missing raises naming it. `pip install .`
+from a checkout builds the pure wheel, and `METTA_PATH` points an installed
+`metta` at a clone's engine tree instead of the bundled one.
 
 Run one MeTTa file with `sh tools/run.sh path/to/program.metta`. Add `--verbose`
 before the path when the program's authoring diagnostics matter, including
@@ -4080,7 +4080,7 @@ There is no built-in tier. This is the shape Apache Airflow's providers have
 
 | extra | packages | what it fills |
 |---|---|---|
-| `engine` | janus-swi, which is the bridge rather than a package | the SWI-Prolog runtime |
+| `engine` | janus-swi, only where the wheel carries no patched host | the bridge to a patched SWI-Prolog you built |
 | `dataframes` | `metta-tables`, `metta-pandas`, `metta-polars` | the `tables` namespace, frame conversions, and each library's own `.metta` accessor |
 | `live` | `metta-live` | the callable `m.live` namespace and `m.live.view` |
 | `remote` | `metta-remote` | `m.remote.connect` and `m.remote.serve` |

@@ -40,9 +40,12 @@ atoms in the same metagraph, read by the same matcher.
 surface, with exact return shapes and no prose to guess at.
 
 ```bash
-sudo apt install swi-prolog          # macOS: brew install swi-prolog
-                                     # Windows: winget install SWI-Prolog.SWI-Prolog
+pip install pymetta    # Linux x86_64, CPython 3.12-3.14: the wheel carries the patched SWI-Prolog
 ```
+
+The engine runs only on a patched SWI-Prolog and refuses to boot on a stock one.
+On any other platform, and for the C seat, build it as
+[docs/patched-host.md](docs/patched-host.md) describes.
 
 # Architecture
 

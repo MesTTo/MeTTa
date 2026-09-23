@@ -41,20 +41,62 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   fail to resolve; it resolves to the OLDER core and the older member, the
   install succeeds, and the reader has the release that was being replaced.
 
+  One finding is invisible to resolution and decides whether any of it holds: a
+  file in the step for a name PyPI has no project for. Everything reading that
+  file resolves, because the file is there; what has not happened is the
+  upload, since PyPI creates a project on first use only through a pending
+  Trusted Publisher, three per round. Measured on the built 0.9.2 set: all 495
+  cells resolve, `pymetta[engine]` included on every platform row, and the nine
+  members PyPI has no project for are named with the round that creates them.
+
 ### Changed
 
-- The separate `pymetta-host` distribution is retired; the patched SWI-Prolog
-  host ships inside pymetta's own manylinux wheels, which are files of the
-  pymetta distribution and upload with it. The release tooling no longer
-  carries a special case for it: `tools/publish-new-projects.sh` uploads its
-  projects in no particular order, where pymetta-host used to go first because
-  `pip install "pymetta[engine]"` resolved to it on Linux x86_64;
-  `tools/pending-publishers.py` describes one list instead of two; and
-  `tools/publish_selftest.sh` takes the two names its fixture needs — one the
-  index already holds, one still to be created — from the ends of the
-  distribution list rather than spelling them, since a fixture naming a
+- The `engine` extra adds `janus-swi` only where no pymetta wheel carries the
+  patched host, and a packaging test holds that marker to the classifiers the
+  host build reads. Every integration member moves to 0.9.2 with pymetta,
+  pinning `pymetta==0.9.2`.
+
+### Removed
+
+- The `pymetta-host` distribution, which PyPI never created. Its activation
+  code is `metta._host`, and its build is the graft
+  `tools/pymetta-host/assemble.sh` makes onto pymetta's pure wheel. The
+  release tooling no longer special-cases it: `tools/publish-new-projects.sh`
+  uploads its projects in no particular order, where pymetta-host used to go
+  first because `pip install "pymetta[engine]"` resolved to it on Linux
+  x86_64; `tools/pending-publishers.py` describes one list instead of two; and
+  `tools/publish_selftest.sh` takes the two names its fixture needs, one the
+  index already holds and one still to be created, from the ends of the
+  distribution list rather than spelling them, since a fixture that names a
   distribution encodes a fact about the release that goes stale under it. That
-  last one is why three of its cases had to move at all.
+  is why three of its cases moved.
+
+### Fixed
+
+- The engine installs on Linux x86_64 again, and it no longer runs on a host
+  that crashes it. pymetta 0.9.1's `engine` extra named `pymetta-host`, which
+  PyPI never created, so `pip install "pymetta[engine]"` could not resolve on
+  the most common platform; and pymetta never called that package's
+  `activate()`, so even a resolvable extra would have left no engine. The
+  patched SWI-Prolog now ships inside pymetta's own manylinux wheels for
+  CPython 3.12, 3.13 and 3.14, as `metta/_host` with the janus bridge built
+  against it, and pymetta activates it before janus loads, so there
+  `pip install pymetta` is the whole install. Each wheel was installed into a
+  clean venv outside the checkout, with a stock `/usr/bin/swipl` on `PATH`, and
+  booted the engine from its own host.
+- The engine refuses to boot on a SWI-Prolog that lacks any patch it relies
+  on. Since 2026-09-16 the engine has leant on patches in
+  `tests/checks/host_workarounds/` instead of working around the defects, and
+  nothing checked for them: a stock SWI 10.1.14 binary answers present for 14
+  of the ledger's reproductions and aborts the process on two, one of them the
+  thread join any MeTTa worker can reach. `engine/host_check.pl` now compares
+  the host's declaration, which `tools/pymetta-host/declare-host.sh` writes
+  into the SWI home, with `engine/host_patches.pl`, generated from the
+  patches, and refuses before anything loads. The refusal names each missing
+  or stale patch and points at `docs/patched-host.md`. The declaration is
+  bound to the `compiled_at` of the binary it was written for, because the C
+  patches live in the binary and `SWI_HOME_DIR` can start any binary on any
+  home. From Python the refusal is an `EngineError`, which is a `metta.MettaError`.
 
 ## [0.9.1] - 2026-09-23
 

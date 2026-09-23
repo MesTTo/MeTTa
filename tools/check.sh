@@ -48,6 +48,9 @@
 #                                            closed-sets-selftest
 #                                            host-workarounds
 #                                            host-workarounds-selftest
+#                                            host-declaration
+#                                            host-declaration-selftest
+#                                            stock-host-refused
 #                                            host-bundle host-bundle-selftest
 #                                            cumulative-syntax
 #                                            cumulative-syntax-selftest
@@ -1257,6 +1260,17 @@ run GATE tokenisation-selftest "$PY" "$HERE/tests/checks/check_tokenisation_self
 run GATE host-workarounds "$PY" "$HERE/tests/checks/check_host_workarounds.py"
 # Umbrella: engine and seat workaround sites must match the host-patch ledger and reproductions.
 run GATE host-workarounds-selftest "$PY" "$HERE/tests/checks/check_host_workarounds_selftest.py"
+# The engine refuses to boot on a host that does not declare every patch in
+# tests/checks/host_workarounds at its current digest (engine/host_check.pl).
+# This lane holds engine/host_patches.pl to those patches and the gate's own
+# host to that requirement, so a stale requirement or an undeclared host fails
+# here once, by name, instead of as every engine lane's first boot.
+run GATE host-declaration "$PY" "$HERE/tests/checks/check_host_declaration.py"
+run GATE host-declaration-selftest "$PY" "$HERE/tests/checks/check_host_declaration_selftest.py"
+# The refusal end to end, through qlf_load_engine/0: the gate's host boots, and
+# a stock swipl on its own home or on the patched one is refused. Exits 125
+# where no stock swipl distinct from the gate's exists to measure against.
+run GATE stock-host-refused sh -c "cd '$HERE' && sh tests/shell/test_stock_host_refused.sh"
 
 # A GATE by the 2026-09-08 layout ruling, refined on 2026-09-15: mixed,
 # recursive and undeclared open boundaries must be resolved at their bodies.

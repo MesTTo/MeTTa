@@ -425,7 +425,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.target:
         print("host-bundle: no bundle or wheel given, so nothing to check. The "
-              "wheels are a build artefact; ext/pymetta-host/build/assemble.sh "
+              "wheels are a build artefact; tools/pymetta-host/assemble.sh "
               "runs this on each one it produces.")
         return 0
 

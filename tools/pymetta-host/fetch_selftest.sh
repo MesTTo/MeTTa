@@ -22,9 +22,9 @@ ROOT=$(CDPATH= cd -- "$HERE/../.." && pwd)
 WORK=$ROOT/ai-tmp/fetch-selftest
 failures=0
 
-rm -rf "$WORK"; mkdir -p "$WORK/dest/sub/deep" "$WORK/patches"
+rm -rf "$WORK"; mkdir -p "$WORK/dest/packages/swipy/deep" "$WORK/patches"
 printf 'outer\n' > "$WORK/dest/outer.txt"
-printf 'inner\n' > "$WORK/dest/sub/deep/inner.txt"
+printf 'inner\n' > "$WORK/dest/packages/swipy/deep/inner.txt"
 ( cd "$WORK/dest" && git init --quiet . && git add -A \
     && git -c user.email=t@t -c user.name=t commit --quiet -m plant )
 
@@ -51,16 +51,10 @@ cat > "$WORK/patches/nowhere.patch" <<'PATCH'
 +y
 PATCH
 
-# The routing rule, verbatim from fetch-source.sh: the root is the tree that
-# holds the target. Copied rather than imported because the script is a
-# pipeline around it and this is the decision inside.
-route() {
-    target=$(grep -oE '^\+\+\+ b/[^ 	]+' "$1" | head -1 | sed 's|^+++ b/||')
-    for candidate in "$WORK/dest" "$WORK/dest/sub"; do
-        [ -f "$candidate/$target" ] && { printf '%s' "$candidate"; return 0; }
-    done
-    return 1
-}
+# The routing rule itself, the one fetch-source.sh and declare-host.sh source,
+# so this holds the decision they make rather than a copy of it.
+. "$HERE/patch-root.sh"
+route() { patch_root "$WORK/dest" "$1"; }
 
 check() {
     want=$2
@@ -72,16 +66,16 @@ check() {
 }
 
 check outer.patch /
-check inner.patch /sub
+check inner.patch /packages/swipy
 check nowhere.patch refused
 
 # And the applications actually land where routing says.
 git -C "$WORK/dest" apply "$WORK/patches/outer.patch"
 grep -qx 'outer patched' "$WORK/dest/outer.txt" || {
     printf '  outer.patch did not reach outer.txt\n'; failures=$((failures + 1)); }
-git -C "$WORK/dest/sub" apply "$WORK/patches/inner.patch"
-grep -qx 'inner patched' "$WORK/dest/sub/deep/inner.txt" || {
-    printf '  inner.patch did not reach sub/deep/inner.txt\n'; failures=$((failures + 1)); }
+git -C "$WORK/dest/packages/swipy" apply "$WORK/patches/inner.patch"
+grep -qx 'inner patched' "$WORK/dest/packages/swipy/deep/inner.txt" || {
+    printf '  inner.patch did not reach packages/swipy/deep/inner.txt\n'; failures=$((failures + 1)); }
 
 rm -rf "$WORK"
 printf 'fetch-selftest: %s defect(s) over 5 cases\n' "$failures"

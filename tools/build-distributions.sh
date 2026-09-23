@@ -22,53 +22,34 @@
 #     structural rather than a list of names to skip, so the next stray
 #     directory cannot reach the build either.
 #     [tested: reproduced at exit 1 before the guard; commit=WORKTREE]
-# Fails when: asked to BUILD ext/pymetta-host. That one carries a patched
-#   SWI-Prolog compiled inside quay.io/pypa/manylinux_2_28_x86_64, one wheel
-#   per interpreter, which is tools/pymetta-host/run.sh and needs a container
-#   this script does not run. Its source is no longer the obstacle:
-#   tools/pymetta-host/fetch-source.sh clones swipl-devel at the pinned
-#   commit and applies the patches this repository carries. So it is skipped
-#   by the BUILD loop and named by --list, which is the whole reason those
-#   two are separate.
+# Fails when: asked for pymetta's manylinux wheels. Those carry the patched
+#   SWI-Prolog, compiled inside quay.io/pypa/manylinux_2_28_x86_64 and grafted
+#   onto the pure wheel this builds, one wheel per interpreter, which is
+#   tools/pymetta-host/run.sh and needs a container this script does not run.
+#   They are the same distribution, pymetta, so nothing here names them.
 # Decides: $DIST, which defaults to dist/ because that is the directory the
 #   workflow uploads and the publisher reads.
 set -eu
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
-# TWO PRODUCERS, named apart. members() is what `python -m build` makes, and
-# the loop below walks exactly it. released() is what the RELEASE publishes,
-# which is members plus the host bundle: that one is built by
-# tools/pymetta-host/run.sh in a manylinux container from a swipl-devel tree
-# fetch-source.sh clones and patches, so it is not a build target here, and
-# it is still a distribution this repository ships.
-#
-# Conflating them is what left pymetta-host out of every plan: it is skipped
-# here for a real reason, and the planner read this list and concluded the
-# project did not exist.
+# The distributions this repository publishes: pymetta, and every directory
+# under ext/ that carries a pyproject.toml. pymetta's Linux wheels are grafted
+# from its pure one by tools/pymetta-host/run.sh and are the same distribution,
+# so they add no name here. A separate host distribution, pymetta-host, used to
+# be listed beside these and was retired on 2026-09-23 when the host moved into
+# pymetta: PyPI never created that project, and 0.9.1's engine extra named it.
 members() {
     printf 'pymetta\n'
     for member in "$HERE"/ext/*/; do
-        name=$(basename "$member")
-        # The host bundle is not a `python -m build` target; see Fails when.
-        [ "$name" = pymetta-host ] && continue
         [ -f "$member/pyproject.toml" ] || continue
-        printf '%s\n' "$name"
+        basename "$member"
     done
 }
-
-released() {
-    members
-    [ -f "$HERE/ext/pymetta-host/pyproject.toml" ] && printf 'pymetta-host\n'
-    return 0
-}
-
 # Answered before the interpreter search, so a caller that only wants the
-# names is not refused by a machine that cannot build. --list answers the
-# RELEASE set, because every caller of it so far asks what gets published
-# rather than what this script builds.
+# names is not refused by a machine that cannot build.
 if [ "${1:-}" = --list ]; then
-    released
+    members
     exit 0
 fi
 
@@ -82,8 +63,6 @@ DIST=${DIST:-$HERE/dist}
 
 "$PYTHON" -m build --outdir "$DIST" "$HERE"
 for member in "$HERE"/ext/*/; do
-    name=$(basename "$member")
-    [ "$name" = pymetta-host ] && continue
     [ -f "$member/pyproject.toml" ] || continue
     "$PYTHON" -m build --outdir "$DIST" "$member"
 done

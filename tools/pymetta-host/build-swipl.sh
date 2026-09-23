@@ -75,3 +75,12 @@ ninja install
 python3 /repo/tools/pymetta-host/canonicalise.py /out/swipl --built-prefix /out/swipl
 python3 /repo/tools/pymetta-host/relocate.py /out/swipl
 /out/swipl/lib/swipl/bin/x86_64-linux/swipl --version
+
+# The declaration the engine's boot check reads (engine/host_check.pl): every
+# patch the source tree carries, and the build of the launcher that ships. It
+# runs last, so the launcher it reads its compiled_at from is the relocated one
+# that goes into the wheel, and it fails the build when any patch is missing,
+# so a half-patched host never reaches a wheel.
+git config --global --add safe.directory /src
+git config --global --add safe.directory /src/packages/swipy
+sh /repo/tools/pymetta-host/declare-host.sh declare /src /out/swipl/lib/swipl

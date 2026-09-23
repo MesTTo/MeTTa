@@ -36,74 +36,59 @@ m.match(S.Parent(V.gp, V.p), S.Parent(V.p, V.gc))
 
 Two commands get you there, and the order matters.
 
-## SWI-Prolog first, then the package
+## Installing it
 
-MeTTa runs on SWI-Prolog. SWI-Prolog is a program rather than a Python package,
-so pip cannot install it for you:
+The engine runs on a PATCHED SWI-Prolog. Stock SWI-Prolog has defects that
+crash the engine or change its answers, so the engine checks its host when it
+boots and refuses one that lacks the patches.
+
+On Linux x86_64 with CPython 3.12, 3.13 or 3.14 the wheel carries the patched
+host and the janus bridge built against it, so this is the whole install:
 
 ```sh
-sudo apt install swi-prolog             # Linux, or your distribution's equivalent
-brew install swi-prolog                 # macOS
-winget install SWI-Prolog.SWI-Prolog    # Windows
+pip install pymetta
 ```
 
-Then the library, with the `engine` extra:
+Anywhere else, build the patched host as [docs/patched-host.md](https://github.com/MesTTo/MeTTa/blob/main/docs/patched-host.md)
+describes, then install the bridge with the `engine` extra:
 
 ```sh
 pip install 'pymetta[engine]'
 ```
 
 The distribution is `pymetta` and the import name is `metta`. From a checkout,
-`pip install '.[engine]'` does the same thing, and `METTA_PATH` pointed at a
-clone uses that tree in place.
+`pip install .` builds the same pure wheel, and `METTA_PATH` pointed at a clone
+uses that tree in place.
 
-## Why the install splits in two
+## Why the bridge is an extra
 
-`pip install pymetta` on its own always succeeds, even on a machine with no
-SWI-Prolog anywhere. That is deliberate, and it is the thing about this extension
-that is not true of any other.
+`pip install pymetta` on its own always succeeds, even where no wheel carries a
+host and no SWI-Prolog exists anywhere. That is deliberate. The bridge is
+`janus_swi`, SWI-Prolog's own Python bridge, a C extension that compiles
+against whichever SWI-Prolog is on the machine. As an ordinary dependency it
+would make a plain install die inside somebody else's build step, with the
+linker's words for an error.
 
-The `engine` extra is `janus_swi`, SWI-Prolog's own Python bridge. It is a C
-extension that compiles against whichever SWI-Prolog is on the machine. If it
-were an ordinary dependency, a plain `pip install pymetta` on a machine without
-SWI would die inside somebody else's build step, and the error a user saw would
-be the linker's: `ImportError: libswipl.so.9: cannot open shared object file`.
-That names neither SWI-Prolog nor anything to do about it.
-
-So the bridge is an extra, the install cannot fail that way, and the first call
-that needs an engine is what tells you. With nothing in place:
+So the first call that needs an engine is what tells you. Without a bridge, on
+a platform no wheel covers:
 
 ```text
-MeTTa runs on SWI-Prolog, which is a program rather than a Python package, so
-pip cannot install it and there is no `swipl` on your PATH. Two steps, in this
-order:
-
-    sudo apt install swi-prolog   (or your distribution's equivalent)
-    pip install 'pymetta[engine]'
-```
-
-With SWI-Prolog installed and only the bridge missing, which is where a plain
-`pip install pymetta` leaves you:
-
-```text
-SWI-Prolog is installed at /usr/bin/swipl, and the Python bridge to it is not.
-It is an extra, so that installing this package cannot fail inside its build:
+The MeTTa engine runs only on a PATCHED SWI-Prolog. pymetta's manylinux x86_64 wheels carry one, so on Linux `pip install pymetta` is the whole install. Here, build the patched SWI-Prolog as docs/patched-host.md describes (https://github.com/MesTTo/MeTTa/blob/main/docs/patched-host.md), then install the bridge against it:
 
     pip install 'pymetta[engine]'
 ```
 
-Both messages name the exact command, and which one you get is read off the
-machine rather than guessed: the difference is whether `swipl` is on your PATH.
-A third message covers the case where the bridge is installed and was built
-against a different SWI-Prolog than the one you now have, which is what
-upgrading SWI after installing looks like, because pip reuses the wheel it
-cached for you.
+With the bridge bound to a stock SWI-Prolog, the engine names every patch it is
+missing, the home it looked in, and this same page. If you installed the source
+distribution on Linux x86_64, where a wheel would have carried the host, the
+message says to reinstall from the wheel instead.
 
-The wheel is pure Python, so there is nothing to compile and no platform build
-to go wrong. The `platforms` job in `.github/workflows/checks.yml` installs it
-on macOS and Windows against Python 3.12 and 3.14, and it installs it *before*
-SWI-Prolog exists on the runner, because that is the state a new reader is in.
-It then asserts the refusal above, installs SWI-Prolog, and boots the engine.
+The wheel is pure Python apart from the Linux ones, so there is nothing to
+compile. The `platforms` job in `.github/workflows/checks.yml` installs it on
+macOS and Windows against Python 3.12 and 3.14 *before* SWI-Prolog exists on the
+runner, because that is the state a new reader is in. It asserts the refusal
+above, installs a stock SWI-Prolog with the bridge, and asserts that the engine
+refuses that host by name.
 
 ## The shortest spelling needs no instance
 

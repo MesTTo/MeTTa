@@ -82,10 +82,8 @@ jobs:
         # precedent the extras are modelled on, so the tag check below names
         # pymetta's own archive rather than whatever is in dist/.
         #
-        # ext/pymetta-host is skipped BY NAME in that script. It carries a
-        # patched SWI-Prolog built inside quay.io/pypa/manylinux_2_28_x86_64,
-        # one wheel per interpreter, which is tools/pymetta-host/run.sh and
-        # needs a container this runner does not have.
+        # pymetta's manylinux wheels are not built here: the host job below
+        # grafts the patched SWI-Prolog onto the pure wheel this step builds.
         #
         # CHECK_PY names the interpreter that just received `build`, rather
         # than letting the script's own search pick a different python3.
@@ -117,24 +115,33 @@ jobs:
           name: distributions
           path: dist/
 
-  # The host bundle, which `python -m build` cannot make: it is a patched
-  # SWI-Prolog compiled inside quay.io/pypa/manylinux_2_28_x86_64, one wheel
-  # per interpreter. It used to need a swipl-devel checkout someone had
-  # prepared by hand, so the release shipped 17 distributions of 18;
-  # tools/pymetta-host/fetch-source.sh clones it at the pinned commit and
-  # applies the nineteen patches this repository already carried, so the
-  # runner needs nothing but Docker, which ubuntu-latest has.
+  # pymetta's Linux wheels, which `python -m build` cannot make: the pure
+  # wheel from the build job with a patched SWI-Prolog grafted in as
+  # metta/_host, compiled inside quay.io/pypa/manylinux_2_28_x86_64, one wheel
+  # per interpreter. tools/pymetta-host/fetch-source.sh clones swipl-devel at
+  # the pinned commit and applies every patch this repository carries, and
+  # declare-host.sh records them in the home, so the runner needs nothing but
+  # Docker, which ubuntu-latest has. These are files of the pymetta
+  # distribution, not a distribution of their own: a separate pymetta-host
+  # was retired on 2026-09-23, after PyPI never created it and 0.9.1's engine
+  # extra named it anyway.
   #
-  # Its own job because it takes tens of minutes and shares nothing with the
-  # sdist/wheel builds; the two run in parallel and meet at the upload.
+  # Its own job because it takes tens of minutes; it waits for the build job
+  # only for the pure wheel it grafts onto.
   host:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Build the host bundle inside manylinux
-        run: sh tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+      - name: Graft the patched host into pymetta's manylinux wheels
+        # bash, the interpreter run.sh's own shebang names.
+        run: DIST="$PWD/dist" bash tools/pymetta-host/run.sh build-swipl.sh build-janus.sh assemble.sh
       - uses: actions/upload-artifact@v4
         with:
           name: host-distributions

@@ -10,9 +10,10 @@ MeTTa, Hyperon's AGI language, based on PeTTa semantics with significant
 extensions.
 
 ```sh
-sudo apt install swi-prolog     # or: brew install swi-prolog
-pip install 'PyMeTTa[engine]'
+pip install PyMeTTa     # Linux x86_64, CPython 3.12-3.14: carries the patched SWI-Prolog
 ```
+
+Anywhere else the engine needs a patched SWI-Prolog you build: [how](https://github.com/MesTTo/MeTTa/blob/main/docs/patched-host.md).
 
 ## What it looks like
 

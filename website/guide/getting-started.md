@@ -65,9 +65,9 @@ file an example imports from beside itself is not there. 225 of the
 repository's 258 runnable examples run here unchanged. Everything else on this
 page is the Python surface, which needs the install below.
 
-The `metta` module is the Python surface for the engine. MeTTa runs on SWI-Prolog, which is a program rather than a Python package, so it is installed first and pip cannot do it for you: `sudo apt install swi-prolog`, `brew install swi-prolog`, or `winget install SWI-Prolog.SWI-Prolog`. Then `pip install 'pymetta[engine]'`, or `pip install '.[engine]'` from a checkout. The runtime is bundled; only the engine underneath it is not. To use a checkout in place, point `METTA_PATH` at the repository tree.
+The `metta` module is the Python surface for the engine. The engine runs on a PATCHED SWI-Prolog and refuses to boot on a stock one. On Linux x86_64 with CPython 3.12, 3.13 or 3.14, `pip install pymetta` is the whole install: the wheel carries the patched host and its bridge. Anywhere else, build the patched host as [docs/patched-host.md](https://github.com/MesTTo/MeTTa/blob/main/docs/patched-host.md) describes, then `pip install 'pymetta[engine]'` for the bridge. To use a checkout in place, point `METTA_PATH` at the repository tree.
 
-`pymetta` without the `engine` extra installs and imports on a machine that has no SWI-Prolog, and the first engine call names the two commands above. That is what the extra is for: the bridge compiles against whichever SWI-Prolog is present, so requiring it would make a plain install fail inside another package's build.
+Without a bridge, `pymetta` still installs and imports, and the first engine call says what to do on your platform. That is why the bridge is an extra: it compiles against whichever SWI-Prolog is present, so requiring it would make a plain install fail inside another package's build.
 
 The shortest spelling needs no instance at all. Module functions run over one lazily created default engine, which is `random`'s and `logging`'s own shape, and `metta.engine()` hands the context over the moment you want control.
 

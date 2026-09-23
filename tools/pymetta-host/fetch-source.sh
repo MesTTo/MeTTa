@@ -62,20 +62,15 @@ got=$(git -C "$DEST/packages/swipy" rev-parse HEAD)
 git -C "$DEST" checkout --quiet --force -- .
 git -C "$DEST/packages/swipy" checkout --quiet --force -- .
 
-# The root for a patch is the tree that CONTAINS its first target, found
-# rather than matched on a path prefix: a prefix rule is a second description
-# of which files live in the submodule, and it is wrong the day one moves.
+# The root for a patch is the tree that CONTAINS its first target, decided in
+# patch-root.sh, which declare-host.sh reads too: the tree a patch is applied
+# in and the tree it is later looked for in are one answer.
+. "$HERE/patch-root.sh"
 applied=0
 for patch in "$PATCHES"/*.patch; do
-    target=$(grep -oE '^\+\+\+ b/[^ 	]+' "$patch" | head -1 | sed 's|^+++ b/||')
-    [ -n "$target" ] || { printf 'fetch-source: %s names no target\n' "$patch" >&2; exit 1; }
-    root=
-    for candidate in "$DEST" "$DEST/packages/swipy"; do
-        [ -f "$candidate/$target" ] && { root=$candidate; break; }
-    done
-    [ -n "$root" ] || {
-        printf 'fetch-source: no tree under %s holds %s, named by %s\n' \
-            "$DEST" "$target" "$(basename "$patch")" >&2; exit 1; }
+    root=$(patch_root "$DEST" "$patch") || {
+        printf 'fetch-source: no tree under %s holds the target %s names\n' \
+            "$DEST" "$(basename "$patch")" >&2; exit 1; }
     git -C "$root" apply "$patch" || {
         printf 'fetch-source: %s no longer applies to %s; the pin moved\n' \
             "$(basename "$patch")" "${root#$DEST}" >&2; exit 1; }
