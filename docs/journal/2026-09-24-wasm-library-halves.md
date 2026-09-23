@@ -143,3 +143,12 @@ WebAssembly host is configured `-DUSE_GMP=OFF`; the native host links GMP and
 answers 0. Fixed in the host: `swi-libbf-powm-unreduced.patch` reduces the
 initial 1. A GMP build never compiles the file, so the native host was
 redeclared, not rebuilt, and its `compiled_at` is unchanged.
+
+### A test that raced
+
+`lib_database.plt`'s abandoned-engine test waited for `finish_store/3`, which
+runs inside `store_owner/2`, so its reopen could reach the lock before the
+owner's cleanup closed the lock stream: 2 of 3 runs failed with
+`database_lock_failed(_, 11)` at load average 91. It now waits for a cleanup
+wrapped around `store_owner/2`, which follows the close, and 6 of 6 runs pass.
+The record had seen it pass on re-run before, which is what a race looks like.

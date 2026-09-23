@@ -220,16 +220,23 @@ close_resources(Directory,Handle) :-
 
 test(abandoned_engines_release_their_resources_after_atom_collection) :-
     with_directory(gc_case).
+% The observer is on store_owner/2 and sends from a cleanup around it, so the
+% message follows the owner's own cleanups, the lock stream's close among them.
+% It was on finish_store/3, which runs INSIDE that scope, so a reopen could
+% reach the lock between the journal's cleanup and the close and be refused
+% with EWOULDBLOCK [measured 2026-09-24: 2 of 3 runs refused with
+% database_lock_failed(_, 11) at load average 91, in battery 4].
 gc_case(Directory) :-
-    journal(Directory,Journal),
+    absolute_file_name(Directory,Store,[expand(false)]),
     setup_call_cleanup(message_queue_create(Queue),
         setup_call_cleanup(
-            wrap_predicate(lib_database:finish_store(_,Path,_),database_gc_observer,Wrapped,
-                           (call(Wrapped),(Path==Journal->thread_send_message(Queue,cleaned);true))),
+            wrap_predicate(lib_database:store_owner(Path,_),database_gc_observer,Wrapped,
+                           setup_call_cleanup(true,Wrapped,
+                               (Path==Store->thread_send_message(Queue,released);true))),
             (thread_create(abandon_database(Directory),Creator,[]),thread_join(Creator,true),
              garbage_collect,garbage_collect_atoms,
-             thread_get_message(Queue,cleaned),reopen_rows(Directory,[abandoned])),
-            unwrap_predicate(lib_database:finish_store(_,_,_),database_gc_observer)),
+             thread_get_message(Queue,released),reopen_rows(Directory,[abandoned])),
+            unwrap_predicate(lib_database:store_owner(_,_),database_gc_observer)),
         message_queue_destroy(Queue)).
 abandon_database(Directory) :-
     'database-open!'(Directory,none,Handle),'database-add!'(Handle,abandoned,true).
