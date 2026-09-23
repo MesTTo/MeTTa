@@ -27,9 +27,9 @@
 # declaration lives in the home, and SWI_HOME_DIR can put any binary in front
 # of any home: the venv here exports it to every process, and a stock
 # /usr/bin/swipl started under it reports the patched home and would read its
-# declaration [measured 2026-09-23: home=/home/user/Dev/swipl-patched/lib/swipl
-# with compiled_at 'Aug 30 2026, 09:21:19', the patched build's being
-# 'Sep 16 2026, 22:48:43'].
+# declaration [measured 2026-09-23: the stock /usr/bin/swipl, compiled_at
+# 'Aug 30 2026, 09:21:19', reported the venv's patched home as its own, the
+# patched build's compiled_at being 'Sep 16 2026, 22:48:43'].
 #
 # The flag is read by RUNNING the host, and there is one way to do that: run a
 # command and take the one line it prints. By default the command is the
