@@ -491,7 +491,12 @@ lane_print_ready() {
 # bench lanes take wall clock, and the two memory-scale lanes take memory.
 # `pytest` is here for a different reason: its workers were measured at
 # 7.31 GB and 5.01 GB apiece on 2026-09-23, so it is the one lane whose
-# FOOTPRINT rather than whose evidence makes it a bad neighbour.
+# FOOTPRINT rather than whose evidence makes it a bad neighbour. The third
+# reason is WRITING what the other lanes read: a lane that purges and
+# regenerates the governed QLF set races every lane booting the engine beside
+# it. parity-perf-selftest is alone for that reason only; engine-bench,
+# c-bench and parity-perf purge the same set and are already alone for their
+# counters.
 #
 # Declared at the lane rather than inferred from its name, because a name that
 # happens to contain `bench` is a spelling and dispatch does not go on
@@ -797,10 +802,22 @@ run_solo GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstr
 # one taken at the wrong path shape, a frozen negative net, a sampling
 # excursion, an uncounted warm-up, a timed-out measurement that leaves a
 # process behind, a dropped rebaseline note, an unmeasured run under CI and a
-# denied counter. It replaces _perf, the lane's one process call, so no engine
-# runs and the whole netting and verdict path is still the production one.
+# denied counter. It replaces _perf, the lane's one process call, so the whole
+# netting and verdict path is still the production one.
+#
+# It runs ALONE, as parity-perf does, because its artifact fixture is the one
+# plant that boots the real engine: it purges the governed QLF set under
+# engine/ and lib/ and regenerates it twice through the shipping loader, then
+# requires the two generations to agree. Every other lane loads that same set,
+# and one that boots meanwhile compiles into it, so under the concurrent gate
+# the generations disagree and the lane fails on a tree that is fine
+# [measured 2026-09-23: with four `swipl -g halt -s engine/main.pl --
+# extensions` boots looping in the same battery the selftest exits 1 on
+# "repeated shipping generations changed artifact set or content digests";
+# alone in a battery it exits 0 with all 26 content digests equal across the
+# two generations; commit=681fdd8b07ed652d7e3798704c0bebce30094c47].
 # Umbrella: the upstream and assembled local engines share the conformance corpus and counter harness.
-run GATE   parity-perf-selftest "$PY" "$HERE/tests/checks/check_upstream_parity_selftest.py"
+run_solo GATE   parity-perf-selftest "$PY" "$HERE/tests/checks/check_upstream_parity_selftest.py"
 
 # Generated programs on both engines, which is the question the two lanes above
 # cannot ask: they replay upstream's 156 examples, so they find only what those

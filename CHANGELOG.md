@@ -115,6 +115,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `parity-perf-selftest` runs alone in the gate. Its artifact fixture purges
+  the governed QLF set under `engine/` and `lib/`, regenerates it twice
+  through the shipping loader and requires the two generations to agree, so
+  since the gate became concurrent any lane booting the engine beside it
+  compiled into the set between the two generations, and the selftest failed
+  on "repeated shipping generations changed artifact set or content digests"
+  for a tree that was fine. With four engine boots looping in the same
+  battery it failed on exactly that; alone it passes with all 26 artifacts'
+  content digests equal across the generations, so QLF output is
+  deterministic and the gate's scheduling was the cause.
+
 - Importing a library no longer fails when an earlier import's function has
   been specialized in the same space. A withdrawal removes one stored
   occurrence by exact reference, and while it ran every other removal was held
