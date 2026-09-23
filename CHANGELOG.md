@@ -80,6 +80,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A Linux wheel's host activation (`metta._host.activate()`) guards whatever
+  its `_vendor/` directory holds, read from the directory, and no longer names
+  the bridge it vendors. It refuses a vendored module already imported with no
+  `__file__` as coming from an unknown location, where it used to name the
+  working directory, and it refuses a bundled SWI home whose `_vendor/` holds
+  nothing, as a damaged install, before `import janus_swi` can find a bridge
+  built for another host.
+
 - `(math-power-mod B 0 1)` answers 0 on the WebAssembly host, as it does
   natively. SWI-Prolog's LibBF emulation of `mpz_powm()`, which a build
   without GMP compiles, returned an exponent of 0 as 1 unreduced by the
