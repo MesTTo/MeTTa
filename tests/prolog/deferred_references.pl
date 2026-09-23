@@ -117,6 +117,18 @@ deferred_reference(user:py_call/1,
                     host(...) record a Python seat wrote; a tokenless engine has \c
                     no Python seat.').
 
+deferred_reference(native_install:'$activate_static_extension'/1,
+                   ['lib/_support/native_install.pl'],
+                   'SWI\'s, and defined only on a host compiled with \c
+                    O_STATIC_EXTENSIONS, the WebAssembly one (src/pl-load.c). \c
+                    The one call runs under static_host/0, which tests for \c
+                    this definition, as boot/syspred.pl does to choose its \c
+                    static use_foreign_library/1; a host that loads shared \c
+                    objects takes the other branch. That predicate is not the \c
+                    route, because it runs the activation through \c
+                    initialization(_, now), which prints a missing extension \c
+                    instead of raising it.').
+
 :- dynamic captured/1, capturing/0.
 
 % Taking list_undefined's report as DATA rather than as text. The hook succeeds,
