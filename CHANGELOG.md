@@ -115,6 +115,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `stats-geometric-mean` over binary64 extremes costs what an ordinary sample
+  costs. The exact ratio of `1.0e308` or `5.0e-324` has a numerator or
+  denominator of about a thousand bits, and the bit length it needs was
+  counted one shift per bit: `(1.0e308 1.0e308)` took 12,158,312 inferences
+  where `(1.0 2.0 3.0 4.0)` took 98,070. It now doubles a probe width and
+  bisects, about 2 log2 B shifts for a B-bit value, and reads 17,641. The
+  hypothesis test that draws such lists went from 218.89 s to 1.29 s, and it
+  was the one test the Python suite's makespan could not get under.
+
 - A reference-face event that leaves the face resolving to what it resolved to
   before no longer recompiles every caller that resolves a name through it.
   Every such event walked the face's whole forward closure before the face was

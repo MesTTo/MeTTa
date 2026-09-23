@@ -64,6 +64,24 @@ test(geometric_exponent_cancellation_and_equal_input_bounds) :-
     invoke('stats-geometric-mean'([54,24,36],ThirtySix)),assertion(ThirtySix == 36.0),
     invoke('stats-geometric-mean'([0,Big],Zero)),assertion(Zero == 0.0).
 
+%statistics-bits is msb(N)+1, found in about 2 log2 B shifts, so the geometric
+%mean of binary64 extremes, whose exact ratios carry about a thousand bits,
+%costs what an ordinary sample costs. One shift per bit cost (1.0e308 1.0e308)
+%12,158,312 inferences where (1.0 2.0 3.0 4.0) cost 98,070 [measured
+%2026-09-23]. Both calls are warmed first, so neither count includes the first
+%compile of a deferred library function.
+test(bit_length_is_msb_and_extremes_cost_an_ordinary_sample) :-
+    forall(( between(0,1024,N) ; between(1,1100,K), member(D,[-1,0,1]), N is 2^K+D ),
+           ( invoke('statistics-bits'(N,Bits)),
+             ( N =:= 0 -> Expected = 0 ; Expected is msb(N)+1 ),
+             assertion(Bits == Expected) )),
+    Ordinary = [1.0,2.0,3.0,4.0], Extreme = [5.0e-324,1.0e308],
+    invoke('stats-geometric-mean'(Ordinary,_)), invoke('stats-geometric-mean'(Extreme,_)),
+    statistics(inferences,I0), invoke('stats-geometric-mean'(Ordinary,_)),
+    statistics(inferences,I1), invoke('stats-geometric-mean'(Extreme,_)),
+    statistics(inferences,I2),
+    assertion(I2-I1 < 4*(I1-I0)).
+
 test(harmonic_mean_preserves_exact_reciprocals) :-
     invoke('stats-harmonic-mean'([40,60],Value)),assertion(Value == 48),
     invoke('stats-harmonic-mean'([40.0,60],Float)),assertion(Float == 48.0),
