@@ -108,6 +108,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library name of `..` is refused as leaving the library root. The escape
+  guard in `library_within/2` read only a name holding `/`, so `..` alone
+  joined `<lib>/../pkg.metta`, the root's parent, through `(library ..)` and
+  `(from ..)`.
+
 - `tests/shell/test_components_follow_a_moved_pin.sh` puts its fixture under
   `TMPDIR` when one is set, and under `ai-tmp/` when run alone. Under the gate,
   `TMPDIR` is the scratch `tests/checks/gate_scratch.sh` allocates and

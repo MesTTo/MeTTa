@@ -218,7 +218,8 @@ test(a_plain_backing_locator_resolves_beside_its_own_manifest) :-
 test(a_library_spec_cannot_walk_out_of_the_library_root) :-
     forall(member(Spec, ['../../../../etc/passwd',
                          '../shared/Helper.metta',
-                         'nested/../../escape.metta']),
+                         'nested/../../escape.metta',
+                         '..']),
            ( catch(( metta_engine:library(Spec, Resolved),
                      Outcome = resolved(Resolved) ),
                    error(Formal, _),

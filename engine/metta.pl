@@ -947,6 +947,10 @@ library_within(Spec, Relative) :-
     (   sub_atom(Name, _, _, _, '/')
     ->  refuse_escaping_library_spec(Name, library/2),
         Relative = Name
+    ;   Name == '..'
+    ->  % The one-segment spelling of the same escape: `..` alone joined
+        % <lib>/../pkg.metta, since only a name holding `/` reached the guard.
+        refuse_escaping_library_spec(Name, library/2)
     ;   file_name_extension(_, Extension, Name), Extension \== ''
     ->  throw(error(domain_error(library_name, Name),
                     context(library/2,
