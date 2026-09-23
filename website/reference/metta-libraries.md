@@ -3978,7 +3978,7 @@ Returns: Grammar forms
 
 ### `process-run!`
 
-*lib.metta:31*
+*lib.metta:35*
 
 ```metta
 (: process-run! (-> %Undefined% %Undefined% Expression))
@@ -3993,7 +3993,7 @@ Returns: Result
 
 ### `process-run-input!`
 
-*lib.metta:37*
+*lib.metta:41*
 
 ```metta
 (: process-run-input! (-> %Undefined% %Undefined% %Undefined% Expression))
@@ -4009,7 +4009,7 @@ Returns: Result
 
 ### `process-signal!`
 
-*lib.metta:43*
+*lib.metta:47*
 
 ```metta
 (: process-signal! (-> %Undefined% Symbol Bool))
@@ -4024,7 +4024,7 @@ Returns: Done
 
 ### `process-signals`
 
-*lib.metta:49*
+*lib.metta:53*
 
 ```metta
 (: process-signals (-> Expression))
@@ -4036,7 +4036,7 @@ Returns: Signals
 
 ### `process-start!`
 
-*lib.metta:55*
+*lib.metta:59*
 
 ```metta
 (: process-start! (-> %Undefined% %Undefined% Number))
@@ -4051,7 +4051,7 @@ Returns: Process
 
 ### `process-status`
 
-*lib.metta:61*
+*lib.metta:65*
 
 ```metta
 (: process-status (-> %Undefined% %Undefined%))
@@ -4065,7 +4065,7 @@ Returns: Status
 
 ### `process-wait!`
 
-*lib.metta:67*
+*lib.metta:71*
 
 ```metta
 (: process-wait! (-> %Undefined% Number))
