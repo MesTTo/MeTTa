@@ -13,6 +13,10 @@ refuses one that does not declare every patch in
 `tests/checks/host_workarounds/` at its current digest. The refusal names each
 missing patch and points here.
 
+All of this belongs to the Prolog engine, which carries the 1.0 line and will
+soon be replaced by an engine written in Rust; the README's Architecture
+section says what carries over.
+
 ## Installs that already have it
 
 pymetta's Linux x86_64 wheels for CPython 3.12, 3.13 and 3.14 carry the patched

@@ -74,7 +74,9 @@ corpus never writes at all, and a row for a head nothing carries.
 ## Install and first call
 
 The distribution is `pymetta` and the module it installs is `metta`, for
-Python 3.12+. The engine runs only on a PATCHED SWI-Prolog
+Python 3.12+. The engine is the Prolog one that carries the 1.0 line, and a
+Rust engine will soon replace it (README.md, Architecture); the MeTTa
+libraries carry over. The engine runs only on a PATCHED SWI-Prolog
 (`docs/patched-host.md`), and it refuses to boot on a stock one, naming the
 patches it lacks. pymetta's Linux x86_64 wheels for CPython 3.12, 3.13 and 3.14
 carry that host in `metta/_host`, with the janus bridge built against it, so

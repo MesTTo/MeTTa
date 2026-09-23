@@ -52,6 +52,13 @@ On any other platform, and for the C seat, build it as
 One engine, in Prolog and C. Everything else reaches it through a declared
 seam, so each piece is built, versioned and published on its own.
 
+This Prolog engine carries the 1.0 line and will soon be replaced by a new
+engine written in Rust. The libraries are written in MeTTa over the engine's
+primitives so that they carry over unchanged, and that primitive set is what
+the Rust engine implements. The patched SWI-Prolog host
+([docs/patched-host.md](docs/patched-host.md)) belongs to the Prolog engine
+and goes with it.
+
 | Component | Repository | Install | What it is |
 |---|---|---|---|
 | the engine | `engine/` | in the PyMeTTa and TSMeTTa packages | translator, matcher, spaces, catalog, extension points, the C half |
