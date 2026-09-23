@@ -42,7 +42,7 @@
 %   that occurrence's atom, so a callback's removal of another atom is decided
 %   the ordinary way even while it is live
 %   [tested: lib_import_lifecycle:an_exact_removal_does_not_select_what_its_callbacks_remove;
-%   commit=WORKTREE].
+%   commit=da91bc244fcd17cb19cd7afbd85919cc9fcb08d7].
 % Guarded by: non-backtrackable thread-local storage isolates removal selection
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
