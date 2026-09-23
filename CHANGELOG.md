@@ -80,6 +80,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/bounded.sh` bounds a command's memory by what it holds resident, not
+  by the address space it reserves, wherever the kernel delegates a memory
+  controller to the user. The outermost rung starts a user cgroup scope for
+  the command's whole tree, with `MemoryMax` at half the box and swap closed,
+  and every rung beneath it is charged to that scope rather than escaping into
+  a sibling. Where no scope can be made, a container among them, the bound is
+  still a data-segment limit of a quarter of the box per process. The
+  data-segment limit charged the MORK backend's first exec for the 11 GiB of
+  buffers it reserves, although it touches 32 kB, so a pytest worker already
+  holding 4.3 GB aborted on it. `systemd-run` is told not to expand the
+  command's arguments, which it otherwise rewrites: `$$` arrives as `$`.
+
 - `@define` compiles a function that reuses a finished `for` loop's variable
   as a later loop's counter, rebinding it before reading it. The compiler's
   check that a loop variable is not read after its loop visited a later

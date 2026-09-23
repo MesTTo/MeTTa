@@ -227,8 +227,9 @@ CHECK_JOBS=${CHECK_JOBS:-$(( $(nproc 2>/dev/null || echo 4) / 4 ))}
 # lanes at once, a suite queue taking `nproc` and a pytest lane taking sixteen
 # workers, this gate asked for well over a hundred processes on a thirty-two
 # core box and drove it from 14GB available to 3GB with 78GB in swap
-# [measured 2026-09-23]. A per-process RLIMIT_DATA ceiling cannot prevent that,
-# because a ceiling is not a reservation (tools/bounded.sh:214-217).
+# [measured 2026-09-23]. No memory ceiling bounded.sh sets can prevent that,
+# per process or per lane, because a ceiling is not a reservation
+# (tools/bounded.sh, the comment above metta_bounded_share).
 #
 # A STATIC division rather than a jobserver's token pool, which is what a build
 # system uses for the same problem. A pool needs each worker to hand its token
@@ -302,6 +303,12 @@ METTA_TIMEOUT=${METTA_TIMEOUT:-$(sh "$HERE/tools/bounded.sh" --enforcer)} || {
     exit 2
 }
 export METTA_TIMEOUT
+
+# Whether bounded.sh can hold a lane's memory in a scope, resolved ONCE for the
+# same reason: answering costs it one scope of its own, and the lanes that name
+# a shell function start a rung per spawn, hundreds of them in a run.
+METTA_BOUNDED_SCOPE=${METTA_BOUNDED_SCOPE:-$(sh "$HERE/tools/bounded.sh" --memory-scope)}
+export METTA_BOUNDED_SCOPE
 
 # run TIER NAME COMMAND...
 # A GATE failure is recorded; a REPORT failure is printed and forgiven.

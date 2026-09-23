@@ -35,9 +35,20 @@
 #     which is the axis the deadline and the owner link both leave open
 #   - case 5d: `--memory none` runs it unbounded, for a lane that needs to
 #   - case 5e: the default is a number derived from this box rather than
-#     `unlimited`, so a caller that passes nothing is still bounded
+#     `unlimited`, so a caller that passes nothing is still bounded, whichever
+#     of the two mechanisms holds it: the scope's memory.max where a scope can
+#     be made here, the data-segment limit where it cannot
 #   - case 5f: a rung that inherits a TIGHTER bound than it asked for says so,
 #     rather than announcing that nothing bounds the command
+#   - case 5h: a reservation nothing touches is not charged, which is the
+#     shape of the MORK backend's 11 GiB exec buffers, so it runs under a share
+#     far smaller than itself where a scope holds the bound
+#   - case 5i: a rung started inside a bounded command is charged to the
+#     outer rung's scope rather than escaping into a sibling scope of its own
+#   - case 5j: the command receives its arguments unchanged, `$$` and
+#     `${USER}` included, which systemd-run would otherwise rewrite
+#   - case 5k: where no scope can be made the bound is the data segment, a
+#     number derived from the box, so the fallback is still a bound
 #   - case 5g: the command starts in the normalised environment the wrapper
 #     promises -- DISPLAY and WAYLAND_DISPLAY gone, DEBUGINFOD_URLS empty --
 #     which is the one guarantee in bounded.sh that nothing used to pin
@@ -253,7 +264,26 @@ if $WRAPPER --memory none /bin/echo bounded >/dev/null 2>&1; then
 else
     fail "case 5d: --memory none refused to run a trivial command"
 fi
-default_limit=$($WRAPPER /bin/sh -c 'ulimit -d' 2>/dev/null)
+# The cases below that are about the OUTERMOST rung have to start outside any
+# metta-bounded scope, and the gate runs this file under bounded.sh, so it is
+# itself inside one: every rung it starts would be nested and charged to the
+# lane's scope. A scope of systemd-run's own is a SIBLING of that one, which is
+# exactly the escape a nested rung is built to avoid, and here it is the
+# point: it gives each such case a tree no metta-bounded scope encloses.
+OUTSIDE=''
+case $(cut -d: -f3 /proc/self/cgroup 2>/dev/null) in
+    */metta-bounded.slice/*)
+        OUTSIDE='systemd-run --user --scope --quiet --expand-environment=no --' ;;
+esac
+
+# The bound in force, read the way the kernel holds it: a scope's memory.max
+# in bytes, else the data-segment limit in kilobytes.
+default_limit=$($OUTSIDE $WRAPPER /bin/sh -c '
+    read -r cg < /proc/self/cgroup; cg=${cg#0::}
+    case $cg in
+        */metta-bounded.slice/*) echo "$(( $(cat "/sys/fs/cgroup$cg/memory.max") / 1024 ))" ;;
+        *) ulimit -d ;;
+    esac' 2>/dev/null)
 case $default_limit in
     unlimited | '' | *[!0-9]*)
         fail "case 5e: the default memory bound read '$default_limit'" ;;
@@ -276,6 +306,66 @@ case $notice in
     *"262144 kB is already in"*ran*)
         printf 'ok  5f an inherited tighter bound is reported, not overstated\n' ;;
     *)  fail "case 5f: the inherited-bound notice read '$notice'" ;;
+esac
+
+# ---------------------------------------------------------------- case 5h
+# The reservation case the resident bound exists for. Four GiB through malloc,
+# which glibc maps and nothing touches, under a share of 256 MB: a scope charges
+# what is resident and runs it, where a data-segment limit charges the whole
+# mapping and refuses it, which the second half asks, so the case cannot pass
+# on an allocation that never happened. The size is passed as a size_t:
+# without argtypes ctypes passes 4 << 30 as an int, which is 0, and malloc(0)
+# succeeds everywhere. Asked of the real wrapper, because a negative control
+# given as WRAPPER has no scope of its own to report on.
+RESERVE='
+import ctypes
+libc = ctypes.CDLL(None)
+libc.malloc.argtypes = [ctypes.c_size_t]
+libc.malloc.restype = ctypes.c_void_p
+print("reserved" if libc.malloc(4 << 30) else "refused")'
+if [ "$(sh "$ROOT/tools/bounded.sh" --memory-scope 2>/dev/null)" = yes ]; then
+    reserved=$($OUTSIDE $WRAPPER --memory 262144 python3 -c "$RESERVE" 2>&1)
+    refused=$(METTA_BOUNDED_SCOPE=no $OUTSIDE $WRAPPER --memory 262144 python3 -c "$RESERVE" 2>&1)
+    case "$reserved/$refused" in
+        reserved/refused)
+            printf 'ok  5h an untouched 4 GiB reservation runs under a 256 MB share that a data limit refuses\n' ;;
+        *)  fail "case 5h: under a 256 MB share the reservation read '$reserved', and under a 256 MB data limit '$refused'" ;;
+    esac
+
+    # ------------------------------------------------------------ case 5i
+    nested=$($OUTSIDE $WRAPPER /bin/sh -c \
+        "cut -d: -f3 /proc/self/cgroup; exec $WRAPPER cut -d: -f3 /proc/self/cgroup" 2>&1)
+    outer=$(printf '%s\n' "$nested" | sed -n 1p)
+    inner=$(printf '%s\n' "$nested" | sed -n 2p)
+    case $outer in
+        */metta-bounded.slice/*)
+            if [ "$outer" = "$inner" ]; then
+                printf 'ok  5i a nested rung is charged to the outer scope\n'
+            else
+                fail "case 5i: the nested rung escaped into '$inner' from '$outer'"
+            fi ;;
+        *)  fail "case 5i: the outer rung made no scope, it ran in '$outer'" ;;
+    esac
+else
+    printf 'ok  5h skipped: no memory scope can be made here, so the bound is the data segment\n'
+    printf 'ok  5i skipped: no memory scope can be made here, so no rung makes one\n'
+fi
+
+# ---------------------------------------------------------------- case 5j
+# Written as the text that must arrive, so any rewriting on the way shows.
+argv=$($WRAPPER /bin/echo 'a $$ ${USER} $HOME (match &self $x $x)' 2>&1)
+case $argv in
+    'a $$ ${USER} $HOME (match &self $x $x)')
+        printf 'ok  5j the command receives its arguments unchanged\n' ;;
+    *)  fail "case 5j: the command received '$argv'" ;;
+esac
+
+# ---------------------------------------------------------------- case 5k
+fallback=$(METTA_BOUNDED_SCOPE=no $OUTSIDE $WRAPPER /bin/sh -c 'ulimit -d' 2>/dev/null)
+case $fallback in
+    unlimited | '' | *[!0-9]*)
+        fail "case 5k: with no scope the data-segment bound read '$fallback'" ;;
+    *)  printf 'ok  5k with no scope the bound is the data segment, %s kB\n' "$fallback" ;;
 esac
 
 # ---------------------------------------------------------------- case 5g

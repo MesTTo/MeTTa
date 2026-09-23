@@ -627,7 +627,7 @@ sh tools/bounded.sh swipl -q -s engine/main.pl -- program.metta
 sh tools/bounded.sh --ceiling 60 npm --prefix extensions/node run test
 ```
 
-It holds two bounds. The deadline lives in a process of the child's own rather
+It holds three bounds. The deadline lives in a process of the child's own rather
 than in the caller's wait loop, so an orphan still ends; and
 `prctl(PR_SET_PDEATHSIG)` links the child to the process that started it, so a
 killed session reaps its children in milliseconds instead of leaving them to
@@ -635,6 +635,14 @@ the deadline. Both have been paid for: two swipl children spun for 122
 CPU-hours over 2026-09-01 to 09-03 with only a parent-side timeout on them, and
 a hand-started `swipl ... materialization.plt` ran 7,540 seconds at 97.8% CPU
 on 2026-09-05 with nothing on it at all.
+
+The third bound is memory. Wherever the kernel delegates a memory controller
+to your user, the outermost `bounded.sh` starts a user cgroup scope for the
+command's whole tree, with half the box to hold resident and swap closed, and
+every rung beneath it is charged to that scope. Elsewhere, a container among
+them, it limits each process's data segment to a quarter of the box. The scope
+charges what is touched: the MORK backend's first exec reserves 11 GiB and
+touches 32 kB, which a data-segment limit charges in full.
 
 ## Engine and library module ownership
 
