@@ -4,9 +4,11 @@
 The MeTTa engine runs only on a patched SWI-Prolog. Stock SWI-Prolog has
 defects that crash the engine or change its answers:
 [host-workarounds.md](host-workarounds.md) lists them, one entry each with a
-reproduction, and a stock 10.1.14 binary answers `present` for 14 of those
-reproductions and aborts the process on two. One of the two is the thread join
-that any worker evaluating MeTTa can reach.
+reproduction. Of the entries a patch fixes, a stock 10.1.14 binary answers
+`present` for 21 and aborts the process on one, the thread join that any
+worker evaluating MeTTa can reach; the two janus entries reproduce through the
+Python bridge, and three read the WebAssembly host rather than a native binary
+(measured 2026-09-24 with `/usr/bin/swipl`).
 
 So the engine checks its host when it boots (`engine/host_check.pl`) and
 refuses one that does not declare, at its current digest, every patch to
