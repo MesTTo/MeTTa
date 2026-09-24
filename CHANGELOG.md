@@ -210,6 +210,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Form 22 of `06-the_prolog_rung_under_lib_thread.metta` in chapter 17 claims
+  that cancelling a running `timer_every` answers `True`. It claimed the
+  literal `stopped`, which its `let` answered whatever `timer_every` and
+  `thread_cancel` did, so it also passed on a host that refuses `lib_thread`
+  and leaves both calls as data. There the new claim fails.
 - The Python twin of `04-matespace2.metta` in chapter 22 says what the program
   runs. It said `(superpose (collapse (match ...)))` gave each round a snapshot
   of the space. superpose takes a written argument as its list of branches, so
