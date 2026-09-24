@@ -171,9 +171,11 @@ HEADER
         # last first, so each is reverse-applied to the tree as it stood right
         # after it was applied. Asked of each patch alone, `git apply --reverse
         # --check` refuses one whose hunk context a later patch rewrites,
-        # though it is applied [measured 2026-09-24: /home/user/Dev/swipl-devel
-        # read 25 of 26, missing swi-concurrent-import-removal-resets-provider,
-        # beneath swi-unlinked-definition-uninitialised].
+        # though it is applied [measured 2026-09-24T09:58:25+10:00: the
+        # swipl-devel tree the host compiled Sep 24 2026, 09:57:51 was built
+        # from read 25 of 26, missing
+        # swi-concurrent-import-removal-resets-provider, beneath
+        # swi-unlinked-definition-uninitialised].
         mkdir -p "$ROOT/ai-tmp"
         STACK=$(mktemp -d "$ROOT/ai-tmp/declare-host.XXXXXX")
         trap 'rm -rf "$STACK"' EXIT

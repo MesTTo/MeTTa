@@ -21,11 +21,13 @@
 #     engines share no table without
 #     swi-threadless-shared-table-private-per-engine.patch, and refuse
 #     through tabling_wait/2 with it
-#     [measured 2026-09-24: present on /home/user/Dev/.venv-pypetta/bin/swipl
-#     (10.1.14 patched, threaded); absent on a threaded build of V10.1.14
-#     with every patch of the ledger and
+#     [measured 2026-09-25T02:56:31+10:00: present on SWI-Prolog 10.1.14
+#     threaded with the ledger's 26 earlier patches (compiled Sep 24 2026,
+#     09:57:51); absent on a threaded build of V10.1.14 with every patch of
+#     the ledger (compiled Sep 24 2026, 16:08:19), which carries
 #     tests/checks/host_workarounds/swi-shared-table-waits-for-owner-beneath.patch,
-#     broken on the single-threaded build of the same tree; commit=622e425d40c126681c04c7f7f81d92618ab83d0d]
+#     broken on a single-threaded build with every patch of the ledger
+#     (compiled Sep 24 2026, 16:00:57)]
 set -u
 probe="$HOST_WORKAROUND_SCRATCH/owner_beneath.pl"
 cat > "$probe" <<'EOF'

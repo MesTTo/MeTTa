@@ -20,13 +20,15 @@
 #     rather than left to the lane's own bound), or the host reports the
 #     unexpected catcher; `absent` iff the process exits 0, prints
 #     `answers [a,b]` and reports nothing; `broken` otherwise
-#     [measured 2026-09-24: present on /home/user/Dev/.venv-pypetta/bin/swipl
-#     (10.1.14 patched, threaded), where the main engine waits forever and a
-#     second engine instead exits 139 in unify_table_status(); present on a
-#     single-threaded build of V10.1.14, which prints the message; absent on
-#     both builds with
-#     tests/checks/host_workarounds/swi-destroyed-leader-keeps-shared-table.patch;
-#     commit=622e425d40c126681c04c7f7f81d92618ab83d0d]
+#     [measured 2026-09-25T02:56:31+10:00: present on SWI-Prolog 10.1.14
+#     threaded with the ledger's 26 earlier patches (compiled Sep 24 2026,
+#     09:57:51), where the main engine waits past the bound and a second
+#     engine instead dies of SIGSEGV in unify_table_status(); present on a
+#     single-threaded V10.1.14 with 22 of them (compiled Sep 24 2026,
+#     13:45:16), which prints the message; absent on a threaded and a
+#     single-threaded build with every patch of the ledger (compiled Sep 24
+#     2026, 16:08:19 and 16:00:57), both carrying
+#     tests/checks/host_workarounds/swi-destroyed-leader-keeps-shared-table.patch]
 set -u
 probe="$HOST_WORKAROUND_SCRATCH/destroyed_leader.pl"
 cat > "$probe" <<'EOF'

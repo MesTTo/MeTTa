@@ -9,11 +9,11 @@
 % Guarantees: present iff the call succeeds leaving its argument unbound and
 % the table then answers [1,2]; absent iff it fails and the table answers
 % [1,2]; broken otherwise, a host without threads included
-% [measured 2026-09-24: present on /home/user/Dev/.venv-pypetta/bin/swipl
-% (10.1.14 patched, threaded); absent on a threaded build of V10.1.14 with
-% every patch of the ledger and
-% tests/checks/host_workarounds/swi-reeval-prepare-writes-past-its-arguments.patch;
-% commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
+% [measured 2026-09-25T02:56:31+10:00: present on SWI-Prolog 10.1.14
+% threaded with the ledger's 26 earlier patches (compiled Sep 24 2026,
+% 09:57:51); absent on a threaded build of V10.1.14 with every patch of the
+% ledger (compiled Sep 24 2026, 16:08:19), which carries
+% tests/checks/host_workarounds/swi-reeval-prepare-writes-past-its-arguments.patch].
 % Owns resources: the message queue and the re-evaluating thread, joined
 % before main reports.
 
