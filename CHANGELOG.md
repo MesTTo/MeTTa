@@ -210,6 +210,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh run` runs its command without `BATTERY_KEEP` or
+  `BATTERY_SOURCE`, the settings it spent on the copy. A `battery.sh` the
+  command ran in turn inherited the outer run's restriction: inside a
+  `BATTERY_KEEP=''` gate, the battery self-test's unrestricted cases ran
+  restricted and failed. The self-test also clears both at its start.
 - `tools/battery.sh run` copies a battery again when the source changes while
   it copies, instead of refusing the run. A commit moves the base the copy's
   restored paths and git identity are held to, and a rebuild rewrites output

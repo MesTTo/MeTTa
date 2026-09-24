@@ -25,6 +25,10 @@
 #   closed -- a file can differ, be extra, or be absent -- so exhausting it
 #   discharges the claim outright instead of supporting it.
 set -eu
+# Every case sets the battery settings it means to test, so none may arrive
+# from the caller: run inside a BATTERY_KEEP='' gate, the unrestricted cases
+# inherited the restriction and held their components at the pin.
+unset BATTERY_KEEP BATTERY_SOURCE
 
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 BATTERY="$HERE/battery.sh"
@@ -682,6 +686,20 @@ else
     failures=$((failures + 1))
 fi
 touch -d '2 days ago' "$first_log"
+
+# BATTERY_KEEP and BATTERY_SOURCE are spent on the copy, so the command runs
+# without them; a battery.sh it runs in turn would otherwise inherit this run's
+# restriction, which is how this selftest failed inside a BATTERY_KEEP='' gate.
+settings_log=$(BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/poolsource" \
+    bounded sh "$POOL/tools/battery.sh" run -- \
+    sh -c 'echo "keep=${BATTERY_KEEP-unset} source=${BATTERY_SOURCE-unset}"' 2>&1 |
+    sed -n 's/^battery [^:]*: exit [0-9]*, log //p')
+if grep -qx 'keep=unset source=unset' "$settings_log"; then
+    echo "  ok   a run's command sees neither BATTERY_KEEP nor BATTERY_SOURCE"
+else
+    echo "  FAIL a run's command inherited the run's own settings:"; cat "$settings_log"
+    failures=$((failures + 1))
+fi
 aged() {
     find "$POOL/ai-tmp/wt-battery-$1" "$POOL/ai-tmp/wt-battery-$1/ai-tmp" -maxdepth 1 \
          -exec touch -h -d '2 days ago' {} +

@@ -959,9 +959,15 @@ case "$command" in
         # in a tree or component whose own .git has gone missing is told it is
         # not in a repository rather than handed the enclosing checkout
         # [GIT_CEILING_DIRECTORIES, git(1): the directories git will not chdir
-        # up into while looking for a repository].
+        # up into while looking for a repository]. BATTERY_KEEP and
+        # BATTERY_SOURCE are this script's own settings, spent on the copy, so
+        # the command runs without them: a battery.sh the command runs in turn
+        # would otherwise inherit this run's restriction, as the selftest did
+        # inside a BATTERY_KEEP='' gate and held its unrestricted cases at the
+        # pin [2026-09-24, the shared baseline on f9c56dbba].
         ( cd "$tree" && GIT_CEILING_DIRECTORIES=$(dirname "$tree") && \
-          export GIT_CEILING_DIRECTORIES && "$@" 9>&- ) >> "$log" 2>&1 && status=0 || status=$?
+          export GIT_CEILING_DIRECTORIES && unset BATTERY_KEEP BATTERY_SOURCE && \
+          "$@" 9>&- ) >> "$log" 2>&1 && status=0 || status=$?
         rm -f "$tree/ai-tmp/battery.pid"
         echo "battery $index: exit $status, log $log"
         exit "$status"
