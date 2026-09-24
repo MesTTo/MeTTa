@@ -189,6 +189,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The C seat's `make install` no longer copies version-control metadata. Its
+  copy of the engine walked `engine` and `lib` with `find -type f`, so an
+  install from the checkout carried `lib`'s whole `.git` repository (1,105 of
+  1,488 selected files, 15 MB) and one from a battery carried `lib`'s gitfile,
+  which `git clean -fdx` then refused to remove. Both walks prune every `.git*`
+  name, and `install-check` refuses an install that carries one.
 - A `from` row declared into a space that has published before is published by
   itself: its row node, the entries it adds to the space's face, the heads
   those entries reach and the metadata they bring, leaving everything the last
