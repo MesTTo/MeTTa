@@ -1532,7 +1532,7 @@ variable_member(Variables, Variable) :-
 %a partial application where upstream PeTTa at 43705f5 answers `kept` in both
 %orders [tested:
 %translator_capturing_lambda_curries:an_overloaded_head_keeps_the_arity_another_equation_defines;
-%commit=WORKTREE].
+%commit=561a63ccabff3a0cfc5245925b1dbdad43f64a34].
 %Called ONLY from the eta-expansion branch above, which is the only place the
 %two arities can differ, so an ordinary equation pays nothing for this. Called
 %unconditionally instead it cost five inferences on every compiled clause,
