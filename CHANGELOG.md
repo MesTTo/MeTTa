@@ -178,6 +178,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The twins lane reads its envelopes again. Nineteen envelope twins had left
+  the bands observed for them on 0a81c782f and d832d20e8, and each is
+  re-observed on the fixed tree 4ff69551e with its move placed on the commits
+  that made it: b7e3d3bcb's per-head reference rows and d4a365c16's tries
+  took the six class twins and reference_maps down by tens to hundreds of
+  thousands of inferences, ae1cc8936's registration walk adds about 11,500
+  for each library import that registers 13 to 40 names, and d781eab8f, the
+  registration service and 850d2a660 account for the rest.
 - A battery restricted by `BATTERY_KEEP` holds the committed tree again when a
   component's own HEAD is ahead of the commit its parent pins. Every component
   was carried at its own HEAD, so `BATTERY_KEEP=''` read another session's
