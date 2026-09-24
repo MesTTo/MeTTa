@@ -210,6 +210,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The C seat's site page no longer links dead pages. It includes
+  `extensions/cmetta/README.md` one directory deeper, where the README's relative
+  links to `vocabularies.h`, `settings.h` and `llms.txt` resolved to nothing; the
+  docs lane failed on the first two, and VitePress skips `.txt` links unchecked.
+  All three use their repository URL now, and `make docs`, run by the C seat's
+  own gate, refuses any relative link in its README.
 - The `parity-perf` gate lane compares the two engines in a battery. It looked
   for the upstream checkout only as `PeTTa-upstream` beside the tree it ran
   in, and a battery, which `tools/battery.sh` makes under the provisioning
