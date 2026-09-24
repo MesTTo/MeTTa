@@ -17,7 +17,8 @@
 #   `run` refuses to start unless `verify` passes, so no command reports a
 #   verdict about an unknown tree, copies again when a commit moved a base
 #   while it copied rather than refusing [tested: tools/battery_selftest.sh;
-#   commit=WORKTREE], and runs its command with git's search for
+#   commit=1cb6f70050516737824425f4ac7d1326b6227374], and runs its command with
+#   git's search for
 #   a repository stopped at the battery's parent, so no git command in it
 #   reaches the checkout the battery sits inside. `run` naming no index takes
 #   the lowest one no run holds, so a finished battery is reused and the pool
