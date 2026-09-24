@@ -342,6 +342,44 @@ else
     failures=$((failures + 1))
 fi
 
+# A battery provisioned again at the SAME revision starts from its base too,
+# not from what the last run left in its git. The identity used to be kept
+# whenever it already named the wanted commit, and its index and operation
+# state were kept with it: a run on battery 5 at e1979a305 opened with an
+# earlier run's staging, `AD tests/checks/evidence_sites.py` and `MM
+# CHANGELOG.md` among nine paths, so every lane reading the tracked set read
+# files that were neither the base's nor the snapshot's
+# [measured 2026-09-25T01:57:42+10:00: git status at the run's start,
+# ai-tmp/battery-logs/battery-5-20260925T015742-1015220.log].
+printf 'staged by a run\n' > "$TREE/second.txt"
+# MERGE_HEAD is written as a file in the worktree's own git directory, which is
+# what an interrupted merge leaves: git 2.53 refuses `update-ref MERGE_HEAD`
+# as a pseudoref.
+if git -C "$TREE" add second.txt &&
+   git -C "$TREE" rm -q --cached top.txt &&
+   git -C "$TREE" rev-parse HEAD > "$(git -C "$TREE" rev-parse --absolute-git-dir)/MERGE_HEAD" &&
+   git -C "$TREE" rev-parse -q --verify MERGE_HEAD >/dev/null &&
+   ! git -C "$TREE" diff --cached --quiet; then
+    :
+else
+    echo "  FAIL the same revision again: could not leave staging and a merge behind to test"
+    failures=$((failures + 1))
+fi
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
+if git -C "$TREE" diff --cached --quiet 2>/dev/null; then
+    echo "  ok   the same revision again: nothing a run staged is still staged"
+else
+    echo "  FAIL the same revision again: the last run's staging survived:"
+    git -C "$TREE" diff --cached --name-status 2>&1 | sed 's/^/       /'
+    failures=$((failures + 1))
+fi
+if git -C "$TREE" rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  FAIL the same revision again: a merge the last run left open is still open"
+    failures=$((failures + 1))
+else
+    echo "  ok   the same revision again: no operation the last run left open"
+fi
+
 # A battery a COMPONENT holds is not part of a snapshot. ai-tmp/ covers the
 # trees this script makes, and a component's own ai-battery-N sits outside it:
 # one such copy, 127 MB of a stale engine, was being rsynced into every

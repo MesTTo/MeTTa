@@ -10,9 +10,10 @@
 #   repository's base, which hold the base's content. A repository's base is
 #   its HEAD, except that under BATTERY_KEEP a component no kept path equals,
 #   contains or sits inside has the commit its parent's base records at its
-#   path, and the git of every repository in the battery answers its base
-#   [tested: tools/battery_selftest.sh;
-#   commit=6ab321d7d488f95bc7cc9f60cc2f803f5018398c]; `verify` exits
+#   path, and the git of every repository in the battery answers its base,
+#   with the base's tree as its index and no operation an earlier run left
+#   open [tested 2026-09-25T04:00:30+10:00: tools/battery_selftest.sh];
+#   `verify` exits
 #   nonzero and names every drifted path otherwise;
 #   `run` refuses to start unless `verify` passes, so no command reports a
 #   verdict about an unknown tree, copies again for as long as the source
@@ -372,14 +373,29 @@ battery_git_identity() {
     identity_source=$1
     identity_tree=$2
     [ -d "$identity_tree" ] || return 0
-    # An identity that is ALREADY THIS REVISION is kept; one from an earlier
-    # provision is replaced. Testing only that a .git exists was an existence
-    # check where a consistency check belongs, and the failure it allows is
-    # silent: re-provisioning ai-tmp/wt-battery-1 on 2026-09-22 gave a tree
-    # whose files were 01287442c and whose git answered cf282de8f, so
-    # `git ls-files` omitted every file added since and each owned() lane read
-    # a short tree and passed. The worktree lane was the only one that said
-    # anything, and it said its probe could not check components out.
+    # Every provision gives the tree a FRESH identity, whatever it held. Testing
+    # only that a .git existed was an existence check where a consistency check
+    # belongs, and the failure it allows is silent: re-provisioning
+    # ai-tmp/wt-battery-1 on 2026-09-22 gave a tree whose files were 01287442c
+    # and whose git answered cf282de8f, so `git ls-files` omitted every file
+    # added since and each owned() lane read a short tree and passed. Keeping an
+    # identity that already named the wanted commit was the next check of that
+    # kind, and it failed the same silent way: the index and the operation
+    # state came with it, so a run on battery 5 at e1979a305 opened with an
+    # earlier run's staging, `AD tests/checks/evidence_sites.py` and `MM
+    # CHANGELOG.md` among nine paths, in front of every lane that reads the
+    # tracked set [measured 2026-09-25T01:57:42+10:00: git status at the run's
+    # start, ai-tmp/battery-logs/battery-5-20260925T015742-1015220.log;
+    # tested 2026-09-25T04:00:30+10:00: tools/battery_selftest.sh].
+    #
+    # A fresh identity costs no checkout. `git worktree add --no-checkout`
+    # writes only the gitfile and leaves the index empty, and `git read-tree`
+    # then builds the index from the base's tree without touching a file, so
+    # the snapshot's files meet an index that is exactly the base and git
+    # status shows only what the snapshot changed [measured
+    # 2026-09-25T02:02:15+10:00: a probe on git 2.53.0 showing an empty index
+    # after the add, the tree's entries after read-tree, and ` M` for the one
+    # file the tree changed].
     #
     # A source that is not a repository has no identity to give. One that IS a
     # repository must give one, and failing to is fatal rather than skipped: a
@@ -419,15 +435,13 @@ battery_git_identity() {
     (
         flock 8
         if [ -e "$identity_tree/.git" ]; then
-            identity_have=$(git -C "$identity_tree" rev-parse HEAD 2>/dev/null || echo have)
-            [ "$identity_want" = "$identity_have" ] && exit 0
             rm -rf "$identity_tree/.git"
             git -C "$identity_source" worktree prune >/dev/null 2>&1 || true
         fi
         identity_seed="$identity_tree.gitseed"
         rm -rf "$identity_seed"
-        git -C "$identity_source" worktree add --detach "$identity_seed" "$identity_want" \
-            >/dev/null 2>&1 || {
+        git -C "$identity_source" worktree add --detach --no-checkout "$identity_seed" \
+            "$identity_want" >/dev/null 2>&1 || {
             echo "battery: cannot give $identity_tree a git identity at $identity_want" \
                  "from $identity_source" >&2
             exit 1
@@ -440,6 +454,10 @@ battery_git_identity() {
             exit 1
         }
         printf '%s\n' "$identity_tree/.git" > "$identity_admin/gitdir"
+        git -C "$identity_tree" read-tree "$identity_want" || {
+            echo "battery: cannot build $identity_tree's index from $identity_want" >&2
+            exit 1
+        }
     ) 8>"$identity_common/battery-identity.lock" || exit 1
 }
 

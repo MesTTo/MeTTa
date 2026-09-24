@@ -242,6 +242,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A battery provisioned again at the revision it already held starts from that
+  revision's index. `tools/battery.sh` gives every repository in a battery a
+  fresh git identity on every provision: a worktree added without a checkout,
+  and an index read from the base's tree. A run no longer opens with the
+  staging, or an unfinished merge, that an earlier run left behind.
+
 - The gate's plunit lane no longer fails at random on
   `source_observation_artifacts`. That check purges every engine and library
   artifact before a cold and a warm shipping run, and as a suite it ran
