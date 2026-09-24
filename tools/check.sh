@@ -1,3 +1,4 @@
+#!/bin/sh
 # Purpose: the single gate. Runs every static check, both test trees, the
 #   shell suites and the Prolog checks, and reports one table. Before this
 #   script the entry points were scattered (test.sh, tests/*.sh,
@@ -164,6 +165,7 @@ trap 'metta_gate_scratch_close' EXIT
 # after alignment; command=sh check.sh no-autoload parity; fixture=inherited MCP
 # VIRTUAL_ENV with CHECK_PY auto-selected;
 # commit=d90a3c9620e56e42d3a2f5982b4353da8423e873].
+# shellcheck disable=SC2034 # read by tools/select-python.sh, sourced next
 METTA_ROOT="$HERE"
 . "$HERE/tools/select-python.sh"
 [ -n "$PY" ] || { echo "check.sh: no python found (set CHECK_PY)" >&2; exit 2; }
@@ -678,6 +680,7 @@ for component_check in "$HERE"/engine/check.sh \
     [ -f "$component_check" ] || continue
     CHECK_OWNER=${component_check#"$HERE/"}
     CHECK_OWNER=${CHECK_OWNER%/check.sh}
+    # shellcheck source=/dev/null # each component's check.sh, linted on its own
     . "$component_check"
 done
 CHECK_OWNER=
@@ -1392,7 +1395,7 @@ check_component_python() {
 there is nothing for this lane to lint" >&2
         return 125
     }
-    # shellcheck disable=SC2086  -- the list is newline-separated paths this
+    # shellcheck disable=SC2086 # the list is newline-separated paths this
     # tree owns, and word splitting is how they reach ruff as arguments.
     ( cd "$HERE" && bounded "$PY" -m ruff check $found )
 }

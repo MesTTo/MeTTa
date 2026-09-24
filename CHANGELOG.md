@@ -178,6 +178,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/check.sh` passes shellcheck again. A `# shellcheck disable=`
+  directive with `--` prose after it failed to parse, which stopped shellcheck
+  there and hid every finding past it. The reason now follows a `#`, the script
+  has a shebang, and the two findings that surfaced are annotated where they
+  are false positives: `METTA_ROOT` is read by the sourced
+  `tools/select-python.sh`, and each component's `check.sh` is linted on its
+  own.
 - `tools/check.sh <lane>...` refuses, with exit 2 and the name, any name that
   selects no lane, directly or as a selector, even beside names that do. Only
   a request where no name matched used to refuse, so a mistyped lane beside a
