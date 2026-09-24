@@ -1384,16 +1384,7 @@ register_function_signatures(Signatures0) :-
 
 %A name arriving as a MeTTa function may already be a Prolog predicate, and
 %every arity it has under that name is one this program can call, so each is
-%recorded. The question is asked for the whole batch at once because
-%current_predicate/1 with the arity unbound ENUMERATES the predicate table:
-%asking about one name costs 17.4us against this engine's 2,845 predicates,
-%where walking the table once and keeping the names wanted costs 416.9us and
-%answers any number of them. Per name that is a walk per name, so a source
-%defining a thousand new functions spent 14,625us asking against 752us for the
-%pass, and a million-function source would spend sixteen seconds
-%[measured 2026-08-24]. Below the crossover, about forty names, the per-name
-%form is still the cheaper one and is what runs; the two return the same
-%list [tested: registering_a_batch_of_names_answers_what_asking_one_by_one_does].
+%recorded.
 register_new_funs([]) :- !.
 register_new_funs(NewFunNames) :-
     forall(member(F, NewFunNames),
@@ -1405,14 +1396,49 @@ register_new_funs(NewFunNames) :-
              ; assertz(arity(F, Arity), ArityRef),
                record_source_assertion(ArityRef) )).
 
+%Which of Names are predicates visible from here, with every arity each has.
+%SWI indexes procedures by functor and keeps no index by name [source:
+%swipl-devel V10.1.14 src/pl-proc.c, current_predicate/1 walks
+%module->procedures when only the name is bound], so with P predicates visible
+%either strategy walks the table, the way a linker scans a symbol table, and
+%no cheaper class is available without a name index SWI does not keep.
+%
+%Asked per name, N names cost N*P*c_probe, one walk inside C for each. Asked
+%once, they cost P*c_walk + N*c_name, one walk that tests every visible
+%predicate against a dict of the names, c_name being the dict's share of a
+%name. The walk is the cheaper when N > P*c_walk/(P*c_probe - c_name), which
+%is c_walk/c_probe to within a name because c_name is small beside P*c_probe:
+%the crossover is the ratio of two per-predicate costs, and P, which grows
+%with every library a program imports, cancels. With P = 4,959, c_probe is
+%445,247/P = 90 instructions a predicate, c_walk is 5,501,646/P = 1,109 (the
+%walk's counted redo into current_predicate/1 and one get_dict/3 call) and
+%c_name is 11,730, so the crossover is 12.7 names at this P, 13.0 at the 2,845
+%predicates this engine had when the branch read forty, and 12.4 as P grows:
+%a batch of thirteen or more walks [measured 2026-09-24: instructions:u per
+%call over 400 calls, three processes a point, widths 4 to 40, fitted by least
+%squares with the largest residual 547 asked per name and 84,201 walked;
+%commit=2803a3ecf877ad410ab19a9168e09096eb50ef5a]. The forty was set at
+%P = 2,845 from wall-clock times of the AVL walk this dict replaced
+%[measured 2026-08-24].
+%
+%Inferences cannot choose between the two: each per-name walk runs inside one
+%C builtin the counter prices at a few inferences, while the batch walk's two a
+%visible predicate are counted, so a batch of thirteen to forty names reads
+%about 2P inferences more walked than asked per name while costing fewer
+%instructions [measured 2026-09-24: a port-counting profile of a 25-name
+%batch, 4,969 redos and 4,969 get_dict/3 calls in 10,074 inferences;
+%commit=WORKTREE]. The two return the same list [tested:
+%registering_a_batch_of_names_answers_what_asking_one_by_one_does,
+%a_visible_predicate_costs_a_large_batch_a_redo_and_a_lookup;
+%commit=WORKTREE].
 existing_predicate_arities(Names, NameArities) :-
     length(Names, Count),
-    (   Count > 40
+    (   Count > 12
     ->  findall(N-wanted, member(N, Names), Wanted0),
-        ord_list_to_assoc(Wanted0, Wanted),
+        dict_create(Wanted, wanted, Wanted0),
         findall(N-Arity,
                 ( current_predicate(N/Arity),
-                  get_assoc(N, Wanted, _),
+                  get_dict(N, Wanted, _),
                   callable_as_written(N, Arity) ),
                 NameArities)
     ;   findall(N-Arity,

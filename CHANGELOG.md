@@ -37,6 +37,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Registering MeTTa function names walks the visible predicate table once for
+  a batch of thirteen names or more, where it walked only above forty, and
+  tests each visible predicate against the batch with a dict lookup where it
+  used an AVL: two inferences a predicate against three. SWI keeps no index by
+  name, so asking per name is one walk inside C for each name, and the
+  crossover is the ratio of the two per-predicate instruction costs, 1,109
+  walked against 90 asked, which the growth of the table with every import
+  does not move. A 35-name batch costs about 9.7 million instructions less.
+  The inference counter reads a batch of thirteen to forty names about two
+  inferences a visible predicate higher than before, because it cannot see
+  the per-name walk it replaced. source-load falls from 260,657 to 250,956
+  inferences and from 292,000,572 to 277,548,429 instructions.
+
 - A library whose platform capability is missing imports, and only the call
   that needs the capability refuses. `lib_process`, `lib_socket` and
   `lib_http` refused the whole library at import through `metta_requires/1`;

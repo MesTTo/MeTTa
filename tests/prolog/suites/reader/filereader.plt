@@ -1541,6 +1541,31 @@ test(registering_new_names_costs_nothing_that_grows_with_their_number) :-
     registration_cost(3200, Wide),
     assertion(Wide < Narrow * 8).
 
+%A large batch walks the visible predicates once and tests each against the
+%names it registers, so a predicate added to module user costs such a batch
+%two inferences: its redo into current_predicate/1 and one get_dict/3 lookup.
+%The AVL the dict replaced cost three, which is how the twelve binding
+%predicates seat 5b0b92274 added to user moved nine point twins by +36
+%[measured 2026-09-24; commit=aaeea643a2813715f51e09a98b3996cd36e7b294].
+test(a_visible_predicate_costs_a_large_batch_a_redo_and_a_lookup,
+     [cleanup(forall(dummy_user_predicate(Name), abolish(user:Name/0)))]) :-
+    probe_names(200, Names),
+    batch_inferences(Names, Before),
+    forall(dummy_user_predicate(Name), assertz(user:Name)),
+    batch_inferences(Names, After),
+    aggregate_all(count, dummy_user_predicate(_), Added),
+    assertion(After - Before =:= Added * 2).
+
+dummy_user_predicate(Name) :-
+    between(1, 50, Index),
+    atom_concat('$filereader_dummy_arity_', Index, Name).
+
+batch_inferences(Names, Inferences) :-
+    statistics(inferences, Before),
+    filereader:existing_predicate_arities(Names, _),
+    statistics(inferences, After),
+    Inferences is After - Before.
+
 registration_cost(Count, Micros) :-
     probe_names(Count, Names),
     forall(between(1, 3, _), filereader:existing_predicate_arities(Names, _)),
