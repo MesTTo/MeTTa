@@ -54,6 +54,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `twin_coverage.py --repin` stamps each re-pin and divergence paragraph it
+  writes with the time that twin's measurement started, as `date -Iseconds`
+  prints it, and writes no commit pin:
+  `[measured 2026-09-25T00:41:07+10:00: min-of-3 serial fresh processes; ...]`.
+  It wrote the date and `commit=WORKTREE`, which a provenance commit then had
+  to resolve. A time that is not a whole stamp is refused before anything is
+  written, and the `twins-selftest` lane holds the tool's reading of a stamp
+  to the evidence gate's.
+
 - The `evidence` lane reads a tag's time. Since 2026-09-24T23:27:42+10:00 a
   tag carries the time its evidence ran, as `date -Iseconds` prints it:
   `[tested 2026-09-25T00:10:11+10:00: translator_type_extensions]`. A time

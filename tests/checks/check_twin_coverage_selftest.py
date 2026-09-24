@@ -33,6 +33,9 @@ Guarantees:
   - an undeclared band overrun is a finding, the declared one passes, and a
     declaration the twin no longer needs is itself a finding
     [tested: this file is its own gate; commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3]
+  - the lane's re-pin reads a tag's time exactly as the evidence gate does,
+    so it cannot write a stamp the gate reports
+    [tested 2026-09-25T00:40:16+10:00: sh tools/check.sh twins-selftest]
 Fails when: the lane stops exposing `run_example` and `run_twin` as its only
   process calls, or moves a verdict out of `check`.
 Owns resources: one TemporaryDirectory per plant, removed on every path.
@@ -142,7 +145,7 @@ def budget_failures() -> list[str]:
                     _twin_source(),
                     run.cost + offset,
                     "a planted move, to prove the band decides",
-                    today="2026-09-07",
+                    stamp="2026-09-07T10:11:12+10:00",
                 ),
                 f"budget{offset}.py",
             )
@@ -174,7 +177,7 @@ def divergence_failures() -> list[str]:
         # The shipped twin DECLARES a divergence of its own, so the two cases
         # about a twin that declares nothing are built from it with the
         # declaration dropped, which is the door that drops one.
-        plain = lane.rediverged(_twin_source(), None, "", "", today="2026-09-07")
+        plain = lane.rediverged(_twin_source(), None, "", "", stamp="2026-09-07T10:11:12+10:00")
         cases = (
             ("undeclared", plain, agreeing, differing, True),
             ("right", _diverged(observed), agreeing, differing, False),
@@ -200,7 +203,7 @@ def _diverged(digest: str) -> str:
         digest,
         "a planted divergence, to prove the declaration decides",
         "the twin holds 1 atom the example does not (1 g)",
-        today="2026-09-07",
+        stamp="2026-09-07T10:11:12+10:00",
     )
 
 
@@ -348,6 +351,26 @@ def orphan_failures() -> list[str]:
     return failures
 
 
+def stamp_failures() -> list[str]:
+    """The lane's re-pin reads a tag's time exactly as the evidence gate does.
+
+    tests/checks/check_evidence_tags.py:STAMP is the authority for what a
+    tag's time is. The lane keeps its own copy because the Python seat is a
+    repository of its own and cannot import this one's checks, so the two are
+    held equal here; apart, the tool could write a stamp the gate reports, or
+    refuse one the gate reads.
+    """
+    sys.path.insert(0, str(ROOT / "tests" / "checks"))
+    from check_evidence_tags import STAMP
+
+    if lane._STAMP.pattern != STAMP.pattern:
+        return [
+            f"the re-pin reads a stamp as {lane._STAMP.pattern!r} and the "
+            f"evidence gate as {STAMP.pattern!r}"
+        ]
+    return []
+
+
 def main() -> int:
     """Plant every verdict the lane makes, and report the ones it missed."""
     failures = [
@@ -357,6 +380,7 @@ def main() -> int:
         *overrun_failures(),
         *capability_failures(),
         *orphan_failures(),
+        *stamp_failures(),
     ]
     for failure in failures:
         print(f"twins selftest: {failure}", file=sys.stderr)
@@ -368,7 +392,8 @@ def main() -> int:
         "an undeclared band overrun each fail the lane, a budget declared "
         "where a capability is present stays uncompared where it is absent, "
         "and a twin covering nothing is reported while a mounted repository's "
-        "own file is not; the honest copies of all four pass"
+        "own file is not; the honest copies of all four pass, and the re-pin "
+        "reads a tag's time as the evidence gate does"
     )
     return 0
 

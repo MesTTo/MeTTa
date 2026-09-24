@@ -90,8 +90,8 @@ from gate_layout import CHECK, TEST  # noqa: E402  -- HERE must be on the path f
 #: and `7ec761da` followed the collector in one fixture and not the other, so
 #: `spec-status-selftest` read its planted FIXED case as OPEN. A restated
 #: anchor is a second authority for one fact, which is the shape
-#: `test_the_repin_tag_uses_the_gates_own_placeholder` already rules out for
-#: the re-pin tag.
+#: check_twin_coverage_selftest.py's stamp_failures rules out for the re-pin
+#: tool's reading of a tag's time.
 PYTEST_ANCHOR = next(
     collector.anchor for collector in COLLECTORS if collector.lane == "pytest"
 )
