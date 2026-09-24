@@ -1,6 +1,7 @@
 # Purpose: name the tree a host-workaround patch belongs to, for every script
 #   that applies one, asks whether one is applied, or requires one, so the
-#   rule has one implementation.
+#   rule has one implementation; and put a source tree back to the pinned
+#   state the patches apply to.
 #
 # Sourced, never run. A patch's paths are relative to the tree it was made
 # in, so that tree is part of what the patch is, and it is written down once:
@@ -32,6 +33,21 @@
 #     printing nothing when SRC has no such directory, so a tree that lacks
 #     the submodule is refused rather than patched in the wrong place
 #     [tested: tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]
+#   - pristine_tree SRC puts every tracked file of SRC and of each of its
+#     submodules, at any depth, back at its checked-out commit, so a second
+#     application of the patches meets the tree the first did. Every submodule
+#     rather than the ones a patch is filed under, because a patch at the top
+#     reaches into a submodule's files too: resetting the top tree and
+#     packages/swipy alone left swi-unicode-map-empty-result-aborts.patch
+#     applied in packages/utf8proc, and a second fetch-source.sh run refused
+#     it as a moved pin [measured 2026-09-24: an existing clone at V10.1.14
+#     with every patch applied; tested: tools/pymetta-host/fetch_selftest.sh;
+#     commit=WORKTREE]
+
+pristine_tree() {
+    git -C "$1" checkout --quiet --force -- . &&
+    git -C "$1" submodule --quiet foreach --recursive 'git checkout --quiet --force -- .'
+}
 
 every_patch() {
     find "$PATCHES" -type f -name '*.patch' | LC_ALL=C sort

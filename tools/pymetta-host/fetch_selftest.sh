@@ -88,6 +88,32 @@ git -C "$WORK/dest/packages/swipy" apply "$WORK/patches/packages/swipy/inner.pat
 grep -qx 'inner patched' "$WORK/dest/packages/swipy/deep/inner.txt" || {
     printf '  inner.patch did not reach packages/swipy/deep/inner.txt\n'; failures=$((failures + 1)); }
 
+# A re-run starts from the pinned tree: a patch at the top that reaches into a
+# submodule's files, as swi-uuid-static-half-unlinked.patch does into
+# packages/clib, applies again after pristine_tree, because the reset reaches
+# every submodule and not only the one a patch is filed under.
+mkdir -p "$WORK/sub" "$WORK/stack/packages/swipy"
+printf 'deep\n' > "$WORK/sub/deep.txt"
+( cd "$WORK/sub" && git init --quiet . && git add -A \
+    && git -c user.email=t@t -c user.name=t commit --quiet -m plant )
+printf 'top\n' > "$WORK/stack/top.txt"
+printf 'inner\n' > "$WORK/stack/packages/swipy/inner.txt"
+( cd "$WORK/stack" && git init --quiet . && git add -A \
+    && git -c protocol.file.allow=always submodule --quiet add "$WORK/sub" packages/other \
+    && git -c user.email=t@t -c user.name=t commit --quiet -m plant )
+cat > "$WORK/reach.patch" <<'PATCH'
+--- a/packages/other/deep.txt
++++ b/packages/other/deep.txt
+@@ -1 +1 @@
+-deep
++deep patched
+PATCH
+git -C "$WORK/stack" apply "$WORK/reach.patch"
+pristine_tree "$WORK/stack"
+git -C "$WORK/stack" apply "$WORK/reach.patch" 2>/dev/null || {
+    printf '  a patch reaching into a submodule did not apply again after pristine_tree\n'
+    failures=$((failures + 1)); }
+
 rm -rf "$WORK"
-printf 'fetch-selftest: %s defect(s) over 6 cases\n' "$failures"
+printf 'fetch-selftest: %s defect(s) over 7 cases\n' "$failures"
 [ "$failures" -eq 0 ]

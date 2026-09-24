@@ -108,6 +108,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/pymetta-host/fetch-source.sh` can be rerun on an existing clone. It
+  reset the top tree and `packages/swipy` before applying the patches, while
+  the uuid and unicode patches edit `packages/clib` and `packages/utf8proc`
+  from the top, so a second run met their first application and stopped,
+  blaming a moved pin. It now resets every submodule.
+
 - A library name of `..` is refused as leaving the library root. The escape
   guard in `library_within/2` read only a name holding `/`, so `..` alone
   joined `<lib>/../pkg.metta`, the root's parent, through `(library ..)` and

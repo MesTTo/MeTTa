@@ -57,15 +57,14 @@ got=$(git -C "$DEST/packages/swipy" rev-parse HEAD)
     printf 'fetch-source: packages/swipy is %s, not the pinned %s\n' \
         "$got" "$SWIPY" >&2; exit 1; }
 
-# Start from the pinned tree every run, so a re-run is not a second
-# application of the same patch onto an already-patched file.
-git -C "$DEST" checkout --quiet --force -- .
-git -C "$DEST/packages/swipy" checkout --quiet --force -- .
-
 # The root for a patch is the tree it sits under in the patch directory,
 # decided in patch-root.sh, which declare-host.sh reads too: the tree a patch
 # is applied in and the tree it is later looked for in are one answer.
 . "$HERE/patch-root.sh"
+
+# Start from the pinned tree every run, so a re-run is not a second
+# application of the same patch onto an already-patched file.
+pristine_tree "$DEST"
 applied=0
 for patch in $(every_patch); do
     root=$(patch_root "$DEST" "$patch") || {
