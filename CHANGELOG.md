@@ -210,6 +210,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `LimitSize` in `lib_nars` and `lib_pln` answers at every size. At a size of
+  0 or below no queue passes its length test, and once the queue was empty
+  the lowest-priority item of `()` was `()` itself, so the call recursed on its
+  own arguments for ever: `(LimitSize () 0)` never answered, and `NARS.Derive`
+  or `PLN.Derive` given a task or belief queue size of 0 hung. An empty queue
+  is now its own limit. No input the old body answered changes, since it
+  answered `()` for `()` at every size of 1 or more. Upstream PeTTa's bodies
+  are the same (`lib/lib_nars.metta:214` and `lib/lib_pln.metta:410` at
+  43705f5). The chapter 22 examples `17-nars_derivation_control` and
+  `19-pln_derivation_control` claim `(LimitSize () 0)` and a derivation with
+  both queues bounded at 0, and so do their Python twins.
 - The engine requires nine more SWI-Prolog patches, which tsmetta's
   WebAssembly host, now build 9, and the native patched host both carry. Under
   Node `(sleep N)` works: library(wasm)'s JavaScript bridge started a call with
